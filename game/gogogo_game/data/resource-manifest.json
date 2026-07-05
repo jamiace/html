@@ -1,0 +1,43 @@
+{
+  "basePath": "Resource/",
+  "images": {
+    "bomb": "IMG_Bomb.gif",
+    "cry": "IMG_Cry.gif",
+    "dumb": "IMG_Dumb.gif",
+    "explosion": "IMG_Explosion.gif",
+    "female1": "IMG_Female1.jpg",
+    "female2": "IMG_Female2.jpg",
+    "gameOver": "IMG_GameOver.jpg",
+    "happy": "IMG_Happy.gif",
+    "heads": [
+      "IMG_Head-11.jpg",
+      "IMG_Head-12.jpg",
+      "IMG_Head-13.jpg",
+      "IMG_Head-14.jpg",
+      "IMG_Head-15.jpg",
+      "IMG_Head-16.jpg",
+      "IMG_Head-17.jpg",
+      "IMG_Head-18.jpg",
+      "IMG_Head-19.jpg",
+      "IMG_Head-20.jpg"
+    ],
+    "lose": "IMG_Lose.jpg",
+    "male": "IMG_Male.jpg",
+    "right": "IMG_Right.gif",
+    "spark": "IMG_Spark.gif",
+    "timer1": "IMG_Timer1.gif",
+    "timer2": "IMG_Timer2.gif",
+    "win": "IMG_Win.jpg",
+    "wrong": "IMG_Wrong.gif"
+  },
+  "music": {
+    "battle": "MSC_Battle-low.mp3",
+    "draw": "MSC_Draw.mp3",
+    "lose": "MSC_Lose.mp3",
+    "win": "MSC_Win.mp3"
+  },
+  "sounds": {
+    "right": "SND_Right.mp3",
+    "wrong": "SND_Wrong.mp3"
+  }
+}

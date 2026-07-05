@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent KALM PMF 討論草案｜AI 中心社內創業會議</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.075);
+      --panel-strong: rgba(255,255,255,0.12);
+      --panel-soft: rgba(255,255,255,0.045);
+      --text: #eef3ff;
+      --muted: #aeb9d6;
+      --weak: #7f8aaa;
+      --line: rgba(255,255,255,0.16);
+      --accent: #8bd3ff;
+      --accent2: #a8ffcb;
+      --accent3: #ffd27d;
+      --danger: #ff9b9b;
+      --purple: #d0b3ff;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --radius: 22px;
+      --max: 1180px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(139,211,255,.23), transparent 32%),
+        radial-gradient(circle at 90% 12%, rgba(168,255,203,.15), transparent 30%),
+        radial-gradient(circle at 70% 92%, rgba(208,179,255,.15), transparent 28%),
+        linear-gradient(135deg, #070a13 0%, #0b1020 45%, #101829 100%);
+      line-height: 1.68;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 38px 28px 88px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      padding: 44px;
+      background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.045));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 460px; height: 460px;
+      right: -160px; top: -170px;
+      background: radial-gradient(circle, rgba(139,211,255,.24), transparent 65%);
+      pointer-events: none;
+    }
+    .eyebrow { color: var(--accent2); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+    h1 { font-size: clamp(34px, 5vw, 64px); line-height: 1.1; margin: 12px 0 16px; letter-spacing: -0.04em; }
+    .subtitle { max-width: 860px; color: var(--muted); font-size: 20px; margin: 0; }
+    .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 32px; }
+    .pill-card {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      border-radius: 18px;
+      padding: 16px 18px;
+      min-height: 104px;
+    }
+    .pill-card b { display: block; color: #fff; font-size: 16px; margin-bottom: 4px; }
+    .pill-card span { color: var(--muted); font-size: 14px; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: 18px 0 26px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(11,16,32,.78);
+      backdrop-filter: blur(16px);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      box-shadow: 0 12px 32px rgba(0,0,0,.22);
+    }
+    .nav a { white-space: nowrap; color: var(--muted); padding: 9px 14px; border-radius: 999px; font-size: 14px; }
+    .nav a:hover { color: #fff; background: var(--panel-strong); }
+
+    section { margin-top: 30px; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      padding: 30px;
+    }
+    .card + .card { margin-top: 18px; }
+    h2 { margin: 0 0 18px; font-size: clamp(26px, 3vw, 38px); line-height: 1.18; letter-spacing: -0.03em; }
+    h3 { margin: 0 0 12px; font-size: 22px; line-height: 1.25; }
+    h4 { margin: 18px 0 8px; font-size: 17px; color: #fff; }
+    p { margin: 0 0 12px; }
+    .lead { font-size: 20px; color: #fff; }
+    .muted { color: var(--muted); }
+    .weak { color: var(--weak); }
+    .highlight {
+      display: inline;
+      background: linear-gradient(transparent 58%, rgba(139,211,255,.25) 58%);
+      padding: 0 .08em;
+    }
+
+    .kicker {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--accent2); font-weight: 800; margin-bottom: 12px;
+      font-size: 14px; letter-spacing: .04em;
+    }
+    .kicker::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 16px var(--accent2); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel-soft);
+      padding: 18px;
+    }
+    .mini strong { color: #fff; display: block; margin-bottom: 6px; }
+    .mini .tag { margin-bottom: 12px; }
+
+    .quote {
+      border-left: 5px solid var(--accent);
+      background: linear-gradient(90deg, rgba(139,211,255,.12), rgba(255,255,255,.035));
+      border-radius: 16px;
+      padding: 18px 20px;
+      font-size: 20px;
+      color: #fff;
+      margin: 16px 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-right: 6px;
+    }
+    .tag.blue { color: var(--accent); border-color: rgba(139,211,255,.35); background: rgba(139,211,255,.08); }
+    .tag.green { color: var(--accent2); border-color: rgba(168,255,203,.32); background: rgba(168,255,203,.07); }
+    .tag.yellow { color: var(--accent3); border-color: rgba(255,210,125,.35); background: rgba(255,210,125,.08); }
+    .tag.purple { color: var(--purple); border-color: rgba(208,179,255,.35); background: rgba(208,179,255,.08); }
+    .tag.red { color: var(--danger); border-color: rgba(255,155,155,.35); background: rgba(255,155,155,.08); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 18px 0 4px;
+    }
+    .step {
+      position: relative;
+      min-height: 118px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(0,0,0,.17);
+    }
+    .step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -14px;
+      top: 42%;
+      color: var(--accent);
+      font-weight: 900;
+      z-index: 1;
+    }
+    .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(139,211,255,.16);
+      color: var(--accent);
+      font-family: var(--mono); font-weight: 900; font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .step b { display: block; margin-bottom: 4px; color: #fff; }
+    .step span { display: block; font-size: 13px; color: var(--muted); }
+
+    ul { margin: 10px 0 0; padding-left: 1.25em; }
+    li { margin: 6px 0; }
+    .list-tight li { margin: 3px 0; }
+
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 16px; margin-top: 14px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; }
+    th { color: #fff; background: rgba(255,255,255,.09); font-size: 14px; }
+    td { color: var(--muted); background: rgba(0,0,0,.12); }
+    td:first-child { color: #fff; font-weight: 700; }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr .95fr .95fr;
+      gap: 1px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--line);
+      margin-top: 14px;
+    }
+    .cell { padding: 16px; background: rgba(10,16,30,.9); min-height: 92px; }
+    .cell.head { background: rgba(255,255,255,.11); font-weight: 800; color: #fff; min-height: auto; }
+    .cell b { color: #fff; }
+    .cell small { color: var(--weak); display: block; margin-top: 4px; }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 18px;
+      align-items: start;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 14px;
+    }
+    .decision .label {
+      font-weight: 900;
+      color: var(--accent2);
+      letter-spacing: .04em;
+    }
+
+    .warning {
+      border: 1px solid rgba(255,210,125,.35);
+      background: rgba(255,210,125,.08);
+      border-radius: 18px;
+      padding: 18px;
+      color: #ffe4ad;
+    }
+    .danger {
+      border: 1px solid rgba(255,155,155,.35);
+      background: rgba(255,155,155,.08);
+      border-radius: 18px;
+      padding: 18px;
+      color: #ffd4d4;
+    }
+    .success {
+      border: 1px solid rgba(168,255,203,.32);
+      background: rgba(168,255,203,.08);
+      border-radius: 18px;
+      padding: 18px;
+      color: #d6ffe8;
+    }
+
+    .footer-note { margin-top: 32px; color: var(--weak); font-size: 13px; text-align: center; }
+
+    @media (max-width: 980px) {
+      .hero { padding: 30px; }
+      .hero-grid, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .step:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -18px; transform: translateX(50%); }
+      .matrix { grid-template-columns: 1fr; }
+      .decision { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      body { background: #fff; color: #1a1a1a; }
+      .wrap { max-width: none; padding: 0; }
+      .nav { display: none; }
+      .hero, .card, .mini, .step, .cell, td, th, .quote, .warning, .danger, .success, .decision {
+        box-shadow: none !important; backdrop-filter: none !important;
+        background: #fff !important; color: #1a1a1a !important;
+        border-color: #d7d7d7 !important;
+      }
+      .muted, .weak, .cell small, .step span, td { color: #444 !important; }
+      h1, h2, h3, h4, .lead, .mini strong, td:first-child, .cell b { color: #111 !important; }
+      section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero" id="top">
+      <div class="eyebrow">AI 中心 Agent KALM 會議｜第三點 PMF 討論草案</div>
+      <h1>Agent KALM：從「裝置與模型」收斂到「學習與知識服務」</h1>
+      <p class="subtitle">本文件目的不是替會議做單一結論，而是建立一個可共同討論的框架：<br>把 To C、To B、Internal 三個 PMF 戰場拆清楚，讓硬體、模型、RAG、MCP、校務系統整合回到正確位置。</p>
+      <div class="hero-grid">
+        <div class="pill-card"><b>To C</b><span>以整理好的知識主題為入口，提供個人 Learning Agent。</span></div>
+        <div class="pill-card"><b>To B</b><span>以學校管理系統與校務整合為核心，支援導入與驗收。</span></div>
+        <div class="pill-card"><b>Internal</b><span>先在出版社內部企劃／編輯流程驗證知識生產能力。</span></div>
+        <div class="pill-card"><b>Device</b><span>AI PC、Phone、Glasses、Personal Device 是載體，不是 PMF 本身。</span></div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="#thesis">核心主張</a>
+      <a href="#three-markets">三個戰場</a>
+      <a href="#toc">To C</a>
+      <a href="#tob">To B</a>
+      <a href="#internal">Internal</a>
+      <a href="#tech">技術定位</a>
+      <a href="#roadmap">路線圖</a>
+      <a href="#discussion">會議討論</a>
+    </nav>
+
+    <section id="thesis">
+      <div class="card">
+        <div class="kicker">先把問題收斂</div>
+        <h2>第三點不應該問<br>「硬體、模型、Engine、RAG、MCP 哪個才是 PMF」</h2>
+        <p class="lead">這些都是解決方案能力，不是市場本身。<br>真正要討論的是：<span class="highlight">Agent KALM 要服務哪一種學習行為、哪一種組織場景、哪一種知識工作流程。</span></p>
+        <div class="quote">建議把 Agent KALM 定義成：<br>「以整理好的知識主題為基礎，協助個人學習、學校管理與內部知識生產的 Learning / Knowledge Agent。」</div>
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">不是主軸</span>
+            <strong>硬體不是 PMF</strong>
+            <p class="muted">AI PC、手機、眼鏡、平板或其他個人裝置，是 KALM 的運行載體與體驗入口。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">不是主軸</span>
+            <strong>模型不是 PMF</strong>
+            <p class="muted">模型能力決定上限，但市場購買的是學習成效、管理能力與知識工作效率。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">應該是主軸</span>
+            <strong>知識服務才是 PMF</strong>
+            <p class="muted">KALM 的差異化來自「已整理知識庫 + 學習流程 + 組織管理 + 系統整合」。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="three-markets">
+      <div class="card">
+        <div class="kicker">建議討論框架</div>
+        <h2>三個 PMF 戰場：不要混在同一題裡討論</h2>
+        <p>Agent KALM 可以有共同底層，但三個市場的購買理由、使用者、驗收方式完全不同。<br>會議時建議分開討論，避免 To C 的產品想像、To B 的採購邏輯、Internal 的流程改善互相混淆。</p>
+
+        <div class="matrix">
+          <div class="cell head">戰場</div>
+          <div class="cell head">真正使用者</div>
+          <div class="cell head">購買／導入理由</div>
+          <div class="cell head">最小驗證方式</div>
+
+          <div class="cell"><b>To C：個人 Learning Agent</b><small>高中生、大學生、社會人士</small></div>
+          <div class="cell">想學課本、技能、職場、生活決策等主題的人。</div>
+          <div class="cell">不是「我可以問 AI」，而是「我可以沿著整理好的主題真的學會」。</div>
+          <div class="cell">選 3–5 個高價值知識主題，驗證留存、完成率、回訪與付費意願。</div>
+
+          <div class="cell"><b>To B：學校導入與管理系統</b><small>學校、老師、行政、政府專案窗口</small></div>
+          <div class="cell">學生使用、老師管理、行政驗收，可能需串校務系統。</div>
+          <div class="cell">能管理、能追蹤、能產報表、能驗收，並能納入學校既有流程。</div>
+          <div class="cell">一校／一系／一班／一門課試辦，完成資料串接、教師後台、成效報表。</div>
+
+          <div class="cell"><b>Internal：出版社知識生產 Agent</b><small>企劃、編輯、數位產品、題庫／教材團隊</small></div>
+          <div class="cell">公司內部內容生產者與知識工作者。</div>
+          <div class="cell">降低整理、比對、改版、標註、轉製與審查成本。</div>
+          <div class="cell">先挑一條真實工作流，例如課綱對照、題庫標記、章節摘要或版本比對。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="toc">
+      <div class="card">
+        <div class="kicker">戰場一：To C</div>
+        <h2>To C 讓使用者進入「已整理好的知識主題」</h2>
+        <p class="lead">KALM 不應該只是泛用聊天 Agent，而應該像一個有內容、有路線、有練習、有評估的 Learning Service。</p>
+
+        <div class="warning">
+          <strong>To C 的產品入口不建議是：「你想學什麼？」</strong><br />
+          這會讓產品變成一般 AI 聊天工具，很難跟 ChatGPT、Gemini、Claude、NotebookLM 區隔。<br>更好的入口是：「這裡有一組已被整理、標註、結構化、可學習與可測驗的知識主題。」
+        </div>
+
+        <br>
+		<h3>To C 的核心產品定義</h3>
+        <div class="quote">KALM 是一個基於整理好知識庫的 Learning Agent，<br>讓使用者沿著可信任的知識主題，透過解說、練習、情境模擬、測驗、回饋與個人記憶，逐步把知識變成能力。</div>
+
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">內容資產</span>
+            <strong>課本內容</strong>
+            <p class="muted">高中職教材、章節架構、知識點、題目、解析、常見錯誤、素養題型。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">技能學習</span>
+            <strong>商業口說英文</strong>
+            <p class="muted">會議、簡報、電話、接待、談判、Email、面試等情境式訓練。</p>
+          </div>
+          <div class="mini">
+            <span class="tag yellow">生活決策</span>
+            <strong>買車／買房／保險／理財</strong>
+            <p class="muted">知識科普、流程說明、檢查清單、試算工具、風險提醒與決策輔助。</p>
+          </div>
+        </div>
+
+        <br>
+		<h3>建議的 To C 使用流程</h3>
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>選擇知識主題</b><span>從 DB / RAG / MD 中已整理好的主題進入。</span></div>
+          <div class="step"><span class="num">2</span><b>判斷程度與目的</b><span>用短測驗、問答或情境題判斷使用者位置。</span></div>
+          <div class="step"><span class="num">3</span><b>生成學習路線</b><span>不是憑空生成，而是基於既有主題結構重新排列。</span></div>
+          <div class="step"><span class="num">4</span><b>練習與回饋</b><span>題目、口說、案例、任務、情境模擬。</span></div>
+          <div class="step"><span class="num">5</span><b>累積個人學習記憶</b><span>記錄弱點、偏好、完成度、可推薦下一主題。</span></div>
+        </div>
+
+        <br>
+		<h3>To C 產品不只要「問答」，而要有四種模式</h3>
+        <div class="grid-4">
+          <div class="mini"><strong>學習模式</strong><p class="muted">解釋概念、建立路線、每日任務、進度追蹤。</p></div>
+          <div class="mini"><strong>練習模式</strong><p class="muted">選擇題、申論、口說、案例題、情境題、錯誤回饋。</p></div>
+          <div class="mini"><strong>顧問模式</strong><p class="muted">買車、買房、保險、理財等知識導向建議與檢查清單。</p></div>
+          <div class="mini"><strong>伴學模式</strong><p class="muted">提醒、鼓勵、複習、弱點追蹤、下一步推薦。</p></div>
+        </div>
+
+        <br>
+		<h3>To C 可以優先驗證的主題池</h3>
+        <table>
+          <thead>
+            <tr><th>主題類型</th><th>適合原因</th><th>可做能力</th><th>驗證指標</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>高中職課本內容</td>
+              <td>公司已有教材資產，知識結構明確，能與出版核心能力連結。</td>
+              <td>章節導讀、知識點說明、測驗、錯題分析、素養題輔導。</td>
+              <td>完成率、答題進步、章節回訪、錯題修正率。</td>
+            </tr>
+            <tr>
+              <td>商業口說英文</td>
+              <td>社會人士與學生都可使用，場景明確，適合做 AI 互動。</td>
+              <td>角色扮演、會議對話、簡報問答、面試模擬、即時修正。</td>
+              <td>每日練習次數、錄音／文字輸出量、連續使用天數。</td>
+            </tr>
+            <tr>
+              <td>保險／理財／投資入門</td>
+              <td>社會人士痛點強，但需注意合規，宜定位為知識教育與試算輔助。</td>
+              <td>名詞解釋、風險分級、流程說明、試算、檢查清單。</td>
+              <td>主題完成率、工具使用次數、收藏／分享、付費意願。</td>
+            </tr>
+            <tr>
+              <td>買車／買房決策知識</td>
+              <td>人生重大決策，資訊分散，適合整理成知識路線與工具包。</td>
+              <td>預算試算、流程說明、比較表、風險提醒、文件清單。</td>
+              <td>回訪、試算使用、清單完成、方案比較次數。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tob">
+      <div class="card">
+        <div class="kicker">戰場二：To B</div>
+        <h2>To B 的重點不是「學生端 Agent」，<br>而是「學校可管理、可整合、可驗收」</h2>
+        <p class="lead">學校與公家機關專案買的不是一個聊天機器人，而是一套可以被納入教學與行政流程的 AI 學習管理系統。</p>
+
+        <div class="quote">To B 版本的 KALM 應該被定位成：「AI Learning Management Layer」，<br>也就是介於學生學習、教師教學、行政管理、校務資料之間的 AI 學習管理層。</div>
+
+        <div class="grid-2">
+          <div class="mini">
+            <span class="tag green">老師／行政視角</span>
+            <strong>學校導入真正會問的問題</strong>
+            <ul class="list-tight muted">
+              <li>學生使用狀況能不能看？</li>
+              <li>老師能不能派任務、看弱點？</li>
+              <li>行政能不能匯出成果報告？</li>
+              <li>能不能對接校務系統、LMS、SSO？</li>
+              <li>資料格式、個資、權限、稽核怎麼處理？</li>
+              <li>公部門計畫如何驗收？</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <span class="tag red">不該只做</span>
+            <strong>To B 常見失焦</strong>
+            <ul class="list-tight muted">
+              <li>只做學生聊天功能，沒有管理端。</li>
+              <li>只展示 AI 回答能力，沒有學習歷程。</li>
+              <li>只做漂亮 Demo，沒有資料匯入／匯出。</li>
+              <li>沒有跟校務流程整合，變成額外負擔。</li>
+              <li>沒有報表與驗收資料，專案很難結案。</li>
+            </ul>
+          </div>
+        </div>
+
+        <br>
+		<h3>To B 系統層級建議</h3>
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>學生端</b><span>使用 KALM 學習、練習、問答、完成任務。</span></div>
+          <div class="step"><span class="num">2</span><b>教師端</b><span>建立任務、查看班級弱點、追蹤學生進度。</span></div>
+          <div class="step"><span class="num">3</span><b>行政端</b><span>管理帳號、班級、課程、授權與成果報表。</span></div>
+          <div class="step"><span class="num">4</span><b>校務整合層</b><span>SSO、校務系統、LMS、成績／學籍／課程資料。</span></div>
+          <div class="step"><span class="num">5</span><b>專案驗收層</b><span>使用數據、學習成效、導入報告、稽核紀錄。</span></div>
+        </div>
+
+        <br>
+		<h3>校務系統整合：不要只想 API，也要準備多種資料路徑</h3>
+        <table>
+          <thead>
+            <tr><th>整合方式</th><th>適用情境</th><th>優點</th><th>風險／注意事項</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>API 整合</td>
+              <td>學校或平台已有穩定系統與技術窗口。</td>
+              <td>即時性高、權限可控、可雙向同步。</td>
+              <td>需規格文件、開發排程、測試環境與維運責任。</td>
+            </tr>
+            <tr>
+              <td>Raw Data 匯入／匯出</td>
+              <td>學校資訊系統封閉，短期無法開 API。</td>
+              <td>導入門檻低，適合試辦或專案初期。</td>
+              <td>需定義 CSV / Excel / JSON 格式、欄位清洗、匯入頻率與錯誤處理。</td>
+            </tr>
+            <tr>
+              <td>資料串流／批次同步</td>
+              <td>需定期同步大量學習紀錄、任務完成、測驗結果。</td>
+              <td>可支援規模化、報表與資料倉儲。</td>
+              <td>需處理資料延遲、重複、失敗重送、權限與個資保護。</td>
+            </tr>
+            <tr>
+              <td>SSO / 帳號串接</td>
+              <td>學生與老師需要用既有校園帳號登入。</td>
+              <td>降低註冊阻力，便於權限管理。</td>
+              <td>需要處理角色、班級、離校、轉班、停用帳號等生命週期。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <br>
+		<h3>To B 最小可行方案</h3>
+        <div class="success">
+          <strong>建議 MVP 不要先做全校級大平台。</strong><br />
+          先做「一校、一班、一門課、一組知識主題」的閉環：學校名單匯入 → 老師派任務 → 學生使用 KALM → 系統記錄學習歷程 → 老師看 Dashboard → 行政匯出成果報告。這條閉環跑通，比展示一堆 AI 功能更有 PMF 價值。
+        </div>
+      </div>
+    </section>
+
+    <section id="internal">
+      <div class="card">
+        <div class="kicker">戰場三：Internal</div>
+        <h2>內部 PMF 是最容易先驗證的起點：<br>出版社的教材生產與知識管理 Agent</h2>
+        <p>公司內部已有課本、題庫、課綱、章節、教案、教師手冊、舊版教材、圖片資源、編輯規範與數位內容需求。<br>這些不是普通資料，而是可轉換為 To C 與 To B 能力的核心資產。</p>
+
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">企劃</span>
+            <strong>新產品與新教材企劃</strong>
+            <p class="muted">競品整理、章節規劃、知識主題拆解、學習路線設計、數位產品腳本。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">編輯</span>
+            <strong>教材整理與改版</strong>
+            <p class="muted">課綱對照、版本比對、重點摘要、題目分類、錯字格式檢查。</p>
+          </div>
+          <div class="mini">
+            <span class="tag yellow">營運／數位</span>
+            <strong>內容轉製與上架</strong>
+            <p class="muted">將紙本內容轉成知識卡、題庫、RAG chunk、學習任務與 App 內容。</p>
+          </div>
+        </div>
+
+        <br>
+		<h3>Internal First 的價值</h3>
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>先處理真資料</b><span>不是空泛 Demo，而是用公司實際教材。</span></div>
+          <div class="step"><span class="num">2</span><b>先服務真使用者</b><span>企劃、編輯、數位團隊每天會遇到這些痛點。</span></div>
+          <div class="step"><span class="num">3</span><b>先打磨流程</b><span>讓 Agent 進入現有工作流，而不是額外增加負擔。</span></div>
+          <div class="step"><span class="num">4</span><b>累積內容結構</b><span>教材被整理成未來 To C / To B 可用的知識資產。</span></div>
+          <div class="step"><span class="num">5</span><b>轉外部產品</b><span>內部能力成熟後，再包成學校與個人可用服務。</span></div>
+        </div>
+
+        <br>
+		<h3>建議先選 3 個內部驗證情境</h3>
+        <table>
+          <thead>
+            <tr><th>驗證情境</th><th>Agent 工作內容</th><th>可量化指標</th><th>外部轉化價值</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>課綱對照 Agent</td>
+              <td>比對教材章節與課綱條目，找缺漏、重複、需要補強之處。</td>
+              <td>人工比對時間降低、缺漏發現率、編輯採納率。</td>
+              <td>To B 可變成教師備課與課程檢核工具。</td>
+            </tr>
+            <tr>
+              <td>題目標記 Agent</td>
+              <td>為題目標註章節、知識點、難度、題型、核心能力與常見錯誤。</td>
+              <td>標記速度、人工修正率、一致性、可搜尋性。</td>
+              <td>To C 可支援個人練習與弱點分析。</td>
+            </tr>
+            <tr>
+              <td>教材轉製 Agent</td>
+              <td>將紙本章節轉成知識卡、學習任務、測驗、摘要、互動腳本。</td>
+              <td>轉製時間、可上架比例、內容審核通過率。</td>
+              <td>To C / To B 可直接形成主題課程與學習模組。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tech">
+      <div class="card">
+        <div class="kicker">技術如何回到產品主軸</div>
+        <h2>硬體、模型、Engine、RAG、MCP 的正確位置</h2>
+        <p>技術不是不重要，而是要避免反過來主導 PMF。更好的說法是：KALM 先有學習與知識服務場景，再決定哪些技術能力是必要支撐。</p>
+
+        <div class="matrix">
+          <div class="cell head">技術項目</div>
+          <div class="cell head">它真正負責什麼</div>
+          <div class="cell head">在 KALM 裡的產品價值</div>
+          <div class="cell head">會議上應避免的失焦</div>
+
+          <div class="cell"><b>Personal Device</b><small>AI PC / Phone / Glasses / Tablet</small></div>
+          <div class="cell">運算載體、隨身入口、隱私邊界、離線能力。</div>
+          <div class="cell">讓 KALM 成為個人持續陪伴的學習與知識裝置。</div>
+          <div class="cell">不要把 PMF 變成「到底是哪一台硬體」。</div>
+
+          <div class="cell"><b>Model</b><small>Local / Cloud / Hybrid</small></div>
+          <div class="cell">理解、生成、推理、摘要、對話與工具呼叫。</div>
+          <div class="cell">決定互動品質，但不是差異化的全部。</div>
+          <div class="cell">不要只比較模型參數或跑分，忘記使用者任務。</div>
+
+          <div class="cell"><b>RAG / MD / Knowledge DB</b><small>內容知識層</small></div>
+          <div class="cell">存放整理好的主題、章節、知識點、題目、規則與文件。</div>
+          <div class="cell">這是 To C 與 Internal 的核心資產，也是 To B 可驗收的內容基礎。</div>
+          <div class="cell">不要只說「我們有 RAG」，要說「有哪些可學習主題」。</div>
+
+          <div class="cell"><b>Engine</b><small>Learning / Workflow / Assessment</small></div>
+          <div class="cell">控制學習路線、任務、測驗、評估、流程、狀態與記憶。</div>
+          <div class="cell">讓 KALM 從問答工具變成可持續使用的學習產品。</div>
+          <div class="cell">不要做成一堆無法驗證的抽象中台。</div>
+
+          <div class="cell"><b>MCP / API Connectors</b><small>工具與系統整合層</small></div>
+          <div class="cell">連接校務系統、LMS、SSO、內容庫、內部系統、檔案與報表。</div>
+          <div class="cell">To B 與 Internal 的關鍵，讓 Agent 能進入真實工作流。</div>
+          <div class="cell">不要為了 MCP 而 MCP，應以實際整合對象決定優先順序。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="card">
+        <div class="kicker">建議推進路線</div>
+        <h2>不是三條線同時亂做，而是用同一個底層逐步外擴</h2>
+        <p>最穩的策略不是一開始就宣布 To C、To B、Internal 全部都做，而是先建立共同底層，再選擇最容易驗證的場景往外推。</p>
+
+        <div class="decision">
+          <div class="label">建議順序</div>
+          <div>
+            <strong>Internal First → To B Second → To C Selective Launch</strong>
+            <p class="muted">先用內部教材與流程打磨知識結構、RAG、標註、轉製與 Agent 工作流。接著用學校試辦驗證管理端與系統整合。To C 則選少數高價值主題上線，不要一開始做成無邊界的大型學習平台。</p>
+          </div>
+        </div>
+
+        <div class="flow">
+          <div class="step"><span class="num">0</span><b>知識主題整理</b><span>定義可學習主題、格式、metadata、權限與品質標準。</span></div>
+          <div class="step"><span class="num">1</span><b>Internal MVP</b><span>課綱對照、題目標記、教材轉製，選一條流程先跑通。</span></div>
+          <div class="step"><span class="num">2</span><b>To B Pilot</b><span>一校／一班／一門課，完成教師端、行政端、資料整合。</span></div>
+          <div class="step"><span class="num">3</span><b>To C 主題試營運</b><span>選 3–5 個主題，驗證留存、完成率、回訪與付費。</span></div>
+          <div class="step"><span class="num">4</span><b>平台化</b><span>累積可重複使用的 Engine、Connector、內容格式與 Agent Template。</span></div>
+        </div>
+
+        <br>
+		<h3>每一階段的決策重點</h3>
+        <table>
+          <thead>
+            <tr><th>階段</th><th>要回答的問題</th><th>產出物</th><th>不該做的事</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>知識主題整理</td>
+              <td>哪些主題值得變成 KALM 的第一批內容？內容結構如何標準化？</td>
+              <td>主題清單、metadata、內容格式、品質標準。</td>
+              <td>不要先把所有教材都丟進 RAG，然後期待自動變產品。</td>
+            </tr>
+            <tr>
+              <td>Internal MVP</td>
+              <td>Agent 是否真的能降低企劃／編輯工作成本？</td>
+              <td>一條可展示工作流、前後效率比較、人工修正紀錄。</td>
+              <td>不要只做聊天介面，沒有接上真實文件與流程。</td>
+            </tr>
+            <tr>
+              <td>To B Pilot</td>
+              <td>學校是否能導入、管理、追蹤、匯出報表？</td>
+              <td>學生端、教師端、行政端、整合規格、驗收報告。</td>
+              <td>不要只給學生試用，卻沒有老師與行政可管理的工具。</td>
+            </tr>
+            <tr>
+              <td>To C 試營運</td>
+              <td>使用者是否願意持續學、回來學、甚至付費？</td>
+              <td>主題頁、學習流程、練習、回饋、個人學習紀錄。</td>
+              <td>不要做成開放式 AI 問答站，與大型模型平台正面衝突。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="discussion">
+      <div class="card">
+        <div class="kicker">給會議用的收斂問題</div>
+        <h2>建議把第三點討論收斂成 6 個決策題</h2>
+        <p>這些問題不是發散用，而是用來逼出下一步分工、MVP 與資源配置。</p>
+
+        <div class="grid-2">
+          <div class="mini">
+            <span class="tag blue">1</span>
+            <strong>第一批知識主題要選哪些？</strong>
+            <p class="muted">建議不要超過 3–5 個。可從課本內容、商業口說英文、買車買房、保險理財等方向挑選。</p>
+          </div>
+          <div class="mini">
+            <span class="tag blue">2</span>
+            <strong>To C 是否先做「封閉主題式學習」？</strong>
+            <p class="muted">也就是使用者從既有知識主題進入，而不是完全開放式任意問答。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">3</span>
+            <strong>To B 第一個學校場景是什麼？</strong>
+            <p class="muted">一校、一班、一門課、一組主題。需要定義老師端、行政端與驗收報表。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">4</span>
+            <strong>校務系統整合先採哪種路徑？</strong>
+            <p class="muted">API、Raw Data 匯入、批次同步、SSO，哪一個最符合第一個試辦場景？</p>
+          </div>
+          <div class="mini">
+            <span class="tag yellow">5</span>
+            <strong>Internal MVP 先挑哪條工作流？</strong>
+            <p class="muted">課綱對照、題目標記、教材轉製、版本比對，先選一條可以量化效率提升的流程。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">6</span>
+            <strong>Personal Device 先支援哪種形態？</strong>
+            <p class="muted">不要先糾結 AI PC。應先確認場景需要的是桌面、手機、平板、眼鏡，還是混合式體驗。</p>
+          </div>
+        </div>
+
+        <br>
+		<h3>可直接在會議中使用的發言版本</h3>
+        <div class="quote">
+          我建議第三點的 PMF 不要先從硬體或模型切入。硬體、模型、RAG、MCP 都是支撐能力，不是市場本身。<br><br>KALM 比較適合先收斂成三個場景：<br>To C 是基於已整理知識主題的個人 Learning Agent<br>To B 是可管理、可整合校務系統、可驗收的學校導入方案<br>Internal 則是出版社內部教材生產與知識管理 Agent。<br><br>短期建議先用內部真實教材與工作流驗證，再做學校試辦，最後挑少數高價值主題做 To C 試營運。<br>這樣討論會比較能收斂到內容資產、系統整合、驗收指標與分工，而不是一直繞在裝置或模型規格上。
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="kicker">一句話總結</div>
+        <h2>Agent KALM 的 PMF，應該是<br>「可信任知識主題 × 學習流程 × 管理整合 × 個人裝置」</h2>
+        <p class="lead">To C 要讓個人沿著整理好的主題真的學會<br>To B 要讓學校可以管理、整合、驗收<br>Internal 要讓出版社把教材資產轉成可持續生產、可外部商業化的知識服務。</p>
+      </div>
+    </section>
+
+    <p class="footer-note">Agent KALM PMF Discussion Draft｜可用於會議投影、內部討論與後續 PRD / Proposal 拆解</p>
+  </main>
+</body>
+</html>

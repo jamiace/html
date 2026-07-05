@@ -1,0 +1,18 @@
+{
+  "name": "賽博燒金紙",
+  "short_name": "燒金紙",
+  "description": "手機優先的無煙祈願互動網頁。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#130f0b",
+  "theme_color": "#15100c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

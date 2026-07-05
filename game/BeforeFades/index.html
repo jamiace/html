@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Before Fades Static Web Visual Novel Engine</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div id="game" class="theme-gray">
+    <div id="bgLayer" class="display-cover">
+      <div id="bgMediaFrame">
+        <img id="bgImage" alt="" draggable="false" />
+      </div>
+      <img id="titleLogo" alt="" draggable="false" />
+    </div>
+    <div id="spriteLayer"></div>
+    <div id="effectLayer">
+      <div id="cutinLayer"><img id="cutinImage" alt="" draggable="false" /></div>
+      <div id="flash"></div>
+    </div>
+
+    <div id="uiLayer">
+      <div id="topBar">
+        <div id="modeBadge">SYSTEM / WAITING</div>
+      </div>
+
+      <div id="mainHud">
+        <div id="dialogueBox" role="button" aria-label="advance dialogue">
+          <div id="speakerName" class="narrator">旁白</div>
+          <div id="dialogueText"></div>
+          <div id="nextIndicator">▼</div>
+        </div>
+        <div id="sidePanel">
+          <div id="sideTitle">CASE / NOTE</div>
+          <div id="sideImageWrap" class="hidden"><img id="sideImage" alt="" draggable="false" /></div>
+          <div id="sideContent">等待腳本載入……</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="choices"></div>
+    <div id="gameVersion" aria-label="遊戲版號"></div>
+
+    <div id="docViewerLayer" aria-hidden="true">
+      <div id="docViewerFrame" role="dialog" aria-modal="true" aria-label="文件放大檢視">
+        <button id="docViewerClose" type="button" aria-label="關閉文件檢視">×</button>
+        <img id="docViewerImage" alt="" draggable="false" />
+        <div id="docViewerCaption"></div>
+      </div>
+    </div>
+
+
+    <div id="loadingLayer" aria-live="polite" aria-busy="true">
+      <div id="loadingCard">
+        <h1 id="loadingTitle">Before Fades</h1>
+        <p id="loadingSubtitle">正在整理最後一場演出的燈光、人物與記憶……</p>
+        <div id="loadingProgressTrack" aria-hidden="true"><div id="loadingProgressBar"></div></div>
+        <div id="loadingPercent">0%</div>
+        <div id="loadingStatus">讀取劇本中……</div>
+        <div id="loadingCurrent"></div>
+        <div id="loadingStats">0 / 0</div>
+        <div id="loadingErrors"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="./macros.js"></script>
+  <script src="./scenes.js"></script>
+
+  <script src="./engine/core.js"></script>
+  <script src="./engine/dom.js"></script>
+  <script src="./engine/dialogue.js"></script>
+  <script src="./engine/background.js"></script>
+  <script src="./engine/sprite.js"></script>
+  <script src="./engine/audio.js"></script>
+  <script src="./engine/effects.js"></script>
+  <script src="./engine/empathy.js"></script>
+  <script src="./engine/choice.js"></script>
+  <script src="./engine/preload.js"></script>
+  <script src="./engine/documentViewer.js"></script>
+</body>
+</html>

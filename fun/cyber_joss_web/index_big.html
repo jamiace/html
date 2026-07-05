@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#15100c" />
+  <meta name="description" content="賽博燒金紙：一個手機優先的無煙祈願互動網頁。" />
+  <title>賽博燒金紙｜放大金紙版</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles_big.css?v=6" />
+</head>
+<body>
+  <main id="app" class="app app-big" aria-live="polite">
+    <canvas id="particleCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+    <div id="ambientGlow" class="ambient-glow" aria-hidden="true"></div>
+    <div id="burnGate" class="burn-gate" aria-hidden="true">
+      <img id="furnaceMouthImage" class="furnace-mouth-image" src="assets/furnace-mouth.png" alt="" />
+      <div class="gate-core"></div>
+    </div>
+
+    <section id="introScreen" class="screen screen-intro is-active">
+      <div class="brand-card">
+        <div class="app-icon-frame" aria-hidden="true">
+          <img id="appIconImage" class="app-icon-image" src="assets/app-icon.png" alt="" />
+          <div class="app-icon-fallback"></div>
+        </div>
+        <p class="eyebrow">無煙、安靜、隨身的小儀式</p>
+        <h1>賽博燒金紙</h1>
+        <p class="intro-copy">把一張金紙輕輕送進手機上緣，<br>讓火光、聲音和觸覺回應你的片刻心意。</p>
+      </div>
+
+      <div class="panel">
+        <button id="startButton" class="primary-button" type="button">開始燒化</button>
+      </div>
+    </section>
+
+    <section id="intentScreen" class="screen screen-intent" aria-hidden="true">
+      <div class="section-header">
+        <p class="eyebrow">選一份心意</p>
+        <h2>今天想把什麼送進火光裡？</h2>
+      </div>
+      <div id="intentGrid" class="intent-grid"></div>
+      <button id="randomIntentButton" class="ghost-button" type="button">不指定，只燒一份心意</button>
+    </section>
+
+    <section id="ritualScreen" class="screen screen-ritual" aria-hidden="true">
+      <header class="ritual-header">
+        <div>
+          <p class="eyebrow">今日心意</p>
+          <h2 id="currentIntentLabel">平安</h2>
+        </div>
+        <div class="toggles">
+          <button id="soundToggle" class="icon-button is-on" type="button" aria-label="切換音效">聲</button>
+          <button id="hapticToggle" class="icon-button is-on" type="button" aria-label="切換震動">觸</button>
+        </div>
+      </header>
+
+      <div id="ritualStage" class="ritual-stage">
+        <div id="instruction" class="instruction-card">長按金紙，讓心意凝聚。</div>
+        <div id="energyMeter" class="energy-meter" aria-hidden="true"><span></span></div>
+
+        <div id="jossPaper" class="joss-paper" role="button" tabindex="0" aria-label="金紙。長按後往上滑送入爐口。">
+          <img id="jossPaperImage" class="joss-paper-image" src="assets/joss-paper-fujin.jpg" alt="" draggable="false" />
+          <div class="joss-paper-fallback">
+            <div class="paper-stamp"></div>
+            <div class="paper-grain"></div>
+          </div>
+          <div id="burnMask" class="burn-mask"></div>
+          <div id="paperEdgeGlow" class="paper-edge-glow"></div>
+        </div>
+        <div class="drag-guide" aria-hidden="true"><span></span></div>
+      </div>
+
+      <footer class="ritual-footer">
+        <div class="stat-pill">
+          <span>今日</span><strong id="todayCount">0</strong>
+        </div>
+        <div class="stat-pill">
+          <span>累積</span><strong id="totalCount">0</strong>
+        </div>
+      </footer>
+    </section>
+
+    <section id="resultScreen" class="screen screen-result" aria-hidden="true">
+      <div class="result-card">
+        <p class="eyebrow">金紙已化</p>
+        <h2>願此心意，隨火光送達。</h2>
+        <p id="blessingText" class="blessing-text"></p>
+        <div class="result-stats">
+          <div><span>今日已燒化</span><strong id="resultTodayCount">0 張</strong></div>
+          <div><span>累積燒化</span><strong id="resultTotalCount">0 張</strong></div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button id="againButton" class="primary-button" type="button">再燒一張</button>
+        <button id="changeIntentButton" class="ghost-button" type="button">換個心意</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js?v=6"></script>
+</body>
+</html>
