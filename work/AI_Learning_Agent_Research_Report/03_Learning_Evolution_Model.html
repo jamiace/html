@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Agent｜學習進化模型報告</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: rgba(255,255,255,.88);
+      --solid: #fff;
+      --text: #1b2434;
+      --muted: #657085;
+      --line: #dfe5ef;
+      --blue: #3058d8;
+      --green: #0d8f70;
+      --cyan: #0a8daa;
+      --amber: #b66b00;
+      --red: #c84450;
+      --purple: #7356d8;
+      --shadow: 0 18px 60px rgba(30, 42, 80, .13);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.72;
+      background:
+        radial-gradient(circle at 5% 0%, rgba(48,88,216,.16), transparent 30rem),
+        radial-gradient(circle at 92% 8%, rgba(13,143,112,.15), transparent 28rem),
+        radial-gradient(circle at 42% 52%, rgba(115,86,216,.10), transparent 32rem),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 46%, #edf1f8 100%);
+    }
+    .hero {
+      padding: 66px 28px 34px;
+      border-bottom: 1px solid rgba(223,229,239,.82);
+      background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.38));
+      backdrop-filter: blur(14px);
+    }
+    .hero-inner, .container { max-width: 1200px; margin: 0 auto; }
+    .eyebrow {
+      display: inline-flex;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(48,88,216,.22);
+      background: rgba(255,255,255,.76);
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+    h1 {
+      margin: 20px 0 14px;
+      font-size: clamp(32px, 5.3vw, 58px);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+    .subtitle {
+      max-width: 940px;
+      margin: 0;
+      color: #45516a;
+      font-size: 19px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .stat {
+      padding: 18px;
+      border: 1px solid rgba(223,229,239,.9);
+      border-radius: 18px;
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 8px 32px rgba(30,42,80,.06);
+    }
+    .stat b { display:block; font-size: 28px; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: 14px; }
+    .container { padding: 28px; }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      margin-bottom: 22px;
+      border: 1px solid rgba(223,229,239,.92);
+      border-radius: 22px;
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 38px rgba(30,42,80,.08);
+    }
+    input, select, button { font: inherit; }
+    .search {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .search:focus { border-color: #7f95ff; box-shadow: 0 0 0 4px rgba(48,88,216,.10); }
+    .btn, select {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+    .section {
+      margin: 28px 0;
+      padding: 26px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(223,229,239,.88);
+      box-shadow: var(--shadow);
+    }
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      letter-spacing: -.02em;
+    }
+    .section-lead { margin: 0 0 20px; color: #48546a; max-width: 950px; }
+    .claim {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .claim-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      background: #fff;
+    }
+    .claim-card small {
+      display:inline-block;
+      color: var(--blue);
+      font-weight: 900;
+      margin-bottom: 6px;
+      letter-spacing: .04em;
+    }
+    .claim-card b { display:block; font-size: 22px; margin-bottom: 8px; }
+    .claim-card p { margin: 0; color: var(--muted); }
+    .arrow {
+      display: inline-flex;
+      margin: 12px 0;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: var(--blue);
+      font-weight: 900;
+    }
+    .nav-pills {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .nav-pills button {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+    }
+    .nav-pills button:hover { border-color: var(--blue); color: var(--blue); }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf0f6;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8faff;
+      color: #3a455d;
+      font-size: 13px;
+      letter-spacing: .02em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .evo-card {
+      margin: 14px 0;
+      border: 1px solid rgba(223,229,239,.9);
+      border-radius: 22px;
+      background: var(--solid);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(30,42,80,.07);
+    }
+    .evo-card.hidden { display:none; }
+    .card-head {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 22px;
+      border: 0;
+      background: linear-gradient(135deg, #fff, #f8faff);
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .card-head small {
+      display:block;
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .card-head strong {
+      display:block;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: -.02em;
+    }
+    .card-head em {
+      display:block;
+      color: var(--muted);
+      font-size: 14px;
+      font-style: normal;
+      margin-top: 4px;
+      max-width: 900px;
+    }
+    .pill {
+      align-self: center;
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: var(--blue);
+      font-size: 13px;
+    }
+    .card-body { display:none; padding: 0 22px 22px; }
+    .evo-card.open .card-body { display:block; }
+    .evo-card.open .pill { background: var(--text); color:#fff; }
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .compare section, .inside {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fbfcff;
+    }
+    .inside { margin-top: 14px; background: #fff; }
+    .compare h3, .inside h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+    .compare ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #556178;
+    }
+    .old h3 { color: var(--red); }
+    .new h3 { color: var(--green); }
+    .ability-grid {
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 12px;
+    }
+    .ability {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+    }
+    .ability b { display:block; font-size: 17px; margin-bottom: 6px; }
+    .ability p { margin: 6px 0; color: var(--muted); font-size: 14px; }
+    .role-flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap: 10px;
+    }
+    .role-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+    }
+    .role-card small { color: var(--blue); font-weight: 900; }
+    .role-card b { display:block; margin: 4px 0; }
+    .role-card span { color: var(--muted); font-size: 13px; }
+    .maturity-grid {
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .maturity-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+    }
+    .maturity-card small { color: var(--purple); font-weight: 900; }
+    .maturity-card b { display:block; font-size: 17px; margin: 4px 0 8px; }
+    .maturity-card p { color: var(--muted); font-size: 14px; margin: 6px 0; }
+    .maturity-card ul { margin: 8px 0; padding-left: 18px; color:#566176; font-size: 14px; }
+    .callout {
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(48,88,216,.1), rgba(13,143,112,.1));
+      border: 1px solid rgba(48,88,216,.18);
+    }
+    .callout strong { display:block; font-size: 22px; margin-bottom: 6px; }
+    .callout p { margin: 8px 0; }
+    .footer { color: var(--muted); text-align:center; padding: 28px; font-size: 13px; }
+    @media (max-width: 1100px) {
+      .hero-grid, .maturity-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .ability-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .role-flow { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .compare, .claim { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .hero { padding: 42px 18px 24px; }
+      .container { padding: 18px; }
+      .hero-grid, .ability-grid, .role-flow, .maturity-grid { grid-template-columns: 1fr; }
+      .toolbar { position: relative; grid-template-columns: 1fr; }
+      .section { padding: 18px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .toolbar, .nav-pills, .footer { display:none !important; }
+      .hero, .section, .evo-card { box-shadow:none; background:#fff; border-color:#ddd; }
+      .card-body { display:block !important; }
+      .evo-card, .maturity-card, .role-card, .ability { break-inside: avoid; }
+      .compare { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">AI PC / AI Learning Agent</span>
+      <h1>學習進化模型報告</h1>
+      <p class="subtitle">
+        這份文件描述 AI PC / AI Agent 時代的下一世代學習：學習不再只是把 AI 加進教材，而是從固定內容、單向教學、考後補救，進化為狀態感知、即時互動、長期陪伴與自主學習能力養成的人機協作系統。
+      </p>
+      <div class="hero-grid">
+        <div class="stat"><b>8</b><span>學習進化面向</span></div>
+        <div class="stat"><b>5</b><span>下一世代能力</span></div>
+        <div class="stat"><b>6</b><span>AI 角色轉換</span></div>
+        <div class="stat"><b>4</b><span>成熟階段</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="toolbar" aria-label="報告操作列">
+      <input id="searchInput" class="search" placeholder="搜尋：個人化、即時修正、提問、驗證、AI PC、學習記憶..." />
+      <select id="evoSelect">
+        <option value="all">全部進化面向</option>
+        <option value="path">01 從固定教材 → 個人化學習路徑</option><option value="interaction">02 從單向教學 → 雙向互動</option><option value="correction">03 從考後補救 → 即時修正</option><option value="roles">04 從老師中心 → 學習者中心 + AI 協作</option><option value="abilities">05 從記憶知識 → 學會提問、驗證、迭代理解</option><option value="memory">06 從一次性學習 → 長期學習記憶</option><option value="aipc">07 從雲端工具 → AI PC 本機學習夥伴</option><option value="os">08 從學習工具 → 學習作業系統</option>
+      </select>
+      <button class="btn" id="toggleAll">全部展開</button>
+      <button class="btn primary" onclick="window.print()">列印 / 轉 PDF</button>
+    </nav>
+
+    <section class="section">
+      <h2>核心主張</h2>
+      <p class="section-lead">
+        下一世代學習的本質，是從「內容驅動的學習」進化為「狀態感知的學習」。
+      </p>
+      <div class="claim">
+        <article class="claim-card">
+          <small>Before</small>
+          <b>內容驅動</b>
+          <p>教材 → 課程 → 練習 → 考試 → 成績。重點是學了什麼內容、完成多少進度、考了多少分。</p>
+        </article>
+        <article class="claim-card">
+          <small>After</small>
+          <b>狀態感知</b>
+          <p>學習狀態 → 即時互動 → 診斷回饋 → 路徑調整 → 能力進化。重點是使用者現在怎麼了，以及如何讓他更會學習。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>學習進化總覽</h2>
+      <p class="section-lead">這張表可以作為簡報摘要，先說明下一世代學習從哪裡進化到哪裡。</p>
+      <div class='table-wrap'><table><thead><tr><th>進化面向</th><th>從什麼</th><th>變成什麼</th><th>核心價值</th></tr></thead><tbody><tr><td>學習內容</td><td>固定教材</td><td>動態知識網絡</td><td>內容可被拆解、重組、對話與追蹤</td></tr><tr><td>學習路徑</td><td>統一進度</td><td>個人化路線</td><td>依弱點、目標、節奏調整</td></tr><tr><td>學習互動</td><td>單向接收</td><td>雙向協作</td><td>使用者可提問、追問、驗證</td></tr><tr><td>學習診斷</td><td>考後補救</td><td>即時修正</td><td>錯誤在形成時就被處理</td></tr><tr><td>學習評量</td><td>分數結果</td><td>能力狀態</td><td>看掌握、穩定、遷移、自主性</td></tr><tr><td>學習角色</td><td>老師中心</td><td>學習者 + AI + 老師</td><td>三方協作，各自負責不同價值</td></tr><tr><td>學習能力</td><td>記憶知識</td><td>提問、驗證、迭代理解</td><td>學會如何學習</td></tr><tr><td>學習紀錄</td><td>使用紀錄</td><td>長期學習記憶</td><td>AI 理解使用者的成長軌跡</td></tr><tr><td>學習節奏</td><td>固定時間</td><td>個人節奏</td><td>依疲勞、回訪、習慣調整</td></tr><tr><td>學習工具</td><td>單點工具</td><td>學習作業系統</td><td>串起教材、筆記、題目、AI 與回饋</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>八大進化面向</h2>
+      <p class="section-lead">點擊任一面向可快速查看詳細內容。</p>
+      <div class="nav-pills">
+        <button data-target="path">個人化學習路徑</button><button data-target="interaction">雙向互動</button><button data-target="correction">即時修正</button><button data-target="roles">學習者中心 + AI 協作</button><button data-target="abilities">提問、驗證、迭代理解</button><button data-target="memory">長期學習記憶</button><button data-target="aipc">AI PC 本機學習夥伴</button><button data-target="os">學習作業系統</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>進化詳細模型</h2>
+      <p class="section-lead">每一個面向都包含：傳統限制、AI Agent 時代的新型態、產品型態變化、成功條件與可觀察指標。</p>
+      <div id="cards">
+        
+    <article class="evo-card" data-id="path" data-search="{&quot;id&quot;: &quot;path&quot;, &quot;title&quot;: &quot;01 從固定教材 → 個人化學習路徑&quot;, &quot;old&quot;: &quot;固定教材&quot;, &quot;new&quot;: &quot;個人化學習路徑&quot;, &quot;core&quot;: &quot;教材不再是唯一中心，學習路線會依使用者狀態、弱點、目標與節奏動態調整。&quot;, &quot;traditional&quot;: [&quot;所有人按照同一個章節與進度前進。&quot;, &quot;學生即使前置知識不足，課程仍然繼續往後走。&quot;, &quot;已經會的人仍可能被迫重複，卡住的人則可能被進度拋下。&quot;, &quot;補救通常發生在測驗後，而不是學習過程中。&quot;], &quot;agent&quot;: [&quot;AI 根據學習訊號判斷使用者缺的是哪一層能力。&quot;, &quot;若發現前置知識不足，先安排短時間回補，再回到原本內容。&quot;, &quot;學習路線由教材、錯誤模式、學習節奏、情緒狀態與目標共同決定。&quot;, &quot;使用者、AI 與老師可以共同調整學習路線。&quot;], &quot;product&quot;: [[&quot;課程目錄&quot;, &quot;個人學習路線&quot;], [&quot;單元進度&quot;, &quot;能力地圖&quot;], [&quot;固定作業&quot;, &quot;動態任務&quot;], [&quot;統一複習&quot;, &quot;個人弱點回補&quot;], [&quot;老師安排全部&quot;, &quot;AI 建議 + 使用者選擇 + 老師調整&quot;]], &quot;metrics&quot;: [[&quot;前置知識補強成功率&quot;, &quot;回補前置概念後，原單元表現是否改善。&quot;], [&quot;個人路徑採納率&quot;, &quot;使用者是否接受 AI 建議的學習路線。&quot;], [&quot;路徑調整後進步幅度&quot;, &quot;改路線後是否真的學得更好。&quot;], [&quot;無效學習時間下降&quot;, &quot;減少重複學已經會的內容。&quot;], [&quot;卡關恢復時間下降&quot;, &quot;遇到困難後更快回到學習狀態。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>01 從固定教材 → 個人化學習路徑</strong>
+          <em>教材不再是唯一中心，學習路線會依使用者狀態、弱點、目標與節奏動態調整。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：固定教材</h3>
+            <ul><li>所有人按照同一個章節與進度前進。</li><li>學生即使前置知識不足，課程仍然繼續往後走。</li><li>已經會的人仍可能被迫重複，卡住的人則可能被進度拋下。</li><li>補救通常發生在測驗後，而不是學習過程中。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：個人化學習路徑</h3>
+            <ul><li>AI 根據學習訊號判斷使用者缺的是哪一層能力。</li><li>若發現前置知識不足，先安排短時間回補，再回到原本內容。</li><li>學習路線由教材、錯誤模式、學習節奏、情緒狀態與目標共同決定。</li><li>使用者、AI 與老師可以共同調整學習路線。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>課程目錄</td><td>個人學習路線</td></tr><tr><td>單元進度</td><td>能力地圖</td></tr><tr><td>固定作業</td><td>動態任務</td></tr><tr><td>統一複習</td><td>個人弱點回補</td></tr><tr><td>老師安排全部</td><td>AI 建議 + 使用者選擇 + 老師調整</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>前置知識補強成功率</td><td>回補前置概念後，原單元表現是否改善。</td></tr><tr><td>個人路徑採納率</td><td>使用者是否接受 AI 建議的學習路線。</td></tr><tr><td>路徑調整後進步幅度</td><td>改路線後是否真的學得更好。</td></tr><tr><td>無效學習時間下降</td><td>減少重複學已經會的內容。</td></tr><tr><td>卡關恢復時間下降</td><td>遇到困難後更快回到學習狀態。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="interaction" data-search="{&quot;id&quot;: &quot;interaction&quot;, &quot;title&quot;: &quot;02 從單向教學 → 雙向互動&quot;, &quot;old&quot;: &quot;單向教學&quot;, &quot;new&quot;: &quot;雙向互動&quot;, &quot;core&quot;: &quot;學習不再只是看教材、聽老師、看影片，而是能即時提問、追問、反駁與要求換一種說法。&quot;, &quot;traditional&quot;: [&quot;老師講，學生聽；教材寫，學生看；影片播，學生看。&quot;, &quot;使用者不懂時，只能暫停、重看、跳過、放棄或另外問人。&quot;, &quot;教材與影片無法理解使用者的卡點。&quot;, &quot;學生常常不知道自己真正不懂的是哪一層。&quot;], &quot;agent&quot;: [&quot;使用者可以在學習中直接對教材、題目與解析提問。&quot;, &quot;AI 可以追問使用者卡在公式、概念、題意還是步驟。&quot;, &quot;同一個概念可以切換成文字版、圖解版、例題版、生活化比喻版。&quot;, &quot;互動不只是聊天，而是用來釐清問題、確認卡點與引導重試。&quot;], &quot;product&quot;: [[&quot;看教材&quot;, &quot;對教材提問&quot;], [&quot;看解析&quot;, &quot;要求換一種解釋&quot;], [&quot;看影片&quot;, &quot;邊看邊追問&quot;], [&quot;做題&quot;, &quot;做題過程中被引導&quot;], [&quot;學完才問&quot;, &quot;學習中即時互動&quot;]], &quot;metrics&quot;: [[&quot;提問品質成長&quot;, &quot;使用者是否從「答案是什麼」進化到「我卡在哪」。&quot;], [&quot;追問延伸比例&quot;, &quot;使用者是否願意進一步追問。&quot;], [&quot;解釋後答題正確率&quot;, &quot;AI 解釋是否真的改善理解。&quot;], [&quot;澄清輪數下降&quot;, &quot;AI 是否越來越能理解使用者問題。&quot;], [&quot;直接要答案比例下降&quot;, &quot;使用者是否減少單純索取答案。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>02 從單向教學 → 雙向互動</strong>
+          <em>學習不再只是看教材、聽老師、看影片，而是能即時提問、追問、反駁與要求換一種說法。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：單向教學</h3>
+            <ul><li>老師講，學生聽；教材寫，學生看；影片播，學生看。</li><li>使用者不懂時，只能暫停、重看、跳過、放棄或另外問人。</li><li>教材與影片無法理解使用者的卡點。</li><li>學生常常不知道自己真正不懂的是哪一層。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：雙向互動</h3>
+            <ul><li>使用者可以在學習中直接對教材、題目與解析提問。</li><li>AI 可以追問使用者卡在公式、概念、題意還是步驟。</li><li>同一個概念可以切換成文字版、圖解版、例題版、生活化比喻版。</li><li>互動不只是聊天，而是用來釐清問題、確認卡點與引導重試。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>看教材</td><td>對教材提問</td></tr><tr><td>看解析</td><td>要求換一種解釋</td></tr><tr><td>看影片</td><td>邊看邊追問</td></tr><tr><td>做題</td><td>做題過程中被引導</td></tr><tr><td>學完才問</td><td>學習中即時互動</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>提問品質成長</td><td>使用者是否從「答案是什麼」進化到「我卡在哪」。</td></tr><tr><td>追問延伸比例</td><td>使用者是否願意進一步追問。</td></tr><tr><td>解釋後答題正確率</td><td>AI 解釋是否真的改善理解。</td></tr><tr><td>澄清輪數下降</td><td>AI 是否越來越能理解使用者問題。</td></tr><tr><td>直接要答案比例下降</td><td>使用者是否減少單純索取答案。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="correction" data-search="{&quot;id&quot;: &quot;correction&quot;, &quot;title&quot;: &quot;03 從考後補救 → 即時修正&quot;, &quot;old&quot;: &quot;考後補救&quot;, &quot;new&quot;: &quot;即時修正&quot;, &quot;core&quot;: &quot;錯誤不再等到考完才被發現，而是在學習過程中被即時診斷、回饋與修正。&quot;, &quot;traditional&quot;: [&quot;學完之後考試，考完才知道錯很多。&quot;, &quot;錯誤發現太晚，錯誤習慣可能已經固定。&quot;, &quot;學生知道自己分數低，但不一定知道錯在哪。&quot;, &quot;補救常常落後於下一個單元進度。&quot;], &quot;agent&quot;: [&quot;AI 可以在學習中辨識同類錯誤與概念混淆。&quot;, &quot;錯誤不是單純扣分，而是用來診斷理解狀態。&quot;, &quot;AI 可以判斷是概念錯、程序錯、粗心、題意錯、策略錯或遷移失敗。&quot;, &quot;修正發生在錯誤形成時，而不是考後才大量補救。&quot;], &quot;product&quot;: [[&quot;考後錯題本&quot;, &quot;即時錯誤診斷&quot;], [&quot;分數回饋&quot;, &quot;錯誤類型回饋&quot;], [&quot;統一補救&quot;, &quot;個人弱點回補&quot;], [&quot;錯了才知道&quot;, &quot;快錯時就提醒&quot;], [&quot;學完才測&quot;, &quot;邊學邊檢核&quot;]], &quot;metrics&quot;: [[&quot;同類錯誤下降率&quot;, &quot;同一錯誤是否逐漸減少。&quot;], [&quot;錯誤診斷準確度&quot;, &quot;AI 是否正確分類錯誤原因。&quot;], [&quot;錯後重試比例&quot;, &quot;使用者答錯後是否願意再試。&quot;], [&quot;回饋後修正成功率&quot;, &quot;看完回饋後是否能改正。&quot;], [&quot;錯誤累積量下降&quot;, &quot;錯誤是否不再一直堆到考後才處理。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>03 從考後補救 → 即時修正</strong>
+          <em>錯誤不再等到考完才被發現，而是在學習過程中被即時診斷、回饋與修正。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：考後補救</h3>
+            <ul><li>學完之後考試，考完才知道錯很多。</li><li>錯誤發現太晚，錯誤習慣可能已經固定。</li><li>學生知道自己分數低，但不一定知道錯在哪。</li><li>補救常常落後於下一個單元進度。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：即時修正</h3>
+            <ul><li>AI 可以在學習中辨識同類錯誤與概念混淆。</li><li>錯誤不是單純扣分，而是用來診斷理解狀態。</li><li>AI 可以判斷是概念錯、程序錯、粗心、題意錯、策略錯或遷移失敗。</li><li>修正發生在錯誤形成時，而不是考後才大量補救。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>考後錯題本</td><td>即時錯誤診斷</td></tr><tr><td>分數回饋</td><td>錯誤類型回饋</td></tr><tr><td>統一補救</td><td>個人弱點回補</td></tr><tr><td>錯了才知道</td><td>快錯時就提醒</td></tr><tr><td>學完才測</td><td>邊學邊檢核</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>同類錯誤下降率</td><td>同一錯誤是否逐漸減少。</td></tr><tr><td>錯誤診斷準確度</td><td>AI 是否正確分類錯誤原因。</td></tr><tr><td>錯後重試比例</td><td>使用者答錯後是否願意再試。</td></tr><tr><td>回饋後修正成功率</td><td>看完回饋後是否能改正。</td></tr><tr><td>錯誤累積量下降</td><td>錯誤是否不再一直堆到考後才處理。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="roles" data-search="{&quot;id&quot;: &quot;roles&quot;, &quot;title&quot;: &quot;04 從老師中心 → 學習者中心 + AI 協作&quot;, &quot;old&quot;: &quot;老師中心&quot;, &quot;new&quot;: &quot;學習者中心 + AI 協作&quot;, &quot;core&quot;: &quot;老師不會消失，但角色會從知識傳遞者，進化為學習設計者、高階引導者與診斷資料解讀者。&quot;, &quot;traditional&quot;: [&quot;老師決定進度、重點、講解方式、作業與補救方式。&quot;, &quot;學生多半是被安排者與接收者。&quot;, &quot;老師很難即時知道每個學生卡在哪裡。&quot;, &quot;大量時間花在重複講解與批改，而不是高價值引導。&quot;], &quot;agent&quot;: [&quot;AI 負責即時陪伴、診斷、回饋、記錄與基礎引導。&quot;, &quot;學生負責提問、練習、反思、修正與選擇策略。&quot;, &quot;老師負責設定學習目標、評量標準、教學設計與高階介入。&quot;, &quot;學習變成老師、AI、學生三方協作。&quot;], &quot;product&quot;: [[&quot;學生：接收者&quot;, &quot;主動學習者、提問者、反思者&quot;], [&quot;老師：講授者&quot;, &quot;學習設計者、診斷者、引導者&quot;], [&quot;AI：工具&quot;, &quot;助教、教練、學習鏡子&quot;], [&quot;教材：內容來源&quot;, &quot;可互動、可拆解、可重組的知識基礎&quot;], [&quot;評量：結果判斷&quot;, &quot;學習狀態診斷&quot;]], &quot;metrics&quot;: [[&quot;學習自主性提升&quot;, &quot;使用者是否更能自己設定目標與選擇策略。&quot;], [&quot;老師介入效率提升&quot;, &quot;老師是否能更快知道學生需要什麼。&quot;], [&quot;AI 回饋採納率&quot;, &quot;使用者是否照 AI 建議行動。&quot;], [&quot;學生自我反思比例&quot;, &quot;使用者是否願意說明自己怎麼想。&quot;], [&quot;老師高價值介入比例&quot;, &quot;老師是否把時間用在真正需要人的地方。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>04 從老師中心 → 學習者中心 + AI 協作</strong>
+          <em>老師不會消失，但角色會從知識傳遞者，進化為學習設計者、高階引導者與診斷資料解讀者。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：老師中心</h3>
+            <ul><li>老師決定進度、重點、講解方式、作業與補救方式。</li><li>學生多半是被安排者與接收者。</li><li>老師很難即時知道每個學生卡在哪裡。</li><li>大量時間花在重複講解與批改，而不是高價值引導。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：學習者中心 + AI 協作</h3>
+            <ul><li>AI 負責即時陪伴、診斷、回饋、記錄與基礎引導。</li><li>學生負責提問、練習、反思、修正與選擇策略。</li><li>老師負責設定學習目標、評量標準、教學設計與高階介入。</li><li>學習變成老師、AI、學生三方協作。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>學生：接收者</td><td>主動學習者、提問者、反思者</td></tr><tr><td>老師：講授者</td><td>學習設計者、診斷者、引導者</td></tr><tr><td>AI：工具</td><td>助教、教練、學習鏡子</td></tr><tr><td>教材：內容來源</td><td>可互動、可拆解、可重組的知識基礎</td></tr><tr><td>評量：結果判斷</td><td>學習狀態診斷</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>學習自主性提升</td><td>使用者是否更能自己設定目標與選擇策略。</td></tr><tr><td>老師介入效率提升</td><td>老師是否能更快知道學生需要什麼。</td></tr><tr><td>AI 回饋採納率</td><td>使用者是否照 AI 建議行動。</td></tr><tr><td>學生自我反思比例</td><td>使用者是否願意說明自己怎麼想。</td></tr><tr><td>老師高價值介入比例</td><td>老師是否把時間用在真正需要人的地方。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="abilities" data-search="{&quot;id&quot;: &quot;abilities&quot;, &quot;title&quot;: &quot;05 從記憶知識 → 學會提問、驗證、迭代理解&quot;, &quot;old&quot;: &quot;記憶知識&quot;, &quot;new&quot;: &quot;提問、驗證、迭代理解&quot;, &quot;core&quot;: &quot;AI 時代，知識取得成本下降；真正重要的是會問、會判斷、會驗證、會修正、會把知識用到新情境。&quot;, &quot;traditional&quot;: [&quot;重視記住定義、背公式、刷題與考試答對。&quot;, &quot;學生常把看懂解析誤認為自己已經理解。&quot;, &quot;面對變形題或新情境時，容易無法遷移。&quot;, &quot;不太訓練如何問問題、驗證答案與修正自己的理解。&quot;], &quot;agent&quot;: [&quot;AI 引導使用者把模糊的不懂轉成具體問題。&quot;, &quot;使用者學會檢查 AI、教材與答案之間是否一致。&quot;, &quot;答錯後不只看解析，而是反思自己為什麼錯。&quot;, &quot;學習目標從答對單題，提升到能遷移、能驗證、能修正。&quot;], &quot;product&quot;: [[&quot;背答案&quot;, &quot;問出好問題&quot;], [&quot;看解析&quot;, &quot;驗證解析是否合理&quot;], [&quot;記公式&quot;, &quot;知道公式何時能用、何時不能用&quot;], [&quot;做同類題&quot;, &quot;處理變形題與新情境&quot;], [&quot;被動聽懂&quot;, &quot;主動修正理解&quot;], [&quot;依賴老師&quot;, &quot;能和 AI 協作學習&quot;]], &quot;metrics&quot;: [[&quot;提問品質分數提升&quot;, &quot;問題從要答案進化到問卡點、問比較、問原理。&quot;], [&quot;自我說明比例提升&quot;, &quot;使用者能說出自己的解法與理解。&quot;], [&quot;AI 糾錯比例&quot;, &quot;使用者能指出 AI 或資料中的矛盾。&quot;], [&quot;變形題答對率提升&quot;, &quot;知識能遷移到新情境。&quot;], [&quot;提示依賴下降&quot;, &quot;使用者逐漸不靠 AI 也能完成。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>05 從記憶知識 → 學會提問、驗證、迭代理解</strong>
+          <em>AI 時代，知識取得成本下降；真正重要的是會問、會判斷、會驗證、會修正、會把知識用到新情境。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：記憶知識</h3>
+            <ul><li>重視記住定義、背公式、刷題與考試答對。</li><li>學生常把看懂解析誤認為自己已經理解。</li><li>面對變形題或新情境時，容易無法遷移。</li><li>不太訓練如何問問題、驗證答案與修正自己的理解。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：提問、驗證、迭代理解</h3>
+            <ul><li>AI 引導使用者把模糊的不懂轉成具體問題。</li><li>使用者學會檢查 AI、教材與答案之間是否一致。</li><li>答錯後不只看解析，而是反思自己為什麼錯。</li><li>學習目標從答對單題，提升到能遷移、能驗證、能修正。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>背答案</td><td>問出好問題</td></tr><tr><td>看解析</td><td>驗證解析是否合理</td></tr><tr><td>記公式</td><td>知道公式何時能用、何時不能用</td></tr><tr><td>做同類題</td><td>處理變形題與新情境</td></tr><tr><td>被動聽懂</td><td>主動修正理解</td></tr><tr><td>依賴老師</td><td>能和 AI 協作學習</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>提問品質分數提升</td><td>問題從要答案進化到問卡點、問比較、問原理。</td></tr><tr><td>自我說明比例提升</td><td>使用者能說出自己的解法與理解。</td></tr><tr><td>AI 糾錯比例</td><td>使用者能指出 AI 或資料中的矛盾。</td></tr><tr><td>變形題答對率提升</td><td>知識能遷移到新情境。</td></tr><tr><td>提示依賴下降</td><td>使用者逐漸不靠 AI 也能完成。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="memory" data-search="{&quot;id&quot;: &quot;memory&quot;, &quot;title&quot;: &quot;06 從一次性學習 → 長期學習記憶&quot;, &quot;old&quot;: &quot;一次性學習&quot;, &quot;new&quot;: &quot;長期學習記憶&quot;, &quot;core&quot;: &quot;AI 不只記錄做了幾題與分數，而是理解使用者的弱點、錯誤模式、提問習慣、情緒反應與學習節奏。&quot;, &quot;traditional&quot;: [&quot;多數系統只記錄做題數、答對率、分數與上次學到哪裡。&quot;, &quot;系統不知道使用者常在哪裡卡住，也不知道錯誤是否同一類。&quot;, &quot;學習紀錄常是靜態報表，沒有真正進入下一輪學習決策。&quot;, &quot;使用者每次回來，常需要重新找狀態。&quot;], &quot;agent&quot;: [&quot;AI 形成個人長期學習模型。&quot;, &quot;AI 能看出這次錯誤和上週某個錯誤其實同類。&quot;, &quot;AI 能根據學習節奏調整任務長度、難度與介入時機。&quot;, &quot;學習記憶成為下一次學習的起點。&quot;], &quot;product&quot;: [[&quot;學習紀錄&quot;, &quot;學習記憶&quot;], [&quot;錯題本&quot;, &quot;錯誤模式模型&quot;], [&quot;進度條&quot;, &quot;能力成長軌跡&quot;], [&quot;單次成績&quot;, &quot;長期掌握穩定度&quot;], [&quot;使用紀錄&quot;, &quot;學習策略演化紀錄&quot;]], &quot;metrics&quot;: [[&quot;長期能力成長&quot;, &quot;跨多次學習後能力是否穩定提升。&quot;], [&quot;同類錯誤下降率&quot;, &quot;反覆錯誤是否逐漸減少。&quot;], [&quot;學習策略多樣性&quot;, &quot;使用者是否逐漸嘗試不同學習方法。&quot;], [&quot;穩定回訪頻率&quot;, &quot;是否形成可持續學習節奏。&quot;], [&quot;自主學習能力分數&quot;, &quot;是否更會設定目標、反思、修正。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>06 從一次性學習 → 長期學習記憶</strong>
+          <em>AI 不只記錄做了幾題與分數，而是理解使用者的弱點、錯誤模式、提問習慣、情緒反應與學習節奏。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：一次性學習</h3>
+            <ul><li>多數系統只記錄做題數、答對率、分數與上次學到哪裡。</li><li>系統不知道使用者常在哪裡卡住，也不知道錯誤是否同一類。</li><li>學習紀錄常是靜態報表，沒有真正進入下一輪學習決策。</li><li>使用者每次回來，常需要重新找狀態。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：長期學習記憶</h3>
+            <ul><li>AI 形成個人長期學習模型。</li><li>AI 能看出這次錯誤和上週某個錯誤其實同類。</li><li>AI 能根據學習節奏調整任務長度、難度與介入時機。</li><li>學習記憶成為下一次學習的起點。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>學習紀錄</td><td>學習記憶</td></tr><tr><td>錯題本</td><td>錯誤模式模型</td></tr><tr><td>進度條</td><td>能力成長軌跡</td></tr><tr><td>單次成績</td><td>長期掌握穩定度</td></tr><tr><td>使用紀錄</td><td>學習策略演化紀錄</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>長期能力成長</td><td>跨多次學習後能力是否穩定提升。</td></tr><tr><td>同類錯誤下降率</td><td>反覆錯誤是否逐漸減少。</td></tr><tr><td>學習策略多樣性</td><td>使用者是否逐漸嘗試不同學習方法。</td></tr><tr><td>穩定回訪頻率</td><td>是否形成可持續學習節奏。</td></tr><tr><td>自主學習能力分數</td><td>是否更會設定目標、反思、修正。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="aipc" data-search="{&quot;id&quot;: &quot;aipc&quot;, &quot;title&quot;: &quot;07 從雲端工具 → AI PC 本機學習夥伴&quot;, &quot;old&quot;: &quot;雲端工具&quot;, &quot;new&quot;: &quot;AI PC 本機學習夥伴&quot;, &quot;core&quot;: &quot;AI PC 的價值不是只有算力，而是能在本機處理教材、筆記、學習訊號與長期記憶，形成低延遲、重隱私的個人學習 Agent。&quot;, &quot;traditional&quot;: [&quot;使用者輸入問題，送到雲端，AI 回答。&quot;, &quot;AI 比較像遠端問答工具，對本機資料與跨工具情境理解有限。&quot;, &quot;學習紀錄、教材、筆記與 AI 對話常常分散。&quot;, &quot;隱私與延遲會限制某些學習訊號的使用。&quot;], &quot;agent&quot;: [&quot;本機模型可以處理部分學習訊號與個人資料。&quot;, &quot;AI 能理解使用者本機教材、筆記、文件與練習紀錄。&quot;, &quot;低延遲讓提示、摘要、重講與回饋更即時。&quot;, &quot;敏感學習資料可優先在本機分析，提升信任。&quot;], &quot;product&quot;: [[&quot;遠端 AI 問答&quot;, &quot;本機學習 Agent&quot;], [&quot;單次輸入輸出&quot;, &quot;長期學習記憶&quot;], [&quot;雲端分析為主&quot;, &quot;本機推論優先&quot;], [&quot;單一 App 學習&quot;, &quot;跨 App 學習工作流&quot;], [&quot;資料分散&quot;, &quot;教材、筆記、題目、回饋串接&quot;]], &quot;metrics&quot;: [[&quot;本機推論比例&quot;, &quot;有多少學習分析可以在本機完成。&quot;], [&quot;低延遲回饋體感&quot;, &quot;使用者是否感覺 AI 回饋即時。&quot;], [&quot;個人學習記憶採納率&quot;, &quot;使用者是否願意讓 AI 記住學習模式。&quot;], [&quot;隱私信任度&quot;, &quot;使用者是否理解並信任資料使用方式。&quot;], [&quot;跨工具學習銜接率&quot;, &quot;AI 是否能串起教材、筆記、題目與回饋。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>07 從雲端工具 → AI PC 本機學習夥伴</strong>
+          <em>AI PC 的價值不是只有算力，而是能在本機處理教材、筆記、學習訊號與長期記憶，形成低延遲、重隱私的個人學習 Agent。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：雲端工具</h3>
+            <ul><li>使用者輸入問題，送到雲端，AI 回答。</li><li>AI 比較像遠端問答工具，對本機資料與跨工具情境理解有限。</li><li>學習紀錄、教材、筆記與 AI 對話常常分散。</li><li>隱私與延遲會限制某些學習訊號的使用。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：AI PC 本機學習夥伴</h3>
+            <ul><li>本機模型可以處理部分學習訊號與個人資料。</li><li>AI 能理解使用者本機教材、筆記、文件與練習紀錄。</li><li>低延遲讓提示、摘要、重講與回饋更即時。</li><li>敏感學習資料可優先在本機分析，提升信任。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>遠端 AI 問答</td><td>本機學習 Agent</td></tr><tr><td>單次輸入輸出</td><td>長期學習記憶</td></tr><tr><td>雲端分析為主</td><td>本機推論優先</td></tr><tr><td>單一 App 學習</td><td>跨 App 學習工作流</td></tr><tr><td>資料分散</td><td>教材、筆記、題目、回饋串接</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>本機推論比例</td><td>有多少學習分析可以在本機完成。</td></tr><tr><td>低延遲回饋體感</td><td>使用者是否感覺 AI 回饋即時。</td></tr><tr><td>個人學習記憶採納率</td><td>使用者是否願意讓 AI 記住學習模式。</td></tr><tr><td>隱私信任度</td><td>使用者是否理解並信任資料使用方式。</td></tr><tr><td>跨工具學習銜接率</td><td>AI 是否能串起教材、筆記、題目與回饋。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+    <article class="evo-card" data-id="os" data-search="{&quot;id&quot;: &quot;os&quot;, &quot;title&quot;: &quot;08 從學習工具 → 學習作業系統&quot;, &quot;old&quot;: &quot;學習工具&quot;, &quot;new&quot;: &quot;學習作業系統&quot;, &quot;core&quot;: &quot;未來不是更多單點學習工具，而是一個 Agent 串起教材、題目、筆記、討論、錯題、目標、進度與長期能力模型。&quot;, &quot;traditional&quot;: [&quot;背單字、刷題、筆記、影片、問答工具各自分散。&quot;, &quot;使用者需要自己在工具之間切換與整理。&quot;, &quot;各工具之間不理解彼此的學習脈絡。&quot;, &quot;學習狀態沒有被整合成一個可延續的系統。&quot;], &quot;agent&quot;: [&quot;AI Agent 串起教材、題目、筆記、AI 對話、錯題與學習目標。&quot;, &quot;每一次互動都能回到完整學習狀態中被理解。&quot;, &quot;學習工具不再只是功能集合，而是有共同記憶與共同判斷的系統。&quot;, &quot;使用者不用管理工具，而是管理自己的學習目標與策略。&quot;], &quot;product&quot;: [[&quot;背單字工具&quot;, &quot;知識記憶模組&quot;], [&quot;刷題工具&quot;, &quot;能力診斷模組&quot;], [&quot;筆記工具&quot;, &quot;個人理解模型&quot;], [&quot;影片工具&quot;, &quot;可互動學習內容&quot;], [&quot;問答工具&quot;, &quot;學習 Agent&quot;], [&quot;多工具切換&quot;, &quot;整合式學習工作流&quot;]], &quot;metrics&quot;: [[&quot;跨模組資料銜接率&quot;, &quot;教材、題目、筆記、AI 對話是否能互相連動。&quot;], [&quot;學習狀態連續性&quot;, &quot;使用者跨工具學習時，AI 是否仍理解目前狀態。&quot;], [&quot;工具切換負擔下降&quot;, &quot;使用者是否減少手動整理與切換成本。&quot;], [&quot;學習決策自動化程度&quot;, &quot;系統是否能提出合理下一步。&quot;], [&quot;整體學習完成率提升&quot;, &quot;整合後是否提升完整學習任務完成率。&quot;]]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Evolution Model</small>
+          <strong>08 從學習工具 → 學習作業系統</strong>
+          <em>未來不是更多單點學習工具，而是一個 Agent 串起教材、題目、筆記、討論、錯題、目標、進度與長期能力模型。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <div class="compare">
+          <section class="old">
+            <h3>過去：學習工具</h3>
+            <ul><li>背單字、刷題、筆記、影片、問答工具各自分散。</li><li>使用者需要自己在工具之間切換與整理。</li><li>各工具之間不理解彼此的學習脈絡。</li><li>學習狀態沒有被整合成一個可延續的系統。</li></ul>
+          </section>
+          <section class="new">
+            <h3>進化後：學習作業系統</h3>
+            <ul><li>AI Agent 串起教材、題目、筆記、AI 對話、錯題與學習目標。</li><li>每一次互動都能回到完整學習狀態中被理解。</li><li>學習工具不再只是功能集合，而是有共同記憶與共同判斷的系統。</li><li>使用者不用管理工具，而是管理自己的學習目標與策略。</li></ul>
+          </section>
+        </div>
+        <section class="inside">
+          <h3>產品型態變化</h3>
+          <div class='table-wrap'><table><thead><tr><th>舊型態</th><th>新型態</th></tr></thead><tbody><tr><td>背單字工具</td><td>知識記憶模組</td></tr><tr><td>刷題工具</td><td>能力診斷模組</td></tr><tr><td>筆記工具</td><td>個人理解模型</td></tr><tr><td>影片工具</td><td>可互動學習內容</td></tr><tr><td>問答工具</td><td>學習 Agent</td></tr><tr><td>多工具切換</td><td>整合式學習工作流</td></tr></tbody></table></div>
+        </section>
+        <section class="inside">
+          <h3>成功條件與可觀察指標</h3>
+          <div class='table-wrap'><table><thead><tr><th>指標</th><th>說明</th></tr></thead><tbody><tr><td>跨模組資料銜接率</td><td>教材、題目、筆記、AI 對話是否能互相連動。</td></tr><tr><td>學習狀態連續性</td><td>使用者跨工具學習時，AI 是否仍理解目前狀態。</td></tr><tr><td>工具切換負擔下降</td><td>使用者是否減少手動整理與切換成本。</td></tr><tr><td>學習決策自動化程度</td><td>系統是否能提出合理下一步。</td></tr><tr><td>整體學習完成率提升</td><td>整合後是否提升完整學習任務完成率。</td></tr></tbody></table></div>
+        </section>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>下一世代學習能力模型</h2>
+      <p class="section-lead">
+        AI Agent 時代，學生需要的不只是知識能力，而是提問、驗證、反思修正與自主調節能力。
+      </p>
+      <div class="ability-grid">
+        
+        <article class="ability">
+          <b>知識理解能力</b>
+          <p>能理解概念、公式、文本與流程。</p>
+          <p><strong>對應指標：</strong>概念檢核正確率、變形題答對率、前置知識缺口下降、同類錯誤下降率</p>
+        </article>
+        
+        <article class="ability">
+          <b>提問能力</b>
+          <p>能把模糊的不懂變成具體問題。</p>
+          <p><strong>對應指標：</strong>提問品質分數、追問延伸比例、澄清輪數下降、問比較/問原理/問遷移比例提升</p>
+        </article>
+        
+        <article class="ability">
+          <b>驗證能力</b>
+          <p>能判斷 AI、教材、答案是否合理。</p>
+          <p><strong>對應指標：</strong>教材來源查看率、AI 糾錯比例、引用資料檢查率、解釋衝突回報率</p>
+        </article>
+        
+        <article class="ability">
+          <b>反思修正能力</b>
+          <p>能說出自己為什麼錯，並修正理解。</p>
+          <p><strong>對應指標：</strong>自我說明比例、錯誤反思比例、答錯後重試比例、回饋後修正成功率</p>
+        </article>
+        
+        <article class="ability">
+          <b>自主學習能力</b>
+          <p>能設定目標、選擇策略、調整節奏。</p>
+          <p><strong>對應指標：</strong>學習目標設定完成率、學習策略選擇比例、穩定回訪頻率、AI 依賴程度下降</p>
+        </article>
+        
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>AI Agent 的角色進化</h2>
+      <p class="section-lead">
+        AI 不應該永遠只當答案機。最好的 AI Learning Agent 是在該出現時出現，在該退場時退場。
+      </p>
+      <div class="role-flow">
+        
+        <article class="role-card">
+          <small>初期</small>
+          <b>解釋者</b>
+          <span>把教材講清楚，降低理解門檻</span>
+        </article>
+        
+        <article class="role-card">
+          <small>卡關時</small>
+          <b>助教</b>
+          <span>找出卡點，給最小提示</span>
+        </article>
+        
+        <article class="role-card">
+          <small>答錯時</small>
+          <b>診斷者</b>
+          <span>分類錯誤，指出修正方向</span>
+        </article>
+        
+        <article class="role-card">
+          <small>練習時</small>
+          <b>教練</b>
+          <span>調整難度、節奏與策略</span>
+        </article>
+        
+        <article class="role-card">
+          <small>成長期</small>
+          <b>反思鏡</b>
+          <span>幫使用者看見自己的學習模式</span>
+        </article>
+        
+        <article class="role-card">
+          <small>成熟期</small>
+          <b>旁觀支援者</b>
+          <span>減少干擾，只在必要時介入</span>
+        </article>
+        
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>學習進化的四個成熟階段</h2>
+      <p class="section-lead">
+        不是所有 AI 學習產品一開始都能達到人機共學。可以用四階段判斷產品成熟度。
+      </p>
+      <div class="maturity-grid">
+        
+        <article class="maturity-card">
+          <small>Stage 1</small>
+          <b>AI Answering｜AI 回答階段</b>
+          <p>使用者主要把 AI 當成問答工具，像搜尋引擎加強版。</p>
+          <ul><li>高度依賴提問</li><li>常問答案</li><li>AI 主要提供回答</li><li>學習價值有限</li></ul>
+          <p><strong>主要風險：</strong>容易形成答案依賴。</p>
+        </article>
+        
+        <article class="maturity-card">
+          <small>Stage 2</small>
+          <b>AI Tutoring｜AI 輔導階段</b>
+          <p>AI 開始引導理解與練習，能分層解釋、提示與分析錯題。</p>
+          <ul><li>會分層解釋</li><li>會提示</li><li>會分析錯題</li><li>能改善短期學習效果</li></ul>
+          <p><strong>主要風險：</strong>若只追求答對，仍可能停留在補習工具。</p>
+        </article>
+        
+        <article class="maturity-card">
+          <small>Stage 3</small>
+          <b>AI Coaching｜AI 教練階段</b>
+          <p>AI 開始理解使用者的學習模式，能診斷長期弱點與調整策略。</p>
+          <ul><li>有長期學習記憶</li><li>能診斷錯誤模式</li><li>能調整學習策略</li><li>能降低依賴、提升自主性</li></ul>
+          <p><strong>主要風險：</strong>若推論不透明，使用者可能不信任 AI 建議。</p>
+        </article>
+        
+        <article class="maturity-card">
+          <small>Stage 4</small>
+          <b>AI Co-Learning｜人機共學階段</b>
+          <p>使用者不只是被 AI 教，而是學會和 AI 一起學習、驗證、反駁與修正。</p>
+          <ul><li>會問好問題</li><li>會查證 AI</li><li>會反思錯誤</li><li>會選擇策略</li><li>AI 逐漸退到輔助位置</li></ul>
+          <p><strong>主要風險：</strong>這是最難達成，但也是最接近下一世代學習的成熟型態。</p>
+        </article>
+        
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="callout">
+        <strong>最高層驗收標準</strong>
+        <p>
+          AI Learning Agent 的成功，不是讓使用者更依賴 AI，而是讓使用者在 AI 協作下，逐漸更能自己理解、提問、驗證、修正與遷移知識。
+        </p>
+        <p>
+          短期：AI 幫使用者學會一個內容。中期：AI 幫使用者改善學習方式。長期：使用者因為 AI 而變得更會學習。
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>簡報首頁一句話</h2>
+      <p class="section-lead">
+        下一世代學習不只是把 AI 放進教材，而是讓學習從固定內容、單向教學、考後補救，進化為一種能感知狀態、即時互動、持續修正、長期陪伴，並逐步培養使用者自主學習能力的人機協作系統。
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    AI Learning Agent｜Learning Evolution Model 學習進化模型報告 V0.1
+  </footer>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const evoSelect = document.getElementById('evoSelect');
+    const cards = Array.from(document.querySelectorAll('.evo-card'));
+    const toggleAll = document.getElementById('toggleAll');
+
+    function setOpen(card, open) {
+      card.classList.toggle('open', open);
+      const btn = card.querySelector('.card-head');
+      const pill = card.querySelector('.pill');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      pill.textContent = open ? '收合' : '展開';
+    }
+
+    document.querySelectorAll('.card-head').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.evo-card');
+        setOpen(card, !card.classList.contains('open'));
+      });
+    });
+
+    function applyFilter(scroll=false) {
+      const q = searchInput.value.trim().toLowerCase();
+      const selected = evoSelect.value;
+
+      cards.forEach(card => {
+        const text = card.dataset.search.toLowerCase();
+        const matchSearch = !q || text.includes(q);
+        const matchType = selected === 'all' || card.dataset.id === selected;
+        const visible = matchSearch && matchType;
+        card.classList.toggle('hidden', !visible);
+        if (q && visible) setOpen(card, true);
+      });
+
+      if (selected !== 'all') {
+        const card = cards.find(c => c.dataset.id === selected);
+        if (card && !card.classList.contains('hidden')) {
+          setOpen(card, true);
+          if (scroll) card.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+    }
+
+    searchInput.addEventListener('input', () => applyFilter(false));
+    evoSelect.addEventListener('change', () => applyFilter(true));
+
+    toggleAll.addEventListener('click', () => {
+      const shouldOpen = cards.some(card => !card.classList.contains('hidden') && !card.classList.contains('open'));
+      cards.forEach(card => {
+        if (!card.classList.contains('hidden')) setOpen(card, shouldOpen);
+      });
+      toggleAll.textContent = shouldOpen ? '全部收合' : '全部展開';
+    });
+
+    document.querySelectorAll('.nav-pills button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        evoSelect.value = btn.dataset.target;
+        applyFilter(true);
+      });
+    });
+
+    setOpen(cards[0], true);
+  </script>
+</body>
+</html>

@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Agent｜學習訊號框架報告</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: rgba(255,255,255,.88);
+      --solid: #ffffff;
+      --text: #1c2434;
+      --muted: #657184;
+      --line: #dfe5ef;
+      --blue: #2f58d8;
+      --cyan: #0d8faf;
+      --green: #0d8f70;
+      --amber: #b86b00;
+      --red: #c6404c;
+      --purple: #7455d8;
+      --shadow: 0 18px 60px rgba(30, 42, 80, .13);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      line-height: 1.72;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(47,88,216,.16), transparent 30rem),
+        radial-gradient(circle at 94% 6%, rgba(13,143,112,.16), transparent 27rem),
+        radial-gradient(circle at 45% 55%, rgba(116,85,216,.10), transparent 31rem),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 46%, #edf1f8 100%);
+    }
+    .hero {
+      padding: 66px 28px 34px;
+      border-bottom: 1px solid rgba(223,229,239,.82);
+      background: linear-gradient(135deg, rgba(255,255,255,.76), rgba(255,255,255,.36));
+      backdrop-filter: blur(14px);
+    }
+    .hero-inner, .container { max-width: 1200px; margin: 0 auto; }
+    .eyebrow {
+      display: inline-flex;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(47,88,216,.22);
+      background: rgba(255,255,255,.75);
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+    h1 {
+      margin: 20px 0 14px;
+      font-size: clamp(32px, 5.3vw, 58px);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+    .subtitle {
+      max-width: 920px;
+      margin: 0;
+      color: #45516a;
+      font-size: 19px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .stat {
+      border: 1px solid rgba(223,229,239,.9);
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(255,255,255,.75);
+      box-shadow: 0 8px 32px rgba(30, 42, 80, .06);
+    }
+    .stat b { display:block; font-size: 28px; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: 14px; }
+    .container { padding: 28px; }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      margin-bottom: 22px;
+      border: 1px solid rgba(223,229,239,.92);
+      border-radius: 22px;
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 38px rgba(30, 42, 80, .08);
+    }
+    input, select, button { font: inherit; }
+    .search {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .search:focus { border-color: #7f95ff; box-shadow: 0 0 0 4px rgba(47,88,216,.10); }
+    .btn, select {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+    .section {
+      margin: 28px 0;
+      padding: 26px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(223,229,239,.88);
+      box-shadow: var(--shadow);
+    }
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      letter-spacing: -.02em;
+    }
+    .section-lead { margin: 0 0 20px; color: #48546a; max-width: 940px; }
+    .logic-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 12px;
+    }
+    .flow-card {
+      position: relative;
+      min-height: 126px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .flow-card small {
+      display:inline-flex;
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .flow-card b { display:block; font-size: 18px; margin-bottom: 4px; }
+    .flow-card span { color: var(--muted); font-size: 14px; }
+    .nav-pills {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .nav-pills button {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+    }
+    .nav-pills button:hover { border-color: var(--blue); color: var(--blue); }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      min-width: 880px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf0f6;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8faff;
+      color: #3a455d;
+      font-size: 13px;
+      letter-spacing: .02em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .signal-card {
+      margin: 14px 0;
+      border: 1px solid rgba(223,229,239,.9);
+      border-radius: 22px;
+      background: var(--solid);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(30, 42, 80, .07);
+    }
+    .signal-card.hidden { display:none; }
+    .card-head {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 22px;
+      border: 0;
+      background: linear-gradient(135deg, #fff, #f8faff);
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .card-head small {
+      display:block;
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .card-head strong {
+      display:block;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: -.02em;
+    }
+    .card-head em {
+      display:block;
+      color: var(--muted);
+      font-size: 14px;
+      font-style: normal;
+      margin-top: 4px;
+    }
+    .pill {
+      align-self: center;
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: var(--blue);
+      font-size: 13px;
+    }
+    .card-body { display:none; padding: 0 22px 22px; }
+    .signal-card.open .card-body { display:block; }
+    .signal-card.open .pill { background: var(--text); color:#fff; }
+    .definition {
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--blue);
+      border-radius: 14px;
+      background: #f6f8ff;
+      color: #39455c;
+    }
+    .subgrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .subgrid h3, .risk-box h3, .metric-box h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+    .risk-metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .risk-box, .metric-box {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fbfcff;
+    }
+    .risk-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #5b667c;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chips span {
+      display:inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eef7f5;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .state-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+    .state-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff;
+    }
+    .state-card b {
+      display:block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .state-card p { margin: 6px 0; color: #526078; font-size: 14px; }
+    .state-card code {
+      display:block;
+      white-space: pre-wrap;
+      background: #f5f7fb;
+      border: 1px solid #e5eaf3;
+      border-radius: 12px;
+      padding: 10px;
+      color: #303a50;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+    pre {
+      margin: 0;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #101828;
+      color: #e9eefc;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .ethics-grid {
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+    .ethic {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .ethic b { display:block; margin-bottom: 4px; }
+    .ethic span { color: var(--muted); font-size: 14px; }
+    .callout {
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(47,88,216,.1), rgba(13,143,112,.1));
+      border: 1px solid rgba(47,88,216,.18);
+    }
+    .callout strong { display:block; font-size: 22px; margin-bottom: 6px; }
+    .footer { color: var(--muted); text-align:center; padding: 28px; font-size: 13px; }
+    @media (max-width: 1050px) {
+      .hero-grid, .logic-flow, .ethics-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .state-grid, .risk-metric-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .hero { padding: 42px 18px 24px; }
+      .container { padding: 18px; }
+      .hero-grid, .logic-flow, .ethics-grid { grid-template-columns: 1fr; }
+      .toolbar { position: relative; grid-template-columns: 1fr; }
+      .section { padding: 18px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .toolbar, .nav-pills, .footer { display:none !important; }
+      .hero, .section, .signal-card { box-shadow:none; background:#fff; border-color:#ddd; }
+      .card-body { display:block !important; }
+      .signal-card { break-inside: avoid; }
+      pre { white-space: pre-wrap; color:#111; background:#fff; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">AI PC / AI Learning Agent</span>
+      <h1>學習訊號框架報告</h1>
+      <p class="subtitle">
+        這份文件定義 AI Learning Agent 應觀察哪些學習訊號，以及如何從訊號推論學習狀態、選擇介入策略、設定驗收指標與避免過度監控。
+      </p>
+      <div class="hero-grid">
+        <div class="stat"><b>6</b><span>訊號類型</span></div>
+        <div class="stat"><b>66+</b><span>可觀察訊號</span></div>
+        <div class="stat"><b>6</b><span>高價值推論狀態</span></div>
+        <div class="stat"><b>1</b><span>最低干擾原則</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="toolbar" aria-label="報告操作列">
+      <input id="searchInput" class="search" placeholder="搜尋：卡關、錯誤、情緒、提示、依賴、變形題、節奏..." />
+      <select id="signalSelect">
+        <option value="all">全部訊號</option>
+        <option value="behavior">01 行為訊號</option><option value="cognitive">02 認知訊號</option><option value="emotion">03 情緒訊號</option><option value="performance">04 成績訊號</option><option value="interaction">05 互動訊號</option><option value="rhythm">06 學習節奏訊號</option>
+      </select>
+      <button class="btn" id="toggleAll">全部展開</button>
+      <button class="btn primary" onclick="window.print()">列印 / 轉 PDF</button>
+    </nav>
+
+    <section class="section">
+      <h2>核心觀念</h2>
+      <p class="section-lead">
+        AI 不應該直接從單一行為判斷使用者狀態，而是要把多個訊號組合成「學習狀態推論」。訊號不是為了監控使用者，而是為了判斷學習狀態與介入時機。
+      </p>
+      <div class="logic-flow">
+        <div class="flow-card"><small>Step 1</small><b>原始訊號</b><span>使用者停留、答錯、提問、跳過解析、回訪等行為。</span></div>
+        <div class="flow-card"><small>Step 2</small><b>訊號組合</b><span>把行為、認知、情緒、成績、互動與節奏交叉判斷。</span></div>
+        <div class="flow-card"><small>Step 3</small><b>狀態推論</b><span>推論可能卡關、表面理解、答案依賴、挫折上升等狀態。</span></div>
+        <div class="flow-card"><small>Step 4</small><b>信心分數</b><span>避免 AI 武斷判斷，依信心程度決定介入強度。</span></div>
+        <div class="flow-card"><small>Step 5</small><b>最低干擾介入</b><span>用最小但有效的協助，讓使用者恢復學習與修正理解。</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>六大訊號類型</h2>
+      <p class="section-lead">點擊可快速切換到對應訊號類型。</p>
+      <div class="nav-pills">
+        <button data-target="behavior">01 行為訊號</button><button data-target="cognitive">02 認知訊號</button><button data-target="emotion">03 情緒訊號</button><button data-target="performance">04 成績訊號</button><button data-target="interaction">05 互動訊號</button><button data-target="rhythm">06 學習節奏訊號</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>訊號總覽主表</h2>
+      <p class="section-lead">這張表適合放在簡報前段，先建立團隊共識。</p>
+      <div class='table-wrap'><table><thead><tr><th>訊號類型</th><th>觀察重點</th><th>代表指標</th><th>最重要風險</th></tr></thead><tbody><tr><td>01 行為訊號</td><td>觀察使用者做了什麼，用來判斷專注、卡關、逃避、重複嘗試與學習投入。</td><td>卡關恢復時間、重複閱讀比例、提示後重試比例</td><td>不能把單一行為直接等同於學習狀態。</td></tr><tr><td>02 認知訊號</td><td>觀察使用者懂不懂，用來判斷概念掌握、錯誤類型、理解深度與知識遷移能力。</td><td>概念檢核正確率、變形題答對率、同類錯誤重複率</td><td>答對不代表理解，可能是猜對、套公式或題目太簡單。</td></tr><tr><td>03 情緒訊號</td><td>觀察使用者感覺如何，用來判斷挫折、焦慮、自信、放棄傾向與成就感。</td><td>答錯後情緒下降訊號、答錯後重試比例、回饋跳過率</td><td>情緒推論要保守，不能把一次語句永久貼標籤。</td></tr><tr><td>04 成績訊號</td><td>觀察學習結果如何，用來判斷答對率、進步幅度、穩定度、保持率與真實掌握程度。</td><td>無提示答對率、不同難度答對率、變形題答對率</td><td>答對率提高可能只是題目變簡單或提示變多。</td></tr><tr><td>05 互動訊號</td><td>觀察使用者如何與 AI 協作，用來判斷提問品質、提示依賴、追問深度與自主調節能力。</td><td>提問品質分數、直接要答案比例、提示後重試比例</td><td>對話次數多不一定代表學習好，可能是依賴或困惑。</td></tr><tr><td>06 學習節奏訊號</td><td>觀察跨時間的學習頻率、時段、持續性、疲勞與回訪模式。</td><td>穩定回訪頻率、節奏穩定度、學習任務完成率</td><td>不能只追求使用時長，學習品質比在線時間更重要。</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>訊號詳細定義</h2>
+      <p class="section-lead">每一類訊號都包含：訊號清單、可能代表的狀態、AI 可介入方式、常見狀態推論、使用風險與代表指標。</p>
+      <div id="cards">
+        
+    <article class="signal-card" data-id="behavior" data-search="{&quot;id&quot;: &quot;behavior&quot;, &quot;title&quot;: &quot;01 行為訊號&quot;, &quot;tagline&quot;: &quot;觀察使用者做了什麼，用來判斷專注、卡關、逃避、重複嘗試與學習投入。&quot;, &quot;definition&quot;: &quot;行為訊號是使用者在學習介面、教材、題目與 AI 對話中的可觀察操作行為。它不直接代表學會或沒學會，但能協助 AI 判斷是否需要輕度介入。&quot;, &quot;signals&quot;: [[&quot;教材停留時間&quot;, &quot;使用者停在某段教材的時間&quot;, &quot;認真閱讀、卡住、分心&quot;, &quot;若搭配重讀與錯題，可提示是否需要換個方式解釋&quot;], [&quot;異常停滯時間&quot;, &quot;長時間無操作&quot;, &quot;思考、離開、放棄前兆&quot;, &quot;先輕提示，不直接判定卡關&quot;], [&quot;重複閱讀 / 重複觀看&quot;, &quot;同一段教材反覆開啟&quot;, &quot;概念不穩、需要複習&quot;, &quot;提供摘要、圖解或例題&quot;], [&quot;快速滑過&quot;, &quot;很快略過教材&quot;, &quot;已熟悉、沒耐心、低投入&quot;, &quot;用小檢核確認是否真的理解&quot;], [&quot;重複點擊&quot;, &quot;多次點同一功能或教材&quot;, &quot;找不到入口、使用困惑、焦躁&quot;, &quot;提供操作提示或重新導引&quot;], [&quot;頻繁切換頁面&quot;, &quot;在教材、題目、AI、筆記間跳動&quot;, &quot;主動查找、注意力分散、理解困難&quot;, &quot;判斷是否需要整理學習路線&quot;], [&quot;中途離開&quot;, &quot;未完成學習就跳出&quot;, &quot;疲勞、挫折、外部干擾&quot;, &quot;下次回來時提供接續點&quot;], [&quot;回到上一段&quot;, &quot;從題目回教材&quot;, &quot;自我修正、補前置知識&quot;, &quot;標記為正向學習行為&quot;], [&quot;暫停後重新開始&quot;, &quot;停一段時間後回來&quot;, &quot;自主恢復、短暫中斷&quot;, &quot;協助快速接回中斷點&quot;], [&quot;筆記 / 標記行為&quot;, &quot;標註、收藏、截圖、複製&quot;, &quot;高投入、整理知識&quot;, &quot;協助整理成個人筆記&quot;]], &quot;inferences&quot;: [[&quot;可能卡關&quot;, &quot;停留過久 + 重複閱讀 + 答錯 + 提問變模糊&quot;], [&quot;可能分心&quot;, &quot;長時間無操作 + 無後續作答 + 無筆記行為&quot;], [&quot;可能逃避&quot;, &quot;連續跳過解析 + 快速進入下一題 + 同類錯誤重複&quot;], [&quot;正向自我修正&quot;, &quot;答錯後回教材 + 看解析 + 再次作答&quot;], [&quot;學習投入提升&quot;, &quot;主動標記 + 主動提問 + 追問 + 完成練習&quot;]], &quot;risks&quot;: [&quot;不能把單一行為直接等同於學習狀態。&quot;, &quot;停留時間長可能是認真思考，也可能是分心或離開座位。&quot;, &quot;AI 過早介入可能打斷使用者正在形成理解的過程。&quot;], &quot;key_metrics&quot;: [&quot;卡關恢復時間&quot;, &quot;重複閱讀比例&quot;, &quot;提示後重試比例&quot;, &quot;中途離開率&quot;, &quot;學習投入行為數&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>01 行為訊號</strong>
+          <em>觀察使用者做了什麼，用來判斷專注、卡關、逃避、重複嘗試與學習投入。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">行為訊號是使用者在學習介面、教材、題目與 AI 對話中的可觀察操作行為。它不直接代表學會或沒學會，但能協助 AI 判斷是否需要輕度介入。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>教材停留時間</td><td>使用者停在某段教材的時間</td><td>認真閱讀、卡住、分心</td><td>若搭配重讀與錯題，可提示是否需要換個方式解釋</td></tr><tr><td>異常停滯時間</td><td>長時間無操作</td><td>思考、離開、放棄前兆</td><td>先輕提示，不直接判定卡關</td></tr><tr><td>重複閱讀 / 重複觀看</td><td>同一段教材反覆開啟</td><td>概念不穩、需要複習</td><td>提供摘要、圖解或例題</td></tr><tr><td>快速滑過</td><td>很快略過教材</td><td>已熟悉、沒耐心、低投入</td><td>用小檢核確認是否真的理解</td></tr><tr><td>重複點擊</td><td>多次點同一功能或教材</td><td>找不到入口、使用困惑、焦躁</td><td>提供操作提示或重新導引</td></tr><tr><td>頻繁切換頁面</td><td>在教材、題目、AI、筆記間跳動</td><td>主動查找、注意力分散、理解困難</td><td>判斷是否需要整理學習路線</td></tr><tr><td>中途離開</td><td>未完成學習就跳出</td><td>疲勞、挫折、外部干擾</td><td>下次回來時提供接續點</td></tr><tr><td>回到上一段</td><td>從題目回教材</td><td>自我修正、補前置知識</td><td>標記為正向學習行為</td></tr><tr><td>暫停後重新開始</td><td>停一段時間後回來</td><td>自主恢復、短暫中斷</td><td>協助快速接回中斷點</td></tr><tr><td>筆記 / 標記行為</td><td>標註、收藏、截圖、複製</td><td>高投入、整理知識</td><td>協助整理成個人筆記</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>可能卡關</td><td>停留過久 + 重複閱讀 + 答錯 + 提問變模糊</td></tr><tr><td>可能分心</td><td>長時間無操作 + 無後續作答 + 無筆記行為</td></tr><tr><td>可能逃避</td><td>連續跳過解析 + 快速進入下一題 + 同類錯誤重複</td></tr><tr><td>正向自我修正</td><td>答錯後回教材 + 看解析 + 再次作答</td></tr><tr><td>學習投入提升</td><td>主動標記 + 主動提問 + 追問 + 完成練習</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>不能把單一行為直接等同於學習狀態。</li><li>停留時間長可能是認真思考，也可能是分心或離開座位。</li><li>AI 過早介入可能打斷使用者正在形成理解的過程。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>卡關恢復時間</span><span>重複閱讀比例</span><span>提示後重試比例</span><span>中途離開率</span><span>學習投入行為數</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+    <article class="signal-card" data-id="cognitive" data-search="{&quot;id&quot;: &quot;cognitive&quot;, &quot;title&quot;: &quot;02 認知訊號&quot;, &quot;tagline&quot;: &quot;觀察使用者懂不懂，用來判斷概念掌握、錯誤類型、理解深度與知識遷移能力。&quot;, &quot;definition&quot;: &quot;認知訊號是使用者在理解、解題、說明、提問與錯誤模式中表現出的知識掌握狀態。這是最接近「是否真的學會」的一層訊號。&quot;, &quot;signals&quot;: [[&quot;錯誤類型&quot;, &quot;答錯原因屬於概念、程序、粗心、閱讀理解、策略&quot;, &quot;找出真正弱點&quot;, &quot;依錯誤類型給不同回饋&quot;], [&quot;概念混淆&quot;, &quot;把兩個相近概念混在一起&quot;, &quot;表面理解、概念邊界不清&quot;, &quot;提供對照表與反例&quot;], [&quot;解題步驟錯誤&quot;, &quot;中間推理或運算流程出錯&quot;, &quot;程序知識不穩&quot;, &quot;逐步拆解與補步驟&quot;], [&quot;題意理解錯誤&quot;, &quot;看錯題目要求&quot;, &quot;閱讀理解或題型判斷問題&quot;, &quot;先訓練讀題，不急著教解法&quot;], [&quot;相似題反覆錯&quot;, &quot;同一知識點在不同題型中錯&quot;, &quot;概念未真正掌握&quot;, &quot;回到前置概念重建&quot;], [&quot;變形題錯誤&quot;, &quot;標準題會，變形題不會&quot;, &quot;缺乏知識遷移能力&quot;, &quot;提供變形題比較與歸納&quot;], [&quot;解釋能力不足&quot;, &quot;答對但說不出原因&quot;, &quot;可能是猜對或套公式&quot;, &quot;要求使用者自我說明&quot;], [&quot;自我修正能力&quot;, &quot;使用者能自己發現並修正錯誤&quot;, &quot;認知成熟度提升&quot;, &quot;減少 AI 提示，增加反思&quot;], [&quot;前置知識缺口&quot;, &quot;新概念學不動，源自舊知識不足&quot;, &quot;學習路徑斷裂&quot;, &quot;回補必要前置知識&quot;], [&quot;錯誤穩定重複&quot;, &quot;多次出現同樣錯誤&quot;, &quot;深層迷思概念&quot;, &quot;建立個人錯誤模式紀錄&quot;]], &quot;inferences&quot;: [[&quot;表面理解&quot;, &quot;教材看很快 + 小檢核答對 + 變形題答錯&quot;], [&quot;概念混淆&quot;, &quot;相近概念題反覆錯 + 提問中混用名詞&quot;], [&quot;程序不穩&quot;, &quot;概念題會 + 多步驟題常錯&quot;], [&quot;前置知識不足&quot;, &quot;新單元連續錯 + 舊概念檢核也錯&quot;], [&quot;真正掌握&quot;, &quot;相似題答對 + 變形題答對 + 能自我說明&quot;]], &quot;risks&quot;: [&quot;答對不代表理解，可能是猜對、套公式或題目太簡單。&quot;, &quot;答錯也不一定代表不懂，可能只是粗心或題意誤讀。&quot;, &quot;錯誤分類如果錯誤，AI 後續補救方向會整個偏掉。&quot;], &quot;key_metrics&quot;: [&quot;概念檢核正確率&quot;, &quot;變形題答對率&quot;, &quot;同類錯誤重複率&quot;, &quot;自我說明比例&quot;, &quot;前置知識缺口數&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>02 認知訊號</strong>
+          <em>觀察使用者懂不懂，用來判斷概念掌握、錯誤類型、理解深度與知識遷移能力。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">認知訊號是使用者在理解、解題、說明、提問與錯誤模式中表現出的知識掌握狀態。這是最接近「是否真的學會」的一層訊號。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>錯誤類型</td><td>答錯原因屬於概念、程序、粗心、閱讀理解、策略</td><td>找出真正弱點</td><td>依錯誤類型給不同回饋</td></tr><tr><td>概念混淆</td><td>把兩個相近概念混在一起</td><td>表面理解、概念邊界不清</td><td>提供對照表與反例</td></tr><tr><td>解題步驟錯誤</td><td>中間推理或運算流程出錯</td><td>程序知識不穩</td><td>逐步拆解與補步驟</td></tr><tr><td>題意理解錯誤</td><td>看錯題目要求</td><td>閱讀理解或題型判斷問題</td><td>先訓練讀題，不急著教解法</td></tr><tr><td>相似題反覆錯</td><td>同一知識點在不同題型中錯</td><td>概念未真正掌握</td><td>回到前置概念重建</td></tr><tr><td>變形題錯誤</td><td>標準題會，變形題不會</td><td>缺乏知識遷移能力</td><td>提供變形題比較與歸納</td></tr><tr><td>解釋能力不足</td><td>答對但說不出原因</td><td>可能是猜對或套公式</td><td>要求使用者自我說明</td></tr><tr><td>自我修正能力</td><td>使用者能自己發現並修正錯誤</td><td>認知成熟度提升</td><td>減少 AI 提示，增加反思</td></tr><tr><td>前置知識缺口</td><td>新概念學不動，源自舊知識不足</td><td>學習路徑斷裂</td><td>回補必要前置知識</td></tr><tr><td>錯誤穩定重複</td><td>多次出現同樣錯誤</td><td>深層迷思概念</td><td>建立個人錯誤模式紀錄</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>表面理解</td><td>教材看很快 + 小檢核答對 + 變形題答錯</td></tr><tr><td>概念混淆</td><td>相近概念題反覆錯 + 提問中混用名詞</td></tr><tr><td>程序不穩</td><td>概念題會 + 多步驟題常錯</td></tr><tr><td>前置知識不足</td><td>新單元連續錯 + 舊概念檢核也錯</td></tr><tr><td>真正掌握</td><td>相似題答對 + 變形題答對 + 能自我說明</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>答對不代表理解，可能是猜對、套公式或題目太簡單。</li><li>答錯也不一定代表不懂，可能只是粗心或題意誤讀。</li><li>錯誤分類如果錯誤，AI 後續補救方向會整個偏掉。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>概念檢核正確率</span><span>變形題答對率</span><span>同類錯誤重複率</span><span>自我說明比例</span><span>前置知識缺口數</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+    <article class="signal-card" data-id="emotion" data-search="{&quot;id&quot;: &quot;emotion&quot;, &quot;title&quot;: &quot;03 情緒訊號&quot;, &quot;tagline&quot;: &quot;觀察使用者感覺如何，用來判斷挫折、焦慮、自信、放棄傾向與成就感。&quot;, &quot;definition&quot;: &quot;情緒訊號反映使用者在學習過程中的心理狀態。AI Learning Agent 不能只看答對答錯，因為很多使用者不是不會學，而是太快放棄、害怕錯或失去信心。&quot;, &quot;signals&quot;: [[&quot;放棄語句&quot;, &quot;例如「算了」「我不會」「不想學了」&quot;, &quot;放棄前兆&quot;, &quot;降低任務難度，給短步驟&quot;], [&quot;焦躁語句&quot;, &quot;例如「為什麼一直錯」「很煩」&quot;, &quot;情緒升高、挫折累積&quot;, &quot;暫停長篇解釋，改用單步協助&quot;], [&quot;自我否定語句&quot;, &quot;例如「我是不是很笨」&quot;, &quot;信心受損&quot;, &quot;具體指出做對的部分&quot;], [&quot;信心下降&quot;, &quot;自評理解度下降&quot;, &quot;學習挫折&quot;, &quot;提供較低難度的成功經驗&quot;], [&quot;過度自信&quot;, &quot;自評很高但表現不穩&quot;, &quot;認知錯估&quot;, &quot;給變形題檢核&quot;], [&quot;沉默停滯&quot;, &quot;答錯後長時間無操作&quot;, &quot;挫折、分心、放棄&quot;, &quot;溫和詢問是否需要一步提示&quot;], [&quot;跳過解析&quot;, &quot;答錯後不看回饋&quot;, &quot;防衛或沒耐心&quot;, &quot;改用一句話錯誤定位&quot;], [&quot;成就感語句&quot;, &quot;例如「懂了」「原來如此」&quot;, &quot;理解突破&quot;, &quot;立即安排相似題鞏固&quot;], [&quot;請求鼓勵&quot;, &quot;明確需要安慰或肯定&quot;, &quot;情緒支持需求&quot;, &quot;給具體肯定，不空泛稱讚&quot;], [&quot;長時間低表現&quot;, &quot;連續錯誤且無改善&quot;, &quot;挫折累積&quot;, &quot;建議重規劃或短休息&quot;]], &quot;inferences&quot;: [[&quot;挫折上升&quot;, &quot;連續答錯 + 焦躁語句 + 跳過解析&quot;], [&quot;放棄風險&quot;, &quot;長時間停滯 + 放棄語句 + 中途離開紀錄&quot;], [&quot;信心錯估&quot;, &quot;自評高 + 變形題錯 + 不看解析&quot;], [&quot;情緒恢復&quot;, &quot;看提示後重試 + 語氣轉正 + 完成小任務&quot;], [&quot;成就感形成&quot;, &quot;修正成功 + 說出理解 + 願意挑戰下一題&quot;]], &quot;risks&quot;: [&quot;情緒推論要保守，不能把一次語句永久貼標籤。&quot;, &quot;情緒安撫不能取代學習引導。&quot;, &quot;過度個人化的情緒分析可能讓使用者覺得被監控。&quot;], &quot;key_metrics&quot;: [&quot;答錯後情緒下降訊號&quot;, &quot;答錯後重試比例&quot;, &quot;回饋跳過率&quot;, &quot;放棄語句出現率&quot;, &quot;信心變化&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>03 情緒訊號</strong>
+          <em>觀察使用者感覺如何，用來判斷挫折、焦慮、自信、放棄傾向與成就感。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">情緒訊號反映使用者在學習過程中的心理狀態。AI Learning Agent 不能只看答對答錯，因為很多使用者不是不會學，而是太快放棄、害怕錯或失去信心。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>放棄語句</td><td>例如「算了」「我不會」「不想學了」</td><td>放棄前兆</td><td>降低任務難度，給短步驟</td></tr><tr><td>焦躁語句</td><td>例如「為什麼一直錯」「很煩」</td><td>情緒升高、挫折累積</td><td>暫停長篇解釋，改用單步協助</td></tr><tr><td>自我否定語句</td><td>例如「我是不是很笨」</td><td>信心受損</td><td>具體指出做對的部分</td></tr><tr><td>信心下降</td><td>自評理解度下降</td><td>學習挫折</td><td>提供較低難度的成功經驗</td></tr><tr><td>過度自信</td><td>自評很高但表現不穩</td><td>認知錯估</td><td>給變形題檢核</td></tr><tr><td>沉默停滯</td><td>答錯後長時間無操作</td><td>挫折、分心、放棄</td><td>溫和詢問是否需要一步提示</td></tr><tr><td>跳過解析</td><td>答錯後不看回饋</td><td>防衛或沒耐心</td><td>改用一句話錯誤定位</td></tr><tr><td>成就感語句</td><td>例如「懂了」「原來如此」</td><td>理解突破</td><td>立即安排相似題鞏固</td></tr><tr><td>請求鼓勵</td><td>明確需要安慰或肯定</td><td>情緒支持需求</td><td>給具體肯定，不空泛稱讚</td></tr><tr><td>長時間低表現</td><td>連續錯誤且無改善</td><td>挫折累積</td><td>建議重規劃或短休息</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>挫折上升</td><td>連續答錯 + 焦躁語句 + 跳過解析</td></tr><tr><td>放棄風險</td><td>長時間停滯 + 放棄語句 + 中途離開紀錄</td></tr><tr><td>信心錯估</td><td>自評高 + 變形題錯 + 不看解析</td></tr><tr><td>情緒恢復</td><td>看提示後重試 + 語氣轉正 + 完成小任務</td></tr><tr><td>成就感形成</td><td>修正成功 + 說出理解 + 願意挑戰下一題</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>情緒推論要保守，不能把一次語句永久貼標籤。</li><li>情緒安撫不能取代學習引導。</li><li>過度個人化的情緒分析可能讓使用者覺得被監控。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>答錯後情緒下降訊號</span><span>答錯後重試比例</span><span>回饋跳過率</span><span>放棄語句出現率</span><span>信心變化</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+    <article class="signal-card" data-id="performance" data-search="{&quot;id&quot;: &quot;performance&quot;, &quot;title&quot;: &quot;04 成績訊號&quot;, &quot;tagline&quot;: &quot;觀察學習結果如何，用來判斷答對率、進步幅度、穩定度、保持率與真實掌握程度。&quot;, &quot;definition&quot;: &quot;成績訊號是使用者在測驗、練習、任務、複習中的表現結果。但成績訊號不等於學習品質，必須搭配難度、提示、時間與變形題一起看。&quot;, &quot;signals&quot;: [[&quot;答對率&quot;, &quot;一段時間內答對比例&quot;, &quot;基礎表現&quot;, &quot;搭配難度與提示判斷&quot;], [&quot;不同難度答對率&quot;, &quot;簡單、適中、困難題答對狀況&quot;, &quot;能力層級&quot;, &quot;調整題目難度&quot;], [&quot;進步幅度&quot;, &quot;與前一次相比是否改善&quot;, &quot;學習成長&quot;, &quot;給具體成長回饋&quot;], [&quot;穩定度&quot;, &quot;表現是否忽高忽低&quot;, &quot;掌握是否穩定&quot;, &quot;安排複習或鞏固&quot;], [&quot;變形題表現&quot;, &quot;換問法或情境後是否答對&quot;, &quot;知識遷移能力&quot;, &quot;補強概念本質&quot;], [&quot;複習後保持率&quot;, &quot;過一段時間後是否還會&quot;, &quot;長期記憶&quot;, &quot;安排間隔複習&quot;], [&quot;同類錯誤下降率&quot;, &quot;同一類錯誤是否減少&quot;, &quot;錯誤修正成效&quot;, &quot;調整回饋策略&quot;], [&quot;完成率&quot;, &quot;任務是否完成&quot;, &quot;學習持續性&quot;, &quot;檢查任務難度與節奏&quot;], [&quot;作答時間變化&quot;, &quot;作答是否更快或更穩&quot;, &quot;熟練度&quot;, &quot;判斷是否進階或鞏固&quot;], [&quot;提示後答對率&quot;, &quot;看提示後是否答對&quot;, &quot;提示有效性&quot;, &quot;調整提示層級&quot;], [&quot;無提示答對率&quot;, &quot;不靠提示是否答對&quot;, &quot;真實掌握程度&quot;, &quot;作為重要驗收指標&quot;], [&quot;連續正確數&quot;, &quot;能否穩定連續答對&quot;, &quot;短期穩定掌握&quot;, &quot;判斷是否進入下一階段&quot;]], &quot;inferences&quot;: [[&quot;真正進步&quot;, &quot;無提示答對率提升 + 變形題答對率提升 + 同類錯誤下降&quot;], [&quot;假性進步&quot;, &quot;答對率提升 + 題目難度下降 + 提示使用增加&quot;], [&quot;掌握不穩&quot;, &quot;答對率忽高忽低 + 作答時間波動大&quot;], [&quot;需要複習&quot;, &quot;當下答對 + 延遲複習錯誤增加&quot;], [&quot;可以進階&quot;, &quot;適中題穩定答對 + 變形題表現良好 + 提示依賴低&quot;]], &quot;risks&quot;: [&quot;答對率提高可能只是題目變簡單或提示變多。&quot;, &quot;完成率提高不一定代表學習品質提升。&quot;, &quot;若只追求成績，系統可能把學習引導成低挑戰、高答對率。&quot;], &quot;key_metrics&quot;: [&quot;無提示答對率&quot;, &quot;不同難度答對率&quot;, &quot;變形題答對率&quot;, &quot;同類錯誤下降率&quot;, &quot;複習後保持率&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>04 成績訊號</strong>
+          <em>觀察學習結果如何，用來判斷答對率、進步幅度、穩定度、保持率與真實掌握程度。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">成績訊號是使用者在測驗、練習、任務、複習中的表現結果。但成績訊號不等於學習品質，必須搭配難度、提示、時間與變形題一起看。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>答對率</td><td>一段時間內答對比例</td><td>基礎表現</td><td>搭配難度與提示判斷</td></tr><tr><td>不同難度答對率</td><td>簡單、適中、困難題答對狀況</td><td>能力層級</td><td>調整題目難度</td></tr><tr><td>進步幅度</td><td>與前一次相比是否改善</td><td>學習成長</td><td>給具體成長回饋</td></tr><tr><td>穩定度</td><td>表現是否忽高忽低</td><td>掌握是否穩定</td><td>安排複習或鞏固</td></tr><tr><td>變形題表現</td><td>換問法或情境後是否答對</td><td>知識遷移能力</td><td>補強概念本質</td></tr><tr><td>複習後保持率</td><td>過一段時間後是否還會</td><td>長期記憶</td><td>安排間隔複習</td></tr><tr><td>同類錯誤下降率</td><td>同一類錯誤是否減少</td><td>錯誤修正成效</td><td>調整回饋策略</td></tr><tr><td>完成率</td><td>任務是否完成</td><td>學習持續性</td><td>檢查任務難度與節奏</td></tr><tr><td>作答時間變化</td><td>作答是否更快或更穩</td><td>熟練度</td><td>判斷是否進階或鞏固</td></tr><tr><td>提示後答對率</td><td>看提示後是否答對</td><td>提示有效性</td><td>調整提示層級</td></tr><tr><td>無提示答對率</td><td>不靠提示是否答對</td><td>真實掌握程度</td><td>作為重要驗收指標</td></tr><tr><td>連續正確數</td><td>能否穩定連續答對</td><td>短期穩定掌握</td><td>判斷是否進入下一階段</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>真正進步</td><td>無提示答對率提升 + 變形題答對率提升 + 同類錯誤下降</td></tr><tr><td>假性進步</td><td>答對率提升 + 題目難度下降 + 提示使用增加</td></tr><tr><td>掌握不穩</td><td>答對率忽高忽低 + 作答時間波動大</td></tr><tr><td>需要複習</td><td>當下答對 + 延遲複習錯誤增加</td></tr><tr><td>可以進階</td><td>適中題穩定答對 + 變形題表現良好 + 提示依賴低</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>答對率提高可能只是題目變簡單或提示變多。</li><li>完成率提高不一定代表學習品質提升。</li><li>若只追求成績，系統可能把學習引導成低挑戰、高答對率。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>無提示答對率</span><span>不同難度答對率</span><span>變形題答對率</span><span>同類錯誤下降率</span><span>複習後保持率</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+    <article class="signal-card" data-id="interaction" data-search="{&quot;id&quot;: &quot;interaction&quot;, &quot;title&quot;: &quot;05 互動訊號&quot;, &quot;tagline&quot;: &quot;觀察使用者如何與 AI 協作，用來判斷提問品質、提示依賴、追問深度與自主調節能力。&quot;, &quot;definition&quot;: &quot;互動訊號反映使用者是否逐漸學會善用 AI。AI Learning Agent 的成功不只是 AI 會回答，而是使用者能用 AI 來發現問題、修正理解與形成自主學習。&quot;, &quot;signals&quot;: [[&quot;提問頻率&quot;, &quot;使用者問 AI 的次數&quot;, &quot;主動性、依賴性&quot;, &quot;搭配問題品質判斷&quot;], [&quot;提問品質&quot;, &quot;問題是否具體、有上下文、能描述卡點&quot;, &quot;學習反思能力&quot;, &quot;提供提問教練&quot;], [&quot;追問比例&quot;, &quot;是否根據 AI 回答繼續追問&quot;, &quot;深度理解或探索&quot;, &quot;鼓勵比較、反思、延伸&quot;], [&quot;接受提示比例&quot;, &quot;使用者是否願意看提示&quot;, &quot;對 AI 的接受度&quot;, &quot;調整提示形式&quot;], [&quot;提示後重試比例&quot;, &quot;看提示後是否再次嘗試&quot;, &quot;提示是否導向行動&quot;, &quot;保留有效提示模式&quot;], [&quot;直接要答案比例&quot;, &quot;是否常要求完整答案&quot;, &quot;依賴或逃避&quot;, &quot;改用引導式回答&quot;], [&quot;重新生成比例&quot;, &quot;是否常要求 AI 重講&quot;, &quot;解釋不清或風格不合&quot;, &quot;找出適合解釋模式&quot;], [&quot;回饋採納率&quot;, &quot;是否照 AI 建議進行下一步&quot;, &quot;AI 建議是否有效&quot;, &quot;優化回饋策略&quot;], [&quot;使用者糾錯&quot;, &quot;使用者指出 AI 錯誤&quot;, &quot;批判思考、信任校正&quot;, &quot;鼓勵查證與來源對照&quot;], [&quot;AI 依賴程度&quot;, &quot;沒有提示就不敢做&quot;, &quot;學習自主性不足&quot;, &quot;逐步撤除提示&quot;], [&quot;自我說明比例&quot;, &quot;使用者願意說明自己的想法&quot;, &quot;反思能力提升&quot;, &quot;強化後設認知&quot;], [&quot;學習策略選擇&quot;, &quot;使用者選擇複習、練習、看解析、問 AI&quot;, &quot;自主調節能力&quot;, &quot;逐步把決策權交還使用者&quot;]], &quot;inferences&quot;: [[&quot;正向 AI 協作&quot;, &quot;提問具體 + 願意追問 + 提示後重試&quot;], [&quot;答案依賴&quot;, &quot;直接要答案比例高 + 無提示答對率低&quot;], [&quot;提問能力提升&quot;, &quot;問題從「答案是什麼」變成「我卡在哪」&quot;], [&quot;AI 解釋不合&quot;, &quot;重新生成比例高 + 解釋後答題正確率低&quot;], [&quot;自主性提升&quot;, &quot;提示使用下降 + 自我說明增加 + 自選策略增加&quot;]], &quot;risks&quot;: [&quot;對話次數多不一定代表學習好，可能是依賴或困惑。&quot;, &quot;AI 若太容易給答案，會削弱使用者自我修正能力。&quot;, &quot;過度追求互動活躍，可能犧牲學習效率。&quot;], &quot;key_metrics&quot;: [&quot;提問品質分數&quot;, &quot;直接要答案比例&quot;, &quot;提示後重試比例&quot;, &quot;AI 依賴程度&quot;, &quot;自我說明比例&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>05 互動訊號</strong>
+          <em>觀察使用者如何與 AI 協作，用來判斷提問品質、提示依賴、追問深度與自主調節能力。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">互動訊號反映使用者是否逐漸學會善用 AI。AI Learning Agent 的成功不只是 AI 會回答，而是使用者能用 AI 來發現問題、修正理解與形成自主學習。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>提問頻率</td><td>使用者問 AI 的次數</td><td>主動性、依賴性</td><td>搭配問題品質判斷</td></tr><tr><td>提問品質</td><td>問題是否具體、有上下文、能描述卡點</td><td>學習反思能力</td><td>提供提問教練</td></tr><tr><td>追問比例</td><td>是否根據 AI 回答繼續追問</td><td>深度理解或探索</td><td>鼓勵比較、反思、延伸</td></tr><tr><td>接受提示比例</td><td>使用者是否願意看提示</td><td>對 AI 的接受度</td><td>調整提示形式</td></tr><tr><td>提示後重試比例</td><td>看提示後是否再次嘗試</td><td>提示是否導向行動</td><td>保留有效提示模式</td></tr><tr><td>直接要答案比例</td><td>是否常要求完整答案</td><td>依賴或逃避</td><td>改用引導式回答</td></tr><tr><td>重新生成比例</td><td>是否常要求 AI 重講</td><td>解釋不清或風格不合</td><td>找出適合解釋模式</td></tr><tr><td>回饋採納率</td><td>是否照 AI 建議進行下一步</td><td>AI 建議是否有效</td><td>優化回饋策略</td></tr><tr><td>使用者糾錯</td><td>使用者指出 AI 錯誤</td><td>批判思考、信任校正</td><td>鼓勵查證與來源對照</td></tr><tr><td>AI 依賴程度</td><td>沒有提示就不敢做</td><td>學習自主性不足</td><td>逐步撤除提示</td></tr><tr><td>自我說明比例</td><td>使用者願意說明自己的想法</td><td>反思能力提升</td><td>強化後設認知</td></tr><tr><td>學習策略選擇</td><td>使用者選擇複習、練習、看解析、問 AI</td><td>自主調節能力</td><td>逐步把決策權交還使用者</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>正向 AI 協作</td><td>提問具體 + 願意追問 + 提示後重試</td></tr><tr><td>答案依賴</td><td>直接要答案比例高 + 無提示答對率低</td></tr><tr><td>提問能力提升</td><td>問題從「答案是什麼」變成「我卡在哪」</td></tr><tr><td>AI 解釋不合</td><td>重新生成比例高 + 解釋後答題正確率低</td></tr><tr><td>自主性提升</td><td>提示使用下降 + 自我說明增加 + 自選策略增加</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>對話次數多不一定代表學習好，可能是依賴或困惑。</li><li>AI 若太容易給答案，會削弱使用者自我修正能力。</li><li>過度追求互動活躍，可能犧牲學習效率。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>提問品質分數</span><span>直接要答案比例</span><span>提示後重試比例</span><span>AI 依賴程度</span><span>自我說明比例</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+    <article class="signal-card" data-id="rhythm" data-search="{&quot;id&quot;: &quot;rhythm&quot;, &quot;title&quot;: &quot;06 學習節奏訊號&quot;, &quot;tagline&quot;: &quot;觀察跨時間的學習頻率、時段、持續性、疲勞與回訪模式。&quot;, &quot;definition&quot;: &quot;學習節奏訊號和學習進化分析高度相關。下一代 AI Learning Agent 不只是陪使用者學一題，而是逐漸理解使用者何時學得進去、何時容易放棄、適合短衝還是長時間學習。&quot;, &quot;signals&quot;: [[&quot;學習頻率&quot;, &quot;一週學幾次&quot;, &quot;是否形成習慣&quot;, &quot;安排合適提醒&quot;], [&quot;單次學習長度&quot;, &quot;每次學多久&quot;, &quot;專注耐力、疲勞點&quot;, &quot;建議任務切片&quot;], [&quot;固定學習時段&quot;, &quot;是否常在固定時間學&quot;, &quot;習慣形成&quot;, &quot;在合適時段提醒&quot;], [&quot;中斷點位置&quot;, &quot;常在哪個階段離開&quot;, &quot;階段風險&quot;, &quot;優化該節點體驗&quot;], [&quot;回訪間隔&quot;, &quot;兩次學習間隔多久&quot;, &quot;持續性&quot;, &quot;安排複習或提醒&quot;], [&quot;疲勞訊號&quot;, &quot;後半段錯誤增加、作答變慢&quot;, &quot;認知疲勞&quot;, &quot;建議休息或降低難度&quot;], [&quot;考前衝刺模式&quot;, &quot;短期高頻使用&quot;, &quot;目標壓力高&quot;, &quot;改用高效率複習&quot;], [&quot;長期沉默&quot;, &quot;一段時間未回來&quot;, &quot;流失風險&quot;, &quot;提供低負擔回歸任務&quot;], [&quot;回歸後銜接能力&quot;, &quot;回來後是否能接續上次&quot;, &quot;學習連續性&quot;, &quot;提供上次摘要與下一步&quot;], [&quot;節奏穩定度&quot;, &quot;學習是否忽冷忽熱&quot;, &quot;習慣是否穩定&quot;, &quot;調整目標與提醒策略&quot;]], &quot;inferences&quot;: [[&quot;習慣形成&quot;, &quot;固定時段學習 + 回訪間隔穩定 + 任務完成率高&quot;], [&quot;認知疲勞&quot;, &quot;後半段錯誤增加 + 作答時間變長 + 跳過解析&quot;], [&quot;考前焦慮&quot;, &quot;高頻使用 + 放棄語句增加 + 直接要答案比例升高&quot;], [&quot;流失風險&quot;, &quot;回訪間隔變長 + 未完成任務增加&quot;], [&quot;適合短任務&quot;, &quot;單次學習短但回訪穩定&quot;], [&quot;適合深度學習&quot;, &quot;單次時間長 + 追問多 + 筆記多&quot;]], &quot;risks&quot;: [&quot;不能只追求使用時長，學習品質比在線時間更重要。&quot;, &quot;提醒過多會變成壓力或干擾。&quot;, &quot;長期學習模型應讓使用者可查看、修正與刪除。&quot;], &quot;key_metrics&quot;: [&quot;穩定回訪頻率&quot;, &quot;節奏穩定度&quot;, &quot;學習任務完成率&quot;, &quot;疲勞訊號出現率&quot;, &quot;回歸後銜接成功率&quot;]}">
+      <button class="card-head" aria-expanded="false">
+        <span>
+          <small>Learning Signal Framework</small>
+          <strong>06 學習節奏訊號</strong>
+          <em>觀察跨時間的學習頻率、時段、持續性、疲勞與回訪模式。</em>
+        </span>
+        <b class="pill">展開</b>
+      </button>
+      <div class="card-body">
+        <p class="definition">學習節奏訊號和學習進化分析高度相關。下一代 AI Learning Agent 不只是陪使用者學一題，而是逐漸理解使用者何時學得進去、何時容易放棄、適合短衝還是長時間學習。</p>
+        <div class="subgrid">
+          <section>
+            <h3>訊號清單</h3>
+            <div class='table-wrap'><table><thead><tr><th>訊號名稱</th><th>觀察內容</th><th>可能代表的學習狀態</th><th>AI 可介入方式</th></tr></thead><tbody><tr><td>學習頻率</td><td>一週學幾次</td><td>是否形成習慣</td><td>安排合適提醒</td></tr><tr><td>單次學習長度</td><td>每次學多久</td><td>專注耐力、疲勞點</td><td>建議任務切片</td></tr><tr><td>固定學習時段</td><td>是否常在固定時間學</td><td>習慣形成</td><td>在合適時段提醒</td></tr><tr><td>中斷點位置</td><td>常在哪個階段離開</td><td>階段風險</td><td>優化該節點體驗</td></tr><tr><td>回訪間隔</td><td>兩次學習間隔多久</td><td>持續性</td><td>安排複習或提醒</td></tr><tr><td>疲勞訊號</td><td>後半段錯誤增加、作答變慢</td><td>認知疲勞</td><td>建議休息或降低難度</td></tr><tr><td>考前衝刺模式</td><td>短期高頻使用</td><td>目標壓力高</td><td>改用高效率複習</td></tr><tr><td>長期沉默</td><td>一段時間未回來</td><td>流失風險</td><td>提供低負擔回歸任務</td></tr><tr><td>回歸後銜接能力</td><td>回來後是否能接續上次</td><td>學習連續性</td><td>提供上次摘要與下一步</td></tr><tr><td>節奏穩定度</td><td>學習是否忽冷忽熱</td><td>習慣是否穩定</td><td>調整目標與提醒策略</td></tr></tbody></table></div>
+          </section>
+          <section>
+            <h3>常見狀態推論</h3>
+            <div class='table-wrap'><table><thead><tr><th>推論狀態</th><th>可能訊號組合</th></tr></thead><tbody><tr><td>習慣形成</td><td>固定時段學習 + 回訪間隔穩定 + 任務完成率高</td></tr><tr><td>認知疲勞</td><td>後半段錯誤增加 + 作答時間變長 + 跳過解析</td></tr><tr><td>考前焦慮</td><td>高頻使用 + 放棄語句增加 + 直接要答案比例升高</td></tr><tr><td>流失風險</td><td>回訪間隔變長 + 未完成任務增加</td></tr><tr><td>適合短任務</td><td>單次學習短但回訪穩定</td></tr><tr><td>適合深度學習</td><td>單次時間長 + 追問多 + 筆記多</td></tr></tbody></table></div>
+          </section>
+        </div>
+        <div class="risk-metric-grid">
+          <div class="risk-box">
+            <h3>使用風險</h3>
+            <ul><li>不能只追求使用時長，學習品質比在線時間更重要。</li><li>提醒過多會變成壓力或干擾。</li><li>長期學習模型應讓使用者可查看、修正與刪除。</li></ul>
+          </div>
+          <div class="metric-box">
+            <h3>代表指標</h3>
+            <div class="chips"><span>穩定回訪頻率</span><span>節奏穩定度</span><span>學習任務完成率</span><span>疲勞訊號出現率</span><span>回歸後銜接成功率</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>高價值學習狀態推論</h2>
+      <p class="section-lead">
+        訊號不是終點，訊號是用來推論使用者目前處於哪一種學習狀態。以下狀態可以作為 AI Learning Agent 的核心判斷模型。
+      </p>
+      <div class="state-grid">
+        
+        <article class="state-card">
+          <b>可能卡關</b>
+          <p>使用者正在某個概念、教材段落或題目上停滯。</p>
+          <code>教材停留時間異常 + 重複閱讀 + 概念檢核錯誤 + 提問「我看不懂」</code>
+          <p><b>AI 介入：</b>先問卡在哪：文字、概念、例題步驟，還是不知道怎麼開始。</p>
+          <p><b>成功指標：</b>卡關恢復時間下降、提示後重試比例上升、卡關後放棄率下降</p>
+        </article>
+        
+        <article class="state-card">
+          <b>表面理解</b>
+          <p>使用者以為懂，但面對變形題或應用題時無法遷移。</p>
+          <code>教材滑過很快 + 自評理解高 + 基礎題答對 + 變形題答錯</code>
+          <p><b>AI 介入：</b>給對比題，不直接否定使用者：「這題和剛剛那題差在哪？」</p>
+          <p><b>成功指標：</b>變形題答對率提升、自我說明比例提升、概念混淆下降</p>
+        </article>
+        
+        <article class="state-card">
+          <b>答案依賴</b>
+          <p>使用者過度依靠 AI 給答案，而不是用 AI 幫助自己理解。</p>
+          <code>直接要答案比例高 + 提示使用比例高 + 無提示答對率低 + 自我說明比例低</code>
+          <p><b>AI 介入：</b>改成引導式提示：第一步提示 → 使用者嘗試 → 第二步提示 → 再嘗試。</p>
+          <p><b>成功指標：</b>提示依賴下降、無提示答對率提升、自我說明比例提升</p>
+        </article>
+        
+        <article class="state-card">
+          <b>挫折上升</b>
+          <p>使用者情緒開始影響學習，有放棄或逃避風險。</p>
+          <code>連續錯誤 + 焦躁語句 + 跳過解析 + 停滯時間增加</code>
+          <p><b>AI 介入：</b>縮小任務，不長篇說教：「我們先不解完整題，只看第一步。」</p>
+          <p><b>成功指標：</b>答錯後重試比例提升、回饋跳過率下降、答錯後情緒下降訊號減少</p>
+        </article>
+        
+        <article class="state-card">
+          <b>真正掌握</b>
+          <p>使用者不只答對，還能解釋、遷移，並在延遲複習後保持。</p>
+          <code>無提示答對 + 變形題答對 + 能自我說明 + 延遲複習仍答對</code>
+          <p><b>AI 介入：</b>降低介入頻率，增加挑戰題或跨情境應用。</p>
+          <p><b>成功指標：</b>知識遷移表現提升、掌握穩定度提升、AI 依賴程度下降</p>
+        </article>
+        
+        <article class="state-card">
+          <b>需要重規劃</b>
+          <p>目前學習路線不適合，繼續往前只會累積挫折。</p>
+          <code>前置知識缺口 + 連續低表現 + 放棄語句增加 + 同類錯誤無改善</code>
+          <p><b>AI 介入：</b>重排學習路徑，回補前置知識或改用短任務模式。</p>
+          <p><b>成功指標：</b>回補後答對率提升、放棄率下降、同類錯誤下降</p>
+        </article>
+        
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>錯誤分類表</h2>
+      <p class="section-lead">答錯不能只算錯。AI 必須先分辨錯誤類型，否則後續補救會偏掉。</p>
+      <div class='table-wrap'><table><thead><tr><th>錯誤類型</th><th>定義</th><th>範例</th><th>AI 處理方式</th></tr></thead><tbody><tr><td>概念錯誤</td><td>根本理解錯</td><td>把速度與加速度混淆</td><td>回到概念差異與反例</td></tr><tr><td>程序錯誤</td><td>知道概念，但步驟錯</td><td>解方程式少移一項</td><td>提供步驟檢查</td></tr><tr><td>粗心錯誤</td><td>會做但不穩</td><td>正負號、單位、選項看錯</td><td>提醒檢查策略</td></tr><tr><td>題意錯誤</td><td>沒看懂題目要求</td><td>問原因卻回答結果</td><td>訓練讀題與關鍵字標記</td></tr><tr><td>策略錯誤</td><td>方法選錯</td><td>用死算處理應該用圖解的題</td><td>提供解題策略比較</td></tr><tr><td>遷移失敗</td><td>換個問法就不會</td><td>公式題會，應用題不會</td><td>用相似題與變形題訓練</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>提問品質分級</h2>
+      <p class="section-lead">AI Learning Agent 的長期目標之一，是讓使用者從「要答案」進化到「問卡點、問比較、問原理、問遷移」。</p>
+      <div class='table-wrap'><table><thead><tr><th>等級</th><th>提問型態</th><th>範例</th><th>代表意義</th></tr></thead><tbody><tr><td>Level 1</td><td>要答案</td><td>答案是什麼？</td><td>高依賴、低反思</td></tr><tr><td>Level 2</td><td>問解法</td><td>這題怎麼算？</td><td>有求助，但還不明確</td></tr><tr><td>Level 3</td><td>問卡點</td><td>我不懂為什麼這裡要移項</td><td>能描述卡住位置</td></tr><tr><td>Level 4</td><td>問比較</td><td>這題跟上一題差在哪？</td><td>開始建立概念差異</td></tr><tr><td>Level 5</td><td>問原理</td><td>為什麼這個公式可以這樣用？</td><td>追求深層理解</td></tr><tr><td>Level 6</td><td>問遷移</td><td>如果條件改成這樣，還能用同方法嗎？</td><td>具備知識遷移意識</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>情緒語句處理原則</h2>
+      <p class="section-lead">情緒訊號要保守推論，且回饋不能空泛安慰；最重要的是讓使用者回到可執行的下一步。</p>
+      <div class='table-wrap'><table><thead><tr><th>類型</th><th>使用者語句範例</th><th>AI 不應該做</th><th>AI 應該做</th></tr></thead><tbody><tr><td>放棄</td><td>我不想學了</td><td>繼續講一大段知識</td><td>降低任務到最小一步</td></tr><tr><td>焦躁</td><td>到底為什麼又錯</td><td>說「再努力一下」</td><td>指出錯誤發生在哪一步</td></tr><tr><td>自我否定</td><td>我很笨</td><td>空泛安慰「你很棒」</td><td>說明他哪一步其實是對的</td></tr><tr><td>無助</td><td>我完全看不懂</td><td>直接給完整答案</td><td>問卡在文字、概念還是步驟</td></tr><tr><td>成就感</td><td>我懂了</td><td>立刻結束</td><td>給一題相似題確認掌握</td></tr><tr><td>懷疑</td><td>你講的跟課本不一樣</td><td>強行辯解</td><td>回到教材來源，列出差異</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>信心分數與介入強度</h2>
+      <p class="section-lead">每個推論都應該有信心分數。信心越低，AI 越應該保持觀察；信心越高，才逐步提高介入強度。</p>
+      <div class='table-wrap'><table><thead><tr><th>信心程度</th><th>信心範圍</th><th>AI 介入方式</th><th>設計目的</th></tr></thead><tbody><tr><td>低信心</td><td>0%～39%</td><td>不介入，只記錄</td><td>避免誤判與打斷</td></tr><tr><td>中低信心</td><td>40%～59%</td><td>顯示低干擾提示</td><td>例如角落提示，不主動彈窗</td></tr><tr><td>中高信心</td><td>60%～79%</td><td>主動詢問是否需要協助</td><td>讓使用者保有選擇權</td></tr><tr><td>高信心</td><td>80%～89%</td><td>提供具體下一步</td><td>例如卡關分類、單步提示</td></tr><tr><td>連續高信心</td><td>90% 以上或多次出現</td><td>啟動學習路徑重規劃</td><td>代表原本路徑可能失效</td></tr></tbody></table></div>
+    </section>
+
+    <section class="section">
+      <h2>事件資料結構範例</h2>
+      <p class="section-lead">若要落到產品與工程設計，可用這種事件格式作為資料埋點與推論模型的初版參考。</p>
+      <pre>{
+  &quot;event_id&quot;: &quot;evt_20260709_0001&quot;,
+  &quot;user_id&quot;: &quot;hashed_user_id&quot;,
+  &quot;session_id&quot;: &quot;session_abc123&quot;,
+  &quot;timestamp&quot;: &quot;2026-07-09T10:30:00+08:00&quot;,
+  &quot;learning_stage&quot;: &quot;遇到卡關&quot;,
+  &quot;signal_type&quot;: &quot;行為訊號&quot;,
+  &quot;event_type&quot;: &quot;重複閱讀&quot;,
+  &quot;target_type&quot;: &quot;教材段落&quot;,
+  &quot;target_id&quot;: &quot;lesson_phy_motion_003&quot;,
+  &quot;duration_seconds&quot;: 92,
+  &quot;value&quot;: {
+    &quot;repeat_count&quot;: 3,
+    &quot;scroll_back&quot;: true
+  },
+  &quot;inferred_state&quot;: {
+    &quot;state&quot;: &quot;可能卡關&quot;,
+    &quot;confidence&quot;: 0.72
+  },
+  &quot;ai_action&quot;: {
+    &quot;action_type&quot;: &quot;輕提示&quot;,
+    &quot;message&quot;: &quot;這段要不要換個方式解釋？&quot;
+  },
+  &quot;privacy_level&quot;: &quot;學習行為資料&quot;
+}</pre>
+    </section>
+
+    <section class="section">
+      <h2>隱私與倫理原則</h2>
+      <p class="section-lead">AI PC 情境下，許多訊號可以在本機推論。設計上應優先避免過度蒐集、過度推論與不可拒絕的介入。</p>
+      <div class="ethics-grid">
+        <div class="ethic"><b>只收集學習必要訊號</b><span>不為了好奇而收集資料。</span></div><div class="ethic"><b>優先使用本機推論</b><span>AI PC 能在本機分析的，就不要全部上雲。</span></div><div class="ethic"><b>情緒推論要保守</b><span>不要武斷判定使用者心理狀態。</span></div><div class="ethic"><b>使用者可查看與刪除紀錄</b><span>個人學習模型應可檢視與清除。</span></div><div class="ethic"><b>不用單一訊號貼標籤</b><span>不能因為一次答錯就說使用者能力差。</span></div><div class="ethic"><b>避免羞辱式回饋</b><span>尤其是低分、連續錯誤、焦慮狀態。</span></div><div class="ethic"><b>介入要可拒絕</b><span>使用者應能關閉提示或降低主動介入。</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="callout">
+        <strong>最高層驗收主張</strong>
+        <p>
+          AI 能從使用者的行為、認知、情緒、成績、互動與學習節奏訊號中，推論出可被驗證的學習狀態，並用最低干擾的方式幫助使用者恢復學習、修正理解、建立自主性。
+        </p>
+        <p>
+          最終驗收不是 AI 收集了多少資料，而是 AI 是否更準確地判斷使用者何時卡住、為什麼卡住、需要什麼協助，以及什麼時候應該退場。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    AI Learning Agent｜Learning Signal Framework 學習訊號框架報告 V0.1
+  </footer>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const signalSelect = document.getElementById('signalSelect');
+    const cards = Array.from(document.querySelectorAll('.signal-card'));
+    const toggleAll = document.getElementById('toggleAll');
+
+    function setOpen(card, open) {
+      card.classList.toggle('open', open);
+      const btn = card.querySelector('.card-head');
+      const pill = card.querySelector('.pill');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      pill.textContent = open ? '收合' : '展開';
+    }
+
+    document.querySelectorAll('.card-head').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.signal-card');
+        setOpen(card, !card.classList.contains('open'));
+      });
+    });
+
+    function applyFilter(scroll=false) {
+      const q = searchInput.value.trim().toLowerCase();
+      const selected = signalSelect.value;
+      cards.forEach(card => {
+        const text = card.dataset.search.toLowerCase();
+        const matchSearch = !q || text.includes(q);
+        const matchType = selected === 'all' || card.dataset.id === selected;
+        const visible = matchSearch && matchType;
+        card.classList.toggle('hidden', !visible);
+        if (q && visible) setOpen(card, true);
+      });
+
+      if (selected !== 'all') {
+        const card = cards.find(c => c.dataset.id === selected);
+        if (card && !card.classList.contains('hidden')) {
+          setOpen(card, true);
+          if (scroll) card.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+    }
+
+    searchInput.addEventListener('input', () => applyFilter(false));
+    signalSelect.addEventListener('change', () => applyFilter(true));
+
+    toggleAll.addEventListener('click', () => {
+      const shouldOpen = cards.some(card => !card.classList.contains('hidden') && !card.classList.contains('open'));
+      cards.forEach(card => {
+        if (!card.classList.contains('hidden')) setOpen(card, shouldOpen);
+      });
+      toggleAll.textContent = shouldOpen ? '全部收合' : '全部展開';
+    });
+
+    document.querySelectorAll('.nav-pills button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        signalSelect.value = btn.dataset.target;
+        applyFilter(true);
+      });
+    });
+
+    setOpen(cards[0], true);
+  </script>
+</body>
+</html>

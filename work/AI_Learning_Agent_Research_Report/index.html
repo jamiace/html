@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Agent｜研究報告入口</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: rgba(255,255,255,.86);
+      --solid: #ffffff;
+      --text: #1b2434;
+      --muted: #657085;
+      --line: #dfe5ef;
+      --blue: #3058d8;
+      --green: #0d8f70;
+      --cyan: #0b8fab;
+      --purple: #7356d8;
+      --amber: #b66b00;
+      --shadow: 0 18px 60px rgba(30, 42, 80, .13);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.72;
+      background:
+        radial-gradient(circle at 5% 0%, rgba(48,88,216,.16), transparent 30rem),
+        radial-gradient(circle at 92% 8%, rgba(13,143,112,.15), transparent 28rem),
+        radial-gradient(circle at 45% 52%, rgba(115,86,216,.10), transparent 32rem),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 48%, #edf1f8 100%);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .hero {
+      padding: 72px 28px 36px;
+      border-bottom: 1px solid rgba(223,229,239,.82);
+      background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.38));
+      backdrop-filter: blur(14px);
+    }
+    .hero-inner, .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(48,88,216,.22);
+      background: rgba(255,255,255,.76);
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+    h1 {
+      margin: 22px 0 14px;
+      font-size: clamp(34px, 5.5vw, 62px);
+      line-height: 1.08;
+      letter-spacing: -.05em;
+    }
+    .subtitle {
+      max-width: 920px;
+      margin: 0;
+      color: #45516a;
+      font-size: 19px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 11px 16px;
+      background: #fff;
+      color: var(--text);
+      font-weight: 800;
+      box-shadow: 0 8px 28px rgba(30,42,80,.06);
+      transition: .18s ease;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .btn.primary {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+    .container { padding: 30px 28px 42px; }
+    .section {
+      margin: 28px 0;
+      padding: 26px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(223,229,239,.88);
+      box-shadow: var(--shadow);
+    }
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      letter-spacing: -.02em;
+    }
+    .section-lead {
+      max-width: 940px;
+      margin: 0 0 20px;
+      color: #48546a;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      font-size: 26px;
+      font-weight: 900;
+    }
+    .report-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 310px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: 0 12px 34px rgba(30,42,80,.08);
+      overflow: hidden;
+      transition: .2s ease;
+    }
+    .report-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 44px rgba(30,42,80,.13);
+    }
+    .report-card:before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 7px;
+      background: var(--blue);
+    }
+    .report-card.signal:before { background: var(--green); }
+    .report-card.evolution:before { background: var(--purple); }
+    .report-card small {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: .06em;
+    }
+    .report-card.signal small {
+      background: #eef8f5;
+      color: var(--green);
+    }
+    .report-card.evolution small {
+      background: #f3efff;
+      color: var(--purple);
+    }
+    .report-card h3 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.25;
+      letter-spacing: -.025em;
+    }
+    .report-card .en {
+      color: var(--muted);
+      font-weight: 800;
+      margin-top: 2px;
+    }
+    .report-card p {
+      color: #526078;
+      margin: 14px 0;
+    }
+    .question {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 16px;
+      background: #f8faff;
+      border: 1px solid #e8edf7;
+      color: #35405a;
+      font-weight: 800;
+    }
+    .open-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: var(--text);
+      color: #fff;
+      font-weight: 900;
+    }
+    .signal .open-link { background: var(--green); }
+    .evolution .open-link { background: var(--purple); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .note {
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .note b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .note p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .relationship {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+    .rel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+    .rel b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .rel span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .rel .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    .rel:nth-child(2) .num { background: var(--green); }
+    .rel:nth-child(3) .num { background: var(--purple); }
+    .callout {
+      padding: 22px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(48,88,216,.10), rgba(13,143,112,.10));
+      border: 1px solid rgba(48,88,216,.18);
+    }
+    .callout strong {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .callout p { margin: 8px 0 0; color: #40506a; }
+    .footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 28px;
+      font-size: 13px;
+    }
+    @media (max-width: 1080px) {
+      .flow {
+        grid-template-columns: 1fr;
+      }
+      .flow-arrow {
+        transform: rotate(90deg);
+        min-height: 16px;
+      }
+      .relationship, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 680px) {
+      .hero { padding: 44px 18px 26px; }
+      .container { padding: 20px 18px 34px; }
+      .section { padding: 18px; }
+      .report-card { min-height: auto; }
+    }
+    @media print {
+      body { background: #fff; }
+      .hero, .section, .report-card {
+        box-shadow: none;
+        background: #fff;
+        border-color: #ddd;
+      }
+      .hero-actions, .open-link { display: none; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">AI PC / AI Learning Agent</span>
+      <h1>AI Learning Agent 研究報告入口</h1>
+      <p class="subtitle">
+        這個入口頁串接三份核心文件：學習互動地圖、學習訊號框架、學習進化模型。三份文件分別回答「一次學習中 AI 何時介入」、「AI 根據什麼判斷使用者狀態」、「長期來看學習方式會如何改變」。
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#reports">查看三份報告</a>
+        <a class="btn" href="01_Learning_Interaction_Map.html">01 學習互動地圖</a>
+        <a class="btn" href="02_Learning_Signal_Framework.html">02 學習訊號框架</a>
+        <a class="btn" href="03_Learning_Evolution_Model.html">03 學習進化模型</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h2>三份文件的定位</h2>
+      <p class="section-lead">
+        這三份文件不是彼此重複，而是從「單次學習流程」到「AI 判斷依據」再到「長期學習型態」的三層模型。
+      </p>
+      <div class="relationship">
+        <div class="rel">
+          <span class="num">01</span>
+          <b>Learning Interaction Map<br>學習互動地圖</b>
+          <span>一次學習中，AI 何時介入？</span>
+        </div>
+        <div class="rel">
+          <span class="num">02</span>
+          <b>Learning Signal Framework<br>學習訊號框架</b>
+          <span>AI 根據什麼判斷使用者狀態？</span>
+        </div>
+        <div class="rel">
+          <span class="num">03</span>
+          <b>Learning Evolution Model<br>學習進化模型</b>
+          <span>長期來看，學習方式會如何改變？</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reports">
+      <h2>報告入口</h2>
+      <p class="section-lead">
+        建議閱讀順序是 01 → 02 → 03。先看一次學習流程，再看 AI 如何判斷狀態，最後看整體學習型態如何進化。
+      </p>
+
+      <div class="flow">
+        <a class="report-card interaction" href="01_Learning_Interaction_Map.html">
+          <small>01 / Interaction</small>
+          <h3>學習互動地圖</h3>
+          <div class="en">Learning Interaction Map</div>
+          <p>
+            描述使用者從開始學習、理解教材、遇到卡關、提問、AI 解釋、練習、答錯、回饋、重新嘗試到完成的完整互動節點。
+          </p>
+          <div class="question">一次學習中，AI 何時介入？</div>
+          <span class="open-link">開啟報告</span>
+        </a>
+
+        <div class="flow-arrow">→</div>
+
+        <a class="report-card signal" href="02_Learning_Signal_Framework.html">
+          <small>02 / Signal</small>
+          <h3>學習訊號框架</h3>
+          <div class="en">Learning Signal Framework</div>
+          <p>
+            定義 AI 應觀察的行為、認知、情緒、成績、互動與學習節奏訊號，並建立狀態推論、信心分數與介入強度。
+          </p>
+          <div class="question">AI 根據什麼判斷使用者狀態？</div>
+          <span class="open-link">開啟報告</span>
+        </a>
+
+        <div class="flow-arrow">→</div>
+
+        <a class="report-card evolution" href="03_Learning_Evolution_Model.html">
+          <small>03 / Evolution</small>
+          <h3>學習進化模型</h3>
+          <div class="en">Learning Evolution Model</div>
+          <p>
+            描述 AI PC / AI Agent 時代，學習如何從固定教材、單向教學、考後補救，進化為個人化、即時互動、長期陪伴的人機協作系統。
+          </p>
+          <div class="question">長期來看，學習方式會如何改變？</div>
+          <span class="open-link">開啟報告</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>使用方式建議</h2>
+      <div class="grid-2">
+        <div class="note">
+          <b>對 PM / 產品討論</b>
+          <p>先用 index 建立共識，再進入各文件討論互動節點、訊號定義、驗收標準與產品 Roadmap。</p>
+        </div>
+        <div class="note">
+          <b>對工程 / AI Agent 設計</b>
+          <p>從訊號框架切入資料事件、狀態推論與介入策略，再回到互動地圖確認每個節點的產品行為。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="callout">
+        <strong>整體核心論述</strong>
+        <p>
+          AI Learning Agent 的價值，不是讓 AI 更會回答，而是讓 AI 能在正確時機理解使用者的學習狀態，提供最低干擾但有效的協助，並長期培養使用者的提問、驗證、反思、修正與自主學習能力。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    AI Learning Agent｜Report Index
+  </footer>
+</body>
+</html>

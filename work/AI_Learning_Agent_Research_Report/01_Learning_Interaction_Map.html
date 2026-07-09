@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Learning Agent｜學習互動地圖報告</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: rgba(255,255,255,.86);
+      --panel-solid: #ffffff;
+      --text: #1d2433;
+      --muted: #647084;
+      --line: #dfe4ee;
+      --blue: #3157d5;
+      --blue2: #6c87ff;
+      --green: #0b8f72;
+      --amber: #b66b00;
+      --red: #c83f49;
+      --purple: #7554d6;
+      --shadow: 0 18px 60px rgba(30, 42, 80, .13);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      line-height: 1.72;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(49,87,213,.16), transparent 26rem),
+        radial-gradient(circle at 88% 10%, rgba(11,143,114,.14), transparent 25rem),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 42%, #eef2fa 100%);
+    }
+    a { color: var(--blue); }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 64px 28px 34px;
+      border-bottom: 1px solid rgba(223,228,238,.8);
+      background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.36));
+      backdrop-filter: blur(12px);
+    }
+    .hero-inner, .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid rgba(49,87,213,.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .04em;
+    }
+    h1 {
+      margin: 22px 0 14px;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -.04em;
+    }
+    .subtitle {
+      max-width: 880px;
+      color: #445068;
+      font-size: 19px;
+      margin: 0;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .stat {
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(223,228,238,.9);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 32px rgba(30, 42, 80, .06);
+    }
+    .stat b { display: block; font-size: 26px; }
+    .stat span { color: var(--muted); font-size: 14px; }
+    .container {
+      padding: 28px;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      margin: 0 auto 22px;
+      padding: 14px;
+      border: 1px solid rgba(223,228,238,.9);
+      border-radius: 22px;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 38px rgba(30, 42, 80, .08);
+    }
+    input, select, button {
+      font: inherit;
+    }
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .search:focus { border-color: var(--blue2); box-shadow: 0 0 0 4px rgba(49,87,213,.1); }
+    .btn, select {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.primary {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+    .section {
+      margin: 28px 0;
+      padding: 26px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(223,228,238,.88);
+      box-shadow: var(--shadow);
+    }
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      letter-spacing: -.02em;
+    }
+    .section-lead {
+      margin: 0 0 20px;
+      color: #48546a;
+      max-width: 920px;
+    }
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+    .principle {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .principle b { display:block; margin-bottom: 4px; }
+    .principle span { color: var(--muted); font-size: 14px; }
+    .overview-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 920px;
+    }
+    th, td {
+      border-bottom: 1px solid #edf0f6;
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8faff;
+      color: #39445c;
+      font-size: 13px;
+      letter-spacing: .02em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(11, minmax(120px,1fr));
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .node {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
+      min-height: 86px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    .node:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(30, 42, 80, .09); }
+    .node small { display:block; color: var(--blue); font-weight:700; }
+    .node span { display:block; font-weight: 800; line-height:1.35; margin-top:3px; }
+    .stage-card {
+      margin: 14px 0;
+      border: 1px solid rgba(223,228,238,.9);
+      border-radius: 22px;
+      background: var(--panel-solid);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(30, 42, 80, .07);
+    }
+    .stage-card.hidden { display:none; }
+    .stage-head {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 22px;
+      border: 0;
+      background: linear-gradient(135deg, #fff, #f8faff);
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .stage-head strong {
+      display: block;
+      font-size: 22px;
+      letter-spacing: -.02em;
+    }
+    .stage-head em {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-style: normal;
+      font-size: 14px;
+    }
+    .stage-kicker {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .chev {
+      align-self: center;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #eef2ff;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .stage-body {
+      display: none;
+      padding: 0 22px 22px;
+    }
+    .stage-card.open .stage-body { display: block; }
+    .stage-card.open .chev { background: #1d2433; color: #fff; }
+    .grid-five {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 12px;
+    }
+    .grid-five section {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fbfcff;
+      min-width: 0;
+    }
+    .grid-five h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .grid-five h3:before {
+      content:"";
+      width: 9px; height: 9px; border-radius:50%;
+      background: var(--blue);
+      display:inline-block;
+    }
+    .grid-five section:nth-child(2) h3:before { background: var(--green); }
+    .grid-five section:nth-child(3) h3:before { background: var(--red); }
+    .grid-five section:nth-child(4) h3:before { background: var(--purple); }
+    .grid-five section:nth-child(5) h3:before { background: var(--amber); }
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    li {
+      padding: 10px 0;
+      border-top: 1px dashed #e1e6f0;
+    }
+    li:first-child { border-top: 0; padding-top: 0; }
+    li b {
+      display: block;
+      font-size: 14px;
+      color: #26314a;
+    }
+    li span {
+      display: block;
+      color: #5d687e;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .metric-dict {
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+    .metric-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+    }
+    .metric-card b {
+      display:block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .metric-card span {
+      display:block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .highlight {
+      outline: 3px solid rgba(49,87,213,.2);
+      background: #fff;
+    }
+    .callout {
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(49,87,213,.1), rgba(11,143,114,.1));
+      border: 1px solid rgba(49,87,213,.18);
+    }
+    .callout strong {
+      display:block;
+      font-size: 21px;
+      margin-bottom: 6px;
+    }
+    .footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 28px;
+      font-size: 13px;
+    }
+    @media (max-width: 1050px) {
+      .hero-grid, .principles, .metric-dict { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .grid-five { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 680px) {
+      .hero { padding: 42px 18px 24px; }
+      .container { padding: 18px; }
+      .hero-grid, .principles, .metric-dict, .grid-five { grid-template-columns: 1fr; }
+      .toolbar { position: relative; grid-template-columns: 1fr; }
+      .section { padding: 18px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .toolbar, .timeline, .footer { display:none !important; }
+      .hero, .section, .stage-card {
+        box-shadow:none;
+        background:#fff;
+        border-color:#ddd;
+      }
+      .stage-body { display:block !important; }
+      .stage-head { page-break-after: avoid; }
+      .stage-card { break-inside: avoid; }
+      .grid-five { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">AI PC / AI Learning Agent</span>
+      <h1>學習互動地圖報告</h1>
+      <p class="subtitle">
+        這份文件用「使用者狀態、AI 可介入方式、風險、指標、成功條件」來描述 AI Learning Agent 在學習歷程中的介入設計。重點不是讓 AI 更會回答，而是讓使用者更能發現問題、修正理解、形成下一代學習方式。
+      </p>
+      <div class="hero-grid">
+        <div class="stat"><b>11</b><span>學習節點</span></div>
+        <div class="stat"><b>5</b><span>分析維度</span></div>
+        <div class="stat"><b>66+</b><span>中文化學習指標</span></div>
+        <div class="stat"><b>1</b><span>核心驗收主張</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="toolbar" aria-label="報告操作列">
+      <input id="searchInput" class="search" placeholder="搜尋：卡關、提問、錯誤、提示、回饋、依賴..." />
+      <select id="stageSelect">
+        <option value="all">全部階段</option>
+        <option value="start">01 開始學習</option><option value="understand">02 理解教材</option><option value="stuck">03 遇到卡關</option><option value="question">04 提問</option><option value="explain">05 AI 解釋</option><option value="practice">06 練習</option><option value="wrong">07 答錯</option><option value="feedback">08 AI 回饋</option><option value="retry">09 重新嘗試</option><option value="complete">10 完成</option><option value="evolution">11 跨 Session 學習進化</option>
+      </select>
+      <button class="btn" id="toggleAll">全部展開</button>
+      <button class="btn primary" onclick="window.print()">列印 / 轉 PDF</button>
+    </nav>
+
+    <section class="section">
+      <h2>報告定位</h2>
+      <p class="section-lead">
+        這不是一般功能表，而是用來建立產品討論共識的驗收框架：每一個 AI 介入都必須對應到使用者狀態、可觀察指標與成功條件，避免「做了很多互動，但不知道學習是否真的變好」。
+      </p>
+      <div class="principles">
+        <div class="principle"><b>1. 先觀察，再介入</b><span>AI 不應每個節點都插話，而是依照訊號選擇介入層級。</span></div>
+        <div class="principle"><b>2. 回饋要能導向行動</b><span>好的回饋不是稱讚，而是讓使用者知道下一步怎麼修正。</span></div>
+        <div class="principle"><b>3. 指標要能反映學習品質</b><span>不能只看使用時間、對話次數與答題量，也要看卡關恢復、錯誤下降、提問品質與自主學習。</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>介入層級</h2>
+      <p class="section-lead">AI Learning Agent 的介入強度應該分層，避免過度熱心造成干擾或依賴。</p>
+      <div class="overview-wrap">
+        <table>
+          <thead><tr><th>層級</th><th>名稱</th><th>說明</th><th>適用情境</th></tr></thead>
+          <tbody>
+            <tr><td>Level 0</td><td>觀察</td><td>AI 不打擾，只記錄學習行為。</td><td>使用者穩定閱讀或練習時。</td></tr>
+            <tr><td>Level 1</td><td>輕提示</td><td>使用者可能卡住時，給很小的提示。</td><td>停留過久、重讀、猶豫、輕微錯誤。</td></tr>
+            <tr><td>Level 2</td><td>引導</td><td>協助拆題、拆概念、提出反思問題。</td><td>模糊卡關、概念混淆、提問不清。</td></tr>
+            <tr><td>Level 3</td><td>教練</td><td>針對錯誤模式、學習習慣給策略。</td><td>同類錯誤反覆出現、長期效率低。</td></tr>
+            <tr><td>Level 4</td><td>重規劃</td><td>當學習路線明顯失效時，重新安排學習路徑。</td><td>前置知識不足、連續挫折、進度失衡。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>學習流程總覽</h2>
+      <p class="section-lead">點擊任一節點可跳到對應詳細內容。</p>
+      <div class="timeline">
+        <button class="node" data-target="start"><small>01</small><span>開始學習</span></button><button class="node" data-target="understand"><small>02</small><span>理解教材</span></button><button class="node" data-target="stuck"><small>03</small><span>遇到卡關</span></button><button class="node" data-target="question"><small>04</small><span>提問</span></button><button class="node" data-target="explain"><small>05</small><span>AI 解釋</span></button><button class="node" data-target="practice"><small>06</small><span>練習</span></button><button class="node" data-target="wrong"><small>07</small><span>答錯</span></button><button class="node" data-target="feedback"><small>08</small><span>AI 回饋</span></button><button class="node" data-target="retry"><small>09</small><span>重新嘗試</span></button><button class="node" data-target="complete"><small>10</small><span>完成</span></button><button class="node" data-target="evolution"><small>11</small><span>跨 Session 學習進化</span></button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>主表：階段、風險、指標與成功條件</h2>
+      <p class="section-lead">這張表可作為簡報摘要，幫團隊快速看懂每個階段應該驗收什麼。</p>
+      <div class="overview-wrap">
+        <table>
+          <thead>
+            <tr><th>階段</th><th>使用者核心狀態</th><th>AI 主要任務</th><th>最大風險</th><th>主要指標</th><th>成功條件</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>開始學習</td><td>動機不明、目標不明</td><td>協助設定目標與模式</td><td>開場太煩</td><td>進入學習所需時間</td><td>快速進入學習</td></tr>
+<tr><td>理解教材</td><td>表面理解或概念混淆</td><td>分層解釋與檢核</td><td>摘要取代理解</td><td>概念檢核正確率</td><td>解釋後能答對</td></tr>
+<tr><td>遇到卡關</td><td>不懂、焦慮、停滯</td><td>偵測卡關並分類</td><td>誤判或直接給答案</td><td>卡關恢復時間</td><td>卡關後能恢復</td></tr>
+<tr><td>提問</td><td>問題模糊或求答案</td><td>幫助問對問題</td><td>形成答案依賴</td><td>提問品質分數</td><td>提問品質提升</td></tr>
+<tr><td>AI 解釋</td><td>等待理解</td><td>提供可追溯解釋</td><td>幻覺與教材衝突</td><td>解釋後答題正確率</td><td>解釋後能力提升</td></tr>
+<tr><td>練習</td><td>驗證自己會不會</td><td>調整難度與節奏</td><td>題目太簡單或太難</td><td>不同難度答對率</td><td>持續練習且進步</td></tr>
+<tr><td>答錯</td><td>挫折或概念錯誤</td><td>錯誤診斷</td><td>錯誤分類錯</td><td>同類錯誤重複率</td><td>同類錯誤下降</td></tr>
+<tr><td>AI 回饋</td><td>需要修正方向</td><td>給具體下一步</td><td>回饋空泛或太長</td><td>下一步採納率</td><td>回饋導向行動</td></tr>
+<tr><td>重新嘗試</td><td>半信半疑或怕再錯</td><td>逐步撤除提示</td><td>提示依賴</td><td>重試成功率</td><td>能自行完成</td></tr>
+<tr><td>完成</td><td>需要收斂</td><td>總結與安排下次</td><td>完成假象</td><td>概念掌握分數</td><td>完成有學習證據</td></tr>
+<tr><td>跨 Session 進化</td><td>學習習慣形成中</td><td>建立長期學習模型</td><td>過度依賴 AI</td><td>自主學習能力分數</td><td>學習自主性提升</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>互動詳細地圖</h2>
+      <p class="section-lead">可用搜尋或階段篩選快速定位；報告列印時會自動展開所有內容。</p>
+      <div id="cards">
+        
+    <article class="stage-card" data-stage="01 開始學習" data-id="start" data-search="{&quot;id&quot;: &quot;start&quot;, &quot;stage&quot;: &quot;01 開始學習&quot;, &quot;summary&quot;: &quot;使用者剛進入學習任務。AI 的重點不是聊天，而是協助快速進入一個可追蹤的小目標。&quot;, &quot;user_states&quot;: [[&quot;明確型&quot;, &quot;知道今天要學什麼，也知道自己想達成什麼。&quot;], [&quot;被動型&quot;, &quot;因任務、老師、系統推播而進入，動機較弱。&quot;], [&quot;焦慮型&quot;, &quot;覺得自己落後、考試接近，容易急著找答案。&quot;], [&quot;無聊型&quot;, &quot;沒有明確動機，只是打開看看。&quot;], [&quot;探索型&quot;, &quot;有學習意願，但不知道從哪裡開始。&quot;]], &quot;interventions&quot;: [[&quot;學習目標確認&quot;, &quot;用極短問題確認本次目標，例如理解概念、完成練習、考前複習。&quot;], [&quot;狀態暖身&quot;, &quot;用 1～2 個問題判斷可用時間、信心、壓力與目前狀態。&quot;], [&quot;任務切片&quot;, &quot;把大目標切成 10～20 分鐘可完成的小任務。&quot;], [&quot;學習模式選擇&quot;, &quot;提供快速複習、完整學習、錯題補強、考前衝刺等模式。&quot;], [&quot;個人化開場&quot;, &quot;根據上次紀錄提醒可銜接的起點。&quot;]], &quot;risks&quot;: [[&quot;開場太囉嗦&quot;, &quot;使用者只是想開始，AI 問太多會煩。&quot;], [&quot;目標設定假精準&quot;, &quot;使用者其實不知道自己不會什麼，AI 卻要求他選。&quot;], [&quot;過度儀式化&quot;, &quot;每次開始都要設定很多東西，降低使用率。&quot;], [&quot;錯誤個人化&quot;, &quot;根據不完整紀錄做出錯誤建議。&quot;]], &quot;metrics&quot;: [[&quot;進入學習所需時間&quot;, &quot;從開啟學習到第一次真正學習行為的時間。&quot;], [&quot;目標設定完成率&quot;, &quot;有多少使用者願意完成本次學習目標設定。&quot;], [&quot;開始流程完成率&quot;, &quot;使用者是否順利通過開場流程。&quot;], [&quot;學習模式選擇分布&quot;, &quot;使用者偏好哪一種學習模式。&quot;], [&quot;開場早期流失率&quot;, &quot;開始後 1～3 分鐘內離開的比例。&quot;]], &quot;success&quot;: [[&quot;快速進入學習&quot;, &quot;開始後 30～60 秒內進入第一個有效學習行為。&quot;], [&quot;AI 沒有造成負擔&quot;, &quot;開場互動放棄率低。&quot;], [&quot;學習目標可追蹤&quot;, &quot;每次學習都有明確任務目的。&quot;], [&quot;個人化建議被接受&quot;, &quot;使用者接受 AI 建議的比例逐步提高。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>01 開始學習</strong>
+          <em>使用者剛進入學習任務。AI 的重點不是聊天，而是協助快速進入一個可追蹤的小目標。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>明確型</b><span>知道今天要學什麼，也知道自己想達成什麼。</span></li>
+<li><b>被動型</b><span>因任務、老師、系統推播而進入，動機較弱。</span></li>
+<li><b>焦慮型</b><span>覺得自己落後、考試接近，容易急著找答案。</span></li>
+<li><b>無聊型</b><span>沒有明確動機，只是打開看看。</span></li>
+<li><b>探索型</b><span>有學習意願，但不知道從哪裡開始。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>學習目標確認</b><span>用極短問題確認本次目標，例如理解概念、完成練習、考前複習。</span></li>
+<li><b>狀態暖身</b><span>用 1～2 個問題判斷可用時間、信心、壓力與目前狀態。</span></li>
+<li><b>任務切片</b><span>把大目標切成 10～20 分鐘可完成的小任務。</span></li>
+<li><b>學習模式選擇</b><span>提供快速複習、完整學習、錯題補強、考前衝刺等模式。</span></li>
+<li><b>個人化開場</b><span>根據上次紀錄提醒可銜接的起點。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>開場太囉嗦</b><span>使用者只是想開始，AI 問太多會煩。</span></li>
+<li><b>目標設定假精準</b><span>使用者其實不知道自己不會什麼，AI 卻要求他選。</span></li>
+<li><b>過度儀式化</b><span>每次開始都要設定很多東西，降低使用率。</span></li>
+<li><b>錯誤個人化</b><span>根據不完整紀錄做出錯誤建議。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>進入學習所需時間</b><span>從開啟學習到第一次真正學習行為的時間。</span></li>
+<li><b>目標設定完成率</b><span>有多少使用者願意完成本次學習目標設定。</span></li>
+<li><b>開始流程完成率</b><span>使用者是否順利通過開場流程。</span></li>
+<li><b>學習模式選擇分布</b><span>使用者偏好哪一種學習模式。</span></li>
+<li><b>開場早期流失率</b><span>開始後 1～3 分鐘內離開的比例。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>快速進入學習</b><span>開始後 30～60 秒內進入第一個有效學習行為。</span></li>
+<li><b>AI 沒有造成負擔</b><span>開場互動放棄率低。</span></li>
+<li><b>學習目標可追蹤</b><span>每次學習都有明確任務目的。</span></li>
+<li><b>個人化建議被接受</b><span>使用者接受 AI 建議的比例逐步提高。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="02 理解教材" data-id="understand" data-search="{&quot;id&quot;: &quot;understand&quot;, &quot;stage&quot;: &quot;02 理解教材&quot;, &quot;summary&quot;: &quot;使用者閱讀、觀看或接觸教材。AI 的重點是協助理解，而不是用摘要取代教材。&quot;, &quot;user_states&quot;: [[&quot;正常吸收&quot;, &quot;能閱讀、觀看並理解教材。&quot;], [&quot;表面理解&quot;, &quot;看得懂字句，但不一定真的理解概念。&quot;], [&quot;被動瀏覽&quot;, &quot;快速滑過、缺少深度處理。&quot;], [&quot;概念混淆&quot;, &quot;關鍵概念彼此混在一起。&quot;], [&quot;注意力下降&quot;, &quot;停留過久、反覆重看、切換視窗或跳出。&quot;]], &quot;interventions&quot;: [[&quot;概念摘要&quot;, &quot;將一段教材濃縮成重點，但仍保留原文入口。&quot;], [&quot;分層解釋&quot;, &quot;提供簡單版、標準版、深入版。&quot;], [&quot;類比說明&quot;, &quot;用生活化比喻協助理解。&quot;], [&quot;關鍵概念標記&quot;, &quot;標示必懂概念、補充概念與易混淆概念。&quot;], [&quot;即時小檢核&quot;, &quot;用 1 題小問題確認是否真的理解。&quot;], [&quot;注意力下降偵測&quot;, &quot;偵測停留過久或反覆跳轉時，詢問是否需要換種解釋。&quot;]], &quot;risks&quot;: [[&quot;摘要取代理解&quot;, &quot;使用者只看 AI 摘要，不再回教材。&quot;], [&quot;類比誤導&quot;, &quot;比喻太簡化而造成錯誤理解。&quot;], [&quot;教材說法不一致&quot;, &quot;AI 解釋與教材、課綱或老師說法不同。&quot;], [&quot;過早提示&quot;, &quot;使用者正在思考，AI 卻打斷。&quot;], [&quot;假理解&quot;, &quot;使用者點了懂了，但後續練習顯示仍不懂。&quot;]], &quot;metrics&quot;: [[&quot;教材停留時間&quot;, &quot;觀察使用者在教材段落中的停留狀況。&quot;], [&quot;重讀重看比例&quot;, &quot;是否反覆閱讀或重看同一段。&quot;], [&quot;摘要使用比例&quot;, &quot;使用者是否頻繁要求 AI 摘要。&quot;], [&quot;概念檢核正確率&quot;, &quot;小檢核題的答對狀況。&quot;], [&quot;解釋切換比例&quot;, &quot;使用者是否頻繁切換不同解釋方式。&quot;], [&quot;理解自評分數&quot;, &quot;使用者對自己理解程度的主觀評估。&quot;]], &quot;success&quot;: [[&quot;能說出核心概念&quot;, &quot;小檢核或反問能答對。&quot;], [&quot;AI 解釋提升理解&quot;, &quot;看過 AI 解釋後，概念檢核正確率提高。&quot;], [&quot;沒有取代原教材&quot;, &quot;使用者仍會回到教材內容。&quot;], [&quot;概念錯誤下降&quot;, &quot;後續練習中的概念型錯誤減少。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>02 理解教材</strong>
+          <em>使用者閱讀、觀看或接觸教材。AI 的重點是協助理解，而不是用摘要取代教材。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>正常吸收</b><span>能閱讀、觀看並理解教材。</span></li>
+<li><b>表面理解</b><span>看得懂字句，但不一定真的理解概念。</span></li>
+<li><b>被動瀏覽</b><span>快速滑過、缺少深度處理。</span></li>
+<li><b>概念混淆</b><span>關鍵概念彼此混在一起。</span></li>
+<li><b>注意力下降</b><span>停留過久、反覆重看、切換視窗或跳出。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>概念摘要</b><span>將一段教材濃縮成重點，但仍保留原文入口。</span></li>
+<li><b>分層解釋</b><span>提供簡單版、標準版、深入版。</span></li>
+<li><b>類比說明</b><span>用生活化比喻協助理解。</span></li>
+<li><b>關鍵概念標記</b><span>標示必懂概念、補充概念與易混淆概念。</span></li>
+<li><b>即時小檢核</b><span>用 1 題小問題確認是否真的理解。</span></li>
+<li><b>注意力下降偵測</b><span>偵測停留過久或反覆跳轉時，詢問是否需要換種解釋。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>摘要取代理解</b><span>使用者只看 AI 摘要，不再回教材。</span></li>
+<li><b>類比誤導</b><span>比喻太簡化而造成錯誤理解。</span></li>
+<li><b>教材說法不一致</b><span>AI 解釋與教材、課綱或老師說法不同。</span></li>
+<li><b>過早提示</b><span>使用者正在思考，AI 卻打斷。</span></li>
+<li><b>假理解</b><span>使用者點了懂了，但後續練習顯示仍不懂。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>教材停留時間</b><span>觀察使用者在教材段落中的停留狀況。</span></li>
+<li><b>重讀重看比例</b><span>是否反覆閱讀或重看同一段。</span></li>
+<li><b>摘要使用比例</b><span>使用者是否頻繁要求 AI 摘要。</span></li>
+<li><b>概念檢核正確率</b><span>小檢核題的答對狀況。</span></li>
+<li><b>解釋切換比例</b><span>使用者是否頻繁切換不同解釋方式。</span></li>
+<li><b>理解自評分數</b><span>使用者對自己理解程度的主觀評估。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>能說出核心概念</b><span>小檢核或反問能答對。</span></li>
+<li><b>AI 解釋提升理解</b><span>看過 AI 解釋後，概念檢核正確率提高。</span></li>
+<li><b>沒有取代原教材</b><span>使用者仍會回到教材內容。</span></li>
+<li><b>概念錯誤下降</b><span>後續練習中的概念型錯誤減少。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="03 遇到卡關" data-id="stuck" data-search="{&quot;id&quot;: &quot;stuck&quot;, &quot;stage&quot;: &quot;03 遇到卡關&quot;, &quot;summary&quot;: &quot;使用者開始停滯、不懂或想放棄。這是 AI Learning Agent 最重要的介入點之一。&quot;, &quot;user_states&quot;: [[&quot;明確卡關&quot;, &quot;知道自己哪裡不懂。&quot;], [&quot;模糊卡關&quot;, &quot;只覺得整個都看不懂。&quot;], [&quot;情緒卡關&quot;, &quot;開始煩躁、焦慮或想放棄。&quot;], [&quot;能力卡關&quot;, &quot;缺少前置知識。&quot;], [&quot;策略卡關&quot;, &quot;不是不會，而是不知道怎麼學。&quot;]], &quot;interventions&quot;: [[&quot;卡關偵測&quot;, &quot;根據停留時間、反覆錯誤、反覆重看判斷可能卡住。&quot;], [&quot;卡關分類&quot;, &quot;協助判斷卡在題意、公式、步驟、概念或策略。&quot;], [&quot;前置知識檢查&quot;, &quot;找出是否缺少前一層概念。&quot;], [&quot;降階提示&quot;, &quot;不直接給答案，只給下一步提示。&quot;], [&quot;情緒安撫&quot;, &quot;用短句降低挫折與放棄感。&quot;], [&quot;學習策略轉換&quot;, &quot;建議改用圖解、例題、反向拆解或比較法。&quot;]], &quot;risks&quot;: [[&quot;誤判卡關&quot;, &quot;使用者只是在思考，AI 卻以為他不會。&quot;], [&quot;直接給答案&quot;, &quot;解決題目，但沒有解決能力。&quot;], [&quot;過度安慰&quot;, &quot;變成情緒陪聊，沒有回到學習。&quot;], [&quot;分類太粗&quot;, &quot;只標記為不懂，卻沒找到真正原因。&quot;], [&quot;提示依賴&quot;, &quot;一遇到難題就等 AI 救援。&quot;]], &quot;metrics&quot;: [[&quot;卡關判斷準確度&quot;, &quot;AI 判斷使用者是否真的卡住的準確程度。&quot;], [&quot;提示接受比例&quot;, &quot;使用者是否願意接受 AI 提示。&quot;], [&quot;提示後重試比例&quot;, &quot;看完提示後是否重新嘗試。&quot;], [&quot;卡關恢復時間&quot;, &quot;從卡住到重新進入學習狀態所需時間。&quot;], [&quot;卡關後放棄率&quot;, &quot;遇到卡關後離開或停止學習的比例。&quot;], [&quot;重複卡關模式&quot;, &quot;同一類問題是否反覆卡住。&quot;]], &quot;success&quot;: [[&quot;卡關後能恢復學習&quot;, &quot;提示後重新嘗試比例提高。&quot;], [&quot;不依賴直接答案&quot;, &quot;使用者能完成中間步驟。&quot;], [&quot;AI 能辨識卡關類型&quot;, &quot;不同卡關原因有不同處理。&quot;], [&quot;放棄率下降&quot;, &quot;遇到難題後離開比例降低。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>03 遇到卡關</strong>
+          <em>使用者開始停滯、不懂或想放棄。這是 AI Learning Agent 最重要的介入點之一。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>明確卡關</b><span>知道自己哪裡不懂。</span></li>
+<li><b>模糊卡關</b><span>只覺得整個都看不懂。</span></li>
+<li><b>情緒卡關</b><span>開始煩躁、焦慮或想放棄。</span></li>
+<li><b>能力卡關</b><span>缺少前置知識。</span></li>
+<li><b>策略卡關</b><span>不是不會，而是不知道怎麼學。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>卡關偵測</b><span>根據停留時間、反覆錯誤、反覆重看判斷可能卡住。</span></li>
+<li><b>卡關分類</b><span>協助判斷卡在題意、公式、步驟、概念或策略。</span></li>
+<li><b>前置知識檢查</b><span>找出是否缺少前一層概念。</span></li>
+<li><b>降階提示</b><span>不直接給答案，只給下一步提示。</span></li>
+<li><b>情緒安撫</b><span>用短句降低挫折與放棄感。</span></li>
+<li><b>學習策略轉換</b><span>建議改用圖解、例題、反向拆解或比較法。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>誤判卡關</b><span>使用者只是在思考，AI 卻以為他不會。</span></li>
+<li><b>直接給答案</b><span>解決題目，但沒有解決能力。</span></li>
+<li><b>過度安慰</b><span>變成情緒陪聊，沒有回到學習。</span></li>
+<li><b>分類太粗</b><span>只標記為不懂，卻沒找到真正原因。</span></li>
+<li><b>提示依賴</b><span>一遇到難題就等 AI 救援。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>卡關判斷準確度</b><span>AI 判斷使用者是否真的卡住的準確程度。</span></li>
+<li><b>提示接受比例</b><span>使用者是否願意接受 AI 提示。</span></li>
+<li><b>提示後重試比例</b><span>看完提示後是否重新嘗試。</span></li>
+<li><b>卡關恢復時間</b><span>從卡住到重新進入學習狀態所需時間。</span></li>
+<li><b>卡關後放棄率</b><span>遇到卡關後離開或停止學習的比例。</span></li>
+<li><b>重複卡關模式</b><span>同一類問題是否反覆卡住。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>卡關後能恢復學習</b><span>提示後重新嘗試比例提高。</span></li>
+<li><b>不依賴直接答案</b><span>使用者能完成中間步驟。</span></li>
+<li><b>AI 能辨識卡關類型</b><span>不同卡關原因有不同處理。</span></li>
+<li><b>放棄率下降</b><span>遇到難題後離開比例降低。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="04 提問" data-id="question" data-search="{&quot;id&quot;: &quot;question&quot;, &quot;stage&quot;: &quot;04 提問&quot;, &quot;summary&quot;: &quot;提問是 AI Agent 與傳統教材最大的差異。AI 不只回答問題，也要幫使用者學會問問題。&quot;, &quot;user_states&quot;: [[&quot;主動探索&quot;, &quot;想深入理解或延伸。&quot;], [&quot;解題求助&quot;, &quot;想完成某題或某步驟。&quot;], [&quot;模糊求助&quot;, &quot;只問這是什麼意思，缺少上下文。&quot;], [&quot;情緒求助&quot;, &quot;問我是不是很爛、我是不是學不會。&quot;], [&quot;懶惰求助&quot;, &quot;想直接拿答案。&quot;], [&quot;高階提問&quot;, &quot;能比較、質疑、延伸與反思。&quot;]], &quot;interventions&quot;: [[&quot;問題重述&quot;, &quot;幫使用者把模糊問題轉成清楚問題。&quot;], [&quot;追問澄清&quot;, &quot;確認卡在定義、公式、例題、步驟或概念。&quot;], [&quot;反問引導&quot;, &quot;不直接回答，先讓使用者說出自己的想法。&quot;], [&quot;問題分級&quot;, &quot;將問題分成基礎、進階、延伸。&quot;], [&quot;提問教練&quot;, &quot;教使用者如何問出更好的問題。&quot;], [&quot;防作弊回答模式&quot;, &quot;對作業與測驗題不直接給完整答案，而給提示與步驟。&quot;]], &quot;risks&quot;: [[&quot;使用者不會問&quot;, &quot;問題太模糊，AI 回答偏掉。&quot;], [&quot;AI 過度回答&quot;, &quot;資訊太多造成認知負擔。&quot;], [&quot;直接餵答案&quot;, &quot;使用者繞過學習過程。&quot;], [&quot;誤解問題&quot;, &quot;AI 回答不是使用者真正想問的。&quot;], [&quot;提問品質停滯&quot;, &quot;使用者永遠只問答案是什麼。&quot;]], &quot;metrics&quot;: [[&quot;提問頻率&quot;, &quot;使用者在學習過程中主動提問的頻率。&quot;], [&quot;提問品質分數&quot;, &quot;問題是否具體、有上下文、能描述卡點。&quot;], [&quot;澄清輪數&quot;, &quot;AI 需要追問幾次才能理解問題。&quot;], [&quot;回答有用度&quot;, &quot;使用者是否認為回答真的幫得上忙。&quot;], [&quot;追問延伸比例&quot;, &quot;使用者是否願意繼續追問與延伸。&quot;], [&quot;答案依賴比例&quot;, &quot;使用者是否過度索取直接答案。&quot;]], &quot;success&quot;: [[&quot;提問變具體&quot;, &quot;問題品質逐步提升。&quot;], [&quot;AI 能正確理解問題&quot;, &quot;澄清輪數下降，回答有用度上升。&quot;], [&quot;願意延伸思考&quot;, &quot;追問與比較型問題增加。&quot;], [&quot;不形成答案依賴&quot;, &quot;提示後能自行完成比例提高。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>04 提問</strong>
+          <em>提問是 AI Agent 與傳統教材最大的差異。AI 不只回答問題，也要幫使用者學會問問題。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>主動探索</b><span>想深入理解或延伸。</span></li>
+<li><b>解題求助</b><span>想完成某題或某步驟。</span></li>
+<li><b>模糊求助</b><span>只問這是什麼意思，缺少上下文。</span></li>
+<li><b>情緒求助</b><span>問我是不是很爛、我是不是學不會。</span></li>
+<li><b>懶惰求助</b><span>想直接拿答案。</span></li>
+<li><b>高階提問</b><span>能比較、質疑、延伸與反思。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>問題重述</b><span>幫使用者把模糊問題轉成清楚問題。</span></li>
+<li><b>追問澄清</b><span>確認卡在定義、公式、例題、步驟或概念。</span></li>
+<li><b>反問引導</b><span>不直接回答，先讓使用者說出自己的想法。</span></li>
+<li><b>問題分級</b><span>將問題分成基礎、進階、延伸。</span></li>
+<li><b>提問教練</b><span>教使用者如何問出更好的問題。</span></li>
+<li><b>防作弊回答模式</b><span>對作業與測驗題不直接給完整答案，而給提示與步驟。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>使用者不會問</b><span>問題太模糊，AI 回答偏掉。</span></li>
+<li><b>AI 過度回答</b><span>資訊太多造成認知負擔。</span></li>
+<li><b>直接餵答案</b><span>使用者繞過學習過程。</span></li>
+<li><b>誤解問題</b><span>AI 回答不是使用者真正想問的。</span></li>
+<li><b>提問品質停滯</b><span>使用者永遠只問答案是什麼。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>提問頻率</b><span>使用者在學習過程中主動提問的頻率。</span></li>
+<li><b>提問品質分數</b><span>問題是否具體、有上下文、能描述卡點。</span></li>
+<li><b>澄清輪數</b><span>AI 需要追問幾次才能理解問題。</span></li>
+<li><b>回答有用度</b><span>使用者是否認為回答真的幫得上忙。</span></li>
+<li><b>追問延伸比例</b><span>使用者是否願意繼續追問與延伸。</span></li>
+<li><b>答案依賴比例</b><span>使用者是否過度索取直接答案。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>提問變具體</b><span>問題品質逐步提升。</span></li>
+<li><b>AI 能正確理解問題</b><span>澄清輪數下降，回答有用度上升。</span></li>
+<li><b>願意延伸思考</b><span>追問與比較型問題增加。</span></li>
+<li><b>不形成答案依賴</b><span>提示後能自行完成比例提高。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="05 AI 解釋" data-id="explain" data-search="{&quot;id&quot;: &quot;explain&quot;, &quot;stage&quot;: &quot;05 AI 解釋&quot;, &quot;summary&quot;: &quot;AI 解釋不是越多越好，而是要可追溯、可理解、可驗證。&quot;, &quot;user_states&quot;: [[&quot;等待理解&quot;, &quot;希望 AI 講清楚。&quot;], [&quot;部分理解&quot;, &quot;某些地方懂，某些地方不懂。&quot;], [&quot;認知超載&quot;, &quot;解釋太多，反而混亂。&quot;], [&quot;失去耐心&quot;, &quot;希望快速得到重點或答案。&quot;], [&quot;產生信任&quot;, &quot;覺得 AI 比教材好懂。&quot;], [&quot;產生懷疑&quot;, &quot;覺得 AI 講得怪怪的。&quot;]], &quot;interventions&quot;: [[&quot;多版本解釋&quot;, &quot;提供簡單版、圖像版、公式版、故事版。&quot;], [&quot;步驟拆解&quot;, &quot;把推理過程拆成小步。&quot;], [&quot;對照教材&quot;, &quot;指出教材哪一段對應 AI 解釋。&quot;], [&quot;例題轉換&quot;, &quot;用相似但更簡單的例子。&quot;], [&quot;概念關聯呈現&quot;, &quot;顯示此概念與其他概念的關係。&quot;], [&quot;理解確認&quot;, &quot;詢問使用者哪一步最不直覺。&quot;]], &quot;risks&quot;: [[&quot;AI 幻覺&quot;, &quot;AI 講錯但看起來很有自信。&quot;], [&quot;與教材衝突&quot;, &quot;造成使用者不知道相信誰。&quot;], [&quot;過度簡化&quot;, &quot;概念被講得太淺。&quot;], [&quot;版本太多造成混亂&quot;, &quot;使用者不知道該看哪一種解釋。&quot;], [&quot;取代老師權威&quot;, &quot;教學現場可能產生管理問題。&quot;]], &quot;metrics&quot;: [[&quot;解釋閱讀完成率&quot;, &quot;使用者是否看完 AI 解釋。&quot;], [&quot;要求重講比例&quot;, &quot;使用者是否常要求換個方式再說一次。&quot;], [&quot;解釋後答題正確率&quot;, &quot;看完 AI 解釋後，相似題答對狀況。&quot;], [&quot;教材來源查看率&quot;, &quot;使用者是否查看 AI 引用的教材來源。&quot;], [&quot;衝突回報率&quot;, &quot;使用者是否回報 AI 與教材不一致。&quot;], [&quot;解釋負擔回饋&quot;, &quot;使用者是否覺得解釋太多、太難或太亂。&quot;]], &quot;success&quot;: [[&quot;解釋後能答對相似題&quot;, &quot;解釋後答題正確率提升。&quot;], [&quot;AI 說法可追溯&quot;, &quot;關鍵解釋能連回教材來源。&quot;], [&quot;能選到適合自己的解釋&quot;, &quot;不同學習者使用不同解釋模式。&quot;], [&quot;幻覺風險可控&quot;, &quot;錯誤回報率低，且能快速修正。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>05 AI 解釋</strong>
+          <em>AI 解釋不是越多越好，而是要可追溯、可理解、可驗證。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>等待理解</b><span>希望 AI 講清楚。</span></li>
+<li><b>部分理解</b><span>某些地方懂，某些地方不懂。</span></li>
+<li><b>認知超載</b><span>解釋太多，反而混亂。</span></li>
+<li><b>失去耐心</b><span>希望快速得到重點或答案。</span></li>
+<li><b>產生信任</b><span>覺得 AI 比教材好懂。</span></li>
+<li><b>產生懷疑</b><span>覺得 AI 講得怪怪的。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>多版本解釋</b><span>提供簡單版、圖像版、公式版、故事版。</span></li>
+<li><b>步驟拆解</b><span>把推理過程拆成小步。</span></li>
+<li><b>對照教材</b><span>指出教材哪一段對應 AI 解釋。</span></li>
+<li><b>例題轉換</b><span>用相似但更簡單的例子。</span></li>
+<li><b>概念關聯呈現</b><span>顯示此概念與其他概念的關係。</span></li>
+<li><b>理解確認</b><span>詢問使用者哪一步最不直覺。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>AI 幻覺</b><span>AI 講錯但看起來很有自信。</span></li>
+<li><b>與教材衝突</b><span>造成使用者不知道相信誰。</span></li>
+<li><b>過度簡化</b><span>概念被講得太淺。</span></li>
+<li><b>版本太多造成混亂</b><span>使用者不知道該看哪一種解釋。</span></li>
+<li><b>取代老師權威</b><span>教學現場可能產生管理問題。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>解釋閱讀完成率</b><span>使用者是否看完 AI 解釋。</span></li>
+<li><b>要求重講比例</b><span>使用者是否常要求換個方式再說一次。</span></li>
+<li><b>解釋後答題正確率</b><span>看完 AI 解釋後，相似題答對狀況。</span></li>
+<li><b>教材來源查看率</b><span>使用者是否查看 AI 引用的教材來源。</span></li>
+<li><b>衝突回報率</b><span>使用者是否回報 AI 與教材不一致。</span></li>
+<li><b>解釋負擔回饋</b><span>使用者是否覺得解釋太多、太難或太亂。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>解釋後能答對相似題</b><span>解釋後答題正確率提升。</span></li>
+<li><b>AI 說法可追溯</b><span>關鍵解釋能連回教材來源。</span></li>
+<li><b>能選到適合自己的解釋</b><span>不同學習者使用不同解釋模式。</span></li>
+<li><b>幻覺風險可控</b><span>錯誤回報率低，且能快速修正。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="06 練習" data-id="practice" data-search="{&quot;id&quot;: &quot;practice&quot;, &quot;stage&quot;: &quot;06 練習&quot;, &quot;summary&quot;: &quot;練習不是刷題數，而是讓使用者在適當難度中穩定建立能力。&quot;, &quot;user_states&quot;: [[&quot;穩定練習&quot;, &quot;願意持續做題。&quot;], [&quot;嘗試驗證&quot;, &quot;想確認自己是不是真的會。&quot;], [&quot;機械刷題&quot;, &quot;只是重複做，不一定理解。&quot;], [&quot;過度自信&quot;, &quot;以為自己會，但表現不穩。&quot;], [&quot;害怕犯錯&quot;, &quot;不敢作答或一直求提示。&quot;]], &quot;interventions&quot;: [[&quot;題目難度調整&quot;, &quot;根據答題表現調整下一題難度。&quot;], [&quot;練習節奏控制&quot;, &quot;避免太簡單無聊、太難挫折。&quot;], [&quot;即時提示&quot;, &quot;答題過程中提供最小必要提示。&quot;], [&quot;錯誤預測&quot;, &quot;根據歷史錯誤提醒可能陷阱。&quot;], [&quot;題型變化&quot;, &quot;用不同表述測試是否真正理解。&quot;], [&quot;間隔複習&quot;, &quot;根據遺忘狀況安排複習。&quot;]], &quot;risks&quot;: [[&quot;題目太簡單&quot;, &quot;有成就感但沒有進步。&quot;], [&quot;題目太難&quot;, &quot;挫折離開。&quot;], [&quot;提示太多&quot;, &quot;使用者沒有真正練習。&quot;], [&quot;只優化答對率&quot;, &quot;系統為了好看而降低難度。&quot;], [&quot;缺乏遷移能力&quot;, &quot;只會做相似題，不會處理變形題。&quot;]], &quot;metrics&quot;: [[&quot;練習完成率&quot;, &quot;使用者是否完成安排的練習。&quot;], [&quot;不同難度答對率&quot;, &quot;簡單、適中、困難題的答對狀況。&quot;], [&quot;提示使用比例&quot;, &quot;作答時使用提示的比例。&quot;], [&quot;每題作答時間&quot;, &quot;每題從開始到提交答案的時間。&quot;], [&quot;答錯後重試比例&quot;, &quot;答錯後是否願意再試一次。&quot;], [&quot;變形題答對率&quot;, &quot;換題型、換表述後是否仍能答對。&quot;], [&quot;掌握穩定度&quot;, &quot;多次練習後是否能穩定答對。&quot;]], &quot;success&quot;: [[&quot;願意持續練習&quot;, &quot;練習完成率提升。&quot;], [&quot;難度落在成長區&quot;, &quot;答對率不過高也不過低，例如約 70～85%。&quot;], [&quot;提示依賴下降&quot;, &quot;同類題提示使用率逐步下降。&quot;], [&quot;能處理變形題&quot;, &quot;變形題答對率提升。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>06 練習</strong>
+          <em>練習不是刷題數，而是讓使用者在適當難度中穩定建立能力。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>穩定練習</b><span>願意持續做題。</span></li>
+<li><b>嘗試驗證</b><span>想確認自己是不是真的會。</span></li>
+<li><b>機械刷題</b><span>只是重複做，不一定理解。</span></li>
+<li><b>過度自信</b><span>以為自己會，但表現不穩。</span></li>
+<li><b>害怕犯錯</b><span>不敢作答或一直求提示。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>題目難度調整</b><span>根據答題表現調整下一題難度。</span></li>
+<li><b>練習節奏控制</b><span>避免太簡單無聊、太難挫折。</span></li>
+<li><b>即時提示</b><span>答題過程中提供最小必要提示。</span></li>
+<li><b>錯誤預測</b><span>根據歷史錯誤提醒可能陷阱。</span></li>
+<li><b>題型變化</b><span>用不同表述測試是否真正理解。</span></li>
+<li><b>間隔複習</b><span>根據遺忘狀況安排複習。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>題目太簡單</b><span>有成就感但沒有進步。</span></li>
+<li><b>題目太難</b><span>挫折離開。</span></li>
+<li><b>提示太多</b><span>使用者沒有真正練習。</span></li>
+<li><b>只優化答對率</b><span>系統為了好看而降低難度。</span></li>
+<li><b>缺乏遷移能力</b><span>只會做相似題，不會處理變形題。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>練習完成率</b><span>使用者是否完成安排的練習。</span></li>
+<li><b>不同難度答對率</b><span>簡單、適中、困難題的答對狀況。</span></li>
+<li><b>提示使用比例</b><span>作答時使用提示的比例。</span></li>
+<li><b>每題作答時間</b><span>每題從開始到提交答案的時間。</span></li>
+<li><b>答錯後重試比例</b><span>答錯後是否願意再試一次。</span></li>
+<li><b>變形題答對率</b><span>換題型、換表述後是否仍能答對。</span></li>
+<li><b>掌握穩定度</b><span>多次練習後是否能穩定答對。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>願意持續練習</b><span>練習完成率提升。</span></li>
+<li><b>難度落在成長區</b><span>答對率不過高也不過低，例如約 70～85%。</span></li>
+<li><b>提示依賴下降</b><span>同類題提示使用率逐步下降。</span></li>
+<li><b>能處理變形題</b><span>變形題答對率提升。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="07 答錯" data-id="wrong" data-search="{&quot;id&quot;: &quot;wrong&quot;, &quot;stage&quot;: &quot;07 答錯&quot;, &quot;summary&quot;: &quot;答錯不只是扣分，而是 AI 用來診斷使用者理解狀態的高價值訊號。&quot;, &quot;user_states&quot;: [[&quot;普通錯誤&quot;, &quot;算錯、看錯、選錯。&quot;], [&quot;概念錯誤&quot;, &quot;根本理解錯。&quot;], [&quot;策略錯誤&quot;, &quot;解題方法錯。&quot;], [&quot;粗心錯誤&quot;, &quot;其實會，但不穩。&quot;], [&quot;情緒受挫&quot;, &quot;覺得自己很笨。&quot;], [&quot;防衛反應&quot;, &quot;不想看解析、不承認錯。&quot;]], &quot;interventions&quot;: [[&quot;錯誤分類&quot;, &quot;判斷是概念、程序、粗心、閱讀理解或策略問題。&quot;], [&quot;最小回饋&quot;, &quot;先不給完整答案，只指出錯誤方向。&quot;], [&quot;錯誤原因診斷&quot;, &quot;詢問使用者當時怎麼想。&quot;], [&quot;同類錯誤追蹤&quot;, &quot;建立個人錯誤模式。&quot;], [&quot;情緒緩衝&quot;, &quot;降低挫折感，但不過度安慰。&quot;], [&quot;重新練習安排&quot;, &quot;針對錯誤類型給相似題或前置題。&quot;]], &quot;risks&quot;: [[&quot;錯誤分類錯誤&quot;, &quot;把概念錯誤當成粗心。&quot;], [&quot;跳過解析&quot;, &quot;答錯後直接下一題。&quot;], [&quot;情緒傷害&quot;, &quot;AI 回饋讓使用者更挫折。&quot;], [&quot;過度診斷&quot;, &quot;每錯一題都長篇分析，使用者疲乏。&quot;], [&quot;錯題本失控&quot;, &quot;錯題太多但沒有優先級。&quot;]], &quot;metrics&quot;: [[&quot;錯誤類型分布&quot;, &quot;概念、程序、粗心、閱讀理解、策略等錯誤比例。&quot;], [&quot;解析開啟率&quot;, &quot;答錯後是否願意看解析。&quot;], [&quot;錯誤反思比例&quot;, &quot;是否願意回答自己剛剛怎麼想。&quot;], [&quot;同類錯誤重複率&quot;, &quot;同一類錯誤是否反覆出現。&quot;], [&quot;答錯後重試比例&quot;, &quot;答錯後是否再次嘗試。&quot;], [&quot;答錯後情緒下降訊號&quot;, &quot;答錯後是否出現離開、停滯、負面語句。&quot;]], &quot;success&quot;: [[&quot;錯誤能被分類&quot;, &quot;系統能辨識主要錯誤型態。&quot;], [&quot;願意看回饋&quot;, &quot;解析開啟率與重試比例提升。&quot;], [&quot;同類錯誤下降&quot;, &quot;同類錯誤重複率下降。&quot;], [&quot;答錯不導致放棄&quot;, &quot;答錯後留存率提升。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>07 答錯</strong>
+          <em>答錯不只是扣分，而是 AI 用來診斷使用者理解狀態的高價值訊號。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>普通錯誤</b><span>算錯、看錯、選錯。</span></li>
+<li><b>概念錯誤</b><span>根本理解錯。</span></li>
+<li><b>策略錯誤</b><span>解題方法錯。</span></li>
+<li><b>粗心錯誤</b><span>其實會，但不穩。</span></li>
+<li><b>情緒受挫</b><span>覺得自己很笨。</span></li>
+<li><b>防衛反應</b><span>不想看解析、不承認錯。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>錯誤分類</b><span>判斷是概念、程序、粗心、閱讀理解或策略問題。</span></li>
+<li><b>最小回饋</b><span>先不給完整答案，只指出錯誤方向。</span></li>
+<li><b>錯誤原因診斷</b><span>詢問使用者當時怎麼想。</span></li>
+<li><b>同類錯誤追蹤</b><span>建立個人錯誤模式。</span></li>
+<li><b>情緒緩衝</b><span>降低挫折感，但不過度安慰。</span></li>
+<li><b>重新練習安排</b><span>針對錯誤類型給相似題或前置題。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>錯誤分類錯誤</b><span>把概念錯誤當成粗心。</span></li>
+<li><b>跳過解析</b><span>答錯後直接下一題。</span></li>
+<li><b>情緒傷害</b><span>AI 回饋讓使用者更挫折。</span></li>
+<li><b>過度診斷</b><span>每錯一題都長篇分析，使用者疲乏。</span></li>
+<li><b>錯題本失控</b><span>錯題太多但沒有優先級。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>錯誤類型分布</b><span>概念、程序、粗心、閱讀理解、策略等錯誤比例。</span></li>
+<li><b>解析開啟率</b><span>答錯後是否願意看解析。</span></li>
+<li><b>錯誤反思比例</b><span>是否願意回答自己剛剛怎麼想。</span></li>
+<li><b>同類錯誤重複率</b><span>同一類錯誤是否反覆出現。</span></li>
+<li><b>答錯後重試比例</b><span>答錯後是否再次嘗試。</span></li>
+<li><b>答錯後情緒下降訊號</b><span>答錯後是否出現離開、停滯、負面語句。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>錯誤能被分類</b><span>系統能辨識主要錯誤型態。</span></li>
+<li><b>願意看回饋</b><span>解析開啟率與重試比例提升。</span></li>
+<li><b>同類錯誤下降</b><span>同類錯誤重複率下降。</span></li>
+<li><b>答錯不導致放棄</b><span>答錯後留存率提升。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="08 AI 回饋" data-id="feedback" data-search="{&quot;id&quot;: &quot;feedback&quot;, &quot;stage&quot;: &quot;08 AI 回饋&quot;, &quot;summary&quot;: &quot;好的回饋不是稱讚或責備，而是指出下一步該怎麼修正。&quot;, &quot;user_states&quot;: [[&quot;等待答案&quot;, &quot;想知道自己錯在哪。&quot;], [&quot;需要鼓勵&quot;, &quot;容易被錯誤打擊。&quot;], [&quot;需要修正&quot;, &quot;準備好理解錯誤原因。&quot;], [&quot;需要挑戰&quot;, &quot;已經懂了，需要更難題。&quot;], [&quot;不耐煩&quot;, &quot;不想聽太多，只想繼續。&quot;]], &quot;interventions&quot;: [[&quot;分層回饋&quot;, &quot;先給一句核心回饋，再讓使用者選擇是否展開。&quot;], [&quot;錯誤定位&quot;, &quot;指出錯在第幾步、哪個概念。&quot;], [&quot;具體正向回饋&quot;, &quot;不是只說你很棒，而是指出哪裡做對、哪裡需要改。&quot;], [&quot;下一步建議&quot;, &quot;告訴使用者現在該重做、看概念還是換題。&quot;], [&quot;成長紀錄&quot;, &quot;呈現某類錯誤正在減少。&quot;], [&quot;反思提問&quot;, &quot;問使用者這題和上一題差在哪裡。&quot;]], &quot;risks&quot;: [[&quot;回饋空泛&quot;, &quot;只有稱讚或責備，沒有具體幫助。&quot;], [&quot;回饋太長&quot;, &quot;使用者不看。&quot;], [&quot;時機錯誤&quot;, &quot;使用者只想繼續，AI 卻長篇教學。&quot;], [&quot;語氣不適配&quot;, &quot;對焦慮者太嚴厲，對懶散者太溫和。&quot;], [&quot;過度個人化&quot;, &quot;讓使用者覺得被監控。&quot;]], &quot;metrics&quot;: [[&quot;回饋閱讀率&quot;, &quot;使用者是否閱讀 AI 回饋。&quot;], [&quot;詳細回饋展開率&quot;, &quot;使用者是否願意展開更多說明。&quot;], [&quot;下一步採納率&quot;, &quot;是否照 AI 建議進行下一步。&quot;], [&quot;回饋後情緒變化&quot;, &quot;回饋後情緒是否改善或惡化。&quot;], [&quot;修正成功率&quot;, &quot;看完回饋後是否能修正錯誤。&quot;], [&quot;回饋跳過率&quot;, &quot;使用者是否大量跳過回饋。&quot;]], &quot;success&quot;: [[&quot;回饋被看見&quot;, &quot;回饋閱讀率不低。&quot;], [&quot;回饋能導向行動&quot;, &quot;下一步採納率提升。&quot;], [&quot;回饋後能修正&quot;, &quot;修正成功率提升。&quot;], [&quot;使用者不反感&quot;, &quot;跳過率與負面回饋低。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>08 AI 回饋</strong>
+          <em>好的回饋不是稱讚或責備，而是指出下一步該怎麼修正。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>等待答案</b><span>想知道自己錯在哪。</span></li>
+<li><b>需要鼓勵</b><span>容易被錯誤打擊。</span></li>
+<li><b>需要修正</b><span>準備好理解錯誤原因。</span></li>
+<li><b>需要挑戰</b><span>已經懂了，需要更難題。</span></li>
+<li><b>不耐煩</b><span>不想聽太多，只想繼續。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>分層回饋</b><span>先給一句核心回饋，再讓使用者選擇是否展開。</span></li>
+<li><b>錯誤定位</b><span>指出錯在第幾步、哪個概念。</span></li>
+<li><b>具體正向回饋</b><span>不是只說你很棒，而是指出哪裡做對、哪裡需要改。</span></li>
+<li><b>下一步建議</b><span>告訴使用者現在該重做、看概念還是換題。</span></li>
+<li><b>成長紀錄</b><span>呈現某類錯誤正在減少。</span></li>
+<li><b>反思提問</b><span>問使用者這題和上一題差在哪裡。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>回饋空泛</b><span>只有稱讚或責備，沒有具體幫助。</span></li>
+<li><b>回饋太長</b><span>使用者不看。</span></li>
+<li><b>時機錯誤</b><span>使用者只想繼續，AI 卻長篇教學。</span></li>
+<li><b>語氣不適配</b><span>對焦慮者太嚴厲，對懶散者太溫和。</span></li>
+<li><b>過度個人化</b><span>讓使用者覺得被監控。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>回饋閱讀率</b><span>使用者是否閱讀 AI 回饋。</span></li>
+<li><b>詳細回饋展開率</b><span>使用者是否願意展開更多說明。</span></li>
+<li><b>下一步採納率</b><span>是否照 AI 建議進行下一步。</span></li>
+<li><b>回饋後情緒變化</b><span>回饋後情緒是否改善或惡化。</span></li>
+<li><b>修正成功率</b><span>看完回饋後是否能修正錯誤。</span></li>
+<li><b>回饋跳過率</b><span>使用者是否大量跳過回饋。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>回饋被看見</b><span>回饋閱讀率不低。</span></li>
+<li><b>回饋能導向行動</b><span>下一步採納率提升。</span></li>
+<li><b>回饋後能修正</b><span>修正成功率提升。</span></li>
+<li><b>使用者不反感</b><span>跳過率與負面回饋低。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="09 重新嘗試" data-id="retry" data-search="{&quot;id&quot;: &quot;retry&quot;, &quot;stage&quot;: &quot;09 重新嘗試&quot;, &quot;summary&quot;: &quot;重新嘗試的重點是逐步撤除提示，讓使用者從被協助走向自己完成。&quot;, &quot;user_states&quot;: [[&quot;願意再試&quot;, &quot;有信心修正。&quot;], [&quot;半信半疑&quot;, &quot;不確定自己是否真的懂了。&quot;], [&quot;怕再錯&quot;, &quot;有心理負擔。&quot;], [&quot;開始掌握&quot;, &quot;已經抓到方法。&quot;], [&quot;依賴 AI&quot;, &quot;沒有 AI 提示就不敢做。&quot;]], &quot;interventions&quot;: [[&quot;降低重試門檻&quot;, &quot;提供較簡單但同概念的題目。&quot;], [&quot;逐步撤除提示&quot;, &quot;第一次提示多，第二次提示少。&quot;], [&quot;對比題&quot;, &quot;用相似題測試是否真的修正。&quot;], [&quot;成功強化&quot;, &quot;指出這次成功是因為哪個步驟改善。&quot;], [&quot;自我說明&quot;, &quot;要求使用者說出自己的解法。&quot;], [&quot;錯誤復盤&quot;, &quot;對比第一次怎麼想與現在怎麼想。&quot;]], &quot;risks&quot;: [[&quot;重試太難&quot;, &quot;再次失敗，挫折加倍。&quot;], [&quot;重試太簡單&quot;, &quot;看似成功，但沒有真正掌握。&quot;], [&quot;提示撤太快&quot;, &quot;使用者無法接上。&quot;], [&quot;提示撤太慢&quot;, &quot;形成依賴。&quot;], [&quot;只追求答對&quot;, &quot;沒有確認理解是否改變。&quot;]], &quot;metrics&quot;: [[&quot;重試意願比例&quot;, &quot;答錯或卡關後是否願意再次嘗試。&quot;], [&quot;重試成功率&quot;, &quot;重新嘗試後是否能完成。&quot;], [&quot;提示減量程度&quot;, &quot;同類題中提示使用是否逐步減少。&quot;], [&quot;自我說明比例&quot;, &quot;是否能說出自己的解法與理由。&quot;], [&quot;相似變形題答對率&quot;, &quot;相似但不同表述的題目是否答對。&quot;], [&quot;信心變化&quot;, &quot;重試前後的自我信心變化。&quot;]], &quot;success&quot;: [[&quot;願意再試&quot;, &quot;重試意願比例提高。&quot;], [&quot;重試後真的掌握&quot;, &quot;相似題與變形題都能答對。&quot;], [&quot;提示依賴下降&quot;, &quot;同類題提示使用逐步下降。&quot;], [&quot;信心合理上升&quot;, &quot;信心提升伴隨正確率提升，而不是盲目自信。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>09 重新嘗試</strong>
+          <em>重新嘗試的重點是逐步撤除提示，讓使用者從被協助走向自己完成。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>願意再試</b><span>有信心修正。</span></li>
+<li><b>半信半疑</b><span>不確定自己是否真的懂了。</span></li>
+<li><b>怕再錯</b><span>有心理負擔。</span></li>
+<li><b>開始掌握</b><span>已經抓到方法。</span></li>
+<li><b>依賴 AI</b><span>沒有 AI 提示就不敢做。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>降低重試門檻</b><span>提供較簡單但同概念的題目。</span></li>
+<li><b>逐步撤除提示</b><span>第一次提示多，第二次提示少。</span></li>
+<li><b>對比題</b><span>用相似題測試是否真的修正。</span></li>
+<li><b>成功強化</b><span>指出這次成功是因為哪個步驟改善。</span></li>
+<li><b>自我說明</b><span>要求使用者說出自己的解法。</span></li>
+<li><b>錯誤復盤</b><span>對比第一次怎麼想與現在怎麼想。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>重試太難</b><span>再次失敗，挫折加倍。</span></li>
+<li><b>重試太簡單</b><span>看似成功，但沒有真正掌握。</span></li>
+<li><b>提示撤太快</b><span>使用者無法接上。</span></li>
+<li><b>提示撤太慢</b><span>形成依賴。</span></li>
+<li><b>只追求答對</b><span>沒有確認理解是否改變。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>重試意願比例</b><span>答錯或卡關後是否願意再次嘗試。</span></li>
+<li><b>重試成功率</b><span>重新嘗試後是否能完成。</span></li>
+<li><b>提示減量程度</b><span>同類題中提示使用是否逐步減少。</span></li>
+<li><b>自我說明比例</b><span>是否能說出自己的解法與理由。</span></li>
+<li><b>相似變形題答對率</b><span>相似但不同表述的題目是否答對。</span></li>
+<li><b>信心變化</b><span>重試前後的自我信心變化。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>願意再試</b><span>重試意願比例提高。</span></li>
+<li><b>重試後真的掌握</b><span>相似題與變形題都能答對。</span></li>
+<li><b>提示依賴下降</b><span>同類題提示使用逐步下降。</span></li>
+<li><b>信心合理上升</b><span>信心提升伴隨正確率提升，而不是盲目自信。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="10 完成" data-id="complete" data-search="{&quot;id&quot;: &quot;complete&quot;, &quot;stage&quot;: &quot;10 完成&quot;, &quot;summary&quot;: &quot;完成不是結束，而是下一輪學習的起點。AI 應該把成果、弱點與下一步收斂起來。&quot;, &quot;user_states&quot;: [[&quot;任務完成&quot;, &quot;完成今日學習。&quot;], [&quot;表面完成&quot;, &quot;做完了，但不一定學會。&quot;], [&quot;成就感&quot;, &quot;覺得自己有進步。&quot;], [&quot;疲勞&quot;, &quot;已經不想再學。&quot;], [&quot;需要收斂&quot;, &quot;需要知道今天學到什麼。&quot;], [&quot;需要下一步&quot;, &quot;不知道明天該做什麼。&quot;]], &quot;interventions&quot;: [[&quot;學習總結&quot;, &quot;整理今天學了什麼、完成什麼。&quot;], [&quot;錯誤模式摘要&quot;, &quot;指出今天最常錯在哪。&quot;], [&quot;能力變化呈現&quot;, &quot;呈現哪些能力提升、哪些仍不穩。&quot;], [&quot;下一步建議&quot;, &quot;建議明天要複習、練習或進階。&quot;], [&quot;情緒收尾&quot;, &quot;讓使用者帶著完成感離開。&quot;], [&quot;長期記憶更新&quot;, &quot;更新個人學習模型。&quot;]], &quot;risks&quot;: [[&quot;完成假象&quot;, &quot;做完任務，但沒有掌握。&quot;], [&quot;總結空泛&quot;, &quot;只說你今天很努力。&quot;], [&quot;下一步不準&quot;, &quot;推薦內容與實際弱點不符。&quot;], [&quot;成就感設計錯誤&quot;, &quot;只鼓勵完成量，不鼓勵理解品質。&quot;], [&quot;資料累積但不用&quot;, &quot;收集行為資料，卻沒有進入下一輪決策。&quot;]], &quot;metrics&quot;: [[&quot;學習任務完成率&quot;, &quot;本次安排的學習任務是否完成。&quot;], [&quot;概念掌握分數&quot;, &quot;本次學習後對核心概念的掌握程度。&quot;], [&quot;總結查看率&quot;, &quot;使用者是否查看學習總結。&quot;], [&quot;下次回訪率&quot;, &quot;使用者是否回來進行下一次學習。&quot;], [&quot;弱點延續追蹤率&quot;, &quot;本次弱點是否被帶入下一輪計畫。&quot;], [&quot;課後收穫感&quot;, &quot;使用者對本次學習收穫的主觀評估。&quot;]], &quot;success&quot;: [[&quot;完成有學習證據&quot;, &quot;不只完成，而是概念掌握分數提升。&quot;], [&quot;知道自己進步在哪&quot;, &quot;總結能具體呈現能力變化。&quot;], [&quot;下一輪可銜接&quot;, &quot;系統能根據本次表現安排下次。&quot;], [&quot;願意回來&quot;, &quot;下次回訪率提升。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>10 完成</strong>
+          <em>完成不是結束，而是下一輪學習的起點。AI 應該把成果、弱點與下一步收斂起來。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>任務完成</b><span>完成今日學習。</span></li>
+<li><b>表面完成</b><span>做完了，但不一定學會。</span></li>
+<li><b>成就感</b><span>覺得自己有進步。</span></li>
+<li><b>疲勞</b><span>已經不想再學。</span></li>
+<li><b>需要收斂</b><span>需要知道今天學到什麼。</span></li>
+<li><b>需要下一步</b><span>不知道明天該做什麼。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>學習總結</b><span>整理今天學了什麼、完成什麼。</span></li>
+<li><b>錯誤模式摘要</b><span>指出今天最常錯在哪。</span></li>
+<li><b>能力變化呈現</b><span>呈現哪些能力提升、哪些仍不穩。</span></li>
+<li><b>下一步建議</b><span>建議明天要複習、練習或進階。</span></li>
+<li><b>情緒收尾</b><span>讓使用者帶著完成感離開。</span></li>
+<li><b>長期記憶更新</b><span>更新個人學習模型。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>完成假象</b><span>做完任務，但沒有掌握。</span></li>
+<li><b>總結空泛</b><span>只說你今天很努力。</span></li>
+<li><b>下一步不準</b><span>推薦內容與實際弱點不符。</span></li>
+<li><b>成就感設計錯誤</b><span>只鼓勵完成量，不鼓勵理解品質。</span></li>
+<li><b>資料累積但不用</b><span>收集行為資料，卻沒有進入下一輪決策。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>學習任務完成率</b><span>本次安排的學習任務是否完成。</span></li>
+<li><b>概念掌握分數</b><span>本次學習後對核心概念的掌握程度。</span></li>
+<li><b>總結查看率</b><span>使用者是否查看學習總結。</span></li>
+<li><b>下次回訪率</b><span>使用者是否回來進行下一次學習。</span></li>
+<li><b>弱點延續追蹤率</b><span>本次弱點是否被帶入下一輪計畫。</span></li>
+<li><b>課後收穫感</b><span>使用者對本次學習收穫的主觀評估。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>完成有學習證據</b><span>不只完成，而是概念掌握分數提升。</span></li>
+<li><b>知道自己進步在哪</b><span>總結能具體呈現能力變化。</span></li>
+<li><b>下一輪可銜接</b><span>系統能根據本次表現安排下次。</span></li>
+<li><b>願意回來</b><span>下次回訪率提升。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+    <article class="stage-card" data-stage="11 跨 Session 學習進化" data-id="evolution" data-search="{&quot;id&quot;: &quot;evolution&quot;, &quot;stage&quot;: &quot;11 跨 Session 學習進化&quot;, &quot;summary&quot;: &quot;單次學習只是互動，跨多次學習才會形成進化。這是學習進化分析的核心。&quot;, &quot;user_states&quot;: [[&quot;穩定成長&quot;, &quot;能持續改善。&quot;], [&quot;短期衝刺&quot;, &quot;考前使用，考後消失。&quot;], [&quot;反覆卡關&quot;, &quot;同一類錯誤一直出現。&quot;], [&quot;學習風格形成&quot;, &quot;逐漸知道自己適合怎麼學。&quot;], [&quot;AI 協作成熟&quot;, &quot;開始善用 AI，而不是依賴 AI。&quot;], [&quot;學習自主性提升&quot;, &quot;開始能自己規劃、提問、檢查。&quot;]], &quot;interventions&quot;: [[&quot;個人學習模型&quot;, &quot;建立概念掌握、錯誤模式、情緒反應、提問習慣。&quot;], [&quot;長期弱點追蹤&quot;, &quot;找出反覆出現的弱點。&quot;], [&quot;學習策略推薦&quot;, &quot;根據使用者特性建議學習方法。&quot;], [&quot;自主性培養&quot;, &quot;逐步讓使用者自己設定目標、反思、檢查。&quot;], [&quot;AI 介入降頻&quot;, &quot;當能力提升，AI 從主動教練轉為旁觀支援。&quot;], [&quot;學習進化報告&quot;, &quot;呈現使用者不只是分數變高，而是學習方式改變。&quot;]], &quot;risks&quot;: [[&quot;過度依賴 AI&quot;, &quot;沒有 AI 就不會學。&quot;], [&quot;個人模型錯誤&quot;, &quot;AI 對使用者貼錯標籤。&quot;], [&quot;隱私疑慮&quot;, &quot;長期記錄學習行為可能讓人不安。&quot;], [&quot;指標錯置&quot;, &quot;只追求使用時間，不追求學習品質。&quot;], [&quot;黑箱推薦&quot;, &quot;使用者不知道為什麼被推薦某內容。&quot;], [&quot;學習窄化&quot;, &quot;AI 只推弱點補強，忽略探索與興趣。&quot;]], &quot;metrics&quot;: [[&quot;長期能力成長&quot;, &quot;跨多次學習後，能力是否穩定提升。&quot;], [&quot;同類錯誤下降率&quot;, &quot;同一類錯誤是否逐步減少。&quot;], [&quot;自主學習能力分數&quot;, &quot;是否更能自己設定目標、反思與修正。&quot;], [&quot;提問品質成長&quot;, &quot;提問是否從要答案進化到描述問題、比較與反思。&quot;], [&quot;AI 依賴程度&quot;, &quot;使用者是否過度依賴 AI 提示與答案。&quot;], [&quot;穩定回訪頻率&quot;, &quot;是否形成穩定學習節奏。&quot;], [&quot;學習策略多樣性&quot;, &quot;是否嘗試不同學習方法。&quot;], [&quot;知識遷移表現&quot;, &quot;是否能把學到的概念用在新情境。&quot;]], &quot;success&quot;: [[&quot;不只是分數變高&quot;, &quot;錯誤模式、提問能力、學習策略都有改善。&quot;], [&quot;AI 介入更準且更少&quot;, &quot;越來越少打擾，但越來越能在關鍵時刻介入。&quot;], [&quot;自主性提升&quot;, &quot;能自己設定目標、反思錯誤、選擇策略。&quot;], [&quot;學習方式改變&quot;, &quot;從被動接收變成主動互動、反思、修正。&quot;]]}">
+      <button class="stage-head" aria-expanded="false">
+        <span>
+          <span class="stage-kicker">Learning Interaction Map</span>
+          <strong>11 跨 Session 學習進化</strong>
+          <em>單次學習只是互動，跨多次學習才會形成進化。這是學習進化分析的核心。</em>
+        </span>
+        <span class="chev">展開</span>
+      </button>
+      <div class="stage-body">
+        <div class="grid-five">
+          <section>
+            <h3>使用者狀態</h3>
+            <ul><li><b>穩定成長</b><span>能持續改善。</span></li>
+<li><b>短期衝刺</b><span>考前使用，考後消失。</span></li>
+<li><b>反覆卡關</b><span>同一類錯誤一直出現。</span></li>
+<li><b>學習風格形成</b><span>逐漸知道自己適合怎麼學。</span></li>
+<li><b>AI 協作成熟</b><span>開始善用 AI，而不是依賴 AI。</span></li>
+<li><b>學習自主性提升</b><span>開始能自己規劃、提問、檢查。</span></li></ul>
+          </section>
+          <section>
+            <h3>AI 可介入方式</h3>
+            <ul><li><b>個人學習模型</b><span>建立概念掌握、錯誤模式、情緒反應、提問習慣。</span></li>
+<li><b>長期弱點追蹤</b><span>找出反覆出現的弱點。</span></li>
+<li><b>學習策略推薦</b><span>根據使用者特性建議學習方法。</span></li>
+<li><b>自主性培養</b><span>逐步讓使用者自己設定目標、反思、檢查。</span></li>
+<li><b>AI 介入降頻</b><span>當能力提升，AI 從主動教練轉為旁觀支援。</span></li>
+<li><b>學習進化報告</b><span>呈現使用者不只是分數變高，而是學習方式改變。</span></li></ul>
+          </section>
+          <section>
+            <h3>風險</h3>
+            <ul><li><b>過度依賴 AI</b><span>沒有 AI 就不會學。</span></li>
+<li><b>個人模型錯誤</b><span>AI 對使用者貼錯標籤。</span></li>
+<li><b>隱私疑慮</b><span>長期記錄學習行為可能讓人不安。</span></li>
+<li><b>指標錯置</b><span>只追求使用時間，不追求學習品質。</span></li>
+<li><b>黑箱推薦</b><span>使用者不知道為什麼被推薦某內容。</span></li>
+<li><b>學習窄化</b><span>AI 只推弱點補強，忽略探索與興趣。</span></li></ul>
+          </section>
+          <section>
+            <h3>指標</h3>
+            <ul><li><b>長期能力成長</b><span>跨多次學習後，能力是否穩定提升。</span></li>
+<li><b>同類錯誤下降率</b><span>同一類錯誤是否逐步減少。</span></li>
+<li><b>自主學習能力分數</b><span>是否更能自己設定目標、反思與修正。</span></li>
+<li><b>提問品質成長</b><span>提問是否從要答案進化到描述問題、比較與反思。</span></li>
+<li><b>AI 依賴程度</b><span>使用者是否過度依賴 AI 提示與答案。</span></li>
+<li><b>穩定回訪頻率</b><span>是否形成穩定學習節奏。</span></li>
+<li><b>學習策略多樣性</b><span>是否嘗試不同學習方法。</span></li>
+<li><b>知識遷移表現</b><span>是否能把學到的概念用在新情境。</span></li></ul>
+          </section>
+          <section>
+            <h3>成功條件</h3>
+            <ul><li><b>不只是分數變高</b><span>錯誤模式、提問能力、學習策略都有改善。</span></li>
+<li><b>AI 介入更準且更少</b><span>越來越少打擾，但越來越能在關鍵時刻介入。</span></li>
+<li><b>自主性提升</b><span>能自己設定目標、反思錯誤、選擇策略。</span></li>
+<li><b>學習方式改變</b><span>從被動接收變成主動互動、反思、修正。</span></li></ul>
+          </section>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>中文化指標字典</h2>
+      <p class="section-lead">
+        以下指標沒有採用英文直譯，而是改成較適合報告閱讀與產品討論的中文名稱。
+      </p>
+      <div class="metric-dict">
+        <div class="metric-card"><b>進入學習所需時間</b><span>從開啟學習到第一次真正學習行為的時間。</span></div><div class="metric-card"><b>目標設定完成率</b><span>有多少使用者願意完成本次學習目標設定。</span></div><div class="metric-card"><b>開始流程完成率</b><span>使用者是否順利通過開場流程。</span></div><div class="metric-card"><b>學習模式選擇分布</b><span>使用者偏好哪一種學習模式。</span></div><div class="metric-card"><b>開場早期流失率</b><span>開始後 1～3 分鐘內離開的比例。</span></div><div class="metric-card"><b>教材停留時間</b><span>觀察使用者在教材段落中的停留狀況。</span></div><div class="metric-card"><b>重讀重看比例</b><span>是否反覆閱讀或重看同一段。</span></div><div class="metric-card"><b>摘要使用比例</b><span>使用者是否頻繁要求 AI 摘要。</span></div><div class="metric-card"><b>概念檢核正確率</b><span>小檢核題的答對狀況。</span></div><div class="metric-card"><b>解釋切換比例</b><span>使用者是否頻繁切換不同解釋方式。</span></div><div class="metric-card"><b>理解自評分數</b><span>使用者對自己理解程度的主觀評估。</span></div><div class="metric-card"><b>卡關判斷準確度</b><span>AI 判斷使用者是否真的卡住的準確程度。</span></div><div class="metric-card"><b>提示接受比例</b><span>使用者是否願意接受 AI 提示。</span></div><div class="metric-card"><b>提示後重試比例</b><span>看完提示後是否重新嘗試。</span></div><div class="metric-card"><b>卡關恢復時間</b><span>從卡住到重新進入學習狀態所需時間。</span></div><div class="metric-card"><b>卡關後放棄率</b><span>遇到卡關後離開或停止學習的比例。</span></div><div class="metric-card"><b>重複卡關模式</b><span>同一類問題是否反覆卡住。</span></div><div class="metric-card"><b>提問頻率</b><span>使用者在學習過程中主動提問的頻率。</span></div><div class="metric-card"><b>提問品質分數</b><span>問題是否具體、有上下文、能描述卡點。</span></div><div class="metric-card"><b>澄清輪數</b><span>AI 需要追問幾次才能理解問題。</span></div><div class="metric-card"><b>回答有用度</b><span>使用者是否認為回答真的幫得上忙。</span></div><div class="metric-card"><b>追問延伸比例</b><span>使用者是否願意繼續追問與延伸。</span></div><div class="metric-card"><b>答案依賴比例</b><span>使用者是否過度索取直接答案。</span></div><div class="metric-card"><b>解釋閱讀完成率</b><span>使用者是否看完 AI 解釋。</span></div><div class="metric-card"><b>要求重講比例</b><span>使用者是否常要求換個方式再說一次。</span></div><div class="metric-card"><b>解釋後答題正確率</b><span>看完 AI 解釋後，相似題答對狀況。</span></div><div class="metric-card"><b>教材來源查看率</b><span>使用者是否查看 AI 引用的教材來源。</span></div><div class="metric-card"><b>衝突回報率</b><span>使用者是否回報 AI 與教材不一致。</span></div><div class="metric-card"><b>解釋負擔回饋</b><span>使用者是否覺得解釋太多、太難或太亂。</span></div><div class="metric-card"><b>練習完成率</b><span>使用者是否完成安排的練習。</span></div><div class="metric-card"><b>不同難度答對率</b><span>簡單、適中、困難題的答對狀況。</span></div><div class="metric-card"><b>提示使用比例</b><span>作答時使用提示的比例。</span></div><div class="metric-card"><b>每題作答時間</b><span>每題從開始到提交答案的時間。</span></div><div class="metric-card"><b>答錯後重試比例</b><span>答錯後是否願意再試一次。</span></div><div class="metric-card"><b>變形題答對率</b><span>換題型、換表述後是否仍能答對。</span></div><div class="metric-card"><b>掌握穩定度</b><span>多次練習後是否能穩定答對。</span></div><div class="metric-card"><b>錯誤類型分布</b><span>概念、程序、粗心、閱讀理解、策略等錯誤比例。</span></div><div class="metric-card"><b>解析開啟率</b><span>答錯後是否願意看解析。</span></div><div class="metric-card"><b>錯誤反思比例</b><span>是否願意回答自己剛剛怎麼想。</span></div><div class="metric-card"><b>同類錯誤重複率</b><span>同一類錯誤是否反覆出現。</span></div><div class="metric-card"><b>答錯後重試比例</b><span>答錯後是否再次嘗試。</span></div><div class="metric-card"><b>答錯後情緒下降訊號</b><span>答錯後是否出現離開、停滯、負面語句。</span></div><div class="metric-card"><b>回饋閱讀率</b><span>使用者是否閱讀 AI 回饋。</span></div><div class="metric-card"><b>詳細回饋展開率</b><span>使用者是否願意展開更多說明。</span></div><div class="metric-card"><b>下一步採納率</b><span>是否照 AI 建議進行下一步。</span></div><div class="metric-card"><b>回饋後情緒變化</b><span>回饋後情緒是否改善或惡化。</span></div><div class="metric-card"><b>修正成功率</b><span>看完回饋後是否能修正錯誤。</span></div><div class="metric-card"><b>回饋跳過率</b><span>使用者是否大量跳過回饋。</span></div><div class="metric-card"><b>重試意願比例</b><span>答錯或卡關後是否願意再次嘗試。</span></div><div class="metric-card"><b>重試成功率</b><span>重新嘗試後是否能完成。</span></div><div class="metric-card"><b>提示減量程度</b><span>同類題中提示使用是否逐步減少。</span></div><div class="metric-card"><b>自我說明比例</b><span>是否能說出自己的解法與理由。</span></div><div class="metric-card"><b>相似變形題答對率</b><span>相似但不同表述的題目是否答對。</span></div><div class="metric-card"><b>信心變化</b><span>重試前後的自我信心變化。</span></div><div class="metric-card"><b>學習任務完成率</b><span>本次安排的學習任務是否完成。</span></div><div class="metric-card"><b>概念掌握分數</b><span>本次學習後對核心概念的掌握程度。</span></div><div class="metric-card"><b>總結查看率</b><span>使用者是否查看學習總結。</span></div><div class="metric-card"><b>下次回訪率</b><span>使用者是否回來進行下一次學習。</span></div><div class="metric-card"><b>弱點延續追蹤率</b><span>本次弱點是否被帶入下一輪計畫。</span></div><div class="metric-card"><b>課後收穫感</b><span>使用者對本次學習收穫的主觀評估。</span></div><div class="metric-card"><b>長期能力成長</b><span>跨多次學習後，能力是否穩定提升。</span></div><div class="metric-card"><b>同類錯誤下降率</b><span>同一類錯誤是否逐步減少。</span></div><div class="metric-card"><b>自主學習能力分數</b><span>是否更能自己設定目標、反思與修正。</span></div><div class="metric-card"><b>提問品質成長</b><span>提問是否從要答案進化到描述問題、比較與反思。</span></div><div class="metric-card"><b>AI 依賴程度</b><span>使用者是否過度依賴 AI 提示與答案。</span></div><div class="metric-card"><b>穩定回訪頻率</b><span>是否形成穩定學習節奏。</span></div><div class="metric-card"><b>學習策略多樣性</b><span>是否嘗試不同學習方法。</span></div><div class="metric-card"><b>知識遷移表現</b><span>是否能把學到的概念用在新情境。</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="callout">
+        <strong>最高層驗收主張</strong>
+        <p>
+          AI 不是讓使用者更快拿到答案，而是讓使用者更快發現自己哪裡不懂，並且更願意、更有能力修正自己的理解。
+        </p>
+        <p>
+          因此專案不應只看使用時間、對話次數、答題數與 AI 回答滿意度；更應看卡關恢復、同類錯誤下降、提問品質提升、提示依賴下降、變形題答對率、自主學習能力提升，以及下次學習是否能接續前次弱點。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    AI Learning Agent｜學習互動地圖報告 V0.1
+  </footer>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const stageSelect = document.getElementById('stageSelect');
+    const cards = Array.from(document.querySelectorAll('.stage-card'));
+    const toggleAll = document.getElementById('toggleAll');
+
+    function setOpen(card, open) {
+      card.classList.toggle('open', open);
+      const btn = card.querySelector('.stage-head');
+      const chev = card.querySelector('.chev');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      chev.textContent = open ? '收合' : '展開';
+    }
+
+    document.querySelectorAll('.stage-head').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.stage-card');
+        setOpen(card, !card.classList.contains('open'));
+      });
+    });
+
+    function applyFilter() {
+      const q = searchInput.value.trim().toLowerCase();
+      const selected = stageSelect.value;
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const text = card.dataset.search.toLowerCase();
+        const matchSearch = !q || text.includes(q);
+        const matchStage = selected === 'all' || card.dataset.id === selected;
+        const visible = matchSearch && matchStage;
+        card.classList.toggle('hidden', !visible);
+        if (visible) visibleCount++;
+        if (q && visible) setOpen(card, true);
+      });
+
+      if (selected !== 'all') {
+        const card = cards.find(c => c.dataset.id === selected);
+        if (card && !card.classList.contains('hidden')) {
+          setOpen(card, true);
+          card.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+    }
+
+    searchInput.addEventListener('input', applyFilter);
+    stageSelect.addEventListener('change', applyFilter);
+
+    toggleAll.addEventListener('click', () => {
+      const shouldOpen = cards.some(card => !card.classList.contains('hidden') && !card.classList.contains('open'));
+      cards.forEach(card => {
+        if (!card.classList.contains('hidden')) setOpen(card, shouldOpen);
+      });
+      toggleAll.textContent = shouldOpen ? '全部收合' : '全部展開';
+    });
+
+    document.querySelectorAll('.node').forEach(node => {
+      node.addEventListener('click', () => {
+        const id = node.dataset.target;
+        stageSelect.value = id;
+        applyFilter();
+      });
+    });
+
+    // 預設展開第一個階段，方便一打開就知道格式。
+    setOpen(cards[0], true);
+  </script>
+</body>
+</html>
