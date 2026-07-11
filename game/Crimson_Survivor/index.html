@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Crimson Survivor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="game" aria-label="遊戲畫面"></canvas>
+
+    <section id="hud" class="hidden" aria-live="polite">
+      <div class="hud-top">
+        <div class="brand"><span class="brand-mark">CE</span><span>深紅倖存者</span></div>
+        <div class="timer-wrap"><span id="timer">15:00</span><small>生存倒數</small></div>
+        <div class="stats-compact"><span>LV <b id="level">1</b></span><span>擊殺 <b id="kills">0</b></span></div>
+      </div>
+
+      <div class="bar-cluster">
+        <div class="bar-row hp-row"><span>HP</span><div class="bar"><i id="hp-fill"></i><em id="hp-text">100 / 100</em></div></div>
+        <div class="bar-row exp-row"><span>EXP</span><div class="bar"><i id="exp-fill"></i><em id="exp-text">0 / 11</em></div></div>
+      </div>
+
+      <div id="weapon-rack" class="weapon-rack"></div>
+      <div id="effect-rack" class="effect-rack"></div>
+      <button id="pause-btn" class="icon-button" aria-label="暫停">Ⅱ</button>
+    </section>
+
+    <section id="start-screen" class="modal-screen show">
+      <div class="start-card panel">
+        <div class="eyebrow">SURVIVOR-LIKE ACTION</div>
+        <h1>深紅倖存者</h1>
+        <p class="subtitle">CRIMSON ECHO</p>
+        <p class="lead">在血月廢墟中存活 15 分鐘。移動、收集、升級，讓六種自動武器組成毀滅性的戰鬥機器。</p><p style="margin:-12px 0 18px;color:#6fe8ff;font-size:12px;font-weight:900;letter-spacing:.12em">R6：8 種敵人保證登場／滑鼠點擊移動／清晰 Boss 彈幕／隕石落下／奇點投射／火焰與刃環重製</p>
+        <div class="feature-grid">
+          <div><b>12</b><span>差異化武器</span></div>
+          <div><b>8</b><span>敵人類型</span></div>
+          <div><b>6</b><span>武器欄位</span></div>
+          <div><b>3</b><span>升級三選一</span></div>
+        </div>
+        <div class="controls"><span><kbd>滑鼠左鍵</kbd> 點擊或按住移動</span><span><kbd>WASD</kbd>／方向鍵移動</span><span><kbd>ESC</kbd> 暫停</span><span>手機可使用虛擬搖桿</span></div>
+        <div class="start-actions">
+          <button id="start-btn" class="primary-btn">進入血月廢墟</button>
+          <button id="sound-btn" class="secondary-btn">音效：開啟</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="level-screen" class="modal-screen">
+      <div class="level-panel panel">
+        <div class="chest-stage"><img src="assets/chest.png" alt="升級寶箱"><div class="chest-glow"></div></div>
+        <p class="eyebrow">LEVEL UP</p>
+        <h2>選擇一項深紅祝福</h2>
+        <div id="reward-cards" class="reward-cards"></div>
+        <p class="key-hint">可按 1、2、3 選擇</p>
+      </div>
+    </section>
+
+    <section id="pause-screen" class="modal-screen">
+      <div class="pause-card panel">
+        <p class="eyebrow">PAUSED</p><h2>時間凝滯</h2>
+        <p>敵人與武器冷卻已暫停。</p>
+        <button id="resume-btn" class="primary-btn">繼續戰鬥</button>
+        <button id="restart-pause-btn" class="secondary-btn">重新開始</button>
+      </div>
+    </section>
+
+    <section id="end-screen" class="modal-screen">
+      <div class="end-card panel">
+        <p id="end-eyebrow" class="eyebrow">RUN ENDED</p>
+        <h2 id="end-title">你被圍攻了</h2>
+        <p id="end-copy">你倒在血月廢墟中。</p>
+        <div class="result-grid">
+          <div><span>存活</span><b id="result-time">00:00</b></div>
+          <div><span>等級</span><b id="result-level">1</b></div>
+          <div><span>擊殺</span><b id="result-kills">0</b></div>
+          <div><span>武器</span><b id="result-weapons">0 / 6</b></div>
+        </div>
+        <button id="restart-btn" class="primary-btn">再次進入廢墟</button>
+      </div>
+    </section>
+
+    <div id="toast-layer"></div>
+    <div id="damage-flash"></div>
+
+    <div id="touch-controls" aria-hidden="true">
+      <div id="joystick-base"><div id="joystick-knob"></div></div>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
