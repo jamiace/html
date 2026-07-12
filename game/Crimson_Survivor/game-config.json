@@ -465,9 +465,9 @@
         "heal": [
           1,
           1,
-          1,
-          1,
-          1
+          2,
+          2,
+          3
         ]
       },
       "revive": {
@@ -3304,16 +3304,16 @@
       "name": "血液補劑",
       "icon": "assets/item_heal.png",
       "color": "#ff5579",
-      "description": "立即回復 40 HP。",
-      "heal": 40
+      "description": "立即回復 25 HP。",
+      "heal": 25
     },
     "regen": {
       "name": "再生注射",
       "icon": "assets/item_regen.png",
       "color": "#58e4ad",
-      "description": "8 秒內持續回復生命。",
-      "duration": 8,
-      "healPercentPerSecond": 0.05,
+      "description": "10 秒內持續回復生命。",
+      "duration": 10,
+      "healPercentPerSecond": 0.03,
       "maximumFlatPerSecond": 5
     },
     "shield": {
@@ -3428,7 +3428,7 @@
       "name": "自癒強化",
       "icon": "assets/stat_hp_regen.png",
       "color": "#6ef2a4",
-      "description": "每隔一段時間恢復 1 HP。Lv.1 為每 5 秒一次，之後每級再縮短 0.5 秒。"
+      "description": "每隔一段時間恢復 1~3 HP。Lv.1 為每 5 秒一次，之後每級再縮短 0.5 秒。"
     },
     "revive": {
       "name": "絕境逢生",
