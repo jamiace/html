@@ -67,23 +67,54 @@ function bossFightRemainingSeconds(elapsedSeconds=game?.elapsed||0){
 function bossFightElapsedSeconds(elapsedSeconds=game?.elapsed||0){
   return Math.max(0,Math.floor(Math.max(0,(Number(elapsedSeconds)||0)-SCORE_BOSS_START)+1e-9));
 }
-function scoreBreakdown(totalExp=game?.totalExp||0,elapsedSeconds=game?.elapsed||0,level=game?.level||1){
-  const normalizedLevel=Math.max(1,Math.floor(Number(level)||1));
-  const levelPoints=normalizedLevel*SCORE_LEVEL_VALUE+SCORE_BASE_ADJUSTMENT;
-  const bossStarted=(Number(elapsedSeconds)||0)>=SCORE_BOSS_START||!!game?.bossSpawned;
-  const bossRemainingSeconds=bossStarted?bossFightRemainingSeconds(elapsedSeconds):0;
-  const bossTimeBonus=bossRemainingSeconds*SCORE_BOSS_SECOND_VALUE;
-  const scoreAdjustment=Math.round(Number(game?.scoreAdjustment)||0);
+function scoreBreakdown(
+  totalExp = game?.totalExp || 0,
+  elapsedSeconds = game?.elapsed || 0,
+  level = game?.level || 1
+) {
+  const expPoints = Math.max(
+    0,
+    Math.round(Number(totalExp) || 0)
+  );
+
+  const normalizedLevel = Math.max(
+    1,
+    Math.floor(Number(level) || 1)
+  );
+
+  const levelPoints =
+    normalizedLevel * SCORE_LEVEL_VALUE +
+    SCORE_BASE_ADJUSTMENT;
+
+  const bossStarted =
+    (Number(elapsedSeconds) || 0) >= SCORE_BOSS_START ||
+    !!game?.bossSpawned;
+
+  const bossRemainingSeconds = bossStarted
+    ? bossFightRemainingSeconds(elapsedSeconds)
+    : 0;
+
+  const bossTimeBonus =
+    bossRemainingSeconds * SCORE_BOSS_SECOND_VALUE;
+
+  const scoreAdjustment =
+    Math.round(Number(game?.scoreAdjustment) || 0);
 
   return {
-    totalExp:Math.round(Number(totalExp)||0),
+    totalExp: expPoints,
+    expPoints,
     levelPoints,
-    baseScoreAdjustment:SCORE_BASE_ADJUSTMENT,
+    baseScoreAdjustment: SCORE_BASE_ADJUSTMENT,
     bossRemainingSeconds,
     bossTimeBonus,
     scoreAdjustment,
-    overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),
-    score:levelPoints+bossTimeBonus+scoreAdjustment
+    overtimeSeconds: bossFightElapsedSeconds(elapsedSeconds),
+
+    score:
+      expPoints +
+      levelPoints +
+      bossTimeBonus +
+      scoreAdjustment
   };
 }
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
