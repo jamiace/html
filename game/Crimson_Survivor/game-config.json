@@ -1,0 +1,4149 @@
+{
+  "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
+  "meta": {
+    "_comment": "版本識別與設定檔格式版本。",
+    "build": "R17 DEBUG LAB",
+    "configVersion": 3,
+    "language": "zh-Hant"
+  },
+  "system": {
+    "_comment": "全域世界比例、遊戲時間、輸入、欄位上限與通用常數。",
+    "_fieldNotes": {
+      "gameDurationSeconds": "倒數到此秒數後才生成 Boss；Boss 死亡才結束。",
+      "unit": "近距離武器常用的世界比例單位。",
+      "baseAttackRange": "基礎針彈的索敵半徑。",
+      "weaponTargetSearchRange": "多數主動武器施放前尋找目標的距離。",
+      "maxDeltaSeconds": "單一影格允許的最大 dt，避免切換分頁後物理瞬間跳躍。",
+      "maxDevicePixelRatio": "Canvas 最大解析度倍率。"
+    },
+    "unit": 52,
+    "gameDurationSeconds": 900,
+    "maxDeltaSeconds": 0.033,
+    "maxDevicePixelRatio": 2,
+    "weaponTargetSearchRange": 650,
+    "maxWeaponSlots": 6,
+    "maxUpgradeLevel": 5,
+    "rewardChoiceCount": 3,
+    "offscreenDespawnDistance": 2600,
+    "projectileDespawnDistance": 1800,
+    "worldCullMargin": 90,
+    "timeFormatMinutesPad": 2,
+    "timeFormatSecondsPad": 2,
+    "keyboardRewardKeys": [
+      "Digit1",
+      "Digit2",
+      "Digit3",
+      "Numpad1",
+      "Numpad2",
+      "Numpad3"
+    ],
+    "preventDefaultKeys": [
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "Space"
+    ],
+    "primaryPointerButton": 0,
+    "joystickTouchScale": 1,
+    "rewardNumberBase": 1,
+    "secondsPerMinute": 60,
+    "millisecondsPerSecond": 1000,
+    "minimumCanvasDimension": 1,
+    "defaultDevicePixelRatio": 1,
+    "touchEndTransform": "translate(0,0)"
+  },
+  "assets": {
+    "_comment": "所有圖片路徑；路徑以 index.html 所在位置為基準。",
+    "arena": "assets/arena_tile.png",
+    "player": "assets/player.png",
+    "exp": "assets/exp_crystal.png",
+    "chest": "assets/chest.png",
+    "rat": "assets/enemy_rat.png",
+    "hound": "assets/enemy_hound.png",
+    "shell": "assets/enemy_shell.png",
+    "spitter": "assets/enemy_spitter.png",
+    "bloater": "assets/enemy_bloater.png",
+    "shadow": "assets/enemy_shadow.png",
+    "golem": "assets/enemy_golem.png",
+    "boss": "assets/enemy_boss.png",
+    "orbitBlade": "assets/fx_orbit_blade.png",
+    "frostRing": "assets/fx_frost_ring.png",
+    "droneUnit": "assets/fx_drone.png",
+    "mineSprite": "assets/fx_mine.png",
+    "meteorSprite": "assets/fx_meteor.png",
+    "gravityOrb": "assets/fx_gravity_orb.png",
+    "flameSprite": "assets/fx_flame.png",
+    "healDrop": "assets/item_heal.png",
+    "freezeDrop": "assets/item_freeze.png",
+    "magnetDrop": "assets/item_magnet.png"
+  },
+  "audio": {
+    "_comment": "Web Audio 音效參數。frequency 為 Hz、duration 為秒、volume 為增益。",
+    "enabledByDefault": true,
+    "minimumFrequency": 30,
+    "minimumGain": 0.0001,
+    "warmupGain": 1e-05,
+    "warmupDuration": 0.01,
+    "tones": {
+      "shot": {
+        "frequency": 210,
+        "duration": 0.055,
+        "wave": "square",
+        "volume": 0.018,
+        "slide": -80
+      },
+      "hit": {
+        "frequency": 95,
+        "duration": 0.04,
+        "wave": "sawtooth",
+        "volume": 0.012,
+        "slide": -35
+      },
+      "level1": {
+        "frequency": 430,
+        "duration": 0.12,
+        "wave": "triangle",
+        "volume": 0.04,
+        "slide": 430
+      },
+      "level2": {
+        "frequency": 680,
+        "duration": 0.16,
+        "wave": "triangle",
+        "volume": 0.03,
+        "slide": 400,
+        "delayMs": 80
+      },
+      "hurt": {
+        "frequency": 120,
+        "duration": 0.18,
+        "wave": "sawtooth",
+        "volume": 0.06,
+        "slide": -70
+      },
+      "boom": {
+        "frequency": 85,
+        "duration": 0.25,
+        "wave": "sawtooth",
+        "volume": 0.05,
+        "slide": -45
+      },
+      "pickup": {
+        "frequency": 680,
+        "duration": 0.05,
+        "wave": "sine",
+        "volume": 0.018,
+        "slide": 150
+      },
+      "boomerang": {
+        "frequency": 270,
+        "duration": 0.1,
+        "wave": "triangle",
+        "volume": 0.025,
+        "slide": 180
+      },
+      "flame": {
+        "frequency": 95,
+        "duration": 0.24,
+        "wave": "sawtooth",
+        "volume": 0.034,
+        "slide": 95
+      },
+      "lightning": {
+        "frequency": 540,
+        "duration": 0.12,
+        "wave": "square",
+        "volume": 0.025,
+        "slide": 420
+      },
+      "frost": {
+        "frequency": 310,
+        "duration": 0.25,
+        "wave": "sine",
+        "volume": 0.035,
+        "slide": 250
+      },
+      "meteor": {
+        "frequency": 130,
+        "duration": 0.25,
+        "wave": "triangle",
+        "volume": 0.025,
+        "slide": -50
+      },
+      "laser": {
+        "frequency": 680,
+        "duration": 0.22,
+        "wave": "sawtooth",
+        "volume": 0.035,
+        "slide": -220
+      },
+      "gravity": {
+        "frequency": 115,
+        "duration": 0.35,
+        "wave": "sine",
+        "volume": 0.04,
+        "slide": -55
+      },
+      "victory": {
+        "frequency": 680,
+        "duration": 0.5,
+        "wave": "triangle",
+        "volume": 0.06,
+        "slide": 500
+      },
+      "defeat": {
+        "frequency": 105,
+        "duration": 0.5,
+        "wave": "sawtooth",
+        "volume": 0.06,
+        "slide": -55
+      }
+    }
+  },
+  "performance": {
+    "_comment": "效能、物件池、更新頻率與視覺物件上限。降低純視覺上限不會改變傷害。",
+    "_fieldNotes": {
+      "hudUpdatesPerSecond": "HUD 每秒更新次數；降低可減少 DOM 負擔。",
+      "spatialCellSize": "Spatial Hash 格子尺寸。",
+      "maxParticles": "同時存在的純視覺粒子上限。",
+      "maxDamageTexts": "同時存在的傷害數字上限。",
+      "denseTargetRefreshSeconds": "敵群密集點快取更新間隔。",
+      "meteorWarningFrameCount": "預先產生的隕石警示圈影格數。",
+      "prewarm": "開始遊戲時預先準備的物件池數量，降低第一次大量生成造成的卡頓。"
+    },
+    "spatialCellSize": 128,
+    "maxEnemyRadius": 70,
+    "maxParticles": 1000,
+    "maxDamageTexts": 120,
+    "projectilePoolLimit": 700,
+    "enemyShotPoolLimit": 500,
+    "gemPoolLimit": 500,
+    "prewarm": {
+      "particles": 320,
+      "texts": 96,
+      "projectiles": 220,
+      "enemyShots": 160,
+      "gems": 180
+    },
+    "hudUpdatesPerSecond": 10,
+    "fpsSampleIntervalMs": 500,
+    "fpsSmoothingOld": 0.55,
+    "fpsSmoothingNew": 0.45,
+    "denseTargetRefreshSeconds": 0.38,
+    "denseTargetLimit": 12,
+    "denseTargetCandidateRadius": 185,
+    "denseTargetMinimumScoreDistance": 170,
+    "denseTargetGridPadding": 70,
+    "meteorWarningFrameCount": 8,
+    "meteorDeathParticleBudgetPerFrame": 72,
+    "meteorImpactParticles": 14,
+    "meteorLargeExtraParticles": 4,
+    "gemMergeCellSize": 58,
+    "gemMergeEnabled": true,
+    "denseCandidatePoolLimit": 64,
+    "denseSearchPaddingCells": 1.5,
+    "denseBucketBaseWeight": 1.65,
+    "denseAxialNeighborWeight": 0.72,
+    "denseDiagonalNeighborWeight": 0.48,
+    "denseCacheStaleMultiplier": 2.5,
+    "nearestSpatialMaximumRange": 2200,
+    "fallbackSearchRange": 99999,
+    "pointRangeEpsilon": 0.001,
+    "meteorFallbackDistance": 300,
+    "meteorFallbackAttempts": 12,
+    "meteorFallbackAngleStep": 0.68,
+    "distinctSpotSkipMultiplier": 3,
+    "distinctFallbackAttempts": 8,
+    "distinctFallbackAngleStep": 0.42,
+    "spatialKeyOffset": 32768,
+    "spatialKeyMultiplier": 65536,
+    "profilerEnabled": false
+  },
+  "player": {
+    "_comment": "玩家初始 HP、移動、滑鼠控制、鏡頭跟隨、受傷無敵與接觸推離參數。",
+    "startX": 0,
+    "startY": 0,
+    "radius": 19,
+    "startHP": 50,
+    "baseSpeed": 158,
+    "startBaseAttackDelay": 0.2,
+    "contactInvulnerabilitySeconds": 0.75,
+    "keyboardMouseDeadZone": 0.001,
+    "mouseArrivalDistance": 9,
+    "mouseSlowDistance": 55,
+    "mouseMinimumMoveScale": 0.28,
+    "cameraFollowRate": 8,
+    "contactPushDistance": 16,
+    "damageTextYOffset": -30,
+    "damageTextSize": 22,
+    "damageParticleCount": 15,
+    "damageParticleVelocityMin": -180,
+    "damageParticleVelocityMax": 180,
+    "damageParticleLifeMin": 0.25,
+    "damageParticleLifeMax": 0.5,
+    "damageParticleSizeMin": 2,
+    "damageParticleSizeMax": 5,
+    "damageShakeAmplitude": 12,
+    "damageShakeDuration": 0.18,
+    "sprite": {
+      "width": 80,
+      "height": 80,
+      "rotationOffsetRadians": 1.5707963267948966
+    },
+    "shadow": {
+      "alpha": 0.22,
+      "offsetY": 22,
+      "width": 44,
+      "height": 20
+    },
+    "shieldVisual": {
+      "radius": 33,
+      "pulseSize": 3,
+      "pulseSpeed": 6,
+      "lineWidth": 3,
+      "shadowBlur": 20,
+      "alpha": 0.82
+    },
+    "hitBlink": {
+      "frequency": 20,
+      "alpha": 0.42
+    }
+  },
+  "progression": {
+    "_comment": "等級經驗公式、永久能力數值、升級選項與獎勵池條件。",
+    "_fieldNotes": {
+      "experienceBase": "升級需求公式基礎值。",
+      "experienceLinear": "隨等級線性增加量。",
+      "experiencePower": "等級曲線次方。",
+      "speedMultipliers": "步伐強化 Lv.0～Lv.5 的速度倍率。",
+      "pickupRadii": "拾取範圍 Lv.0～Lv.5 的像素半徑。"
+    },
+    "startLevel": 1,
+    "startExp": 0,
+    "xpFormula": {
+      "base": 8,
+      "linear": 2.5,
+      "quadratic": 0.22
+    },
+    "speedMultipliers": [
+      1,
+      1.3,
+      1.6,
+      1.9,
+      2.2,
+      2.5
+    ],
+    "pickupRadii": [
+      83,
+      112,
+      140,
+      169,
+      198,
+      226
+    ],
+    "hpPerUpgrade": 15,
+    "weaponRewardWeight": 1,
+    "statRewardWeight": 0.7,
+    "itemRewardWeight": 0.55,
+    "rewardCardAccentAlpha": 0.18,
+    "maxLevelDamageScalingLevel": 40,
+    "baseAttackDamagePerLevel": 0.02,
+    "rewardHealFullHpThreshold": 1,
+    "rewardRegenHpRatioThreshold": 0.9,
+    "rewardMagnetMinimumGems": 8,
+    "rewardDoubleXpMinimumRemainingSeconds": 25,
+    "nextLevelDelayMs": 120,
+    "speedDescriptionTemplate": "移動速度由 {from}× 提高為 {to}×。"
+  },
+  "enemyScaling": {
+    "_comment": "敵人隨遊戲時間成長的全域公式；minute = elapsedSeconds / 60。",
+    "hpLinearPerMinute": 0.06,
+    "hpQuadraticPerMinuteSquared": 0.008,
+    "damagePerMinute": 0.04,
+    "speedPerMinute": 0.012,
+    "speedMaximumMultiplier": 1.18
+  },
+  "enemies": {
+    "_comment": "八種敵人的基礎 HP、速度、接觸傷害、EXP、半徑、出場時間與出怪成本；尚未套用時間成長倍率。",
+    "_fieldNotes": {
+      "hp": "初始生命值。",
+      "speed": "每秒移動像素。",
+      "damage": "碰到玩家的基礎傷害。",
+      "exp": "死亡掉落經驗。",
+      "radius": "碰撞半徑。",
+      "budgetCost": "出怪導演所消耗的成本。",
+      "from": "最早登場秒數。",
+      "image": "assets 內對應的圖片鍵。"
+    },
+    "rat": {
+      "image": "rat",
+      "hp": 15,
+      "speed": 112,
+      "damage": 6,
+      "exp": 1,
+      "radius": 19,
+      "budgetCost": 1,
+      "from": 0,
+      "role": "大量弱怪"
+    },
+    "hound": {
+      "image": "hound",
+      "hp": 40,
+      "speed": 182,
+      "damage": 9,
+      "exp": 2,
+      "radius": 23,
+      "budgetCost": 2,
+      "from": 105,
+      "role": "快速怪"
+    },
+    "shell": {
+      "image": "shell",
+      "hp": 150,
+      "speed": 82,
+      "damage": 13,
+      "exp": 4,
+      "radius": 29,
+      "budgetCost": 5,
+      "from": 155,
+      "role": "厚甲怪"
+    },
+    "spitter": {
+      "image": "spitter",
+      "hp": 80,
+      "speed": 84,
+      "damage": 8,
+      "exp": 5,
+      "radius": 27,
+      "budgetCost": 6,
+      "from": 215,
+      "role": "遠程怪"
+    },
+    "bloater": {
+      "image": "bloater",
+      "hp": 100,
+      "speed": 103,
+      "damage": 10,
+      "exp": 5,
+      "radius": 29,
+      "budgetCost": 6,
+      "from": 290,
+      "role": "自爆壓力怪"
+    },
+    "shadow": {
+      "image": "shadow",
+      "hp": 135,
+      "speed": 168,
+      "damage": 18,
+      "exp": 7,
+      "radius": 28,
+      "budgetCost": 8,
+      "from": 395,
+      "role": "突進控制怪"
+    },
+    "golem": {
+      "image": "golem",
+      "hp": 800,
+      "speed": 50,
+      "damage": 27,
+      "exp": 22,
+      "radius": 43,
+      "budgetCost": 24,
+      "from": 515,
+      "role": "高HP重型怪"
+    },
+    "boss": {
+      "image": "boss",
+      "hp": 7500,
+      "speed": 60,
+      "damage": 35,
+      "exp": 120,
+      "radius": 62,
+      "budgetCost": 999,
+      "from": 900,
+      "role": "終局Boss"
+    }
+  },
+  "enemyAI": {
+    "_comment": "各類敵人的索敵、延遲、衝刺、射擊、自爆、控制抗性與移動行為。距離為像素，時間為秒。",
+    "burnTickSeconds": 0.5,
+    "hound": {
+      "awarenessMin": 0.7,
+      "awarenessMax": 1.15,
+      "retargetMin": 0.48,
+      "retargetMax": 0.72,
+      "arrivalDistance": 22,
+      "searchPauseMin": 0.16,
+      "searchPauseMax": 0.3
+    },
+    "shadow": {
+      "awarenessMin": 0.7,
+      "awarenessMax": 1.15,
+      "retargetMin": 0.62,
+      "retargetMax": 0.92,
+      "arrivalDistance": 22,
+      "searchPauseMin": 0.16,
+      "searchPauseMax": 0.3,
+      "dashTriggerRange": 520,
+      "windupSeconds": 0.55,
+      "dashSeconds": 0.52,
+      "dashSpeed": 330,
+      "dashCooldown": 3.4,
+      "warningStartRadius": 20,
+      "warningEndRadius": 170,
+      "warningDuration": 0.5,
+      "warningColor": "rgba(196,94,255,.8)"
+    },
+    "spitter": {
+      "approachDistance": 390,
+      "retreatDistance": 235,
+      "retreatSpeedMultiplier": 0.75,
+      "strafeMultiplier": 0.16,
+      "attackRange": 520,
+      "shotCooldown": 2.4,
+      "shotDamage": 12,
+      "shotSpeed": 286
+    },
+    "bloater": {
+      "triggerDistance": 110,
+      "chargeSeconds": 0.8,
+      "explosionRadius": 104,
+      "explosionDamage": 22
+    },
+    "bossFreezeSlowAmount": 0.8,
+    "bossFreezeSlowDuration": 0.2,
+    "golemKnockbackResistance": 0.1,
+    "initial": {
+      "aiMin": 0,
+      "aiMax": 3,
+      "shotMin": 0.5,
+      "shotMax": 2,
+      "dashMin": 1.5,
+      "dashMax": 3.2,
+      "retargetMin": 0.35,
+      "retargetMax": 0.7,
+      "flipChance": 0.5
+    }
+  },
+  "spawn": {
+    "_comment": "出怪導演。rate 為每秒累積的出怪成本，cap 為場上同時存在上限。",
+    "_fieldNotes": {
+      "openingGraceSeconds": "開場完全不出怪的緩衝。",
+      "preHoundRateMultiplier": "狗登場前的出怪速度倍率。",
+      "rateSegments": "前期分段出怪速率曲線。",
+      "capSegments": "不同時間的場上敵人上限。",
+      "introductions": "特殊敵人首次登場的保證怪潮。"
+    },
+    "openingGraceSeconds": 3,
+    "preHoundRateMultiplier": 2,
+    "preHoundCapMultiplier": 1.5,
+    "budgetLoopGuard": 10,
+    "budgetWhenCapped": 3,
+    "mixedWaveStartSeconds": 180,
+    "mixedWaveTimerStart": 42,
+    "mixedWaveIntervalMin": 38,
+    "mixedWaveIntervalMax": 55,
+    "normalSpawnDistanceScreenMultiplier": 0.63,
+    "normalSpawnExtraMin": 120,
+    "normalSpawnExtraMax": 260,
+    "introSpawnDistanceMin": 390,
+    "introSpawnDistanceMax": 560,
+    "nearSpawnDistanceMin": 160,
+    "nearSpawnDistanceMax": 280,
+    "introductions": [
+      {
+        "type": "hound",
+        "time": 105,
+        "count": 2,
+        "label": "快速怪：血獵犬加入戰場"
+      },
+      {
+        "type": "shell",
+        "time": 155,
+        "count": 2,
+        "label": "厚甲怪：鐵殼守衛加入戰場"
+      },
+      {
+        "type": "spitter",
+        "time": 215,
+        "count": 2,
+        "label": "遠程怪：瘟疫噴吐者加入戰場"
+      },
+      {
+        "type": "bloater",
+        "time": 290,
+        "count": 2,
+        "label": "壓力怪：膨脹自爆體加入戰場"
+      },
+      {
+        "type": "shadow",
+        "time": 395,
+        "count": 2,
+        "label": "突進怪：虛影獵手加入戰場"
+      },
+      {
+        "type": "golem",
+        "time": 515,
+        "count": 1,
+        "label": "高HP怪：深岩巨像加入戰場"
+      }
+    ],
+    "roleIntervals": {
+      "hound": [
+        17,
+        25
+      ],
+      "shell": [
+        24,
+        34
+      ],
+      "spitter": [
+        22,
+        32
+      ],
+      "bloater": [
+        27,
+        38
+      ],
+      "shadow": [
+        30,
+        42
+      ],
+      "golem": [
+        48,
+        66
+      ]
+    },
+    "roleTimerStarts": {
+      "hound": 18,
+      "shell": 25,
+      "spitter": 23,
+      "bloater": 28,
+      "shadow": 31,
+      "golem": 50
+    },
+    "phases": [
+      {
+        "from": 0,
+        "to": 105,
+        "mix": {
+          "rat": 12
+        }
+      },
+      {
+        "from": 105,
+        "to": 155,
+        "mix": {
+          "rat": 9,
+          "hound": 2.2
+        }
+      },
+      {
+        "from": 155,
+        "to": 215,
+        "mix": {
+          "rat": 7,
+          "hound": 2.4,
+          "shell": 2.2
+        }
+      },
+      {
+        "from": 215,
+        "to": 290,
+        "mix": {
+          "rat": 6,
+          "hound": 2.5,
+          "shell": 2.4,
+          "spitter": 2.8
+        }
+      },
+      {
+        "from": 290,
+        "to": 395,
+        "mix": {
+          "rat": 5,
+          "hound": 2.7,
+          "shell": 2.6,
+          "spitter": 3,
+          "bloater": 2.5
+        }
+      },
+      {
+        "from": 395,
+        "to": 515,
+        "mix": {
+          "rat": 4,
+          "hound": 2.8,
+          "shell": 2.8,
+          "spitter": 3.2,
+          "bloater": 2.8,
+          "shadow": 2.8
+        }
+      },
+      {
+        "from": 515,
+        "to": 660,
+        "mix": {
+          "rat": 3,
+          "hound": 3,
+          "shell": 3,
+          "spitter": 3.4,
+          "bloater": 3.1,
+          "shadow": 3.3,
+          "golem": 1.5
+        }
+      },
+      {
+        "from": 660,
+        "to": 810,
+        "mix": {
+          "rat": 2.2,
+          "hound": 3.1,
+          "shell": 3.3,
+          "spitter": 3.7,
+          "bloater": 3.4,
+          "shadow": 3.8,
+          "golem": 2.3
+        }
+      },
+      {
+        "from": 810,
+        "to": 900,
+        "mix": {
+          "rat": 1.6,
+          "hound": 3.1,
+          "shell": 3.5,
+          "spitter": 3.9,
+          "bloater": 3.7,
+          "shadow": 4.1,
+          "golem": 3
+        }
+      }
+    ],
+    "rateSegments": [
+      {
+        "until": 3,
+        "start": 0,
+        "end": 0
+      },
+      {
+        "until": 20,
+        "start": 0.28,
+        "end": 0.28
+      },
+      {
+        "until": 60,
+        "start": 0.48,
+        "end": 0.82
+      },
+      {
+        "until": 120,
+        "start": 0.9,
+        "end": 1.38
+      },
+      {
+        "until": 240,
+        "start": 1.45,
+        "end": 2.2
+      }
+    ],
+    "lateRate": {
+      "maximum": 5.8,
+      "base": 2.2,
+      "linear": 0.32,
+      "quadratic": 0.028,
+      "startMinute": 4
+    },
+    "capSegments": [
+      {
+        "until": 20,
+        "cap": 8
+      },
+      {
+        "until": 45,
+        "cap": 14
+      },
+      {
+        "until": 90,
+        "cap": 24
+      },
+      {
+        "until": 150,
+        "cap": 38
+      },
+      {
+        "until": 240,
+        "cap": 62
+      },
+      {
+        "until": 390,
+        "cap": 95
+      },
+      {
+        "until": 570,
+        "cap": 135
+      },
+      {
+        "until": 750,
+        "cap": 180
+      },
+      {
+        "until": 999999,
+        "cap": 230
+      }
+    ]
+  },
+  "boss": {
+    "_comment": "深淵暴君的階段門檻、扇形彈幕、長槍連射、環形彈幕與召喚規則。",
+    "phaseThresholds": [
+      0.75,
+      0.5,
+      0.25
+    ],
+    "initialShotTimer": 2.0,
+    "initialNovaTimer": 4.0,
+    "initialBurstTimer": 6.0,
+    "fan": {
+      "countByPhase": [
+        5,
+        6,
+        7,
+        10
+      ],
+      "stepByPhase": [
+        0.25,
+        0.25,
+        0.25,
+        0.22
+      ],
+      "damageBase": 18,
+      "damagePerPhase": 2,
+      "speedBase": 270,
+      "speedPerPhase": 8,
+      "cooldownByPhase": [
+        3.6,
+        3.05,
+        2.65,
+        2.1
+      ]
+    },
+    "burst": {
+      "shotsByPhase": [
+        5,
+        8,
+        12,
+        20
+      ],
+      "spreadAlternating": 0.035,
+      "damageBase": 24,
+      "damagePerPhase": 2,
+      "speedBase": 385,
+      "speedPerPhase": 12,
+      "shotGap": 0.17,
+      "initialGap": 0.28,
+      "cooldownByPhase": [
+        9.2,
+        8.1,
+        7.1,
+        6.0
+      ],
+      "warningStartRadius": 18,
+      "warningEndRadius": 120,
+      "warningDuration": 0.55,
+      "warningColor": "rgba(255,94,205,.92)"
+    },
+    "nova": {
+      "countByPhase": [
+        10,
+        15,
+        20,
+        30
+      ],
+      "ringRotationPerCast": 0.19,
+      "damageBase": 15,
+      "damagePerPhase": 1,
+      "speedBase": 285,
+      "speedPerPhase": 8,
+      "chargeSeconds": 0.9,
+      "cooldownByPhase": [
+        8.2,
+        7.3,
+        6.5,
+        5.5
+      ],
+      "warningStartRadius": 20,
+      "warningEndRadius": 210,
+      "warningDuration": 0.9,
+      "warningColor": "rgba(255,198,72,.92)"
+    },
+    "summon": {
+      "stageCount": 20,
+      "rats": 10,
+      "hounds": 5,
+      "waveStartRadius": 30,
+      "waveEndRadius": 350,
+      "waveDuration": 0.7,
+      "waveColor": "rgba(255,45,105,.85)"
+    }
+  },
+  "baseAttack": {
+    "_comment": "玩家最基本的自動針彈攻擊。",
+    "cooldown": 0.82,
+    "baseDamage": 13,
+    "projectileSpeed": 470,
+    "color": "#ff5d8b",
+    "type": "needle",
+    "_fieldNotes": {
+      "cooldown": "基礎自動攻擊間隔秒數。",
+      "baseDamage": "Lv.1 基礎傷害，另受 progression.baseAttackDamagePerLevel 成長。",
+      "targetSearchRange": "尋找敵人的最大距離（像素）。",
+      "range": "子彈從生成點起算的最大飛行距離（像素）；所有武器 range 皆使用相同單位。",
+      "projectileRadius": "子彈碰撞半徑（像素）。",
+      "projectileSpeed": "每秒移動像素。",
+      "visualRadius": "純視覺繪製半徑；未設定時等同 projectileRadius，不影響碰撞。"
+    },
+    "targetSearchRange": 470,
+    "range": 550,
+    "projectileRadius": 10,
+    "name": "基礎針彈",
+    "icon": "assets/player.png"
+  },
+  "weapons": {
+    "_comment": "十二種武器。每把武器皆使用 levels 陣列依 Lv.1～Lv.5 分組；所有 range/radius 均統一為像素。",
+    "_fieldNotes": {
+      "levels": "固定五個物件，索引 0～4 對應 Lv.1～Lv.5。每個物件包含該等級實際完整參數。",
+      "range": "最大有效距離或直線延伸長度，統一使用像素，可直接與 baseAttack.range 比較。",
+      "radius": "圓形作用範圍、爆炸區或軌道距離，統一使用像素。",
+      "projectileRadius/hitRadius": "投射物或刃片碰撞半徑，統一使用像素。",
+      "cooldown/duration/delay/*Seconds": "時間一律為秒。",
+      "visualAlpha/*Alpha": "透明度一律 0～1。",
+      "null": "表示該等級沒有該附加能力。"
+    },
+    "shotgun": {
+      "_comment": "爆裂霰彈。所有會因等級變化的玩法參數皆集中在 levels[0]～levels[4]。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "spreadDegrees": "整個扇形的總角度（度）。",
+        "projectileRadius": "每顆彈丸的碰撞半徑（像素）。",
+        "core": "Lv.5 額外核心彈；radius 是碰撞半徑，visualRadius 是畫面顯示半徑。本版 visualRadius 為碰撞半徑的 2 倍。",
+        "muzzle": "槍口純視覺粒子設定。"
+      },
+      "name": "爆裂霰彈",
+      "icon": "assets/weapon_shotgun.png",
+      "color": "#ff7b62",
+      "descriptions": [
+        "5 顆扇形彈丸，每顆造成 9 傷害。",
+        "彈丸增加為 7 顆，扇形擴大。",
+        "每顆傷害提高並增加擊退。",
+        "冷卻縮短、射程提高。",
+        "加入穿透核心彈，命中後爆裂。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 1.15,
+          "count": 5,
+          "spreadDegrees": 55,
+          "damage": 9,
+          "range": 400,
+          "speed": 800,
+          "projectileRadius": 7,
+          "knockback": 5,
+          "angleJitterRadians": 0.025,
+          "aimPointDistance": 100,
+          "core": null,
+          "muzzle": {
+            "offset": 28,
+            "color": "#ff9a66",
+            "particles": 10
+          },
+          "colorProjectile": "#ff8a6a"
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 1.15,
+          "count": 7,
+          "spreadDegrees": 65,
+          "damage": 9,
+          "range": 400,
+          "speed": 800,
+          "projectileRadius": 7,
+          "knockback": 5,
+          "angleJitterRadians": 0.025,
+          "aimPointDistance": 100,
+          "core": null,
+          "muzzle": {
+            "offset": 28,
+            "color": "#ff9a66",
+            "particles": 10
+          },
+          "colorProjectile": "#ff8a6a"
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 1.15,
+          "count": 7,
+          "spreadDegrees": 65,
+          "damage": 12,
+          "range": 400,
+          "speed": 800,
+          "projectileRadius": 7,
+          "knockback": 12,
+          "angleJitterRadians": 0.025,
+          "aimPointDistance": 100,
+          "core": null,
+          "muzzle": {
+            "offset": 28,
+            "color": "#ff9a66",
+            "particles": 10
+          },
+          "colorProjectile": "#ff8a6a"
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 0.85,
+          "count": 7,
+          "spreadDegrees": 65,
+          "damage": 12,
+          "range": 550,
+          "speed": 800,
+          "projectileRadius": 7,
+          "knockback": 12,
+          "angleJitterRadians": 0.025,
+          "aimPointDistance": 100,
+          "core": null,
+          "muzzle": {
+            "offset": 28,
+            "color": "#ff9a66",
+            "particles": 10
+          },
+          "colorProjectile": "#ff8a6a"
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 0.85,
+          "count": 7,
+          "spreadDegrees": 65,
+          "damage": 12,
+          "range": 550,
+          "speed": 900,
+          "projectileRadius": 7,
+          "knockback": 12,
+          "angleJitterRadians": 0.025,
+          "aimPointDistance": 100,
+          "core": {
+            "level": 5,
+            "damage": 28,
+            "speed": 610,
+            "radius": 15,
+            "color": "#fff0a0",
+            "range": 550,
+            "pierce": 3,
+            "knockback": 18,
+            "explosionRadius": 52,
+            "explosionDamage": 20,
+            "explosionKnockback": 12,
+            "waveStart": 6,
+            "waveDuration": 0.2,
+            "waveColor": "rgba(255,241,154,.8)",
+            "visualRadius": 22
+          },
+          "muzzle": {
+            "offset": 28,
+            "color": "#ff9a66",
+            "particles": 10
+          },
+          "colorProjectile": "#ff8a6a"
+        }
+      ]
+    },
+    "boomerang": {
+      "_comment": "迴旋斬輪。range 統一表示離開玩家後的最大去程距離，radius 表示斬輪碰撞半徑。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "returnAfterSeconds": "即使尚未飛到 range，也會在此秒數後開始回程。",
+        "returnSteerRate": "回程朝玩家轉向的速度。",
+        "catchDistance": "回到玩家多少像素內視為收回。",
+        "returnBurst": "Lv.5 收回時的範圍爆發；null 表示沒有。"
+      },
+      "name": "迴旋斬輪",
+      "icon": "assets/weapon_boomerang.png",
+      "color": "#ffc069",
+      "descriptions": [
+        "投出斬輪，去程與回程皆可命中。",
+        "傷害與尺寸提高。",
+        "同時投出 2 枚斬輪。",
+        "冷卻縮短、尺寸提高。",
+        "回到玩家時釋放圓盤斬。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 1.45,
+          "count": 1,
+          "spreadRadians": 0.35,
+          "speed": 420,
+          "returnSpeed": 560,
+          "returnSteerRate": 7,
+          "returnAfterSeconds": 0.65,
+          "range": 375,
+          "damage": 18,
+          "radius": 15,
+          "rotationSpeed": 9,
+          "hitKnockback": 8,
+          "catchDistance": 28,
+          "maximumLife": 3,
+          "returnBurst": null
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 1.45,
+          "count": 1,
+          "spreadRadians": 0.35,
+          "speed": 420,
+          "returnSpeed": 560,
+          "returnSteerRate": 7,
+          "returnAfterSeconds": 0.65,
+          "range": 375,
+          "damage": 22,
+          "radius": 18,
+          "rotationSpeed": 9,
+          "hitKnockback": 8,
+          "catchDistance": 28,
+          "maximumLife": 3,
+          "returnBurst": null
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 1.45,
+          "count": 2,
+          "spreadRadians": 0.35,
+          "speed": 420,
+          "returnSpeed": 560,
+          "returnSteerRate": 7,
+          "returnAfterSeconds": 0.65,
+          "range": 375,
+          "damage": 22,
+          "radius": 18,
+          "rotationSpeed": 9,
+          "hitKnockback": 8,
+          "catchDistance": 28,
+          "maximumLife": 3,
+          "returnBurst": null
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 1.15,
+          "count": 2,
+          "spreadRadians": 0.35,
+          "speed": 420,
+          "returnSpeed": 560,
+          "returnSteerRate": 7,
+          "returnAfterSeconds": 0.65,
+          "range": 375,
+          "damage": 22,
+          "radius": 21,
+          "rotationSpeed": 9,
+          "hitKnockback": 8,
+          "catchDistance": 28,
+          "maximumLife": 3,
+          "returnBurst": null
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 1.15,
+          "count": 2,
+          "spreadRadians": 0.35,
+          "speed": 420,
+          "returnSpeed": 560,
+          "returnSteerRate": 7,
+          "returnAfterSeconds": 0.65,
+          "range": 375,
+          "damage": 22,
+          "radius": 21,
+          "rotationSpeed": 9,
+          "hitKnockback": 8,
+          "catchDistance": 28,
+          "maximumLife": 3,
+          "returnBurst": {
+            "radius": 160,
+            "damage": 35,
+            "knockback": 18,
+            "waveStart": 8,
+            "waveDuration": 0.28,
+            "waveColor": "rgba(255,188,82,.8)"
+          }
+        }
+      ]
+    },
+    "orbit": {
+      "_comment": "衛星刃環。軌道半徑與刃片顯示尺寸維持原設定，碰撞半徑縮小以避免視覺邊緣過度命中。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "bladeSize": "刃片 PNG 顯示寬高（像素）。",
+        "hitRadius": "刃片實際碰撞半徑（像素）；本版刻意小於刃片顯示尺寸，只有靠近刃片中心才算命中。",
+        "hitRepeatDelay": "同一刃片再次命中同一敵人前的等待秒數。",
+        "expandRadius": "Lv.5 外擴週期可額外增加的軌道半徑。",
+        "expandHitRadius": "Lv.5 外擴時額外增加的碰撞半徑；已同步縮小，不影響軌道半徑與圖片大小。"
+      },
+      "name": "衛星刃環",
+      "icon": "assets/weapon_orbit.png",
+      "color": "#6fe8ff",
+      "descriptions": [
+        "2 枚大型刃片環繞玩家。",
+        "3 枚刃片，尺寸與命中範圍提高。",
+        "4 枚大型刃片，傷害與旋轉速度提高。",
+        "5 枚巨刃，擴大軌道並附帶擊退。",
+        "6 枚超大型刃片，週期外擴且尺寸同步成長。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 0,
+          "count": 2,
+          "radius": 100,
+          "bladeSize": 40,
+          "hitRadius": 18,
+          "damage": 12,
+          "rotationSpeed": 2.35,
+          "hitRepeatDelay": 0.34,
+          "knockback": 4,
+          "expandCycleSeconds": 0,
+          "expandRadius": 0,
+          "expandBladeSize": 0,
+          "expandHitRadius": 0
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 0,
+          "count": 3,
+          "radius": 115,
+          "bladeSize": 43,
+          "hitRadius": 22,
+          "damage": 12,
+          "rotationSpeed": 2.35,
+          "hitRepeatDelay": 0.34,
+          "knockback": 4,
+          "expandCycleSeconds": 0,
+          "expandRadius": 0,
+          "expandBladeSize": 0,
+          "expandHitRadius": 0
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 0,
+          "count": 4,
+          "radius": 130,
+          "bladeSize": 47,
+          "hitRadius": 27,
+          "damage": 18,
+          "rotationSpeed": 3.05,
+          "hitRepeatDelay": 0.34,
+          "knockback": 4,
+          "expandCycleSeconds": 0,
+          "expandRadius": 0,
+          "expandBladeSize": 0,
+          "expandHitRadius": 0
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 0,
+          "count": 5,
+          "radius": 145,
+          "bladeSize": 50,
+          "hitRadius": 34,
+          "damage": 18,
+          "rotationSpeed": 3.05,
+          "hitRepeatDelay": 0.34,
+          "knockback": 14,
+          "expandCycleSeconds": 0,
+          "expandRadius": 0,
+          "expandBladeSize": 0,
+          "expandHitRadius": 0
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 0,
+          "count": 6,
+          "radius": 160,
+          "bladeSize": 60,
+          "hitRadius": 44,
+          "damage": 27,
+          "rotationSpeed": 3.05,
+          "hitRepeatDelay": 0.34,
+          "knockback": 14,
+          "expandCycleSeconds": 2.7,
+          "expandRadius": 60,
+          "expandBladeSize": 15,
+          "expandHitRadius": 14
+        }
+      ]
+    },
+    "flame": {
+      "_comment": "燼火噴流。range 已直接換算為像素，不再使用 rangeUnits。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "halfAngleDegrees": "從中心線向單側展開的角度；總扇形角度為此值的兩倍。",
+        "targetSearchRange": "噴流轉向時尋找敵人的距離。",
+        "tickSeconds": "傷害判定間隔。",
+        "burnDamagePerSecond": "附加燃燒每秒傷害；0 表示沒有燃燒。",
+        "directionCount": "同時噴射方向數。",
+        "particle": "火焰純視覺粒子的完整設定。"
+      },
+      "name": "燼火噴流",
+      "icon": "assets/weapon_flame.png",
+      "color": "#ff7338",
+      "descriptions": [
+        "向敵群噴射火焰，每 0.2 秒造成傷害。",
+        "持續時間與噴射角度提高。",
+        "直接傷害提高並附加持續燃燒。",
+        "冷卻縮短、射程提高。",
+        "同時向前後噴射，燃燒效果提高。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 3.8,
+          "duration": 1.5,
+          "range": 286.0,
+          "halfAngleDegrees": 42,
+          "targetSearchRange": 440,
+          "turnRadiansPerSecond": 1.7,
+          "tickSeconds": 0.2,
+          "damage": 8,
+          "burnDuration": 0,
+          "burnDamagePerSecond": 0,
+          "directionCount": 1,
+          "particle": {
+            "emitIntervalBase": 0.07,
+            "emitIntervalLevel4": 0.055,
+            "countBase": 1,
+            "countLevel4": 2,
+            "capBase": 10,
+            "capLevel4": 14,
+            "spreadMultiplier": 0.72,
+            "rangeMultiplier": 0.92,
+            "lifeMin": 0.34,
+            "lifeMax": 0.5,
+            "speedMinMultiplier": 1.5,
+            "speedMaxMultiplier": 2.0,
+            "spawnOffset": 24,
+            "velocityJitter": 20,
+            "sizeMin": 27,
+            "sizeMax": 40,
+            "spinMin": -1.1,
+            "spinMax": 1.1,
+            "dragBase": 0.42
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 3.8,
+          "duration": 1.9,
+          "range": 286.0,
+          "halfAngleDegrees": 50,
+          "targetSearchRange": 440,
+          "turnRadiansPerSecond": 1.7,
+          "tickSeconds": 0.2,
+          "damage": 8,
+          "burnDuration": 0,
+          "burnDamagePerSecond": 0,
+          "directionCount": 1,
+          "particle": {
+            "emitIntervalBase": 0.07,
+            "emitIntervalLevel4": 0.055,
+            "countBase": 1,
+            "countLevel4": 2,
+            "capBase": 10,
+            "capLevel4": 14,
+            "spreadMultiplier": 0.72,
+            "rangeMultiplier": 0.92,
+            "lifeMin": 0.34,
+            "lifeMax": 0.5,
+            "speedMinMultiplier": 1.5,
+            "speedMaxMultiplier": 2.0,
+            "spawnOffset": 24,
+            "velocityJitter": 20,
+            "sizeMin": 27,
+            "sizeMax": 40,
+            "spinMin": -1.1,
+            "spinMax": 1.1,
+            "dragBase": 0.42
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 3.8,
+          "duration": 1.9,
+          "range": 286.0,
+          "halfAngleDegrees": 50,
+          "targetSearchRange": 440,
+          "turnRadiansPerSecond": 1.7,
+          "tickSeconds": 0.2,
+          "damage": 10,
+          "burnDuration": 3.2,
+          "burnDamagePerSecond": 5,
+          "directionCount": 1,
+          "particle": {
+            "emitIntervalBase": 0.07,
+            "emitIntervalLevel4": 0.055,
+            "countBase": 1,
+            "countLevel4": 2,
+            "capBase": 10,
+            "capLevel4": 14,
+            "spreadMultiplier": 0.72,
+            "rangeMultiplier": 0.92,
+            "lifeMin": 0.34,
+            "lifeMax": 0.5,
+            "speedMinMultiplier": 1.5,
+            "speedMaxMultiplier": 2.0,
+            "spawnOffset": 24,
+            "velocityJitter": 20,
+            "sizeMin": 27,
+            "sizeMax": 40,
+            "spinMin": -1.1,
+            "spinMax": 1.1,
+            "dragBase": 0.42
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 3,
+          "duration": 1.9,
+          "range": 338.0,
+          "halfAngleDegrees": 50,
+          "targetSearchRange": 440,
+          "turnRadiansPerSecond": 1.7,
+          "tickSeconds": 0.2,
+          "damage": 10,
+          "burnDuration": 3.2,
+          "burnDamagePerSecond": 5,
+          "directionCount": 1,
+          "particle": {
+            "emitIntervalBase": 0.07,
+            "emitIntervalLevel4": 0.055,
+            "countBase": 1,
+            "countLevel4": 2,
+            "capBase": 10,
+            "capLevel4": 14,
+            "spreadMultiplier": 0.72,
+            "rangeMultiplier": 0.92,
+            "lifeMin": 0.34,
+            "lifeMax": 0.5,
+            "speedMinMultiplier": 1.5,
+            "speedMaxMultiplier": 2.0,
+            "spawnOffset": 24,
+            "velocityJitter": 20,
+            "sizeMin": 27,
+            "sizeMax": 40,
+            "spinMin": -1.1,
+            "spinMax": 1.1,
+            "dragBase": 0.42
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 3,
+          "duration": 1.9,
+          "range": 338.0,
+          "halfAngleDegrees": 50,
+          "targetSearchRange": 440,
+          "turnRadiansPerSecond": 1.7,
+          "tickSeconds": 0.2,
+          "damage": 10,
+          "burnDuration": 3.2,
+          "burnDamagePerSecond": 9,
+          "directionCount": 2,
+          "particle": {
+            "emitIntervalBase": 0.07,
+            "emitIntervalLevel4": 0.055,
+            "countBase": 1,
+            "countLevel4": 2,
+            "capBase": 10,
+            "capLevel4": 14,
+            "spreadMultiplier": 0.72,
+            "rangeMultiplier": 0.92,
+            "lifeMin": 0.34,
+            "lifeMax": 0.5,
+            "speedMinMultiplier": 1.5,
+            "speedMaxMultiplier": 2.0,
+            "spawnOffset": 24,
+            "velocityJitter": 20,
+            "sizeMin": 27,
+            "sizeMax": 40,
+            "spinMin": -1.1,
+            "spinMax": 1.1,
+            "dragBase": 0.42
+          }
+        }
+      ]
+    },
+    "lightning": {
+      "_comment": "雷弧鏈。range 為第一個目標搜索距離；jumpRange 為每次跳躍的最大距離。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "maxHits": "單條雷弧最多命中的敵人數。",
+        "jumpRange": "前一個目標到下一個目標的最大跳躍距離。",
+        "castSpacingSeconds": "同次施放多條雷弧時，第二條之後的間隔秒數。",
+        "visual": "雷線粗細、抖動、光暈與顏色。"
+      },
+      "name": "雷弧鏈",
+      "icon": "assets/weapon_lightning.png",
+      "color": "#ffe76a",
+      "descriptions": [
+        "雷電在 4 名敵人之間跳躍。",
+        "增加 2 次跳躍。",
+        "傷害提高。",
+        "冷卻縮短並微暈眩。",
+        "同時產生 2 條起始雷弧。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 1.6,
+          "count": 1,
+          "range": 520,
+          "maxHits": 4,
+          "damage": 30,
+          "castSpacingSeconds": 0,
+          "jumpRange": 166,
+          "stunSeconds": 0,
+          "visualDuration": 0.4,
+          "visual": {
+            "lineWidth": 4,
+            "shadowBlur": 22,
+            "segmentSteps": 4,
+            "jitter": 10,
+            "color": "#ffec74"
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 1.6,
+          "count": 1,
+          "range": 520,
+          "maxHits": 6,
+          "damage": 30,
+          "castSpacingSeconds": 0,
+          "jumpRange": 166,
+          "stunSeconds": 0,
+          "visualDuration": 0.4,
+          "visual": {
+            "lineWidth": 5,
+            "shadowBlur": 22,
+            "segmentSteps": 4,
+            "jitter": 10,
+            "color": "#ffec74"
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 1.6,
+          "count": 1,
+          "range": 520,
+          "maxHits": 6,
+          "damage": 40,
+          "castSpacingSeconds": 0,
+          "jumpRange": 166,
+          "stunSeconds": 0,
+          "visualDuration": 0.4,
+          "visual": {
+            "lineWidth": 6,
+            "shadowBlur": 22,
+            "segmentSteps": 4,
+            "jitter": 10,
+            "color": "#ffec74"
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 1.25,
+          "count": 1,
+          "range": 520,
+          "maxHits": 6,
+          "damage": 40,
+          "castSpacingSeconds": 0,
+          "jumpRange": 166,
+          "stunSeconds": 0.15,
+          "visualDuration": 0.4,
+          "visual": {
+            "lineWidth": 7,
+            "shadowBlur": 22,
+            "segmentSteps": 4,
+            "jitter": 15,
+            "color": "#ffec74"
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 1.25,
+          "count": 2,
+          "range": 520,
+          "maxHits": 6,
+          "damage": 40,
+          "castSpacingSeconds": 0.18,
+          "jumpRange": 166,
+          "stunSeconds": 0.15,
+          "visualDuration": 0.4,
+          "visual": {
+            "lineWidth": 7,
+            "shadowBlur": 22,
+            "segmentSteps": 4,
+            "jitter": 15,
+            "color": "#ffec74"
+          }
+        }
+      ]
+    },
+    "frost": {
+      "_comment": "寒霜脈衝。radius 已直接換算為像素，不再使用 radiusUnits。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "slowAmount": "速度降低比例；0.35 代表降低 35%。",
+        "freezeSeconds": "不同敵人類型的凍結秒數；全部為 0 表示該等級不凍結。",
+        "visual": "冰環起始半徑、持續時間、透明度與圖片縮放。"
+      },
+      "name": "寒霜脈衝",
+      "icon": "assets/weapon_frost.png",
+      "color": "#7edcff",
+      "descriptions": [
+        "釋放較大範圍的寒霜脈衝並緩速敵人。",
+        "脈衝半徑進一步提高。",
+        "傷害與緩速效果提高。",
+        "冷卻明顯縮短、擊退提高。",
+        "先凍結敵人，死亡時可能碎裂。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 2.75,
+          "radius": 175,
+          "damage": 28,
+          "slowDuration": 2,
+          "slowAmount": 0.4,
+          "freezeSeconds": {
+            "normal": 0,
+            "golem": 0,
+            "boss": 0
+          },
+          "knockback": 18,
+          "visual": {
+            "startRadius": 120,
+            "duration": 0.4,
+            "color": "rgba(108,220,255,.9)",
+            "alpha": 1.0,
+            "scale": 2.15,
+            "rotationSpeed": 0.25
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 2.75,
+          "radius": 220,
+          "damage": 28,
+          "slowDuration": 2,
+          "slowAmount": 0.4,
+          "freezeSeconds": {
+            "normal": 0,
+            "golem": 0,
+            "boss": 0
+          },
+          "knockback": 18,
+          "visual": {
+            "startRadius": 150,
+            "duration": 0.4,
+            "color": "rgba(108,220,255,.9)",
+            "alpha": 1.0,
+            "scale": 2.5,
+            "rotationSpeed": 0.25
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 2.75,
+          "radius": 220,
+          "damage": 40,
+          "slowDuration": 3,
+          "slowAmount": 0.5,
+          "freezeSeconds": {
+            "normal": 0,
+            "golem": 0,
+            "boss": 0
+          },
+          "knockback": 18,
+          "visual": {
+            "startRadius": 150,
+            "duration": 0.4,
+            "color": "rgba(108,220,255,.9)",
+            "alpha": 1.0,
+            "scale": 2.5,
+            "rotationSpeed": 0.25
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 2.0,
+          "radius": 220,
+          "damage": 40,
+          "slowDuration": 3,
+          "slowAmount": 0.5,
+          "freezeSeconds": {
+            "normal": 0,
+            "golem": 0,
+            "boss": 0
+          },
+          "knockback": 32,
+          "visual": {
+            "startRadius": 150,
+            "duration": 0.4,
+            "color": "rgba(108,220,255,.9)",
+            "alpha": 1.0,
+            "scale": 2.5,
+            "rotationSpeed": 0.25
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 2.0,
+          "radius": 220,
+          "damage": 40,
+          "slowDuration": 3,
+          "slowAmount": 0.5,
+          "freezeSeconds": {
+            "normal": 1.1,
+            "golem": 0.55,
+            "boss": 0.27
+          },
+          "knockback": 32,
+          "visual": {
+            "startRadius": 200,
+            "duration": 0.4,
+            "color": "rgba(108,220,255,.99)",
+            "alpha": 1.0,
+            "scale": 2.5,
+            "rotationSpeed": 0.25
+          }
+        }
+      ]
+    },
+    "meteor": {
+      "_comment": "天墜隕石。所有距離與半徑均為像素。burnVisualAlpha 是橢圓形燃燒區真正使用的主要透明度。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "minimumRange": "隕石落點距離玩家的最小距離。",
+        "maximumRange": "隕石落點距離玩家的最大距離。",
+        "minimumSeparation": "同次多顆隕石落點之間的最小距離。",
+        "burnVisualAlpha": "落地後橢圓形燃燒區的實際繪製透明度；程式會把此值存入 zone.visualAlpha。",
+        "largeMeteor": "Lv.5 最後一顆大型隕石覆寫值；null 表示沒有大型隕石。",
+        "impact": "落地震波、震動、粒子與音效合併參數。",
+        "fallVisual": "墜落貼圖、陰影與警示圈視覺。"
+      },
+      "name": "天墜隕石",
+      "icon": "assets/weapon_meteor.png",
+      "color": "#ff6a43",
+      "descriptions": [
+        "在敵人密集處降下一顆隕石，落地後留下燃燒區。",
+        "爆炸半徑與傷害提高。",
+        "每次降下 2 顆隕石。",
+        "大幅延長落地燃燒區的持續時間。",
+        "降下 3 顆，最後一顆為大型隕石。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 3.4,
+          "count": 1,
+          "minimumRange": 100,
+          "maximumRange": 400,
+          "minimumSeparation": 230,
+          "castSpacingSeconds": 0.38,
+          "fallDuration": 0.88,
+          "radius": 90,
+          "damage": 64,
+          "knockback": 35,
+          "stunSeconds": 0,
+          "burnDuration": 2.6,
+          "burnDamage": 9,
+          "burnTickSeconds": 1,
+          "burnStartTick": 0.2,
+          "burnParticleInterval": 0.14,
+          "burnVisualAlpha": 0.95,
+          "largeMeteor": null,
+          "impact": {
+            "waveStart": 8,
+            "waveDuration": 0.42,
+            "shakeNormal":10,
+            "shakeLarge": 15,
+            "shakeDurationNormal": 0.15,
+            "shakeDurationLarge": 0.20,
+            "boomMergeWindow": 0.11,
+            "particleVelocity": 230,
+            "particleLifeMin": 0.32,
+            "particleLifeMax": 0.72,
+            "particleSizeMin": 3,
+            "particleSizeMax": 9,
+            "waveColor": "rgba(255,116,50,.95)",
+            "particleColors": [
+              "#ff3e1f",
+              "#ff8f32",
+              "#ffd06b",
+              "#fff1b0"
+            ]
+          },
+          "fallVisual": {
+            "warningDash": [
+              10,
+              8
+            ],
+            "fixedRotation": -0.37690927032482097,
+            "offsetX": -170,
+            "offsetY": -430,
+            "easingPower": 2.2,
+            "scaleStart": 0.55,
+            "scaleGrowth": 0.65,
+            "largeScale": 1.55,
+            "spriteSize": 96,
+            "spriteAlpha": 0.95,
+            "shadowAlphaBase": 0.2,
+            "shadowAlphaGrowth": 0.45,
+            "shadowWidthMultiplier": 0.4,
+            "shadowHeightMultiplier": 0.4,
+            "shadowBaseWidth": 6,
+            "shadowBaseHeight": 4,
+            "cacheScale": 2
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 3.4,
+          "count": 1,
+          "minimumRange": 100,
+          "maximumRange": 400,
+          "minimumSeparation": 230,
+          "castSpacingSeconds": 0.38,
+          "fallDuration": 0.88,
+          "radius": 112,
+          "damage": 76,
+          "knockback": 35,
+          "stunSeconds": 0,
+          "burnDuration": 2.6,
+          "burnDamage": 9,
+          "burnTickSeconds": 1,
+          "burnStartTick": 0.2,
+          "burnParticleInterval": 0.14,
+          "burnVisualAlpha": 0.95,
+          "largeMeteor": null,
+          "impact": {
+            "waveStart": 8,
+            "waveDuration": 0.42,
+            "shakeNormal":10,
+            "shakeLarge": 15,
+            "shakeDurationNormal": 0.15,
+            "shakeDurationLarge": 0.20,
+            "boomMergeWindow": 0.11,
+            "particleVelocity": 230,
+            "particleLifeMin": 0.32,
+            "particleLifeMax": 0.72,
+            "particleSizeMin": 3,
+            "particleSizeMax": 9,
+            "waveColor": "rgba(255,116,50,.95)",
+            "particleColors": [
+              "#ff3e1f",
+              "#ff8f32",
+              "#ffd06b",
+              "#fff1b0"
+            ]
+          },
+          "fallVisual": {
+            "warningDash": [
+              10,
+              8
+            ],
+            "fixedRotation": -0.37690927032482097,
+            "offsetX": -170,
+            "offsetY": -430,
+            "easingPower": 2.2,
+            "scaleStart": 0.55,
+            "scaleGrowth": 0.65,
+            "largeScale": 1.55,
+            "spriteSize": 96,
+            "spriteAlpha": 0.95,
+            "shadowAlphaBase": 0.2,
+            "shadowAlphaGrowth": 0.45,
+            "shadowWidthMultiplier": 0.4,
+            "shadowHeightMultiplier": 0.4,
+            "shadowBaseWidth": 6,
+            "shadowBaseHeight": 4,
+            "cacheScale": 2
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 3.4,
+          "count": 2,
+          "minimumRange": 100,
+          "maximumRange": 400,
+          "minimumSeparation": 230,
+          "castSpacingSeconds": 0.38,
+          "fallDuration": 0.88,
+          "radius": 112,
+          "damage": 76,
+          "knockback": 35,
+          "stunSeconds": 0,
+          "burnDuration": 2.6,
+          "burnDamage": 9,
+          "burnTickSeconds": 1,
+          "burnStartTick": 0.2,
+          "burnParticleInterval": 0.14,
+          "burnVisualAlpha": 0.95,
+          "largeMeteor": null,
+          "impact": {
+            "waveStart": 8,
+            "waveDuration": 0.42,
+            "shakeNormal":10,
+            "shakeLarge": 15,
+            "shakeDurationNormal": 0.15,
+            "shakeDurationLarge": 0.20,
+            "boomMergeWindow": 0.11,
+            "particleVelocity": 230,
+            "particleLifeMin": 0.32,
+            "particleLifeMax": 0.72,
+            "particleSizeMin": 3,
+            "particleSizeMax": 9,
+            "waveColor": "rgba(255,116,50,.95)",
+            "particleColors": [
+              "#ff3e1f",
+              "#ff8f32",
+              "#ffd06b",
+              "#fff1b0"
+            ]
+          },
+          "fallVisual": {
+            "warningDash": [
+              10,
+              8
+            ],
+            "fixedRotation": -0.37690927032482097,
+            "offsetX": -170,
+            "offsetY": -430,
+            "easingPower": 2.2,
+            "scaleStart": 0.55,
+            "scaleGrowth": 0.65,
+            "largeScale": 1.55,
+            "spriteSize": 96,
+            "spriteAlpha": 0.95,
+            "shadowAlphaBase": 0.2,
+            "shadowAlphaGrowth": 0.45,
+            "shadowWidthMultiplier": 0.4,
+            "shadowHeightMultiplier": 0.4,
+            "shadowBaseWidth": 6,
+            "shadowBaseHeight": 4,
+            "cacheScale": 2
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 3.4,
+          "count": 2,
+          "minimumRange": 100,
+          "maximumRange": 400,
+          "minimumSeparation": 230,
+          "castSpacingSeconds": 0.38,
+          "fallDuration": 0.88,
+          "radius": 112,
+          "damage": 76,
+          "knockback": 35,
+          "stunSeconds": 0,
+          "burnDuration": 5,
+          "burnDamage": 9,
+          "burnTickSeconds": 1,
+          "burnStartTick": 0.2,
+          "burnParticleInterval": 0.14,
+          "burnVisualAlpha": 0.99,
+          "largeMeteor": null,
+          "impact": {
+            "waveStart": 8,
+            "waveDuration": 0.42,
+            "shakeNormal":10,
+            "shakeLarge": 15,
+            "shakeDurationNormal": 0.15,
+            "shakeDurationLarge": 0.20,
+            "boomMergeWindow": 0.11,
+            "particleVelocity": 230,
+            "particleLifeMin": 0.32,
+            "particleLifeMax": 0.72,
+            "particleSizeMin": 3,
+            "particleSizeMax": 9,
+            "waveColor": "rgba(255,116,50,.95)",
+            "particleColors": [
+              "#ff3e1f",
+              "#ff8f32",
+              "#ffd06b",
+              "#fff1b0"
+            ]
+          },
+          "fallVisual": {
+            "warningDash": [
+              10,
+              8
+            ],
+            "fixedRotation": -0.37690927032482097,
+            "offsetX": -170,
+            "offsetY": -430,
+            "easingPower": 2.2,
+            "scaleStart": 0.55,
+            "scaleGrowth": 0.65,
+            "largeScale": 1.55,
+            "spriteSize": 96,
+            "spriteAlpha": 0.95,
+            "shadowAlphaBase": 0.2,
+            "shadowAlphaGrowth": 0.45,
+            "shadowWidthMultiplier": 0.4,
+            "shadowHeightMultiplier": 0.4,
+            "shadowBaseWidth": 6,
+            "shadowBaseHeight": 4,
+            "cacheScale": 2
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 3.4,
+          "count": 3,
+          "minimumRange": 100,
+          "maximumRange": 400,
+          "minimumSeparation": 230,
+          "castSpacingSeconds": 0.38,
+          "fallDuration": 0.88,
+          "radius": 112,
+          "damage": 76,
+          "knockback": 35,
+          "stunSeconds": 0,
+          "burnDuration": 5,
+          "burnDamage": 9,
+          "burnTickSeconds": 1,
+          "burnStartTick": 0.2,
+          "burnParticleInterval": 0.14,
+          "burnVisualAlpha": 0.99,
+          "largeMeteor": {
+            "fallDuration": 1.05,
+            "radius": 145,
+            "damage": 120,
+            "stunSeconds": 0.45,
+            "burnDamage": 12
+          },
+          "impact": {
+            "waveStart": 8,
+            "waveDuration": 0.42,
+            "shakeNormal":10,
+            "shakeLarge": 15,
+            "shakeDurationNormal": 0.15,
+            "shakeDurationLarge": 0.20,
+            "boomMergeWindow": 0.11,
+            "particleVelocity": 230,
+            "particleLifeMin": 0.32,
+            "particleLifeMax": 0.72,
+            "particleSizeMin": 3,
+            "particleSizeMax": 9,
+            "waveColor": "rgba(255,116,50,.95)",
+            "particleColors": [
+              "#ff3e1f",
+              "#ff8f32",
+              "#ffd06b",
+              "#fff1b0"
+            ]
+          },
+          "fallVisual": {
+            "warningDash": [
+              10,
+              8
+            ],
+            "fixedRotation": -0.37690927032482097,
+            "offsetX": -170,
+            "offsetY": -430,
+            "easingPower": 2.2,
+            "scaleStart": 0.55,
+            "scaleGrowth": 0.65,
+            "largeScale": 1.55,
+            "spriteSize": 96,
+            "spriteAlpha": 0.95,
+            "shadowAlphaBase": 0.2,
+            "shadowAlphaGrowth": 0.45,
+            "shadowWidthMultiplier": 0.4,
+            "shadowHeightMultiplier": 0.4,
+            "shadowBaseWidth": 6,
+            "shadowBaseHeight": 4,
+            "cacheScale": 2
+          }
+        }
+      ]
+    },
+    "mine": {
+      "_comment": "腐蝕地雷。radius 同時作為爆炸與毒池半徑。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "maximumCount": "場上同時可存在的地雷上限。",
+        "triggerRadius": "敵人進入此半徑便引爆。",
+        "acidDamage": "毒池每次 tick 的傷害。",
+        "acidTickSeconds": "毒池傷害判定間隔。",
+        "chainRange": "連鎖引爆其他地雷的距離；0 表示停用。",
+        "chainDelaySeconds": "連鎖引爆延遲秒數。"
+      },
+      "name": "腐蝕地雷",
+      "icon": "assets/weapon_mine.png",
+      "color": "#61e59e",
+      "descriptions": [
+        "在腳下布置地雷與腐蝕池。",
+        "地雷上限與持續時間提高。",
+        "爆炸與腐蝕傷害提高。",
+        "冷卻縮短、範圍提高。",
+        "地雷可連鎖引爆並緩速。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 2.3,
+          "maximumCount": 5,
+          "radius": 73,
+          "autoDetonateSeconds": 5,
+          "triggerRadius": 18,
+          "explosionDamage": 28,
+          "explosionKnockback": 12,
+          "acidDuration": 3,
+          "acidDamage": 6,
+          "acidStartTick": 0.3,
+          "acidTickSeconds": 1,
+          "acidSlowDuration": 0,
+          "acidSlowAmount": 0,
+          "acidParticleInterval": 0.18,
+          "chainRange": 0,
+          "chainDelaySeconds": 0,
+          "wave": {
+            "startRadius": 7,
+            "duration": 0.3,
+            "color": "rgba(85,231,149,.85)"
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 2.3,
+          "maximumCount": 7,
+          "radius": 73,
+          "autoDetonateSeconds": 5,
+          "triggerRadius": 18,
+          "explosionDamage": 28,
+          "explosionKnockback": 12,
+          "acidDuration": 4,
+          "acidDamage": 6,
+          "acidStartTick": 0.3,
+          "acidTickSeconds": 1,
+          "acidSlowDuration": 0,
+          "acidSlowAmount": 0,
+          "acidParticleInterval": 0.18,
+          "chainRange": 0,
+          "chainDelaySeconds": 0,
+          "wave": {
+            "startRadius": 7,
+            "duration": 0.3,
+            "color": "rgba(85,231,149,.85)"
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 2.3,
+          "maximumCount": 7,
+          "radius": 73,
+          "autoDetonateSeconds": 5,
+          "triggerRadius": 18,
+          "explosionDamage": 42,
+          "explosionKnockback": 12,
+          "acidDuration": 4,
+          "acidDamage": 9,
+          "acidStartTick": 0.3,
+          "acidTickSeconds": 1,
+          "acidSlowDuration": 0,
+          "acidSlowAmount": 0,
+          "acidParticleInterval": 0.18,
+          "chainRange": 0,
+          "chainDelaySeconds": 0,
+          "wave": {
+            "startRadius": 7,
+            "duration": 0.3,
+            "color": "rgba(85,231,149,.85)"
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 1.7,
+          "maximumCount": 7,
+          "radius": 88,
+          "autoDetonateSeconds": 5,
+          "triggerRadius": 18,
+          "explosionDamage": 42,
+          "explosionKnockback": 12,
+          "acidDuration": 4,
+          "acidDamage": 9,
+          "acidStartTick": 0.3,
+          "acidTickSeconds": 1,
+          "acidSlowDuration": 0,
+          "acidSlowAmount": 0,
+          "acidParticleInterval": 0.18,
+          "chainRange": 0,
+          "chainDelaySeconds": 0,
+          "wave": {
+            "startRadius": 7,
+            "duration": 0.3,
+            "color": "rgba(85,231,149,.85)"
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 1.7,
+          "maximumCount": 7,
+          "radius": 88,
+          "autoDetonateSeconds": 5,
+          "triggerRadius": 18,
+          "explosionDamage": 42,
+          "explosionKnockback": 12,
+          "acidDuration": 4,
+          "acidDamage": 9,
+          "acidStartTick": 0.3,
+          "acidTickSeconds": 1,
+          "acidSlowDuration": 0.3,
+          "acidSlowAmount": 0.25,
+          "acidParticleInterval": 0.18,
+          "chainRange": 200,
+          "chainDelaySeconds": 0.1,
+          "wave": {
+            "startRadius": 7,
+            "duration": 0.3,
+            "color": "rgba(85,231,149,.95)"
+          }
+        }
+      ]
+    },
+    "laser": {
+      "_comment": "貫星光束。原本 length 統一改名為 range，表示光束從玩家向外延伸的像素長度。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "width": "光束完整寬度（像素）。",
+        "tickSeconds": "持續光束的傷害判定間隔。",
+        "trackingRadiansPerSecond": "光束追蹤轉向速度；0 表示不追蹤。",
+        "directionCount": "同時發射方向數。",
+        "markCount": "同一敵人累積幾次標記後追加傷害；0 表示停用。"
+      },
+      "name": "貫星光束",
+      "icon": "assets/weapon_laser.png",
+      "color": "#ed79ff",
+      "descriptions": [
+        "發射長直線全穿透光束。",
+        "光束寬度提高。",
+        "持續時間與傷害提高。",
+        "冷卻縮短並可追蹤轉向。",
+        "同時向前後發射並追加傷害。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 3.5,
+          "duration": 0.45,
+          "range": 520,
+          "width": 29,
+          "damage": 12,
+          "tickSeconds": 0.1,
+          "targetSearchRange": 700,
+          "trackingRadiansPerSecond": 0,
+          "directionCount": 1,
+          "markCount": 0,
+          "markDamage": 0,
+          "markDelaySeconds": 0,
+          "visual": {
+            "bodyAlpha": 0.28,
+            "coreAlpha": 0.92,
+            "coreWidthMultiplier": 0.24,
+            "shadowBlur": 34,
+            "bodyColor": "#ed72ff",
+            "coreColor": "#fff",
+            "shadowColor": "#d65dff"
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 3.5,
+          "duration": 0.45,
+          "range": 520,
+          "width": 50,
+          "damage": 12,
+          "tickSeconds": 0.1,
+          "targetSearchRange": 700,
+          "trackingRadiansPerSecond": 0,
+          "directionCount": 1,
+          "markCount": 0,
+          "markDamage": 0,
+          "markDelaySeconds": 0,
+          "visual": {
+            "bodyAlpha": 0.28,
+            "coreAlpha": 0.92,
+            "coreWidthMultiplier": 0.24,
+            "shadowBlur": 34,
+            "bodyColor": "#ed72ff",
+            "coreColor": "#fff",
+            "shadowColor": "#d65dff"
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 3.5,
+          "duration": 0.65,
+          "range": 520,
+          "width": 50,
+          "damage": 13,
+          "tickSeconds": 0.1,
+          "targetSearchRange": 700,
+          "trackingRadiansPerSecond": 0,
+          "directionCount": 1,
+          "markCount": 0,
+          "markDamage": 0,
+          "markDelaySeconds": 0,
+          "visual": {
+            "bodyAlpha": 0.28,
+            "coreAlpha": 0.92,
+            "coreWidthMultiplier": 0.24,
+            "shadowBlur": 34,
+            "bodyColor": "#ed72ff",
+            "coreColor": "#fff",
+            "shadowColor": "#d65dff"
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 2.7,
+          "duration": 0.65,
+          "range": 520,
+          "width": 50,
+          "damage": 13,
+          "tickSeconds": 0.1,
+          "targetSearchRange": 700,
+          "trackingRadiansPerSecond": 1.2,
+          "directionCount": 1,
+          "markCount": 0,
+          "markDamage": 0,
+          "markDelaySeconds": 0,
+          "visual": {
+            "bodyAlpha": 0.28,
+            "coreAlpha": 0.92,
+            "coreWidthMultiplier": 0.24,
+            "shadowBlur": 34,
+            "bodyColor": "#ed72ff",
+            "coreColor": "#fff",
+            "shadowColor": "#d65dff"
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 2.7,
+          "duration": 0.65,
+          "range": 520,
+          "width": 50,
+          "damage": 13,
+          "tickSeconds": 0.1,
+          "targetSearchRange": 700,
+          "trackingRadiansPerSecond": 1.2,
+          "directionCount": 2,
+          "markCount": 5,
+          "markDamage": 20,
+          "markDelaySeconds": 0.5,
+          "visual": {
+            "bodyAlpha": 0.28,
+            "coreAlpha": 0.92,
+            "coreWidthMultiplier": 0.24,
+            "shadowBlur": 34,
+            "bodyColor": "#ed72ff",
+            "coreColor": "#fff",
+            "shadowColor": "#d65dff"
+          }
+        }
+      ]
+    },
+    "hammer": {
+      "_comment": "震地戰鎚。radius 已直接換算為像素；outerWave 為 Lv.5 額外外環。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "stunSeconds": "命中後暈眩時間；0 表示沒有。",
+        "wave": "主震波純視覺設定。",
+        "outerWave": "Lv.5 第二道外環；null 表示沒有。"
+      },
+      "name": "震地戰鎚",
+      "icon": "assets/weapon_hammer.png",
+      "color": "#e0bb78",
+      "descriptions": [
+        "近身重擊並強力擊退，基礎傷害提高。",
+        "傷害進一步提高。",
+        "範圍提高。",
+        "冷卻明顯縮短並附加暈眩。",
+        "追加第二道高傷害大型外環。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 2.15,
+          "radius": 135,
+          "damage": 52,
+          "knockback": 58,
+          "stunSeconds": 0,
+          "wave": {
+            "startRadius": 20,
+            "duration": 0.7,
+            "color": "rgba(238,194,116,.95)"
+          },
+          "outerWave": null
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 2.15,
+          "radius": 135,
+          "damage": 70,
+          "knockback": 58,
+          "stunSeconds": 0,
+          "wave": {
+            "startRadius": 20,
+            "duration": 0.7,
+            "color": "rgba(238,194,116,.95)"
+          },
+          "outerWave": null
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 2.15,
+          "radius": 180,
+          "damage": 70,
+          "knockback": 58,
+          "stunSeconds": 0,
+          "wave": {
+            "startRadius": 20,
+            "duration": 0.7,
+            "color": "rgba(238,194,116,.95)"
+          },
+          "outerWave": null
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 1.65,
+          "radius": 180,
+          "damage": 70,
+          "knockback": 58,
+          "stunSeconds": 0.3,
+          "wave": {
+            "startRadius": 20,
+            "duration": 0.7,
+            "color": "rgba(238,194,116,.95)"
+          },
+          "outerWave": null
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 1.65,
+          "radius": 200,
+          "damage": 70,
+          "knockback": 58,
+          "stunSeconds": 0.3,
+          "wave": {
+            "startRadius": 20,
+            "duration": 0.7,
+            "color": "rgba(238,194,116,.95)"
+          },
+          "outerWave": {
+            "radius": 230,
+            "delay": 0.45,
+            "damageDuration": 0.45,
+            "visualDuration": 0.9,
+            "damage": 62,
+            "damageColor": "rgba(242,208,135,.95)",
+            "visualColor": "rgba(242,208,135,.6)",
+            "hitKnockback": 20
+          }
+        }
+      ]
+    },
+    "drone": {
+      "_comment": "獵殺無人機。各等級完整列出無人機數量、普通彈與飛彈參數。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "orbitRadius": "無人機繞玩家飛行的軌道半徑。",
+        "shotCooldown": "每架無人機普通射擊間隔。",
+        "targetSearchRange": "普通射擊索敵距離。",
+        "projectileRadius": "普通子彈碰撞半徑。",
+        "projectileRange": "普通子彈最大飛行距離。",
+        "missile": "Lv.5 飛彈完整參數；radius 是碰撞半徑，visualRadius 是畫面顯示半徑。本版 visualRadius 為碰撞半徑的 2 倍。"
+      },
+      "name": "獵殺無人機",
+      "icon": "assets/weapon_drone.png",
+      "color": "#72cfff",
+      "descriptions": [
+        "1 架無人機自動射擊。",
+        "無人機增加為 2 架。",
+        "傷害提高並穿透。",
+        "射擊間隔縮短。",
+        "3 架無人機，週期發射飛彈。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 0,
+          "count": 1,
+          "orbitRadius": 57,
+          "orbitSpeed": 0.9,
+          "startShotTimerMax": 0.3,
+          "startMissileTimerMax": 2,
+          "shotCooldown": 0.55,
+          "targetSearchRange": 365,
+          "damage": 10,
+          "speed": 650,
+          "projectileRadius": 6,
+          "projectileRange": 900,
+          "pierce": 0,
+          "missile": null
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 0,
+          "count": 2,
+          "orbitRadius": 57,
+          "orbitSpeed": 0.9,
+          "startShotTimerMax": 0.3,
+          "startMissileTimerMax": 2,
+          "shotCooldown": 0.55,
+          "targetSearchRange": 365,
+          "damage": 10,
+          "speed": 650,
+          "projectileRadius": 6,
+          "projectileRange": 900,
+          "pierce": 0,
+          "missile": null
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 0,
+          "count": 2,
+          "orbitRadius": 57,
+          "orbitSpeed": 0.9,
+          "startShotTimerMax": 0.3,
+          "startMissileTimerMax": 2,
+          "shotCooldown": 0.55,
+          "targetSearchRange": 365,
+          "damage": 14,
+          "speed": 700,
+          "projectileRadius": 6,
+          "projectileRange": 900,
+          "pierce": 1,
+          "missile": null
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 0,
+          "count": 2,
+          "orbitRadius": 57,
+          "orbitSpeed": 0.9,
+          "startShotTimerMax": 0.3,
+          "startMissileTimerMax": 2,
+          "shotCooldown": 0.38,
+          "targetSearchRange": 365,
+          "damage": 14,
+          "speed": 700,
+          "projectileRadius": 6,
+          "projectileRange": 900,
+          "pierce": 1,
+          "missile": null
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 0,
+          "count": 3,
+          "orbitRadius": 57,
+          "orbitSpeed": 0.9,
+          "startShotTimerMax": 0.3,
+          "startMissileTimerMax": 2,
+          "shotCooldown": 0.38,
+          "targetSearchRange": 365,
+          "damage": 14,
+          "speed": 700,
+          "projectileRadius": 6,
+          "projectileRange": 900,
+          "pierce": 1,
+          "missile": {
+            "level": 5,
+            "cooldown": 3,
+            "targetRange": 480,
+            "damage": 30,
+            "speed": 500,
+            "radius": 15,
+            "color": "#ffcb6e",
+            "explosionRadius": 55,
+            "explosionDamage": 30,
+            "explosionKnockback": 8,
+            "waveStart": 4,
+            "waveDuration": 0.22,
+            "waveColor": "rgba(255,179,80,.85)",
+            "visualRadius": 26
+          }
+        }
+      ]
+    },
+    "gravity": {
+      "_comment": "重力奇點。minimumRange、maximumRange、wellRadius 全部使用像素，不再使用 radiusUnits。",
+      "_fieldNotes": {
+        "level": "武器等級，固定為 1～5。",
+        "cooldown": "每次施放後等待秒數；越小攻擊越頻繁。",
+        "damage": "單次直接命中傷害。持續傷害會使用 burnDamage、acidDamage、tickDamage 等明確名稱。",
+        "range": "從發射點或玩家中心計算的最大有效距離，統一使用像素；可直接與 baseAttack.range 比較。",
+        "radius": "圓形範圍、碰撞體或爆炸區的半徑，統一使用像素。",
+        "duration": "效果持續秒數。",
+        "count": "同次施放產生的物件數量。",
+        "speed": "每秒移動像素。",
+        "delay": "事件發生前的等待秒數。",
+        "visualAlpha": "主要視覺透明度，0 為完全透明、1 為完全不透明。",
+        "minimumRange": "奇點落點距離玩家的最小距離。",
+        "maximumRange": "奇點落點距離玩家的最大距離。",
+        "wellRadius": "奇點作用半徑（像素）。",
+        "tickDamage": "奇點每次 tick 傷害。",
+        "pull": "每次 tick 對一般敵人的拉力位移基準。",
+        "finalDamage": "奇點結束爆炸傷害。",
+        "projectile": "投擲核心的飛行、弧線與粒子設定。"
+      },
+      "name": "重力奇點",
+      "icon": "assets/weapon_gravity.png",
+      "color": "#b278ff",
+      "descriptions": [
+        "從玩家位置投射重力核心，抵達後展開奇點。",
+        "奇點半徑提高。",
+        "持續時間與傷害提高。",
+        "冷卻縮短、吸力提高。",
+        "同時向不同敵群投射 2 枚重力核心。"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "_comment": "Lv.1",
+          "cooldown": 5.2,
+          "count": 1,
+          "minimumRange": 150,
+          "maximumRange": 550,
+          "minimumSeparation": 210,
+          "castSpacingSeconds": 0.42,
+          "projectile": {
+            "durationBase": 0.42,
+            "distanceDivisor": 1400,
+            "durationMin": 0.52,
+            "durationMax": 0.9,
+            "arcHeight": 34,
+            "spinSpeed": 8,
+            "particleRatePerSecond": 24,
+            "particleVelocity": 45,
+            "particleLifeMin": 0.22,
+            "particleLifeMax": 0.42,
+            "particleSizeMin": 2,
+            "particleSizeMax": 5,
+            "particleColors": [
+              "#c58cff",
+              "#8b4dff",
+              "#ffffff"
+            ]
+          },
+          "wellRadius": 140,
+          "wellDuration": 2.2,
+          "tickSeconds": 0.25,
+          "pull": 78,
+          "heavyPullMultiplier": 0.5,
+          "tickDamage": 8,
+          "finalDamage": 35,
+          "finalKnockback": 12,
+          "finalWave": {
+            "startRadius": 8,
+            "duration": 0.32,
+            "color": "rgba(179,100,255,.85)"
+          },
+          "arrival": {
+            "waveStart": 6,
+            "waveEnd": 58,
+            "waveDuration": 0.28,
+            "shakeAmplitude": 5,
+            "shakeDuration": 0.1,
+            "waveColor": "rgba(202,142,255,.95)"
+          }
+        },
+        {
+          "level": 2,
+          "_comment": "Lv.2",
+          "cooldown": 5.2,
+          "count": 1,
+          "minimumRange": 150,
+          "maximumRange": 550,
+          "minimumSeparation": 210,
+          "castSpacingSeconds": 0.42,
+          "projectile": {
+            "durationBase": 0.42,
+            "distanceDivisor": 1400,
+            "durationMin": 0.52,
+            "durationMax": 0.9,
+            "arcHeight": 34,
+            "spinSpeed": 8,
+            "particleRatePerSecond": 24,
+            "particleVelocity": 45,
+            "particleLifeMin": 0.22,
+            "particleLifeMax": 0.42,
+            "particleSizeMin": 2,
+            "particleSizeMax": 5,
+            "particleColors": [
+              "#c58cff",
+              "#8b4dff",
+              "#ffffff"
+            ]
+          },
+          "wellRadius": 166,
+          "wellDuration": 2.2,
+          "tickSeconds": 0.25,
+          "pull": 78,
+          "heavyPullMultiplier": 0.5,
+          "tickDamage": 8,
+          "finalDamage": 35,
+          "finalKnockback": 12,
+          "finalWave": {
+            "startRadius": 8,
+            "duration": 0.32,
+            "color": "rgba(179,100,255,.85)"
+          },
+          "arrival": {
+            "waveStart": 6,
+            "waveEnd": 58,
+            "waveDuration": 0.28,
+            "shakeAmplitude": 5,
+            "shakeDuration": 0.1,
+            "waveColor": "rgba(202,142,255,.95)"
+          }
+        },
+        {
+          "level": 3,
+          "_comment": "Lv.3",
+          "cooldown": 5.2,
+          "count": 1,
+          "minimumRange": 150,
+          "maximumRange": 550,
+          "minimumSeparation": 210,
+          "castSpacingSeconds": 0.42,
+          "projectile": {
+            "durationBase": 0.42,
+            "distanceDivisor": 1400,
+            "durationMin": 0.52,
+            "durationMax": 0.9,
+            "arcHeight": 34,
+            "spinSpeed": 8,
+            "particleRatePerSecond": 24,
+            "particleVelocity": 45,
+            "particleLifeMin": 0.22,
+            "particleLifeMax": 0.42,
+            "particleSizeMin": 2,
+            "particleSizeMax": 5,
+            "particleColors": [
+              "#c58cff",
+              "#8b4dff",
+              "#ffffff"
+            ]
+          },
+          "wellRadius": 166,
+          "wellDuration": 2.8,
+          "tickSeconds": 0.25,
+          "pull": 78,
+          "heavyPullMultiplier": 0.5,
+          "tickDamage": 10,
+          "finalDamage": 35,
+          "finalKnockback": 12,
+          "finalWave": {
+            "startRadius": 8,
+            "duration": 0.32,
+            "color": "rgba(179,100,255,.85)"
+          },
+          "arrival": {
+            "waveStart": 6,
+            "waveEnd": 58,
+            "waveDuration": 0.28,
+            "shakeAmplitude": 5,
+            "shakeDuration": 0.1,
+            "waveColor": "rgba(202,142,255,.95)"
+          }
+        },
+        {
+          "level": 4,
+          "_comment": "Lv.4",
+          "cooldown": 4.2,
+          "count": 1,
+          "minimumRange": 150,
+          "maximumRange": 550,
+          "minimumSeparation": 210,
+          "castSpacingSeconds": 0.42,
+          "projectile": {
+            "durationBase": 0.42,
+            "distanceDivisor": 1400,
+            "durationMin": 0.52,
+            "durationMax": 0.9,
+            "arcHeight": 34,
+            "spinSpeed": 8,
+            "particleRatePerSecond": 24,
+            "particleVelocity": 45,
+            "particleLifeMin": 0.22,
+            "particleLifeMax": 0.42,
+            "particleSizeMin": 2,
+            "particleSizeMax": 5,
+            "particleColors": [
+              "#c58cff",
+              "#8b4dff",
+              "#ffffff"
+            ]
+          },
+          "wellRadius": 166,
+          "wellDuration": 2.8,
+          "tickSeconds": 0.25,
+          "pull": 110,
+          "heavyPullMultiplier": 0.5,
+          "tickDamage": 10,
+          "finalDamage": 35,
+          "finalKnockback": 12,
+          "finalWave": {
+            "startRadius": 8,
+            "duration": 0.32,
+            "color": "rgba(179,100,255,.85)"
+          },
+          "arrival": {
+            "waveStart": 6,
+            "waveEnd": 58,
+            "waveDuration": 0.28,
+            "shakeAmplitude": 5,
+            "shakeDuration": 0.1,
+            "waveColor": "rgba(202,142,255,.95)"
+          }
+        },
+        {
+          "level": 5,
+          "_comment": "Lv.5",
+          "cooldown": 4.2,
+          "count": 2,
+          "minimumRange": 150,
+          "maximumRange": 550,
+          "minimumSeparation": 210,
+          "castSpacingSeconds": 0.42,
+          "projectile": {
+            "durationBase": 0.42,
+            "distanceDivisor": 1400,
+            "durationMin": 0.52,
+            "durationMax": 0.9,
+            "arcHeight": 34,
+            "spinSpeed": 8,
+            "particleRatePerSecond": 24,
+            "particleVelocity": 45,
+            "particleLifeMin": 0.22,
+            "particleLifeMax": 0.42,
+            "particleSizeMin": 2,
+            "particleSizeMax": 5,
+            "particleColors": [
+              "#c58cff",
+              "#8b4dff",
+              "#ffffff"
+            ]
+          },
+          "wellRadius": 166,
+          "wellDuration": 2.8,
+          "tickSeconds": 0.25,
+          "pull": 110,
+          "heavyPullMultiplier": 0.5,
+          "tickDamage": 10,
+          "finalDamage": 60,
+          "finalKnockback": 12,
+          "finalWave": {
+            "startRadius": 8,
+            "duration": 0.32,
+            "color": "rgba(179,100,255,.85)"
+          },
+          "arrival": {
+            "waveStart": 6,
+            "waveEnd": 58,
+            "waveDuration": 0.28,
+            "shakeAmplitude": 5,
+            "shakeDuration": 0.1,
+            "waveColor": "rgba(202,142,255,.95)"
+          }
+        }
+      ]
+    },
+    "_parameterDictionary": {
+      "_comment": "武器設定欄位字典。每個 levels 內出現的欄位，都可在此查到功能、單位與調整方向。",
+      "level": "武器等級，固定 1～5。",
+      "cooldown": "施放後等待秒數；數值越小，攻擊頻率越高。0 代表被動持續型武器，不走一般冷卻流程。",
+      "count": "同次施放或同時存在的主要武器物件數量。",
+      "damage": "單次直接命中傷害。",
+      "range": "最大有效距離、飛行距離或直線延伸長度，統一使用像素。可直接和 baseAttack.range 比較。",
+      "radius": "圓形作用區、爆炸區、碰撞體或軌道距離的半徑，統一使用像素。",
+      "projectileRadius": "子彈碰撞半徑，單位為像素。",
+      "hitRadius": "刃片或近戰物件實際碰撞半徑，單位為像素。",
+      "bladeSize": "刃片 PNG 的顯示寬高，單位為像素；不等同 hitRadius。",
+      "width": "光束或線性攻擊的完整寬度，單位為像素。",
+      "speed": "主要投射物每秒移動像素。",
+      "projectileSpeed": "投射物每秒移動像素。",
+      "returnSpeed": "迴旋武器回程時的目標速度。",
+      "orbitSpeed": "繞玩家旋轉的角速度，單位為弧度/秒。",
+      "rotationSpeed": "貼圖或軌道旋轉速度，單位為弧度/秒。",
+      "duration": "效果、光束、噴流或區域存在秒數。",
+      "fallDuration": "隕石從開始顯示到落地的秒數。",
+      "burnDuration": "燃燒狀態或燃燒區持續秒數。",
+      "acidDuration": "毒性區域持續秒數。",
+      "wellDuration": "黑洞奇點存在秒數。",
+      "tickSeconds": "持續性效果每次判定間隔秒數。",
+      "burnTickSeconds": "燃燒區每次造成傷害的間隔秒數。",
+      "acidTickSeconds": "毒池每次造成傷害的間隔秒數。",
+      "shotCooldown": "每架無人機普通射擊間隔秒數。",
+      "castSpacingSeconds": "同次施放多個物件時，第二個之後彼此錯開的秒數。",
+      "delay": "事件開始前等待秒數。",
+      "markDelaySeconds": "雷射標記達成後，到追加傷害發生前的等待秒數。",
+      "chainDelaySeconds": "地雷連鎖引爆的等待秒數。",
+      "minimumRange": "選點距離玩家的最小距離，單位為像素。",
+      "maximumRange": "選點距離玩家的最大距離，單位為像素。",
+      "minimumSeparation": "同次多個落點之間的最小距離，單位為像素。",
+      "targetSearchRange": "武器尋找敵人的最大距離，單位為像素。",
+      "jumpRange": "連鎖雷電由上一個敵人跳到下一個敵人的最大距離。",
+      "spreadDegrees": "完整散射扇形角度，單位為度。",
+      "halfAngleDegrees": "從中心線向單側展開的角度；實際總角度為兩倍。",
+      "angleJitterRadians": "每顆彈丸的隨機角度擾動，單位為弧度。",
+      "spreadRadians": "多個物件之間的角度間隔，單位為弧度。",
+      "turnRadiansPerSecond": "自動追蹤目標時每秒可轉向的最大弧度。",
+      "trackingRadiansPerSecond": "光束追蹤目標時每秒可轉向的最大弧度；0 表示不追蹤。",
+      "knockback": "命中時推開敵人的距離基準。",
+      "hitKnockback": "特定命中事件使用的擊退距離。",
+      "explosionKnockback": "爆炸命中時的擊退距離。",
+      "stunSeconds": "暈眩秒數；0 表示沒有暈眩。",
+      "slowDuration": "緩速持續秒數。",
+      "slowAmount": "緩速比例；0.35 表示降低 35% 移動速度。",
+      "freezeSeconds": "依敵人類型區分的凍結秒數。",
+      "burnDamage": "燃燒區每次 tick 的傷害。",
+      "burnDamagePerSecond": "附加在敵人身上的燃燒每秒傷害。",
+      "acidDamage": "毒池每次 tick 的傷害。",
+      "tickDamage": "黑洞奇點每次 tick 的傷害。",
+      "finalDamage": "黑洞結束爆炸傷害。",
+      "visualDuration": "純視覺效果持續秒數，不會改變傷害判定。",
+      "visualAlpha": "純視覺透明度；0 完全透明，1 完全不透明。",
+      "burnVisualAlpha": "隕石落地後橢圓形燃燒區的實際透明度。此值會直接存到 zone.visualAlpha 並由 drawWorld 使用。",
+      "bodyAlpha": "光束外層本體透明度。",
+      "coreAlpha": "光束中心亮線透明度。",
+      "lineWidth": "線條完整粗細，單位為像素。",
+      "shadowBlur": "Canvas 光暈模糊半徑；數值越大越亮也越耗效能。",
+      "jitter": "雷電折線每段的隨機偏移像素。",
+      "segmentSteps": "每段雷電路徑切成多少小段。",
+      "particle": "純視覺粒子的生成速度、壽命、尺寸與數量設定。",
+      "particleInterval": "地面區域每次生成一顆視覺粒子的間隔秒數。",
+      "burnParticleInterval": "燃燒區生成火焰粒子的間隔秒數。",
+      "acidParticleInterval": "毒池生成毒性粒子的間隔秒數。",
+      "maximumCount": "場上同時存在的地雷上限。",
+      "autoDetonateSeconds": "地雷未被踩中時，自動爆炸前等待秒數。",
+      "triggerRadius": "敵人進入後觸發地雷的距離半徑。",
+      "chainRange": "Lv.5 地雷尋找其他地雷進行連鎖的距離；0 表示停用。",
+      "directionCount": "同次施放的方向數；2 通常代表前後雙向。",
+      "maxHits": "單條雷電最多命中的敵人數。",
+      "pierce": "投射物可額外穿透的敵人數。",
+      "core": "Lv.5 核心彈設定；null 表示該等級沒有。",
+      "missile": "Lv.5 無人機飛彈設定；null 表示該等級沒有。",
+      "largeMeteor": "Lv.5 最後一顆大型隕石的覆寫參數；null 表示沒有。",
+      "outerWave": "Lv.5 震地戰鎚第二道外環；null 表示沒有。",
+      "returnBurst": "Lv.5 迴旋斬輪回到玩家時的爆發；null 表示沒有。",
+      "wellRadius": "黑洞奇點作用半徑，單位為像素。",
+      "pull": "黑洞每次 tick 拉動一般敵人的位移基準。",
+      "heavyPullMultiplier": "Boss 與高重量敵人的拉力倍率。",
+      "orbitRadius": "無人機或武器中心距離玩家的軌道半徑。",
+      "expandRadius": "Lv.5 週期外擴時可增加的軌道半徑。",
+      "expandBladeSize": "Lv.5 外擴時可增加的刃片圖片尺寸。",
+      "expandHitRadius": "Lv.5 外擴時可增加的碰撞半徑。",
+      "expandCycleSeconds": "完成一次外擴到收縮循環所需秒數；0 表示不啟用。",
+      "hitRepeatDelay": "同一刃片再次命中同一敵人前的等待秒數。",
+      "projectile": "黑洞投擲核心的飛行弧線、時間與粒子設定。",
+      "arrival": "黑洞核心抵達落點時的震波與震動設定。",
+      "impact": "隕石落地時的震波、震動、粒子與音效合併設定。",
+      "fallVisual": "隕石墜落貼圖、警示圈、陰影與縮放設定。",
+      "visual": "該武器專用的純視覺參數集合。",
+      "wave": "範圍震波的起始半徑、持續時間與顏色。",
+      "visualRadius": "投射物純視覺繪製半徑，單位為像素；不影響碰撞，未設定時等同 projectileRadius 或 radius。"
+    }
+  },
+  "items": {
+    "_comment": "升級三選一與地圖掉落物所使用的即時／限時道具文字與數值。",
+    "heal": {
+      "name": "血液補劑",
+      "icon": "assets/item_heal.png",
+      "color": "#ff5579",
+      "description": "立即回復 40 HP。",
+      "heal": 40
+    },
+    "regen": {
+      "name": "再生注射",
+      "icon": "assets/item_regen.png",
+      "color": "#58e4ad",
+      "description": "8 秒內持續回復生命。",
+      "duration": 8,
+      "healPercentPerSecond": 0.05,
+      "maximumFlatPerSecond": 5
+    },
+    "shield": {
+      "name": "光盾電池",
+      "icon": "assets/item_shield.png",
+      "color": "#6cbcff",
+      "description": "5 秒內完全無敵。",
+      "duration": 5
+    },
+    "magnet": {
+      "name": "全域磁極",
+      "icon": "assets/item_magnet.png",
+      "color": "#5be9ff",
+      "description": "將地圖上全部 EXP 吸向玩家。",
+      "duration": 8
+    },
+    "freeze": {
+      "name": "停滯鐘",
+      "icon": "assets/item_freeze.png",
+      "color": "#8ddfff",
+      "description": "所有敵人停止動作 6 秒。",
+      "duration": 6
+    },
+    "doublexp": {
+      "name": "雙倍知識",
+      "icon": "assets/item_doublexp.png",
+      "color": "#ffd963",
+      "description": "20 秒內取得 EXP ×2。",
+      "duration": 20,
+      "multiplier": 2
+    },
+    "overload": {
+      "name": "過載核心",
+      "icon": "assets/item_overload.png",
+      "color": "#ff76e6",
+      "description": "12 秒內所有武器冷卻縮短 40%。",
+      "duration": 12,
+      "cooldownMultiplier": 0.6
+    },
+    "bomb": {
+      "name": "清場炸彈",
+      "icon": "assets/item_bomb.png",
+      "color": "#ff7359",
+      "description": "重創場上所有敵人。",
+      "normalDamage": 200,
+      "bossMaximumDamage": 200,
+      "bossHPPercent": 0.08
+    },
+    "push": {
+      "name": "驅散衝擊",
+      "icon": "assets/item_push.png",
+      "color": "#baa0ff",
+      "description": "擊退畫面內敵人並暈眩。",
+      "screenRangeMultiplier": 0.75,
+      "pushDistance": 180,
+      "stunSeconds": 1,
+      "waveRangeMultiplier": 0.65,
+      "waveDuration": 0.6
+    },
+    "vampire": {
+      "name": "吸血契約",
+      "icon": "assets/item_vampire.png",
+      "color": "#f65081",
+      "description": "15 秒內擊殺敵人可回復生命。",
+      "duration": 15,
+      "healPercentPerKill": 0.003
+    }
+  },
+  "stats": {
+    "_comment": "永久能力的顯示資料；實際數值陣列位於 progression。",
+    "hp": {
+      "name": "生命強化",
+      "icon": "assets/stat_hp.png",
+      "color": "#ff6688",
+      "description": "最大 HP +15，並回復 15 HP。"
+    },
+    "speed": {
+      "name": "步伐強化",
+      "icon": "assets/stat_speed.png",
+      "color": "#69dcff",
+      "description": "提高移動速度。第 5 級達基礎速度 2.5 倍。"
+    },
+    "pickup": {
+      "name": "磁力強化",
+      "icon": "assets/stat_pickup.png",
+      "color": "#a982ff",
+      "description": "擴大 EXP 與拾取物吸引範圍。"
+    }
+  },
+  "drops": {
+    "_comment": "地圖隨機掉落物與 EXP 晶體的生成、吸附、移動和合併參數。",
+    "firstDropDelay": 11,
+    "nextDropDelayMin": 14,
+    "nextDropDelayMax": 22,
+    "lifetime": 16,
+    "spawnRangeMin": 140,
+    "spawnRangeMax": 460,
+    "healChance": 0.5,
+    "freezeCumulativeChance": 0.67,
+    "healAmount": 35,
+    "freezeDuration": 4.5,
+    "magnetDuration": 5,
+    "pickupExtraRadius": 18,
+    "exp": {
+      "largeValue": 20,
+      "mediumValue": 5,
+      "radiusSmall": 7,
+      "radiusMedium": 10,
+      "radiusLarge": 13,
+      "spinSpeed": 1.8,
+      "globalMagnetForce": 980,
+      "localForceBase": 170,
+      "localForcePerPixel": 5.5,
+      "localForceMin": 190,
+      "localForceMax": 780,
+      "velocityLerpRate": 9,
+      "idleDragRate": 8,
+      "returnRate": 7,
+      "pickupExtraRadius": 14
+    },
+    "magnetCumulativeChance": 0.76,
+    "mapMaximumCount": 7,
+    "mapRadius": 20,
+    "mapLifetime": 26,
+    "mapDistanceScreenBase": 0.28,
+    "mapDistanceScreenRandom": 0.22,
+    "mapPositionJitter": 90,
+    "mapBobSpeed": 2.6,
+    "mapPickupRadiusMultiplier": 0.95,
+    "mapAttractForceBase": 150,
+    "mapAttractForcePerPixel": 4.3,
+    "mapAttractForceMin": 180,
+    "mapAttractForceMax": 620,
+    "mapVelocityLerpRate": 7,
+    "mapPickupOverlapReduction": 6
+  },
+  "visuals": {
+    "_comment": "Canvas 繪製使用的尺寸、線寬、透明度、顏色、動畫速度與離屏快取設定。",
+    "_fieldNotes": {
+      "alpha/opacity": "0～1 的透明度。",
+      "lineWidth": "Canvas 線條粗細，單位為像素。",
+      "shadowBlur": "發光／陰影模糊半徑；越大越耗 GPU。",
+      "spriteSize": "貼圖顯示尺寸。",
+      "pulseSpeed/rotationSpeed": "每秒動畫速度。",
+      "cache": "離屏快取，只在載入或尺寸改變時重建。"
+    },
+    "background": {
+      "fill": "#0a0911",
+      "patternTile": 512,
+      "patternAlpha": 0.78,
+      "patternOverscan": 1024,
+      "vignetteInnerRadius": 70,
+      "vignetteOuterMultiplier": 0.72,
+      "vignetteStops": [
+        [
+          0,
+          "rgba(255,32,88,.025)"
+        ],
+        [
+          0.55,
+          "rgba(5,5,10,.1)"
+        ],
+        [
+          1,
+          "rgba(0,0,0,.62)"
+        ]
+      ]
+    },
+    "shake": {
+      "envelopePower": 1.55,
+      "currentEnvelopePower": 1.5,
+      "xFrequency1": 48,
+      "xFrequency2": 81,
+      "xPhase2": 1.1,
+      "xSecondWeight": 0.32,
+      "xWeight": 0.76,
+      "yFrequency1": 57,
+      "yPhase1": 2,
+      "yFrequency2": 93,
+      "yPhase2": 0.4,
+      "ySecondWeight": 0.28,
+      "yWeight": 0.54,
+      "quantizeStepsPerPixel": 2,
+      "minimumDurationDenominator": 0.001
+    },
+    "particles": {
+      "velocityDragBase": 0.2,
+      "damageTextRiseSpeed": 34,
+      "damageTextLife": 0.65,
+      "hitBurstVelocity": 90,
+      "hitBurstLifeMin": 0.15,
+      "hitBurstLifeMax": 0.3,
+      "hitBurstSizeMin": 2,
+      "hitBurstSizeMax": 4,
+      "muzzleVelocity": 130,
+      "muzzleLifeMin": 0.12,
+      "muzzleLifeMax": 0.25,
+      "muzzleSizeMin": 2,
+      "muzzleSizeMax": 5
+    },
+    "groundZones": {
+      "cacheWidth": 320,
+      "cacheHeight": 240,
+      "centerX": 160,
+      "centerY": 120,
+      "innerRadius": 12,
+      "outerRadius": 148,
+      "ellipseRadiusX": 145,
+      "ellipseRadiusY": 105,
+      "burnColors": [
+        "rgba(255,170,54,.56)",
+        "rgba(255,76,31,.30)",
+        "rgba(255,40,16,0)"
+      ],
+      "acidColors": [
+        "rgba(130,255,170,.50)",
+        "rgba(55,216,132,.28)",
+        "rgba(25,170,98,0)"
+      ],
+      "burnDrawAlpha": 0.24,
+      "acidDrawAlpha": 0.48,
+      "fallbackBurnAlpha": 0.09,
+      "fallbackAcidAlpha": 0.18,
+      "ellipseYMultiplier": 0.75
+    },
+    "enemyShots": {
+      "radius": {
+        "bossSpear": 13,
+        "bossBolt": 16,
+        "bossOrb": 14,
+        "spitterOrb": 12,
+        "wave": 12,
+        "default": 9
+      },
+      "life": {
+        "bossSpear": 5.2,
+        "boss": 6,
+        "default": 4.5
+      }
+    },
+    "projectile": {
+      "trailWidthMultiplier": 0.65,
+      "shadowBlur": 12,
+      "coreRadiusMultiplier": 0.45,
+      "collisionPadding": 4,
+      "expireAge": 9999,
+      "coreColor": "#fff"
+    },
+    "boomerang": {
+      "lineWidth": 8,
+      "shadowBlur": 18,
+      "arcStart": 0.2,
+      "arcEnd": 5.45,
+      "color": "#ffc46d",
+      "shadowColor": "#ff9e38"
+    },
+    "drone": {
+      "spriteSize": 40,
+      "shadowAlpha": 0.16,
+      "shadowOffsetY": 12,
+      "shadowRadiusX": 14,
+      "shadowRadiusY": 6,
+      "shadowColor": "#000"
+    },
+    "flame": {
+      "coreGradientStart": 12,
+      "coreGradientEnd": 120,
+      "coreAlpha": 0.62,
+      "coreShadowBlur": 18,
+      "coreLength": 126,
+      "coreHalfWidth": 18,
+      "particleAlpha": 0.82,
+      "particleShadowBlur": 11,
+      "particleWidthMultiplier": 0.8,
+      "particleHeightMultiplier": 1.24,
+      "fadeInSeconds": 0.1,
+      "fadeOutSeconds": 0.18,
+      "coreGradientStops": [
+        [
+          0,
+          "rgba(255,255,220,.82)"
+        ],
+        [
+          0.28,
+          "rgba(255,196,72,.58)"
+        ],
+        [
+          1,
+          "rgba(255,72,22,0)"
+        ]
+      ],
+      "coreShadowColor": "#ff7b25",
+      "coreStartX": 12,
+      "coreStartHalfWidth": 8,
+      "coreControlX": 72,
+      "coreEndX": 126,
+      "particleFadeInProgress": 0.13,
+      "particleFadePower": 0.65,
+      "particleScaleStart": 0.92,
+      "particleScaleGrowth": 0.78,
+      "particleHotThreshold": 0.55,
+      "particleHotShadowColor": "#ff3e15",
+      "particleCoolShadowColor": "#ff9a28",
+      "particleDrawXMultiplier": 0.4,
+      "particleDrawYMultiplier": 0.62
+    },
+    "wave": {
+      "lineWidth": 5,
+      "shadowBlur": 16
+    },
+    "mine": {
+      "spriteSize": 46,
+      "rotationSpeed": 0.8
+    },
+    "well": {
+      "rotationSpeed": 2,
+      "alpha": 0.78,
+      "ringCount": 4,
+      "lineWidth": 3,
+      "coreRadius": 18,
+      "shadowBlur": 28,
+      "ringBaseAlpha": 0.2,
+      "ringAlphaStep": 0.12,
+      "ringColorRgb": "183,108,255",
+      "ringRadiusBaseX": 0.3,
+      "ringRadiusStepX": 0.18,
+      "ringRadiusBaseY": 0.12,
+      "ringRadiusStepY": 0.08,
+      "ringRotationStep": 0.7,
+      "coreColor": "#030308",
+      "coreShadowColor": "#9d52ff"
+    },
+    "gravityOrb": {
+      "sizeStart": 32,
+      "sizeGrowth": 18,
+      "shadowBlur": 28,
+      "lineWidth": 2,
+      "ringRadiusMultiplier": 0.72,
+      "ringPulse": 3,
+      "ringPulseSpeed": 10,
+      "shadowColor": "#b069ff",
+      "ringColor": "rgba(229,202,255,.7)"
+    },
+    "mouseTarget": {
+      "alpha": 0.7,
+      "lineWidth": 2,
+      "dash": [
+        6,
+        5
+      ],
+      "radius": 15,
+      "pulse": 3,
+      "pulseSpeed": 8,
+      "lineOuter": 22,
+      "lineInner": 8,
+      "color": "#74ebff"
+    },
+    "mapDrop": {
+      "bobAmount": 6,
+      "shadowAlpha": 0.16,
+      "shadowOffsetY": 20,
+      "shadowRadiusX": 18,
+      "shadowRadiusY": 7,
+      "shadowBlur": 22,
+      "spriteSize": 36,
+      "ringAlpha": 0.4,
+      "lineWidth": 2,
+      "ringRadius": 22,
+      "ringPulse": 2,
+      "ringPulseSpeed": 1.4,
+      "shadowColor": "#000",
+      "healGlow": "#ff5c8b",
+      "freezeGlow": "#91e2ff",
+      "magnetGlow": "#63f0ff",
+      "ringColor": "rgba(255,255,255,.4)"
+    },
+    "fpsUI": {
+      "right": "20px",
+      "top": "126px",
+      "zIndex": "27",
+      "minWidth": "86px",
+      "padding": "8px 12px",
+      "border": "1px solid rgba(109,232,255,.28)",
+      "borderRadius": "12px",
+      "background": "rgba(5,10,18,.76)",
+      "backdropFilter": "blur(6px)",
+      "boxShadow": "0 8px 24px rgba(0,0,0,.28)",
+      "font": "800 13px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace",
+      "letterSpacing": ".06em",
+      "color": "#bff6ff"
+    },
+    "damage": {
+      "textNormal": "#f4edf2",
+      "textCritical": "#fff3a4",
+      "playerText": "#ff668b",
+      "playerParticle": "#ff386b",
+      "enemyParticle": "#ff4d7d",
+      "spitterParticle": "#5ce5b1",
+      "hitFlashSeconds": 0.07,
+      "textChance": 0.48,
+      "textJitter": 8,
+      "normalTextSize": 14,
+      "criticalTextSize": 19,
+      "deathParticleBase": 6,
+      "deathParticleRadiusDivisor": 3,
+      "deathParticleMaximum": 18,
+      "deathParticleVelocity": 150,
+      "deathParticleLifeMin": 0.3,
+      "deathParticleLifeMax": 0.7,
+      "deathParticleSizeMin": 2,
+      "deathParticleSizeMax": 6
+    },
+    "enemyExplosion": {
+      "waveStart": 15,
+      "waveDuration": 0.38,
+      "waveColor": "rgba(255,70,108,.85)"
+    },
+    "weaponRack": {
+      "emptyIconHeight": 42,
+      "emptyIconColor": "#6d6470",
+      "emptySymbol": "＋"
+    },
+    "itemPushWave": {
+      "startRadius": 20,
+      "color": "rgba(191,159,255,.75)"
+    },
+    "groundParticles": {
+      "burnColors": [
+        "#ff5b22",
+        "#ff9d35",
+        "#ffd066"
+      ],
+      "acidColors": [
+        "#4cff9c",
+        "#78ff4f",
+        "#b6ff5d"
+      ],
+      "radiusMultiplier": 0.78,
+      "ellipseYMultiplier": 0.72,
+      "burnVx": 18,
+      "burnVyMin": -72,
+      "burnVyMax": -28,
+      "burnLifeMin": 0.28,
+      "burnLifeMax": 0.5,
+      "acidVx": 12,
+      "acidVyMin": -34,
+      "acidVyMax": -12,
+      "acidLifeMin": 0.36,
+      "acidLifeMax": 0.62,
+      "sizeMin": 3,
+      "sizeMax": 6
+    },
+    "culling": {
+      "_comment": "各類物件的畫面外剔除加值；超出鏡頭與此範圍時不繪製，但遊戲邏輯仍會更新。",
+      "zoneExtra": 0,
+      "wellExtra": 0,
+      "mineExtra": 40,
+      "gemExtra": 10,
+      "mapDropExtra": 35,
+      "enemyExtra": 35,
+      "gravityOrbExtra": 50,
+      "meteorExtra": 180,
+      "enemyShotExtra": 45,
+      "projectileExtra": 30,
+      "boomerangExtra": 20,
+      "waveExtra": 20,
+      "particleExtra": 10,
+      "textExtra": 40
+    },
+    "gem": {
+      "spriteScale": 2.6,
+      "rotationSpeed": 1.7
+    },
+    "canvasParticle": {
+      "shadowBlur": 8
+    },
+    "damageText": {
+      "fontWeight": 900,
+      "fontFamily": "system-ui",
+      "shadowColor": "#000",
+      "shadowBlur": 4
+    },
+    "enemy": {
+      "_comment": "敵人貼圖、地面陰影、受擊、凍結提示與 HP 條視覺。",
+      "bloaterChargeReferenceSeconds": 0.8,
+      "bloaterChargePulseSpeed": 25,
+      "bloaterChargePulseAmount": 0.08,
+      "bloaterChargeGrowth": 0.24,
+      "bossPulseSpeed": 2,
+      "bossPulseAmount": 0.025,
+      "shadowAlpha": 0.24,
+      "shadowColor": "#000",
+      "shadowOffsetMultiplier": 0.82,
+      "shadowRadiusXMultiplier": 0.9,
+      "shadowRadiusYMultiplier": 0.34,
+      "freezeShadowBlur": 24,
+      "freezeShadowColor": "#74ddff",
+      "bossShadowBlur": 28,
+      "normalShadowBlur": 14,
+      "spitterShadowColor": "#42e3aa",
+      "normalShadowColor": "#ff426f",
+      "hitFlashAlpha": 0.72,
+      "spriteScale": 2.9,
+      "fallbackColor": "#c43b64",
+      "freezeRingAlpha": 0.65,
+      "freezeRingColor": "rgba(136,227,255,.9)",
+      "freezeRingWidth": 3,
+      "freezeRingPadding": 6,
+      "freezeRingPulseSpeed": 6,
+      "freezeRingPulsePhaseScale": 6,
+      "freezeRingPulseAmount": 2,
+      "shadowWindColor": "rgba(211,109,255,.9)",
+      "shadowWindLineWidth": 3,
+      "shadowWindVectorMultiplier": 0.65,
+      "bloaterChargeRingAlphaBase": 0.4,
+      "bloaterChargeRingAlphaPulse": 0.3,
+      "bloaterChargeRingPulseSpeed": 35,
+      "bloaterChargeRingColorRgb": "255,78,121",
+      "bloaterChargeRingWidth": 5,
+      "bloaterChargeRingRadius": 55,
+      "hpBar": {
+        "bossWidth": 120,
+        "golemWidth": 76,
+        "height": 7,
+        "offsetY": 18,
+        "cornerRadius": 4,
+        "background": "rgba(0,0,0,.65)",
+        "bossColor": "#ff356d",
+        "golemColor": "#d5aa68"
+      }
+    },
+    "player": {
+      "_comment": "玩家貼圖、地面陰影、受傷閃爍與護盾環視覺。",
+      "shadowAlpha": 0.22,
+      "shadowColor": "#000",
+      "shadowOffsetY": 22,
+      "shadowRadiusX": 22,
+      "shadowRadiusY": 10,
+      "shieldShadowBlur": 34,
+      "normalShadowBlur": 20,
+      "shieldShadowColor": "#67c9ff",
+      "normalShadowColor": "#ff3c70",
+      "invulnerabilityBlinkRate": 20,
+      "invulnerabilityAlpha": 0.42,
+      "spriteRotationOffset": 1.5707963267948966,
+      "spriteSize": 80,
+      "shieldRingColor": "rgba(104,206,255,.82)",
+      "shieldRingWidth": 3,
+      "shieldRingShadowBlur": 20,
+      "shieldRingShadowColor": "#77d8ff",
+      "shieldRingRadius": 33,
+      "shieldRingPulseSpeed": 6,
+      "shieldRingPulseAmount": 3
+    },
+    "enemyShotStyles": {
+      "_comment": "所有敵方子彈的繪製參數；實際傷害、速度、半徑與壽命位於 boss、enemyAI 與 visuals.enemyShots。",
+      "bossSpear": {
+        "blackColor": "rgba(0,0,0,.95)",
+        "blackWidth": 18,
+        "trailStart": -34,
+        "trailEnd": 18,
+        "color": "#ff66df",
+        "lineWidth": 9,
+        "shadowBlur": 30,
+        "shadowColor": "#ff25cc",
+        "tipColor": "#fff4ff",
+        "tipX": 24,
+        "tipBackX": 8,
+        "tipHalfHeight": 9
+      },
+      "bossOrb": {
+        "blackColor": "rgba(0,0,0,.9)",
+        "blackWidth": 10,
+        "color": "#ffbf35",
+        "lineWidth": 5,
+        "shadowBlur": 24,
+        "shadowColor": "#ff8a00",
+        "rotationSpeed": 3.2,
+        "fillColor": "#fff0a8",
+        "outlineColor": "#3a1200",
+        "outlineWidth": 4,
+        "starPoints": 10,
+        "innerRadiusMultiplier": 0.62
+      },
+      "bossBolt": {
+        "blackColor": "rgba(0,0,0,.92)",
+        "blackWidth": 12,
+        "color": "#4ff3ff",
+        "lineWidth": 6,
+        "shadowBlur": 28,
+        "shadowColor": "#00eaff",
+        "rotationSpeed": 5,
+        "fillColor": "#eaffff",
+        "outlineColor": "#00151b",
+        "outlineWidth": 4,
+        "starPoints": 8,
+        "innerRadiusMultiplier": 0.58,
+        "ringColor": "#45efff",
+        "ringWidth": 3,
+        "ringPadding": 7,
+        "ringPulseSpeed": 9,
+        "ringPulseAmount": 2
+      },
+      "spitterOrb": {
+        "blackColor": "rgba(0,0,0,.92)",
+        "blackWidth": 11,
+        "color": "#bfff26",
+        "lineWidth": 5,
+        "shadowBlur": 24,
+        "shadowColor": "#8dff00",
+        "bodyColor": "#101900",
+        "outlineColor": "#e7ff75",
+        "outlineWidth": 4,
+        "bodyRadiusPadding": 2,
+        "coreColor": "#dfff42",
+        "coreShadowBlur": 22,
+        "coreShadowColor": "#a5ff00",
+        "coreOffsetX": -2,
+        "coreOffsetY": -2,
+        "coreRadiusMultiplier": 0.62,
+        "highlightColor": "#fffbd2",
+        "highlightOffsetX": -4,
+        "highlightOffsetY": -5,
+        "highlightRadius": 3.5,
+        "ringColor": "rgba(210,255,72,.88)",
+        "ringWidth": 3,
+        "ringPadding": 8,
+        "ringPulseSpeed": 11,
+        "ringPulseAmount": 2
+      },
+      "default": {
+        "rotationSpeed": 4,
+        "shadowBlur": 18,
+        "waveShadowColor": "#ffe76a",
+        "normalShadowColor": "#6dffb8",
+        "waveColor": "#ffe76a",
+        "normalColor": "#5ae8ad",
+        "outlineColor": "rgba(0,0,0,.8)",
+        "outlineWidth": 3,
+        "starPoints": 8,
+        "innerRadiusMultiplier": 0.55
+      }
+    },
+    "orbit": {
+      "expandPhaseMultiplier": 0.5,
+      "expandPhaseOffset": 0.5,
+      "ringAlpha": 0.2,
+      "ringColor": "rgba(143,231,255,.55)",
+      "ringWidthBase": 2,
+      "ringWidthLevel4": 4,
+      "ringShadowBlur": 12,
+      "ringShadowColor": "#5cddff",
+      "trailAlpha": 0.25,
+      "trailColor": "#8deaff",
+      "trailMinimumWidth": 4,
+      "trailWidthMultiplier": 0.11,
+      "trailArcLength": 0.16,
+      "bladeRotationSpeed": 5
+    },
+    "meteorCache": {
+      "_comment": "隕石貼圖、警示圈與地面區域的離屏快取尺寸及顏色。",
+      "spriteCacheSize": 192,
+      "spriteSourceSize": 96,
+      "spriteShadowBlur": 30,
+      "spriteShadowColor": "#ff5a20",
+      "spriteAlpha": 0.98,
+      "warningSize": 320,
+      "warningBaseRadius": 145,
+      "warningAlphaBase": 0.22,
+      "warningAlphaGrowth": 0.2,
+      "warningFillColor": "#ff3f20",
+      "warningStrokeColor": "#ffb34f",
+      "warningLineWidth": 4,
+      "warningRadiusShrink": 0.22,
+      "zoneGradientMiddleStop": 0.55
+    },
+    "meteor": {
+      "shadowColor": "#000",
+      "warningBaseRadius": 145,
+      "warningBaseSize": 320
+    },
+    "input": {
+      "joystickRadius": 44
+    },
+    "fallbackCanvasFill": "#080810"
+  },
+  "debug": {
+    "_comment": "隱藏 Debug Lab。遊戲暫停後依序輸入 jami 才會開啟；暫停畫面只顯示 FPS 開關。",
+    "advanceSeconds": 60,
+    "overlayStyle": {
+      "position": "absolute",
+      "inset": "0",
+      "zIndex": "80",
+      "display": "none",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "padding": "24px",
+      "background": "rgba(2,3,8,.82)",
+      "backdropFilter": "blur(8px)",
+      "pointerEvents": "auto"
+    },
+    "panelStyle": {
+      "width": "min(1180px,96vw)",
+      "maxHeight": "92vh",
+      "overflow": "auto",
+      "padding": "24px",
+      "border": "1px solid rgba(120,225,255,.34)",
+      "borderRadius": "22px",
+      "background": "linear-gradient(150deg,rgba(16,26,38,.98),rgba(8,8,16,.98))",
+      "boxShadow": "0 26px 80px rgba(0,0,0,.62),0 0 34px rgba(70,220,255,.12)",
+      "color": "#f7fbff"
+    },
+    "pauseToolsStyle": {
+      "display": "grid",
+      "gridTemplateColumns": "1fr",
+      "gap": "10px",
+      "marginTop": "12px",
+      "maxWidth": "360px",
+      "marginLeft": "auto",
+      "marginRight": "auto"
+    },
+    "panelTemplate": "R17 由 JavaScript 動態建立圖示式 Debug Lab，此欄位保留供舊版本相容。",
+    "secretSequence": "jami",
+    "secretTimeoutMs": 3500,
+    "weaponGridStyle": {
+      "display": "grid",
+      "gridTemplateColumns": "repeat(auto-fit,minmax(112px,1fr))",
+      "gap": "10px",
+      "margin": "12px 0 18px"
+    },
+    "weaponCardStyle": {
+      "minHeight": "118px",
+      "padding": "10px",
+      "border": "1px solid rgba(255,255,255,.14)",
+      "borderRadius": "14px",
+      "background": "rgba(255,255,255,.045)",
+      "color": "#f7fbff",
+      "cursor": "pointer",
+      "textAlign": "center"
+    },
+    "weaponCardSelectedStyle": {
+      "borderColor": "rgba(101,231,255,.9)",
+      "background": "rgba(49,199,232,.14)",
+      "boxShadow": "0 0 22px rgba(49,199,232,.18)"
+    },
+    "weaponIconStyle": {
+      "width": "58px",
+      "height": "58px",
+      "objectFit": "contain",
+      "display": "block",
+      "margin": "0 auto 7px",
+      "borderRadius": "10px"
+    },
+    "parameterGridStyle": {
+      "display": "grid",
+      "gridTemplateColumns": "repeat(auto-fit,minmax(230px,1fr))",
+      "gap": "9px"
+    },
+    "parameterInputStyle": {
+      "width": "100%",
+      "padding": "8px 10px",
+      "border": "1px solid rgba(255,255,255,.16)",
+      "borderRadius": "9px",
+      "background": "#0c1420",
+      "color": "#fff",
+      "font": "inherit"
+    },
+    "parameterGroupNames": {
+      "root": "主要參數",
+      "core": "Lv.5 核心彈",
+      "missile": "Lv.5 飛彈",
+      "muzzle": "槍口效果",
+      "particle": "粒子",
+      "visual": "視覺",
+      "impact": "落地衝擊",
+      "fallVisual": "墜落視覺",
+      "largeMeteor": "大型隕石",
+      "acid": "毒池",
+      "chain": "連鎖",
+      "outerWave": "外環",
+      "returnBurst": "回程爆發",
+      "projectile": "投擲核心",
+      "arrival": "抵達效果",
+      "finalWave": "結束爆發",
+      "wave": "震波",
+      "freezeSeconds": "凍結時間"
+    },
+    "parameterLabels": {
+      "cooldown": "冷卻時間",
+      "damage": "傷害",
+      "range": "射程",
+      "radius": "作用半徑",
+      "projectileRadius": "碰撞半徑",
+      "visualRadius": "顯示半徑",
+      "hitRadius": "碰撞半徑",
+      "bladeSize": "刃片顯示大小",
+      "expandHitRadius": "外擴碰撞增加",
+      "expandBladeSize": "外擴顯示增加",
+      "speed": "子彈／物件速度",
+      "projectileSpeed": "子彈速度",
+      "duration": "持續時間",
+      "count": "數量",
+      "minimumRange": "最小生成距離",
+      "maximumRange": "最大生成距離",
+      "targetSearchRange": "索敵距離",
+      "projectileRange": "子彈飛行距離",
+      "wellRadius": "黑洞半徑",
+      "width": "寬度",
+      "lineWidth": "線條粗細",
+      "visualDuration": "視覺持續時間",
+      "fallDuration": "墜落時間",
+      "burnDuration": "燃燒持續時間",
+      "burnDamage": "燃燒傷害",
+      "tickDamage": "每次持續傷害",
+      "tickSeconds": "傷害間隔",
+      "shotCooldown": "射擊間隔",
+      "orbitRadius": "軌道半徑",
+      "orbitSpeed": "軌道速度",
+      "knockback": "擊退",
+      "visualAlpha": "透明度",
+      "burnVisualAlpha": "燃燒區透明度",
+      "spriteSize": "貼圖大小",
+      "particleSizeMin": "粒子最小尺寸",
+      "particleSizeMax": "粒子最大尺寸",
+      "castSpacingSeconds": "連續發射間隔",
+      "delay": "延遲",
+      "damageDuration": "傷害波持續",
+      "spreadDegrees": "散射角度",
+      "halfAngleDegrees": "半角度",
+      "maxHits": "最大命中數",
+      "jumpRange": "跳躍距離",
+      "pull": "吸力",
+      "finalDamage": "結束傷害"
+    },
+    "parameterExcludedKeys": [
+      "level"
+    ]
+  },
+  "text": {
+    "_comment": "正常遊戲中所有顯示文字。{name}、{level} 等大括號內容為程式替換用變數，請保留。",
+    "documentTitle": "深紅倖存者 Crimson Survivor",
+    "canvasAria": "深紅倖存者遊戲畫面",
+    "brandMark": "CS",
+    "brandName": "深紅倖存者",
+    "timerLabel": "生存倒數",
+    "levelPrefix": "LV",
+    "killsLabel": "擊殺",
+    "hpLabel": "HP",
+    "expLabel": "EXP",
+    "pauseAria": "暫停",
+    "startEyebrow": "SURVIVOR-LIKE ACTION · R15 CONFIG-DRIVEN",
+    "startTitle": "深紅倖存者",
+    "startSubtitle": "CRIMSON SURVIVOR",
+    "startLead": "在血月廢墟中撐到 15:00，深淵暴君才會降臨；擊敗 Boss 後才能結束這場戰鬥。",
+    "startBuildNote": "R15：遊戲數值與顯示文字改由 game-config.json 控制",
+    "features": [
+      {
+        "value": "12",
+        "label": "差異化武器"
+      },
+      {
+        "value": "8",
+        "label": "敵人類型"
+      },
+      {
+        "value": "6",
+        "label": "武器欄位"
+      },
+      {
+        "value": "3",
+        "label": "升級三選一"
+      }
+    ],
+    "controlsHtml": "<span><kbd>WASD</kbd>／方向鍵／滑鼠移動</span><span><kbd>ESC</kbd> 暫停</span><span>暫停畫面可開啟 Debug 升級</span>",
+    "startButton": "進入血月廢墟",
+    "soundOn": "音效：開啟",
+    "soundOff": "音效：關閉",
+    "levelEyebrow": "LEVEL UP",
+    "levelTitle": "選擇一項深紅祝福",
+    "levelKeyHint": "可按 1、2、3 選擇",
+    "chestAlt": "升級寶箱",
+    "pauseEyebrow": "PAUSED",
+    "pauseTitle": "時間凝滯",
+    "pauseCopy": "敵人與武器冷卻已暫停。",
+    "resumeButton": "繼續戰鬥",
+    "restartButton": "重新開始",
+    "fpsOff": "FPS 顯示：關閉",
+    "fpsOn": "FPS 顯示：開啟",
+    "fpsValue": "FPS {value}",
+    "fpsEmpty": "FPS --",
+    "debugOpen": "",
+    "endWinEyebrow": "BOSS DEFEATED",
+    "endLoseEyebrow": "RUN ENDED",
+    "endWinTitle": "深淵暴君已殞落",
+    "endLoseTitle": "殘響消散",
+    "endWinCopy": "你撐過十五分鐘，並親手終結了深淵暴君。",
+    "endLoseCopy": "你倒在血月廢墟中，但殘響仍等待下一次甦醒。",
+    "resultTimeLabel": "存活",
+    "resultLevelLabel": "等級",
+    "resultKillsLabel": "擊殺",
+    "resultWeaponsLabel": "武器",
+    "restartEndButton": "再次進入廢墟",
+    "startToast": "血月升起。15:00 時深淵暴君將會降臨",
+    "bossKilledToast": "深淵暴君已被擊殺",
+    "bossArrivalToast": "15:00 — 深淵暴君降臨，擊敗牠才能結束",
+    "bossArrivalDebugToast": "DEBUG — 已進入深淵暴君階段",
+    "emptyWeaponSlot": "EMPTY",
+    "rewardCategoryWeapon": "武器",
+    "rewardCategoryStat": "能力",
+    "rewardCategoryItem": "道具",
+    "rewardNew": "NEW",
+    "rewardNextLevel": "Lv.{level}",
+    "toastSymbol": "◆",
+    "debug": {
+      "eyebrow": "DEBUG LAB",
+      "title": "戰鬥實驗室",
+      "copy": "以武器圖示選擇項目；可調整等級、切換永久效果，並直接修改目前等級的數值。參數修改只作用於本次執行，重新整理後會回復 JSON。",
+      "selectLabel": "升級項目",
+      "upgradeOne": "升級 +1",
+      "upgradeMax": "升至 Lv.5",
+      "advanceMinute": "時間前進 +1 分鐘",
+      "enterBoss": "直接進入 Boss 階段",
+      "close": "返回暫停畫面（ESC）",
+      "weaponGroup": "武器（{count}/{max}）",
+      "statGroup": "永久能力",
+      "option": "{name}　Lv.{level}/{max}",
+      "defaultStatus": "選擇武器圖示後可調整等級與數值。",
+      "alreadyMax": "{name} 已達 Lv.{max}",
+      "weaponSlotsFull": "武器欄已滿，無法新增第 {slot} 種武器",
+      "adjusted": "{name} 已調整為 Lv.{level}",
+      "advanced": "遊戲時間已前進 {seconds} 秒，目前為 {time}",
+      "alreadyBoss": "已經進入 15:00 Boss 階段",
+      "enteredBoss": "已直接進入 15:00 Boss 階段；返回暫停畫面後可繼續戰鬥。",
+      "weaponSection": "武器與基礎攻擊",
+      "statSection": "永久能力",
+      "quickSection": "快速配置",
+      "effectSection": "永久測試效果",
+      "parameterSection": "目前等級參數",
+      "parameterHint": "輸入後立即寫入執行中的設定；持續型武器通常立刻生效，投射物與範圍效果會在下一次生成時套用。",
+      "downgradeOne": "降級 -1",
+      "removeWeapon": "移除武器",
+      "allWeaponsMax": "一鍵取得 12 種武器＋Lv.5",
+      "baseOnly": "退回只有基礎武器",
+      "confirmAllWeapons": "確定要取得全部 12 種武器並全部升至 Lv.5？這會突破正常 6 格武器上限。",
+      "confirmBaseOnly": "確定要移除全部特殊武器與場上特殊攻擊，只保留基礎針彈？",
+      "godMode": "GOD 模式",
+      "overloadMode": "過載核心（CD 縮短）",
+      "doubleXpMode": "雙倍 EXP",
+      "freezeMode": "全域冰凍",
+      "magnetMode": "全域磁極",
+      "toggleOn": "開啟",
+      "toggleOff": "關閉",
+      "baseAttackName": "基礎針彈",
+      "baseAttackLevel": "常駐",
+      "notOwned": "未持有",
+      "levelText": "Lv.{level}",
+      "selected": "已選擇 {name}",
+      "downgraded": "{name} 已降為 Lv.{level}",
+      "removed": "已移除 {name}",
+      "allWeaponsApplied": "已取得全部 12 種武器，等級皆為 Lv.5。",
+      "baseOnlyApplied": "已移除所有特殊武器，目前只保留基礎針彈。",
+      "godEnabled": "GOD 模式已開啟：HP 不減且免疫傷害。",
+      "godDisabled": "GOD 模式已關閉。",
+      "effectEnabled": "{name} 已設為永久開啟。",
+      "effectDisabled": "{name} 已關閉。",
+      "parameterChanged": "{name}：{path} 已調整為 {value}",
+      "noParameters": "此項目沒有可調整的數值參數。"
+    },
+    "configLoadErrorTitle": "無法載入 game-config.json",
+    "configLoadErrorCopy": "請確認 game-config.json 與 game.js 位於同一資料夾，並透過 GitHub Pages 或本機 HTTP 伺服器開啟。瀏覽器直接以 file:// 開啟時通常會封鎖 JSON 讀取。",
+    "configLoadErrorDetail": "錯誤：{error}",
+    "rewardCategoryBoost": "提升",
+    "rewardItemImmediate": "立即生效",
+    "rewardNewWeapon": "取得新武器",
+    "rewardLevelTransition": "Lv.{from} → Lv.{to}",
+    "rewardToast": "{name} Lv.{level}",
+    "effectTime": "{seconds}s",
+    "weaponLevel": "Lv.{level}",
+    "weaponResult": "{count} / {max}",
+    "hudHp": "{current} / {max}",
+    "hudExp": "{current} / {need}",
+    "toastDurationMs": 2500,
+    "pauseSymbol": "Ⅱ",
+    "configPickerButton": "選擇 game-config.json",
+    "configPickerCopy": "瀏覽器阻擋了本機 JSON 讀取。請選擇同資料夾內的 game-config.json，遊戲會立即重新載入。",
+    "configPickerInvalid": "選取的檔案不是有效的 JSON：{error}"
+  },
+  "editingGuide": {
+    "_comment": "編輯指南；此區只供閱讀，遊戲不會拿來計算。",
+    "units": {
+      "seconds": "時間與冷卻通常以秒為單位；名稱含 Ms 的欄位以毫秒為單位。",
+      "pixels": "射程、半徑、大小、線寬與距離通常以 Canvas 像素為單位。",
+      "units": "名稱含 Units 的欄位會乘上 system.unit，適合依整體比例調整。",
+      "alpha": "透明度使用 0～1；0 完全透明，1 完全不透明。",
+      "speed": "移動速度與彈速多為每秒像素數。",
+      "angles": "Degrees 為角度；Radians 為弧度；rotationSpeed 多為每秒旋轉弧度。",
+      "colors": "顏色使用 CSS 格式，例如 #ff376e 或 rgba(255,55,110,.5)。"
+    },
+    "rules": [
+      "欄位名稱、物件層級與陣列長度最好不要任意刪除；只修改數值或文字最安全。",
+      "武器與能力等級上限由 system.maxUpgradeLevel 控制，預設為 5。",
+      "同一功能的 base、upgraded、level2、level3、level4、level5 代表不同升級階段。",
+      "修改 game-config.json 後必須重新整理頁面；遊戲進行中不會熱更新設定。",
+      "使用 GitHub Pages／Live Server 可自動讀取 JSON；直接用 file:// 開啟時，依瀏覽器限制可能需要手動選取設定檔。"
+    ],
+    "debugLab": "遊戲中按 ESC 暫停後，依序輸入 jami 開啟隱藏 Debug Lab。Debug 參數編輯只修改記憶體中的 CFG，重新整理後回復 game-config.json。"
+  }
+}
