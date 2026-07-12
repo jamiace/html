@@ -55,7 +55,7 @@ const dist2=(a,b)=>{const x=a.x-b.x,y=a.y-b.y;return x*x+y*y};
 const fmtTime = seconds => {const value=Math.max(0,seconds),minutes=Math.floor(value/60),secs=Math.floor(value%60);return `${String(minutes).padStart(SYS.timeFormatMinutesPad,'0')}:${String(secs).padStart(SYS.timeFormatSecondsPad,'0')}`};
 const SCORE_EXP_VALUE=Number(SCORE_CFG.expPointValue)||1;
 const SCORE_BOSS_START=Number(SCORE_CFG.bossStartSeconds)||Number(SYS.gameDurationSeconds)||900;
-const SCORE_OVERTIME_PENALTY=Number(SCORE_CFG.overtimePenaltyPerSecond)||10;
+const SCORE_OVERTIME_PENALTY=Number(SCORE_CFG.overtimePenaltyPerSecond)||20;
 const SCORE_LEVEL_PENALTY=Number(SCORE_CFG.levelPenaltyPerLevel)||100;
 function scoreOvertimeSeconds(elapsedSeconds=game?.elapsed||0){
   return Math.max(0,Math.floor(Math.max(0,Number(elapsedSeconds)||0)-SCORE_BOSS_START+1e-9));
