@@ -2,8 +2,8 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R25 HUD PASSIVES + PAUSE LOADOUT",
-    "configVersion": 9,
+    "build": "R26 SCORE SYNC + LV1 ZERO",
+    "configVersion": 10,
     "language": "zh-Hant"
   },
   "system": {
@@ -317,7 +317,7 @@
       "radius": 33,
       "pulseSize": 3,
       "pulseSpeed": 6,
-      "lineWidth": 3,
+      "lineWidth": 4,
       "shadowBlur": 20,
       "alpha": 0.82
     },
@@ -390,7 +390,7 @@
     "rewardDoubleXpMinimumRemainingSeconds": 25,
     "nextLevelDelayMs": 120,
     "speedDescriptionTemplate": "移動速度由 {from}× 提高為 {to}×。",
-    "lifestealPerLevel": 0.012,
+    "lifestealPerLevel": 0.003,
     "mapDropCooldownReductionPerLevel": 0.05,
     "weaponCooldownReductionPerLevel": 0.04,
     "weaponAreaBonusPerLevel": 0.06,
@@ -411,11 +411,11 @@
     "statLevelValues": {
       "lifesteal": {
         "rate": [
+          0.003,
+          0.006,
+          0.009,
           0.012,
-          0.024,
-          0.036,
-          0.048,
-          0.06
+          0.015
         ]
       },
       "dropCooldown": {
@@ -515,9 +515,9 @@
         "expPerTick": [
           1,
           1,
-          1,
-          1,
-          1
+          2,
+          2,
+          3
         ]
       },
       "fullHpCooldown": {
@@ -2703,9 +2703,9 @@
           "knockback": 58,
           "stunSeconds": 0,
           "wave": {
-            "startRadius": 80,
+            "startRadius": 100,
             "duration": 0.4,
-            "color": "rgba(238,194,116,.99)"
+            "color": "rgba(238,194,116,1)"
           },
           "outerWave": null
         },
@@ -2718,9 +2718,9 @@
           "knockback": 58,
           "stunSeconds": 0,
           "wave": {
-            "startRadius": 80,
+            "startRadius": 100,
             "duration": 0.4,
-            "color": "rgba(238,194,116,.99)"
+            "color": "rgba(238,194,116,1)"
           },
           "outerWave": null
         },
@@ -2733,9 +2733,9 @@
           "knockback": 58,
           "stunSeconds": 0,
           "wave": {
-            "startRadius": 80,
+            "startRadius": 100,
             "duration": 0.4,
-            "color": "rgba(238,194,116,.99)"
+            "color": "rgba(238,194,116,1)"
           },
           "outerWave": null
         },
@@ -2748,9 +2748,9 @@
           "knockback": 58,
           "stunSeconds": 0.3,
           "wave": {
-            "startRadius": 80,
+            "startRadius": 130,
             "duration": 0.4,
-            "color": "rgba(238,194,116,.99)"
+            "color": "rgba(238,194,116,1)"
           },
           "outerWave": null
         },
@@ -2763,9 +2763,9 @@
           "knockback": 58,
           "stunSeconds": 0.3,
           "wave": {
-            "startRadius": 80,
+            "startRadius": 130,
             "duration": 0.4,
-            "color": "rgba(238,194,116,.99)"
+            "color": "rgba(238,194,116,1)"
           },
           "outerWave": {
             "radius": 250,
@@ -2773,7 +2773,7 @@
             "damageDuration": 0.45,
             "visualDuration": 0.9,
             "damage": 62,
-            "damageColor": "rgba(242,208,135,.99)",
+            "damageColor": "rgba(242,208,135,1)",
             "visualColor": "rgba(242,208,135,.8)",
             "hitKnockback": 20
           }
@@ -3398,7 +3398,7 @@
       "name": "嗜血轉化",
       "icon": "assets/stat_lifesteal.png",
       "color": "#ff4f7f",
-      "description": "敵人受到的傷害有 1.2% 轉為 HP；不足 1 HP 的部分會持續累積。 每級再 +1.2%。"
+      "description": "敵人受到的傷害有 0.3% 轉為 HP；不足 1 HP 的部分會持續累積。 每級再 +0.3%。"
     },
     "dropCooldown": {
       "name": "道具脈衝",
@@ -3448,7 +3448,7 @@
       "name": "動態感知",
       "icon": "assets/stat_run_exp.png",
       "color": "#d893ff",
-      "description": "連續跑步 2 秒後會週期性獲得 EXP。 Lv.1 為每 2 秒 +1 EXP，之後每級再縮短 0.2 秒。"
+      "description": "連續跑步 2 秒後會週期性獲得 EXP。 Lv.1 為每 2 秒 +1~3 EXP，之後每級再縮短 0.2 秒。"
     },
     "fullHpCooldown": {
       "name": "無損狂熱",
@@ -3472,11 +3472,11 @@
     "magnetDuration": 5,
     "pickupExtraRadius": 18,
     "exp": {
-      "largeValue": 20,
-      "mediumValue": 5,
-      "radiusSmall": 7,
-      "radiusMedium": 10,
-      "radiusLarge": 13,
+      "largeValue": 100,
+      "mediumValue": 50,
+      "radiusSmall": 10,
+      "radiusMedium": 13,
+      "radiusLarge": 16,
       "spinSpeed": 1.8,
       "globalMagnetForce": 980,
       "localForceBase": 170,
@@ -4472,7 +4472,7 @@
   "onlineScores": {
     "_comment": "Google Apps Script Web App 成績接收端與 Top 50 排行榜。試算表只保留排名最高的 10000 筆成績。",
     "enabled": true,
-    "endpoint": "https://script.google.com/macros/s/AKfycbxEgKqjnlVwKdyPLRf_EH21GLYyjsj4iZQ729b8bu-naBaME-L11CvOzT-KZrwibsjKYw/exec",
+    "endpoint": "https://script.google.com/macros/s/AKfycbxSuDnrhcDsDILSKEc2V8Ra9M-f7rOB5y1YE5r5tubLSnmhsPt-TyUeVpsQDFZo1Q4kfw/exec",
     "requestTimeoutMs": 12000,
     "playerNameMaxLength": 20,
     "storageKey": "crimson-survivor-player-name",
@@ -4484,10 +4484,11 @@
     "leaderboardRetryDelayMs": 900
   },
   "scoring": {
-    "_comment": "總分公式：結算等級 × levelPointsPerLevel＋擊敗 Boss 時剩餘完整秒數 × bossRemainingPointPerSecond。Boss 於 15:00 出現，限時 180 秒。",
+    "_comment": "總分公式：結算等級 × levelPointsPerLevel＋baseScoreAdjustment＋擊敗 Boss 時剩餘完整秒數 × bossRemainingPointPerSecond＋本局分數調整。baseScoreAdjustment 預設為 -100，因此 Lv.1 的等級分數為 0。Boss 於 15:00 出現，限時 180 秒。",
     "bossStartSeconds": 900,
     "bossFightLimitSeconds": 180,
     "levelPointsPerLevel": 100,
+    "baseScoreAdjustment": -100,
     "bossRemainingPointPerSecond": 30
   }
 }

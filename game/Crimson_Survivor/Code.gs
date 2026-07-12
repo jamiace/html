@@ -11,9 +11,10 @@
  * 5. 最後以較早送達伺服器者優先
  *
  * 分數公式：
- * 總 EXP × 1
- * - 超過 15:00 的完整秒數 × 10
- * - 結算等級 × 100
+ * 結算等級 × 100
+ * - 100（讓 Lv.1 的等級分數為 0）
+ * + 擊敗 Boss 時剩餘完整秒數 × 30
+ * + 本局分數調整（目前只接受 0 或負數，例如購買復活 -1000）
  *
  * Google Sheets 只保留排名最高的 10000 筆成績。
  *
@@ -37,10 +38,15 @@ const MAX_STORED_SCORES = 10000;
 const DEFAULT_LEADERBOARD_LIMIT = 50;
 const MAX_LEADERBOARD_LIMIT = 50;
 
-const SCORE_EXP_VALUE = 1;
 const SCORE_BOSS_START_SECONDS = 900;
-const SCORE_OVERTIME_PENALTY = 10;
-const SCORE_LEVEL_PENALTY = 100;
+const SCORE_BOSS_FIGHT_LIMIT_SECONDS = 180;
+const SCORE_LEVEL_POINTS_PER_LEVEL = 100;
+const SCORE_BASE_ADJUSTMENT = -100;
+const SCORE_BOSS_REMAINING_POINTS_PER_SECOND = 30;
+const SCORE_MIN_RUN_ADJUSTMENT = -100000;
+const SCORE_MAX_RUN_ADJUSTMENT = 0;
+const SCORE_SCHEMA_VERSION = 'R26_SCORE_V2';
+const SCORE_SCHEMA_PROPERTY = 'CRIMSON_SURVIVOR_SCORE_SCHEMA';
 
 const COL = Object.freeze({
   SERVER_TIME: 1,
@@ -61,10 +67,11 @@ const COL = Object.freeze({
   CLIENT_TIME: 16,
   USER_AGENT: 17,
   TOTAL_EXP: 18,
-  OVERTIME_SECONDS: 19,
-  TIME_PENALTY: 20,
-  LEVEL_PENALTY: 21,
-  SCORE: 22
+  BOSS_REMAINING_SECONDS: 19,
+  BOSS_TIME_BONUS: 20,
+  LEVEL_POINTS: 21,
+  SCORE_ADJUSTMENT: 22,
+  SCORE: 23
 });
 
 const HEADERS = [
@@ -86,9 +93,10 @@ const HEADERS = [
   '客戶端時間',
   'User Agent',
   '總 EXP',
-  '超出時間（秒）',
-  '時間扣分',
-  '等級扣分',
+  'Boss 剩餘（秒）',
+  'Boss 時間獎勵',
+  '等級分數',
+  '本局分數調整',
   '總分'
 ];
 
@@ -102,8 +110,9 @@ function setupScoreSheet() {
   sheet.getRange('A:A').setNumberFormat('yyyy/MM/dd HH:mm');
   sheet.getRange('D:D').setNumberFormat('0.000');
   sheet.getRange('E:E').setNumberFormat('@');
-  sheet.getRange('R:V').setNumberFormat('0');
+  sheet.getRange('R:W').setNumberFormat('0');
 
+  recalculateStoredScores_(sheet, true);
   sortAndPruneTopScores_(sheet);
 
   getBoundSpreadsheet_().toast(
@@ -223,9 +232,10 @@ function doPost(e) {
       safeCell_(score.clientTimestamp),
       safeCell_(score.userAgent),
       score.totalExp,
-      score.overtimeSeconds,
-      score.timePenalty,
-      score.levelPenalty,
+      score.bossRemainingSeconds,
+      score.bossTimeBonus,
+      score.levelPoints,
+      score.scoreAdjustment,
       score.score
     ]);
 
@@ -245,7 +255,7 @@ function doPost(e) {
       .setValue(score.elapsedText);
 
     sheet
-      .getRange(appendedRow, COL.TOTAL_EXP, 1, 5)
+      .getRange(appendedRow, COL.TOTAL_EXP, 1, 6)
       .setNumberFormat('0');
 
     sortAndPruneTopScores_(sheet);
@@ -309,6 +319,9 @@ function buildLeaderboard_(gameId, limit, runId) {
     const totalExp = Number(rawTotalExp);
     const level = Number(row[COL.LEVEL - 1]);
     const kills = Number(row[COL.KILLS - 1]);
+    const scoreAdjustment = normalizeStoredScoreAdjustment_(
+      row[COL.SCORE_ADJUSTMENT - 1]
+    );
 
     if (
       result !== 'victory' ||
@@ -326,7 +339,8 @@ function buildLeaderboard_(gameId, limit, runId) {
     const computed = calculateScore_(
       totalExp,
       elapsedSeconds,
-      level
+      level,
+      scoreAdjustment
     );
 
     const serverDate =
@@ -349,11 +363,14 @@ function buildLeaderboard_(gameId, limit, runId) {
       elapsedText:
         formatDuration_(elapsedSeconds),
       totalExp: computed.totalExp,
-      overtimeSeconds: computed.overtimeSeconds,
-      overtimeText:
-        formatDuration_(computed.overtimeSeconds),
-      timePenalty: computed.timePenalty,
-      levelPenalty: computed.levelPenalty,
+      bossElapsedSeconds: computed.bossElapsedSeconds,
+      bossRemainingSeconds: computed.bossRemainingSeconds,
+      bossRemainingText:
+        formatDuration_(computed.bossRemainingSeconds),
+      bossTimeBonus: computed.bossTimeBonus,
+      levelPoints: computed.levelPoints,
+      baseScoreAdjustment: computed.baseScoreAdjustment,
+      scoreAdjustment: computed.scoreAdjustment,
       score: computed.score,
       level: Math.floor(level),
       kills: Math.floor(kills),
@@ -418,8 +435,16 @@ function publicScore_(score) {
     score: score.score,
     playerName: score.playerName,
     kills: score.kills,
-    overtimeSeconds: score.overtimeSeconds,
-    overtimeText: score.overtimeText,
+    bossElapsedSeconds: score.bossElapsedSeconds,
+    bossRemainingSeconds: score.bossRemainingSeconds,
+    bossRemainingText: score.bossRemainingText,
+    bossTimeBonus: score.bossTimeBonus,
+    levelPoints: score.levelPoints,
+    baseScoreAdjustment: score.baseScoreAdjustment,
+    scoreAdjustment: score.scoreAdjustment,
+    // 保留舊欄位，讓尚未更新的前端仍能正確顯示「Boss 剩餘」。
+    overtimeSeconds: score.bossRemainingSeconds,
+    overtimeText: score.bossRemainingText,
     level: score.level,
     elapsedSeconds: score.elapsedSeconds,
     elapsedText: score.elapsedText,
@@ -478,8 +503,9 @@ function validateScore_(data) {
 
   const elapsedSeconds = finiteNumber_(
     data.elapsedSeconds,
-    0,
-    86400,
+    SCORE_BOSS_START_SECONDS,
+    SCORE_BOSS_START_SECONDS +
+      SCORE_BOSS_FIGHT_LIMIT_SECONDS + 10,
     '通關時間'
   );
 
@@ -504,10 +530,22 @@ function validateScore_(data) {
     '總 EXP'
   );
 
+  const scoreAdjustment =
+    data.scoreAdjustment == null ||
+    data.scoreAdjustment === ''
+      ? 0
+      : finiteInteger_(
+          data.scoreAdjustment,
+          SCORE_MIN_RUN_ADJUSTMENT,
+          SCORE_MAX_RUN_ADJUSTMENT,
+          '本局分數調整'
+        );
+
   const computed = calculateScore_(
     totalExp,
     elapsedSeconds,
-    level
+    level,
+    scoreAdjustment
   );
 
   return {
@@ -519,9 +557,12 @@ function validateScore_(data) {
     level,
     kills,
     totalExp: computed.totalExp,
-    overtimeSeconds: computed.overtimeSeconds,
-    timePenalty: computed.timePenalty,
-    levelPenalty: computed.levelPenalty,
+    bossElapsedSeconds: computed.bossElapsedSeconds,
+    bossRemainingSeconds: computed.bossRemainingSeconds,
+    bossTimeBonus: computed.bossTimeBonus,
+    levelPoints: computed.levelPoints,
+    baseScoreAdjustment: computed.baseScoreAdjustment,
+    scoreAdjustment: computed.scoreAdjustment,
     score: computed.score,
     hp: finiteNumber_(
       data.hp,
@@ -559,41 +600,66 @@ function validateScore_(data) {
   };
 }
 
-function calculateScore_(totalExp, elapsedSeconds, level) {
+function calculateScore_(
+  totalExp,
+  elapsedSeconds,
+  level,
+  scoreAdjustment
+) {
   const normalizedExp =
     Math.max(0, Math.round(Number(totalExp) || 0));
 
-  const overtimeSeconds =
+  const normalizedElapsed =
+    Math.max(0, Number(elapsedSeconds) || 0);
+
+  const normalizedLevel =
+    Math.max(1, Math.floor(Number(level) || 1));
+
+  const normalizedScoreAdjustment =
+    normalizeStoredScoreAdjustment_(scoreAdjustment);
+
+  const bossElapsedExact =
+    Math.max(
+      0,
+      normalizedElapsed - SCORE_BOSS_START_SECONDS
+    );
+
+  const bossElapsedSeconds =
+    Math.floor(bossElapsedExact + 1e-9);
+
+  // 直接對「剩餘時間」取 floor，與 game.js 完全一致。
+  // 不能先 floor 已經過時間再相減，否則部分小數秒會多算 1 秒。
+  const bossRemainingSeconds =
     Math.max(
       0,
       Math.floor(
-        Math.max(0, Number(elapsedSeconds) || 0) -
-        SCORE_BOSS_START_SECONDS +
+        SCORE_BOSS_FIGHT_LIMIT_SECONDS -
+        bossElapsedExact +
         1e-9
       )
     );
 
-  const normalizedLevel =
-    Math.max(0, Math.floor(Number(level) || 0));
+  const levelPoints =
+    normalizedLevel *
+      SCORE_LEVEL_POINTS_PER_LEVEL +
+    SCORE_BASE_ADJUSTMENT;
 
-  const expPoints =
-    normalizedExp * SCORE_EXP_VALUE;
-
-  const timePenalty =
-    overtimeSeconds * SCORE_OVERTIME_PENALTY;
-
-  const levelPenalty =
-    normalizedLevel * SCORE_LEVEL_PENALTY;
+  const bossTimeBonus =
+    bossRemainingSeconds *
+    SCORE_BOSS_REMAINING_POINTS_PER_SECOND;
 
   return {
     totalExp: normalizedExp,
-    overtimeSeconds,
-    timePenalty,
-    levelPenalty,
+    bossElapsedSeconds,
+    bossRemainingSeconds,
+    bossTimeBonus,
+    levelPoints,
+    baseScoreAdjustment: SCORE_BASE_ADJUSTMENT,
+    scoreAdjustment: normalizedScoreAdjustment,
     score:
-      expPoints -
-      timePenalty -
-      levelPenalty
+      levelPoints +
+      bossTimeBonus +
+      normalizedScoreAdjustment
   };
 }
 
@@ -692,7 +758,118 @@ function getOrCreateScoreSheet_() {
   }
 
   ensureHeaders_(sheet);
+  ensureScoreSchema_(sheet);
   return sheet;
+}
+
+function ensureScoreSchema_(sheet) {
+  const properties =
+    PropertiesService.getDocumentProperties();
+
+  if (
+    properties.getProperty(SCORE_SCHEMA_PROPERTY) ===
+    SCORE_SCHEMA_VERSION
+  ) {
+    return;
+  }
+
+  // 舊版第 22 欄是舊公式總分，不是本局分數調整；
+  // 第一次升級時必須把既有紀錄的調整值視為 0。
+  recalculateStoredScores_(sheet, false);
+
+  properties.setProperty(
+    SCORE_SCHEMA_PROPERTY,
+    SCORE_SCHEMA_VERSION
+  );
+}
+
+function recalculateStoredScores_(
+  sheet,
+  preserveAdjustments
+) {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    return;
+  }
+
+  const rowCount = lastRow - 1;
+  const values = sheet
+    .getRange(2, 1, rowCount, HEADERS.length)
+    .getValues();
+
+  const recalculated = values.map(row => {
+    const result = String(row[COL.RESULT - 1] || '');
+    const elapsedSeconds = Number(
+      row[COL.ELAPSED_SECONDS - 1]
+    );
+    const totalExp = Number(row[COL.TOTAL_EXP - 1]);
+    const level = Number(row[COL.LEVEL - 1]);
+
+    if (
+      result !== 'victory' ||
+      !Number.isFinite(elapsedSeconds) ||
+      !Number.isFinite(totalExp) ||
+      !Number.isFinite(level)
+    ) {
+      return [
+        row[COL.BOSS_REMAINING_SECONDS - 1] || '',
+        row[COL.BOSS_TIME_BONUS - 1] || '',
+        row[COL.LEVEL_POINTS - 1] || '',
+        preserveAdjustments
+          ? row[COL.SCORE_ADJUSTMENT - 1] || 0
+          : 0,
+        row[COL.SCORE - 1] || ''
+      ];
+    }
+
+    const scoreAdjustment = preserveAdjustments
+      ? normalizeStoredScoreAdjustment_(
+          row[COL.SCORE_ADJUSTMENT - 1]
+        )
+      : 0;
+
+    const computed = calculateScore_(
+      totalExp,
+      elapsedSeconds,
+      level,
+      scoreAdjustment
+    );
+
+    return [
+      computed.bossRemainingSeconds,
+      computed.bossTimeBonus,
+      computed.levelPoints,
+      computed.scoreAdjustment,
+      computed.score
+    ];
+  });
+
+  sheet
+    .getRange(
+      2,
+      COL.BOSS_REMAINING_SECONDS,
+      rowCount,
+      5
+    )
+    .setValues(recalculated)
+    .setNumberFormat('0');
+}
+
+function normalizeStoredScoreAdjustment_(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return 0;
+  }
+
+  return Math.max(
+    SCORE_MIN_RUN_ADJUSTMENT,
+    Math.min(
+      SCORE_MAX_RUN_ADJUSTMENT,
+      Math.round(number)
+    )
+  );
 }
 
 function ensureHeaders_(sheet) {

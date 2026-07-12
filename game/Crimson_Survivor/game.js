@@ -56,6 +56,7 @@ const fmtTime = seconds => {const value=Math.max(0,seconds),minutes=Math.floor(v
 const SCORE_BOSS_START=Number(SCORE_CFG.bossStartSeconds)||Number(SYS.gameDurationSeconds)||900;
 const BOSS_FIGHT_LIMIT_SECONDS=Number(SCORE_CFG.bossFightLimitSeconds)||180;
 const SCORE_LEVEL_VALUE=Number(SCORE_CFG.levelPointsPerLevel)||100;
+const SCORE_BASE_ADJUSTMENT=Number.isFinite(Number(SCORE_CFG.baseScoreAdjustment))?Number(SCORE_CFG.baseScoreAdjustment):-100;
 const SCORE_BOSS_SECOND_VALUE=Number(SCORE_CFG.bossRemainingPointPerSecond)||30;
 function bossFightRemainingExact(elapsedSeconds=game?.elapsed||0){
   return Math.max(0,BOSS_FIGHT_LIMIT_SECONDS-Math.max(0,(Number(elapsedSeconds)||0)-SCORE_BOSS_START));
@@ -67,12 +68,13 @@ function bossFightElapsedSeconds(elapsedSeconds=game?.elapsed||0){
   return Math.max(0,Math.floor(Math.max(0,(Number(elapsedSeconds)||0)-SCORE_BOSS_START)+1e-9));
 }
 function scoreBreakdown(totalExp=game?.totalExp||0,elapsedSeconds=game?.elapsed||0,level=game?.level||1){
-  const levelPoints=Math.max(0,Math.floor(Number(level)||0))*SCORE_LEVEL_VALUE;
+  const normalizedLevel=Math.max(1,Math.floor(Number(level)||1));
+  const levelPoints=normalizedLevel*SCORE_LEVEL_VALUE+SCORE_BASE_ADJUSTMENT;
   const bossStarted=(Number(elapsedSeconds)||0)>=SCORE_BOSS_START||!!game?.bossSpawned;
   const bossRemainingSeconds=bossStarted?bossFightRemainingSeconds(elapsedSeconds):0;
   const bossTimeBonus=bossRemainingSeconds*SCORE_BOSS_SECOND_VALUE;
   const scoreAdjustment=Math.round(Number(game?.scoreAdjustment)||0);
-  return {totalExp:Math.round(Number(totalExp)||0),levelPoints,bossRemainingSeconds,bossTimeBonus,scoreAdjustment,overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),score:levelPoints+bossTimeBonus+scoreAdjustment};
+  return {totalExp:Math.round(Number(totalExp)||0),levelPoints,baseScoreAdjustment:SCORE_BASE_ADJUSTMENT,bossRemainingSeconds,bossTimeBonus,scoreAdjustment,overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),score:levelPoints+bossTimeBonus+scoreAdjustment};
 }
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
@@ -504,11 +506,13 @@ function buildScorePayload(playerName){
     elapsedText:fmtTime(game.elapsed),
     totalExp:finalScore.totalExp,
     levelPoints:finalScore.levelPoints,
+    baseScoreAdjustment:finalScore.baseScoreAdjustment,
     bossRemainingSeconds:finalScore.bossRemainingSeconds,
     bossRemainingText:fmtTime(finalScore.bossRemainingSeconds),
     bossTimeBonus:finalScore.bossTimeBonus,
     bossElapsedSeconds:finalScore.overtimeSeconds,
-    overtimeSeconds:finalScore.bossRemainingSeconds,
+    overtimeSeconds:finalScore.overtimeSeconds,
+    scoreAdjustment:finalScore.scoreAdjustment,
     score:finalScore.score,
     level:game.level,
     kills:game.kills,
@@ -564,13 +568,13 @@ function appendLeaderboardRow(score,isOwn=false){
   if(isOwn)row.classList.add('is-own');
   if(score.weapons)row.title=score.weapons;
 
-  const overtimeText=score.bossRemainingText||score.overtimeText||(score.bossRemainingSeconds!==undefined?fmtTime(Number(score.bossRemainingSeconds)||0):'—');
+  const bossRemainingText=score.bossRemainingText||score.overtimeText||(score.bossRemainingSeconds!==undefined?fmtTime(Number(score.bossRemainingSeconds)||0):'—');
   const values=[
     score.rank??'—',
     Number.isFinite(Number(score.score))?Math.round(Number(score.score)).toLocaleString('zh-TW'):'—',
     `${score.playerName||'匿名'}${isOwn?'（你）':''}`,
     score.kills??'—',
-    overtimeText,
+    bossRemainingText,
     score.level??'—'
   ];
   values.forEach((value,index)=>{
