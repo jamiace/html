@@ -45,7 +45,7 @@ const SCORE_BASE_ADJUSTMENT = -100;
 const SCORE_BOSS_REMAINING_POINTS_PER_SECOND = 30;
 const SCORE_MIN_RUN_ADJUSTMENT = -100000;
 const SCORE_MAX_RUN_ADJUSTMENT = 0;
-const SCORE_SCHEMA_VERSION = 'R26_SCORE_V2';
+const SCORE_SCHEMA_VERSION = 'R26_SCORE_V3_EXP';
 const SCORE_SCHEMA_PROPERTY = 'CRIMSON_SURVIVOR_SCORE_SCHEMA';
 
 const COL = Object.freeze({
@@ -656,10 +656,11 @@ function calculateScore_(
     levelPoints,
     baseScoreAdjustment: SCORE_BASE_ADJUSTMENT,
     scoreAdjustment: normalizedScoreAdjustment,
-    score:
-      levelPoints +
-      bossTimeBonus +
-      normalizedScoreAdjustment
+  score:
+    normalizedExp +
+    levelPoints +
+    bossTimeBonus +
+    normalizedScoreAdjustment
   };
 }
 

@@ -74,7 +74,17 @@ function scoreBreakdown(totalExp=game?.totalExp||0,elapsedSeconds=game?.elapsed|
   const bossRemainingSeconds=bossStarted?bossFightRemainingSeconds(elapsedSeconds):0;
   const bossTimeBonus=bossRemainingSeconds*SCORE_BOSS_SECOND_VALUE;
   const scoreAdjustment=Math.round(Number(game?.scoreAdjustment)||0);
-  return {totalExp:Math.round(Number(totalExp)||0),levelPoints,baseScoreAdjustment:SCORE_BASE_ADJUSTMENT,bossRemainingSeconds,bossTimeBonus,scoreAdjustment,overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),score:levelPoints+bossTimeBonus+scoreAdjustment};
+
+  return {
+    totalExp:Math.round(Number(totalExp)||0),
+    levelPoints,
+    baseScoreAdjustment:SCORE_BASE_ADJUSTMENT,
+    bossRemainingSeconds,
+    bossTimeBonus,
+    scoreAdjustment,
+    overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),
+    score:levelPoints+bossTimeBonus+scoreAdjustment
+  };
 }
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
@@ -710,7 +720,10 @@ async function submitOnlineScore(){
 }
 
 function startGame(){
-  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.hud.classList.remove('hidden');last=performance.now();toast(TEXT.startToast);
+  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.hud.classList.remove('hidden');
+  last = performance.now();
+// 遊戲開始後，將開始說明顯示 6 秒
+toast(TEXT.startLead, 6000);
 }
 function endGame(win){
   if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
@@ -1969,7 +1982,22 @@ function addText(x,y,text,color=VIS.damage.textNormal,size=VIS.damage.normalText
 function hitBurst(x,y,color,count=5){const cfg=VIS.particles;for(let i=0;i<count;i++)particle(x,y,rand(-cfg.hitBurstVelocity,cfg.hitBurstVelocity),rand(-cfg.hitBurstVelocity,cfg.hitBurstVelocity),rand(cfg.hitBurstLifeMin,cfg.hitBurstLifeMax),color,rand(cfg.hitBurstSizeMin,cfg.hitBurstSizeMax))}
 function muzzle(x,y,color,count){const cfg=VIS.particles;for(let i=0;i<count;i++)particle(x,y,rand(-cfg.muzzleVelocity,cfg.muzzleVelocity),rand(-cfg.muzzleVelocity,cfg.muzzleVelocity),rand(cfg.muzzleLifeMin,cfg.muzzleLifeMax),color,rand(cfg.muzzleSizeMin,cfg.muzzleSizeMax))}
 function addWave(x,y,start,max,dur,color,style='ring'){game.waves.push({x,y,r:start,max,age:0,dur,color,style})}
-function toast(text){const node=document.createElement('div');node.className='toast';node.innerHTML=`<b>${TEXT.toastSymbol}</b> ${text}`;DOM.toastLayer.append(node);setTimeout(()=>node.remove(),TEXT.toastDurationMs)}
+function toast(text, durationMs = TEXT.toastDurationMs) {
+  const node = document.createElement('div');
+  const fadeDurationMs = 250;
+  const fadeStartMs = Math.max(0, durationMs - fadeDurationMs);
+
+  node.className = 'toast';
+  node.innerHTML = `<b>${TEXT.toastSymbol}</b> ${text}`;
+
+  // 覆蓋 CSS 原本固定在 2.2 秒後淡出的設定
+  node.style.animation =
+    `toastIn .25s ease, toastOut .25s ease ${fadeStartMs}ms forwards`;
+
+  DOM.toastLayer.append(node);
+
+  setTimeout(() => node.remove(), durationMs);
+}
 function hexToRgba(hex,a){const n=parseInt(hex.replace('#',''),16);return `rgba(${n>>16},${n>>8&255},${n&255},${a})`}
 
 function isVisibleWorld(x,y,radius=0){return Math.abs(x-game.camera.x)<=W/2+radius+SYS.worldCullMargin&&Math.abs(y-game.camera.y)<=H/2+radius+SYS.worldCullMargin}
