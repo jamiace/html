@@ -1,4 +1,4 @@
-/* BUILD R17 - HIDDEN DEBUG LAB / RUNTIME TUNING - 2026-07-12 */
+/* BUILD R21 - SCORE LEADERBOARD TOP 50 - 2026-07-12 */
 (async () => {
 'use strict';
 
@@ -23,7 +23,7 @@ try {
   shell.append(box,input);return;
 }
 
-const SYS=CFG.system, PERF=CFG.performance, PLAYER_CFG=CFG.player, PROG=CFG.progression, SCALE=CFG.enemyScaling, SPAWN=CFG.spawn, AI=CFG.enemyAI, BOSS=CFG.boss, BASE=CFG.baseAttack, VIS=CFG.visuals, TEXT=CFG.text, AUDIO=CFG.audio, DROP=CFG.drops, DEBUG_CFG=CFG.debug;
+const SYS=CFG.system, PERF=CFG.performance, PLAYER_CFG=CFG.player, PROG=CFG.progression, SCALE=CFG.enemyScaling, SPAWN=CFG.spawn, AI=CFG.enemyAI, BOSS=CFG.boss, BASE=CFG.baseAttack, VIS=CFG.visuals, TEXT=CFG.text, AUDIO=CFG.audio, DROP=CFG.drops, DEBUG_CFG=CFG.debug, ONLINE_SCORE=CFG.onlineScores||{}, SCORE_CFG=CFG.scoring||{};
 const dataEntries=obj=>Object.entries(obj).filter(([key])=>!key.startsWith('_'));
 const formatText=(template,values={})=>String(template).replace(/\{(\w+)\}/g,(_,key)=>values[key]??`{${key}}`);
 const levelChoice=(level,base,upgraded,threshold)=>level>=threshold?upgraded:base;
@@ -53,15 +53,34 @@ const rand = (a,b)=>a+Math.random()*(b-a);
 const pick = a=>a[(Math.random()*a.length)|0];
 const dist2=(a,b)=>{const x=a.x-b.x,y=a.y-b.y;return x*x+y*y};
 const fmtTime = seconds => {const value=Math.max(0,seconds),minutes=Math.floor(value/60),secs=Math.floor(value%60);return `${String(minutes).padStart(SYS.timeFormatMinutesPad,'0')}:${String(secs).padStart(SYS.timeFormatSecondsPad,'0')}`};
+const SCORE_EXP_VALUE=Number(SCORE_CFG.expPointValue)||1;
+const SCORE_BOSS_START=Number(SCORE_CFG.bossStartSeconds)||Number(SYS.gameDurationSeconds)||900;
+const SCORE_OVERTIME_PENALTY=Number(SCORE_CFG.overtimePenaltyPerSecond)||10;
+const SCORE_LEVEL_PENALTY=Number(SCORE_CFG.levelPenaltyPerLevel)||100;
+function scoreOvertimeSeconds(elapsedSeconds=game?.elapsed||0){
+  return Math.max(0,Math.floor(Math.max(0,Number(elapsedSeconds)||0)-SCORE_BOSS_START+1e-9));
+}
+function scoreBreakdown(totalExp=game?.totalExp||0,elapsedSeconds=game?.elapsed||0,level=game?.level||1){
+  const expPoints=Math.round((Number(totalExp)||0)*SCORE_EXP_VALUE);
+  const overtimeSeconds=scoreOvertimeSeconds(elapsedSeconds);
+  const timePenalty=overtimeSeconds*SCORE_OVERTIME_PENALTY;
+  const levelPenalty=Math.max(0,Math.floor(Number(level)||0))*SCORE_LEVEL_PENALTY;
+  return {totalExp:Math.round(Number(totalExp)||0),expPoints,overtimeSeconds,timePenalty,levelPenalty,score:expPoints-timePenalty-levelPenalty};
+}
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
 const DOM = {
   hud: $('#hud'), start: $('#start-screen'), level: $('#level-screen'), pause: $('#pause-screen'), end: $('#end-screen'),
-  timer: $('#timer'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
+  timer: $('#timer'), score: $('#score'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
   weaponRack: $('#weapon-rack'), effectRack: $('#effect-rack'), rewardCards: $('#reward-cards'),
-  resultTime: $('#result-time'), resultLevel: $('#result-level'), resultKills: $('#result-kills'), resultWeapons: $('#result-weapons'),
+  resultScore: $('#result-score'), resultTime: $('#result-time'), resultLevel: $('#result-level'), resultKills: $('#result-kills'), resultWeapons: $('#result-weapons'),
   endTitle: $('#end-title'), endCopy: $('#end-copy'), endEyebrow: $('#end-eyebrow'), toastLayer: $('#toast-layer'), damageFlash: $('#damage-flash'),
-  soundBtn: $('#sound-btn')
+  soundBtn: $('#sound-btn'),
+  onlineScorePanel: $('#online-score-panel'), scorePlayerName: $('#score-player-name'),
+  submitScoreBtn: $('#submit-score-btn'), scoreSubmitStatus: $('#score-submit-status'),
+  leaderboardPanel: $('#leaderboard-panel'), leaderboardBody: $('#leaderboard-body'),
+  leaderboardStatus: $('#leaderboard-status'), leaderboardRule: $('#leaderboard-rule'),
+  leaderboardRefreshBtn: $('#leaderboard-refresh-btn')
 };
 
 function applyStaticText(){
@@ -70,14 +89,14 @@ function applyStaticText(){
   const html=(selector,value)=>{const node=document.querySelector(selector);if(node)node.innerHTML=value};
   canvas.setAttribute('aria-label',TEXT.canvasAria);
   set('.brand-mark',TEXT.brandMark);set('.brand span:last-child',TEXT.brandName);set('.timer-wrap small',TEXT.timerLabel);
-  set('#level-label', TEXT.levelPrefix);set('#kills-label', TEXT.killsLabel);
+  set('#score-label',TEXT.scoreLabel||'分數');set('#level-label', TEXT.levelPrefix);set('#kills-label', TEXT.killsLabel);
   set('.hp-row > span',TEXT.hpLabel);set('.exp-row > span',TEXT.expLabel);$('#pause-btn')?.setAttribute('aria-label',TEXT.pauseAria);set('#pause-btn',TEXT.pauseSymbol);
   set('#start-screen .eyebrow',TEXT.startEyebrow);set('#start-screen h1',TEXT.startTitle);set('#start-screen .subtitle',TEXT.startSubtitle);set('#start-screen .lead',TEXT.startLead);set('#start-build-note',TEXT.startBuildNote);
   const featureGrid=document.querySelector('.feature-grid');if(featureGrid)featureGrid.innerHTML=TEXT.features.map(item=>`<div><b>${item.value}</b><span>${item.label}</span></div>`).join('');
   html('.controls',TEXT.controlsHtml);set('#start-btn',TEXT.startButton);set('#sound-btn',sound.enabled?TEXT.soundOn:TEXT.soundOff);
   set('#level-screen .eyebrow',TEXT.levelEyebrow);set('#level-screen h2',TEXT.levelTitle);set('#level-screen .key-hint',TEXT.levelKeyHint);const chest=document.querySelector('.chest-stage img');if(chest){chest.src=CFG.assets.chest;chest.alt=TEXT.chestAlt}
   set('#pause-screen .eyebrow',TEXT.pauseEyebrow);set('#pause-screen h2',TEXT.pauseTitle);set('#pause-screen .pause-card > p:not(.eyebrow)',TEXT.pauseCopy);set('#resume-btn',TEXT.resumeButton);set('#restart-pause-btn',TEXT.restartButton);
-  set('#end-eyebrow',TEXT.endLoseEyebrow);set('#end-title',TEXT.endLoseTitle);set('#end-copy',TEXT.endLoseCopy);set('#result-time-label',TEXT.resultTimeLabel);set('#result-level-label',TEXT.resultLevelLabel);set('#result-kills-label',TEXT.resultKillsLabel);set('#result-weapons-label',TEXT.resultWeaponsLabel);set('#restart-btn',TEXT.restartEndButton);
+  set('#end-eyebrow',TEXT.endLoseEyebrow);set('#end-title',TEXT.endLoseTitle);set('#end-copy',TEXT.endLoseCopy);set('#result-score-label',TEXT.resultScoreLabel||'總分');set('#result-time-label',TEXT.resultTimeLabel);set('#result-level-label',TEXT.resultLevelLabel);set('#result-kills-label',TEXT.resultKillsLabel);set('#result-weapons-label',TEXT.resultWeaponsLabel);set('#restart-btn',TEXT.restartEndButton);
 }
 
 const ASSET_PATHS = CFG.assets;
@@ -125,6 +144,7 @@ const ROLE_INTERVALS = SPAWN.roleIntervals;
 
 let state='menu', last=performance.now(), DPR=1, W=0,H=0;
 let game=null, debugReturnState='paused', debugUI=null, pauseDebugButton=null, pauseFpsButton=null, fpsUI=null, vignetteCache=null, debugSecretBuffer='', debugSecretLast=0;
+let leaderboardRequestToken=0;
 const keys={}; const touch={x:0,y:0,active:false}; const mouse={active:false,held:false,targetX:0,targetY:0};
 
 // ---------------------------------------------------------------------------
@@ -281,7 +301,7 @@ function ensureEffectNodes(){
 
 function resetGame(){
   game={
-    elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,
+    elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,totalExp:0,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,won:false,scoreSubmitted:false,scoreRunId:'',
     shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,
     player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay},
     enemies:[],projectiles:[],enemyShots:[],gems:[],mapDrops:[],particles:[],texts:[],waves:[],beams:[],meteors:[],gravityOrbs:[],zones:[],mines:[],wells:[],boomerangs:[],lightning:[],drones:[],delayedCasts:[],effects:{regen:0,shield:0,freeze:0,doublexp:0,overload:0,vampire:0},
@@ -304,13 +324,331 @@ function rebuildVignetteCache(){
 function resize(){DPR=Math.min(SYS.maxDevicePixelRatio,window.devicePixelRatio||SYS.defaultDevicePixelRatio);W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.imageSmoothingEnabled=true;rebuildVignetteCache();}
 window.addEventListener('resize',resize);resize();
 
+
+function isScoreEndpointConfigured(){
+  const endpoint=String(ONLINE_SCORE.endpoint||'').trim();
+  return !!ONLINE_SCORE.enabled && /^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(?:\?.*)?$/i.test(endpoint);
+}
+function setScoreSubmitStatus(message,type=''){
+  if(!DOM.scoreSubmitStatus)return;
+  DOM.scoreSubmitStatus.textContent=message;
+  DOM.scoreSubmitStatus.className=`score-submit-status${type?` ${type}`:''}`;
+}
+function setLeaderboardStatus(message,type=''){
+  if(!DOM.leaderboardStatus)return;
+  DOM.leaderboardStatus.textContent=message;
+  DOM.leaderboardStatus.className=`leaderboard-status${type?` ${type}`:''}`;
+}
+function resetOnlineScoreUI(){
+  leaderboardRequestToken++;
+  if(DOM.onlineScorePanel)DOM.onlineScorePanel.classList.add('hidden');
+  if(DOM.leaderboardPanel)DOM.leaderboardPanel.classList.add('hidden');
+  if(DOM.leaderboardBody)DOM.leaderboardBody.replaceChildren();
+  if(DOM.leaderboardRule)DOM.leaderboardRule.textContent='';
+  if(DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.disabled=false;
+  if(DOM.submitScoreBtn){
+    DOM.submitScoreBtn.disabled=false;
+    DOM.submitScoreBtn.textContent='送出成績';
+  }
+  if(DOM.scorePlayerName)DOM.scorePlayerName.disabled=false;
+  setScoreSubmitStatus('');
+  setLeaderboardStatus('');
+}
+function prepareOnlineScoreUI(win){
+  resetOnlineScoreUI();
+  if(!win)return;
+  DOM.onlineScorePanel?.classList.remove('hidden');
+  DOM.leaderboardPanel?.classList.remove('hidden');
+  const savedName=localStorage.getItem(ONLINE_SCORE.storageKey||'crimson-survivor-player-name')||'';
+  DOM.scorePlayerName.maxLength=Number(ONLINE_SCORE.playerNameMaxLength)||20;
+  DOM.scorePlayerName.value=savedName;
+  if(!isScoreEndpointConfigured()){
+    DOM.submitScoreBtn.disabled=true;
+    DOM.leaderboardRefreshBtn.disabled=true;
+    setScoreSubmitStatus('尚未設定 Google Apps Script Web App 網址。請先在 game-config.json 填入 endpoint。','error');
+    setLeaderboardStatus('排行榜無法載入：尚未設定 endpoint。','error');
+    return;
+  }
+  refreshLeaderboard({runId:'',retryOwn:false});
+}
+function makeRunId(){
+  if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,12)}`;
+}
+function normalizedWeaponLevel(weaponState,key){
+  const definition=CFG.weapons?.[key];
+  const maximum=Math.max(1,Number(SYS.maxUpgradeLevel)||5);
+  const seen=new Set();
+
+  const readLevel=(value,depth=0)=>{
+    if(value==null||depth>6)return NaN;
+
+    if(typeof value==='number'){
+      return Number.isFinite(value)?value:NaN;
+    }
+
+    if(typeof value==='string'){
+      const trimmed=value.trim();
+      if(!trimmed)return NaN;
+      const direct=Number(trimmed);
+      if(Number.isFinite(direct))return direct;
+      const matched=trimmed.match(/(?:Lv\.?\s*)?(\d+)/i);
+      return matched?Number(matched[1]):NaN;
+    }
+
+    if(typeof value!=='object')return NaN;
+    if(seen.has(value))return NaN;
+    seen.add(value);
+
+    if(Array.isArray(definition?.levels)){
+      const configIndex=definition.levels.indexOf(value);
+      if(configIndex>=0)return configIndex+1;
+    }
+
+    for(const property of ['level','lv','weaponLevel','currentLevel','current','value']){
+      if(Object.prototype.hasOwnProperty.call(value,property)){
+        const nested=readLevel(value[property],depth+1);
+        if(Number.isFinite(nested))return nested;
+      }
+    }
+
+    return NaN;
+  };
+
+  const rawLevel=readLevel(weaponState);
+  if(!Number.isFinite(rawLevel))return 0;
+  return Math.max(0,Math.min(maximum,Math.round(rawLevel)));
+}
+function buildScorePayload(playerName){
+  if(!game.scoreRunId)game.scoreRunId=makeRunId();
+
+  const weaponDetails=Object.entries(game.player.weapons||{}).map(([key,weaponState])=>{
+    const name=CFG.weapons?.[key]?.name||key;
+    return {
+      key,
+      name,
+      level:normalizedWeaponLevel(weaponState,key)
+    };
+  });
+
+  const weaponEntries=weaponDetails.map(
+    weapon=>`${weapon.name} Lv.${weapon.level}`
+  );
+  const finalScore=scoreBreakdown();
+
+  return {
+    gameId:String(ONLINE_SCORE.gameId||'crimson-survivor'),
+    runId:game.scoreRunId,
+    playerName,
+    result:'victory',
+    elapsedSeconds:Math.round(game.elapsed*1000)/1000,
+    elapsedText:fmtTime(game.elapsed),
+    totalExp:finalScore.totalExp,
+    overtimeSeconds:finalScore.overtimeSeconds,
+    score:finalScore.score,
+    level:game.level,
+    kills:game.kills,
+    hp:Math.max(0,Math.round(game.player.hp*100)/100),
+    maxHp:Math.round(game.player.maxHp*100)/100,
+    weaponCount:weaponDetails.length,
+    weapons:weaponEntries.join('｜'),
+    weaponLevels:JSON.stringify(weaponDetails),
+    build:String(CFG.meta?.build||''),
+    configVersion:String(CFG.meta?.configVersion||''),
+    clientTimestamp:new Date().toISOString(),
+    userAgent:navigator.userAgent.slice(0,300)
+  };
+}
+function leaderboardJsonp(runId=''){
+  return new Promise((resolve,reject)=>{
+    const callbackName=`__crimsonLeaderboard_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script=document.createElement('script');
+    const url=new URL(String(ONLINE_SCORE.endpoint).trim());
+    const timeoutMs=Number(ONLINE_SCORE.leaderboardTimeoutMs)||12000;
+    let timer=0;
+    const cleanup=()=>{
+      clearTimeout(timer);
+      script.remove();
+      try{delete globalThis[callbackName]}catch(_){globalThis[callbackName]=undefined}
+    };
+    globalThis[callbackName]=payload=>{
+      cleanup();
+      if(payload?.ok)resolve(payload);
+      else reject(new Error(payload?.error||'排行榜服務回傳錯誤'));
+    };
+    script.onerror=()=>{
+      cleanup();
+      reject(new Error('排行榜連線失敗'));
+    };
+    url.searchParams.set('action','leaderboard');
+    url.searchParams.set('limit',String(Number(ONLINE_SCORE.leaderboardLimit)||50));
+    url.searchParams.set('gameId',String(ONLINE_SCORE.gameId||'crimson-survivor'));
+    if(runId)url.searchParams.set('runId',runId);
+    url.searchParams.set('callback',callbackName);
+    url.searchParams.set('_',String(Date.now()));
+    script.src=url.toString();
+    script.async=true;
+    timer=setTimeout(()=>{
+      cleanup();
+      reject(new Error('排行榜讀取逾時'));
+    },timeoutMs);
+    document.head.append(script);
+  });
+}
+function appendLeaderboardRow(score,isOwn=false){
+  const row=document.createElement('tr');
+  if(isOwn)row.classList.add('is-own');
+  if(score.weapons)row.title=score.weapons;
+
+  const overtimeText=score.overtimeText||fmtTime(Number(score.overtimeSeconds)||0);
+  const values=[
+    score.rank??'—',
+    Number.isFinite(Number(score.score))?Math.round(Number(score.score)).toLocaleString('zh-TW'):'—',
+    `${score.playerName||'匿名'}${isOwn?'（你）':''}`,
+    score.kills??'—',
+    overtimeText,
+    score.level??'—'
+  ];
+  values.forEach((value,index)=>{
+    const cell=document.createElement(index===2?'th':'td');
+    if(index===2)cell.scope='row';
+    cell.textContent=String(value);
+    row.append(cell);
+  });
+  DOM.leaderboardBody.append(row);
+}
+function renderLeaderboard(payload,runId=''){
+  if(!DOM.leaderboardBody)return;
+  DOM.leaderboardBody.replaceChildren();
+  const entries=Array.isArray(payload.entries)?payload.entries:[];
+  if(!entries.length){
+    const row=document.createElement('tr');
+    row.className='leaderboard-empty-row';
+    const cell=document.createElement('td');
+    cell.colSpan=6;
+    cell.textContent='目前還沒有通關成績。';
+    row.append(cell);
+    DOM.leaderboardBody.append(row);
+  }else{
+    for(const entry of entries)appendLeaderboardRow(entry,!!runId&&entry.runId===runId);
+  }
+  const own=payload.own||null;
+  if(own&&!own.inTop){
+    const divider=document.createElement('tr');
+    divider.className='leaderboard-own-divider';
+    const cell=document.createElement('td');
+    cell.colSpan=6;
+    cell.textContent='你的本局成績';
+    divider.append(cell);
+    DOM.leaderboardBody.append(divider);
+    appendLeaderboardRow(own,true);
+  }
+  if(DOM.leaderboardRule){
+    DOM.leaderboardRule.textContent=payload.rankingRule||'分數較高者優先；同分依最短時間、最多擊殺數、最低等級排序。';
+  }
+}
+const leaderboardDelay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function refreshLeaderboard({runId='',retryOwn=false}={}){
+  if(!isScoreEndpointConfigured())return false;
+  const requestToken=++leaderboardRequestToken;
+  const attempts=retryOwn?Math.max(1,Number(ONLINE_SCORE.leaderboardRetryCount)||5):1;
+  const retryDelay=Math.max(250,Number(ONLINE_SCORE.leaderboardRetryDelayMs)||900);
+  DOM.leaderboardPanel?.classList.remove('hidden');
+  if(DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.disabled=true;
+  setLeaderboardStatus(runId?'正在確認本局名次…':'正在載入 Top 50…');
+  let latestPayload=null;
+  try{
+    for(let attempt=0;attempt<attempts;attempt++){
+      latestPayload=await leaderboardJsonp(runId);
+      if(requestToken!==leaderboardRequestToken)return false;
+      renderLeaderboard(latestPayload,runId);
+      if(!runId||latestPayload.own){
+        const ownText=latestPayload.own?`你的本局排名：第 ${latestPayload.own.rank} 名。`:'';
+        setLeaderboardStatus(`共 ${latestPayload.total||0} 筆通關紀錄。${ownText}`,'success');
+        return true;
+      }
+      if(attempt<attempts-1){
+        setLeaderboardStatus(`成績已送出，等待排行榜更新…（${attempt+1}/${attempts}）`);
+        await leaderboardDelay(retryDelay*(attempt+1));
+      }
+    }
+    setLeaderboardStatus('尚未在排行榜讀到本局紀錄，請稍後按「重新整理」。','warning');
+    return false;
+  }catch(error){
+    if(requestToken!==leaderboardRequestToken)return false;
+    console.error('Leaderboard load failed',error);
+    if(latestPayload)renderLeaderboard(latestPayload,runId);
+    setLeaderboardStatus(error?.message||'排行榜載入失敗。','error');
+    return false;
+  }finally{
+    if(requestToken===leaderboardRequestToken&&DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.disabled=false;
+  }
+}
+async function submitOnlineScore(){
+  if(!game?.ended||!game?.won){
+    setScoreSubmitStatus('只有擊敗 Boss 的勝利紀錄可以送出。','error');return;
+  }
+  if(game.scoreSubmitted){
+    setScoreSubmitStatus('這一局成績已經送出。','success');
+    refreshLeaderboard({runId:game.scoreRunId||'',retryOwn:false});
+    return;
+  }
+  if(!isScoreEndpointConfigured()){
+    setScoreSubmitStatus('Google Apps Script Web App 網址尚未設定。','error');return;
+  }
+  const maxLength=Number(ONLINE_SCORE.playerNameMaxLength)||20;
+  const playerName=String(DOM.scorePlayerName.value||'').trim().slice(0,maxLength);
+  if(!playerName){
+    DOM.scorePlayerName.focus();
+    setScoreSubmitStatus('請先輸入玩家名稱。','error');return;
+  }
+  localStorage.setItem(ONLINE_SCORE.storageKey||'crimson-survivor-player-name',playerName);
+  DOM.submitScoreBtn.disabled=true;
+  DOM.scorePlayerName.disabled=true;
+  DOM.submitScoreBtn.textContent='傳送中…';
+  setScoreSubmitStatus('正在傳送成績…');
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),Number(ONLINE_SCORE.requestTimeoutMs)||12000);
+  try{
+    const payload=buildScorePayload(playerName);
+    const body=new URLSearchParams();
+    Object.entries(payload).forEach(([key,value])=>body.set(key,String(value??'')));
+    await fetch(String(ONLINE_SCORE.endpoint).trim(),{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body,
+      signal:controller.signal,
+      cache:'no-store',
+      keepalive:true
+    });
+    game.scoreSubmitted=true;
+    DOM.submitScoreBtn.textContent='已送出';
+    setScoreSubmitStatus('成績已送出，正在確認排行榜…','success');
+    const confirmed=await refreshLeaderboard({runId:payload.runId,retryOwn:true});
+    setScoreSubmitStatus(
+      confirmed?'成績已登錄，排行榜已更新。':'成績已送出；若尚未出現，請稍後重新整理排行榜。',
+      confirmed?'success':''
+    );
+  }catch(error){
+    console.error('Score submission failed',error);
+    DOM.submitScoreBtn.disabled=false;
+    DOM.scorePlayerName.disabled=false;
+    DOM.submitScoreBtn.textContent='重新送出';
+    setScoreSubmitStatus(error?.name==='AbortError'?'傳送逾時。':'傳送失敗，請稍後重試。','error');
+  }finally{
+    clearTimeout(timeout);
+  }
+}
+
 function startGame(){
-  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.hud.classList.remove('hidden');last=performance.now();toast(TEXT.startToast);
+  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.hud.classList.remove('hidden');last=performance.now();toast(TEXT.startToast);
 }
 function endGame(win){
-  if(game.ended)return;game.ended=true;state='ended';syncFPSVisibility();DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
+  if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
   DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:TEXT.endLoseCopy;
-  DOM.resultTime.textContent=fmtTime(game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;sound.play(win?'victory':'defeat');
+  DOM.resultScore.textContent=scoreBreakdown().score.toLocaleString('zh-TW');DOM.resultTime.textContent=fmtTime(game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;
+  prepareOnlineScoreUI(win);sound.play(win?'victory':'defeat');
 }
 function togglePause(force){
   if(state==='level'||state==='menu'||state==='ended'||state==='debug')return;
@@ -1251,7 +1589,7 @@ function spawnGem(x,y,value){const cfg=DROP.exp,cx=Math.floor(x/PERF.gemMergeCel
 function updateGems(dt){const player=game.player,radius=PICKUP_RAD[player.stats.pickup],cfg=DROP.exp;for(const gem of game.gems){gem.age+=dt;gem.spin+=dt*cfg.spinSpeed;const dx=player.x-gem.x,dy=player.y-gem.y,distance=Math.hypot(dx,dy)||1;if(game.globalMagnet>0||distance<radius){const force=game.globalMagnet>0?cfg.globalMagnetForce:clamp(cfg.localForceBase+(radius-distance)*cfg.localForcePerPixel,cfg.localForceMin,cfg.localForceMax);gem.vx+=(dx/distance*force-gem.vx)*Math.min(1,dt*cfg.velocityLerpRate);gem.vy+=(dy/distance*force-gem.vy)*Math.min(1,dt*cfg.velocityLerpRate);gem.x+=gem.vx*dt;gem.y+=gem.vy*dt}else{gem.vx*=Math.max(0,1-dt*cfg.idleDragRate);gem.vy*=Math.max(0,1-dt*cfg.idleDragRate);gem.x+=(gem.baseX-gem.x)*Math.min(1,dt*cfg.returnRate);gem.y+=(gem.baseY-gem.y)*Math.min(1,dt*cfg.returnRate)}if(Math.hypot(player.x-gem.x,player.y-gem.y)<player.r+cfg.pickupExtraRadius){gainExp(gem.value);gem.dead=true;sound.pickup()}}game.globalMagnet=Math.max(0,game.globalMagnet-dt);compactInPlace(game.gems,gem=>!gem.dead,recycleGem)}
 function spawnMapDrop(){const roll=Math.random(),key=roll<DROP.healChance?'heal':roll<DROP.magnetCumulativeChance?'magnet':'freeze',player=game.player,angle=Math.random()*TAU,distance=Math.max(W,H)*(DROP.mapDistanceScreenBase+Math.random()*DROP.mapDistanceScreenRandom),x=player.x+Math.cos(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter),y=player.y+Math.sin(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter);game.mapDrops.push({x,y,key,r:DROP.mapRadius,age:0,life:DROP.mapLifetime,bob:rand(0,TAU),vx:0,vy:0});while(game.mapDrops.length>DROP.mapMaximumCount)game.mapDrops.shift()}
 function updateMapDrops(dt){game.nextMapDrop-=dt;if(game.nextMapDrop<=0){spawnMapDrop();game.nextMapDrop=rand(DROP.nextDropDelayMin,DROP.nextDropDelayMax)}const player=game.player,radius=PICKUP_RAD[player.stats.pickup]*DROP.mapPickupRadiusMultiplier;for(const drop of game.mapDrops){drop.age+=dt;drop.bob+=dt*DROP.mapBobSpeed;const dx=player.x-drop.x,dy=player.y-drop.y,distance=Math.hypot(dx,dy)||1;if(distance<radius){const force=clamp(DROP.mapAttractForceBase+(radius-distance)*DROP.mapAttractForcePerPixel,DROP.mapAttractForceMin,DROP.mapAttractForceMax);drop.vx+=(dx/distance*force-drop.vx)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.vy+=(dy/distance*force-drop.vy)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.x+=drop.vx*dt;drop.y+=drop.vy*dt}if(distance<player.r+drop.r-DROP.mapPickupOverlapReduction){applyItem(drop.key);drop.dead=true;sound.pickup()}if(drop.age>drop.life)drop.dead=true}compactInPlace(game.mapDrops,drop=>!drop.dead)}
-function gainExp(value){game.exp+=value*(game.effects.doublexp>0?CFG.items.doublexp.multiplier:1);while(game.exp>=game.need){game.exp-=game.need;game.level++;game.need=needXP(game.level);game.pendingLevels++}if(game.pendingLevels>0&&state==='playing')openLevelUp()}
+function gainExp(value){const gained=value*(game.effects.doublexp>0?CFG.items.doublexp.multiplier:1);game.totalExp+=gained;game.exp+=gained;while(game.exp>=game.need){game.exp-=game.need;game.level++;game.need=needXP(game.level);game.pendingLevels++}if(game.pendingLevels>0&&state==='playing')openLevelUp()}
 
 function openLevelUp(){state='level';sound.level();game.rewardChoices=generateRewards();DOM.rewardCards.innerHTML='';game.rewardChoices.forEach((reward,index)=>{const card=document.createElement('button');card.className='reward-card';card.style.setProperty('--accent',reward.color);card.style.setProperty('--accent-soft',hexToRgba(reward.color,PROG.rewardCardAccentAlpha));card.innerHTML=`<span class="keycap">${index+1}</span><img src="${reward.icon}" alt=""><span class="category">${reward.categoryLabel}</span><h3>${reward.name}</h3><span class="level-note">${reward.levelNote||''}</span><p>${reward.desc}</p>`;card.onclick=()=>chooseReward(index);DOM.rewardCards.append(card)});DOM.level.classList.add('show');updateHUD(true)}
 function generateRewards(){const player=game.player,candidates=[];for(const [key,weapon] of Object.entries(WEAPONS)){const level=player.weapons[key]?.level||0;if(level>=SYS.maxUpgradeLevel)continue;if(level===0&&Object.keys(player.weapons).length>=SYS.maxWeaponSlots)continue;candidates.push({type:'weapon',key,name:weapon.name,icon:weapon.icon,color:weapon.color,categoryLabel:TEXT.rewardCategoryWeapon,levelNote:level?formatText(TEXT.rewardLevelTransition,{from:level,to:level+1}):TEXT.rewardNewWeapon,desc:weapon.desc[level]})}
@@ -1281,7 +1619,7 @@ function buildWeaponRack(){
     DOM.weaponRack.append(slot);
   }
 }
-function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,remaining=fmtTime(game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:Math.ceil(Math.max(0,player.hp)),max:player.maxHp}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
+function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,remaining=fmtTime(game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:Math.ceil(Math.max(0,player.hp)),max:player.maxHp}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('score',DOM.score,scoreBreakdown().score.toLocaleString('zh-TW'));setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
 
 function particle(x,y,vx,vy,life,color,size){
   if(game.particles.length>=MAX_PARTICLES)return;
@@ -1434,7 +1772,7 @@ window.addEventListener('keydown',e=>{
   }
 });
 window.addEventListener('keyup',e=>keys[e.code]=false);
-$('#start-btn').onclick=startGame;$('#restart-btn').onclick=startGame;$('#restart-pause-btn').onclick=startGame;$('#pause-btn').onclick=()=>togglePause();$('#resume-btn').onclick=()=>togglePause(false);
+$('#start-btn').onclick=startGame;$('#restart-btn').onclick=startGame;$('#restart-pause-btn').onclick=startGame;$('#pause-btn').onclick=()=>togglePause();$('#resume-btn').onclick=()=>togglePause(false);if(DOM.submitScoreBtn)DOM.submitScoreBtn.onclick=submitOnlineScore;if(DOM.scorePlayerName)DOM.scorePlayerName.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();submitOnlineScore()}});if(DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.onclick=()=>refreshLeaderboard({runId:game?.scoreRunId||'',retryOwn:false});
 DOM.soundBtn.onclick=()=>{sound.enabled=!sound.enabled;DOM.soundBtn.textContent=sound.enabled?TEXT.soundOn:TEXT.soundOff;if(sound.enabled)sound.pickup()};
 
 const joy=$('#joystick-base'),knob=$('#joystick-knob');let joyId=null;

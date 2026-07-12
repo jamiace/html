@@ -15,6 +15,10 @@
         <div class="brand"><span class="brand-mark"></span><span></span></div>
         <div class="timer-wrap"><span id="timer"></span><small></small></div>
         <div class="stats-compact">
+          <span class="stat-item score-stat">
+            <em id="score-label">分數</em>
+            <b id="score">-100</b>
+          </span>
           <span class="stat-item">
             <em id="level-label">LV</em>
             <b id="level">1</b>
@@ -58,11 +62,44 @@
       <div class="end-card panel">
         <p id="end-eyebrow" class="eyebrow"></p><h2 id="end-title"></h2><p id="end-copy"></p>
         <div class="result-grid">
+          <div class="result-score-card"><span id="result-score-label">分數</span><b id="result-score"></b></div>
           <div><span id="result-time-label"></span><b id="result-time"></b></div>
           <div><span id="result-level-label"></span><b id="result-level"></b></div>
           <div><span id="result-kills-label"></span><b id="result-kills"></b></div>
           <div><span id="result-weapons-label"></span><b id="result-weapons"></b></div>
         </div>
+        <section id="online-score-panel" class="online-score-panel hidden" aria-live="polite">
+          <div class="score-panel-heading">
+            <strong>登錄線上成績</strong>
+            <span>擊敗 Boss 後可將本次紀錄送到 Google Sheets</span>
+          </div>
+          <label class="score-name-field" for="score-player-name">
+            <span>玩家名稱</span>
+            <input id="score-player-name" type="text" maxlength="20" autocomplete="nickname" placeholder="請輸入名稱" />
+          </label>
+          <button id="submit-score-btn" class="primary-btn score-submit-btn" type="button">送出成績</button>
+          <p id="score-submit-status" class="score-submit-status"></p>
+        </section>
+
+        <section id="leaderboard-panel" class="leaderboard-panel hidden" aria-live="polite">
+          <div class="leaderboard-heading">
+            <div>
+              <strong>線上排行榜 Top 50</strong>
+              <span id="leaderboard-rule">分數較高者優先</span>
+            </div>
+            <button id="leaderboard-refresh-btn" class="secondary-btn leaderboard-refresh-btn" type="button">重新整理</button>
+          </div>
+          <p id="leaderboard-status" class="leaderboard-status"></p>
+          <div class="leaderboard-table-wrap">
+            <table class="leaderboard-table">
+              <thead>
+                <tr><th>排名</th><th>分數</th><th>姓名</th><th>擊殺數</th><th>超出時間</th><th>等級</th></tr>
+              </thead>
+              <tbody id="leaderboard-body"></tbody>
+            </table>
+          </div>
+        </section>
+
         <button id="restart-btn" class="primary-btn"></button>
       </div>
     </section>
