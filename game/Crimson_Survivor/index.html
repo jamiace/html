@@ -17,7 +17,7 @@
         <div class="stats-compact">
           <span class="stat-item score-stat">
             <em id="score-label">分數</em>
-            <b id="score">-100</b>
+            <b id="score">100</b>
           </span>
           <span class="stat-item">
             <em id="level-label">LV</em>
@@ -33,6 +33,7 @@
         <div class="bar-row hp-row"><span></span><div class="bar"><i id="hp-fill"></i><em id="hp-text"></em></div></div>
         <div class="bar-row exp-row"><span></span><div class="bar"><i id="exp-fill"></i><em id="exp-text"></em></div></div>
       </div>
+      <div id="passive-rack" class="passive-rack hidden" aria-label="永久升級"></div>
       <div id="weapon-rack" class="weapon-rack"></div>
       <div id="effect-rack" class="effect-rack"></div>
       <button id="pause-btn" class="icon-button"></button>
@@ -55,7 +56,21 @@
     </section>
 
     <section id="pause-screen" class="modal-screen">
-      <div class="pause-card panel"><p class="eyebrow"></p><h2></h2><p></p><button id="resume-btn" class="primary-btn"></button><button id="restart-pause-btn" class="secondary-btn"></button></div>
+      <div class="pause-card panel">
+        <p class="eyebrow"></p><h2></h2><p></p>
+        <div id="pause-loadout" class="pause-loadout" aria-live="polite">
+          <section class="pause-loadout-section">
+            <div class="pause-loadout-heading"><h3 id="pause-weapons-title">目前武器</h3><span id="pause-weapons-count"></span></div>
+            <div id="pause-weapons-list" class="pause-loadout-list"></div>
+          </section>
+          <section class="pause-loadout-section">
+            <div class="pause-loadout-heading"><h3 id="pause-passives-title">永久升級</h3><span id="pause-passives-count"></span></div>
+            <div id="pause-passives-list" class="pause-loadout-list"></div>
+          </section>
+        </div>
+        <button id="resume-btn" class="primary-btn"></button>
+        <button id="restart-pause-btn" class="secondary-btn"></button>
+      </div>
     </section>
 
     <section id="end-screen" class="modal-screen">
@@ -93,7 +108,7 @@
           <div class="leaderboard-table-wrap">
             <table class="leaderboard-table">
               <thead>
-                <tr><th>排名</th><th>分數</th><th>姓名</th><th>擊殺數</th><th>超出時間</th><th>等級</th></tr>
+                <tr><th>排名</th><th>分數</th><th>姓名</th><th>擊殺數</th><th>Boss剩餘</th><th>等級</th></tr>
               </thead>
               <tbody id="leaderboard-body"></tbody>
             </table>

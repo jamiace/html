@@ -1,4 +1,4 @@
-/* BUILD R21 - SCORE LEADERBOARD TOP 50 - 2026-07-12 */
+/* BUILD R24 - DEBUG PASSIVE LEVEL PARAMETERS - 2026-07-12 */
 (async () => {
 'use strict';
 
@@ -53,26 +53,34 @@ const rand = (a,b)=>a+Math.random()*(b-a);
 const pick = a=>a[(Math.random()*a.length)|0];
 const dist2=(a,b)=>{const x=a.x-b.x,y=a.y-b.y;return x*x+y*y};
 const fmtTime = seconds => {const value=Math.max(0,seconds),minutes=Math.floor(value/60),secs=Math.floor(value%60);return `${String(minutes).padStart(SYS.timeFormatMinutesPad,'0')}:${String(secs).padStart(SYS.timeFormatSecondsPad,'0')}`};
-const SCORE_EXP_VALUE=Number(SCORE_CFG.expPointValue)||1;
 const SCORE_BOSS_START=Number(SCORE_CFG.bossStartSeconds)||Number(SYS.gameDurationSeconds)||900;
-const SCORE_OVERTIME_PENALTY=Number(SCORE_CFG.overtimePenaltyPerSecond)||20;
-const SCORE_LEVEL_PENALTY=Number(SCORE_CFG.levelPenaltyPerLevel)||100;
-function scoreOvertimeSeconds(elapsedSeconds=game?.elapsed||0){
-  return Math.max(0,Math.floor(Math.max(0,Number(elapsedSeconds)||0)-SCORE_BOSS_START+1e-9));
+const BOSS_FIGHT_LIMIT_SECONDS=Number(SCORE_CFG.bossFightLimitSeconds)||180;
+const SCORE_LEVEL_VALUE=Number(SCORE_CFG.levelPointsPerLevel)||100;
+const SCORE_BOSS_SECOND_VALUE=Number(SCORE_CFG.bossRemainingPointPerSecond)||30;
+function bossFightRemainingExact(elapsedSeconds=game?.elapsed||0){
+  return Math.max(0,BOSS_FIGHT_LIMIT_SECONDS-Math.max(0,(Number(elapsedSeconds)||0)-SCORE_BOSS_START));
+}
+function bossFightRemainingSeconds(elapsedSeconds=game?.elapsed||0){
+  return Math.max(0,Math.floor(bossFightRemainingExact(elapsedSeconds)+1e-9));
+}
+function bossFightElapsedSeconds(elapsedSeconds=game?.elapsed||0){
+  return Math.max(0,Math.floor(Math.max(0,(Number(elapsedSeconds)||0)-SCORE_BOSS_START)+1e-9));
 }
 function scoreBreakdown(totalExp=game?.totalExp||0,elapsedSeconds=game?.elapsed||0,level=game?.level||1){
-  const expPoints=Math.round((Number(totalExp)||0)*SCORE_EXP_VALUE);
-  const overtimeSeconds=scoreOvertimeSeconds(elapsedSeconds);
-  const timePenalty=overtimeSeconds*SCORE_OVERTIME_PENALTY;
-  const levelPenalty=Math.max(0,Math.floor(Number(level)||0))*SCORE_LEVEL_PENALTY;
-  return {totalExp:Math.round(Number(totalExp)||0),expPoints,overtimeSeconds,timePenalty,levelPenalty,score:expPoints-timePenalty-levelPenalty};
+  const levelPoints=Math.max(0,Math.floor(Number(level)||0))*SCORE_LEVEL_VALUE;
+  const bossStarted=(Number(elapsedSeconds)||0)>=SCORE_BOSS_START||!!game?.bossSpawned;
+  const bossRemainingSeconds=bossStarted?bossFightRemainingSeconds(elapsedSeconds):0;
+  const bossTimeBonus=bossRemainingSeconds*SCORE_BOSS_SECOND_VALUE;
+  const scoreAdjustment=Math.round(Number(game?.scoreAdjustment)||0);
+  return {totalExp:Math.round(Number(totalExp)||0),levelPoints,bossRemainingSeconds,bossTimeBonus,scoreAdjustment,overtimeSeconds:bossFightElapsedSeconds(elapsedSeconds),score:levelPoints+bossTimeBonus+scoreAdjustment};
 }
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
 const DOM = {
   hud: $('#hud'), start: $('#start-screen'), level: $('#level-screen'), pause: $('#pause-screen'), end: $('#end-screen'),
-  timer: $('#timer'), score: $('#score'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
-  weaponRack: $('#weapon-rack'), effectRack: $('#effect-rack'), rewardCards: $('#reward-cards'),
+  timer: $('#timer'), timerLabel: $('.timer-wrap small'), score: $('#score'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
+  weaponRack: $('#weapon-rack'), passiveRack: $('#passive-rack'), effectRack: $('#effect-rack'), rewardCards: $('#reward-cards'),
+  pauseWeaponsList: $('#pause-weapons-list'), pausePassivesList: $('#pause-passives-list'), pauseWeaponsCount: $('#pause-weapons-count'), pausePassivesCount: $('#pause-passives-count'),
   resultScore: $('#result-score'), resultTime: $('#result-time'), resultLevel: $('#result-level'), resultKills: $('#result-kills'), resultWeapons: $('#result-weapons'),
   endTitle: $('#end-title'), endCopy: $('#end-copy'), endEyebrow: $('#end-eyebrow'), toastLayer: $('#toast-layer'), damageFlash: $('#damage-flash'),
   soundBtn: $('#sound-btn'),
@@ -95,7 +103,7 @@ function applyStaticText(){
   const featureGrid=document.querySelector('.feature-grid');if(featureGrid)featureGrid.innerHTML=TEXT.features.map(item=>`<div><b>${item.value}</b><span>${item.label}</span></div>`).join('');
   html('.controls',TEXT.controlsHtml);set('#start-btn',TEXT.startButton);set('#sound-btn',sound.enabled?TEXT.soundOn:TEXT.soundOff);
   set('#level-screen .eyebrow',TEXT.levelEyebrow);set('#level-screen h2',TEXT.levelTitle);set('#level-screen .key-hint',TEXT.levelKeyHint);const chest=document.querySelector('.chest-stage img');if(chest){chest.src=CFG.assets.chest;chest.alt=TEXT.chestAlt}
-  set('#pause-screen .eyebrow',TEXT.pauseEyebrow);set('#pause-screen h2',TEXT.pauseTitle);set('#pause-screen .pause-card > p:not(.eyebrow)',TEXT.pauseCopy);set('#resume-btn',TEXT.resumeButton);set('#restart-pause-btn',TEXT.restartButton);
+  set('#pause-screen .eyebrow',TEXT.pauseEyebrow);set('#pause-screen h2',TEXT.pauseTitle);set('#pause-screen .pause-card > p:not(.eyebrow)',TEXT.pauseCopy);set('#pause-weapons-title',TEXT.pauseWeaponsTitle||'目前武器');set('#pause-passives-title',TEXT.pausePassivesTitle||'永久升級');set('#resume-btn',TEXT.resumeButton);set('#restart-pause-btn',TEXT.restartButton);
   set('#end-eyebrow',TEXT.endLoseEyebrow);set('#end-title',TEXT.endLoseTitle);set('#end-copy',TEXT.endLoseCopy);set('#result-score-label',TEXT.resultScoreLabel||'總分');set('#result-time-label',TEXT.resultTimeLabel);set('#result-level-label',TEXT.resultLevelLabel);set('#result-kills-label',TEXT.resultKillsLabel);set('#result-weapons-label',TEXT.resultWeaponsLabel);set('#restart-btn',TEXT.restartEndButton);
 }
 
@@ -128,7 +136,58 @@ class Sound {
 }
 const sound=new Sound();
 
-function weaponLevelConfig(key,level){const weapon=CFG.weapons[key],index=Math.max(0,Math.min(SYS.maxUpgradeLevel,level||1)-1);if(!weapon||!Array.isArray(weapon.levels)||!weapon.levels[index])throw new Error(`Missing weapon level config: ${key} Lv.${level}`);return weapon.levels[index]}
+const scaledWeaponConfigCache=new Map();
+const AREA_SCALE_KEYS=new Set(['range','radius','width','targetSearchRange','targetRange','projectileRange','jumpRange','chainRange','triggerRadius','explosionRadius','wellRadius','orbitRadius','expandRadius','hitRadius','expandHitRadius','maximumRange','minimumSeparation','catchDistance']);
+const SIZE_SCALE_KEYS=new Set(['radius','width','projectileRadius','hitRadius','expandHitRadius','bladeSize','spriteSize','visualRadius','explosionRadius','wellRadius','orbitRadius','expandRadius','warningStartRadius','warningEndRadius','startRadius','waveStart']);
+const AREA_SCALE_SKIP_PARENTS=new Set(['visual','fallVisual','muzzle','particle']);
+const SIZE_SCALE_SKIP_PARENTS=new Set(['muzzle']);
+function statMaxLevel(key){return Math.max(1,Number(STATS?.[key]?.maxLevel)||SYS.maxUpgradeLevel)}
+function statLevel(key){return Math.max(0,Math.min(statMaxLevel(key),game?.player?.stats?.[key]||0))}
+function statLevelValue(key,parameter,level=statLevel(key),fallback=0){
+  const values=PROG.statLevelValues?.[key]?.[parameter];
+  if(Array.isArray(values)&&values.length&&level>0){const index=Math.max(0,Math.min(values.length,level)-1),value=Number(values[index]);if(Number.isFinite(value))return value}
+  const value=typeof fallback==='function'?fallback(level):fallback;
+  return Number.isFinite(Number(value))?Number(value):0;
+}
+function lifestealRate(){return statLevelValue('lifesteal','rate',statLevel('lifesteal'),level=>level*(Number(PROG.lifestealPerLevel)||0))}
+function mapDropCooldownMultiplier(){return Math.max(0.05,1-statLevelValue('dropCooldown','reduction',statLevel('dropCooldown'),level=>level*(Number(PROG.mapDropCooldownReductionPerLevel)||0)))}
+function permanentWeaponCooldownMultiplier(){return Math.max(0.05,1-statLevelValue('weaponCooldown','reduction',statLevel('weaponCooldown'),level=>level*(Number(PROG.weaponCooldownReductionPerLevel)||0)))}
+function weaponAreaMultiplier(){return 1+statLevelValue('weaponArea','bonus',statLevel('weaponArea'),level=>level*(Number(PROG.weaponAreaBonusPerLevel)||0))}
+function weaponSizeMultiplier(){return 1+statLevelValue('weaponSize','bonus',statLevel('weaponSize'),level=>level*(Number(PROG.weaponSizeBonusPerLevel)||0))}
+function hpRegenInterval(){const level=statLevel('hpRegen');if(level<=0)return Number.POSITIVE_INFINITY;return Math.max(0.2,statLevelValue('hpRegen','interval',level,Math.max(0.2,(Number(PROG.hpRegenBaseInterval)||5)-Math.max(0,level-1)*(Number(PROG.hpRegenIntervalReductionPerLevel)||0))))}
+function hpRegenAmount(){const level=statLevel('hpRegen');return level>0?Math.max(0,statLevelValue('hpRegen','heal',level,Number(PROG.hpRegenAmount)||1)):0}
+function focusStationaryDelay(){const level=statLevel('focus');return level>0?Math.max(0,statLevelValue('focus','stationaryDelay',level,Number(PROG.stationaryDamageDelay)||3)):Number.POSITIVE_INFINITY}
+function stationaryDamageActive(){return statLevel('focus')>0&&(game?.player?.stationaryTime||0)>=focusStationaryDelay()}
+function stationaryDamageMultiplier(){const level=statLevel('focus');return stationaryDamageActive()?1+statLevelValue('focus','damageBonus',level,level*(Number(PROG.stationaryDamageBonusPerLevel)||0)):1}
+function runExpWarmupSeconds(){const level=statLevel('runExp');return level>0?Math.max(0,statLevelValue('runExp','warmup',level,Number(PROG.runExpWarmup)||2)):Number.POSITIVE_INFINITY}
+function runExpInterval(){const level=statLevel('runExp');if(level<=0)return Number.POSITIVE_INFINITY;return Math.max(0.2,statLevelValue('runExp','interval',level,Math.max(0.2,(Number(PROG.runExpBaseInterval)||2)-Math.max(0,level-1)*(Number(PROG.runExpIntervalReductionPerLevel)||0))))}
+function runExpAmount(){const level=statLevel('runExp');return level>0?Math.max(0,statLevelValue('runExp','expPerTick',level,Number(PROG.runExpPerTick)||1)):0}
+function fullHpCooldownMultiplier(){const level=statLevel('fullHpCooldown');if(level<=0||!game?.player)return 1;const reduction=statLevelValue('fullHpCooldown','reduction',level,level*(Number(PROG.fullHpCooldownReductionPerLevel)||0));return game.player.hp>=game.player.maxHp-1e-6?Math.max(0.05,1-reduction):1}
+function reviveScoreCost(){return Math.max(0,statLevelValue('revive','scoreCost',1,Number(PROG.reviveScoreCost)||1000))}
+function reviveRestoreRatio(){return Math.max(0,statLevelValue('revive','restoreRatio',1,Number(PROG.reviveRestoreRatio)||0.5))}
+function reviveInvulnerabilitySeconds(){return Math.max(0,statLevelValue('revive','invulnerabilitySeconds',1,Number(PROG.reviveInvulnerabilitySeconds)||2.2))}
+function invalidateScaledWeaponConfigs(){scaledWeaponConfigCache.clear()}
+function scaleWeaponConfigValue(value,areaMultiplier,sizeMultiplier,parentKey=''){
+  if(Array.isArray(value))return value.map(entry=>scaleWeaponConfigValue(entry,areaMultiplier,sizeMultiplier,parentKey));
+  if(!value||typeof value!=='object')return value;
+  const output={};
+  for(const [key,entry] of Object.entries(value)){
+    if(typeof entry==='number'){
+      let scaled=entry;
+      if(AREA_SCALE_KEYS.has(key)&&!AREA_SCALE_SKIP_PARENTS.has(parentKey))scaled*=areaMultiplier;
+      if(SIZE_SCALE_KEYS.has(key)&&!SIZE_SCALE_SKIP_PARENTS.has(parentKey))scaled*=sizeMultiplier;
+      output[key]=scaled;
+    }else output[key]=scaleWeaponConfigValue(entry,areaMultiplier,sizeMultiplier,key);
+  }
+  return output;
+}
+function weaponLevelConfig(key,level){
+  const weapon=CFG.weapons[key],index=Math.max(0,Math.min(SYS.maxUpgradeLevel,level||1)-1);
+  if(!weapon||!Array.isArray(weapon.levels)||!weapon.levels[index])throw new Error(`Missing weapon level config: ${key} Lv.${level}`);
+  const areaLevel=statLevel('weaponArea'),sizeLevel=statLevel('weaponSize');if(areaLevel<=0&&sizeLevel<=0)return weapon.levels[index];
+  const cacheKey=`${key}:${index}:${areaLevel}:${sizeLevel}`;if(!scaledWeaponConfigCache.has(cacheKey))scaledWeaponConfigCache.set(cacheKey,scaleWeaponConfigValue(weapon.levels[index],weaponAreaMultiplier(),weaponSizeMultiplier()));
+  return scaledWeaponConfigCache.get(cacheKey);
+}
 const WEAPONS = Object.fromEntries(dataEntries(CFG.weapons).map(([key,w])=>[key,{...w,desc:w.descriptions}]));
 
 const ITEMS = Object.fromEntries(dataEntries(CFG.items).map(([key,item])=>[key,{...item,desc:item.description}]));
@@ -291,7 +350,7 @@ function setTextIfChanged(key,node,value){value=String(value);if(hudCache[key]!=
 function setStyleIfChanged(key,node,prop,value){if(hudCache[key]!==value){node.style[prop]=value;hudCache[key]=value}}
 function ensureEffectNodes(){
   if(effectNodes.size)return;
-  const map={regen:'regen',shield:'shield',freeze:'freeze',doublexp:'doublexp',overload:'overload',vampire:'vampire'};
+  const map={regen:'regen',shield:'shield',freeze:'freeze',doublexp:'doublexp',overload:'overload'};
   for(const [effect,itemKey] of Object.entries(map)){
     const item=ITEMS[itemKey],node=document.createElement('div');node.className='effect-pill';node.style.display='none';
     const img=document.createElement('img');img.src=item.icon;img.alt='';const label=document.createElement('span');label.textContent=item.name;const time=document.createElement('b');time.textContent=formatText(TEXT.effectTime,{seconds:(0).toFixed(1)});
@@ -301,11 +360,11 @@ function ensureEffectNodes(){
 
 function resetGame(){
   game={
-    elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,totalExp:0,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,won:false,scoreSubmitted:false,scoreRunId:'',
-    shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,
-    player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay},
-    enemies:[],projectiles:[],enemyShots:[],gems:[],mapDrops:[],particles:[],texts:[],waves:[],beams:[],meteors:[],gravityOrbs:[],zones:[],mines:[],wells:[],boomerangs:[],lightning:[],drones:[],delayedCasts:[],effects:{regen:0,shield:0,freeze:0,doublexp:0,overload:0,vampire:0},
-    pendingLevels:0,rewardChoices:[],camera:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY},pattern:null,globalMagnet:0,nextMapDrop:DROP.firstDropDelay,
+    elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,totalExp:0,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,won:false,scoreSubmitted:false,scoreRunId:'',scoreAdjustment:0,
+    shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,bossFightStartedAt:null,bossTimedOut:false,
+    player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0,lifesteal:0,dropCooldown:0,weaponCooldown:0,weaponArea:0,weaponSize:0,hpRegen:0,revive:0,focus:0,runExp:0,fullHpCooldown:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay,lifestealRemainder:0,regenTimer:Number(PROG.hpRegenBaseInterval)||5,stationaryTime:0,runExpWarmup:0,runExpTimer:Number(PROG.runExpBaseInterval)||2},
+    enemies:[],projectiles:[],enemyShots:[],gems:[],mapDrops:[],particles:[],texts:[],waves:[],beams:[],meteors:[],gravityOrbs:[],zones:[],mines:[],wells:[],boomerangs:[],lightning:[],drones:[],delayedCasts:[],effects:{regen:0,shield:0,freeze:0,doublexp:0,overload:0},
+    pendingLevels:0,rewardChoices:[],camera:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY},pattern:null,globalMagnet:0,nextMapDrop:DROP.firstDropDelay*mapDropCooldownMultiplier(),
     introFlags:{},roleTimers:{...SPAWN.roleTimerStarts},wavePackTimer:SPAWN.mixedWaveTimerStart,spawnCounts:{rat:0,hound:0,shell:0,spitter:0,bloater:0,shadow:0,golem:0,boss:0},openingGrace:SPAWN.openingGraceSeconds,hudTimer:0,
     denseTargets:[],denseTargetTimer:0,denseTargetUpdated:-999,frameDeathParticleBudget:PERF.meteorDeathParticleBudgetPerFrame,frameGemMap:new Map(),lastMeteorBoom:-999,debugModes:{godMode:false,effects:{overload:false,doublexp:false,freeze:false,magnet:false}}
   };
@@ -444,7 +503,12 @@ function buildScorePayload(playerName){
     elapsedSeconds:Math.round(game.elapsed*1000)/1000,
     elapsedText:fmtTime(game.elapsed),
     totalExp:finalScore.totalExp,
-    overtimeSeconds:finalScore.overtimeSeconds,
+    levelPoints:finalScore.levelPoints,
+    bossRemainingSeconds:finalScore.bossRemainingSeconds,
+    bossRemainingText:fmtTime(finalScore.bossRemainingSeconds),
+    bossTimeBonus:finalScore.bossTimeBonus,
+    bossElapsedSeconds:finalScore.overtimeSeconds,
+    overtimeSeconds:finalScore.bossRemainingSeconds,
     score:finalScore.score,
     level:game.level,
     kills:game.kills,
@@ -500,7 +564,7 @@ function appendLeaderboardRow(score,isOwn=false){
   if(isOwn)row.classList.add('is-own');
   if(score.weapons)row.title=score.weapons;
 
-  const overtimeText=score.overtimeText||fmtTime(Number(score.overtimeSeconds)||0);
+  const overtimeText=score.bossRemainingText||score.overtimeText||(score.bossRemainingSeconds!==undefined?fmtTime(Number(score.bossRemainingSeconds)||0):'—');
   const values=[
     score.rank??'—',
     Number.isFinite(Number(score.score))?Math.round(Number(score.score)).toLocaleString('zh-TW'):'—',
@@ -646,7 +710,8 @@ function startGame(){
 }
 function endGame(win){
   if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
-  DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:TEXT.endLoseCopy;
+  const timedOut=!win&&game.bossTimedOut;
+  DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:timedOut?TEXT.bossTimeoutEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:timedOut?TEXT.bossTimeoutTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:timedOut?TEXT.bossTimeoutCopy:TEXT.endLoseCopy;
   DOM.resultScore.textContent=scoreBreakdown().score.toLocaleString('zh-TW');DOM.resultTime.textContent=fmtTime(game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;
   prepareOnlineScoreUI(win);sound.play(win?'victory':'defeat');
 }
@@ -660,6 +725,8 @@ function togglePause(force){
   debugSecretLast=0;
   last=performance.now();
   syncFPSVisibility();
+  if(on)renderPauseLoadout();
+  if(!on&&game.pendingLevels>0)setTimeout(()=>{if(state==='playing'&&game.pendingLevels>0)openLevelUp()},0);
 }
 function ensurePauseDebugButton(){
   const card=DOM.pause?.querySelector('.pause-card');
@@ -731,9 +798,10 @@ function ensureDebugUI(){
     <section data-role="selection-panel" style="margin-top:18px;padding:16px;border:1px solid rgba(101,231,255,.22);border-radius:16px;background:rgba(5,13,24,.55)">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <img data-role="selected-icon" alt="" style="width:64px;height:64px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.045)">
-        <div style="min-width:170px;flex:1">
+        <div style="min-width:220px;flex:1">
           <div data-role="selected-name" style="font-size:20px;font-weight:900"></div>
           <div data-role="selected-level" style="margin-top:4px;color:#8eeaff;font-size:13px"></div>
+          <div data-role="selected-effect" style="margin-top:6px;color:#c7d7e3;font-size:12px;line-height:1.55"></div>
         </div>
         <div data-role="level-controls" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
@@ -769,6 +837,7 @@ function ensureDebugUI(){
     selectedIcon:panel.querySelector('[data-role="selected-icon"]'),
     selectedName:panel.querySelector('[data-role="selected-name"]'),
     selectedLevel:panel.querySelector('[data-role="selected-level"]'),
+    selectedEffect:panel.querySelector('[data-role="selected-effect"]'),
     levelControls:panel.querySelector('[data-role="level-controls"]'),
     quickActions:panel.querySelector('[data-role="quick-actions"]'),
     effectToggles:panel.querySelector('[data-role="effect-toggles"]'),
@@ -787,6 +856,30 @@ function debugCurrentLevel(type,key){
   if(type==='stat')return game.player.stats[key]||0;
   return 0;
 }
+function debugMaximumLevel(type,key){return type==='stat'?statMaxLevel(key):SYS.maxUpgradeLevel}
+function debugLevelText(type,key,level){
+  if(type==='base')return TEXT.debug.baseAttackLevel;
+  if(type==='stat'&&key==='revive')return level>0?(TEXT.debug.reviveOwned||'已持有一次復活'):(TEXT.debug.reviveNotOwned||TEXT.debug.notOwned);
+  return level>0?formatText(TEXT.debug.levelText,{level}):TEXT.debug.notOwned;
+}
+function debugStatEffectSummary(key,level=debugCurrentLevel('stat',key)){
+  if(level<=0)return TEXT.debug.noRuntimeEffect||'目前未啟用；請先提升等級。';
+  const percent=value=>`${(Number(value)*100).toFixed(Math.abs(Number(value)*100-Math.round(Number(value)*100))<1e-8?0:1)}%`;
+  if(key==='lifesteal')return `造成傷害的 ${percent(statLevelValue(key,'rate',level))} 轉為 HP`;
+  if(key==='dropCooldown')return `地圖道具生成冷卻 -${percent(statLevelValue(key,'reduction',level))}`;
+  if(key==='weaponCooldown')return `所有武器冷卻 -${percent(statLevelValue(key,'reduction',level))}`;
+  if(key==='weaponArea')return `所有武器射程／效果半徑 +${percent(statLevelValue(key,'bonus',level))}`;
+  if(key==='weaponSize')return `武器視覺與碰撞判定 +${percent(statLevelValue(key,'bonus',level))}`;
+  if(key==='hpRegen')return `每 ${statLevelValue(key,'interval',level).toFixed(2).replace(/\.00$/,'')} 秒回復 ${statLevelValue(key,'heal',level)} HP`;
+  if(key==='revive')return `死亡時以 ${percent(reviveRestoreRatio())} Max HP 復活；無敵 ${reviveInvulnerabilitySeconds()} 秒；購買 ${Math.round(reviveScoreCost())} 分`;
+  if(key==='focus')return `原地 ${statLevelValue(key,'stationaryDelay',level)} 秒後，傷害 +${percent(statLevelValue(key,'damageBonus',level))}`;
+  if(key==='runExp')return `跑步 ${statLevelValue(key,'warmup',level)} 秒後，每 ${statLevelValue(key,'interval',level)} 秒 EXP +${statLevelValue(key,'expPerTick',level)}`;
+  if(key==='fullHpCooldown')return `滿血時所有武器冷卻 -${percent(statLevelValue(key,'reduction',level))}`;
+  if(key==='hp')return `最大 HP ${game.player.maxHp}`;
+  if(key==='speed')return `移動速度 ${SPEED_MULT[Math.min(level,SPEED_MULT.length-1)].toFixed(2)}×`;
+  if(key==='pickup')return `拾取半徑 ${PICKUP_RAD[Math.min(level,PICKUP_RAD.length-1)]} px`;
+  return '';
+}
 
 function debugWeaponDefinition(type,key){
   if(type==='base')return {name:BASE.name||TEXT.debug.baseAttackName,icon:BASE.icon||CFG.assets.player,color:'#ff5d8b'};
@@ -802,7 +895,7 @@ function debugCard(type,key,definition){
   const selected=debugUI.selectedType===type&&debugUI.selectedKey===key;
   if(selected)Object.assign(button.style,DEBUG_CFG.weaponCardSelectedStyle);
   const level=debugCurrentLevel(type,key);
-  const levelText=type==='base'?TEXT.debug.baseAttackLevel:(level>0?formatText(TEXT.debug.levelText,{level}):TEXT.debug.notOwned);
+  const levelText=debugLevelText(type,key,level);
   button.innerHTML=`
     <img src="${definition.icon||CFG.assets.player}" alt="" style="${Object.entries(DEBUG_CFG.weaponIconStyle).map(([k,v])=>`${k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}:${v}`).join(';')}">
     <div style="font-size:12px;font-weight:900;line-height:1.25">${definition.name}</div>
@@ -823,6 +916,7 @@ function debugSelectedConfig(){
     const current=debugCurrentLevel(type,key);
     return weaponLevelConfig(key,Math.max(1,current));
   }
+  if(type==='stat')return PROG.statLevelValues?.[key]||null;
   return null;
 }
 
@@ -859,13 +953,20 @@ function setDebugPath(root,path,value){
   target[last]=value;
 }
 
+function debugStatParameterKey(path){const parts=path.split('.');return parts.length>1&&/^\d+$/.test(parts[parts.length-1])?parts.slice(0,-1).join('.'):path}
+function debugStatParameterFullKey(path){return `${debugUI.selectedKey}.${debugStatParameterKey(path)}`}
+function debugStatPercentField(path){return debugUI.selectedType==='stat'&&(DEBUG_CFG.statPercentParameters||[]).includes(debugStatParameterFullKey(path))}
+function debugStatIntegerField(path){return debugUI.selectedType==='stat'&&(DEBUG_CFG.statIntegerParameters||[]).includes(debugStatParameterFullKey(path))}
 function debugFieldLabel(path){
-  const key=path.split('.').pop();
-  return DEBUG_CFG.parameterLabels?.[path]||DEBUG_CFG.parameterLabels?.[key]||key.replace(/([a-z0-9])([A-Z])/g,'$1 $2');
+  const parts=path.split('.'),last=parts[parts.length-1],parameter=/^\d+$/.test(last)?parts.slice(0,-1).join('.'):path,key=parameter.split('.').pop();
+  const base=DEBUG_CFG.parameterLabels?.[parameter]||DEBUG_CFG.parameterLabels?.[key]||key.replace(/([a-z0-9])([A-Z])/g,'$1 $2');
+  if(debugUI.selectedType==='stat'&&/^\d+$/.test(last))return `${base} · Lv.${Number(last)+1}${debugStatPercentField(path)?'（%）':''}`;
+  return base;
 }
 
 function debugFieldDescription(path){
   const key=path.split('.').pop();
+  if(debugUI.selectedType==='stat')return DEBUG_CFG.statParameterDescriptions?.[debugStatParameterFullKey(path)]||'此數值對應指定等級，修改後會立即套用。';
   const selected=debugUI.selectedType==='weapon'?CFG.weapons[debugUI.selectedKey]:null;
   return selected?._fieldNotes?.[path]||selected?._fieldNotes?.[key]||CFG.weapons._parameterDictionary?.[path]||CFG.weapons._parameterDictionary?.[key]||'執行中的數值參數。';
 }
@@ -900,13 +1001,13 @@ function renderDebugParameterEditor(){
   }
   for(const [group,items] of groups){
     const details=document.createElement('details');
-    details.open=group==='root';
+    details.open=debugUI.selectedType==='stat'||group==='root';
     details.style.marginBottom='9px';
     details.style.border='1px solid rgba(255,255,255,.11)';
     details.style.borderRadius='12px';
     details.style.padding='10px 12px';
     const summary=document.createElement('summary');
-    summary.textContent=DEBUG_CFG.parameterGroupNames?.[group]||group;
+    summary.textContent=DEBUG_CFG.parameterGroupNames?.[group]||debugFieldLabel(group);
     summary.style.cursor='pointer';
     summary.style.fontWeight='900';
     summary.style.color='#dff8ff';
@@ -931,30 +1032,40 @@ function renderDebugParameterEditor(){
       path.style.margin='2px 0 6px';
       const input=document.createElement('input');
       input.type='number';
-      input.value=String(field.value);
-      input.step=String(debugNumberStep(field.path,field.value));
+      const percentage=debugStatPercentField(field.path),integer=debugStatIntegerField(field.path);
+      input.value=String(percentage?field.value*100:field.value);
+      input.step=percentage?'1':(integer?'1':String(debugNumberStep(field.path,field.value)));
       Object.assign(input.style,DEBUG_CFG.parameterInputStyle);
       const lower=field.path.toLowerCase();
       if(lower.includes('alpha')){input.min='0';input.max='1'}
-      if(/count|hits|pierce|steps|points|particles/.test(lower))input.step='1';
+      if(percentage){input.min='0';if(debugStatParameterFullKey(field.path).includes('reduction'))input.max='95'}
+      if(/count|hits|pierce|steps|points|particles/.test(lower)||integer)input.step='1';
       input.title=debugFieldDescription(field.path);
       input.onchange=()=>{
-        let value=Number(input.value);
-        if(!Number.isFinite(value)){input.value=String(getDebugPath(root,field.path));return}
+        let displayValue=Number(input.value);
+        if(!Number.isFinite(displayValue)){const current=getDebugPath(root,field.path);input.value=String(percentage?current*100:current);return}
+        let value=percentage?displayValue/100:displayValue;
         if(lower.includes('alpha'))value=clamp(value,0,1);
-        if(/count|hits|pierce|steps|points|particles/.test(lower))value=Math.round(value);
+        if(/count|hits|pierce|steps|points|particles/.test(lower)||integer)value=Math.round(value);
         setDebugPath(root,field.path,value);
-        input.value=String(value);
+        invalidateScaledWeaponConfigs();
+        input.value=String(percentage?value*100:value);
         if(debugUI.selectedType==='weapon'){
           const weapon=game.player.weapons[debugUI.selectedKey];
           if(weapon)weapon.timer=0;
         }else if(debugUI.selectedType==='base'){
           game.player.baseTimer=0;
+        }else if(debugUI.selectedType==='stat'){
+          if(debugUI.selectedKey==='hpRegen')game.player.regenTimer=Math.min(game.player.regenTimer||hpRegenInterval(),hpRegenInterval());
+          if(debugUI.selectedKey==='runExp')game.player.runExpTimer=Math.min(game.player.runExpTimer||runExpInterval(),runExpInterval());
+          if(debugUI.selectedKey==='dropCooldown')game.nextMapDrop=Math.min(game.nextMapDrop,DROP.nextDropDelayMax*mapDropCooldownMultiplier());
+          debugUI.selectedEffect.textContent=formatText(TEXT.debug.runtimeEffect||'目前效果：{effect}',{effect:debugStatEffectSummary(debugUI.selectedKey)});
+          updateHUD(true);
         }
         debugUI.status.textContent=formatText(TEXT.debug.parameterChanged,{
           name:debugWeaponDefinition(debugUI.selectedType,debugUI.selectedKey).name,
           path:field.path,
-          value
+          value:percentage?`${value*100}%`:value
         });
       };
       row.append(title,path,input);
@@ -967,24 +1078,33 @@ function renderDebugParameterEditor(){
 
 function renderDebugSelection(){
   const type=debugUI.selectedType,key=debugUI.selectedKey,definition=debugWeaponDefinition(type,key);
-  const level=debugCurrentLevel(type,key);
+  const level=debugCurrentLevel(type,key),max=debugMaximumLevel(type,key);
   debugUI.selectedIcon.src=definition.icon||CFG.assets.player;
   debugUI.selectedName.textContent=definition.name;
-  debugUI.selectedLevel.textContent=type==='base'?TEXT.debug.baseAttackLevel:(level>0?formatText(TEXT.debug.levelText,{level}):TEXT.debug.notOwned);
+  debugUI.selectedLevel.textContent=debugLevelText(type,key,level);
+  debugUI.selectedEffect.textContent=type==='stat'?formatText(TEXT.debug.runtimeEffect||'目前效果：{effect}',{effect:debugStatEffectSummary(key,level)}):'';
   debugUI.levelControls.innerHTML='';
 
   if(type!=='base'){
     const minus=makeDebugButton(TEXT.debug.downgradeOne,'minus');
     minus.onclick=debugDowngrade;
-    const plus=makeDebugButton(TEXT.debug.upgradeOne,'plus',{background:'linear-gradient(135deg,#31c7e8,#157da8)',border:'0'});
+    const plusLabel=type==='stat'&&key==='revive'?(TEXT.debug.grantRevive||'取得復活'):TEXT.debug.upgradeOne;
+    const plus=makeDebugButton(plusLabel,'plus',{background:'linear-gradient(135deg,#31c7e8,#157da8)',border:'0'});
     plus.onclick=()=>debugUpgrade(false);
-    const max=makeDebugButton(TEXT.debug.upgradeMax,'max');
-    max.onclick=()=>debugUpgrade(true);
-    debugUI.levelControls.append(minus,plus,max);
+    const maxLabel=max===1?plusLabel:`升至 Lv.${max}`;
+    const maxButton=makeDebugButton(maxLabel,'max');
+    maxButton.onclick=()=>debugUpgrade(true);
+    debugUI.levelControls.append(minus,plus);
+    if(max>1)debugUI.levelControls.append(maxButton);
     if(type==='weapon'){
       const remove=makeDebugButton(TEXT.debug.removeWeapon,'remove',{color:'#ffb6ca',borderColor:'rgba(255,80,132,.35)'});
       remove.onclick=debugRemoveSelectedWeapon;
       debugUI.levelControls.append(remove);
+    }
+    if(type==='stat'&&key==='revive'&&level>0){
+      const consume=makeDebugButton(TEXT.debug.consumeRevive||'模擬消耗復活','consume-revive',{color:'#ffd6a0',borderColor:'rgba(255,205,118,.45)'});
+      consume.onclick=debugConsumeRevive;
+      debugUI.levelControls.append(consume);
     }
   }
   renderDebugParameterEditor();
@@ -1001,7 +1121,15 @@ function renderDebugQuickActions(){
   time.onclick=debugAdvanceMinute;
   const boss=makeDebugButton(TEXT.debug.enterBoss,'boss',{color:'#ffb1ca'});
   boss.onclick=debugEnterBossStage;
-  host.append(all,base,time,boss);
+  const score=makeDebugButton(TEXT.debug.scorePlus1000||'分數調整 +1000','score-plus');
+  score.onclick=debugAddScore;
+  const hpOne=makeDebugButton(TEXT.debug.hpToOne||'HP 設為 1','hp-one');
+  hpOne.onclick=()=>{game.player.hp=1;updateHUD(true);renderDebugUI('玩家 HP 已設為 1。')};
+  const hpMax=makeDebugButton(TEXT.debug.hpToMax||'HP 補滿','hp-max');
+  hpMax.onclick=()=>{game.player.hp=game.player.maxHp;updateHUD(true);renderDebugUI('玩家 HP 已補滿。')};
+  const exp=makeDebugButton(TEXT.debug.expPlus100||'EXP +100','exp-plus');
+  exp.onclick=()=>{gainExp(100);updateHUD(true);renderDebugUI('已增加 100 EXP。')};
+  host.append(all,base,time,boss,score,hpOne,hpMax,exp);
 }
 
 function renderDebugToggles(){
@@ -1044,7 +1172,7 @@ function renderDebugUI(message=''){
 
 function debugUpgrade(toMax=false){
   if(!game||!debugUI)return;
-  const type=debugUI.selectedType,key=debugUI.selectedKey,player=game.player,max=SYS.maxUpgradeLevel;
+  const type=debugUI.selectedType,key=debugUI.selectedKey,player=game.player,max=debugMaximumLevel(type,key);
   if(type==='base')return;
   if(type==='weapon'){
     const current=player.weapons[key]?.level||0;
@@ -1071,9 +1199,28 @@ function debugUpgrade(toMax=false){
       player.maxHp+=PROG.hpPerUpgrade*delta;
       player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade*delta);
     }
+    if(key==='dropCooldown'&&delta>0)game.nextMapDrop=Math.min(game.nextMapDrop,DROP.nextDropDelayMax*mapDropCooldownMultiplier());
+    if(key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());
+    if(key==='runExp')player.runExpTimer=Math.min(player.runExpTimer||runExpInterval(),runExpInterval());
+    invalidateScaledWeaponConfigs();
+    buildWeaponRack();
     updateHUD(true);
     renderDebugUI(formatText(TEXT.debug.adjusted,{name:STATS[key].name,level:target}));
   }
+}
+
+function debugConsumeRevive(){
+  if(!game||debugUI.selectedType!=='stat'||debugUI.selectedKey!=='revive')return;
+  game.player.stats.revive=0;
+  buildWeaponRack();
+  updateHUD(true);
+  renderDebugUI(TEXT.debug.reviveConsumed||'復活已模擬消耗。');
+}
+function debugAddScore(){
+  if(!game)return;
+  game.scoreAdjustment=(Number(game.scoreAdjustment)||0)+1000;
+  updateHUD(true);
+  renderDebugUI(formatText(TEXT.debug.scorePlusApplied||'Debug 分數已增加 1000，目前總分為 {score}',{score:scoreBreakdown().score.toLocaleString('zh-TW')}));
 }
 
 function debugDowngrade(){
@@ -1105,6 +1252,8 @@ function debugDowngrade(){
       player.maxHp=Math.max(PLAYER_CFG.startHP,player.maxHp-PROG.hpPerUpgrade);
       player.hp=Math.min(player.hp,player.maxHp);
     }
+    invalidateScaledWeaponConfigs();
+    buildWeaponRack();
     updateHUD(true);
     renderDebugUI(formatText(TEXT.debug.downgraded,{name:STATS[key].name,level:current-1}));
   }
@@ -1252,6 +1401,8 @@ function closeDebugUI(){
   state='paused';
   game.paused=true;
   DOM.pause.classList.add('show');syncFPSVisibility();
+  buildWeaponRack();
+  renderPauseLoadout();
   last=performance.now();
 }
 function toggleDebugUI(){if(state==='debug')closeDebugUI();else if(state==='paused')openDebugUI()}
@@ -1262,9 +1413,10 @@ function update(dt){
   const keyX=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),keyY=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
   let dx=keyX+touch.x,dy=keyY+touch.y,moveScale=1;const manual=Math.hypot(dx,dy)>PLAYER_CFG.keyboardMouseDeadZone;if(manual)mouse.active=false;
   else if(mouse.active){const mx=mouse.targetX-p.x,my=mouse.targetY-p.y,md=Math.hypot(mx,my);if(md<PLAYER_CFG.mouseArrivalDistance){mouse.active=false;dx=dy=0}else{dx=mx/md;dy=my/md;moveScale=clamp(md/PLAYER_CFG.mouseSlowDistance,PLAYER_CFG.mouseMinimumMoveScale,1)}}
-  const len=Math.hypot(dx,dy);if(len>PLAYER_CFG.keyboardMouseDeadZone){dx/=Math.max(1,len);dy/=Math.max(1,len);p.angle=Math.atan2(dy,dx)}
+  const len=Math.hypot(dx,dy),isMoving=len>PLAYER_CFG.keyboardMouseDeadZone;if(isMoving){dx/=Math.max(1,len);dy/=Math.max(1,len);p.angle=Math.atan2(dy,dx)}
   const speed=p.baseSpeed*SPEED_MULT[p.stats.speed];p.x+=dx*speed*moveScale*dt;p.y+=dy*speed*moveScale*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
-  updateSpawns(dt);updateEnemies(dt);rebuildEnemySpatial();game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;refreshDenseTargetCache()}
+  updatePassiveBonuses(dt,isMoving);
+  updateSpawns(dt);if(game.bossSpawned&&bossFightRemainingExact(game.elapsed)<=0){game.bossTimedOut=true;toast(TEXT.bossTimeoutToast);endGame(false);return}updateEnemies(dt);rebuildEnemySpatial();game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;refreshDenseTargetCache()}
   updateWeapons(dt);updateDelayedCasts(dt);updateProjectiles(dt);updateEnemyShots(dt);updateSpecials(dt);updateGems(dt);updateMapDrops(dt);updateParticles(dt);
   game.hudTimer-=dt;if(game.hudTimer<=0){game.hudTimer=1/PERF.hudUpdatesPerSecond;updateHUD(false)}
 }
@@ -1281,8 +1433,45 @@ function updateEffects(dt){
     player.hp=Math.min(player.maxHp,player.hp+heal);
     effects.regen=Math.max(0,effects.regen-dt);
   }
-  for(const key of ['shield','freeze','doublexp','overload','vampire']){
+  for(const key of ['shield','freeze','doublexp','overload']){
     if(effects[key]>0&&Number.isFinite(effects[key]))effects[key]=Math.max(0,effects[key]-dt);
+  }
+}
+
+function updatePassiveBonuses(dt,isMoving){
+  const player=game.player;
+  if(!player)return;
+  const regenLevel=statLevel('hpRegen');
+  if(regenLevel>0){
+    if(!Number.isFinite(player.regenTimer)||player.regenTimer<=0)player.regenTimer=hpRegenInterval();
+    player.regenTimer-=dt;
+    while(player.regenTimer<=0){
+      player.hp=Math.min(player.maxHp,player.hp+hpRegenAmount());
+      player.regenTimer+=hpRegenInterval();
+    }
+  }else player.regenTimer=Number(PROG.hpRegenBaseInterval)||5;
+
+  if(isMoving){
+    player.stationaryTime=0;
+    const runLevel=statLevel('runExp');
+    if(runLevel>0){
+      player.runExpWarmup=(player.runExpWarmup||0)+dt;
+      if(player.runExpWarmup>=runExpWarmupSeconds()){
+        if(!Number.isFinite(player.runExpTimer)||player.runExpTimer<=0)player.runExpTimer=runExpInterval();
+        player.runExpTimer-=dt;
+        while(player.runExpTimer<=0){
+          gainExp(runExpAmount());
+          player.runExpTimer+=runExpInterval();
+        }
+      }else player.runExpTimer=runExpInterval();
+    }else {
+      player.runExpWarmup=0;
+      player.runExpTimer=Number(PROG.runExpBaseInterval)||2;
+    }
+  }else{
+    player.stationaryTime=(player.stationaryTime||0)+dt;
+    player.runExpWarmup=0;
+    player.runExpTimer=runExpInterval();
   }
 }
 
@@ -1330,6 +1519,7 @@ function spawnRateAt(time){
 function enemyCapAt(time){const segment=SPAWN.capSegments.find(item=>time<item.until)||SPAWN.capSegments[SPAWN.capSegments.length-1],cap=segment.cap;return time<ENEMIES.hound.from?Math.ceil(cap*SPAWN.preHoundCapMultiplier):cap}
 function startFinalBossStage(clearField=false,fromDebug=false){
   game.elapsed=Math.max(game.elapsed,game.duration);
+  if(game.bossFightStartedAt===null)game.bossFightStartedAt=game.duration;
   game.spawnBudget=0;
   if(clearField){
     game.enemies=game.enemies.filter(e=>e.type==='boss'&&!e.dead);
@@ -1391,15 +1581,31 @@ function hurtPlayer(amount){
   const player=game.player;if(game.debugModes?.godMode||player.invuln>0||game.effects.shield>0)return;player.hp-=amount;player.invuln=PLAYER_CFG.contactInvulnerabilitySeconds;startScreenShake(PLAYER_CFG.damageShakeAmplitude,PLAYER_CFG.damageShakeDuration);DOM.damageFlash.classList.remove('on');void DOM.damageFlash.offsetWidth;DOM.damageFlash.classList.add('on');sound.hurt();
   addText(player.x,player.y+PLAYER_CFG.damageTextYOffset,`-${Math.round(amount)}`,VIS.damage.playerText,PLAYER_CFG.damageTextSize);
   for(let i=0;i<PLAYER_CFG.damageParticleCount;i++)particle(player.x,player.y,rand(PLAYER_CFG.damageParticleVelocityMin,PLAYER_CFG.damageParticleVelocityMax),rand(PLAYER_CFG.damageParticleVelocityMin,PLAYER_CFG.damageParticleVelocityMax),rand(PLAYER_CFG.damageParticleLifeMin,PLAYER_CFG.damageParticleLifeMax),VIS.damage.playerParticle,rand(PLAYER_CFG.damageParticleSizeMin,PLAYER_CFG.damageParticleSizeMax));
-  if(player.hp<=0)endGame(false);
+  if(player.hp<=0){
+    if((player.stats.revive||0)>0){
+      player.stats.revive=0;
+      buildWeaponRack();
+      player.hp=Math.max(1,player.maxHp*reviveRestoreRatio());
+      player.invuln=Math.max(player.invuln,reviveInvulnerabilitySeconds());
+      player.stationaryTime=0;
+      toast('復活啟動！');
+      updateHUD(true);
+      return;
+    }
+    endGame(false);
+  }
 }
 function damageEnemy(enemy,amount,kind='normal',showText=true,knockback=0,sourceX=game.player.x,sourceY=game.player.y){
-  if(enemy.dead)return;if(!Number.isFinite(amount)){console.error('Invalid damage amount:',amount,kind);amount=0}enemy.hp-=amount;enemy.hitFlash=VIS.damage.hitFlashSeconds;
+  if(enemy.dead)return;if(!Number.isFinite(amount)){console.error('Invalid damage amount:',amount,kind);amount=0}
+  amount*=stationaryDamageMultiplier();
+  const previousHp=Math.max(0,enemy.hp),actualDamage=Math.max(0,Math.min(previousHp,amount));enemy.hp-=amount;enemy.hitFlash=VIS.damage.hitFlashSeconds;
+  const rate=lifestealRate();if(rate>0&&actualDamage>0){const player=game.player;player.lifestealRemainder=(player.lifestealRemainder||0)+actualDamage*rate;const wholeHeal=Math.floor(player.lifestealRemainder+1e-9);if(wholeHeal>=1){player.lifestealRemainder-=wholeHeal;player.hp=Math.min(player.maxHp,player.hp+wholeHeal)}}
   if(showText&&Math.random()<VIS.damage.textChance){const critical=kind==='crit';addText(enemy.x+rand(-VIS.damage.textJitter,VIS.damage.textJitter),enemy.y-enemy.r,String(Math.round(amount)),critical?VIS.damage.textCritical:VIS.damage.textNormal,critical?VIS.damage.criticalTextSize:VIS.damage.normalTextSize)}
   if(knockback>0&&enemy.type!=='boss'){const distance=Math.hypot(enemy.x-sourceX,enemy.y-sourceY)||1,resistance=enemy.type==='golem'?AI.golemKnockbackResistance:1;enemy.x+=(enemy.x-sourceX)/distance*knockback*resistance;enemy.y+=(enemy.y-sourceY)/distance*knockback*resistance}if(enemy.hp<=0)killEnemy(enemy,true);
 }
 function killEnemy(enemy,drop=true){
-  if(enemy.dead)return;enemy.dead=true;game.kills++;if(drop)spawnGem(enemy.x,enemy.y,enemy.exp);if(game.effects.vampire>0)game.player.hp=Math.min(game.player.maxHp,game.player.hp+game.player.maxHp*CFG.items.vampire.healPercentPerKill);
+  if(enemy.dead)return;enemy.dead=true;game.kills++;
+  if(drop){if(enemy.type==='boss')gainExp(enemy.exp,false);else spawnGem(enemy.x,enemy.y,enemy.exp)}
   const d=VIS.damage,desired=Math.min(d.deathParticleMaximum,d.deathParticleBase+enemy.r/d.deathParticleRadiusDivisor),allowed=Math.max(0,Math.min(desired,game.frameDeathParticleBudget||0));game.frameDeathParticleBudget=Math.max(0,(game.frameDeathParticleBudget||0)-allowed);
   for(let i=0;i<allowed;i++)particle(enemy.x,enemy.y,rand(-d.deathParticleVelocity,d.deathParticleVelocity),rand(-d.deathParticleVelocity,d.deathParticleVelocity),rand(d.deathParticleLifeMin,d.deathParticleLifeMax),enemy.type==='spitter'?d.spitterParticle:d.enemyParticle,rand(d.deathParticleSizeMin,d.deathParticleSizeMax));
   if(enemy.type==='boss'){toast(TEXT.bossKilledToast);endGame(true)}
@@ -1423,13 +1629,13 @@ function updateDelayedCasts(dt){
 }
 
 function updateWeapons(dt){
-  const player=game.player,cooldownMultiplier=game.effects.overload>0?CFG.items.overload.cooldownMultiplier:1;player.baseTimer-=dt;
-  if(player.baseTimer<=0){player.baseTimer=BASE.cooldown;const target=nearestEnemy(BASE.targetSearchRange);if(target){const damage=BASE.baseDamage*(1+Math.min(game.level-PROG.startLevel,PROG.maxLevelDamageScalingLevel)*PROG.baseAttackDamagePerLevel);fireProjectile(player.x,player.y,target.x,target.y,damage,BASE.projectileSpeed,BASE.projectileRadius,BASE.color,BASE.range,0,BASE.type)}}
+  const player=game.player,temporaryCooldownMultiplier=game.effects.overload>0?CFG.items.overload.cooldownMultiplier:1,cooldownMultiplier=temporaryCooldownMultiplier*permanentWeaponCooldownMultiplier()*fullHpCooldownMultiplier(),areaMultiplier=weaponAreaMultiplier(),sizeMultiplier=weaponSizeMultiplier();player.baseTimer-=dt;
+  if(player.baseTimer<=0){player.baseTimer=BASE.cooldown*cooldownMultiplier;const target=nearestEnemy(BASE.targetSearchRange*areaMultiplier);if(target){const damage=BASE.baseDamage*(1+Math.min(game.level-PROG.startLevel,PROG.maxLevelDamageScalingLevel)*PROG.baseAttackDamagePerLevel);fireProjectile(player.x,player.y,target.x,target.y,damage,BASE.projectileSpeed,BASE.projectileRadius*sizeMultiplier,BASE.color,BASE.range*areaMultiplier,0,BASE.type,0,BASE.visualRadius?BASE.visualRadius*sizeMultiplier:undefined)}}
   for(const [key,weapon] of Object.entries(player.weapons)){weapon.timer=(weapon.timer||0)-dt;if(key==='orbit')continue;if(key==='drone'){updateDronesWeapon(weapon,dt,cooldownMultiplier);continue}if(weapon.timer<=0){triggerWeapon(key,weapon.level);weapon.timer=weaponCooldown(key,weapon.level)*cooldownMultiplier}}
 }
 function weaponCooldown(key,level){return weaponLevelConfig(key,level).cooldown}
 function triggerWeapon(key,level){
-  const player=game.player,levelCfg=weaponLevelConfig(key,level),target=nearestEnemy(SYS.weaponTargetSearchRange);if(!target&&!['mine','frost','hammer'].includes(key))return;const angle=target?Math.atan2(target.y-player.y,target.x-player.x):player.angle;
+  const player=game.player,levelCfg=weaponLevelConfig(key,level),target=nearestEnemy(SYS.weaponTargetSearchRange*weaponAreaMultiplier());if(!target&&!['mine','frost','hammer'].includes(key))return;const angle=target?Math.atan2(target.y-player.y,target.x-player.x):player.angle;
   if(key==='shotgun'){
     const c=levelCfg;for(let i=0;i<c.count;i++){const shotAngle=angle-c.spreadDegrees*Math.PI/360+c.spreadDegrees*Math.PI/180*(i/(c.count-1||1))+rand(-c.angleJitterRadians,c.angleJitterRadians);fireProjectile(player.x,player.y,player.x+Math.cos(shotAngle)*c.aimPointDistance,player.y+Math.sin(shotAngle)*c.aimPointDistance,c.damage,c.speed,c.projectileRadius,c.colorProjectile||CFG.weapons.shotgun.color,c.range,0,'pellet',c.knockback)}if(c.core){const core=c.core;fireProjectile(player.x,player.y,player.x+Math.cos(angle)*c.aimPointDistance,player.y+Math.sin(angle)*c.aimPointDistance,core.damage,core.speed,core.radius,core.color,core.range,core.pierce,'core',core.knockback,core.visualRadius??core.radius)}muzzle(player.x+Math.cos(angle)*c.muzzle.offset,player.y+Math.sin(angle)*c.muzzle.offset,c.muzzle.color,c.muzzle.particles);sound.shot();
   }else if(key==='boomerang'){
@@ -1455,7 +1661,7 @@ function triggerWeapon(key,level){
 
 function updateDronesWeapon(weapon,dt,cooldownMultiplier){
   const level=weapon.level,c=weaponLevelConfig('drone',level),count=c.count;if(game.drones.length!==count)game.drones=Array.from({length:count},(_,i)=>({angle:i/count*TAU,timer:rand(0,c.startShotTimerMax),missile:rand(0,c.startMissileTimerMax)}));
-  for(const drone of game.drones){drone.angle+=dt*c.orbitSpeed;drone.timer-=dt;drone.missile-=dt;const x=game.player.x+Math.cos(drone.angle)*c.orbitRadius,y=game.player.y+Math.sin(drone.angle)*c.orbitRadius;if(drone.timer<=0){drone.timer=c.shotCooldown*cooldownMultiplier;const target=nearestEnemy(c.targetSearchRange);if(target)fireProjectile(x,y,target.x,target.y,c.damage,c.speed,c.projectileRadius,CFG.weapons.drone.color,c.projectileRange,c.pierce,'drone')}if(c.missile&&drone.missile<=0){const m=c.missile;drone.missile=m.cooldown;const target=nearestEnemy(m.targetRange);if(target)fireProjectile(x,y,target.x,target.y,m.damage,m.speed,m.radius,m.color,c.projectileRange,0,'missile',0,m.visualRadius??m.radius)}}
+  for(const drone of game.drones){drone.angle+=dt*c.orbitSpeed;drone.timer-=dt;drone.missile-=dt;const x=game.player.x+Math.cos(drone.angle)*c.orbitRadius,y=game.player.y+Math.sin(drone.angle)*c.orbitRadius;if(drone.timer<=0){drone.timer=c.shotCooldown*cooldownMultiplier;const target=nearestEnemy(c.targetSearchRange);if(target)fireProjectile(x,y,target.x,target.y,c.damage,c.speed,c.projectileRadius,CFG.weapons.drone.color,c.projectileRange,c.pierce,'drone')}if(c.missile&&drone.missile<=0){const m=c.missile;drone.missile=m.cooldown*cooldownMultiplier;const target=nearestEnemy(m.targetRange);if(target)fireProjectile(x,y,target.x,target.y,m.damage,m.speed,m.radius,m.color,c.projectileRange,0,'missile',0,m.visualRadius??m.radius)}}
 }
 
 function fireProjectile(x,y,targetX,targetY,damage,speed,radius,color,maxRange=BASE.range,pierce=0,type='normal',knockback=0,visualRadius=radius){
@@ -1587,18 +1793,145 @@ function getDistinctEnemySpots(count,minDistance=weaponLevelConfig('gravity',1).
 
 function spawnGem(x,y,value){const cfg=DROP.exp,cx=Math.floor(x/PERF.gemMergeCellSize),cy=Math.floor(y/PERF.gemMergeCellSize),key=(cx+PERF.spatialKeyOffset)*PERF.spatialKeyMultiplier+(cy+PERF.spatialKeyOffset),existing=PERF.gemMergeEnabled?game.frameGemMap.get(key):null,radiusFor=v=>v>=cfg.largeValue?cfg.radiusLarge:v>=cfg.mediumValue?cfg.radiusMedium:cfg.radiusSmall;if(existing&&!existing.dead){existing.value+=value;existing.r=radiusFor(existing.value);return existing}const gem=objectPools.gems.pop()||{};Object.assign(gem,{x,y,baseX:x,baseY:y,value,r:radiusFor(value),vx:0,vy:0,age:0,spin:rand(0,TAU),dead:false});game.gems.push(gem);if(PERF.gemMergeEnabled)game.frameGemMap.set(key,gem);return gem}
 function updateGems(dt){const player=game.player,radius=PICKUP_RAD[player.stats.pickup],cfg=DROP.exp;for(const gem of game.gems){gem.age+=dt;gem.spin+=dt*cfg.spinSpeed;const dx=player.x-gem.x,dy=player.y-gem.y,distance=Math.hypot(dx,dy)||1;if(game.globalMagnet>0||distance<radius){const force=game.globalMagnet>0?cfg.globalMagnetForce:clamp(cfg.localForceBase+(radius-distance)*cfg.localForcePerPixel,cfg.localForceMin,cfg.localForceMax);gem.vx+=(dx/distance*force-gem.vx)*Math.min(1,dt*cfg.velocityLerpRate);gem.vy+=(dy/distance*force-gem.vy)*Math.min(1,dt*cfg.velocityLerpRate);gem.x+=gem.vx*dt;gem.y+=gem.vy*dt}else{gem.vx*=Math.max(0,1-dt*cfg.idleDragRate);gem.vy*=Math.max(0,1-dt*cfg.idleDragRate);gem.x+=(gem.baseX-gem.x)*Math.min(1,dt*cfg.returnRate);gem.y+=(gem.baseY-gem.y)*Math.min(1,dt*cfg.returnRate)}if(Math.hypot(player.x-gem.x,player.y-gem.y)<player.r+cfg.pickupExtraRadius){gainExp(gem.value);gem.dead=true;sound.pickup()}}game.globalMagnet=Math.max(0,game.globalMagnet-dt);compactInPlace(game.gems,gem=>!gem.dead,recycleGem)}
-function spawnMapDrop(){const roll=Math.random(),key=roll<DROP.healChance?'heal':roll<DROP.magnetCumulativeChance?'magnet':'freeze',player=game.player,angle=Math.random()*TAU,distance=Math.max(W,H)*(DROP.mapDistanceScreenBase+Math.random()*DROP.mapDistanceScreenRandom),x=player.x+Math.cos(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter),y=player.y+Math.sin(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter);game.mapDrops.push({x,y,key,r:DROP.mapRadius,age:0,life:DROP.mapLifetime,bob:rand(0,TAU),vx:0,vy:0});while(game.mapDrops.length>DROP.mapMaximumCount)game.mapDrops.shift()}
-function updateMapDrops(dt){game.nextMapDrop-=dt;if(game.nextMapDrop<=0){spawnMapDrop();game.nextMapDrop=rand(DROP.nextDropDelayMin,DROP.nextDropDelayMax)}const player=game.player,radius=PICKUP_RAD[player.stats.pickup]*DROP.mapPickupRadiusMultiplier;for(const drop of game.mapDrops){drop.age+=dt;drop.bob+=dt*DROP.mapBobSpeed;const dx=player.x-drop.x,dy=player.y-drop.y,distance=Math.hypot(dx,dy)||1;if(distance<radius){const force=clamp(DROP.mapAttractForceBase+(radius-distance)*DROP.mapAttractForcePerPixel,DROP.mapAttractForceMin,DROP.mapAttractForceMax);drop.vx+=(dx/distance*force-drop.vx)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.vy+=(dy/distance*force-drop.vy)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.x+=drop.vx*dt;drop.y+=drop.vy*dt}if(distance<player.r+drop.r-DROP.mapPickupOverlapReduction){applyItem(drop.key);drop.dead=true;sound.pickup()}if(drop.age>drop.life)drop.dead=true}compactInPlace(game.mapDrops,drop=>!drop.dead)}
-function gainExp(value){const gained=value*(game.effects.doublexp>0?CFG.items.doublexp.multiplier:1);game.totalExp+=gained;game.exp+=gained;while(game.exp>=game.need){game.exp-=game.need;game.level++;game.need=needXP(game.level);game.pendingLevels++}if(game.pendingLevels>0&&state==='playing')openLevelUp()}
+function randomMapDropKey(){const entries=Object.entries(DROP.mapItemWeights||{}).filter(([key,weight])=>ITEMS[key]&&Number(weight)>0);if(!entries.length)return 'heal';const total=entries.reduce((sum,[,weight])=>sum+Number(weight),0);let roll=Math.random()*total;for(const [key,weight] of entries){roll-=Number(weight);if(roll<=0)return key}return entries[entries.length-1][0]}
+function spawnMapDrop(){const key=randomMapDropKey(),player=game.player,angle=Math.random()*TAU,distance=Math.max(W,H)*(DROP.mapDistanceScreenBase+Math.random()*DROP.mapDistanceScreenRandom),x=player.x+Math.cos(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter),y=player.y+Math.sin(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter);game.mapDrops.push({x,y,key,r:DROP.mapRadius,age:0,life:DROP.mapLifetime,bob:rand(0,TAU),vx:0,vy:0});while(game.mapDrops.length>DROP.mapMaximumCount)game.mapDrops.shift()}
+function updateMapDrops(dt){game.nextMapDrop-=dt;if(game.nextMapDrop<=0){spawnMapDrop();game.nextMapDrop=rand(DROP.nextDropDelayMin,DROP.nextDropDelayMax)*mapDropCooldownMultiplier()}const player=game.player,radius=PICKUP_RAD[player.stats.pickup]*DROP.mapPickupRadiusMultiplier;for(const drop of game.mapDrops){drop.age+=dt;drop.bob+=dt*DROP.mapBobSpeed;const dx=player.x-drop.x,dy=player.y-drop.y,distance=Math.hypot(dx,dy)||1;if(distance<radius){const force=clamp(DROP.mapAttractForceBase+(radius-distance)*DROP.mapAttractForcePerPixel,DROP.mapAttractForceMin,DROP.mapAttractForceMax);drop.vx+=(dx/distance*force-drop.vx)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.vy+=(dy/distance*force-drop.vy)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.x+=drop.vx*dt;drop.y+=drop.vy*dt}if(distance<player.r+drop.r-DROP.mapPickupOverlapReduction){applyItem(drop.key);drop.dead=true;sound.pickup()}if(drop.age>drop.life)drop.dead=true}compactInPlace(game.mapDrops,drop=>!drop.dead)}
+function gainExp(value,openReward=true){const gained=value*(game.effects.doublexp>0?CFG.items.doublexp.multiplier:1);game.totalExp+=gained;game.exp+=gained;while(game.exp>=game.need){game.exp-=game.need;game.level++;game.need=needXP(game.level);game.pendingLevels++}if(openReward&&game.pendingLevels>0&&state==='playing')openLevelUp()}
 
-function openLevelUp(){state='level';sound.level();game.rewardChoices=generateRewards();DOM.rewardCards.innerHTML='';game.rewardChoices.forEach((reward,index)=>{const card=document.createElement('button');card.className='reward-card';card.style.setProperty('--accent',reward.color);card.style.setProperty('--accent-soft',hexToRgba(reward.color,PROG.rewardCardAccentAlpha));card.innerHTML=`<span class="keycap">${index+1}</span><img src="${reward.icon}" alt=""><span class="category">${reward.categoryLabel}</span><h3>${reward.name}</h3><span class="level-note">${reward.levelNote||''}</span><p>${reward.desc}</p>`;card.onclick=()=>chooseReward(index);DOM.rewardCards.append(card)});DOM.level.classList.add('show');updateHUD(true)}
+function openLevelUp(){
+  if(!game || game.ended)return;
+
+  // 先產生選項，不要先進入升級狀態
+  const choices=generateRewards();
+
+  // 所有項目都已升滿，或目前沒有可選項目
+  if(!choices.length){
+    game.rewardChoices=[];
+    game.pendingLevels=0;
+
+    DOM.rewardCards.innerHTML='';
+    DOM.level.classList.remove('show');
+
+    state='playing';
+    last=performance.now();
+
+    toast('所有武器與永久升級皆已達上限');
+    updateHUD(true);
+    return;
+  }
+
+  state='level';
+  sound.level();
+
+  game.rewardChoices=choices;
+  DOM.rewardCards.innerHTML='';
+
+  game.rewardChoices.forEach((reward,index)=>{
+    const card=document.createElement('button');
+
+    card.className='reward-card';
+    card.style.setProperty('--accent',reward.color);
+    card.style.setProperty(
+      '--accent-soft',
+      hexToRgba(reward.color,PROG.rewardCardAccentAlpha)
+    );
+
+    card.innerHTML=`
+      <span class="keycap">${index+1}</span>
+      <img src="${reward.icon}" alt="">
+      <span class="category">${reward.categoryLabel}</span>
+      <h3>${reward.name}</h3>
+      <span class="level-note">${reward.levelNote||''}</span>
+      <p>${reward.desc}</p>
+    `;
+
+    card.onclick=()=>chooseReward(index);
+    DOM.rewardCards.append(card);
+  });
+
+  DOM.level.classList.add('show');
+  updateHUD(true);
+}
 function generateRewards(){const player=game.player,candidates=[];for(const [key,weapon] of Object.entries(WEAPONS)){const level=player.weapons[key]?.level||0;if(level>=SYS.maxUpgradeLevel)continue;if(level===0&&Object.keys(player.weapons).length>=SYS.maxWeaponSlots)continue;candidates.push({type:'weapon',key,name:weapon.name,icon:weapon.icon,color:weapon.color,categoryLabel:TEXT.rewardCategoryWeapon,levelNote:level?formatText(TEXT.rewardLevelTransition,{from:level,to:level+1}):TEXT.rewardNewWeapon,desc:weapon.desc[level]})}
-  for(const [key,stat] of Object.entries(STATS)){const level=player.stats[key];if(level>=SYS.maxUpgradeLevel)continue;let description=stat.desc;if(key==='speed')description=formatText(PROG.speedDescriptionTemplate,{from:SPEED_MULT[level].toFixed(1),to:SPEED_MULT[level+1].toFixed(1)});candidates.push({type:'stat',key,name:stat.name,icon:stat.icon,color:stat.color,categoryLabel:TEXT.rewardCategoryBoost,levelNote:formatText(TEXT.rewardLevelTransition,{from:level,to:level+1}),desc:description})}
-  for(const [key,item] of Object.entries(ITEMS)){if(key==='heal'&&player.hp>=player.maxHp*PROG.rewardHealFullHpThreshold)continue;if(key==='regen'&&player.hp/player.maxHp>=PROG.rewardRegenHpRatioThreshold)continue;if(key==='magnet'&&game.gems.length<PROG.rewardMagnetMinimumGems)continue;if(key==='doublexp'&&game.duration-game.elapsed<PROG.rewardDoubleXpMinimumRemainingSeconds)continue;candidates.push({type:'item',key,name:item.name,icon:item.icon,color:item.color,categoryLabel:TEXT.rewardCategoryItem,levelNote:TEXT.rewardItemImmediate,desc:item.desc})}
-  const output=[],permanent=candidates.filter(entry=>entry.type!=='item');if(permanent.length)output.push(pick(permanent));const pool=candidates.filter(entry=>!output.some(existing=>existing.type===entry.type&&existing.key===entry.key));while(output.length<SYS.rewardChoiceCount&&pool.length){const index=(Math.random()*pool.length)|0;output.push(pool.splice(index,1)[0])}return output.sort(()=>Math.random()-0.5)}
-function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}else applyItem(reward.key);game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';last=performance.now()}}
-function applyItem(key){const player=game.player,effects=game.effects,item=CFG.items[key];if(key==='heal')player.hp=Math.min(player.maxHp,player.hp+item.heal);else if(key==='regen')effects.regen=item.duration;else if(key==='shield')effects.shield=item.duration;else if(key==='magnet')game.globalMagnet=item.duration;else if(key==='freeze')effects.freeze=item.duration;else if(key==='doublexp')effects.doublexp=item.duration;else if(key==='overload')effects.overload=item.duration;else if(key==='bomb'){for(const enemy of game.enemies)damageEnemy(enemy,enemy.type==='boss'?Math.min(item.bossMaximumDamage,enemy.hp*item.bossHPPercent):item.normalDamage,'crit',false)}else if(key==='push'){for(const enemy of game.enemies){const dx=enemy.x-player.x,dy=enemy.y-player.y,distance=Math.hypot(dx,dy)||1;if(distance<Math.max(W,H)*item.screenRangeMultiplier){enemy.x+=dx/distance*item.pushDistance;enemy.y+=dy/distance*item.pushDistance;enemy.stun=item.stunSeconds}}const visual=VIS.itemPushWave;addWave(player.x,player.y,visual.startRadius,Math.max(W,H)*item.waveRangeMultiplier,item.waveDuration,visual.color)}else if(key==='vampire')effects.vampire=item.duration;toast(ITEMS[key].name)}
+  for(const [key,stat] of Object.entries(STATS)){
+    const level=player.stats[key]||0,maxLevel=Number(stat.maxLevel)||SYS.maxUpgradeLevel;
+    if(level>=maxLevel)continue;
+	// 復活分數不足時，不放進本次三選一候選池
+    if(
+      key==='revive' &&
+      scoreBreakdown().score<reviveScoreCost()
+    ){
+    continue;
+  }
+    let description=stat.desc,levelNote=formatText(TEXT.rewardLevelTransition,{from:level,to:Math.min(level+1,maxLevel)});
+    if(key==='speed')description=formatText(PROG.speedDescriptionTemplate,{from:SPEED_MULT[level].toFixed(1),to:SPEED_MULT[level+1].toFixed(1)});
+    if(key==='revive'){
+      const cost=reviveScoreCost();
+      levelNote=`消耗 ${Math.round(cost).toLocaleString('zh-TW')} 分購買`;
+      description=`HP 歸 0 時，立即以 ${Math.round(reviveRestoreRatio()*100)}% Max HP 復活一次。購買後直到消耗掉之前，都不會再出現在升級池。`;
+    }
+    candidates.push({type:'stat',key,name:stat.name,icon:stat.icon,color:stat.color,categoryLabel:TEXT.rewardCategoryBoost,levelNote,desc:description,maxLevel});
+  }
+  const output=[];if(candidates.length)output.push(pick(candidates));const pool=candidates.filter(entry=>!output.some(existing=>existing.type===entry.type&&existing.key===entry.key));while(output.length<SYS.rewardChoiceCount&&pool.length){const index=(Math.random()*pool.length)|0;output.push(pool.splice(index,1)[0])}return output.sort(()=>Math.random()-0.5)}
+function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){if(reward.key==='revive'){const cost=reviveScoreCost(),currentScore=scoreBreakdown().score;if(currentScore<cost){toast(`分數不足，需要 ${Math.round(cost).toLocaleString('zh-TW')} 分`);return}player.stats[reward.key]=1;game.scoreAdjustment-=cost;toast(`購買 ${reward.name}（-${Math.round(cost).toLocaleString('zh-TW')} 分）`)}else{player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}if(reward.key==='dropCooldown')game.nextMapDrop*=Math.max(0.05,1-(Number(PROG.mapDropCooldownReductionPerLevel)||0));if(reward.key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());invalidateScaledWeaponConfigs();toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}}game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();updateHUD(true);if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';last=performance.now()}}
+function applyItem(key){const player=game.player,effects=game.effects,item=CFG.items[key];if(key==='heal')player.hp=Math.min(player.maxHp,player.hp+item.heal);else if(key==='regen')effects.regen=item.duration;else if(key==='shield')effects.shield=item.duration;else if(key==='magnet')game.globalMagnet=item.duration;else if(key==='freeze')effects.freeze=item.duration;else if(key==='doublexp')effects.doublexp=item.duration;else if(key==='overload')effects.overload=item.duration;else if(key==='bomb'){for(const enemy of game.enemies)damageEnemy(enemy,enemy.type==='boss'?Math.min(item.bossMaximumDamage,enemy.hp*item.bossHPPercent):item.normalDamage,'crit',false)}else if(key==='push'){for(const enemy of game.enemies){const dx=enemy.x-player.x,dy=enemy.y-player.y,distance=Math.hypot(dx,dy)||1;if(distance<Math.max(W,H)*item.screenRangeMultiplier){enemy.x+=dx/distance*item.pushDistance;enemy.y+=dy/distance*item.pushDistance;enemy.stun=item.stunSeconds}}const visual=VIS.itemPushWave;addWave(player.x,player.y,visual.startRadius,Math.max(W,H)*item.waveRangeMultiplier,item.waveDuration,visual.color)}toast(ITEMS[key].name)}
 
+function passiveLevelLabel(level){return formatText(TEXT.pauseLevel||TEXT.weaponLevel||'Lv.{level}',{level})}
+function ownedPermanentStats(){
+  if(!game)return [];
+  return Object.entries(game.player.stats).filter(([key,level])=>Number(level)>0&&STATS[key]);
+}
+function buildPassiveRack(){
+  if(!game||!DOM.passiveRack)return;
+  const entries=ownedPermanentStats();
+  DOM.passiveRack.innerHTML='';
+  DOM.passiveRack.classList.toggle('hidden',entries.length===0);
+  for(const [key,rawLevel] of entries){
+    const level=Math.max(1,Number(rawLevel)||1),definition=STATS[key],slot=document.createElement('div');
+    slot.className='weapon-slot passive-slot';
+    slot.style.setProperty('--passive-accent',definition.color||'#ffffff');
+    slot.title=`${definition.name} ${passiveLevelLabel(level)}`;
+    slot.innerHTML=`<img src="${definition.icon}" alt="${definition.name}"><b>${passiveLevelLabel(level)}</b>`;
+    DOM.passiveRack.append(slot);
+  }
+}
+function makePauseLoadoutItem({name,icon,color,level,description}){
+  const item=document.createElement('article');
+  item.className='pause-loadout-item';
+  item.style.setProperty('--item-accent',color||'#ffffff');
+  const image=document.createElement('img');image.src=icon;image.alt=name;
+  const copy=document.createElement('div');copy.className='pause-loadout-item-copy';
+  const title=document.createElement('div');title.className='pause-loadout-item-title';
+  const heading=document.createElement('h4');heading.textContent=name;
+  const badge=document.createElement('span');badge.className='pause-loadout-level';badge.textContent=passiveLevelLabel(level);
+  const desc=document.createElement('p');desc.textContent=description||'';
+  title.append(heading,badge);copy.append(title,desc);item.append(image,copy);
+  return item;
+}
+function renderPauseLoadout(){
+  if(!game||!DOM.pauseWeaponsList||!DOM.pausePassivesList)return;
+  const weapons=Object.entries(game.player.weapons);
+  const passives=ownedPermanentStats();
+  DOM.pauseWeaponsList.innerHTML='';DOM.pausePassivesList.innerHTML='';
+  DOM.pauseWeaponsCount.textContent=formatText(TEXT.pauseWeaponsCount||'{count} / {max}',{count:weapons.length,max:SYS.maxWeaponSlots});
+  DOM.pausePassivesCount.textContent=formatText(TEXT.pausePassivesCount||'已取得 {count} 項',{count:passives.length});
+  if(!weapons.length){
+    const empty=document.createElement('div');empty.className='pause-loadout-empty';empty.textContent=TEXT.pauseEmptyWeapons||'尚未取得額外武器。';DOM.pauseWeaponsList.append(empty);
+  }else{
+    for(const [key,weapon] of weapons){
+      const definition=WEAPONS[key],level=Math.max(1,weapon.level||1),descriptions=definition.desc||[],description=descriptions[Math.min(descriptions.length-1,level-1)]||definition.name;
+      DOM.pauseWeaponsList.append(makePauseLoadoutItem({name:definition.name,icon:definition.icon,color:definition.color,level,description}));
+    }
+  }
+  if(!passives.length){
+    const empty=document.createElement('div');empty.className='pause-loadout-empty';empty.textContent=TEXT.pauseEmptyPassives||'尚未取得永久升級。';DOM.pausePassivesList.append(empty);
+  }else{
+    for(const [key,rawLevel] of passives){
+      const definition=STATS[key],level=Math.max(1,Number(rawLevel)||1);
+      DOM.pausePassivesList.append(makePauseLoadoutItem({name:definition.name,icon:definition.icon,color:definition.color,level,description:definition.desc}));
+    }
+  }
+}
 function buildWeaponRack(){
   if(!game)return;
   DOM.weaponRack.innerHTML='';
@@ -1618,8 +1951,10 @@ function buildWeaponRack(){
     }
     DOM.weaponRack.append(slot);
   }
+  buildPassiveRack();
+  if(state==='paused')renderPauseLoadout();
 }
-function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,remaining=fmtTime(game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:Math.ceil(Math.max(0,player.hp)),max:player.maxHp}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('score',DOM.score,scoreBreakdown().score.toLocaleString('zh-TW'));setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
+function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,bossStage=game.bossSpawned||game.elapsed>=game.duration,remaining=fmtTime(bossStage?bossFightRemainingExact(game.elapsed):game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:Math.ceil(Math.max(0,player.hp)),max:player.maxHp}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('timerLabel',DOM.timerLabel,bossStage?(TEXT.bossTimerLabel||'BOSS 戰鬥倒數'):TEXT.timerLabel);setTextIfChanged('score',DOM.score,scoreBreakdown().score.toLocaleString('zh-TW'));setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
 
 function particle(x,y,vx,vy,life,color,size){
   if(game.particles.length>=MAX_PARTICLES)return;
@@ -1730,7 +2065,7 @@ function buildMeteorSpriteCache(){if(!images.meteorSprite)return;const cache=VIS
 function drawMeteor(meteor){if(meteor.hit||meteor.age<0)return;const config=weaponLevelConfig('meteor',meteor.level),visual=config.fallVisual,cache=VIS.meteorCache,progress=clamp(meteor.age/meteor.duration,0,1),ease=1-Math.pow(1-progress,visual.easingPower),impactRadius=meteor.big&&config.largeMeteor?config.largeMeteor.radius:config.radius,frameIndex=Math.min(METEOR_WARNING_FRAME_COUNT-1,(progress*METEOR_WARNING_FRAME_COUNT)|0),warning=meteorWarningFrames[frameIndex];if(warning){const scale=impactRadius/cache.warningBaseRadius,size=cache.warningSize*scale;ctx.drawImage(warning,meteor.x-size/2,meteor.y-size/2,size,size)}ctx.save();ctx.translate(meteor.x,meteor.y);ctx.globalAlpha=visual.shadowAlphaBase+visual.shadowAlphaGrowth*progress;ctx.fillStyle=VIS.meteor.shadowColor;ctx.beginPath();ctx.ellipse(0,0,impactRadius*visual.shadowWidthMultiplier*progress+visual.shadowBaseWidth,impactRadius*visual.shadowHeightMultiplier*progress+visual.shadowBaseHeight,0,0,TAU);ctx.fill();ctx.restore();const offsetX=visual.offsetX*(1-ease),offsetY=visual.offsetY*(1-ease),scale=(meteor.big?visual.largeScale:1)*(visual.scaleStart+visual.scaleGrowth*ease),spriteSize=visual.spriteSize*scale,x=meteor.x+offsetX,y=meteor.y+offsetY;ctx.save();ctx.translate(x,y);ctx.rotate(METEOR_FIXED_ROTATION);ctx.globalAlpha=visual.spriteAlpha;if(meteorSpriteCache){const cacheSize=spriteSize*visual.cacheScale;ctx.drawImage(meteorSpriteCache,-cacheSize/2,-cacheSize/2,cacheSize,cacheSize)}else ctx.drawImage(images.meteorSprite,-spriteSize/2,-spriteSize/2,spriteSize,spriteSize);ctx.restore()}
 function drawGravityOrb(orb){const visual=VIS.gravityOrb,t=clamp(orb.age/orb.duration,0,1),size=visual.sizeStart+visual.sizeGrowth*t;ctx.save();ctx.translate(orb.x,orb.y);ctx.rotate(orb.spin);ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.shadowColor;ctx.drawImage(images.gravityOrb,-size/2,-size/2,size,size);ctx.strokeStyle=visual.ringColor;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.arc(0,0,size*visual.ringRadiusMultiplier+Math.sin(game.elapsed*visual.ringPulseSpeed)*visual.ringPulse,0,TAU);ctx.stroke();ctx.restore()}
 function drawMouseTarget(){if(!mouse.active||state!=='playing')return;const visual=VIS.mouseTarget;ctx.save();ctx.translate(mouse.targetX,mouse.targetY);ctx.globalAlpha=visual.alpha;ctx.strokeStyle=visual.color;ctx.lineWidth=visual.lineWidth;ctx.setLineDash(visual.dash);ctx.beginPath();ctx.arc(0,0,visual.radius+Math.sin(game.elapsed*visual.pulseSpeed)*visual.pulse,0,TAU);ctx.stroke();ctx.setLineDash(METEOR_SOLID_DASH);ctx.beginPath();ctx.moveTo(-visual.lineOuter,0);ctx.lineTo(-visual.lineInner,0);ctx.moveTo(visual.lineOuter,0);ctx.lineTo(visual.lineInner,0);ctx.moveTo(0,-visual.lineOuter);ctx.lineTo(0,-visual.lineInner);ctx.moveTo(0,visual.lineOuter);ctx.lineTo(0,visual.lineInner);ctx.stroke();ctx.restore()}
-function drawMapDrop(drop){const visual=VIS.mapDrop,key=drop.key==='heal'?'healDrop':drop.key==='freeze'?'freezeDrop':'magnetDrop',bob=Math.sin(drop.bob)*visual.bobAmount;ctx.save();ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(drop.x,drop.y+visual.shadowOffsetY,visual.shadowRadiusX,visual.shadowRadiusY,0,0,TAU);ctx.fill();ctx.restore();ctx.save();ctx.translate(drop.x,drop.y+bob);ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=drop.key==='heal'?visual.healGlow:drop.key==='freeze'?visual.freezeGlow:visual.magnetGlow;ctx.drawImage(images[key],-visual.spriteSize/2,-visual.spriteSize/2,visual.spriteSize,visual.spriteSize);ctx.strokeStyle=visual.ringColor;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.arc(0,0,visual.ringRadius+Math.sin(drop.bob*visual.ringPulseSpeed)*visual.ringPulse,0,TAU);ctx.stroke();ctx.restore()}
+function drawMapDrop(drop){const visual=VIS.mapDrop,assetKeys={heal:'healDrop',regen:'regenDrop',shield:'shieldDrop',magnet:'magnetDrop',freeze:'freezeDrop',doublexp:'doublexpDrop',overload:'overloadDrop',bomb:'bombDrop',push:'pushDrop'},key=assetKeys[drop.key]||'healDrop',item=ITEMS[drop.key]||ITEMS.heal,bob=Math.sin(drop.bob)*visual.bobAmount;ctx.save();ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(drop.x,drop.y+visual.shadowOffsetY,visual.shadowRadiusX,visual.shadowRadiusY,0,0,TAU);ctx.fill();ctx.restore();ctx.save();ctx.translate(drop.x,drop.y+bob);ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=item.color||visual.magnetGlow;if(images[key])ctx.drawImage(images[key],-visual.spriteSize/2,-visual.spriteSize/2,visual.spriteSize,visual.spriteSize);ctx.strokeStyle=item.color||visual.ringColor;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.arc(0,0,visual.ringRadius+Math.sin(drop.bob*visual.ringPulseSpeed)*visual.ringPulse,0,TAU);ctx.stroke();ctx.restore()}
 function drawImageCentered(image,x,y,width,height,rotation=0){if(!image)return;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore()}
 function roundRect(context,x,y,width,height,radius){context.beginPath();context.roundRect(x,y,width,height,radius);return context}
 

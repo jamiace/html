@@ -2,8 +2,8 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R21 SCORE TOP 50",
-    "configVersion": 6,
+    "build": "R25 HUD PASSIVES + PAUSE LOADOUT",
+    "configVersion": 9,
     "language": "zh-Hant"
   },
   "system": {
@@ -76,7 +76,23 @@
     "flameSprite": "assets/fx_flame.png",
     "healDrop": "assets/item_heal.png",
     "freezeDrop": "assets/item_freeze.png",
-    "magnetDrop": "assets/item_magnet.png"
+    "magnetDrop": "assets/item_magnet.png",
+    "regenDrop": "assets/item_regen.png",
+    "shieldDrop": "assets/item_shield.png",
+    "doublexpDrop": "assets/item_doublexp.png",
+    "overloadDrop": "assets/item_overload.png",
+    "bombDrop": "assets/item_bomb.png",
+    "pushDrop": "assets/item_push.png",
+    "statLifesteal": "assets/stat_lifesteal.png",
+    "statDropCooldown": "assets/stat_drop_cooldown.png",
+    "statWeaponCooldown": "assets/stat_weapon_cooldown.png",
+    "statWeaponArea": "assets/stat_weapon_area.png",
+    "statWeaponSize": "assets/stat_weapon_size.png",
+    "statHpRegen": "assets/stat_hp_regen.png",
+    "statRevive": "assets/stat_revive.png",
+    "statFocus": "assets/stat_focus.png",
+    "statRunExp": "assets/stat_run_exp.png",
+    "statFullHpCooldown": "assets/stat_fullhp_cooldown.png"
   },
   "audio": {
     "_comment": "Web Audio 音效參數。frequency 為 Hz、duration 為秒、volume 為增益。",
@@ -317,7 +333,26 @@
       "experienceLinear": "隨等級線性增加量。",
       "experiencePower": "等級曲線次方。",
       "speedMultipliers": "步伐強化 Lv.0～Lv.5 的速度倍率。",
-      "pickupRadii": "拾取範圍 Lv.0～Lv.5 的像素半徑。"
+      "pickupRadii": "拾取範圍 Lv.0～Lv.5 的像素半徑。",
+      "lifestealPerLevel": "永久吸血每級增加的傷害轉換率。",
+      "mapDropCooldownReductionPerLevel": "地圖道具生成冷卻每級縮短比例。",
+      "weaponCooldownReductionPerLevel": "所有玩家武器冷卻每級縮短比例。",
+      "weaponAreaBonusPerLevel": "所有玩家武器射程或效果半徑每級增加比例。",
+      "weaponSizeBonusPerLevel": "武器放大每級增加的尺寸與碰撞倍率。",
+      "hpRegenBaseInterval": "永久生命回復 Lv.1 的基礎間隔秒數。",
+      "hpRegenIntervalReductionPerLevel": "生命回復每提升 1 級額外縮短的秒數。",
+      "hpRegenAmount": "每次生命回復恢復的 HP。",
+      "reviveScoreCost": "購買一次復活需要支付的分數。",
+      "reviveRestoreRatio": "復活時恢復的最大 HP 比例。",
+      "reviveInvulnerabilitySeconds": "復活後短暫無敵秒數。",
+      "stationaryDamageDelay": "原地不動多久後啟動瞄準器增傷。",
+      "stationaryDamageBonusPerLevel": "瞄準器每級增加的傷害倍率。",
+      "runExpWarmup": "持續移動多久後開始進入跑步獲得 EXP 狀態。",
+      "runExpBaseInterval": "跑步獲得 EXP 的基礎間隔秒數。",
+      "runExpIntervalReductionPerLevel": "跑步獲得 EXP 每提升 1 級額外縮短的秒數。",
+      "runExpPerTick": "跑步獲得 EXP 每次給予的經驗值。",
+      "fullHpCooldownReductionPerLevel": "滿血時每級縮短的武器冷卻比例。",
+      "statLevelValues": "新增永久能力的逐級實際參數。Debug UI 可直接修改每一級數值，遊戲公式會即時讀取。"
     },
     "startLevel": 1,
     "startExp": 0,
@@ -335,12 +370,12 @@
       2.5
     ],
     "pickupRadii": [
-      83,
-      112,
-      140,
-      169,
-      198,
-      226
+      100,
+      150,
+      200,
+      250,
+      300,
+      350
     ],
     "hpPerUpgrade": 15,
     "weaponRewardWeight": 1,
@@ -354,7 +389,147 @@
     "rewardMagnetMinimumGems": 8,
     "rewardDoubleXpMinimumRemainingSeconds": 25,
     "nextLevelDelayMs": 120,
-    "speedDescriptionTemplate": "移動速度由 {from}× 提高為 {to}×。"
+    "speedDescriptionTemplate": "移動速度由 {from}× 提高為 {to}×。",
+    "lifestealPerLevel": 0.012,
+    "mapDropCooldownReductionPerLevel": 0.05,
+    "weaponCooldownReductionPerLevel": 0.04,
+    "weaponAreaBonusPerLevel": 0.06,
+    "weaponSizeBonusPerLevel": 0.06,
+    "hpRegenBaseInterval": 5,
+    "hpRegenIntervalReductionPerLevel": 0.5,
+    "hpRegenAmount": 1,
+    "reviveScoreCost": 1000,
+    "reviveRestoreRatio": 0.5,
+    "reviveInvulnerabilitySeconds": 2.2,
+    "stationaryDamageDelay": 3,
+    "stationaryDamageBonusPerLevel": 0.15,
+    "runExpWarmup": 2,
+    "runExpBaseInterval": 2,
+    "runExpIntervalReductionPerLevel": 0.2,
+    "runExpPerTick": 1,
+    "fullHpCooldownReductionPerLevel": 0.07,
+    "statLevelValues": {
+      "lifesteal": {
+        "rate": [
+          0.012,
+          0.024,
+          0.036,
+          0.048,
+          0.06
+        ]
+      },
+      "dropCooldown": {
+        "reduction": [
+          0.05,
+          0.1,
+          0.15,
+          0.2,
+          0.25
+        ]
+      },
+      "weaponCooldown": {
+        "reduction": [
+          0.04,
+          0.08,
+          0.12,
+          0.16,
+          0.2
+        ]
+      },
+      "weaponArea": {
+        "bonus": [
+          0.06,
+          0.12,
+          0.18,
+          0.24,
+          0.3
+        ]
+      },
+      "weaponSize": {
+        "bonus": [
+          0.06,
+          0.12,
+          0.18,
+          0.24,
+          0.3
+        ]
+      },
+      "hpRegen": {
+        "interval": [
+          5.0,
+          4.5,
+          4.0,
+          3.5,
+          3.0
+        ],
+        "heal": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "revive": {
+        "scoreCost": [
+          1000
+        ],
+        "restoreRatio": [
+          0.5
+        ],
+        "invulnerabilitySeconds": [
+          2.2
+        ]
+      },
+      "focus": {
+        "stationaryDelay": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "damageBonus": [
+          0.15,
+          0.3,
+          0.45,
+          0.6,
+          0.75
+        ]
+      },
+      "runExp": {
+        "warmup": [
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "interval": [
+          2.0,
+          1.8,
+          1.6,
+          1.4,
+          1.2
+        ],
+        "expPerTick": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "fullHpCooldown": {
+        "reduction": [
+          0.07,
+          0.14,
+          0.21,
+          0.28,
+          0.35
+        ]
+      }
+    }
   },
   "enemyScaling": {
     "_comment": "敵人隨遊戲時間成長的全域公式；minute = elapsedSeconds / 60。",
@@ -389,7 +564,7 @@
     },
     "hound": {
       "image": "hound",
-      "hp": 40,
+      "hp": 50,
       "speed": 182,
       "damage": 9,
       "exp": 5,
@@ -400,7 +575,7 @@
     },
     "shell": {
       "image": "shell",
-      "hp": 200,
+      "hp": 300,
       "speed": 82,
       "damage": 13,
       "exp": 20,
@@ -411,7 +586,7 @@
     },
     "spitter": {
       "image": "spitter",
-      "hp": 100,
+      "hp": 150,
       "speed": 84,
       "damage": 8,
       "exp": 30,
@@ -422,7 +597,7 @@
     },
     "bloater": {
       "image": "bloater",
-      "hp": 150,
+      "hp": 200,
       "speed": 103,
       "damage": 10,
       "exp": 35,
@@ -433,7 +608,7 @@
     },
     "shadow": {
       "image": "shadow",
-      "hp": 150,
+      "hp": 200,
       "speed": 168,
       "damage": 18,
       "exp": 40,
@@ -444,7 +619,7 @@
     },
     "golem": {
       "image": "golem",
-      "hp": 1000,
+      "hp": 1500,
       "speed": 50,
       "damage": 27,
       "exp": 120,
@@ -455,7 +630,7 @@
     },
     "boss": {
       "image": "boss",
-      "hp": 7500,
+      "hp": 10000,
       "speed": 60,
       "damage": 35,
       "exp": 2000,
@@ -1571,7 +1746,7 @@
           "count": 1,
           "range": 430,
           "maxHits": 4,
-          "damage": 10,
+          "damage": 12,
           "castSpacingSeconds": 0,
           "jumpRange": 166,
           "stunSeconds": 0,
@@ -1580,7 +1755,7 @@
             "lineWidth": 4,
             "shadowBlur": 22,
             "segmentSteps": 4,
-            "jitter": 10,
+            "jitter": 12,
             "color": "#ffec74"
           }
         },
@@ -1591,7 +1766,7 @@
           "count": 1,
           "range": 450,
           "maxHits": 6,
-          "damage": 10,
+          "damage": 15,
           "castSpacingSeconds": 0,
           "jumpRange": 166,
           "stunSeconds": 0,
@@ -1600,7 +1775,7 @@
             "lineWidth": 5,
             "shadowBlur": 22,
             "segmentSteps": 4,
-            "jitter": 10,
+            "jitter": 12,
             "color": "#ffec74"
           }
         },
@@ -1611,7 +1786,7 @@
           "count": 1,
           "range": 460,
           "maxHits": 6,
-          "damage": 15,
+          "damage": 23,
           "castSpacingSeconds": 0,
           "jumpRange": 166,
           "stunSeconds": 0,
@@ -1619,8 +1794,8 @@
           "visual": {
             "lineWidth": 6,
             "shadowBlur": 22,
-            "segmentSteps": 4,
-            "jitter": 10,
+            "segmentSteps": 6,
+            "jitter": 12,
             "color": "#ffec74"
           }
         },
@@ -1631,7 +1806,7 @@
           "count": 1,
           "range": 460,
           "maxHits": 6,
-          "damage": 15,
+          "damage": 23,
           "castSpacingSeconds": 0,
           "jumpRange": 166,
           "stunSeconds": 0.15,
@@ -1639,8 +1814,8 @@
           "visual": {
             "lineWidth": 7,
             "shadowBlur": 22,
-            "segmentSteps": 4,
-            "jitter": 15,
+            "segmentSteps": 6,
+            "jitter": 12,
             "color": "#ffec74"
           }
         },
@@ -1651,7 +1826,7 @@
           "count": 2,
           "range": 460,
           "maxHits": 6,
-          "damage": 15,
+          "damage": 23,
           "castSpacingSeconds": 0.18,
           "jumpRange": 166,
           "stunSeconds": 0.15,
@@ -1659,7 +1834,7 @@
           "visual": {
             "lineWidth": 7,
             "shadowBlur": 22,
-            "segmentSteps": 4,
+            "segmentSteps": 6,
             "jitter": 15,
             "color": "#ffec74"
           }
@@ -2780,8 +2955,8 @@
           "_comment": "Lv.1",
           "cooldown": 5.2,
           "count": 1,
-          "minimumRange": 150,
-          "maximumRange": 550,
+          "minimumRange": 120,
+          "maximumRange": 500,
           "minimumSeparation": 210,
           "castSpacingSeconds": 0.42,
           "projectile": {
@@ -2830,8 +3005,8 @@
           "_comment": "Lv.2",
           "cooldown": 5.2,
           "count": 1,
-          "minimumRange": 150,
-          "maximumRange": 550,
+          "minimumRange": 120,
+          "maximumRange": 500,
           "minimumSeparation": 210,
           "castSpacingSeconds": 0.42,
           "projectile": {
@@ -2880,8 +3055,8 @@
           "_comment": "Lv.3",
           "cooldown": 5.2,
           "count": 1,
-          "minimumRange": 150,
-          "maximumRange": 550,
+          "minimumRange": 120,
+          "maximumRange": 500,
           "minimumSeparation": 210,
           "castSpacingSeconds": 0.42,
           "projectile": {
@@ -2930,8 +3105,8 @@
           "_comment": "Lv.4",
           "cooldown": 4.2,
           "count": 1,
-          "minimumRange": 150,
-          "maximumRange": 550,
+          "minimumRange": 120,
+          "maximumRange": 500,
           "minimumSeparation": 210,
           "castSpacingSeconds": 0.42,
           "projectile": {
@@ -2980,8 +3155,8 @@
           "_comment": "Lv.5",
           "cooldown": 4.2,
           "count": 2,
-          "minimumRange": 150,
-          "maximumRange": 550,
+          "minimumRange": 120,
+          "maximumRange": 500,
           "minimumSeparation": 210,
           "castSpacingSeconds": 0.42,
           "projectile": {
@@ -3197,14 +3372,6 @@
       "stunSeconds": 1,
       "waveRangeMultiplier": 0.65,
       "waveDuration": 0.6
-    },
-    "vampire": {
-      "name": "吸血契約",
-      "icon": "assets/item_vampire.png",
-      "color": "#f65081",
-      "description": "15 秒內擊殺敵人可回復生命。",
-      "duration": 15,
-      "healPercentPerKill": 0.003
     }
   },
   "stats": {
@@ -3226,10 +3393,72 @@
       "icon": "assets/stat_pickup.png",
       "color": "#a982ff",
       "description": "擴大 EXP 與拾取物吸引範圍。"
+    },
+    "lifesteal": {
+      "name": "嗜血轉化",
+      "icon": "assets/stat_lifesteal.png",
+      "color": "#ff4f7f",
+      "description": "敵人受到的傷害有 1.2% 轉為 HP；不足 1 HP 的部分會持續累積。 每級再 +1.2%。"
+    },
+    "dropCooldown": {
+      "name": "道具脈衝",
+      "icon": "assets/stat_drop_cooldown.png",
+      "color": "#58e7ff",
+      "description": "地圖道具出現冷卻 -5%。 每級再 -5%。"
+    },
+    "weaponCooldown": {
+      "name": "戰術超頻",
+      "icon": "assets/stat_weapon_cooldown.png",
+      "color": "#c47bff",
+      "description": "所有武器冷卻 -4%，包含基礎針彈與無人機。 每級再 -4%。"
+    },
+    "weaponArea": {
+      "name": "廣域增幅",
+      "icon": "assets/stat_weapon_area.png",
+      "color": "#ffd36b",
+      "description": "所有武器射程或效果半徑 +6%。 每級再 +6%。"
+    },
+    "weaponSize": {
+      "name": "實體增幅",
+      "icon": "assets/stat_weapon_size.png",
+      "color": "#ffb357",
+      "description": "武器視覺與判定都會放大 +6%。 每級再 +6%。"
+    },
+    "hpRegen": {
+      "name": "自癒強化",
+      "icon": "assets/stat_hp_regen.png",
+      "color": "#6ef2a4",
+      "description": "每隔一段時間恢復 1 HP。Lv.1 為每 5 秒一次，之後每級再縮短 0.5 秒。"
+    },
+    "revive": {
+      "name": "絕境逢生",
+      "icon": "assets/stat_revive.png",
+      "color": "#ffd86f",
+      "description": "HP 歸 0 時可用 1/2 Max HP 復活一次。 購買後會先離開升級池，消耗掉才會重新出現。",
+      "maxLevel": 1,
+      "scoreCost": 1000
+    },
+    "focus": {
+      "name": "瞄準器",
+      "icon": "assets/stat_focus.png",
+      "color": "#7ac8ff",
+      "description": "原地不動 3 秒後進入瞄準狀態並增加傷害；一旦移動就解除。 每級再 +15%。"
+    },
+    "runExp": {
+      "name": "動態感知",
+      "icon": "assets/stat_run_exp.png",
+      "color": "#d893ff",
+      "description": "連續跑步 2 秒後會週期性獲得 EXP。 Lv.1 為每 2 秒 +1 EXP，之後每級再縮短 0.2 秒。"
+    },
+    "fullHpCooldown": {
+      "name": "無損狂熱",
+      "icon": "assets/stat_fullhp_cooldown.png",
+      "color": "#ff7fae",
+      "description": "滿血狀態時，所有武器冷卻縮短。 每級再 -7%。"
     }
   },
   "drops": {
-    "_comment": "地圖隨機掉落物與 EXP 晶體的生成、吸附、移動和合併參數。",
+    "_comment": "地圖隨機掉落物與 EXP 晶體的生成、吸附、移動和合併參數。mapItemWeights 控制九種地圖道具的相對出現機率。",
     "firstDropDelay": 11,
     "nextDropDelayMin": 14,
     "nextDropDelayMax": 22,
@@ -3273,7 +3502,18 @@
     "mapAttractForceMin": 180,
     "mapAttractForceMax": 620,
     "mapVelocityLerpRate": 7,
-    "mapPickupOverlapReduction": 6
+    "mapPickupOverlapReduction": 6,
+    "mapItemWeights": {
+      "heal": 1,
+      "regen": 1,
+      "shield": 1,
+      "magnet": 1,
+      "freeze": 1,
+      "doublexp": 1,
+      "overload": 1,
+      "bomb": 1,
+      "push": 1
+    }
   },
   "visuals": {
     "_comment": "Canvas 繪製使用的尺寸、線寬、透明度、顏色、動畫速度與離屏快取設定。",
@@ -3924,7 +4164,19 @@
       "arrival": "抵達效果",
       "finalWave": "結束爆發",
       "wave": "震波",
-      "freezeSeconds": "凍結時間"
+      "freezeSeconds": "凍結時間",
+      "rate": "吸血比例",
+      "reduction": "冷卻縮短比例",
+      "bonus": "增幅比例",
+      "interval": "觸發間隔",
+      "heal": "每次回復量",
+      "scoreCost": "購買分數",
+      "restoreRatio": "復活生命比例",
+      "invulnerabilitySeconds": "復活無敵時間",
+      "stationaryDelay": "原地等待時間",
+      "damageBonus": "傷害加成",
+      "warmup": "跑步暖機時間",
+      "expPerTick": "每次獲得 EXP"
     },
     "parameterLabels": {
       "cooldown": "冷卻時間",
@@ -3971,10 +4223,55 @@
       "maxHits": "最大命中數",
       "jumpRange": "跳躍距離",
       "pull": "吸力",
-      "finalDamage": "結束傷害"
+      "finalDamage": "結束傷害",
+      "rate": "吸血比例",
+      "reduction": "冷卻縮短",
+      "bonus": "效果增幅",
+      "interval": "間隔秒數",
+      "heal": "回復 HP",
+      "scoreCost": "消耗分數",
+      "restoreRatio": "回復 Max HP",
+      "invulnerabilitySeconds": "無敵秒數",
+      "stationaryDelay": "啟動等待秒數",
+      "damageBonus": "傷害加成",
+      "warmup": "連續跑步秒數",
+      "expPerTick": "每次 EXP"
     },
     "parameterExcludedKeys": [
       "level"
+    ],
+    "statParameterDescriptions": {
+      "lifesteal.rate": "敵人實際受到傷害後，轉換為玩家 HP 的比例。",
+      "dropCooldown.reduction": "地圖道具生成冷卻的縮短比例。",
+      "weaponCooldown.reduction": "所有武器的永久冷卻縮短比例。",
+      "weaponArea.bonus": "所有武器射程與效果半徑的增加比例。",
+      "weaponSize.bonus": "武器視覺尺寸與碰撞判定的增加比例。",
+      "hpRegen.interval": "永久生命回復每次觸發的間隔秒數。",
+      "hpRegen.heal": "永久生命回復每次恢復的 HP。",
+      "revive.scoreCost": "三選一購買復活時扣除的分數。",
+      "revive.restoreRatio": "復活時恢復的 Max HP 比例。",
+      "revive.invulnerabilitySeconds": "復活後的無敵秒數。",
+      "focus.stationaryDelay": "玩家必須原地不動多久，才啟動瞄準器增傷。",
+      "focus.damageBonus": "瞄準器啟動後增加的傷害比例。",
+      "runExp.warmup": "玩家必須連續移動多久，才開始跑步 EXP 計時。",
+      "runExp.interval": "跑步狀態下每次增加 EXP 的間隔秒數。",
+      "runExp.expPerTick": "跑步 EXP 每次增加的數值。",
+      "fullHpCooldown.reduction": "玩家滿血時，所有武器冷卻縮短的比例。"
+    },
+    "statPercentParameters": [
+      "lifesteal.rate",
+      "dropCooldown.reduction",
+      "weaponCooldown.reduction",
+      "weaponArea.bonus",
+      "weaponSize.bonus",
+      "revive.restoreRatio",
+      "focus.damageBonus",
+      "fullHpCooldown.reduction"
+    ],
+    "statIntegerParameters": [
+      "hpRegen.heal",
+      "revive.scoreCost",
+      "runExp.expPerTick"
     ]
   },
   "text": {
@@ -3992,8 +4289,8 @@
     "startEyebrow": "SURVIVOR-LIKE ACTION · R15 CONFIG-DRIVEN",
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
-    "startLead": "在血月廢墟中撐到 15:00，深淵暴君才會降臨；擊敗 Boss 後才能結束這場戰鬥。",
-    "startBuildNote": "R15：遊戲數值與顯示文字改由 game-config.json 控制",
+    "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
+    "startBuildNote": "R25：右下角永久升級列、ESC 武器與永久升級總覽、Boss EXP 直接入帳",
     "features": [
       {
         "value": "12",
@@ -4034,17 +4331,17 @@
     "endLoseEyebrow": "RUN ENDED",
     "endWinTitle": "深淵暴君已殞落",
     "endLoseTitle": "殘響消散",
-    "endWinCopy": "你撐過十五分鐘，並親手終結了深淵暴君。",
+    "endWinCopy": "你撐過十五分鐘，並在三分鐘限時內終結了深淵暴君。",
     "endLoseCopy": "你倒在血月廢墟中，但殘響仍等待下一次甦醒。",
     "resultTimeLabel": "存活",
     "resultLevelLabel": "等級",
     "resultKillsLabel": "擊殺",
     "resultWeaponsLabel": "武器",
     "restartEndButton": "再次進入廢墟",
-    "startToast": "血月升起。15:00 時深淵暴君將會降臨",
+    "startToast": "血月升起。15:00 後將進入 3 分鐘 Boss 決戰",
     "bossKilledToast": "深淵暴君已被擊殺",
-    "bossArrivalToast": "15:00 — 深淵暴君降臨，擊敗牠才能結束",
-    "bossArrivalDebugToast": "DEBUG — 已進入深淵暴君階段",
+    "bossArrivalToast": "15:00 — 深淵暴君降臨，限時 3 分鐘",
+    "bossArrivalDebugToast": "DEBUG — 已進入 3 分鐘 Boss 決戰",
     "emptyWeaponSlot": "EMPTY",
     "rewardCategoryWeapon": "武器",
     "rewardCategoryStat": "能力",
@@ -4055,7 +4352,7 @@
     "debug": {
       "eyebrow": "DEBUG LAB",
       "title": "戰鬥實驗室",
-      "copy": "以武器圖示選擇項目；可調整等級、切換永久效果，並直接修改目前等級的數值。參數修改只作用於本次執行，重新整理後會回復 JSON。",
+      "copy": "選擇武器或永久能力後，可直接調整等級；新增能力可編輯 Lv.1～Lv.5 的實際參數。所有修改只作用於本次執行，重新整理後會回復 JSON。",
       "selectLabel": "升級項目",
       "upgradeOne": "升級 +1",
       "upgradeMax": "升至 Lv.5",
@@ -4065,7 +4362,7 @@
       "weaponGroup": "武器（{count}/{max}）",
       "statGroup": "永久能力",
       "option": "{name}　Lv.{level}/{max}",
-      "defaultStatus": "選擇武器圖示後可調整等級與數值。",
+      "defaultStatus": "選擇永久能力後，可調整等級並修改每一級的實際參數。",
       "alreadyMax": "{name} 已達 Lv.{max}",
       "weaponSlotsFull": "武器欄已滿，無法新增第 {slot} 種武器",
       "adjusted": "{name} 已調整為 Lv.{level}",
@@ -4077,7 +4374,7 @@
       "quickSection": "快速配置",
       "effectSection": "永久測試效果",
       "parameterSection": "目前等級參數",
-      "parameterHint": "輸入後立即寫入執行中的設定；持續型武器通常立刻生效，投射物與範圍效果會在下一次生成時套用。",
+      "parameterHint": "新增永久能力會顯示 Lv.1～Lv.5 的逐級參數；百分比欄位以 15 表示 15%。修改後立即套用於本次遊戲。",
       "downgradeOne": "降級 -1",
       "removeWeapon": "移除武器",
       "allWeaponsMax": "一鍵取得 12 種武器＋Lv.5",
@@ -4105,12 +4402,24 @@
       "effectEnabled": "{name} 已設為永久開啟。",
       "effectDisabled": "{name} 已關閉。",
       "parameterChanged": "{name}：{path} 已調整為 {value}",
-      "noParameters": "此項目沒有可調整的數值參數。"
+      "noParameters": "此項目沒有可調整的數值參數。",
+      "reviveOwned": "已持有一次復活",
+      "reviveNotOwned": "未持有復活",
+      "grantRevive": "取得復活",
+      "consumeRevive": "模擬消耗復活",
+      "reviveConsumed": "復活已模擬消耗，三選一會重新允許出現復活。",
+      "scorePlus1000": "分數調整 +1000",
+      "scorePlusApplied": "Debug 分數已增加 1000，目前總分為 {score}",
+      "hpToOne": "HP 設為 1",
+      "hpToMax": "HP 補滿",
+      "expPlus100": "EXP +100",
+      "runtimeEffect": "目前效果：{effect}",
+      "noRuntimeEffect": "目前未啟用；請先提升等級。"
     },
     "configLoadErrorTitle": "無法載入 game-config.json",
     "configLoadErrorCopy": "請確認 game-config.json 與 game.js 位於同一資料夾，並透過 GitHub Pages 或本機 HTTP 伺服器開啟。瀏覽器直接以 file:// 開啟時通常會封鎖 JSON 讀取。",
     "configLoadErrorDetail": "錯誤：{error}",
-    "rewardCategoryBoost": "提升",
+    "rewardCategoryBoost": "永久能力",
     "rewardItemImmediate": "立即生效",
     "rewardNewWeapon": "取得新武器",
     "rewardLevelTransition": "Lv.{from} → Lv.{to}",
@@ -4126,7 +4435,19 @@
     "configPickerCopy": "瀏覽器阻擋了本機 JSON 讀取。請選擇同資料夾內的 game-config.json，遊戲會立即重新載入。",
     "configPickerInvalid": "選取的檔案不是有效的 JSON：{error}",
     "scoreLabel": "分數",
-    "resultScoreLabel": "總分"
+    "resultScoreLabel": "總分",
+    "bossTimerLabel": "BOSS 戰鬥倒數",
+    "bossTimeoutEyebrow": "TIME LIMIT EXPIRED",
+    "bossTimeoutTitle": "討伐失敗",
+    "bossTimeoutCopy": "Boss 戰鬥的三分鐘已耗盡，深淵暴君仍然存活。",
+    "bossTimeoutToast": "3 分鐘耗盡，Boss 討伐失敗",
+    "pauseWeaponsTitle": "目前武器",
+    "pausePassivesTitle": "永久升級",
+    "pauseWeaponsCount": "{count} / {max}",
+    "pausePassivesCount": "已取得 {count} 項",
+    "pauseEmptyWeapons": "尚未取得額外武器。",
+    "pauseEmptyPassives": "尚未取得永久升級。",
+    "pauseLevel": "Lv.{level}"
   },
   "editingGuide": {
     "_comment": "編輯指南；此區只供閱讀，遊戲不會拿來計算。",
@@ -4163,10 +4484,10 @@
     "leaderboardRetryDelayMs": 900
   },
   "scoring": {
-    "_comment": "排行榜總分公式：總 EXP × expPointValue－超出 Boss 出場時間的完整秒數 × overtimePenaltyPerSecond－結算等級 × levelPenaltyPerLevel。",
-    "expPointValue": 1,
+    "_comment": "總分公式：結算等級 × levelPointsPerLevel＋擊敗 Boss 時剩餘完整秒數 × bossRemainingPointPerSecond。Boss 於 15:00 出現，限時 180 秒。",
     "bossStartSeconds": 900,
-    "overtimePenaltyPerSecond": 20,
-    "levelPenaltyPerLevel": 100
+    "bossFightLimitSeconds": 180,
+    "levelPointsPerLevel": 100,
+    "bossRemainingPointPerSecond": 30
   }
 }
