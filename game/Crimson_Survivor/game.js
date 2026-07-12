@@ -405,7 +405,7 @@ function resetGame(){
   game={
     elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,totalExp:0,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,won:false,scoreSubmitted:false,scoreRunId:'',scoreAdjustment:0,
     shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,bossFightStartedAt:null,bossTimedOut:false,
-    player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0,lifesteal:0,dropCooldown:0,weaponCooldown:0,weaponArea:0,weaponSize:0,hpRegen:0,revive:0,focus:0,runExp:0,fullHpCooldown:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay,lifestealRemainder:0,regenTimer:Number(PROG.hpRegenBaseInterval)||5,stationaryTime:0,runExpWarmup:0,runExpTimer:Number(PROG.runExpBaseInterval)||2},
+    player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,vx:0,vy:0,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0,lifesteal:0,dropCooldown:0,weaponCooldown:0,weaponArea:0,weaponSize:0,hpRegen:0,revive:0,focus:0,runExp:0,fullHpCooldown:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay,lifestealRemainder:0,regenTimer:Number(PROG.hpRegenBaseInterval)||5,stationaryTime:0,runExpWarmup:0,runExpTimer:Number(PROG.runExpBaseInterval)||2},
     enemies:[],projectiles:[],enemyShots:[],gems:[],mapDrops:[],particles:[],texts:[],waves:[],beams:[],meteors:[],gravityOrbs:[],zones:[],mines:[],wells:[],boomerangs:[],lightning:[],drones:[],delayedCasts:[],effects:{regen:0,shield:0,freeze:0,doublexp:0,overload:0},
     pendingLevels:0,rewardChoices:[],camera:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY},pattern:null,globalMagnet:0,nextMapDrop:DROP.firstDropDelay*mapDropCooldownMultiplier(),
     introFlags:{},roleTimers:{...SPAWN.roleTimerStarts},wavePackTimer:SPAWN.mixedWaveTimerStart,spawnCounts:{rat:0,hound:0,shell:0,spitter:0,bloater:0,shadow:0,golem:0,boss:0},openingGrace:SPAWN.openingGraceSeconds,hudTimer:0,
@@ -1462,7 +1462,7 @@ function update(dt){
   let dx=keyX+touch.x,dy=keyY+touch.y,moveScale=1;const manual=Math.hypot(dx,dy)>PLAYER_CFG.keyboardMouseDeadZone;if(manual)mouse.active=false;
   else if(mouse.active){const mx=mouse.targetX-p.x,my=mouse.targetY-p.y,md=Math.hypot(mx,my);if(md<PLAYER_CFG.mouseArrivalDistance){mouse.active=false;dx=dy=0}else{dx=mx/md;dy=my/md;moveScale=clamp(md/PLAYER_CFG.mouseSlowDistance,PLAYER_CFG.mouseMinimumMoveScale,1)}}
   const len=Math.hypot(dx,dy),isMoving=len>PLAYER_CFG.keyboardMouseDeadZone;if(isMoving){dx/=Math.max(1,len);dy/=Math.max(1,len);p.angle=Math.atan2(dy,dx)}
-  const speed=p.baseSpeed*SPEED_MULT[p.stats.speed];p.x+=dx*speed*moveScale*dt;p.y+=dy*speed*moveScale*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
+  const speed=p.baseSpeed*SPEED_MULT[p.stats.speed];p.vx=dx*speed*moveScale;p.vy=dy*speed*moveScale;p.x+=p.vx*dt;p.y+=p.vy*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
   updatePassiveBonuses(dt,isMoving);
   updateSpawns(dt);if(game.bossSpawned&&bossFightRemainingExact(game.elapsed)<=0){game.bossTimedOut=true;toast(TEXT.bossTimeoutToast);endGame(false);return}updateEnemies(dt);rebuildEnemySpatial();game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;refreshDenseTargetCache()}
   updateWeapons(dt);updateDelayedCasts(dt);updateProjectiles(dt);updateEnemyShots(dt);updateSpecials(dt);updateGems(dt);updateMapDrops(dt);updateParticles(dt);
@@ -1588,7 +1588,28 @@ function updateSpawns(dt){
 }
 function spawnEnemy(type,near){
   const def=ENEMIES[type],player=game.player;let x,y;if(game.spawnCounts)game.spawnCounts[type]=(game.spawnCounts[type]||0)+1;
-  if(near){const angle=Math.random()*TAU,min=near==='intro'?SPAWN.introSpawnDistanceMin:SPAWN.nearSpawnDistanceMin,max=near==='intro'?SPAWN.introSpawnDistanceMax:SPAWN.nearSpawnDistanceMax,distance=rand(min,max);x=player.x+Math.cos(angle)*distance;y=player.y+Math.sin(angle)*distance}
+if(near){
+  const angle=Math.random()*TAU;
+
+  let min;
+  let max;
+
+  if(near==='intro'){
+    min=SPAWN.introSpawnDistanceMin;
+    max=SPAWN.introSpawnDistanceMax;
+  }else if(near==='boss'){
+    min=BOSS.summon.spawnDistanceMin;
+    max=BOSS.summon.spawnDistanceMax;
+  }else{
+    min=SPAWN.nearSpawnDistanceMin;
+    max=SPAWN.nearSpawnDistanceMax;
+  }
+
+  const distance=rand(min,max);
+
+  x=player.x+Math.cos(angle)*distance;
+  y=player.y+Math.sin(angle)*distance;
+}
   else{const angle=Math.random()*TAU,distance=Math.max(W,H)*SPAWN.normalSpawnDistanceScreenMultiplier+rand(SPAWN.normalSpawnExtraMin,SPAWN.normalSpawnExtraMax);x=player.x+Math.cos(angle)*distance;y=player.y+Math.sin(angle)*distance}
   const multiplier=type==='boss'?1:hpMult(game.elapsed),trackingLag=type==='hound'||type==='shadow',init=AI.initial,track=AI[type]||AI.hound;
   game.enemies.push({type,x,y,r:def.r,hp:def.hp*multiplier,maxHp:def.hp*multiplier,speed:def.speed*speedMult(game.elapsed),damage:def.damage*dmgMult(game.elapsed),exp:def.exp,hitFlash:0,slow:0,slowAmt:0,freeze:0,stun:0,burn:0,burnDps:0,acidTick:0,ai:rand(init.aiMin,init.aiMax),state:'move',charge:0,shot:type==='boss'?BOSS.initialShotTimer:rand(init.shotMin,init.shotMax),dash:rand(init.dashMin,init.dashMax),vx:0,vy:0,bossStage:0,bossNovaTimer:type==='boss'?BOSS.initialNovaTimer:0,bossNovaCharge:0,bossBurstTimer:type==='boss'?BOSS.initialBurstTimer:0,bossBurstShots:0,bossBurstGap:0,bossBurstAngle:0,bossRingOffset:rand(0,TAU),variant:Math.random(),flip:Math.random()<init.flipChance?-1:1,trackingLag,awareness:trackingLag?rand(track.awarenessMin,track.awarenessMax):0,retargetTimer:trackingLag?rand(init.retargetMin,init.retargetMax):0,targetX:player.x,targetY:player.y,searchPause:0,dead:false});
@@ -1614,11 +1635,71 @@ function updateEnemies(dt){
     if(e.type==='boss'){
       const hpRatio=clamp(e.hp/e.maxHp,0,1),phase=hpRatio>BOSS.phaseThresholds[0]?1:hpRatio>BOSS.phaseThresholds[1]?2:hpRatio>BOSS.phaseThresholds[2]?3:4,index=phase-1,aim=Math.atan2(playerDy,playerDx),fan=BOSS.fan,burst=BOSS.burst,nova=BOSS.nova;
       e.shot-=dt;if(e.shot<=0){const count=fan.countByPhase[index],step=fan.stepByPhase[index],center=(count-1)/2;for(let i=0;i<count;i++){const angle=aim+(i-center)*step;spawnEnemyShot(e.x,e.y,Math.cos(angle),Math.sin(angle),fan.damageBase+phase*fan.damagePerPhase,fan.speedBase+phase*fan.speedPerPhase,'bossBolt')}e.shot=fan.cooldownByPhase[index]}
-      if(e.bossBurstShots>0){e.bossBurstGap-=dt;if(e.bossBurstGap<=0){const spread=e.bossBurstShots%2===0?burst.spreadAlternating:-burst.spreadAlternating,angle=e.bossBurstAngle+spread;spawnEnemyShot(e.x,e.y,Math.cos(angle),Math.sin(angle),burst.damageBase+phase*burst.damagePerPhase,burst.speedBase+phase*burst.speedPerPhase,'bossSpear');e.bossBurstShots--;e.bossBurstGap=burst.shotGap}}
-      else{e.bossBurstTimer-=dt;if(e.bossBurstTimer<=0){e.bossBurstAngle=aim;e.bossBurstShots=burst.shotsByPhase[index];e.bossBurstGap=burst.initialGap;e.bossBurstTimer=burst.cooldownByPhase[index];addWave(e.x,e.y,burst.warningStartRadius,burst.warningEndRadius,burst.warningDuration,burst.warningColor)}}
+if(e.bossBurstShots>0){
+  e.bossBurstGap-=dt;
+
+  if(e.bossBurstGap<=0){
+    const spearSpeed=
+      burst.speedBase+
+      phase*burst.speedPerPhase;
+
+    /*
+      每一發射出前，重新根據：
+      1. 玩家最新座標
+      2. 玩家目前移動速度
+      3. 長槍飛行速度
+      計算攔截點。
+    */
+    const predictedAngle=predictiveAimAngle(
+      e.x,
+      e.y,
+      p,
+      spearSpeed,
+      burst.maxLeadSeconds??1.15,
+      burst.predictionStrength??0.9
+    );
+
+    // 保留原本左右交錯的槍線
+    const spread=e.bossBurstShots%2===0
+      ? burst.spreadAlternating
+      : -burst.spreadAlternating;
+
+    const angle=predictedAngle+spread;
+
+    spawnEnemyShot(
+      e.x,
+      e.y,
+      Math.cos(angle),
+      Math.sin(angle),
+      burst.damageBase+phase*burst.damagePerPhase,
+      spearSpeed,
+      'bossSpear'
+    );
+
+    e.bossBurstShots--;
+    e.bossBurstGap=burst.shotGap;
+  }
+}else{
+  e.bossBurstTimer-=dt;
+
+  if(e.bossBurstTimer<=0){
+    e.bossBurstShots=burst.shotsByPhase[index];
+    e.bossBurstGap=burst.initialGap;
+    e.bossBurstTimer=burst.cooldownByPhase[index];
+
+    addWave(
+      e.x,
+      e.y,
+      burst.warningStartRadius,
+      burst.warningEndRadius,
+      burst.warningDuration,
+      burst.warningColor
+    );
+  }
+}
       if(e.bossNovaCharge>0){e.bossNovaCharge-=dt;if(e.bossNovaCharge<=0){const count=nova.countByPhase[index];e.bossRingOffset+=nova.ringRotationPerCast;for(let i=0;i<count;i++){const angle=e.bossRingOffset+i/count*TAU;spawnEnemyShot(e.x,e.y,Math.cos(angle),Math.sin(angle),nova.damageBase+phase*nova.damagePerPhase,nova.speedBase+phase*nova.speedPerPhase,'bossOrb')}sound.boom()}}
       else{e.bossNovaTimer-=dt;if(e.bossNovaTimer<=0){e.bossNovaCharge=nova.chargeSeconds;e.bossNovaTimer=nova.cooldownByPhase[index];addWave(e.x,e.y,nova.warningStartRadius,nova.warningEndRadius,nova.warningDuration,nova.warningColor)}}
-      const stage=Math.floor((1-hpRatio)*BOSS.summon.stageCount);if(stage>e.bossStage){e.bossStage=stage;for(let i=0;i<BOSS.summon.rats;i++)spawnEnemy('rat',true);for(let i=0;i<BOSS.summon.hounds;i++)spawnEnemy('hound',true);addWave(e.x,e.y,BOSS.summon.waveStartRadius,BOSS.summon.waveEndRadius,BOSS.summon.waveDuration,BOSS.summon.waveColor);sound.boom()}
+      const stage=Math.floor((1-hpRatio)*BOSS.summon.stageCount);if(stage>e.bossStage){e.bossStage=stage;for(let i=0;i<BOSS.summon.rats;i++)spawnEnemy('rat','boss');for(let i=0;i<BOSS.summon.hounds;i++)spawnEnemy('hound','boss');addWave(e.x,e.y,BOSS.summon.waveStartRadius,BOSS.summon.waveEndRadius,BOSS.summon.waveDuration,BOSS.summon.waveColor);sound.boom()}
     }
     const contact=e.r+p.r;if(playerDist<contact){hurtPlayer(e.damage);e.x-=pxn*PLAYER_CFG.contactPushDistance;e.y-=pyn*PLAYER_CFG.contactPushDistance}
   }
@@ -1742,6 +1823,92 @@ function updateProjectiles(dt){
     }
   }
   compactInPlace(game.projectiles,projectile=>projectile.age<projectile.maxRange&&Math.abs(projectile.x-game.player.x)<SYS.projectileDespawnDistance&&Math.abs(projectile.y-game.player.y)<SYS.projectileDespawnDistance,recycleProjectile);
+}
+function predictiveAimAngle(
+  shooterX,
+  shooterY,
+  target,
+  projectileSpeed,
+  maxLeadSeconds=1.15,
+  predictionStrength=0.9
+){
+  // 射擊者到玩家的相對位置
+  const rx=target.x-shooterX;
+  const ry=target.y-shooterY;
+
+  // 玩家目前的實際移動速度
+  const vx=Number(target.vx)||0;
+  const vy=Number(target.vy)||0;
+
+  const shotSpeed=Math.max(1,projectileSpeed);
+
+  /*
+    求解：
+    |玩家相對位置 + 玩家速度 × t| = 投射物速度 × t
+
+    展開後為：
+    a·t² + b·t + c = 0
+  */
+  const a=vx*vx+vy*vy-shotSpeed*shotSpeed;
+  const b=2*(rx*vx+ry*vy);
+  const c=rx*rx+ry*ry;
+
+  let interceptTime=0;
+
+  // 接近一次方程式的特殊情況
+  if(Math.abs(a)<0.000001){
+    if(Math.abs(b)>0.000001){
+      const candidate=-c/b;
+
+      if(candidate>0){
+        interceptTime=candidate;
+      }
+    }
+  }else{
+    const discriminant=b*b-4*a*c;
+
+    if(discriminant>=0){
+      const root=Math.sqrt(discriminant);
+      const t1=(-b-root)/(2*a);
+      const t2=(-b+root)/(2*a);
+
+      // 只選擇未來時間，不能選負數
+      if(t1>0&&t2>0){
+        interceptTime=Math.min(t1,t2);
+      }else if(t1>0){
+        interceptTime=t1;
+      }else if(t2>0){
+        interceptTime=t2;
+      }
+    }
+  }
+
+  /*
+    玩家移動速度高於長槍，而且正在遠離 Boss 時，
+    可能不存在真正的攔截解。
+
+    此時改用「目前距離 ÷ 子彈速度」估算。
+  */
+  if(!Number.isFinite(interceptTime)||interceptTime<=0){
+    interceptTime=Math.sqrt(c)/shotSpeed;
+  }
+
+  // 避免距離太遠時預測到過於誇張的位置
+  interceptTime=Math.min(
+    interceptTime,
+    Math.max(0,maxLeadSeconds)
+  );
+
+  // 允許只套用部分預測，降低 Boss 的必中感
+  interceptTime*=clamp(predictionStrength,0,1);
+
+  const predictedX=target.x+vx*interceptTime;
+  const predictedY=target.y+vy*interceptTime;
+
+  return Math.atan2(
+    predictedY-shooterY,
+    predictedX-shooterX
+  );
 }
 
 function spawnEnemyShot(x,y,nx,ny,damage,speed,type){

@@ -96,7 +96,7 @@
   },
   "audio": {
     "_comment": "Web Audio 音效參數。frequency 為 Hz、duration 為秒、volume 為增益。",
-    "enabledByDefault": true,
+    "enabledByDefault": false,
     "minimumFrequency": 30,
     "minimumGain": 0.0001,
     "warmupGain": 1e-05,
@@ -976,9 +976,9 @@
       0.5,
       0.25
     ],
-    "initialShotTimer": 2.0,
-    "initialNovaTimer": 4.0,
-    "initialBurstTimer": 6.0,
+    "initialShotTimer": 3.6,
+    "initialNovaTimer": 8.2,
+    "initialBurstTimer": 7.0,
     "fan": {
       "countByPhase": [
         5,
@@ -1010,7 +1010,9 @@
         25,
         40
       ],
-      "spreadAlternating": 0.035,
+      "spreadAlternating": 0.025,
+      "predictionStrength": 0.80,
+      "maxLeadSeconds": 1.10,
       "damageBase": 24,
       "damagePerPhase": 2,
       "speedBase": 385,
@@ -1018,10 +1020,10 @@
       "shotGap": 0.17,
       "initialGap": 0.28,
       "cooldownByPhase": [
-        7.0,
+        8.2,
+        7.3,
         6.5,
-        6.0,
-        5.0
+        5.5
       ],
       "warningStartRadius": 18,
       "warningEndRadius": 120,
@@ -1042,10 +1044,10 @@
       "speedPerPhase": 8,
       "chargeSeconds": 0.9,
       "cooldownByPhase": [
-        8.2,
-        7.3,
+        7.0,
         6.5,
-        5.5
+        6.0,
+        5.0
       ],
       "warningStartRadius": 20,
       "warningEndRadius": 210,
@@ -1056,6 +1058,8 @@
       "stageCount": 20,
       "rats": 10,
       "hounds": 5,
+      "spawnDistanceMin": 300,
+      "spawnDistanceMax": 550,
       "waveStartRadius": 30,
       "waveEndRadius": 350,
       "waveDuration": 0.7,
@@ -4290,7 +4294,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "R25：右下角永久升級列、ESC 武器與永久升級總覽、Boss EXP 直接入帳",
+    "startBuildNote": "",
     "features": [
       {
         "value": "12",
