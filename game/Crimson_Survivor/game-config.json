@@ -2,8 +2,8 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R32 PERFORMANCE GRID + RENDER CACHES",
-    "configVersion": 15,
+    "build": "R34 PERFORMANCE LOG EXPORT FIX",
+    "configVersion": 18,
     "language": "zh-Hant"
   },
   "system": {
@@ -238,7 +238,15 @@
       "particleSizeQuantization": "粒子圖片快取的尺寸量化單位。",
       "bulletTrailLengthQuantization": "子彈拖尾圖片快取的長度量化單位。",
       "enemyShotRotationFrames": "旋轉敵方子彈的預快取角度影格數。",
-      "enemyShotPulseFrames": "脈動敵方子彈的預快取影格數。"
+      "enemyShotPulseFrames": "脈動敵方子彈的預快取影格數。",
+      "profilerFrameBudgetMs": "輕微掉幀統計門檻；略高於 60Hz 的 16.67ms，避免正常 VSync 抖動被全部計為長幀。",
+      "profilerSlowFrameThresholdMs": "一般卡頓幀門檻。",
+      "profilerLongFrameThresholdMs": "明顯卡頓幀統計門檻。",
+      "profilerSevereFrameThresholdMs": "嚴重卡頓門檻；超過此值時另外寫入 long_frame 事件。",
+      "profilerCriticalFrameThresholdMs": "極端卡頓幀門檻。",
+      "profilerSuspensionThresholdMs": "超過此間隔視為分頁切換或系統暫停，不納入 FPS 平均。",
+      "profilerLogMaxSamples": "JSON Log 最多保留的每秒取樣筆數。",
+      "profilerLogMaxEvents": "JSON Log 最多保留的長幀與瀏覽器事件數。"
     },
     "spatialCellSize": 128,
     "maxEnemyRadius": 70,
@@ -287,17 +295,25 @@
     "spatialKeyOffset": 32768,
     "spatialKeyMultiplier": 65536,
     "profilerEnabled": true,
-    "spatialGridWidth": 50,
-    "spatialGridHeight": 50,
+    "spatialGridWidth": 100,
+    "spatialGridHeight": 100,
     "profilerVisibleByDefault": false,
-    "profilerSampleIntervalMs": 500,
+    "profilerSampleIntervalMs": 1000,
     "weaponSearchRangeMultiplier": 1.1,
     "lightningPathFrames": 5,
     "lightningPathFrameRate": 30,
     "particleSizeQuantization": 0.5,
     "bulletTrailLengthQuantization": 1,
     "enemyShotRotationFrames": 16,
-    "enemyShotPulseFrames": 8
+    "enemyShotPulseFrames": 8,
+    "profilerFrameBudgetMs": 17.5,
+    "profilerSlowFrameThresholdMs": 25,
+    "profilerLongFrameThresholdMs": 33.34,
+    "profilerSevereFrameThresholdMs": 50,
+    "profilerCriticalFrameThresholdMs": 100,
+    "profilerSuspensionThresholdMs": 1000,
+    "profilerLogMaxSamples": 7200,
+    "profilerLogMaxEvents": 2000
   },
   "player": {
     "_comment": "玩家初始 HP、移動、滑鼠控制、鏡頭跟隨、受傷無敵與接觸推離參數。",
@@ -4668,7 +4684,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "",
+    "startBuildNote": "R34：效能 Log 下載修正／開啟與複製備援",
     "features": [
       {
         "value": "12",
@@ -4687,7 +4703,7 @@
         "label": "升級三選一"
       }
     ],
-    "controlsHtml": "<span><kbd>WASD</kbd>／方向鍵／滑鼠移動</span><span><kbd>ESC</kbd> 暫停</span>",
+    "controlsHtml": "<span><kbd>WASD</kbd>／方向鍵／滑鼠移動</span><span><kbd>ESC</kbd> 暫停</span><span>暫停畫面可開啟 Debug 升級</span>",
     "startButton": "進入血月廢墟",
     "soundOn": "音效：開啟",
     "soundOff": "音效：關閉",
@@ -4892,10 +4908,10 @@
     "pickupSeconds": 15,
     "rings": 10,
     "gemsPerRing": 20,
-    "spreadRadiusMin": 180,
-    "spreadRadiusMax": 800,
+    "spreadRadiusMin": 200,
+    "spreadRadiusMax": 750,
     "pickupDelaySeconds": 2,
-    "radiusJitter": 32,
+    "radiusJitter": 100,
     "angleJitterRadians": 0.08,
     "ejectionSeconds": 6,
     "flightDurationMin": 0.7,

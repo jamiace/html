@@ -1,4 +1,4 @@
-/* BUILD R32 - PERFORMANCE GRID + RENDER CACHES - 2026-07-14 */
+/* BUILD R33 - REAL FRAME PROFILER + EXPORTABLE PERFORMANCE LOG - 2026-07-14 */
 (async () => {
 'use strict';
 
@@ -263,7 +263,7 @@ const ENEMY_PHASES = SPAWN.phases;
 const ROLE_INTERVALS = SPAWN.roleIntervals;
 
 let state='menu', last=performance.now(), DPR=1, W=0,H=0;
-let game=null, debugReturnState='paused', debugUI=null, pauseDebugButton=null, pauseFpsButton=null, pauseProfilerButton=null, fpsUI=null, profilerUI=null, vignetteCache=null, debugSecretBuffer='', debugSecretLast=0;
+let game=null, debugReturnState='paused', debugUI=null, pauseDebugButton=null, pauseFpsButton=null, pauseProfilerButton=null, pausePerfRecordButton=null, pausePerfDownloadButton=null, pausePerfOpenButton=null, pausePerfCopyButton=null, pausePerfClearButton=null, endPerfDownloadButton=null, endPerfOpenButton=null, fpsUI=null, profilerUI=null, vignetteCache=null, debugSecretBuffer='', debugSecretLast=0;
 let leaderboardRequestToken=0;
 const keys={}; const touch={x:0,y:0,active:false}; const mouse={active:false,held:false,targetX:0,targetY:0};
 
@@ -440,76 +440,305 @@ function updateFPSDisplay(now){
   fpsMonitor.frames++;
   const elapsed=now-fpsMonitor.lastSample;
   if(elapsed>=PERF.fpsSampleIntervalMs){
-    const instant=fpsMonitor.frames*SYS.millisecondsPerSecond/elapsed;
-    fpsMonitor.value=fpsMonitor.value?fpsMonitor.value*PERF.fpsSmoothingOld+instant*PERF.fpsSmoothingNew:instant;
+    const actual=fpsMonitor.frames*SYS.millisecondsPerSecond/Math.max(1,elapsed);
+    fpsMonitor.value=fpsMonitor.value?fpsMonitor.value*PERF.fpsSmoothingOld+actual*PERF.fpsSmoothingNew:actual;
     if(fpsUI)fpsUI.textContent=formatText(TEXT.fpsValue,{value:Math.round(fpsMonitor.value)});
     fpsMonitor.frames=0;fpsMonitor.lastSample=now;
   }
 }
 
-const profiler={
-  enabled:PERF.profilerEnabled!==false,
-  visible:!!PERF.profilerVisibleByDefault,
-  frameStart:0,
-  current:Object.create(null),
-  counters:Object.create(null),
-  sums:Object.create(null),
-  counterSums:Object.create(null),
-  frames:0,
-  sampleStart:performance.now(),
-  last:Object.create(null),
-  lastCounters:Object.create(null),
-  frameMs:0,
-  maxFrameMs:0
+const PERF_LONG_16=Number(PERF.profilerFrameBudgetMs)||16.67;
+const PERF_LONG_25=Number(PERF.profilerSlowFrameThresholdMs)||25;
+const PERF_LONG_33=Number(PERF.profilerLongFrameThresholdMs)||33.34;
+const PERF_LONG_50=Number(PERF.profilerSevereFrameThresholdMs)||50;
+const PERF_LONG_100=Number(PERF.profilerCriticalFrameThresholdMs)||100;
+const PERF_SUSPEND_MS=Math.max(250,Number(PERF.profilerSuspensionThresholdMs)||1000);
+const PERF_LOG_MAX_SAMPLES=Math.max(60,Number(PERF.profilerLogMaxSamples)||7200);
+const PERF_LOG_MAX_EVENTS=Math.max(100,Number(PERF.profilerLogMaxEvents)||2000);
+const roundMetric=(value,digits=3)=>Number.isFinite(Number(value))?Number(Number(value).toFixed(digits)):0;
+const sumValues=values=>values.reduce((sum,value)=>sum+value,0);
+function percentile(values,p){
+  if(!values.length)return 0;
+  const sorted=[...values].sort((a,b)=>a-b),position=(sorted.length-1)*clamp(p,0,1),lower=Math.floor(position),upper=Math.ceil(position);
+  if(lower===upper)return sorted[lower];
+  const weight=position-lower;return sorted[lower]*(1-weight)+sorted[upper]*weight;
+}
+function performancePhase(){
+  if(!game)return state;
+  if(game.bossRewardPhase)return 'boss_loot';
+  if(game.lastRippleActive)return 'last_ripple';
+  if(game.bossSpawned&&!game.bossDefeated)return 'boss';
+  return 'survival';
+}
+function performanceLoadout(){
+  if(!game)return '';
+  return Object.entries(game.player?.weapons||{}).map(([key,value])=>`${key}:${normalizedWeaponLevel(value,key)}`).sort().join(',');
+}
+function performancePassives(){
+  if(!game)return '';
+  return Object.entries(game.player?.stats||{}).filter(([,level])=>Number(level)>0).map(([key,level])=>`${key}:${level}`).sort().join(',');
+}
+function collectRuntimeCounts(){
+  if(!game)return Object.create(null);
+  const fx=(game.waves?.length||0)+(game.beams?.length||0)+(game.meteors?.length||0)+(game.gravityOrbs?.length||0)+(game.zones?.length||0)+(game.mines?.length||0)+(game.wells?.length||0)+(game.boomerangs?.length||0)+(game.lightning?.length||0)+(game.drones?.length||0);
+  return {
+    enemies:game.enemies?.length||0,playerProjectiles:game.projectiles?.length||0,enemyShots:game.enemyShots?.length||0,
+    gems:game.gems?.length||0,mapDrops:game.mapDrops?.length||0,particles:game.particles?.length||0,texts:game.texts?.length||0,
+    weaponFx:fx,waves:game.waves?.length||0,beams:game.beams?.length||0,meteors:game.meteors?.length||0,gravityOrbs:game.gravityOrbs?.length||0,
+    zones:game.zones?.length||0,mines:game.mines?.length||0,wells:game.wells?.length||0,boomerangs:game.boomerangs?.length||0,
+    lightning:game.lightning?.length||0,drones:game.drones?.length||0,delayedEvents:game.delayedCasts?.length||0
+  };
+}
+function readMemorySnapshot(){
+  const memory=performance.memory;
+  return memory?{
+    usedJSHeapMB:roundMetric(memory.usedJSHeapSize/1048576,2),
+    totalJSHeapMB:roundMetric(memory.totalJSHeapSize/1048576,2),
+    heapLimitMB:roundMetric(memory.jsHeapSizeLimit/1048576,2)
+  }:null;
+}
+
+const performanceLog={
+  recording:false,startedAt:'',startedMonotonic:0,stoppedAt:'',metadata:null,samples:[],events:[],sessionId:'',lastDownloadName:''
 };
-function profilerActive(){return profiler.enabled&&profiler.visible&&state==='playing'}
+const profiler={
+  enabled:PERF.profilerEnabled!==false,visible:!!PERF.profilerVisibleByDefault,
+  frameStart:0,currentFrameInterval:0,current:Object.create(null),counters:Object.create(null),
+  sums:Object.create(null),counterSums:Object.create(null),runtimeSums:Object.create(null),runtimeMax:Object.create(null),
+  frames:0,sampleStart:0,frameIntervals:[],workTimes:[],outsideTimes:[],last:Object.create(null),lastCounters:Object.create(null),
+  ignoredFrames:0,clampedFrames:0,long16:0,long25:0,long33:0,long50:0,long100:0
+};
+function profilerActive(){return profiler.enabled&&state==='playing'&&(profiler.visible||performanceLog.recording)}
 function profilerStart(){return profilerActive()?performance.now():0}
 function profilerEnd(name,start){if(!start||!profilerActive())return;profiler.current[name]=(profiler.current[name]||0)+(performance.now()-start)}
 function profilerCount(name,value=1){if(!profilerActive())return;profiler.counters[name]=(profiler.counters[name]||0)+value}
-function profilerBeginFrame(now){
-  if(!profilerActive())return;
-  profiler.frameStart=now;profiler.current=Object.create(null);profiler.counters=Object.create(null);
+function resetProfilerAggregation(now=performance.now()){
+  profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.runtimeSums=Object.create(null);profiler.runtimeMax=Object.create(null);
+  profiler.frames=0;profiler.sampleStart=now;profiler.frameIntervals.length=0;profiler.workTimes.length=0;profiler.outsideTimes.length=0;
+  profiler.ignoredFrames=0;profiler.clampedFrames=0;profiler.long16=0;profiler.long25=0;profiler.long33=0;profiler.long50=0;profiler.long100=0;
 }
-function profilerEndFrame(now){
+function profilerBeginFrame(rafNow,frameIntervalMs,workStart){
   if(!profilerActive())return;
-  const frameMs=Math.max(0,now-profiler.frameStart);profiler.frameMs+=frameMs;profiler.maxFrameMs=Math.max(profiler.maxFrameMs,frameMs);profiler.frames++;
-  for(const [key,value] of Object.entries(profiler.current))profiler.sums[key]=(profiler.sums[key]||0)+value;
-  for(const [key,value] of Object.entries(profiler.counters))profiler.counterSums[key]=(profiler.counterSums[key]||0)+value;
-  const interval=Math.max(100,Number(PERF.profilerSampleIntervalMs)||500);
-  if(now-profiler.sampleStart<interval)return;
-  const divisor=Math.max(1,profiler.frames),last=Object.create(null),lastCounters=Object.create(null);
+  profiler.frameStart=workStart;profiler.currentFrameInterval=Number(frameIntervalMs)||0;profiler.current=Object.create(null);profiler.counters=Object.create(null);
+  if(!profiler.sampleStart)profiler.sampleStart=rafNow;
+}
+function recordPerformanceEvent(type,data={}){
+  if(!performanceLog.recording)return;
+  if(performanceLog.events.length>=PERF_LOG_MAX_EVENTS)return;
+  performanceLog.events.push({
+    type,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),...data
+  });
+}
+function makeProfilerSample(rafNow){
+  const frameValues=profiler.frameIntervals,workValues=profiler.workTimes,outsideValues=profiler.outsideTimes,divisor=Math.max(1,profiler.frames);
+  const frameTotal=sumValues(frameValues),last=Object.create(null),lastCounters=Object.create(null),runtimeAvg=Object.create(null),runtimeMax={...profiler.runtimeMax};
   for(const [key,value] of Object.entries(profiler.sums))last[key]=value/divisor;
   for(const [key,value] of Object.entries(profiler.counterSums))lastCounters[key]=value/divisor;
-  last.frame=profiler.frameMs/divisor;last.frameMax=profiler.maxFrameMs;
-  profiler.last=last;profiler.lastCounters=lastCounters;profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.frames=0;profiler.frameMs=0;profiler.maxFrameMs=0;profiler.sampleStart=now;
-  updateProfilerUI();
+  for(const [key,value] of Object.entries(profiler.runtimeSums))runtimeAvg[key]=value/divisor;
+  last.fps=frameTotal>0?frameValues.length*1000/frameTotal:0;
+  last.frameAvg=frameValues.length?frameTotal/frameValues.length:0;last.frameMin=frameValues.length?Math.min(...frameValues):0;last.frameP50=percentile(frameValues,.5);last.frameP95=percentile(frameValues,.95);last.frameP99=percentile(frameValues,.99);last.frameMax=frameValues.length?Math.max(...frameValues):0;
+  last.workAvg=workValues.length?sumValues(workValues)/workValues.length:0;last.workP95=percentile(workValues,.95);last.workP99=percentile(workValues,.99);last.workMax=workValues.length?Math.max(...workValues):0;
+  last.outsideAvg=outsideValues.length?sumValues(outsideValues)/outsideValues.length:0;last.outsideP95=percentile(outsideValues,.95);last.jsUtilization=last.frameAvg>0?last.workAvg/last.frameAvg*100:0;
+  last.long16=profiler.long16;last.long25=profiler.long25;last.long33=profiler.long33;last.long50=profiler.long50;last.long100=profiler.long100;last.clampedFrames=profiler.clampedFrames;last.ignoredFrames=profiler.ignoredFrames;
+  const memory=readMemorySnapshot();
+  const sample={
+    sampleIndex:performanceLog.samples.length,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),state,
+    frames:frameValues.length,frameTotalMs:roundMetric(frameTotal),fps:roundMetric(last.fps,2),frameMs:{avg:roundMetric(last.frameAvg),min:roundMetric(last.frameMin),p50:roundMetric(last.frameP50),p95:roundMetric(last.frameP95),p99:roundMetric(last.frameP99),max:roundMetric(last.frameMax)},
+    jsWorkMs:{avg:roundMetric(last.workAvg),p95:roundMetric(last.workP95),p99:roundMetric(last.workP99),max:roundMetric(last.workMax)},
+    outsideMeasuredJsMs:{avg:roundMetric(last.outsideAvg),p95:roundMetric(last.outsideP95)},jsUtilizationPercent:roundMetric(last.jsUtilization,2),
+    longFrames:{overFrameBudget:profiler.long16,over25:profiler.long25,over33_34:profiler.long33,over50:profiler.long50,over100:profiler.long100,simulationDtClamped:profiler.clampedFrames,ignoredSuspensions:profiler.ignoredFrames},
+    sections:Object.fromEntries(Object.entries(last).filter(([key])=>key.includes('.')).map(([key,value])=>[key,roundMetric(value)])),
+    counters:Object.fromEntries(Object.entries(lastCounters).map(([key,value])=>[key,roundMetric(value,2)])),
+    runtimeAvg:Object.fromEntries(Object.entries(runtimeAvg).map(([key,value])=>[key,roundMetric(value,2)])),runtimeMax,
+    drawCache:{particleSprites:particleSpriteCache.size,projectileSprites:projectileSpriteCache.size,enemyShotSprites:enemyShotSpriteCache.size,trailSprites:trailSpriteCache.size},
+    viewport:{cssWidth:W,cssHeight:H,dpr:DPR,canvasWidth:canvas.width,canvasHeight:canvas.height},memory,
+    level:game?.level||0,kills:game?.kills||0,loadout:performanceLoadout(),passives:performancePassives()
+  };
+  profiler.last=last;profiler.lastCounters=lastCounters;profiler.lastRuntimeAvg=runtimeAvg;profiler.lastRuntimeMax=runtimeMax;
+  return sample;
+}
+function profilerEndFrame(rafNow,workEnd){
+  if(!profilerActive())return;
+  const interval=profiler.currentFrameInterval,workMs=Math.max(0,workEnd-profiler.frameStart);
+  if(!(interval>0)||document.visibilityState!=='visible'||interval>PERF_SUSPEND_MS){
+    profiler.ignoredFrames++;
+    if(interval>PERF_SUSPEND_MS)recordPerformanceEvent('raf_suspension',{frameIntervalMs:roundMetric(interval),visibility:document.visibilityState});
+    return;
+  }
+  profiler.frames++;profiler.frameIntervals.push(interval);profiler.workTimes.push(workMs);profiler.outsideTimes.push(Math.max(0,interval-workMs));
+  if(interval>PERF_LONG_16)profiler.long16++;if(interval>PERF_LONG_25)profiler.long25++;if(interval>PERF_LONG_33)profiler.long33++;if(interval>PERF_LONG_50)profiler.long50++;if(interval>PERF_LONG_100)profiler.long100++;
+  if(interval>SYS.maxDeltaSeconds*1000+0.25)profiler.clampedFrames++;
+  for(const [key,value] of Object.entries(profiler.current))profiler.sums[key]=(profiler.sums[key]||0)+value;
+  for(const [key,value] of Object.entries(profiler.counters))profiler.counterSums[key]=(profiler.counterSums[key]||0)+value;
+  const runtime=collectRuntimeCounts();for(const [key,value] of Object.entries(runtime)){profiler.runtimeSums[key]=(profiler.runtimeSums[key]||0)+value;profiler.runtimeMax[key]=Math.max(profiler.runtimeMax[key]||0,value)}
+  if(performanceLog.recording&&interval>=PERF_LONG_50)recordPerformanceEvent('long_frame',{
+    frameIntervalMs:roundMetric(interval),jsWorkMs:roundMetric(workMs),outsideMeasuredJsMs:roundMetric(Math.max(0,interval-workMs)),sections:Object.fromEntries(Object.entries(profiler.current).map(([key,value])=>[key,roundMetric(value)])),counts:runtime
+  });
+  const intervalMs=Math.max(250,Number(PERF.profilerSampleIntervalMs)||1000);
+  if(rafNow-profiler.sampleStart<intervalMs)return;
+  const sample=makeProfilerSample(rafNow);
+  if(performanceLog.recording){performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift()}
+  updateProfilerUI();syncPerformanceLogButtons();resetProfilerAggregation(rafNow);
 }
 function ensureProfilerUI(){
   if(profilerUI)return;
   const node=document.createElement('pre');node.id='performance-profiler';
-  Object.assign(node.style,{position:'absolute',left:'14px',top:'74px',zIndex:'28',display:'none',pointerEvents:'none',margin:'0',minWidth:'310px',maxWidth:'430px',padding:'12px 14px',border:'1px solid rgba(255,255,255,.16)',borderRadius:'12px',background:'rgba(5,7,14,.88)',backdropFilter:'blur(8px)',color:'#dff8ff',font:'700 11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace',whiteSpace:'pre-wrap',boxShadow:'0 12px 32px rgba(0,0,0,.42)'});
-  node.textContent='Profiler waiting…';document.querySelector('#game-shell').append(node);profilerUI=node;
+  Object.assign(node.style,{position:'absolute',left:'14px',top:'74px',zIndex:'28',display:'none',pointerEvents:'none',margin:'0',minWidth:'345px',maxWidth:'520px',padding:'12px 14px',border:'1px solid rgba(255,255,255,.16)',borderRadius:'12px',background:'rgba(5,7,14,.90)',backdropFilter:'blur(8px)',color:'#dff8ff',font:'700 11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace',whiteSpace:'pre-wrap',boxShadow:'0 12px 32px rgba(0,0,0,.42)'});
+  node.textContent='Profiler waiting for real animation frames…';document.querySelector('#game-shell').append(node);profilerUI=node;
 }
-function setProfilerVisible(visible){profiler.visible=!!visible;profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.frames=0;profiler.frameMs=0;profiler.maxFrameMs=0;profiler.sampleStart=performance.now();if(pauseProfilerButton)pauseProfilerButton.textContent=`效能監測：${profiler.visible?'開啟':'關閉'}`;syncFPSVisibility()}
+function setProfilerVisible(visible){profiler.visible=!!visible;resetProfilerAggregation(performance.now());if(pauseProfilerButton)pauseProfilerButton.textContent=`效能監測：${profiler.visible?'開啟':'關閉'}`;syncFPSVisibility()}
 function toggleProfilerDisplay(){setProfilerVisible(!profiler.visible)}
+function syncPerformanceLogButtons(){
+  if(pausePerfRecordButton)pausePerfRecordButton.textContent=`效能記錄：${performanceLog.recording?'錄製中':'開始'}`;
+  const hasSavedData=performanceLog.samples.length>0||performanceLog.events.length>0;
+  const hasLiveSnapshot=profiler.frames>0;
+  const exportReady=hasSavedData||hasLiveSnapshot||performanceLog.recording;
+  if(pausePerfDownloadButton){
+    pausePerfDownloadButton.disabled=false;
+    pausePerfDownloadButton.textContent=exportReady?'下載效能 Log（JSON）':'下載效能 Log（尚無資料）';
+    pausePerfDownloadButton.title=exportReady?'下載已錄製的 Log；未錄製時會匯出目前監測快照。':'請先開始效能記錄，或開啟效能監測並回到遊戲執行數秒。';
+  }
+  if(pausePerfOpenButton){pausePerfOpenButton.disabled=false;pausePerfOpenButton.title='下載被瀏覽器阻擋時，可在新分頁開啟 JSON。'}
+  if(pausePerfCopyButton){pausePerfCopyButton.disabled=false;pausePerfCopyButton.title='將完整 JSON 複製到剪貼簿。'}
+  if(pausePerfClearButton)pausePerfClearButton.disabled=!hasSavedData&&!performanceLog.recording;
+}
+function createPerformanceMetadata(){
+  return {
+    schemaVersion:2,game:'Crimson Survivor',build:String(CFG.meta?.build||''),configVersion:String(CFG.meta?.configVersion||''),startedAt:performanceLog.startedAt,
+    userAgent:navigator.userAgent,platform:navigator.platform||'',language:navigator.language||'',hardwareConcurrency:navigator.hardwareConcurrency||null,deviceMemoryGB:navigator.deviceMemory||null,
+    viewport:{cssWidth:W,cssHeight:H,dpr:DPR,canvasWidth:canvas.width,canvasHeight:canvas.height},
+    profilerSettings:{sampleIntervalMs:Number(PERF.profilerSampleIntervalMs)||1000,frameBudgetMs:PERF_LONG_16,longFrameMs:PERF_LONG_33,severeFrameMs:PERF_LONG_50,criticalFrameMs:PERF_LONG_100,suspensionMs:PERF_SUSPEND_MS,maxDeltaSeconds:SYS.maxDeltaSeconds},
+    notes:{
+      fps:'由相鄰 requestAnimationFrame callback timestamp 的真實間隔計算。',
+      jsWork:'只包含被遊戲 Profiler 包住的 JavaScript update、draw 與相關程式工作。',
+      outsideMeasuredJs:'frame interval 減去已測得 JS work；可能包含 VSync 等待、Canvas/GPU/合成、瀏覽器工作、GC、作業系統排程與未包入監測的 JS。'
+    }
+  };
+}
+function startPerformanceRecording(){
+  performanceLog.recording=true;performanceLog.startedAt=new Date().toISOString();performanceLog.startedMonotonic=performance.now();performanceLog.stoppedAt='';performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId=makeRunId();performanceLog.metadata=createPerformanceMetadata();resetProfilerAggregation(performance.now());recordPerformanceEvent('recording_started');syncPerformanceLogButtons();syncEndPerformanceDownloadButton();toast('效能 Log 開始錄製。完成測試後請暫停並下載 Log。',4500);
+}
+function flushPerformanceLogSample(){
+  if(!performanceLog.recording||profiler.frames<=0)return;
+  const sample=makeProfilerSample(performance.now());performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift();resetProfilerAggregation(performance.now());
+}
+function stopPerformanceRecording(){
+  if(!performanceLog.recording)return;flushPerformanceLogSample();recordPerformanceEvent('recording_stopped');performanceLog.recording=false;performanceLog.stoppedAt=new Date().toISOString();syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast(`效能 Log 已停止，共 ${performanceLog.samples.length} 筆取樣。`,3500);
+}
+function togglePerformanceRecording(){performanceLog.recording?stopPerformanceRecording():startPerformanceRecording()}
+function clearPerformanceLog(){
+  performanceLog.recording=false;performanceLog.startedAt='';performanceLog.stoppedAt='';performanceLog.metadata=null;performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId='';resetProfilerAggregation(performance.now());syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast('效能 Log 已清除。',2500);
+}
+function ensurePerformanceLogDataForExport(){
+  if(performanceLog.recording)flushPerformanceLogSample();
+  if(performanceLog.samples.length||performanceLog.events.length)return {ok:true,snapshot:false};
+  if(profiler.frames<=0){
+    toast('目前沒有可匯出的效能資料。請先按「效能記錄：開始」，回到遊戲執行幾秒後再下載。',5000);
+    return {ok:false,snapshot:false};
+  }
+  const now=performance.now();
+  performanceLog.recording=false;
+  performanceLog.startedMonotonic=profiler.sampleStart||now;
+  performanceLog.startedAt=new Date(Date.now()-Math.max(0,now-performanceLog.startedMonotonic)).toISOString();
+  performanceLog.stoppedAt=new Date().toISOString();
+  performanceLog.sessionId=performanceLog.sessionId||makeRunId();
+  performanceLog.metadata=performanceLog.metadata||createPerformanceMetadata();
+  performanceLog.samples.push(makeProfilerSample(now));
+  resetProfilerAggregation(now);
+  syncPerformanceLogButtons();syncEndPerformanceDownloadButton();
+  return {ok:true,snapshot:true};
+}
+function ensureEndPerformanceDownloadButton(){
+  if(endPerfDownloadButton)return endPerfDownloadButton;
+  const card=DOM.end?.querySelector('.end-card'),restart=$('#restart-btn');if(!card)return null;
+  const download=document.createElement('button');download.id='end-perf-download-btn';download.className='secondary-btn';download.type='button';download.textContent='下載效能 Log（JSON）';download.onclick=downloadPerformanceLog;download.style.marginBottom='10px';download.style.display='none';
+  const open=document.createElement('button');open.id='end-perf-open-btn';open.className='secondary-btn';open.type='button';open.textContent='開啟效能 Log';open.onclick=openPerformanceLog;open.style.marginBottom='10px';open.style.display='none';
+  if(restart){card.insertBefore(download,restart);card.insertBefore(open,restart)}else{card.append(download,open)}
+  endPerfDownloadButton=download;endPerfOpenButton=open;return download;
+}
+function syncEndPerformanceDownloadButton(){
+  const button=ensureEndPerformanceDownloadButton();if(!button)return;
+  const visible=(performanceLog.samples.length||performanceLog.events.length)?'block':'none';
+  button.style.display=visible;if(endPerfOpenButton)endPerfOpenButton.style.display=visible;
+}
+function buildPerformanceSummary(){
+  const samples=performanceLog.samples,totalFrames=samples.reduce((sum,sample)=>sum+(sample.frames||0),0),totalFrameMs=samples.reduce((sum,sample)=>sum+(sample.frameTotalMs||0),0);
+  const maxOf=(path,fallback=0)=>samples.reduce((max,sample)=>Math.max(max,path(sample)||fallback),fallback),sumOf=path=>samples.reduce((sum,sample)=>sum+(path(sample)||0),0);
+  const weighted=(path)=>totalFrames?samples.reduce((sum,sample)=>sum+(path(sample)||0)*(sample.frames||0),0)/totalFrames:0;
+  const started=Number(performanceLog.startedMonotonic)||performance.now();
+  return {
+    durationSeconds:roundMetric(Math.max(0,(performance.now()-started)/1000),2),samples:samples.length,frames:totalFrames,actualAverageFps:roundMetric(totalFrameMs>0?totalFrames*1000/totalFrameMs:0,2),
+    minimumOneSecondFps:roundMetric(samples.length?Math.min(...samples.map(sample=>sample.fps||Infinity)):0,2),maximumFrameMs:roundMetric(maxOf(sample=>sample.frameMs?.max)),maximumP99FrameMs:roundMetric(maxOf(sample=>sample.frameMs?.p99)),
+    averageJsWorkMs:roundMetric(weighted(sample=>sample.jsWorkMs?.avg)),averageOutsideMeasuredJsMs:roundMetric(weighted(sample=>sample.outsideMeasuredJsMs?.avg)),
+    longFrames:{frameBudgetMs:PERF_LONG_16,overFrameBudget:sumOf(sample=>sample.longFrames?.overFrameBudget),over25:sumOf(sample=>sample.longFrames?.over25),over33_34:sumOf(sample=>sample.longFrames?.over33_34),over50:sumOf(sample=>sample.longFrames?.over50),over100:sumOf(sample=>sample.longFrames?.over100),simulationDtClamped:sumOf(sample=>sample.longFrames?.simulationDtClamped)},
+    maximumCounts:{enemies:maxOf(sample=>sample.runtimeMax?.enemies),playerProjectiles:maxOf(sample=>sample.runtimeMax?.playerProjectiles),enemyShots:maxOf(sample=>sample.runtimeMax?.enemyShots),particles:maxOf(sample=>sample.runtimeMax?.particles),weaponFx:maxOf(sample=>sample.runtimeMax?.weaponFx)},
+    slowestSamples:[...samples].sort((a,b)=>(b.frameMs?.p99||0)-(a.frameMs?.p99||0)).slice(0,20).map(sample=>({sampleIndex:sample.sampleIndex,wallTimeMs:sample.wallTimeMs,gameTime:sample.gameTime,phase:sample.phase,fps:sample.fps,frameMs:sample.frameMs,jsWorkMs:sample.jsWorkMs,outsideMeasuredJsMs:sample.outsideMeasuredJsMs,runtimeMax:sample.runtimeMax,loadout:sample.loadout}))
+  };
+}
+function createPerformanceExport(){
+  const ready=ensurePerformanceLogDataForExport();if(!ready.ok)return null;
+  const payload={metadata:performanceLog.metadata||createPerformanceMetadata(),sessionId:performanceLog.sessionId,stoppedAt:performanceLog.stoppedAt||null,exportedAt:new Date().toISOString(),snapshotOnly:ready.snapshot,summary:buildPerformanceSummary(),samples:performanceLog.samples,events:performanceLog.events};
+  const text=JSON.stringify(payload,null,2),stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+  return {payload,text,filename:`deep_crimson_performance_${stamp}.json`};
+}
+function downloadPerformanceLog(){
+  const exported=createPerformanceExport();if(!exported)return;
+  try{
+    const blob=new Blob([exported.text],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');
+    anchor.href=url;anchor.download=exported.filename;anchor.rel='noopener';anchor.style.display='none';document.body.append(anchor);anchor.click();
+    performanceLog.lastDownloadName=exported.filename;
+    setTimeout(()=>anchor.remove(),500);setTimeout(()=>URL.revokeObjectURL(url),30000);
+    toast(`已送出下載請求：${exported.filename}。若瀏覽器沒有產生檔案，請按「開啟效能 Log」或「複製效能 Log」。`,6500);
+  }catch(error){
+    console.error('Performance Log download failed:',error);
+    toast(`下載失敗：${error?.message||error}。請改用「開啟效能 Log」或「複製效能 Log」。`,6500);
+  }
+}
+function openPerformanceLog(){
+  const exported=createPerformanceExport();if(!exported)return;
+  try{
+    const blob=new Blob([exported.text],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),opened=window.open(url,'_blank');
+    if(opened){try{opened.opener=null}catch{}setTimeout(()=>URL.revokeObjectURL(url),120000);toast('效能 Log 已在新分頁開啟，可使用瀏覽器「另存新檔」。',5000);return}
+    URL.revokeObjectURL(url);toast('瀏覽器阻擋了新分頁，請改按「複製效能 Log」。',4500);
+  }catch(error){console.error('Performance Log open failed:',error);toast(`開啟 Log 失敗：${error?.message||error}`,5000)}
+}
+async function copyPerformanceLog(){
+  const exported=createPerformanceExport();if(!exported)return;
+  try{
+    if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(exported.text)}else{
+      const area=document.createElement('textarea');area.value=exported.text;area.style.position='fixed';area.style.left='-9999px';document.body.append(area);area.select();if(!document.execCommand('copy'))throw new Error('瀏覽器不允許複製');area.remove();
+    }
+    toast(`效能 Log 已複製到剪貼簿（${exported.text.length.toLocaleString('zh-TW')} 字元）。`,4500);
+  }catch(error){console.error('Performance Log copy failed:',error);toast(`複製失敗：${error?.message||error}`,5000)}
+}
 function updateProfilerUI(){
   if(!profilerUI||!profiler.visible)return;
-  const t=profiler.last,c=profiler.lastCounters,fmt=value=>Number(value||0).toFixed(2),count=value=>Math.round(Number(value)||0);
+  const t=profiler.last,c=profiler.lastCounters||{},r=profiler.lastRuntimeAvg||{},fmt=value=>Number(value||0).toFixed(2),fmt3=value=>Number(value||0).toFixed(3),count=value=>Math.round(Number(value)||0);
   const rows=[
-    `FPS ${Math.round(t.frame?1000/t.frame:(fpsMonitor.value||0))} | Frame ${fmt(t.frame)} ms | Max ${fmt(t.frameMax)} ms`,
-    `Update ${fmt(t['update.total'])} | Draw ${fmt(t['draw.total'])}`,
-    `敵人 ${fmt(t['update.enemies'])} | Enemy Grid ${fmt(t['grid.enemies'])}`,
-    `武器 ${fmt(t['update.weapons'])} | 延遲事件 ${fmt(t['update.scheduler'])}`,
-    `玩家彈碰撞 ${fmt(t['update.projectiles'])} | 敵方彈 ${fmt(t['update.enemyShots'])}`,
-    `特殊武器 ${fmt(t['update.specials'])} | EXP/粒子 ${fmt((t['update.gems']||0)+(t['update.particles']||0))}`,
-    `繪製敵人 ${fmt(t['draw.enemies'])} | 玩家彈 ${fmt(t['draw.projectiles'])} | 敵方彈 ${fmt(t['draw.enemyShots'])}`,
-    `繪製武器FX ${fmt(t['draw.weaponFx'])} | 粒子/文字 ${fmt(t['draw.particles'])}`,
-    `Counts E:${game?.enemies?.length||0} P:${game?.projectiles?.length||0} ES:${game?.enemyShots?.length||0} FX:${game?.particles?.length||0}`,
+    `實際 FPS ${fmt(t.fps)} | 1% Low ${fmt(t.frameP99>0?1000/t.frameP99:0)} | Frame ${fmt(t.frameAvg)} ms | P95 ${fmt(t.frameP95)} | Max ${fmt(t.frameMax)}`,
+    `JS Work ${fmt(t.workAvg)} | P95 ${fmt(t.workP95)} | Frame-JS ${fmt(t.outsideAvg)} | JS ${fmt(t.jsUtilization)}%`,
+    `Update ${fmt3(t['update.total'])} | Draw(JS提交) ${fmt3(t['draw.total'])}`,
+    `敵人 ${fmt3(t['update.enemies'])} | Enemy Grid ${fmt3(t['grid.enemies'])}`,
+    `武器 ${fmt3(t['update.weapons'])} | 延遲事件 ${fmt3(t['update.scheduler'])}`,
+    `玩家彈碰撞 ${fmt3(t['update.projectiles'])} | 敵方彈 ${fmt3(t['update.enemyShots'])}`,
+    `特殊武器 ${fmt3(t['update.specials'])} | EXP/粒子 ${fmt3((t['update.gems']||0)+(t['update.particles']||0))}`,
+    `繪製敵人 ${fmt3(t['draw.enemies'])} | 玩家彈 ${fmt3(t['draw.projectiles'])} | 敵方彈 ${fmt3(t['draw.enemyShots'])}`,
+    `繪製武器FX ${fmt3(t['draw.weaponFx'])} | 粒子/文字 ${fmt3(t['draw.particles'])}`,
+    `長幀 >${fmt(PERF_LONG_16)}:${count(t.long16)} >${fmt(PERF_LONG_25)}:${count(t.long25)} >${fmt(PERF_LONG_33)}:${count(t.long33)} >${fmt(PERF_LONG_50)}:${count(t.long50)} >${fmt(PERF_LONG_100)}:${count(t.long100)} Clamp:${count(t.clampedFrames)}`,
+    `Avg E:${count(r.enemies)} P:${count(r.playerProjectiles)} ES:${count(r.enemyShots)} Part:${count(r.particles)} FX:${count(r.weaponFx)}`,
     `Grid Q enemy:${count(c.enemyGridQueries)} projectile:${count(c.projectileGridQueries)} candidates:${count((c.enemyGridCandidates||0)+(c.projectileGridCandidates||0))}`,
-    `DrawImage ${count(c.drawImages)} | Cache P:${particleSpriteCache.size} B:${projectileSpriteCache.size+enemyShotSpriteCache.size+trailSpriteCache.size}`
+    `DrawImage ${count(c.drawImages)} | Cache Part:${particleSpriteCache.size} Bullet:${projectileSpriteCache.size+enemyShotSpriteCache.size+trailSpriteCache.size}`,
+    `Log ${performanceLog.recording?'REC':'STOP'} | Samples ${performanceLog.samples.length} | Events ${performanceLog.events.length}`
   ];
   profilerUI.textContent=rows.join('\n');
 }
+let longTaskObserver=null;
+try{
+  if(globalThis.PerformanceObserver&&PerformanceObserver.supportedEntryTypes?.includes('longtask')){
+    longTaskObserver=new PerformanceObserver(list=>{if(!performanceLog.recording)return;for(const entry of list.getEntries())recordPerformanceEvent('browser_long_task',{startTime:roundMetric(entry.startTime,1),durationMs:roundMetric(entry.duration),name:entry.name||''})});
+    longTaskObserver.observe({type:'longtask',buffered:true});
+  }
+}catch(error){console.warn('Long Task observer unavailable',error)}
 function startScreenShake(amplitude,duration=weaponLevelConfig('meteor',1).impact.shakeDurationNormal){
   if(!game||amplitude<=0||duration<=0)return;
   const shakeCfg=VIS.shake,current=game.shakeRemaining>0?game.shakeAmplitude*Math.pow(game.shakeRemaining/Math.max(shakeCfg.minimumDurationDenominator,game.shakeDuration),shakeCfg.currentEnvelopePower):0;
@@ -897,13 +1126,13 @@ async function submitOnlineScore(){
 }
 
 function startGame(){
-  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.remove('hidden');
+  sound.ensure();ensurePauseDebugButton();ensureFPSUI();ensureEndPerformanceDownloadButton();syncEndPerformanceDownloadButton();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.remove('hidden');
   last = performance.now();
 // 遊戲開始後，將開始說明顯示 6 秒
 toast(TEXT.startLead, 6000);
 }
 function endGame(win){
-  if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
+  if(game.ended)return;if(performanceLog.recording)stopPerformanceRecording();syncEndPerformanceDownloadButton();game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
   const timedOut=!win&&game.bossTimedOut, rippleExpired=!win&&game.lastRippleExpired;
   DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:rippleExpired?(TEXT.lastRippleDefeatEyebrow||'波紋燃盡'):timedOut?TEXT.bossTimeoutEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:rippleExpired?(TEXT.lastRippleDefeatTitle||'最後的波紋消散了'):timedOut?TEXT.bossTimeoutTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:rippleExpired?(TEXT.lastRippleDefeatCopy||'十秒已到，Boss 仍未被擊敗。'):timedOut?TEXT.bossTimeoutCopy:TEXT.endLoseCopy;
   DOM.resultScore.textContent=scoreBreakdown().score.toLocaleString('zh-TW');DOM.resultTime.textContent=fmtTime(game.bossDefeated&&Number.isFinite(game.bossDefeatElapsed)?game.bossDefeatElapsed:game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;
@@ -942,8 +1171,24 @@ function ensurePauseDebugButton(){
   if(!pauseProfilerButton){
     const btn=document.createElement('button');btn.id='profiler-pause-btn';btn.className='secondary-btn';btn.onclick=toggleProfilerDisplay;row.append(btn);pauseProfilerButton=btn;
   }
+  if(!pausePerfRecordButton){
+    const btn=document.createElement('button');btn.id='perf-record-pause-btn';btn.className='secondary-btn';btn.onclick=togglePerformanceRecording;row.append(btn);pausePerfRecordButton=btn;
+  }
+  if(!pausePerfDownloadButton){
+    const btn=document.createElement('button');btn.id='perf-download-pause-btn';btn.className='secondary-btn';btn.textContent='下載效能 Log（JSON）';btn.onclick=downloadPerformanceLog;row.append(btn);pausePerfDownloadButton=btn;
+  }
+  if(!pausePerfOpenButton){
+    const btn=document.createElement('button');btn.id='perf-open-pause-btn';btn.className='secondary-btn';btn.textContent='開啟效能 Log';btn.onclick=openPerformanceLog;row.append(btn);pausePerfOpenButton=btn;
+  }
+  if(!pausePerfCopyButton){
+    const btn=document.createElement('button');btn.id='perf-copy-pause-btn';btn.className='secondary-btn';btn.textContent='複製效能 Log';btn.onclick=copyPerformanceLog;row.append(btn);pausePerfCopyButton=btn;
+  }
+  if(!pausePerfClearButton){
+    const btn=document.createElement('button');btn.id='perf-clear-pause-btn';btn.className='secondary-btn';btn.textContent='清除效能 Log';btn.onclick=clearPerformanceLog;row.append(btn);pausePerfClearButton=btn;
+  }
   pauseFpsButton.textContent=fpsMonitor.visible?TEXT.fpsOn:TEXT.fpsOff;
   pauseProfilerButton.textContent=`效能監測：${profiler.visible?'開啟':'關閉'}`;
+  syncPerformanceLogButtons();
 }
 function makeDebugButton(text,role,style={}){
   const button=document.createElement('button');
@@ -2615,9 +2860,23 @@ function drawMapDrop(drop){const visual=VIS.mapDrop,assetKeys={heal:'healDrop',r
 function drawImageCentered(image,x,y,width,height,rotation=0){if(!image)return;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore();profilerCount('drawImages')}
 function roundRect(context,x,y,width,height,radius){context.beginPath();context.roundRect(x,y,width,height,radius);return context}
 
+let previousAnimationFrameTimestamp=0;
 function loop(now){
-  const dt=Math.min(SYS.maxDeltaSeconds,(now-last)/1000||0);last=now;profilerBeginFrame(performance.now());let section=profilerStart();update(dt);profilerEnd('update.total',section);section=profilerStart();draw();profilerEnd('draw.total',section);updateFPSDisplay(now);profilerEndFrame(performance.now());requestAnimationFrame(loop);
+  const realFrameIntervalMs=previousAnimationFrameTimestamp>0?Math.max(0,now-previousAnimationFrameTimestamp):0;
+  previousAnimationFrameTimestamp=now;
+  const dt=Math.min(SYS.maxDeltaSeconds,(now-last)/1000||0);last=now;
+  const callbackStart=performance.now();profilerBeginFrame(now,realFrameIntervalMs,callbackStart);
+  let section=profilerStart();update(dt);profilerEnd('update.total',section);
+  section=profilerStart();draw();profilerEnd('draw.total',section);
+  updateFPSDisplay(now);
+  profilerEndFrame(now,performance.now());
+  requestAnimationFrame(loop);
 }
+
+document.addEventListener('visibilitychange',()=>{
+  previousAnimationFrameTimestamp=0;last=performance.now();fpsMonitor.frames=0;fpsMonitor.lastSample=performance.now();
+  if(performanceLog.recording)recordPerformanceEvent('visibility_changed',{visibility:document.visibilityState});
+});
 
 // input
 function pointerToWorld(e){
