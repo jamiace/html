@@ -1,4 +1,4 @@
-/* BUILD R31 - PHASED GENERIC BOSS SUMMONS - 2026-07-14 */
+/* BUILD R32 - PERFORMANCE GRID + RENDER CACHES - 2026-07-14 */
 (async () => {
 'use strict';
 
@@ -182,7 +182,8 @@ class Sound {
 }
 const sound=new Sound();
 
-const scaledWeaponConfigCache=new Map();
+const baseWeaponLevelCache=Object.fromEntries(dataEntries(CFG.weapons).map(([key,weapon])=>[key,Array.isArray(weapon.levels)?weapon.levels:[]]));
+let activeWeaponLevelCache=Object.create(null),activeWeaponAreaLevel=-1,activeWeaponSizeLevel=-1;
 const AREA_SCALE_KEYS=new Set(['range','radius','width','targetSearchRange','targetRange','projectileRange','jumpRange','chainRange','triggerRadius','explosionRadius','wellRadius','orbitRadius','expandRadius','hitRadius','expandHitRadius','maximumRange','minimumSeparation','catchDistance']);
 const SIZE_SCALE_KEYS=new Set(['radius','width','projectileRadius','hitRadius','expandHitRadius','bladeSize','spriteSize','visualRadius','explosionRadius','wellRadius','orbitRadius','expandRadius','warningStartRadius','warningEndRadius','startRadius','waveStart']);
 const AREA_SCALE_SKIP_PARENTS=new Set(['visual','fallVisual','muzzle','particle']);
@@ -212,7 +213,6 @@ function fullHpCooldownMultiplier(){const level=statLevel('fullHpCooldown');if(l
 function reviveScoreCost(){return Math.max(0,statLevelValue('revive','scoreCost',1,Number(PROG.reviveScoreCost)||1000))}
 function reviveRestoreRatio(){return Math.max(0,statLevelValue('revive','restoreRatio',1,Number(PROG.reviveRestoreRatio)||0.5))}
 function reviveInvulnerabilitySeconds(){return Math.max(0,statLevelValue('revive','invulnerabilitySeconds',1,Number(PROG.reviveInvulnerabilitySeconds)||2.2))}
-function invalidateScaledWeaponConfigs(){scaledWeaponConfigCache.clear()}
 function scaleWeaponConfigValue(value,areaMultiplier,sizeMultiplier,parentKey=''){
   if(Array.isArray(value))return value.map(entry=>scaleWeaponConfigValue(entry,areaMultiplier,sizeMultiplier,parentKey));
   if(!value||typeof value!=='object')return value;
@@ -227,13 +227,28 @@ function scaleWeaponConfigValue(value,areaMultiplier,sizeMultiplier,parentKey=''
   }
   return output;
 }
-function weaponLevelConfig(key,level){
-  const weapon=CFG.weapons[key],index=Math.max(0,Math.min(SYS.maxUpgradeLevel,level||1)-1);
-  if(!weapon||!Array.isArray(weapon.levels)||!weapon.levels[index])throw new Error(`Missing weapon level config: ${key} Lv.${level}`);
-  const areaLevel=statLevel('weaponArea'),sizeLevel=statLevel('weaponSize');if(areaLevel<=0&&sizeLevel<=0)return weapon.levels[index];
-  const cacheKey=`${key}:${index}:${areaLevel}:${sizeLevel}`;if(!scaledWeaponConfigCache.has(cacheKey))scaledWeaponConfigCache.set(cacheKey,scaleWeaponConfigValue(weapon.levels[index],weaponAreaMultiplier(),weaponSizeMultiplier()));
-  return scaledWeaponConfigCache.get(cacheKey);
+function rebuildWeaponLevelCache(){
+  const areaLevel=statLevel('weaponArea'),sizeLevel=statLevel('weaponSize');
+  if(areaLevel===activeWeaponAreaLevel&&sizeLevel===activeWeaponSizeLevel&&Object.keys(activeWeaponLevelCache).length)return;
+  const areaMultiplier=weaponAreaMultiplier(),sizeMultiplier=weaponSizeMultiplier(),next=Object.create(null),scaled=areaLevel>0||sizeLevel>0;
+  for(const [key,levels] of Object.entries(baseWeaponLevelCache))next[key]=scaled?levels.map(level=>scaleWeaponConfigValue(level,areaMultiplier,sizeMultiplier)):levels;
+  activeWeaponLevelCache=next;activeWeaponAreaLevel=areaLevel;activeWeaponSizeLevel=sizeLevel;
 }
+function invalidateScaledWeaponConfigs(){activeWeaponAreaLevel=-1;activeWeaponSizeLevel=-1;activeWeaponLevelCache=Object.create(null);rebuildWeaponLevelCache()}
+function weaponLevelConfig(key,level){
+  rebuildWeaponLevelCache();
+  const index=Math.max(0,Math.min(SYS.maxUpgradeLevel,level||1)-1),levels=activeWeaponLevelCache[key],config=levels?.[index];
+  if(!config)throw new Error(`Missing weapon level config: ${key} Lv.${level}`);
+  return config;
+}
+function weaponMaximumRange(key,config){
+  if(!config)return 0;
+  const explicit={shotgun:config.range,boomerang:config.range,flame:config.range,lightning:config.range,laser:config.range,drone:config.projectileRange,meteor:config.maximumRange,gravity:config.maximumRange};
+  const candidates=[explicit[key],config.maximumRange,config.projectileRange,config.range,config.radius,config.targetRange,config.targetSearchRange];
+  let maximum=0;for(const value of candidates){const number=Number(value);if(Number.isFinite(number)&&number>maximum)maximum=number}
+  return maximum;
+}
+function weaponSearchRange(key,config){return Math.max(0,weaponMaximumRange(key,config)*(Number(PERF.weaponSearchRangeMultiplier)||1.1))}
 const WEAPONS = Object.fromEntries(dataEntries(CFG.weapons).map(([key,w])=>[key,{...w,desc:w.descriptions}]));
 
 const ITEMS = Object.fromEntries(dataEntries(CFG.items).map(([key,item])=>[key,{...item,desc:item.description}]));
@@ -248,7 +263,7 @@ const ENEMY_PHASES = SPAWN.phases;
 const ROLE_INTERVALS = SPAWN.roleIntervals;
 
 let state='menu', last=performance.now(), DPR=1, W=0,H=0;
-let game=null, debugReturnState='paused', debugUI=null, pauseDebugButton=null, pauseFpsButton=null, fpsUI=null, vignetteCache=null, debugSecretBuffer='', debugSecretLast=0;
+let game=null, debugReturnState='paused', debugUI=null, pauseDebugButton=null, pauseFpsButton=null, pauseProfilerButton=null, fpsUI=null, profilerUI=null, vignetteCache=null, debugSecretBuffer='', debugSecretLast=0;
 let leaderboardRequestToken=0;
 const keys={}; const touch={x:0,y:0,active:false}; const mouse={active:false,held:false,targetX:0,targetY:0};
 
@@ -271,54 +286,115 @@ function compactInPlace(array,keep,onDrop=null){
   return array;
 }
 
-class SpatialHash{
-  constructor(cellSize=PERF.spatialCellSize){this.cellSize=cellSize;this.cells=new Map();this.bucketPool=[];this.count=0;}
-  // Numeric cell keys avoid thousands of temporary "x,y" strings during
-  // rebuilds and targeting queries. The game world never approaches this range.
-  key(cx,cy){return (cx+PERF.spatialKeyOffset)*PERF.spatialKeyMultiplier+(cy+PERF.spatialKeyOffset)}
-  getBucket(cx,cy){return this.cells.get(this.key(cx,cy))}
+class FixedRingGrid{
+  constructor(cellSize=PERF.spatialCellSize,width=PERF.spatialGridWidth||100,height=PERF.spatialGridHeight||100,name='grid'){
+    this.cellSize=cellSize;this.width=Math.max(8,width|0);this.height=Math.max(8,height|0);this.name=name;this.size=this.width*this.height;
+    this.buckets=Array.from({length:this.size},()=>[]);this.bucketX=new Int32Array(this.size);this.bucketY=new Int32Array(this.size);this.stamps=new Uint32Array(this.size);this.activeIndices=[];this.generation=1;this.count=0;this.maxRadius=0;
+  }
+  modulo(value,limit){const result=value%limit;return result<0?result+limit:result}
+  index(cx,cy){return this.modulo(cx,this.width)+this.modulo(cy,this.height)*this.width}
   clear(){
-    for(const bucket of this.cells.values()){bucket.length=0;this.bucketPool.push(bucket)}
-    this.cells.clear();this.count=0;
+    for(let i=0;i<this.activeIndices.length;i++)this.buckets[this.activeIndices[i]].length=0;
+    this.activeIndices.length=0;this.count=0;this.maxRadius=0;this.generation++;
+    if(this.generation===0xffffffff){this.stamps.fill(0);this.generation=1}
   }
   insert(entity){
-    const cx=Math.floor(entity.x/this.cellSize),cy=Math.floor(entity.y/this.cellSize),key=this.key(cx,cy);
-    let bucket=this.cells.get(key);
-    if(!bucket){bucket=this.bucketPool.pop()||[];bucket.cx=cx;bucket.cy=cy;this.cells.set(key,bucket)}
-    bucket.push(entity);this.count++;
+    const cx=Math.floor(entity.x/this.cellSize),cy=Math.floor(entity.y/this.cellSize),index=this.index(cx,cy);
+    if(this.stamps[index]!==this.generation||this.bucketX[index]!==cx||this.bucketY[index]!==cy){
+      this.stamps[index]=this.generation;this.bucketX[index]=cx;this.bucketY[index]=cy;this.buckets[index].length=0;this.activeIndices.push(index);
+    }
+    this.buckets[index].push(entity);this.count++;this.maxRadius=Math.max(this.maxRadius,Number(entity.r)||0);
   }
+  getBucket(cx,cy){const index=this.index(cx,cy);return this.stamps[index]===this.generation&&this.bucketX[index]===cx&&this.bucketY[index]===cy?this.buckets[index]:null}
   queryCircle(x,y,r,out){
-    out.length=0;
-    const minX=Math.floor((x-r)/this.cellSize),maxX=Math.floor((x+r)/this.cellSize);
-    const minY=Math.floor((y-r)/this.cellSize),maxY=Math.floor((y+r)/this.cellSize);
+    out.length=0;profilerCount(`${this.name}Queries`);
+    const minX=Math.floor((x-r)/this.cellSize),maxX=Math.floor((x+r)/this.cellSize),minY=Math.floor((y-r)/this.cellSize),maxY=Math.floor((y+r)/this.cellSize);
     for(let cy=minY;cy<=maxY;cy++)for(let cx=minX;cx<=maxX;cx++){
-      const bucket=this.cells.get(this.key(cx,cy));
-      if(!bucket)continue;
+      const bucket=this.getBucket(cx,cy);if(!bucket)continue;profilerCount(`${this.name}Candidates`,bucket.length);
       for(let i=0;i<bucket.length;i++)out.push(bucket[i]);
     }
     return out;
   }
+  forEachActiveBucket(callback){for(let i=0;i<this.activeIndices.length;i++)callback(this.buckets[this.activeIndices[i]])}
 }
 
-const enemySpatial=new SpatialHash(SPATIAL_CELL_SIZE);
+const enemySpatial=new FixedRingGrid(SPATIAL_CELL_SIZE,PERF.spatialGridWidth,PERF.spatialGridHeight,'enemyGrid');
+const projectileSpatial=new FixedRingGrid(SPATIAL_CELL_SIZE,PERF.spatialGridWidth,PERF.spatialGridHeight,'projectileGrid');
 const spatialScratch={
   nearest:[],projectile:[],aoe:[],boomerang:[],orbit:[],flame:[],beam:[],mine:[],well:[],wave:[],lightning:[],densityCandidates:[],densityNeighbors:[]
 };
 const denseCandidatePool=[];
 let meteorSpriteCache=null;
 const meteorWarningFrames=[];
-let burnZoneSpriteCache=null,acidZoneSpriteCache=null;
-function rebuildEnemySpatial(){
-  enemySpatial.clear();
-  if(!game)return;
-  for(const e of game.enemies)if(!e.dead)enemySpatial.insert(e);
+let burnZoneSpriteCache=null,acidZoneSpriteCache=null,flameCoreCache=null;
+const projectileSpriteCache=new Map(),enemyShotSpriteCache=new Map(),trailSpriteCache=new Map(),particleSpriteCache=new Map();
+function createCacheCanvas(width,height){
+  const w=Math.max(1,Math.ceil(width)),h=Math.max(1,Math.ceil(height));
+  if(typeof OffscreenCanvas==='function')return new OffscreenCanvas(w,h);
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;return canvas;
 }
-function queryEnemies(x,y,r,out){
-  if(enemySpatial.count>0)return enemySpatial.queryCircle(x,y,r,out);
-  out.length=0;
-  if(game)for(const e of game.enemies)if(!e.dead)out.push(e);
-  return out;
+function quantized(value,step){const unit=Math.max(0.01,Number(step)||1);return Math.max(unit,Math.round(Number(value||0)/unit)*unit)}
+function cacheContext(canvas){return canvas.getContext('2d',{alpha:true})}
+function getPlayerProjectileSprite(projectile){
+  const visual=VIS.projectile,drawRadius=Math.max(0.5,Number(projectile.visualR??projectile.r)||1),dx=projectile.x-projectile.px,dy=projectile.y-projectile.py,length=quantized(Math.hypot(dx,dy),PERF.bulletTrailLengthQuantization),radius=quantized(drawRadius,0.25),key=`player|${projectile.color}|${radius}|${length}`;
+  let sprite=projectileSpriteCache.get(key);if(sprite)return sprite;
+  const lineWidth=radius*visual.trailWidthMultiplier,padding=Math.ceil(visual.shadowBlur+radius*2+lineWidth),width=length+padding*2,height=padding*2,canvas=createCacheCanvas(width,height),c=cacheContext(canvas),centerY=height/2,startX=padding,endX=padding+length;
+  c.strokeStyle=projectile.color;c.lineWidth=lineWidth;c.lineCap='round';c.shadowBlur=visual.shadowBlur;c.shadowColor=projectile.color;c.beginPath();c.moveTo(startX,centerY);c.lineTo(endX,centerY);c.stroke();c.fillStyle=visual.coreColor;c.beginPath();c.arc(endX,centerY,radius*visual.coreRadiusMultiplier,0,TAU);c.fill();
+  sprite={canvas,padding,height,length};projectileSpriteCache.set(key,sprite);return sprite;
 }
+function getParticleSprite(color,size){
+  const visual=VIS.canvasParticle,radius=quantized(size,PERF.particleSizeQuantization),key=`${color}|${radius}`;let sprite=particleSpriteCache.get(key);if(sprite)return sprite;
+  const padding=Math.ceil((Number(visual.shadowBlur)||0)+radius*2),dimension=padding*2,canvas=createCacheCanvas(dimension,dimension),c=cacheContext(canvas),center=dimension/2;
+  c.fillStyle=color;c.shadowBlur=visual.shadowBlur;c.shadowColor=color;c.beginPath();c.arc(center,center,radius,0,TAU);c.fill();sprite={canvas,center,radius};particleSpriteCache.set(key,sprite);return sprite;
+}
+function getTrailSprite(key,length,blackColor,blackWidth,color,lineWidth,shadowBlur,shadowColor){
+  const quantizedLength=quantized(length,PERF.bulletTrailLengthQuantization),cacheKey=`${key}|${quantizedLength}`;let sprite=trailSpriteCache.get(cacheKey);if(sprite)return sprite;
+  const padding=Math.ceil(Math.max(blackWidth,lineWidth,shadowBlur)*1.5+4),width=quantizedLength+padding*2,height=padding*2,canvas=createCacheCanvas(width,height),c=cacheContext(canvas),cy=height/2;
+  c.lineCap='round';c.strokeStyle=blackColor;c.lineWidth=blackWidth;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke();c.strokeStyle=color;c.lineWidth=lineWidth;c.shadowBlur=shadowBlur;c.shadowColor=shadowColor;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke();sprite={canvas,padding,height,length:quantizedLength};trailSpriteCache.set(cacheKey,sprite);return sprite;
+}
+function drawCachedTrail(styleKey,x1,y1,x2,y2,style){
+  const dx=x2-x1,dy=y2-y1,length=Math.hypot(dx,dy);if(length<=0.01)return;
+  const sprite=getTrailSprite(styleKey,length,style.blackColor,style.blackWidth,style.color,style.lineWidth,style.shadowBlur,style.shadowColor);ctx.save();ctx.translate(x1,y1);ctx.rotate(Math.atan2(dy,dx));ctx.drawImage(sprite.canvas,-sprite.padding,-sprite.height/2);ctx.restore();profilerCount('drawImages');
+}
+function getEnemyShotBodySprite(shot){
+  const styles=VIS.enemyShotStyles,type=shot.type,radius=Math.max(1,Number(shot.r)||1),rotationFrames=Math.max(1,PERF.enemyShotRotationFrames|0),pulseFrames=Math.max(1,PERF.enemyShotPulseFrames|0);let rotationFrame=0,pulseFrame=0,styleKey=type;
+  if(type==='bossOrb'){rotationFrame=Math.floor((game.elapsed*styles.bossOrb.rotationSpeed/TAU)*rotationFrames)%rotationFrames}
+  else if(type==='bossBolt'){rotationFrame=Math.floor((game.elapsed*styles.bossBolt.rotationSpeed/TAU)*rotationFrames)%rotationFrames;pulseFrame=Math.floor((game.elapsed*styles.bossBolt.ringPulseSpeed/TAU)*pulseFrames)%pulseFrames}
+  else if(type==='orb'){pulseFrame=Math.floor((game.elapsed*styles.spitterOrb.ringPulseSpeed/TAU)*pulseFrames)%pulseFrames}
+  else if(type!=='bossSpear'){rotationFrame=Math.floor((game.elapsed*styles.default.rotationSpeed/TAU)*rotationFrames)%rotationFrames;styleKey=type==='wave'?'wave':'default'}
+  const key=`${styleKey}|${radius}|${rotationFrame}|${pulseFrame}`;let sprite=enemyShotSpriteCache.get(key);if(sprite)return sprite;
+  let extent=radius+40;if(type==='bossSpear')extent=70;const canvas=createCacheCanvas(extent*2,extent*2),c=cacheContext(canvas),center=extent;c.translate(center,center);
+  if(type==='bossSpear'){
+    const v=styles.bossSpear;c.lineCap='round';c.strokeStyle=v.blackColor;c.lineWidth=v.blackWidth;c.beginPath();c.moveTo(v.trailStart,0);c.lineTo(v.trailEnd,0);c.stroke();c.strokeStyle=v.color;c.lineWidth=v.lineWidth;c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.beginPath();c.moveTo(v.trailStart,0);c.lineTo(v.trailEnd,0);c.stroke();c.shadowBlur=0;c.fillStyle=v.tipColor;c.beginPath();c.moveTo(v.tipX,0);c.lineTo(v.tipBackX,-v.tipHalfHeight);c.lineTo(v.tipBackX,v.tipHalfHeight);c.closePath();c.fill();
+  }else if(type==='bossOrb'){
+    const v=styles.bossOrb;c.rotate(rotationFrame/rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();
+  }else if(type==='bossBolt'){
+    const v=styles.bossBolt,pulse=Math.sin(pulseFrame/pulseFrames*TAU)*v.ringPulseAmount;c.rotate(rotationFrame/rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
+  }else if(type==='orb'){
+    const v=styles.spitterOrb,pulse=Math.sin(pulseFrame/pulseFrames*TAU)*v.ringPulseAmount;c.fillStyle=v.bodyColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;c.beginPath();c.arc(0,0,radius+v.bodyRadiusPadding,0,TAU);c.fill();c.stroke();c.fillStyle=v.coreColor;c.shadowBlur=v.coreShadowBlur;c.shadowColor=v.coreShadowColor;c.beginPath();c.arc(v.coreOffsetX,v.coreOffsetY,radius*v.coreRadiusMultiplier,0,TAU);c.fill();c.fillStyle=v.highlightColor;c.beginPath();c.arc(v.highlightOffsetX,v.highlightOffsetY,v.highlightRadius,0,TAU);c.fill();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
+  }else{
+    const v=styles.default;c.rotate(rotationFrame/rotationFrames*TAU);c.shadowBlur=v.shadowBlur;c.shadowColor=type==='wave'?v.waveShadowColor:v.normalShadowColor;c.fillStyle=type==='wave'?v.waveColor:v.normalColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.fill();c.stroke();
+  }
+  sprite={canvas,extent};enemyShotSpriteCache.set(key,sprite);return sprite;
+}
+function buildFlameCoreCache(){
+  const v=VIS.flame,padding=Math.ceil((Number(v.coreShadowBlur)||0)+12),minX=Math.min(0,v.coreStartX)-padding,maxX=Math.max(v.coreEndX,v.coreControlX)+padding,minY=-Math.max(v.coreHalfWidth,v.coreStartHalfWidth)-padding,maxY=Math.max(v.coreHalfWidth,v.coreStartHalfWidth)+padding,canvas=createCacheCanvas(maxX-minX,maxY-minY),c=cacheContext(canvas);
+  c.translate(-minX,-minY);const gradient=c.createLinearGradient(v.coreGradientStart,0,v.coreGradientEnd,0);for(const [stop,color] of v.coreGradientStops)gradient.addColorStop(stop,color);c.fillStyle=gradient;c.shadowBlur=v.coreShadowBlur;c.shadowColor=v.coreShadowColor;c.beginPath();c.moveTo(v.coreStartX,-v.coreStartHalfWidth);c.quadraticCurveTo(v.coreControlX,-v.coreHalfWidth,v.coreEndX,0);c.quadraticCurveTo(v.coreControlX,v.coreHalfWidth,v.coreStartX,v.coreStartHalfWidth);c.lineTo(v.coreStartX,v.coreStartHalfWidth);c.closePath();c.fill();flameCoreCache={canvas,offsetX:minX,offsetY:minY};
+}
+function buildLightningPathFrames(points,visual){
+  const frameCount=Math.max(1,PERF.lightningPathFrames|0),frames=[];
+  for(let frame=0;frame<frameCount;frame++){
+    const path=typeof Path2D==='function'?new Path2D():[];
+    for(let index=0;index<points.length;index++){
+      const point=points[index];if(!index){if(path instanceof Array)path.push([point.x,point.y,true]);else path.moveTo(point.x,point.y);continue}
+      const previous=points[index-1];for(let step=1;step<=visual.segmentSteps;step++){const t=step/visual.segmentSteps,xx=previous.x+(point.x-previous.x)*t+rand(-visual.jitter,visual.jitter),yy=previous.y+(point.y-previous.y)*t+rand(-visual.jitter,visual.jitter);if(path instanceof Array)path.push([xx,yy,false]);else path.lineTo(xx,yy)}
+    }
+    frames.push(path);
+  }
+  return frames;
+}
+function rebuildEnemySpatial(){enemySpatial.clear();if(!game)return;for(const e of game.enemies)if(!e.dead)enemySpatial.insert(e)}
+function queryEnemies(x,y,r,out){if(enemySpatial.count>0)return enemySpatial.queryCircle(x,y,r,out);out.length=0;if(game)for(const e of game.enemies)if(!e.dead)out.push(e);return out}
 
 const objectPools={particles:[],texts:[],projectiles:[],enemyShots:[],gems:[]};
 function recycleParticle(p){if(objectPools.particles.length<MAX_PARTICLES)objectPools.particles.push(p)}
@@ -346,8 +422,9 @@ function ensureFPSUI(){
   fpsUI=node;
 }
 function syncFPSVisibility(){
-  ensureFPSUI();
+  ensureFPSUI();ensureProfilerUI();
   fpsUI.style.display=fpsMonitor.visible&&state==='playing'?'block':'none';
+  profilerUI.style.display=profiler.visible&&state==='playing'?'block':'none';
 }
 function setFPSVisible(visible){
   fpsMonitor.visible=!!visible;fpsMonitor.frames=0;fpsMonitor.lastSample=performance.now();
@@ -368,6 +445,70 @@ function updateFPSDisplay(now){
     if(fpsUI)fpsUI.textContent=formatText(TEXT.fpsValue,{value:Math.round(fpsMonitor.value)});
     fpsMonitor.frames=0;fpsMonitor.lastSample=now;
   }
+}
+
+const profiler={
+  enabled:PERF.profilerEnabled!==false,
+  visible:!!PERF.profilerVisibleByDefault,
+  frameStart:0,
+  current:Object.create(null),
+  counters:Object.create(null),
+  sums:Object.create(null),
+  counterSums:Object.create(null),
+  frames:0,
+  sampleStart:performance.now(),
+  last:Object.create(null),
+  lastCounters:Object.create(null),
+  frameMs:0,
+  maxFrameMs:0
+};
+function profilerActive(){return profiler.enabled&&profiler.visible&&state==='playing'}
+function profilerStart(){return profilerActive()?performance.now():0}
+function profilerEnd(name,start){if(!start||!profilerActive())return;profiler.current[name]=(profiler.current[name]||0)+(performance.now()-start)}
+function profilerCount(name,value=1){if(!profilerActive())return;profiler.counters[name]=(profiler.counters[name]||0)+value}
+function profilerBeginFrame(now){
+  if(!profilerActive())return;
+  profiler.frameStart=now;profiler.current=Object.create(null);profiler.counters=Object.create(null);
+}
+function profilerEndFrame(now){
+  if(!profilerActive())return;
+  const frameMs=Math.max(0,now-profiler.frameStart);profiler.frameMs+=frameMs;profiler.maxFrameMs=Math.max(profiler.maxFrameMs,frameMs);profiler.frames++;
+  for(const [key,value] of Object.entries(profiler.current))profiler.sums[key]=(profiler.sums[key]||0)+value;
+  for(const [key,value] of Object.entries(profiler.counters))profiler.counterSums[key]=(profiler.counterSums[key]||0)+value;
+  const interval=Math.max(100,Number(PERF.profilerSampleIntervalMs)||500);
+  if(now-profiler.sampleStart<interval)return;
+  const divisor=Math.max(1,profiler.frames),last=Object.create(null),lastCounters=Object.create(null);
+  for(const [key,value] of Object.entries(profiler.sums))last[key]=value/divisor;
+  for(const [key,value] of Object.entries(profiler.counterSums))lastCounters[key]=value/divisor;
+  last.frame=profiler.frameMs/divisor;last.frameMax=profiler.maxFrameMs;
+  profiler.last=last;profiler.lastCounters=lastCounters;profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.frames=0;profiler.frameMs=0;profiler.maxFrameMs=0;profiler.sampleStart=now;
+  updateProfilerUI();
+}
+function ensureProfilerUI(){
+  if(profilerUI)return;
+  const node=document.createElement('pre');node.id='performance-profiler';
+  Object.assign(node.style,{position:'absolute',left:'14px',top:'74px',zIndex:'28',display:'none',pointerEvents:'none',margin:'0',minWidth:'310px',maxWidth:'430px',padding:'12px 14px',border:'1px solid rgba(255,255,255,.16)',borderRadius:'12px',background:'rgba(5,7,14,.88)',backdropFilter:'blur(8px)',color:'#dff8ff',font:'700 11px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace',whiteSpace:'pre-wrap',boxShadow:'0 12px 32px rgba(0,0,0,.42)'});
+  node.textContent='Profiler waiting…';document.querySelector('#game-shell').append(node);profilerUI=node;
+}
+function setProfilerVisible(visible){profiler.visible=!!visible;profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.frames=0;profiler.frameMs=0;profiler.maxFrameMs=0;profiler.sampleStart=performance.now();if(pauseProfilerButton)pauseProfilerButton.textContent=`效能監測：${profiler.visible?'開啟':'關閉'}`;syncFPSVisibility()}
+function toggleProfilerDisplay(){setProfilerVisible(!profiler.visible)}
+function updateProfilerUI(){
+  if(!profilerUI||!profiler.visible)return;
+  const t=profiler.last,c=profiler.lastCounters,fmt=value=>Number(value||0).toFixed(2),count=value=>Math.round(Number(value)||0);
+  const rows=[
+    `FPS ${Math.round(t.frame?1000/t.frame:(fpsMonitor.value||0))} | Frame ${fmt(t.frame)} ms | Max ${fmt(t.frameMax)} ms`,
+    `Update ${fmt(t['update.total'])} | Draw ${fmt(t['draw.total'])}`,
+    `敵人 ${fmt(t['update.enemies'])} | Enemy Grid ${fmt(t['grid.enemies'])}`,
+    `武器 ${fmt(t['update.weapons'])} | 延遲事件 ${fmt(t['update.scheduler'])}`,
+    `玩家彈碰撞 ${fmt(t['update.projectiles'])} | 敵方彈 ${fmt(t['update.enemyShots'])}`,
+    `特殊武器 ${fmt(t['update.specials'])} | EXP/粒子 ${fmt((t['update.gems']||0)+(t['update.particles']||0))}`,
+    `繪製敵人 ${fmt(t['draw.enemies'])} | 玩家彈 ${fmt(t['draw.projectiles'])} | 敵方彈 ${fmt(t['draw.enemyShots'])}`,
+    `繪製武器FX ${fmt(t['draw.weaponFx'])} | 粒子/文字 ${fmt(t['draw.particles'])}`,
+    `Counts E:${game?.enemies?.length||0} P:${game?.projectiles?.length||0} ES:${game?.enemyShots?.length||0} FX:${game?.particles?.length||0}`,
+    `Grid Q enemy:${count(c.enemyGridQueries)} projectile:${count(c.projectileGridQueries)} candidates:${count((c.enemyGridCandidates||0)+(c.projectileGridCandidates||0))}`,
+    `DrawImage ${count(c.drawImages)} | Cache P:${particleSpriteCache.size} B:${projectileSpriteCache.size+enemyShotSpriteCache.size+trailSpriteCache.size}`
+  ];
+  profilerUI.textContent=rows.join('\n');
 }
 function startScreenShake(amplitude,duration=weaponLevelConfig('meteor',1).impact.shakeDurationNormal){
   if(!game||amplitude<=0||duration<=0)return;
@@ -415,7 +556,7 @@ function resetGame(){
     introFlags:{},roleTimers:{...SPAWN.roleTimerStarts},wavePackTimer:SPAWN.mixedWaveTimerStart,spawnCounts:{rat:0,hound:0,shell:0,spitter:0,bloater:0,shadow:0,golem:0,boss:0},openingGrace:SPAWN.openingGraceSeconds,hudTimer:0,
     denseTargets:[],denseTargetTimer:0,denseTargetUpdated:-999,frameDeathParticleBudget:PERF.meteorDeathParticleBudgetPerFrame,frameGemMap:new Map(),lastMeteorBoom:-999,debugModes:{godMode:false,effects:{overload:false,doublexp:false,freeze:false,magnet:false}}
   };
-  enemySpatial.clear();resetHudCache();ensureEffectNodes();prewarmObjectPools();if(images.arena)game.pattern=ctx.createPattern(images.arena,'repeat');updateHUD(true);buildWeaponRack();
+  enemySpatial.clear();projectileSpatial.clear();invalidateScaledWeaponConfigs();resetHudCache();ensureEffectNodes();prewarmObjectPools();if(images.arena)game.pattern=ctx.createPattern(images.arena,'repeat');updateHUD(true);buildWeaponRack();
 }
 function needXP(level){const f=PROG.xpFormula;return Math.round(f.base+f.linear*level+f.quadratic*level*level)}
 function hpMult(seconds){const minute=seconds/SYS.secondsPerMinute;return 1+SCALE.hpLinearPerMinute*minute+SCALE.hpQuadraticPerMinuteSquared*minute*minute}
@@ -796,15 +937,13 @@ function ensurePauseDebugButton(){
   if(oldDebug)oldDebug.remove();
   pauseDebugButton=null;
   if(!pauseFpsButton){
-    const btn=document.createElement('button');
-    btn.id='fps-pause-btn';
-    btn.className='secondary-btn';
-    btn.textContent=TEXT.fpsOff;
-    btn.onclick=toggleFPSDisplay;
-    row.append(btn);
-    pauseFpsButton=btn;
+    const btn=document.createElement('button');btn.id='fps-pause-btn';btn.className='secondary-btn';btn.textContent=TEXT.fpsOff;btn.onclick=toggleFPSDisplay;row.append(btn);pauseFpsButton=btn;
+  }
+  if(!pauseProfilerButton){
+    const btn=document.createElement('button');btn.id='profiler-pause-btn';btn.className='secondary-btn';btn.onclick=toggleProfilerDisplay;row.append(btn);pauseProfilerButton=btn;
   }
   pauseFpsButton.textContent=fpsMonitor.visible?TEXT.fpsOn:TEXT.fpsOff;
+  pauseProfilerButton.textContent=`效能監測：${profiler.visible?'開啟':'關閉'}`;
 }
 function makeDebugButton(text,role,style={}){
   const button=document.createElement('button');
@@ -1349,7 +1488,7 @@ function clearWeaponObjects(key){
     game.gravityOrbs.length=0;
     game.wells.length=0;
   }
-  compactInPlace(game.delayedCasts,cast=>cast.type!==key);
+  const delayedTypes={lightning:new Set(['lightning']),meteor:new Set(['meteor']),gravity:new Set(['gravity']),laser:new Set(['laserMark']),mine:new Set(['mineChain'])}[key];if(delayedTypes)compactInPlace(game.delayedCasts,cast=>!delayedTypes.has(cast.type));
 }
 
 function clearAllSpecialWeaponObjects(){
@@ -1508,7 +1647,7 @@ function declineLastRipple(){if(state!=='lastRipplePrompt'||!game||game.ended)re
 function clearBossBattleThreats(keepBossRewardGems=false){
   for(const shot of game.enemyShots)recycleEnemyShot(shot);game.enemyShots.length=0;
   for(const projectile of game.projectiles)recycleProjectile(projectile);game.projectiles.length=0;
-  for(const enemy of game.enemies)enemy.dead=true;game.enemies.length=0;enemySpatial.clear();
+  for(const enemy of game.enemies)enemy.dead=true;game.enemies.length=0;enemySpatial.clear();projectileSpatial.clear();
   compactInPlace(game.gems,gem=>keepBossRewardGems&&gem.bossReward===true,recycleGem);
   compactInPlace(game.particles,()=>false,recycleParticle);
   compactInPlace(game.texts,()=>false,recycleText);
@@ -1538,22 +1677,35 @@ function startBossRewardPhase(x,y){
 function update(dt){
   if(state!=='playing'||!game||game.ended)return;
   const lootPhase=game.bossRewardPhase,p=game.player;
-  game.elapsed+=dt;
-  game.frameDeathParticleBudget=PERF.meteorDeathParticleBudgetPerFrame;game.frameGemMap.clear();if(!lootPhase)updateEffects(dt);else clearBossBattleThreats(true);updateScreenShake(dt);p.invuln=Math.max(0,p.invuln-dt);
+  game.elapsed+=dt;game.frameDeathParticleBudget=PERF.meteorDeathParticleBudgetPerFrame;game.frameGemMap.clear();
+  let section=profilerStart();if(!lootPhase)updateEffects(dt);else clearBossBattleThreats(true);profilerEnd('update.effects',section);
+  updateScreenShake(dt);p.invuln=Math.max(0,p.invuln-dt);
   const keyX=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),keyY=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
   let dx=keyX+touch.x,dy=keyY+touch.y,moveScale=1;const manual=Math.hypot(dx,dy)>PLAYER_CFG.keyboardMouseDeadZone;if(manual)mouse.active=false;
   else if(mouse.active){const mx=mouse.targetX-p.x,my=mouse.targetY-p.y,md=Math.hypot(mx,my);if(md<PLAYER_CFG.mouseArrivalDistance){mouse.active=false;dx=dy=0}else{dx=mx/md;dy=my/md;moveScale=clamp(md/PLAYER_CFG.mouseSlowDistance,PLAYER_CFG.mouseMinimumMoveScale,1)}}
   const len=Math.hypot(dx,dy),isMoving=len>PLAYER_CFG.keyboardMouseDeadZone;if(isMoving){dx/=Math.max(1,len);dy/=Math.max(1,len);p.angle=Math.atan2(dy,dx)}
   const rippleMove=game.lastRippleActive?(Number(LAST_RIPPLE.moveSpeedMultiplier)||1.25):1,speed=p.baseSpeed*SPEED_MULT[p.stats.speed]*rippleMove;p.vx=dx*speed*moveScale;p.vy=dy*speed*moveScale;p.x+=p.vx*dt;p.y+=p.vy*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
   if(lootPhase){
-    game.bossRewardRemaining=Math.max(0,game.bossRewardRemaining-dt);updateGems(dt,false);updateParticles(dt);
+    game.bossRewardRemaining=Math.max(0,game.bossRewardRemaining-dt);
+    section=profilerStart();updateGems(dt,false);profilerEnd('update.gems',section);
+    section=profilerStart();updateParticles(dt);profilerEnd('update.particles',section);
     game.hudTimer-=dt;if(game.hudTimer<=0){game.hudTimer=1/PERF.hudUpdatesPerSecond;updateHUD(false)}
     if(game.bossRewardRemaining<=0){game.bossRewardPhase=false;endGame(true)}return;
   }
-  updatePassiveBonuses(dt,isMoving);
-  if(game.lastRippleActive)game.lastRippleRemaining=Math.max(0,game.lastRippleRemaining-dt);
-  updateSpawns(dt);if(game.bossSpawned&&bossFightRemainingExact(game.elapsed)<=0){game.bossTimedOut=true;toast(TEXT.bossTimeoutToast);endGame(false);return}updateEnemies(dt);rebuildEnemySpatial();game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;refreshDenseTargetCache()}
-  updateWeapons(dt);updateDelayedCasts(dt);updateProjectiles(dt);updateEnemyShots(dt);updateSpecials(dt);updateGems(dt);updateMapDrops(dt);updateParticles(dt);
+  updatePassiveBonuses(dt,isMoving);if(game.lastRippleActive)game.lastRippleRemaining=Math.max(0,game.lastRippleRemaining-dt);
+  section=profilerStart();updateSpawns(dt);profilerEnd('update.spawns',section);
+  if(game.bossSpawned&&bossFightRemainingExact(game.elapsed)<=0){game.bossTimedOut=true;toast(TEXT.bossTimeoutToast);endGame(false);return}
+  section=profilerStart();updateEnemies(dt);profilerEnd('update.enemies',section);
+  section=profilerStart();rebuildEnemySpatial();profilerEnd('grid.enemies',section);
+  game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;section=profilerStart();refreshDenseTargetCache();profilerEnd('grid.denseTargets',section)}
+  section=profilerStart();updateWeapons(dt);profilerEnd('update.weapons',section);
+  section=profilerStart();updateDelayedCasts(dt);profilerEnd('update.scheduler',section);
+  section=profilerStart();updateProjectiles(dt);profilerEnd('update.projectiles',section);
+  section=profilerStart();updateEnemyShots(dt);profilerEnd('update.enemyShots',section);
+  section=profilerStart();updateSpecials(dt);profilerEnd('update.specials',section);
+  section=profilerStart();updateGems(dt);profilerEnd('update.gems',section);
+  section=profilerStart();updateMapDrops(dt);profilerEnd('update.mapDrops',section);
+  section=profilerStart();updateParticles(dt);profilerEnd('update.particles',section);
   if(game.bossRewardPhase){clearBossBattleThreats(true);updateHUD(true);return}
   if(game.lastRippleActive&&game.lastRippleRemaining<=0&&!game.bossDefeated){game.lastRippleExpired=true;endGame(false);return}
   game.hudTimer-=dt;if(game.hudTimer<=0){game.hudTimer=1/PERF.hudUpdatesPerSecond;updateHUD(false)}
@@ -1865,7 +2017,15 @@ function launchGravityOrb(spot,level){
   game.gravityOrbs.push({x:player.x,y:player.y,sx:player.x,sy:player.y,tx:spot.x,ty:spot.y,age:0,duration:clamp(cfg.durationBase+distance/cfg.distanceDivisor,cfg.durationMin,cfg.durationMax),level,spin:rand(0,TAU)});
 }
 function spawnMeteorAt(spot,level,big=false){const levelCfg=weaponLevelConfig('meteor',level),duration=big&&levelCfg.largeMeteor?levelCfg.largeMeteor.fallDuration:levelCfg.fallDuration;game.meteors.push({x:spot.x,y:spot.y,age:0,duration,level,big})}
-function executeDelayedCast(cast){const data=cast.data;if(cast.type==='lightning'){const first=nearestEnemy(weaponLevelConfig('lightning',data.level).range,null,data.exclude||null);if(first)chainLightning(first,data.level,data.maxHits,data.damage)}else if(cast.type==='meteor')spawnMeteorAt(data.spot,data.level,data.big);else if(cast.type==='gravity')launchGravityOrb(data.spot,data.level)}
+function executeDelayedCast(cast){
+  const data=cast.data;
+  if(cast.type==='lightning'){
+    const cfg=weaponLevelConfig('lightning',data.level),first=nearestEnemy(weaponSearchRange('lightning',cfg),null,data.exclude||null);if(first)chainLightning(first,data.level,data.maxHits,data.damage);
+  }else if(cast.type==='meteor')spawnMeteorAt(data.spot,data.level,data.big);
+  else if(cast.type==='gravity')launchGravityOrb(data.spot,data.level);
+  else if(cast.type==='laserMark'){if(data.enemy&&!data.enemy.dead)damageEnemy(data.enemy,data.damage,'crit')}
+  else if(cast.type==='mineChain'){if(data.mine&&!data.mine.dead)detonateMine(data.mine)}
+}
 function updateDelayedCasts(dt){
   for(const cast of game.delayedCasts){
     cast.delay-=dt;if(cast.delay<=0&&!cast.done){cast.done=true;executeDelayedCast(cast)}
@@ -1875,12 +2035,12 @@ function updateDelayedCasts(dt){
 
 function updateWeapons(dt){
   const player=game.player,temporaryCooldownMultiplier=game.effects.overload>0?CFG.items.overload.cooldownMultiplier:1,rippleCooldownMultiplier=game.lastRippleActive?(Number(LAST_RIPPLE.cooldownMultiplier)||0.7):1,cooldownMultiplier=temporaryCooldownMultiplier*permanentWeaponCooldownMultiplier()*fullHpCooldownMultiplier()*rippleCooldownMultiplier,areaMultiplier=weaponAreaMultiplier(),sizeMultiplier=weaponSizeMultiplier();player.baseTimer-=dt;
-  if(player.baseTimer<=0){player.baseTimer=BASE.cooldown*cooldownMultiplier;const target=nearestEnemy(BASE.targetSearchRange*areaMultiplier);if(target){const damage=BASE.baseDamage*(1+Math.min(game.level-PROG.startLevel,PROG.maxLevelDamageScalingLevel)*PROG.baseAttackDamagePerLevel);fireProjectile(player.x,player.y,target.x,target.y,damage,BASE.projectileSpeed,BASE.projectileRadius*sizeMultiplier,BASE.color,BASE.range*areaMultiplier,0,BASE.type,0,BASE.visualRadius?BASE.visualRadius*sizeMultiplier:undefined)}}
+  if(player.baseTimer<=0){player.baseTimer=BASE.cooldown*cooldownMultiplier;const target=nearestEnemy(BASE.range*areaMultiplier*(Number(PERF.weaponSearchRangeMultiplier)||1.1));if(target){const damage=BASE.baseDamage*(1+Math.min(game.level-PROG.startLevel,PROG.maxLevelDamageScalingLevel)*PROG.baseAttackDamagePerLevel);fireProjectile(player.x,player.y,target.x,target.y,damage,BASE.projectileSpeed,BASE.projectileRadius*sizeMultiplier,BASE.color,BASE.range*areaMultiplier,0,BASE.type,0,BASE.visualRadius?BASE.visualRadius*sizeMultiplier:undefined)}}
   for(const [key,weapon] of Object.entries(player.weapons)){weapon.timer=(weapon.timer||0)-dt;if(key==='orbit')continue;if(key==='drone'){updateDronesWeapon(weapon,dt,cooldownMultiplier);continue}if(weapon.timer<=0){triggerWeapon(key,weapon.level);weapon.timer=weaponCooldown(key,weapon.level)*cooldownMultiplier}}
 }
 function weaponCooldown(key,level){return weaponLevelConfig(key,level).cooldown}
 function triggerWeapon(key,level){
-  const player=game.player,levelCfg=weaponLevelConfig(key,level),target=nearestEnemy(SYS.weaponTargetSearchRange*weaponAreaMultiplier());if(!target&&!['mine','frost','hammer'].includes(key))return;const angle=target?Math.atan2(target.y-player.y,target.x-player.x):player.angle;
+  const player=game.player,levelCfg=weaponLevelConfig(key,level),needsTarget=!['mine','frost','hammer','meteor','gravity'].includes(key),target=needsTarget?nearestEnemy(weaponSearchRange(key,levelCfg)):null;if(!target&&needsTarget)return;const angle=target?Math.atan2(target.y-player.y,target.x-player.x):player.angle;
   if(key==='shotgun'){
     const c=levelCfg;for(let i=0;i<c.count;i++){const shotAngle=angle-c.spreadDegrees*Math.PI/360+c.spreadDegrees*Math.PI/180*(i/(c.count-1||1))+rand(-c.angleJitterRadians,c.angleJitterRadians);fireProjectile(player.x,player.y,player.x+Math.cos(shotAngle)*c.aimPointDistance,player.y+Math.sin(shotAngle)*c.aimPointDistance,c.damage,c.speed,c.projectileRadius,c.colorProjectile||CFG.weapons.shotgun.color,c.range,0,'pellet',c.knockback)}if(c.core){const core=c.core;fireProjectile(player.x,player.y,player.x+Math.cos(angle)*c.aimPointDistance,player.y+Math.sin(angle)*c.aimPointDistance,core.damage,core.speed,core.radius,core.color,core.range,core.pierce,'core',core.knockback,core.visualRadius??core.radius)}muzzle(player.x+Math.cos(angle)*c.muzzle.offset,player.y+Math.sin(angle)*c.muzzle.offset,c.muzzle.color,c.muzzle.particles);sound.shot();
   }else if(key==='boomerang'){
@@ -1888,7 +2048,7 @@ function triggerWeapon(key,level){
   }else if(key==='flame'){
     const c=levelCfg,makeJet=direction=>({type:'flameJet',x:player.x,y:player.y,ang:direction,age:0,duration:c.duration,level,tick:0,emitTimer:0,flames:[]});for(let i=0;i<c.directionCount;i++)game.zones.push(makeJet(angle+i*Math.PI));sound.play('flame');
   }else if(key==='lightning'){
-    const c=levelCfg,first=nearestEnemy(c.range);if(first)chainLightning(first,level,c.maxHits,c.damage);for(let i=1;i<c.count;i++)queueDelayedCast(c.castSpacingSeconds*i,'lightning',{level,maxHits:c.maxHits,damage:c.damage,exclude:first});sound.play('lightning');
+    const c=levelCfg,first=nearestEnemy(weaponSearchRange('lightning',c));if(first)chainLightning(first,level,c.maxHits,c.damage);for(let i=1;i<c.count;i++)queueDelayedCast(c.castSpacingSeconds*i,'lightning',{level,maxHits:c.maxHits,damage:c.damage,exclude:first});sound.play('lightning');
   }else if(key==='frost'){
     const c=levelCfg;aoe(player.x,player.y,c.radius,c.damage,enemy=>{enemy.slow=Math.max(enemy.slow,c.slowDuration);enemy.slowAmt=Math.max(enemy.slowAmt,c.slowAmount);const f=enemy.type==='boss'?c.freezeSeconds.boss:enemy.type==='golem'?c.freezeSeconds.golem:c.freezeSeconds.normal;if(f>0)enemy.freeze=Math.max(enemy.freeze,f)},c.knockback,'frost');addWave(player.x,player.y,c.visual.startRadius,c.radius,c.visual.duration,c.visual.color,'frost');sound.play('frost');
   }else if(key==='meteor'){
@@ -1906,7 +2066,7 @@ function triggerWeapon(key,level){
 
 function updateDronesWeapon(weapon,dt,cooldownMultiplier){
   const level=weapon.level,c=weaponLevelConfig('drone',level),count=c.count;if(game.drones.length!==count)game.drones=Array.from({length:count},(_,i)=>({angle:i/count*TAU,timer:rand(0,c.startShotTimerMax),missile:rand(0,c.startMissileTimerMax)}));
-  for(const drone of game.drones){drone.angle+=dt*c.orbitSpeed;drone.timer-=dt;drone.missile-=dt;const x=game.player.x+Math.cos(drone.angle)*c.orbitRadius,y=game.player.y+Math.sin(drone.angle)*c.orbitRadius;if(drone.timer<=0){drone.timer=c.shotCooldown*cooldownMultiplier;const target=nearestEnemy(c.targetSearchRange);if(target)fireProjectile(x,y,target.x,target.y,c.damage,c.speed,c.projectileRadius,CFG.weapons.drone.color,c.projectileRange,c.pierce,'drone')}if(c.missile&&drone.missile<=0){const m=c.missile;drone.missile=m.cooldown*cooldownMultiplier;const target=nearestEnemy(m.targetRange);if(target)fireProjectile(x,y,target.x,target.y,m.damage,m.speed,m.radius,m.color,c.projectileRange,0,'missile',0,m.visualRadius??m.radius)}}
+  for(const drone of game.drones){drone.angle+=dt*c.orbitSpeed;drone.timer-=dt;drone.missile-=dt;const x=game.player.x+Math.cos(drone.angle)*c.orbitRadius,y=game.player.y+Math.sin(drone.angle)*c.orbitRadius;if(drone.timer<=0){drone.timer=c.shotCooldown*cooldownMultiplier;const target=nearestEnemy(weaponSearchRange('drone',c));if(target)fireProjectile(x,y,target.x,target.y,c.damage,c.speed,c.projectileRadius,CFG.weapons.drone.color,c.projectileRange,c.pierce,'drone')}if(c.missile&&drone.missile<=0){const m=c.missile;drone.missile=m.cooldown*cooldownMultiplier;const target=nearestEnemy(Math.max(Number(c.projectileRange)||0,Number(m.targetRange)||0)*(Number(PERF.weaponSearchRangeMultiplier)||1.1));if(target)fireProjectile(x,y,target.x,target.y,m.damage,m.speed,m.radius,m.color,c.projectileRange,0,'missile',0,m.visualRadius??m.radius)}}
 }
 
 function fireProjectile(x,y,targetX,targetY,damage,speed,radius,color,maxRange=BASE.range,pierce=0,type='normal',knockback=0,visualRadius=radius){
@@ -1925,20 +2085,29 @@ function fireProjectile(x,y,targetX,targetY,damage,speed,radius,color,maxRange=B
     maxRange:maxRange||BASE.range,
     pierce,
     type,
-    knock:knockback
+    knock:knockback,dead:false
   });
   game.projectiles.push(projectile);
 }
 function updateProjectiles(dt){
-  const candidates=spatialScratch.projectile,visual=VIS.projectile;
-  for(const projectile of game.projectiles){projectile.px=projectile.x;projectile.py=projectile.y;projectile.x+=projectile.vx*dt;projectile.y+=projectile.vy*dt;projectile.age+=(projectile.travelSpeed||Math.hypot(projectile.vx,projectile.vy))*dt;queryEnemies(projectile.x,projectile.y,projectile.r+MAX_ENEMY_RADIUS+visual.collisionPadding,candidates);
-    for(const enemy of candidates){if(enemy.dead||projectile.hit.has(enemy))continue;const radius=enemy.r+projectile.r;if((enemy.x-projectile.x)**2+(enemy.y-projectile.y)**2>=radius*radius)continue;projectile.hit.add(enemy);damageEnemy(enemy,projectile.damage,projectile.type==='core'?'crit':'normal',true,projectile.knock,projectile.x,projectile.y);hitBurst(projectile.x,projectile.y,projectile.color);
+  const candidates=spatialScratch.projectile,visual=VIS.projectile,player=game.player;
+  projectileSpatial.clear();
+  for(const projectile of game.projectiles){
+    projectile.dead=false;projectile.px=projectile.x;projectile.py=projectile.y;projectile.x+=projectile.vx*dt;projectile.y+=projectile.vy*dt;projectile.age+=(projectile.travelSpeed||Math.hypot(projectile.vx,projectile.vy))*dt;
+    if(projectile.age<projectile.maxRange&&Math.abs(projectile.x-player.x)<SYS.projectileDespawnDistance&&Math.abs(projectile.y-player.y)<SYS.projectileDespawnDistance)projectileSpatial.insert(projectile);else projectile.dead=true;
+  }
+  const maximumProjectileRadius=projectileSpatial.maxRadius+visual.collisionPadding;
+  for(const enemy of game.enemies){
+    if(game.bossRewardPhase)break;if(enemy.dead)continue;projectileSpatial.queryCircle(enemy.x,enemy.y,enemy.r+maximumProjectileRadius,candidates);
+    for(const projectile of candidates){
+      if(projectile.dead||projectile.hit.has(enemy))continue;const radius=enemy.r+projectile.r,dx=enemy.x-projectile.x,dy=enemy.y-projectile.y;if(dx*dx+dy*dy>=radius*radius)continue;
+      projectile.hit.add(enemy);damageEnemy(enemy,projectile.damage,projectile.type==='core'?'crit':'normal',true,projectile.knock,projectile.x,projectile.y);if(game.bossRewardPhase){projectile.dead=true;break}hitBurst(projectile.x,projectile.y,projectile.color);
       if(projectile.type==='core'){const core=weaponLevelConfig('shotgun',SYS.maxUpgradeLevel).core;aoe(projectile.x,projectile.y,core.explosionRadius,core.explosionDamage,null,core.explosionKnockback,'normal');addWave(projectile.x,projectile.y,core.waveStart,core.explosionRadius,core.waveDuration,core.waveColor)}
-      if(projectile.type==='missile'){const missile=weaponLevelConfig('drone',SYS.maxUpgradeLevel).missile;aoe(projectile.x,projectile.y,missile.explosionRadius,missile.explosionDamage,null,missile.explosionKnockback,'normal');addWave(projectile.x,projectile.y,missile.waveStart,missile.explosionRadius,missile.waveDuration,missile.waveColor);projectile.age=visual.expireAge;break}
-      if(projectile.pierce>0)projectile.pierce--;else{projectile.age=visual.expireAge;break}
+      if(projectile.type==='missile'){const missile=weaponLevelConfig('drone',SYS.maxUpgradeLevel).missile;aoe(projectile.x,projectile.y,missile.explosionRadius,missile.explosionDamage,null,missile.explosionKnockback,'normal');addWave(projectile.x,projectile.y,missile.waveStart,missile.explosionRadius,missile.waveDuration,missile.waveColor);projectile.dead=true;break}
+      if(projectile.pierce>0)projectile.pierce--;else{projectile.dead=true;break}
     }
   }
-  compactInPlace(game.projectiles,projectile=>projectile.age<projectile.maxRange&&Math.abs(projectile.x-game.player.x)<SYS.projectileDespawnDistance&&Math.abs(projectile.y-game.player.y)<SYS.projectileDespawnDistance,recycleProjectile);
+  compactInPlace(game.projectiles,projectile=>!projectile.dead&&projectile.age<projectile.maxRange&&Math.abs(projectile.x-player.x)<SYS.projectileDespawnDistance&&Math.abs(projectile.y-player.y)<SYS.projectileDespawnDistance,recycleProjectile);projectileSpatial.clear();
 }
 function predictiveAimAngle(
   shooterX,
@@ -2053,7 +2222,7 @@ function updateSpecials(dt){
   for(const zone of game.zones){zone.age+=dt;zone.tick-=dt;
     if(zone.type==='flameJet'){
       zone.flames=zone.flames||[];zone.emitTimer=(zone.emitTimer??0)-dt;const flameCfg=weaponLevelConfig('flame',zone.level),active=zone.age<zone.duration,range=flameCfg.range,half=flameCfg.halfAngleDegrees*Math.PI/180;
-      if(active){zone.x=player.x;zone.y=player.y;const target=nearestEnemy(flameCfg.targetSearchRange);if(target){const targetAngle=Math.atan2(target.y-player.y,target.x-player.x),maximumTurn=dt*flameCfg.turnRadiansPerSecond;zone.ang+=clamp(angleDiff(zone.ang,targetAngle),-maximumTurn,maximumTurn)}
+      if(active){zone.x=player.x;zone.y=player.y;const target=nearestEnemy(weaponSearchRange('flame',flameCfg));if(target){const targetAngle=Math.atan2(target.y-player.y,target.x-player.x),maximumTurn=dt*flameCfg.turnRadiansPerSecond;zone.ang+=clamp(angleDiff(zone.ang,targetAngle),-maximumTurn,maximumTurn)}
         if(zone.emitTimer<=0){const particleCfg=flameCfg.particle,level4=zone.level>=4;zone.emitTimer+=level4?particleCfg.emitIntervalLevel4:particleCfg.emitIntervalBase;const count=level4?particleCfg.countLevel4:particleCfg.countBase,cap=level4?particleCfg.capLevel4:particleCfg.capBase;for(let i=0;i<count&&zone.flames.length<cap;i++)spawnFlameParticle(zone,half,range*particleCfg.rangeMultiplier)}
         if(zone.tick<=0){zone.tick=flameCfg.tickSeconds;queryEnemies(zone.x,zone.y,range+MAX_ENEMY_RADIUS,zoneCandidates);for(const enemy of zoneCandidates){if(enemy.dead)continue;const dx=enemy.x-zone.x,dy=enemy.y-zone.y;if(dx*dx+dy*dy>=range*range)continue;if(Math.abs(angleDiff(zone.ang,Math.atan2(dy,dx)))<half){damageEnemy(enemy,flameCfg.damage,'fire',false);if(flameCfg.burnDuration>0){enemy.burn=Math.max(enemy.burn,flameCfg.burnDuration);enemy.burnDps=flameCfg.burnDamagePerSecond}}}}
       }
@@ -2068,8 +2237,8 @@ function updateSpecials(dt){
   compactInPlace(game.zones,zone=>zone.type==='flameJet'?(zone.age<zone.duration||zone.flames.length>0):zone.age<zone.duration);
 
   const beamCandidates=spatialScratch.beam;
-  for(const beam of game.beams){beam.age+=dt;beam.tick-=dt;beam.x=player.x;beam.y=player.y;const laserCfg=weaponLevelConfig('laser',beam.level),target=nearestEnemy(laserCfg.targetSearchRange);if(target&&laserCfg.trackingRadiansPerSecond>0){const targetAngle=Math.atan2(target.y-player.y,target.x-player.x);beam.ang+=clamp(angleDiff(beam.ang,targetAngle),-dt*laserCfg.trackingRadiansPerSecond,dt*laserCfg.trackingRadiansPerSecond)}
-    if(beam.tick<=0){beam.tick=laserCfg.tickSeconds;const length=laserCfg.range,width=laserCfg.width,endX=beam.x+Math.cos(beam.ang)*length,endY=beam.y+Math.sin(beam.ang)*length,midX=(beam.x+endX)/2,midY=(beam.y+endY)/2;queryEnemies(midX,midY,length/2+width+MAX_ENEMY_RADIUS,beamCandidates);for(const enemy of beamCandidates){if(enemy.dead)continue;if(pointLineDistance(enemy.x,enemy.y,beam.x,beam.y,endX,endY)<enemy.r+width/2){damageEnemy(enemy,laserCfg.damage,'laser',false);if(laserCfg.markCount>0){enemy.laserMark=(enemy.laserMark||0)+1;if(enemy.laserMark===laserCfg.markCount)setTimeout(()=>{if(!enemy.dead)damageEnemy(enemy,laserCfg.markDamage,'crit')},laserCfg.markDelaySeconds*1000)}}}}
+  for(const beam of game.beams){beam.age+=dt;beam.tick-=dt;beam.x=player.x;beam.y=player.y;const laserCfg=weaponLevelConfig('laser',beam.level),target=nearestEnemy(weaponSearchRange('laser',laserCfg));if(target&&laserCfg.trackingRadiansPerSecond>0){const targetAngle=Math.atan2(target.y-player.y,target.x-player.x);beam.ang+=clamp(angleDiff(beam.ang,targetAngle),-dt*laserCfg.trackingRadiansPerSecond,dt*laserCfg.trackingRadiansPerSecond)}
+    if(beam.tick<=0){beam.tick=laserCfg.tickSeconds;const length=laserCfg.range,width=laserCfg.width,endX=beam.x+Math.cos(beam.ang)*length,endY=beam.y+Math.sin(beam.ang)*length,midX=(beam.x+endX)/2,midY=(beam.y+endY)/2;queryEnemies(midX,midY,length/2+width+MAX_ENEMY_RADIUS,beamCandidates);for(const enemy of beamCandidates){if(enemy.dead)continue;if(pointLineDistance(enemy.x,enemy.y,beam.x,beam.y,endX,endY)<enemy.r+width/2){damageEnemy(enemy,laserCfg.damage,'laser',false);if(laserCfg.markCount>0){enemy.laserMark=(enemy.laserMark||0)+1;if(enemy.laserMark===laserCfg.markCount)queueDelayedCast(laserCfg.markDelaySeconds,'laserMark',{enemy,damage:laserCfg.markDamage})}}}}
   }
   compactInPlace(game.beams,beam=>beam.age<beam.duration);
 
@@ -2090,9 +2259,9 @@ function updateSpecials(dt){
   const waveCandidates=spatialScratch.wave;for(const wave of game.waves){wave.age+=dt;if(wave.age<0)continue;const previous=wave.r;wave.r=Math.min(wave.max,wave.max*(wave.age/wave.dur));if(wave.damage){queryEnemies(wave.x,wave.y,wave.r+MAX_ENEMY_RADIUS,waveCandidates);for(const enemy of waveCandidates){if(enemy.dead||wave.hit.has(enemy))continue;const distance=Math.hypot(enemy.x-wave.x,enemy.y-wave.y);if(distance>=previous-enemy.r&&distance<=wave.r+enemy.r){wave.hit.add(enemy);damageEnemy(enemy,wave.damage,'hammer',true,wave.hitKnockback||0,wave.x,wave.y)}}}}compactInPlace(game.waves,wave=>wave.age<wave.dur);
   for(const lightning of game.lightning)lightning.age+=dt;compactInPlace(game.lightning,lightning=>lightning.age<lightning.duration);
 }
-function detonateMine(mine){const c=weaponLevelConfig('mine',mine.level);mine.dead=true;aoe(mine.x,mine.y,mine.r,c.explosionDamage,null,c.explosionKnockback,'acid');game.zones.push({type:'acid',x:mine.x,y:mine.y,r:mine.r,age:0,duration:c.acidDuration,damage:c.acidDamage,tick:c.acidStartTick,tickSeconds:c.acidTickSeconds,particleInterval:c.acidParticleInterval,slow:c.acidSlowDuration>0,slowDuration:c.acidSlowDuration,slowAmount:c.acidSlowAmount,visualAlpha:null,visualTick:0});addWave(mine.x,mine.y,c.wave.startRadius,mine.r,c.wave.duration,c.wave.color);if(c.chainRange>0){for(const other of game.mines){if(other!==mine&&!other.dead&&Math.hypot(other.x-mine.x,other.y-mine.y)<c.chainRange)setTimeout(()=>{if(!other.dead)detonateMine(other)},c.chainDelaySeconds*1000)}}}
+function detonateMine(mine){const c=weaponLevelConfig('mine',mine.level);mine.dead=true;aoe(mine.x,mine.y,mine.r,c.explosionDamage,null,c.explosionKnockback,'acid');game.zones.push({type:'acid',x:mine.x,y:mine.y,r:mine.r,age:0,duration:c.acidDuration,damage:c.acidDamage,tick:c.acidStartTick,tickSeconds:c.acidTickSeconds,particleInterval:c.acidParticleInterval,slow:c.acidSlowDuration>0,slowDuration:c.acidSlowDuration,slowAmount:c.acidSlowAmount,visualAlpha:null,visualTick:0});addWave(mine.x,mine.y,c.wave.startRadius,mine.r,c.wave.duration,c.wave.color);if(c.chainRange>0){for(const other of game.mines){if(other!==mine&&!other.dead&&Math.hypot(other.x-mine.x,other.y-mine.y)<c.chainRange)queueDelayedCast(c.chainDelaySeconds,'mineChain',{mine:other})}}}
 
-function chainLightning(first,level,maxHits,damage){const c=weaponLevelConfig('lightning',level),used=new Set(),points=[{x:game.player.x,y:game.player.y}],candidates=spatialScratch.lightning;let current=first;for(let i=0;i<maxHits&&current;i++){used.add(current);points.push({x:current.x,y:current.y});damageEnemy(current,damage,'lightning',true);if(c.stunSeconds>0)current.stun=Math.max(current.stun,c.stunSeconds);let next=null,best=c.jumpRange*c.jumpRange;queryEnemies(current.x,current.y,c.jumpRange+MAX_ENEMY_RADIUS,candidates);for(const enemy of candidates){if(enemy.dead||used.has(enemy))continue;const distance=(enemy.x-current.x)**2+(enemy.y-current.y)**2;if(distance<best){best=distance;next=enemy}}current=next}game.lightning.push({pts:points,age:0,duration:c.visualDuration,level})}
+function chainLightning(first,level,maxHits,damage){const c=weaponLevelConfig('lightning',level),used=new Set(),points=[{x:game.player.x,y:game.player.y}],candidates=spatialScratch.lightning;let current=first;for(let i=0;i<maxHits&&current;i++){used.add(current);points.push({x:current.x,y:current.y});damageEnemy(current,damage,'lightning',true);if(c.stunSeconds>0)current.stun=Math.max(current.stun,c.stunSeconds);let next=null,best=c.jumpRange*c.jumpRange;queryEnemies(current.x,current.y,c.jumpRange+MAX_ENEMY_RADIUS,candidates);for(const enemy of candidates){if(enemy.dead||used.has(enemy))continue;const distance=(enemy.x-current.x)**2+(enemy.y-current.y)**2;if(distance<best){best=distance;next=enemy}}current=next}game.lightning.push({pts:points,paths:buildLightningPathFrames(points,c.visual),age:0,duration:c.visualDuration,level})}
 function aoe(x,y,r,damage,fn,knock=0,kind='normal',showText=true){
   const candidates=spatialScratch.aoe;queryEnemies(x,y,r+MAX_ENEMY_RADIUS,candidates);
   for(const e of candidates){if(e.dead)continue;if((e.x-x)**2+(e.y-y)**2<(r+e.r)**2){damageEnemy(e,damage,kind,showText,knock,x,y);if(fn&&!e.dead)fn(e)}}
@@ -2112,9 +2281,9 @@ function insertDenseCandidate(cache,candidate){
   if(displaced)recycleDenseCandidate(displaced);
 }
 function refreshDenseTargetCache(){if(!game)return;const cache=game.denseTargets;for(const candidate of cache)recycleDenseCandidate(candidate);cache.length=0;if(!enemySpatial.count){game.denseTargetUpdated=game.elapsed;return}const player=game.player,maxRange=weaponLevelConfig('gravity',1).maximumRange+PERF.spatialCellSize*PERF.denseSearchPaddingCells,maxSquared=maxRange*maxRange;
-  for(const bucket of enemySpatial.cells.values()){if(!bucket.length)continue;let sumX=0,sumY=0;for(const enemy of bucket){sumX+=enemy.x;sumY+=enemy.y}const x=sumX/bucket.length,y=sumY/bucket.length,dx=x-player.x,dy=y-player.y;if(dx*dx+dy*dy>maxSquared)continue;let score=bucket.length*PERF.denseBucketBaseWeight;
-    for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){if(!ox&&!oy)continue;const neighbor=enemySpatial.getBucket(bucket.cx+ox,bucket.cy+oy);if(neighbor)score+=neighbor.length*((ox===0||oy===0)?PERF.denseAxialNeighborWeight:PERF.denseDiagonalNeighborWeight)}
-    const candidate=denseCandidatePool.pop()||{};candidate.x=x;candidate.y=y;candidate.score=score;insertDenseCandidate(cache,candidate)}game.denseTargetUpdated=game.elapsed;
+  enemySpatial.forEachActiveBucket(bucket=>{if(!bucket.length)return;let sumX=0,sumY=0;for(const enemy of bucket){sumX+=enemy.x;sumY+=enemy.y}const x=sumX/bucket.length,y=sumY/bucket.length,dx=x-player.x,dy=y-player.y;if(dx*dx+dy*dy>maxSquared)return;const cx=Math.floor(x/enemySpatial.cellSize),cy=Math.floor(y/enemySpatial.cellSize);let score=bucket.length*PERF.denseBucketBaseWeight;
+    for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){if(!ox&&!oy)continue;const neighbor=enemySpatial.getBucket(cx+ox,cy+oy);if(neighbor)score+=neighbor.length*((ox===0||oy===0)?PERF.denseAxialNeighborWeight:PERF.denseDiagonalNeighborWeight)}
+    const candidate=denseCandidatePool.pop()||{};candidate.x=x;candidate.y=y;candidate.score=score;insertDenseCandidate(cache,candidate)});game.denseTargetUpdated=game.elapsed;
 }
 function densestEnemySpot(skip=0,exclude=[],minRange=0,maxRange=Infinity){if(!game.denseTargets.length||game.elapsed-game.denseTargetUpdated>PERF.denseTargetRefreshSeconds*PERF.denseCacheStaleMultiplier)refreshDenseTargetCache();const start=game.denseTargets.length?skip%game.denseTargets.length:0,minSeparationSquared=PERF.denseTargetMinimumScoreDistance**2;for(let offset=0;offset<game.denseTargets.length;offset++){const source=game.denseTargets[(start+offset)%game.denseTargets.length],candidate=clampPointToRange(source.x,source.y,minRange,maxRange);let separated=true;for(const point of exclude){const dx=point.x-candidate.x,dy=point.y-candidate.y;if(dx*dx+dy*dy<minSeparationSquared){separated=false;break}}if(separated)return candidate}const target=nearestEnemy(maxRange===Infinity?PERF.fallbackSearchRange:maxRange)||nearestEnemy(PERF.fallbackSearchRange);return target?clampPointToRange(target.x,target.y,minRange,maxRange):null}
 function getCachedMeteorSpots(count,minDistance=weaponLevelConfig('meteor',1).minimumSeparation,minRange=weaponLevelConfig('meteor',1).minimumRange,maxRange=weaponLevelConfig('meteor',1).maximumRange){const output=[],minimumSquared=minDistance*minDistance,player=game.player,cache=game.denseTargets;for(let i=0;i<cache.length&&output.length<count;i++){const source=cache[i],dx=source.x-player.x,dy=source.y-player.y,distance=Math.hypot(dx,dy)||minRange,angle=Math.atan2(dy,dx),clamped=clamp(distance,minRange,maxRange),x=player.x+Math.cos(angle)*clamped,y=player.y+Math.sin(angle)*clamped;let separated=true;for(const point of output){const sx=point.x-x,sy=point.y-y;if(sx*sx+sy*sy<minimumSquared){separated=false;break}}if(separated)output.push({x,y})}
@@ -2348,12 +2517,11 @@ function hexToRgba(hex,a){const n=parseInt(hex.replace('#',''),16);return `rgba(
 function isVisibleWorld(x,y,radius=0){return Math.abs(x-game.camera.x)<=W/2+radius+SYS.worldCullMargin&&Math.abs(y-game.camera.y)<=H/2+radius+SYS.worldCullMargin}
 function draw(){
   if(!game){ctx.fillStyle=VIS.fallbackCanvasFill;ctx.fillRect(0,0,W,H);return}
-  const shake=screenShakeOffset(),background=VIS.background;
-  const camX=game.camera.x-W/2+shake.x,camY=game.camera.y-H/2+shake.y;
-  ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=background.fill;ctx.fillRect(0,0,W,H);
-  ctx.save();const tile=background.patternTile,overscan=background.patternOverscan;ctx.translate(-((camX%tile)+tile)%tile,-((camY%tile)+tile)%tile);ctx.globalAlpha=background.patternAlpha;if(game.pattern){ctx.fillStyle=game.pattern;ctx.fillRect(-tile,-tile,W+overscan,H+overscan)}ctx.restore();
-  ctx.save();ctx.translate(-camX,-camY);drawWorld(camX,camY);ctx.restore();
-  if(vignetteCache)ctx.drawImage(vignetteCache,0,0,W,H);ctx.restore();
+  const shake=screenShakeOffset(),background=VIS.background,camX=game.camera.x-W/2+shake.x,camY=game.camera.y-H/2+shake.y;
+  let section=profilerStart();ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=background.fill;ctx.fillRect(0,0,W,H);
+  ctx.save();const tile=background.patternTile,overscan=background.patternOverscan;ctx.translate(-((camX%tile)+tile)%tile,-((camY%tile)+tile)%tile);ctx.globalAlpha=background.patternAlpha;if(game.pattern){ctx.fillStyle=game.pattern;ctx.fillRect(-tile,-tile,W+overscan,H+overscan)}ctx.restore();profilerEnd('draw.background',section);
+  section=profilerStart();ctx.save();ctx.translate(-camX,-camY);drawWorld(camX,camY);ctx.restore();profilerEnd('draw.world',section);
+  section=profilerStart();if(vignetteCache){ctx.drawImage(vignetteCache,0,0,W,H);profilerCount('drawImages')}ctx.restore();profilerEnd('draw.vignette',section);
 }
 function drawGemSprite(gem){
   if(gem.ballistic&&!gem.launched)return;
@@ -2365,35 +2533,36 @@ function drawGemSprite(gem){
   drawImageCentered(images.exp,gem.x,drawY,size*(1+Math.min(0.18,height/900)),size*(1+Math.min(0.18,height/900)),gem.spin||game.elapsed*VIS.gem.rotationSpeed);
 }
 function drawWorld(camX,camY){
-  const cull=VIS.culling,zoneVisual=VIS.groundZones;
+  const cull=VIS.culling,zoneVisual=VIS.groundZones;let section;
   if(game.bossRewardPhase){
-    for(const gem of game.gems)if(gem.bossReward&&gem.launched&&isVisibleWorld(gem.x,gem.y-(gem.height||0),gem.r+cull.gemExtra+(gem.height||0)))drawGemSprite(gem);
-    drawPlayer();
-    return;
+    section=profilerStart();for(const gem of game.gems)if(gem.bossReward&&gem.launched&&isVisibleWorld(gem.x,gem.y-(gem.height||0),gem.r+cull.gemExtra+(gem.height||0)))drawGemSprite(gem);drawPlayer();profilerEnd('draw.weaponFx',section);return;
   }
+  section=profilerStart();
   for(const zone of game.zones)if((zone.type==='burn'||zone.type==='acid')&&isVisibleWorld(zone.x,zone.y,zone.r+cull.zoneExtra)){
     const burn=zone.type==='burn',sprite=burn?burnZoneSpriteCache:acidZoneSpriteCache,baseAlpha=zone.visualAlpha??(burn?zoneVisual.burnDrawAlpha:zoneVisual.acidDrawAlpha),alpha=baseAlpha*(1-zone.age/zone.duration);
-    if(sprite){ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(sprite,zone.x-zone.r*1.1,zone.y-zone.r*.82,zone.r*2.2,zone.r*1.64);ctx.restore()}
+    if(sprite){ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(sprite,zone.x-zone.r*1.1,zone.y-zone.r*.82,zone.r*2.2,zone.r*1.64);ctx.restore();profilerCount('drawImages')}
     else{ctx.save();ctx.globalAlpha=(zone.visualAlpha??(burn?zoneVisual.fallbackBurnAlpha:zoneVisual.fallbackAcidAlpha))*(1-zone.age/zone.duration);ctx.fillStyle=burn?zoneVisual.burnColors[1]:zoneVisual.acidColors[1];ctx.beginPath();ctx.ellipse(zone.x,zone.y,zone.r,zone.r*zoneVisual.ellipseYMultiplier,0,0,TAU);ctx.fill();ctx.restore()}
   }
   for(const well of game.wells)if(isVisibleWorld(well.x,well.y,well.r+cull.wellExtra))drawWell(well);
   for(const mine of game.mines)if(isVisibleWorld(mine.x,mine.y,cull.mineExtra))drawMine(mine);
   for(const gem of game.gems)if((!gem.ballistic||gem.launched)&&isVisibleWorld(gem.x,gem.y-(gem.height||0),gem.r+cull.gemExtra+(gem.height||0)))drawGemSprite(gem);
-  for(const drop of game.mapDrops)if(isVisibleWorld(drop.x,drop.y,cull.mapDropExtra))drawMapDrop(drop);
-  drawEnemies();
-  for(const orb of game.gravityOrbs)if(isVisibleWorld(orb.x,orb.y,cull.gravityOrbExtra))drawGravityOrb(orb);
-  for(const meteor of game.meteors)if(isVisibleWorld(meteor.x,meteor.y,cull.meteorExtra))drawMeteor(meteor);
-  for(const shot of game.enemyShots)if(isVisibleWorld(shot.x,shot.y,cull.enemyShotExtra))drawEnemyShot(shot);
-  for(const projectile of game.projectiles)if(isVisibleWorld(projectile.x,projectile.y,cull.projectileExtra))drawProjectile(projectile);
+  for(const drop of game.mapDrops)if(isVisibleWorld(drop.x,drop.y,cull.mapDropExtra))drawMapDrop(drop);profilerEnd('draw.groundFx',section);
+  section=profilerStart();drawEnemies();profilerEnd('draw.enemies',section);
+  section=profilerStart();for(const orb of game.gravityOrbs)if(isVisibleWorld(orb.x,orb.y,cull.gravityOrbExtra))drawGravityOrb(orb);for(const meteor of game.meteors)if(isVisibleWorld(meteor.x,meteor.y,cull.meteorExtra))drawMeteor(meteor);profilerEnd('draw.heavyFx',section);
+  section=profilerStart();for(const shot of game.enemyShots)if(isVisibleWorld(shot.x,shot.y,cull.enemyShotExtra))drawEnemyShot(shot);profilerEnd('draw.enemyShots',section);
+  section=profilerStart();for(const projectile of game.projectiles)if(isVisibleWorld(projectile.x,projectile.y,cull.projectileExtra))drawProjectile(projectile);profilerEnd('draw.projectiles',section);
+  section=profilerStart();
   for(const boomerang of game.boomerangs)if(isVisibleWorld(boomerang.x,boomerang.y,boomerang.r+cull.boomerangExtra))drawBoomerang(boomerang);
   for(const zone of game.zones)if(zone.type==='flameJet')drawFlameJet(zone);
   for(const beam of game.beams)drawBeam(beam);
   for(const lightning of game.lightning)drawLightning(lightning);
   for(const wave of game.waves)if(isVisibleWorld(wave.x,wave.y,wave.r+cull.waveExtra))drawWave(wave);
-  if(!game.bossRewardPhase){drawOrbit();drawDrones()}drawMouseTarget();drawPlayer();
-  for(const particleItem of game.particles)if(isVisibleWorld(particleItem.x,particleItem.y,particleItem.size+cull.particleExtra)){ctx.save();ctx.globalAlpha=particleItem.life/particleItem.max;ctx.fillStyle=particleItem.color;ctx.shadowBlur=VIS.canvasParticle.shadowBlur;ctx.shadowColor=particleItem.color;ctx.beginPath();ctx.arc(particleItem.x,particleItem.y,particleItem.size,0,TAU);ctx.fill();ctx.restore()}
-  for(const textItem of game.texts)if(isVisibleWorld(textItem.x,textItem.y,cull.textExtra)){ctx.save();ctx.globalAlpha=textItem.life/textItem.max;ctx.font=`${VIS.damageText.fontWeight} ${textItem.size}px ${VIS.damageText.fontFamily}`;ctx.textAlign='center';ctx.fillStyle=textItem.color;ctx.shadowColor=VIS.damageText.shadowColor;ctx.shadowBlur=VIS.damageText.shadowBlur;ctx.fillText(textItem.text,textItem.x,textItem.y);ctx.restore()}
+  drawOrbit();drawDrones();drawMouseTarget();drawPlayer();profilerEnd('draw.weaponFx',section);
+  section=profilerStart();
+  for(const particleItem of game.particles)if(isVisibleWorld(particleItem.x,particleItem.y,particleItem.size+cull.particleExtra)){const sprite=getParticleSprite(particleItem.color,particleItem.size);ctx.save();ctx.globalAlpha=particleItem.life/particleItem.max;ctx.drawImage(sprite.canvas,particleItem.x-sprite.center,particleItem.y-sprite.center);ctx.restore();profilerCount('drawImages')}
+  for(const textItem of game.texts)if(isVisibleWorld(textItem.x,textItem.y,cull.textExtra)){ctx.save();ctx.globalAlpha=textItem.life/textItem.max;ctx.font=`${VIS.damageText.fontWeight} ${textItem.size}px ${VIS.damageText.fontFamily}`;ctx.textAlign='center';ctx.fillStyle=textItem.color;ctx.shadowColor=VIS.damageText.shadowColor;ctx.shadowBlur=VIS.damageText.shadowBlur;ctx.fillText(textItem.text,textItem.x,textItem.y);ctx.restore()}profilerEnd('draw.particles',section);
 }
+
 function drawEnemies(){
   const visual=VIS.enemy,hpVisual=visual.hpBar;
   for(const enemy of game.enemies){
@@ -2401,10 +2570,8 @@ function drawEnemies(){
     ctx.save();ctx.translate(enemy.x,enemy.y);let scale=1;
     if(enemy.type==='bloater'&&enemy.state==='charge')scale=1+Math.sin((visual.bloaterChargeReferenceSeconds-enemy.charge)*visual.bloaterChargePulseSpeed)*visual.bloaterChargePulseAmount+(1-enemy.charge/visual.bloaterChargeReferenceSeconds)*visual.bloaterChargeGrowth;
     if(enemy.type==='boss')scale=1+Math.sin(game.elapsed*visual.bossPulseSpeed)*visual.bossPulseAmount;
-    ctx.scale(enemy.flip||1,1);ctx.scale(scale,scale);ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(0,enemy.r*visual.shadowOffsetMultiplier,enemy.r*visual.shadowRadiusXMultiplier,enemy.r*visual.shadowRadiusYMultiplier,0,0,TAU);ctx.fill();
-    if(enemy.freeze>0||game.effects.freeze>0){ctx.shadowBlur=visual.freezeShadowBlur;ctx.shadowColor=visual.freezeShadowColor}else{ctx.shadowBlur=enemy.type==='boss'?visual.bossShadowBlur:visual.normalShadowBlur;ctx.shadowColor=enemy.type==='spitter'?visual.spitterShadowColor:visual.normalShadowColor}
-    ctx.globalAlpha=enemy.hitFlash>0?visual.hitFlashAlpha:1;const image=images[ENEMIES[enemy.type].img];
-    if(image)ctx.drawImage(image,-enemy.r*visual.spriteScale/2,-enemy.r*visual.spriteScale/2,enemy.r*visual.spriteScale,enemy.r*visual.spriteScale);else{ctx.fillStyle=visual.fallbackColor;ctx.beginPath();ctx.arc(0,0,enemy.r,0,TAU);ctx.fill()}
+    ctx.scale(enemy.flip||1,1);ctx.scale(scale,scale);ctx.globalAlpha=enemy.hitFlash>0?visual.hitFlashAlpha:1;const image=images[ENEMIES[enemy.type].img];
+    if(image){ctx.drawImage(image,-enemy.r*visual.spriteScale/2,-enemy.r*visual.spriteScale/2,enemy.r*visual.spriteScale,enemy.r*visual.spriteScale);profilerCount('drawImages')}else{ctx.fillStyle=visual.fallbackColor;ctx.beginPath();ctx.arc(0,0,enemy.r,0,TAU);ctx.fill()}
     if(enemy.freeze>0||game.effects.freeze>0){ctx.globalAlpha=visual.freezeRingAlpha;ctx.strokeStyle=visual.freezeRingColor;ctx.lineWidth=visual.freezeRingWidth;ctx.beginPath();ctx.arc(0,0,enemy.r+visual.freezeRingPadding+Math.sin(game.elapsed*visual.freezeRingPulseSpeed+enemy.variant*visual.freezeRingPulsePhaseScale)*visual.freezeRingPulseAmount,0,TAU);ctx.stroke()}
     if(enemy.type==='shadow'&&enemy.state==='wind'){ctx.strokeStyle=visual.shadowWindColor;ctx.lineWidth=visual.shadowWindLineWidth;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(enemy.vx*visual.shadowWindVectorMultiplier,enemy.vy*visual.shadowWindVectorMultiplier);ctx.stroke()}
     if(enemy.type==='bloater'&&enemy.state==='charge'){const alpha=visual.bloaterChargeRingAlphaBase+Math.sin(game.elapsed*visual.bloaterChargeRingPulseSpeed)*visual.bloaterChargeRingAlphaPulse;ctx.strokeStyle=`rgba(${visual.bloaterChargeRingColorRgb},${alpha})`;ctx.lineWidth=visual.bloaterChargeRingWidth;ctx.beginPath();ctx.arc(0,0,visual.bloaterChargeRingRadius,0,TAU);ctx.stroke()}
@@ -2412,43 +2579,31 @@ function drawEnemies(){
     if(enemy.type==='golem'||enemy.type==='boss'){const width=enemy.type==='boss'?hpVisual.bossWidth:hpVisual.golemWidth,height=hpVisual.height,x=enemy.x-width/2,y=enemy.y-enemy.r-hpVisual.offsetY;ctx.fillStyle=hpVisual.background;roundRect(ctx,x,y,width,height,hpVisual.cornerRadius);ctx.fill();ctx.fillStyle=enemy.type==='boss'?hpVisual.bossColor:hpVisual.golemColor;roundRect(ctx,x,y,width*clamp(enemy.hp/enemy.maxHp,0,1),height,hpVisual.cornerRadius);ctx.fill()}
   }
 }
+
 function drawPlayer(){
   const player=game.player,visual=VIS.player;ctx.save();ctx.translate(player.x,player.y);ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(0,visual.shadowOffsetY,visual.shadowRadiusX,visual.shadowRadiusY,0,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=game.effects.shield>0?visual.shieldShadowBlur:visual.normalShadowBlur;ctx.shadowColor=game.effects.shield>0?visual.shieldShadowColor:visual.normalShadowColor;if(player.invuln>0&&Math.floor(player.invuln*visual.invulnerabilityBlinkRate)%2)ctx.globalAlpha=visual.invulnerabilityAlpha;ctx.rotate(player.angle+visual.spriteRotationOffset);ctx.drawImage(images.player,-visual.spriteSize/2,-visual.spriteSize/2,visual.spriteSize,visual.spriteSize);ctx.restore();
   if(game.effects.shield>0){ctx.save();ctx.strokeStyle=visual.shieldRingColor;ctx.lineWidth=visual.shieldRingWidth;ctx.shadowBlur=visual.shieldRingShadowBlur;ctx.shadowColor=visual.shieldRingShadowColor;ctx.beginPath();ctx.arc(player.x,player.y,visual.shieldRingRadius+Math.sin(game.elapsed*visual.shieldRingPulseSpeed)*visual.shieldRingPulseAmount,0,TAU);ctx.stroke();ctx.restore()}
 }
 function drawProjectile(projectile){
-  const visual=VIS.projectile,drawRadius=projectile.visualR??projectile.r;
-  ctx.save();
-  ctx.strokeStyle=projectile.color;
-  ctx.lineWidth=drawRadius*visual.trailWidthMultiplier;
-  ctx.lineCap='round';
-  ctx.shadowBlur=visual.shadowBlur;
-  ctx.shadowColor=projectile.color;
-  ctx.beginPath();
-  ctx.moveTo(projectile.px,projectile.py);
-  ctx.lineTo(projectile.x,projectile.y);
-  ctx.stroke();
-  ctx.fillStyle=visual.coreColor;
-  ctx.beginPath();
-  ctx.arc(projectile.x,projectile.y,drawRadius*visual.coreRadiusMultiplier,0,TAU);
-  ctx.fill();
-  ctx.restore();
+  const dx=projectile.x-projectile.px,dy=projectile.y-projectile.py,sprite=getPlayerProjectileSprite(projectile);ctx.save();ctx.translate(projectile.px,projectile.py);ctx.rotate(Math.atan2(dy,dx));ctx.drawImage(sprite.canvas,-sprite.padding,-sprite.height/2);ctx.restore();profilerCount('drawImages');
 }
+
 function drawStar(ctx,radius,points,innerMultiplier){ctx.beginPath();for(let i=0;i<points;i++){const angle=i/points*TAU,r=i%2?radius*innerMultiplier:radius,x=Math.cos(angle)*r,y=Math.sin(angle)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath()}
 function drawEnemyShot(shot){
-  const styles=VIS.enemyShotStyles;ctx.save();
-  if(shot.type==='bossSpear'){const v=styles.bossSpear,angle=Math.atan2(shot.vy,shot.vx);ctx.translate(shot.x,shot.y);ctx.rotate(angle);ctx.lineCap='round';ctx.strokeStyle=v.blackColor;ctx.lineWidth=v.blackWidth;ctx.beginPath();ctx.moveTo(v.trailStart,0);ctx.lineTo(v.trailEnd,0);ctx.stroke();ctx.strokeStyle=v.color;ctx.lineWidth=v.lineWidth;ctx.shadowBlur=v.shadowBlur;ctx.shadowColor=v.shadowColor;ctx.beginPath();ctx.moveTo(v.trailStart,0);ctx.lineTo(v.trailEnd,0);ctx.stroke();ctx.fillStyle=v.tipColor;ctx.beginPath();ctx.moveTo(v.tipX,0);ctx.lineTo(v.tipBackX,-v.tipHalfHeight);ctx.lineTo(v.tipBackX,v.tipHalfHeight);ctx.closePath();ctx.fill();ctx.restore();return}
-  if(shot.type==='bossOrb'){const v=styles.bossOrb;ctx.lineCap='round';ctx.strokeStyle=v.blackColor;ctx.lineWidth=v.blackWidth;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.strokeStyle=v.color;ctx.lineWidth=v.lineWidth;ctx.shadowBlur=v.shadowBlur;ctx.shadowColor=v.shadowColor;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.translate(shot.x,shot.y);ctx.rotate(game.elapsed*v.rotationSpeed);ctx.fillStyle=v.fillColor;ctx.strokeStyle=v.outlineColor;ctx.lineWidth=v.outlineWidth;drawStar(ctx,shot.r,v.starPoints,v.innerRadiusMultiplier);ctx.fill();ctx.stroke();ctx.restore();return}
-  if(shot.type==='bossBolt'){const v=styles.bossBolt;ctx.lineCap='round';ctx.strokeStyle=v.blackColor;ctx.lineWidth=v.blackWidth;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.strokeStyle=v.color;ctx.lineWidth=v.lineWidth;ctx.shadowBlur=v.shadowBlur;ctx.shadowColor=v.shadowColor;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.translate(shot.x,shot.y);ctx.rotate(game.elapsed*v.rotationSpeed);ctx.fillStyle=v.fillColor;ctx.strokeStyle=v.outlineColor;ctx.lineWidth=v.outlineWidth;drawStar(ctx,shot.r,v.starPoints,v.innerRadiusMultiplier);ctx.fill();ctx.stroke();ctx.strokeStyle=v.ringColor;ctx.lineWidth=v.ringWidth;ctx.beginPath();ctx.arc(0,0,shot.r+v.ringPadding+Math.sin(game.elapsed*v.ringPulseSpeed)*v.ringPulseAmount,0,TAU);ctx.stroke();ctx.restore();return}
-  if(shot.type==='orb'){const v=styles.spitterOrb;ctx.lineCap='round';ctx.strokeStyle=v.blackColor;ctx.lineWidth=v.blackWidth;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.strokeStyle=v.color;ctx.lineWidth=v.lineWidth;ctx.shadowBlur=v.shadowBlur;ctx.shadowColor=v.shadowColor;ctx.beginPath();ctx.moveTo(shot.px,shot.py);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.translate(shot.x,shot.y);ctx.fillStyle=v.bodyColor;ctx.strokeStyle=v.outlineColor;ctx.lineWidth=v.outlineWidth;ctx.beginPath();ctx.arc(0,0,shot.r+v.bodyRadiusPadding,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle=v.coreColor;ctx.shadowBlur=v.coreShadowBlur;ctx.shadowColor=v.coreShadowColor;ctx.beginPath();ctx.arc(v.coreOffsetX,v.coreOffsetY,shot.r*v.coreRadiusMultiplier,0,TAU);ctx.fill();ctx.fillStyle=v.highlightColor;ctx.beginPath();ctx.arc(v.highlightOffsetX,v.highlightOffsetY,v.highlightRadius,0,TAU);ctx.fill();ctx.strokeStyle=v.ringColor;ctx.lineWidth=v.ringWidth;ctx.beginPath();ctx.arc(0,0,shot.r+v.ringPadding+Math.sin(game.elapsed*v.ringPulseSpeed)*v.ringPulseAmount,0,TAU);ctx.stroke();ctx.restore();return}
-  const v=styles.default;ctx.translate(shot.x,shot.y);ctx.rotate(game.elapsed*v.rotationSpeed);ctx.shadowBlur=v.shadowBlur;ctx.shadowColor=shot.type==='wave'?v.waveShadowColor:v.normalShadowColor;ctx.fillStyle=shot.type==='wave'?v.waveColor:v.normalColor;ctx.strokeStyle=v.outlineColor;ctx.lineWidth=v.outlineWidth;drawStar(ctx,shot.r,v.starPoints,v.innerRadiusMultiplier);ctx.fill();ctx.stroke();ctx.restore();
+  const styles=VIS.enemyShotStyles;
+  if(shot.type==='bossSpear'){const sprite=getEnemyShotBodySprite(shot);ctx.save();ctx.translate(shot.x,shot.y);ctx.rotate(Math.atan2(shot.vy,shot.vx));ctx.drawImage(sprite.canvas,-sprite.extent,-sprite.extent);ctx.restore();profilerCount('drawImages');return}
+  if(shot.type==='bossOrb')drawCachedTrail('bossOrb',shot.px,shot.py,shot.x,shot.y,styles.bossOrb);
+  else if(shot.type==='bossBolt')drawCachedTrail('bossBolt',shot.px,shot.py,shot.x,shot.y,styles.bossBolt);
+  else if(shot.type==='orb')drawCachedTrail('spitterOrb',shot.px,shot.py,shot.x,shot.y,styles.spitterOrb);
+  const sprite=getEnemyShotBodySprite(shot);ctx.drawImage(sprite.canvas,shot.x-sprite.extent,shot.y-sprite.extent);profilerCount('drawImages');
 }
+
 function drawBoomerang(boomerang){const visual=VIS.boomerang;ctx.save();ctx.translate(boomerang.x,boomerang.y);ctx.rotate(boomerang.rot);ctx.strokeStyle=visual.color||CFG.weapons.boomerang.color;ctx.lineWidth=visual.lineWidth;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.shadowColor||CFG.weapons.boomerang.color;ctx.beginPath();ctx.arc(0,0,boomerang.r,visual.arcStart,visual.arcEnd);ctx.stroke();ctx.restore()}
 function drawOrbit(){const weapon=game.player.weapons.orbit;if(!weapon)return;const level=weapon.level,levelCfg=weaponLevelConfig('orbit',level),visual=VIS.orbit,expand=levelCfg.expandCycleSeconds>0?(Math.sin(game.elapsed*TAU/levelCfg.expandCycleSeconds)*visual.expandPhaseMultiplier+visual.expandPhaseOffset):0,spec=orbitSpec(level,expand);ctx.save();ctx.globalAlpha=visual.ringAlpha;ctx.strokeStyle=visual.ringColor;ctx.lineWidth=level>=4?visual.ringWidthLevel4:visual.ringWidthBase;ctx.shadowBlur=visual.ringShadowBlur;ctx.shadowColor=visual.ringShadowColor;ctx.beginPath();ctx.arc(game.player.x,game.player.y,spec.radius,0,TAU);ctx.stroke();ctx.restore();for(let i=0;i<spec.count;i++){const angle=(game.orbitPhase||0)+i/spec.count*TAU,x=game.player.x+Math.cos(angle)*spec.radius,y=game.player.y+Math.sin(angle)*spec.radius;ctx.save();ctx.globalAlpha=visual.trailAlpha;ctx.strokeStyle=visual.trailColor;ctx.lineWidth=Math.max(visual.trailMinimumWidth,spec.size*visual.trailWidthMultiplier);ctx.beginPath();ctx.arc(game.player.x,game.player.y,spec.radius,angle-visual.trailArcLength,angle);ctx.stroke();ctx.restore();drawImageCentered(images.orbitBlade,x,y,spec.size,spec.size,angle+game.elapsed*visual.bladeRotationSpeed)}}
 function drawDrones(){const weapon=game.player.weapons.drone,config=weaponLevelConfig('drone',weapon?weapon.level:1),visual=VIS.drone;for(const drone of game.drones){const x=game.player.x+Math.cos(drone.angle)*config.orbitRadius,y=game.player.y+Math.sin(drone.angle)*config.orbitRadius;ctx.save();ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(x,y+visual.shadowOffsetY,visual.shadowRadiusX,visual.shadowRadiusY,0,0,TAU);ctx.fill();ctx.restore();drawImageCentered(images.droneUnit,x,y,visual.spriteSize,visual.spriteSize,drone.angle+Math.PI/2)}}
-function drawFlameJet(zone){const visual=VIS.flame,active=zone.age<zone.duration,envelope=active?clamp(Math.min(zone.age/visual.fadeInSeconds,(zone.duration-zone.age)/visual.fadeOutSeconds),0,1):0;if(envelope>0){ctx.save();ctx.translate(zone.x,zone.y);ctx.rotate(zone.ang);ctx.globalCompositeOperation='lighter';const gradient=ctx.createLinearGradient(visual.coreGradientStart,0,visual.coreGradientEnd,0);for(const [stop,color] of visual.coreGradientStops)gradient.addColorStop(stop,color);ctx.globalAlpha=visual.coreAlpha*envelope;ctx.fillStyle=gradient;ctx.shadowBlur=visual.coreShadowBlur;ctx.shadowColor=visual.coreShadowColor;ctx.beginPath();ctx.moveTo(visual.coreStartX,-visual.coreStartHalfWidth);ctx.quadraticCurveTo(visual.coreControlX,-visual.coreHalfWidth,visual.coreEndX,0);ctx.quadraticCurveTo(visual.coreControlX,visual.coreHalfWidth,visual.coreStartX,visual.coreStartHalfWidth);ctx.lineTo(visual.coreStartX,visual.coreStartHalfWidth);ctx.closePath();ctx.fill();ctx.restore()}for(const flame of zone.flames||[]){const remain=clamp(flame.life/flame.max,0,1),progress=1-remain,fadeIn=clamp(progress/visual.particleFadeInProgress,0,1),alpha=fadeIn*Math.pow(remain,visual.particleFadePower)*visual.particleAlpha,size=flame.size*(visual.particleScaleStart+progress*visual.particleScaleGrowth);ctx.save();ctx.translate(flame.x,flame.y);ctx.rotate(flame.rot);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=alpha;ctx.shadowBlur=visual.particleShadowBlur;ctx.shadowColor=flame.tone>visual.particleHotThreshold?visual.particleHotShadowColor:visual.particleCoolShadowColor;ctx.drawImage(images.flameSprite,-size*visual.particleDrawXMultiplier,-size*visual.particleDrawYMultiplier,size*visual.particleWidthMultiplier,size*visual.particleHeightMultiplier);ctx.restore()}}
+function drawFlameJet(zone){const visual=VIS.flame,active=zone.age<zone.duration,envelope=active?clamp(Math.min(zone.age/visual.fadeInSeconds,(zone.duration-zone.age)/visual.fadeOutSeconds),0,1):0;if(envelope>0&&flameCoreCache){ctx.save();ctx.translate(zone.x,zone.y);ctx.rotate(zone.ang);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=visual.coreAlpha*envelope;ctx.drawImage(flameCoreCache.canvas,flameCoreCache.offsetX,flameCoreCache.offsetY);ctx.restore();profilerCount('drawImages')}for(const flame of zone.flames||[]){const remain=clamp(flame.life/flame.max,0,1),progress=1-remain,fadeIn=clamp(progress/visual.particleFadeInProgress,0,1),alpha=fadeIn*Math.pow(remain,visual.particleFadePower)*visual.particleAlpha,size=flame.size*(visual.particleScaleStart+progress*visual.particleScaleGrowth);ctx.save();ctx.translate(flame.x,flame.y);ctx.rotate(flame.rot);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=alpha;ctx.shadowBlur=visual.particleShadowBlur;ctx.shadowColor=flame.tone>visual.particleHotThreshold?visual.particleHotShadowColor:visual.particleCoolShadowColor;ctx.drawImage(images.flameSprite,-size*visual.particleDrawXMultiplier,-size*visual.particleDrawYMultiplier,size*visual.particleWidthMultiplier,size*visual.particleHeightMultiplier);ctx.restore();profilerCount('drawImages')}}
 function drawBeam(beam){const config=weaponLevelConfig('laser',beam.level),visual=config.visual,length=config.range,width=config.width,alpha=Math.sin(clamp(beam.age/beam.duration,0,1)*Math.PI);ctx.save();ctx.translate(beam.x,beam.y);ctx.rotate(beam.ang);ctx.globalAlpha=visual.bodyAlpha*alpha;ctx.fillStyle=visual.bodyColor;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.shadowColor;ctx.fillRect(0,-width/2,length,width);ctx.globalAlpha=visual.coreAlpha*alpha;ctx.fillStyle=visual.coreColor;ctx.fillRect(0,-width*visual.coreWidthMultiplier/2,length,width*visual.coreWidthMultiplier);ctx.restore()}
-function drawLightning(lightning){const visual=weaponLevelConfig('lightning',lightning.level||1).visual;ctx.save();ctx.globalAlpha=1-lightning.age/lightning.duration;ctx.lineWidth=visual.lineWidth;ctx.strokeStyle=visual.color;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.color;ctx.beginPath();lightning.pts.forEach((point,index)=>{if(!index)ctx.moveTo(point.x,point.y);else{const previous=lightning.pts[index-1];for(let step=1;step<=visual.segmentSteps;step++){const t=step/visual.segmentSteps,xx=previous.x+(point.x-previous.x)*t+rand(-visual.jitter,visual.jitter),yy=previous.y+(point.y-previous.y)*t+rand(-visual.jitter,visual.jitter);ctx.lineTo(xx,yy)}}});ctx.stroke();ctx.restore()}
+function drawLightning(lightning){const visual=weaponLevelConfig('lightning',lightning.level||1).visual,paths=lightning.paths||[],frame=paths.length?paths[Math.floor(lightning.age*(Number(PERF.lightningPathFrameRate)||30))%paths.length]:null;ctx.save();ctx.globalAlpha=1-lightning.age/lightning.duration;ctx.lineWidth=visual.lineWidth;ctx.strokeStyle=visual.color;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.color;if(frame instanceof Array){ctx.beginPath();for(const [x,y,move] of frame){if(move)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()}else if(frame)ctx.stroke(frame);ctx.restore()}
 function drawWave(wave){if(wave.age<0)return;const visual=VIS.wave,alpha=1-clamp(wave.age/wave.dur,0,1);ctx.save();if(wave.style==='frost'&&images.frostRing){const frost=weaponLevelConfig('frost',game.player.weapons.frost?.level||1).visual;ctx.globalAlpha=frost.alpha*alpha;drawImageCentered(images.frostRing,wave.x,wave.y,wave.r*frost.scale,wave.r*frost.scale,game.elapsed*frost.rotationSpeed);ctx.restore();return}ctx.globalAlpha=alpha;ctx.strokeStyle=wave.color;ctx.lineWidth=visual.lineWidth;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=wave.color;ctx.beginPath();ctx.arc(wave.x,wave.y,wave.r,0,TAU);ctx.stroke();ctx.restore()}
 function drawMine(mine){drawImageCentered(images.mineSprite,mine.x,mine.y,VIS.mine.spriteSize,VIS.mine.spriteSize,game.elapsed*VIS.mine.rotationSpeed)}
 function drawWell(well){const visual=VIS.well,time=game.elapsed*visual.rotationSpeed;ctx.save();ctx.translate(well.x,well.y);ctx.globalAlpha=visual.alpha;for(let i=0;i<visual.ringCount;i++){ctx.strokeStyle=`rgba(${visual.ringColorRgb},${visual.ringBaseAlpha+i*visual.ringAlphaStep})`;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.ellipse(0,0,well.r*(visual.ringRadiusBaseX+i*visual.ringRadiusStepX),well.r*(visual.ringRadiusBaseY+i*visual.ringRadiusStepY),time+i*visual.ringRotationStep,0,TAU);ctx.stroke()}ctx.fillStyle=visual.coreColor;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.coreShadowColor;ctx.beginPath();ctx.arc(0,0,visual.coreRadius,0,TAU);ctx.fill();ctx.restore()}
@@ -2457,11 +2612,11 @@ function drawMeteor(meteor){if(meteor.hit||meteor.age<0)return;const config=weap
 function drawGravityOrb(orb){const visual=VIS.gravityOrb,t=clamp(orb.age/orb.duration,0,1),size=visual.sizeStart+visual.sizeGrowth*t;ctx.save();ctx.translate(orb.x,orb.y);ctx.rotate(orb.spin);ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.shadowColor;ctx.drawImage(images.gravityOrb,-size/2,-size/2,size,size);ctx.strokeStyle=visual.ringColor;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.arc(0,0,size*visual.ringRadiusMultiplier+Math.sin(game.elapsed*visual.ringPulseSpeed)*visual.ringPulse,0,TAU);ctx.stroke();ctx.restore()}
 function drawMouseTarget(){if(!mouse.active||state!=='playing')return;const visual=VIS.mouseTarget;ctx.save();ctx.translate(mouse.targetX,mouse.targetY);ctx.globalAlpha=visual.alpha;ctx.strokeStyle=visual.color;ctx.lineWidth=visual.lineWidth;ctx.setLineDash(visual.dash);ctx.beginPath();ctx.arc(0,0,visual.radius+Math.sin(game.elapsed*visual.pulseSpeed)*visual.pulse,0,TAU);ctx.stroke();ctx.setLineDash(METEOR_SOLID_DASH);ctx.beginPath();ctx.moveTo(-visual.lineOuter,0);ctx.lineTo(-visual.lineInner,0);ctx.moveTo(visual.lineOuter,0);ctx.lineTo(visual.lineInner,0);ctx.moveTo(0,-visual.lineOuter);ctx.lineTo(0,-visual.lineInner);ctx.moveTo(0,visual.lineOuter);ctx.lineTo(0,visual.lineInner);ctx.stroke();ctx.restore()}
 function drawMapDrop(drop){const visual=VIS.mapDrop,assetKeys={heal:'healDrop',regen:'regenDrop',shield:'shieldDrop',magnet:'magnetDrop',freeze:'freezeDrop',doublexp:'doublexpDrop',overload:'overloadDrop',bomb:'bombDrop',push:'pushDrop'},key=assetKeys[drop.key]||'healDrop',item=ITEMS[drop.key]||ITEMS.heal,bob=Math.sin(drop.bob)*visual.bobAmount;ctx.save();ctx.globalAlpha=visual.shadowAlpha;ctx.fillStyle=visual.shadowColor;ctx.beginPath();ctx.ellipse(drop.x,drop.y+visual.shadowOffsetY,visual.shadowRadiusX,visual.shadowRadiusY,0,0,TAU);ctx.fill();ctx.restore();ctx.save();ctx.translate(drop.x,drop.y+bob);ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=item.color||visual.magnetGlow;if(images[key])ctx.drawImage(images[key],-visual.spriteSize/2,-visual.spriteSize/2,visual.spriteSize,visual.spriteSize);ctx.strokeStyle=item.color||visual.ringColor;ctx.lineWidth=visual.lineWidth;ctx.beginPath();ctx.arc(0,0,visual.ringRadius+Math.sin(drop.bob*visual.ringPulseSpeed)*visual.ringPulse,0,TAU);ctx.stroke();ctx.restore()}
-function drawImageCentered(image,x,y,width,height,rotation=0){if(!image)return;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore()}
+function drawImageCentered(image,x,y,width,height,rotation=0){if(!image)return;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore();profilerCount('drawImages')}
 function roundRect(context,x,y,width,height,radius){context.beginPath();context.roundRect(x,y,width,height,radius);return context}
 
 function loop(now){
-  const dt=Math.min(SYS.maxDeltaSeconds,(now-last)/1000||0);last=now;update(dt);draw();updateFPSDisplay(now);requestAnimationFrame(loop);
+  const dt=Math.min(SYS.maxDeltaSeconds,(now-last)/1000||0);last=now;profilerBeginFrame(performance.now());let section=profilerStart();update(dt);profilerEnd('update.total',section);section=profilerStart();draw();profilerEnd('draw.total',section);updateFPSDisplay(now);profilerEndFrame(performance.now());requestAnimationFrame(loop);
 }
 
 // input
@@ -2505,6 +2660,6 @@ const joy=$('#joystick-base'),knob=$('#joystick-knob');let joyId=null;
 function joyMove(e){const point=[...e.changedTouches].find(item=>item.identifier===joyId);if(!point)return;const rect=joy.getBoundingClientRect(),centerX=rect.left+rect.width/2,centerY=rect.top+rect.height/2,dx=point.clientX-centerX,dy=point.clientY-centerY,distance=Math.hypot(dx,dy),radius=VIS.input.joystickRadius,magnitude=Math.min(radius,distance),nx=distance?dx/distance:0,ny=distance?dy/distance:0;knob.style.transform=`translate(${nx*magnitude}px,${ny*magnitude}px)`;touch.x=nx*Math.min(SYS.joystickTouchScale,distance/radius);touch.y=ny*Math.min(SYS.joystickTouchScale,distance/radius);touch.active=true;e.preventDefault()}
 joy.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier;joyMove(e)},{passive:false});joy.addEventListener('touchmove',joyMove,{passive:false});joy.addEventListener('touchend',e=>{if([...e.changedTouches].some(x=>x.identifier===joyId)){joyId=null;touch.x=touch.y=0;touch.active=false;knob.style.transform=SYS.touchEndTransform}},{passive:false});
 
-applyStaticText();ensurePauseDebugButton();ensureFPSUI();
-loadImages().then(()=>{buildMeteorSpriteCache();resetGame();requestAnimationFrame(loop)});
+applyStaticText();ensurePauseDebugButton();ensureFPSUI();ensureProfilerUI();
+loadImages().then(()=>{buildMeteorSpriteCache();buildFlameCoreCache();resetGame();setProfilerVisible(!!PERF.profilerVisibleByDefault);requestAnimationFrame(loop)});
 })();
