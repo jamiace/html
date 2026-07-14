@@ -2,8 +2,8 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R26 SCORE SYNC + LV1 ZERO",
-    "configVersion": 10,
+    "build": "R31 PHASED GENERIC BOSS SUMMONS",
+    "configVersion": 14,
     "language": "zh-Hant"
   },
   "system": {
@@ -390,7 +390,7 @@
     "rewardDoubleXpMinimumRemainingSeconds": 25,
     "nextLevelDelayMs": 120,
     "speedDescriptionTemplate": "移動速度由 {from}× 提高為 {to}×。",
-    "lifestealPerLevel": 0.003,
+    "lifestealPerLevel": 0.0003,
     "mapDropCooldownReductionPerLevel": 0.05,
     "weaponCooldownReductionPerLevel": 0.04,
     "weaponAreaBonusPerLevel": 0.06,
@@ -399,7 +399,7 @@
     "hpRegenIntervalReductionPerLevel": 0.5,
     "hpRegenAmount": 1,
     "reviveScoreCost": 1000,
-    "reviveRestoreRatio": 0.5,
+    "reviveRestoreRatio": 1,
     "reviveInvulnerabilitySeconds": 2.2,
     "stationaryDamageDelay": 3,
     "stationaryDamageBonusPerLevel": 0.15,
@@ -411,11 +411,11 @@
     "statLevelValues": {
       "lifesteal": {
         "rate": [
-          0.003,
-          0.006,
-          0.009,
-          0.012,
-          0.015
+          0.0003,
+          0.0006,
+          0.0009,
+          0.0012,
+          0.0015
         ]
       },
       "dropCooldown": {
@@ -475,7 +475,7 @@
           1000
         ],
         "restoreRatio": [
-          0.5
+          1
         ],
         "invulnerabilitySeconds": [
           2.2
@@ -575,7 +575,7 @@
     },
     "shell": {
       "image": "shell",
-      "hp": 300,
+      "hp": 500,
       "speed": 82,
       "damage": 13,
       "exp": 20,
@@ -586,7 +586,7 @@
     },
     "spitter": {
       "image": "spitter",
-      "hp": 150,
+      "hp": 250,
       "speed": 84,
       "damage": 8,
       "exp": 30,
@@ -597,7 +597,7 @@
     },
     "bloater": {
       "image": "bloater",
-      "hp": 200,
+      "hp": 400,
       "speed": 103,
       "damage": 10,
       "exp": 35,
@@ -608,7 +608,7 @@
     },
     "shadow": {
       "image": "shadow",
-      "hp": 200,
+      "hp": 400,
       "speed": 168,
       "damage": 18,
       "exp": 40,
@@ -619,7 +619,7 @@
     },
     "golem": {
       "image": "golem",
-      "hp": 1500,
+      "hp": 2500,
       "speed": 50,
       "damage": 27,
       "exp": 120,
@@ -630,10 +630,10 @@
     },
     "boss": {
       "image": "boss",
-      "hp": 10000,
+      "hp": 20000,
       "speed": 60,
       "damage": 35,
-      "exp": 2000,
+      "exp": 1000,
       "radius": 62,
       "budgetCost": 999,
       "from": 900,
@@ -1011,8 +1011,8 @@
         40
       ],
       "spreadAlternating": 0.025,
-      "predictionStrength": 0.80,
-      "maxLeadSeconds": 1.10,
+      "predictionStrength": 0.8,
+      "maxLeadSeconds": 1.1,
       "damageBase": 24,
       "damagePerPhase": 2,
       "speedBase": 385,
@@ -1055,15 +1055,374 @@
       "warningColor": "rgba(255,198,72,.92)"
     },
     "summon": {
-      "stageCount": 20,
-      "rats": 10,
-      "hounds": 5,
-      "spawnDistanceMin": 300,
-      "spawnDistanceMax": 550,
+      "_comment": "Boss 招喚改為完全由 waves 陣列驅動。units 可使用 enemies 內任何非 boss 怪物 type；count 為該波數量。onSpawn=true 代表 Boss 生成時立即觸發；triggerHpRatio 代表 Boss HP 比例低於或等於該值時觸發。",
+      "_fieldNotes": {
+        "waves": "依陣列順序定義各次招喚。每波只觸發一次；若單次傷害跨過多個門檻，會補觸發所有尚未觸發且已跨過的波次。",
+        "onSpawn": "true 時於 Boss 初次生成後立即招喚，不等待受傷。",
+        "triggerHpRatio": "0～1 的 Boss HP 比例，例如 0.75 代表 HP 剩餘 75% 時觸發。",
+        "units": "可放 enemies 中任意非 boss 怪物，例如 rat、hound、shell、spitter、bloater、shadow、golem。",
+        "spawnDistanceMin": "Boss 招喚怪物相對玩家的最小生成距離。",
+        "spawnDistanceMax": "Boss 招喚怪物相對玩家的最大生成距離。"
+      },
+      "spawnDistanceMin": 350,
+      "spawnDistanceMax": 650,
       "waveStartRadius": 30,
       "waveEndRadius": 350,
       "waveDuration": 0.7,
-      "waveColor": "rgba(255,45,105,.85)"
+      "waveColor": "rgba(255,45,105,.85)",
+      "waves": [
+        {
+          "id": "opening",
+          "label": "Boss 初始招喚",
+          "onSpawn": true,
+          "triggerHpRatio": 1.0,
+          "units": [
+            {
+              "type": "rat",
+              "count": 8
+            },
+            {
+              "type": "hound",
+              "count": 4
+            },
+            {
+              "type": "shell",
+              "count": 0
+            },
+            {
+              "type": "spitter",
+              "count": 0
+            },
+            {
+              "type": "bloater",
+              "count": 0
+            },
+            {
+              "type": "shadow",
+              "count": 0
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase90",
+          "label": "Boss HP 90% 招喚",
+          "triggerHpRatio": 0.9,
+          "units": [
+            {
+              "type": "rat",
+              "count": 9
+            },
+            {
+              "type": "hound",
+              "count": 5
+            },
+            {
+              "type": "shell",
+              "count": 0
+            },
+            {
+              "type": "spitter",
+              "count": 0
+            },
+            {
+              "type": "bloater",
+              "count": 0
+            },
+            {
+              "type": "shadow",
+              "count": 0
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase80",
+          "label": "Boss HP 80% 招喚",
+          "triggerHpRatio": 0.8,
+          "units": [
+            {
+              "type": "rat",
+              "count": 11
+            },
+            {
+              "type": "hound",
+              "count": 5
+            },
+            {
+              "type": "shell",
+              "count": 1
+            },
+            {
+              "type": "spitter",
+              "count": 0
+            },
+            {
+              "type": "bloater",
+              "count": 0
+            },
+            {
+              "type": "shadow",
+              "count": 0
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase70",
+          "label": "Boss HP 70% 招喚",
+          "triggerHpRatio": 0.7,
+          "units": [
+             {
+              "type": "rat",
+              "count": 12
+            },
+            {
+              "type": "hound",
+              "count": 6
+            },
+            {
+              "type": "shell",
+              "count": 1
+            },
+            {
+              "type": "spitter",
+              "count": 1
+            },
+            {
+              "type": "bloater",
+              "count": 0
+            },
+            {
+              "type": "shadow",
+              "count": 0
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase60",
+          "label": "Boss HP 60% 招喚",
+          "triggerHpRatio": 0.6,
+          "units": [
+            {
+              "type": "rat",
+              "count": 13
+            },
+            {
+              "type": "hound",
+              "count": 7
+            },
+            {
+              "type": "shell",
+              "count": 2
+            },
+            {
+              "type": "spitter",
+              "count": 2
+            },
+            {
+              "type": "bloater",
+              "count": 1
+            },
+            {
+              "type": "shadow",
+              "count": 0
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase50",
+          "label": "Boss HP 50% 招喚",
+          "triggerHpRatio": 0.5,
+          "units": [
+            {
+              "type": "rat",
+              "count": 15
+            },
+            {
+              "type": "hound",
+              "count": 7
+            },
+            {
+              "type": "shell",
+              "count": 2
+            },
+            {
+              "type": "spitter",
+              "count": 2
+            },
+            {
+              "type": "bloater",
+              "count": 1
+            },
+            {
+              "type": "shadow",
+              "count": 1
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase40",
+          "label": "Boss HP 40% 招喚",
+          "triggerHpRatio": 0.4,
+          "units": [
+            {
+              "type": "rat",
+              "count": 16
+            },
+            {
+              "type": "hound",
+              "count": 8
+            },
+            {
+              "type": "shell",
+              "count": 3
+            },
+            {
+              "type": "spitter",
+              "count": 3
+            },
+            {
+              "type": "bloater",
+              "count": 2
+            },
+            {
+              "type": "shadow",
+              "count": 1
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase30",
+          "label": "Boss HP 30% 招喚",
+          "triggerHpRatio": 0.3,
+          "units": [
+            {
+              "type": "rat",
+              "count": 17
+            },
+            {
+              "type": "hound",
+              "count": 9
+            },
+            {
+              "type": "shell",
+              "count": 3
+            },
+            {
+              "type": "spitter",
+              "count": 3
+            },
+            {
+              "type": "bloater",
+              "count": 2
+            },
+            {
+              "type": "shadow",
+              "count": 2
+            },
+            {
+              "type": "golem",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "id": "phase20",
+          "label": "Boss HP 20% 招喚",
+          "triggerHpRatio": 0.2,
+          "units": [
+            {
+              "type": "rat",
+              "count": 19
+            },
+            {
+              "type": "hound",
+              "count": 9
+            },
+            {
+              "type": "shell",
+              "count": 4
+            },
+            {
+              "type": "spitter",
+              "count": 4
+            },
+            {
+              "type": "bloater",
+              "count": 3
+            },
+            {
+              "type": "shadow",
+              "count": 2
+            },
+            {
+              "type": "golem",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "lastStand",
+          "label": "Boss HP 10% 最後招喚",
+          "triggerHpRatio": 0.1,
+          "units": [
+            {
+              "type": "rat",
+              "count": 20
+            },
+            {
+              "type": "hound",
+              "count": 10
+            },
+            {
+              "type": "shell",
+              "count": 4
+            },
+            {
+              "type": "spitter",
+              "count": 4
+            },
+            {
+              "type": "bloater",
+              "count": 3
+            },
+            {
+              "type": "shadow",
+              "count": 3
+            },
+            {
+              "type": "golem",
+              "count": 1
+            }
+          ]
+        }
+      ]
     }
   },
   "baseAttack": {
@@ -3402,7 +3761,7 @@
       "name": "嗜血轉化",
       "icon": "assets/stat_lifesteal.png",
       "color": "#ff4f7f",
-      "description": "敵人受到的傷害有 0.3% 轉為 HP；不足 1 HP 的部分會持續累積。 每級再 +0.3%。"
+      "description": "敵人受到的傷害有 0.03% 轉為 HP；不足 1 HP 的部分會持續累積。每級再 +0.03%，Lv.5 共 0.15%。"
     },
     "dropCooldown": {
       "name": "道具脈衝",
@@ -3432,15 +3791,7 @@
       "name": "自癒強化",
       "icon": "assets/stat_hp_regen.png",
       "color": "#6ef2a4",
-      "description": "每隔一段時間恢復 1~3 HP。Lv.1 為每 5 秒一次，之後每級再縮短 0.5 秒。"
-    },
-    "revive": {
-      "name": "絕境逢生",
-      "icon": "assets/stat_revive.png",
-      "color": "#ffd86f",
-      "description": "HP 歸 0 時可用 1/2 Max HP 復活一次。 購買後會先離開升級池，消耗掉才會重新出現。",
-      "maxLevel": 1,
-      "scoreCost": 1000
+      "description": "每隔一段時間恢復 HP。 Lv.1～Lv.5  每次分別回復 1~3 HP  間隔為 5~3 秒。"
     },
     "focus": {
       "name": "瞄準器",
@@ -4294,7 +4645,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "",
+    "startBuildNote": "R30：Boss EXP 拋物線噴發／Debug 一鍵升滿永久能力",
     "features": [
       {
         "value": "12",
@@ -4343,7 +4694,7 @@
     "resultWeaponsLabel": "武器",
     "restartEndButton": "再次進入廢墟",
     "startToast": "血月升起。15:00 後將進入 3 分鐘 Boss 決戰",
-    "bossKilledToast": "深淵暴君已被擊殺",
+    "bossKilledToast": "深淵暴君倒下！15 秒內拾取戰利品。",
     "bossArrivalToast": "15:00 — 深淵暴君降臨，限時 3 分鐘",
     "bossArrivalDebugToast": "DEBUG — 已進入 3 分鐘 Boss 決戰",
     "emptyWeaponSlot": "EMPTY",
@@ -4418,7 +4769,10 @@
       "hpToMax": "HP 補滿",
       "expPlus100": "EXP +100",
       "runtimeEffect": "目前效果：{effect}",
-      "noRuntimeEffect": "目前未啟用；請先提升等級。"
+      "noRuntimeEffect": "目前未啟用；請先提升等級。",
+      "allStatsMax": "一鍵升滿所有永久能力",
+      "confirmAllStats": "確定要把所有永久能力直接升到最高等級？",
+      "allStatsApplied": "所有永久能力皆已升至最高等級。"
     },
     "configLoadErrorTitle": "無法載入 game-config.json",
     "configLoadErrorCopy": "請確認 game-config.json 與 game.js 位於同一資料夾，並透過 GitHub Pages 或本機 HTTP 伺服器開啟。瀏覽器直接以 file:// 開啟時通常會封鎖 JSON 讀取。",
@@ -4451,7 +4805,10 @@
     "pausePassivesCount": "已取得 {count} 項",
     "pauseEmptyWeapons": "尚未取得額外武器。",
     "pauseEmptyPassives": "尚未取得永久升級。",
-    "pauseLevel": "Lv.{level}"
+    "pauseLevel": "Lv.{level}",
+    "lastRippleDefeatEyebrow": "波紋燃盡",
+    "lastRippleDefeatTitle": "最後的波紋消散了",
+    "lastRippleDefeatCopy": "十秒已到，Boss 仍未被擊敗。"
   },
   "editingGuide": {
     "_comment": "編輯指南；此區只供閱讀，遊戲不會拿來計算。",
@@ -4494,5 +4851,36 @@
     "levelPointsPerLevel": 100,
     "baseScoreAdjustment": -100,
     "bossRemainingPointPerSecond": 30
+  },
+  "lastRipple": {
+    "_comment": "Boss 戰死亡後可消耗分數啟動一次的決死復活。以 100% Max HP 復活；cooldownMultiplier 0.7 代表冷卻時間縮短 30%。",
+    "scoreCost": 1000,
+    "durationSeconds": 10,
+    "restoreRatio": 1,
+    "invulnerabilitySeconds": 3,
+    "damageMultiplier": 1.5,
+    "moveSpeedMultiplier": 1.25,
+    "cooldownMultiplier": 0.7
+  },
+  "bossReward": {
+    "_comment": "Boss 死亡時先記錄擊殺時間並徹底清除所有戰鬥物件與舊 EXP；200 顆各 5 EXP 會在 3 秒內分批以拋物線粒子物理噴出並落地，3 秒後才可拾取。其後總共開放 15 秒移動拾取，這段時間不計入 Boss 戰耗時與成績時間。",
+    "gemCount": 200,
+    "expPerGem": 5,
+    "pickupSeconds": 15,
+    "rings": 10,
+    "gemsPerRing": 20,
+    "spreadRadiusMin": 180,
+    "spreadRadiusMax": 640,
+    "pickupDelaySeconds": 3,
+    "radiusJitter": 32,
+    "angleJitterRadians": 0.08,
+    "ejectionSeconds": 3,
+    "flightDurationMin": 0.7,
+    "flightDurationMax": 1.25,
+    "gravity": 920,
+    "launchOriginJitter": 16,
+    "shadowAlpha": 0.22,
+    "shadowScaleMin": 0.35,
+    "shadowScaleMax": 0.9
   }
 }

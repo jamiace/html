@@ -1,4 +1,4 @@
-/* BUILD R24 - DEBUG PASSIVE LEVEL PARAMETERS - 2026-07-12 */
+/* BUILD R31 - PHASED GENERIC BOSS SUMMONS - 2026-07-14 */
 (async () => {
 'use strict';
 
@@ -23,7 +23,7 @@ try {
   shell.append(box,input);return;
 }
 
-const SYS=CFG.system, PERF=CFG.performance, PLAYER_CFG=CFG.player, PROG=CFG.progression, SCALE=CFG.enemyScaling, SPAWN=CFG.spawn, AI=CFG.enemyAI, BOSS=CFG.boss, BASE=CFG.baseAttack, VIS=CFG.visuals, TEXT=CFG.text, AUDIO=CFG.audio, DROP=CFG.drops, DEBUG_CFG=CFG.debug, ONLINE_SCORE=CFG.onlineScores||{}, SCORE_CFG=CFG.scoring||{};
+const SYS=CFG.system, PERF=CFG.performance, PLAYER_CFG=CFG.player, PROG=CFG.progression, SCALE=CFG.enemyScaling, SPAWN=CFG.spawn, AI=CFG.enemyAI, BOSS=CFG.boss, BASE=CFG.baseAttack, VIS=CFG.visuals, TEXT=CFG.text, AUDIO=CFG.audio, DROP=CFG.drops, DEBUG_CFG=CFG.debug, ONLINE_SCORE=CFG.onlineScores||{}, SCORE_CFG=CFG.scoring||{}, LAST_RIPPLE=CFG.lastRipple||{}, BOSS_REWARD=CFG.bossReward||{};
 const dataEntries=obj=>Object.entries(obj).filter(([key])=>!key.startsWith('_'));
 const formatText=(template,values={})=>String(template).replace(/\{(\w+)\}/g,(_,key)=>values[key]??`{${key}}`);
 const levelChoice=(level,base,upgraded,threshold)=>level>=threshold?upgraded:base;
@@ -53,6 +53,7 @@ const rand = (a,b)=>a+Math.random()*(b-a);
 const pick = a=>a[(Math.random()*a.length)|0];
 const dist2=(a,b)=>{const x=a.x-b.x,y=a.y-b.y;return x*x+y*y};
 const fmtTime = seconds => {const value=Math.max(0,seconds),minutes=Math.floor(value/60),secs=Math.floor(value%60);return `${String(minutes).padStart(SYS.timeFormatMinutesPad,'0')}:${String(secs).padStart(SYS.timeFormatSecondsPad,'0')}`};
+const fmtHp = value => {const number=Math.max(0,Number(value)||0);return String(number>0?Math.max(1,Math.round(number)):0)};
 const SCORE_BOSS_START=Number(SCORE_CFG.bossStartSeconds)||Number(SYS.gameDurationSeconds)||900;
 const BOSS_FIGHT_LIMIT_SECONDS=Number(SCORE_CFG.bossFightLimitSeconds)||180;
 const SCORE_LEVEL_VALUE=Number(SCORE_CFG.levelPointsPerLevel)||100;
@@ -69,7 +70,7 @@ function bossFightElapsedSeconds(elapsedSeconds=game?.elapsed||0){
 }
 function scoreBreakdown(
   totalExp = game?.totalExp || 0,
-  elapsedSeconds = game?.elapsed || 0,
+  elapsedSeconds = (game?.bossDefeated && Number.isFinite(game?.bossDefeatElapsed)) ? game.bossDefeatElapsed : (game?.elapsed || 0),
   level = game?.level || 1
 ) {
   const expPoints = Math.max(
@@ -120,8 +121,8 @@ function scoreBreakdown(
 const angleDiff=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
 const DOM = {
-  hud: $('#hud'), start: $('#start-screen'), level: $('#level-screen'), pause: $('#pause-screen'), end: $('#end-screen'),
-  timer: $('#timer'), timerLabel: $('.timer-wrap small'), score: $('#score'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
+  hud: $('#hud'), start: $('#start-screen'), level: $('#level-screen'), pause: $('#pause-screen'), end: $('#end-screen'), lastRipple: $('#last-ripple-screen'),
+  timer: $('#timer'), timerWrap: $('.timer-wrap'), timerLabel: $('.timer-wrap small'), score: $('#score'), levelText: $('#level'), kills: $('#kills'), hpFill: $('#hp-fill'), hpText: $('#hp-text'), expFill: $('#exp-fill'), expText: $('#exp-text'),
   weaponRack: $('#weapon-rack'), passiveRack: $('#passive-rack'), effectRack: $('#effect-rack'), rewardCards: $('#reward-cards'),
   pauseWeaponsList: $('#pause-weapons-list'), pausePassivesList: $('#pause-passives-list'), pauseWeaponsCount: $('#pause-weapons-count'), pausePassivesCount: $('#pause-passives-count'),
   resultScore: $('#result-score'), resultTime: $('#result-time'), resultLevel: $('#result-level'), resultKills: $('#result-kills'), resultWeapons: $('#result-weapons'),
@@ -131,7 +132,9 @@ const DOM = {
   submitScoreBtn: $('#submit-score-btn'), scoreSubmitStatus: $('#score-submit-status'),
   leaderboardPanel: $('#leaderboard-panel'), leaderboardBody: $('#leaderboard-body'),
   leaderboardStatus: $('#leaderboard-status'), leaderboardRule: $('#leaderboard-rule'),
-  leaderboardRefreshBtn: $('#leaderboard-refresh-btn')
+  leaderboardRefreshBtn: $('#leaderboard-refresh-btn'),
+  lastRippleScore: $('#last-ripple-score'), lastRippleAccept: $('#last-ripple-accept'), lastRippleDecline: $('#last-ripple-decline'),
+  phaseBanner: $('#phase-banner'), phaseBannerTitle: $('#phase-banner-title'), phaseBannerTime: $('#phase-banner-time'), phaseBannerCopy: $('#phase-banner-copy')
 };
 
 function applyStaticText(){
@@ -404,7 +407,8 @@ function ensureEffectNodes(){
 function resetGame(){
   game={
     elapsed:0,duration:SYS.gameDurationSeconds,level:PROG.startLevel,exp:PROG.startExp,totalExp:0,need:needXP(PROG.startLevel),kills:0,paused:false,ended:false,won:false,scoreSubmitted:false,scoreRunId:'',scoreAdjustment:0,
-    shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,bossFightStartedAt:null,bossTimedOut:false,
+    shakeAmplitude:0,shakeRemaining:0,shakeDuration:weaponLevelConfig('meteor',1).impact.shakeDurationNormal,shakePhase:rand(0,TAU),spawnBudget:0,bossSpawned:false,bossFightStartedAt:null,bossTimedOut:false,bossDefeated:false,bossDefeatElapsed:null,
+    lastRippleUsed:false,lastRippleActive:false,lastRippleRemaining:0,lastRippleExpired:false,bossRewardPhase:false,bossRewardRemaining:0,
     player:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY,vx:0,vy:0,r:PLAYER_CFG.radius,hp:PLAYER_CFG.startHP,maxHp:PLAYER_CFG.startHP,baseSpeed:PLAYER_CFG.baseSpeed,invuln:0,angle:0,stats:{hp:0,speed:0,pickup:0,lifesteal:0,dropCooldown:0,weaponCooldown:0,weaponArea:0,weaponSize:0,hpRegen:0,revive:0,focus:0,runExp:0,fullHpCooldown:0},weapons:{},baseTimer:PLAYER_CFG.startBaseAttackDelay,lifestealRemainder:0,regenTimer:Number(PROG.hpRegenBaseInterval)||5,stationaryTime:0,runExpWarmup:0,runExpTimer:Number(PROG.runExpBaseInterval)||2},
     enemies:[],projectiles:[],enemyShots:[],gems:[],mapDrops:[],particles:[],texts:[],waves:[],beams:[],meteors:[],gravityOrbs:[],zones:[],mines:[],wells:[],boomerangs:[],lightning:[],drones:[],delayedCasts:[],effects:{regen:0,shield:0,freeze:0,doublexp:0,overload:0},
     pendingLevels:0,rewardChoices:[],camera:{x:PLAYER_CFG.startX,y:PLAYER_CFG.startY},pattern:null,globalMagnet:0,nextMapDrop:DROP.firstDropDelay*mapDropCooldownMultiplier(),
@@ -537,14 +541,15 @@ function buildScorePayload(playerName){
     weapon=>`${weapon.name} Lv.${weapon.level}`
   );
   const finalScore=scoreBreakdown();
+  const finalElapsed=game.bossDefeated&&Number.isFinite(game.bossDefeatElapsed)?game.bossDefeatElapsed:game.elapsed;
 
   return {
     gameId:String(ONLINE_SCORE.gameId||'crimson-survivor'),
     runId:game.scoreRunId,
     playerName,
     result:'victory',
-    elapsedSeconds:Math.round(game.elapsed*1000)/1000,
-    elapsedText:fmtTime(game.elapsed),
+    elapsedSeconds:Math.round(finalElapsed*1000)/1000,
+    elapsedText:fmtTime(finalElapsed),
     totalExp:finalScore.totalExp,
     levelPoints:finalScore.levelPoints,
     baseScoreAdjustment:finalScore.baseScoreAdjustment,
@@ -751,16 +756,16 @@ async function submitOnlineScore(){
 }
 
 function startGame(){
-  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.hud.classList.remove('hidden');
+  sound.ensure();ensurePauseDebugButton();ensureFPSUI();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.remove('hidden');
   last = performance.now();
 // 遊戲開始後，將開始說明顯示 6 秒
 toast(TEXT.startLead, 6000);
 }
 function endGame(win){
-  if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
-  const timedOut=!win&&game.bossTimedOut;
-  DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:timedOut?TEXT.bossTimeoutEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:timedOut?TEXT.bossTimeoutTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:timedOut?TEXT.bossTimeoutCopy:TEXT.endLoseCopy;
-  DOM.resultScore.textContent=scoreBreakdown().score.toLocaleString('zh-TW');DOM.resultTime.textContent=fmtTime(game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;
+  if(game.ended)return;game.ended=true;game.won=!!win;game.scoreSubmitted=false;state='ended';syncFPSVisibility();DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.add('hidden');DOM.end.classList.add('show');
+  const timedOut=!win&&game.bossTimedOut, rippleExpired=!win&&game.lastRippleExpired;
+  DOM.endEyebrow.textContent=win?TEXT.endWinEyebrow:rippleExpired?(TEXT.lastRippleDefeatEyebrow||'波紋燃盡'):timedOut?TEXT.bossTimeoutEyebrow:TEXT.endLoseEyebrow;DOM.endTitle.textContent=win?TEXT.endWinTitle:rippleExpired?(TEXT.lastRippleDefeatTitle||'最後的波紋消散了'):timedOut?TEXT.bossTimeoutTitle:TEXT.endLoseTitle;DOM.endCopy.textContent=win?TEXT.endWinCopy:rippleExpired?(TEXT.lastRippleDefeatCopy||'十秒已到，Boss 仍未被擊敗。'):timedOut?TEXT.bossTimeoutCopy:TEXT.endLoseCopy;
+  DOM.resultScore.textContent=scoreBreakdown().score.toLocaleString('zh-TW');DOM.resultTime.textContent=fmtTime(game.bossDefeated&&Number.isFinite(game.bossDefeatElapsed)?game.bossDefeatElapsed:game.elapsed);DOM.resultLevel.textContent=game.level;DOM.resultKills.textContent=game.kills;DOM.resultWeapons.textContent=`${Object.keys(game.player.weapons).length} / ${SYS.maxWeaponSlots}`;
   prepareOnlineScoreUI(win);sound.play(win?'victory':'defeat');
 }
 function togglePause(force){
@@ -913,12 +918,13 @@ function debugLevelText(type,key,level){
 function debugStatEffectSummary(key,level=debugCurrentLevel('stat',key)){
   if(level<=0)return TEXT.debug.noRuntimeEffect||'目前未啟用；請先提升等級。';
   const percent=value=>`${(Number(value)*100).toFixed(Math.abs(Number(value)*100-Math.round(Number(value)*100))<1e-8?0:1)}%`;
+  const compactNumber=value=>{const number=Number(value)||0;return Number.isInteger(number)?String(number):number.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')};
   if(key==='lifesteal')return `造成傷害的 ${percent(statLevelValue(key,'rate',level))} 轉為 HP`;
   if(key==='dropCooldown')return `地圖道具生成冷卻 -${percent(statLevelValue(key,'reduction',level))}`;
   if(key==='weaponCooldown')return `所有武器冷卻 -${percent(statLevelValue(key,'reduction',level))}`;
   if(key==='weaponArea')return `所有武器射程／效果半徑 +${percent(statLevelValue(key,'bonus',level))}`;
   if(key==='weaponSize')return `武器視覺與碰撞判定 +${percent(statLevelValue(key,'bonus',level))}`;
-  if(key==='hpRegen')return `每 ${statLevelValue(key,'interval',level).toFixed(2).replace(/\.00$/,'')} 秒回復 ${statLevelValue(key,'heal',level)} HP`;
+  if(key==='hpRegen')return `每 ${compactNumber(statLevelValue(key,'interval',level))} 秒回復 ${compactNumber(statLevelValue(key,'heal',level))} HP`;
   if(key==='revive')return `死亡時以 ${percent(reviveRestoreRatio())} Max HP 復活；無敵 ${reviveInvulnerabilitySeconds()} 秒；購買 ${Math.round(reviveScoreCost())} 分`;
   if(key==='focus')return `原地 ${statLevelValue(key,'stationaryDelay',level)} 秒後，傷害 +${percent(statLevelValue(key,'damageBonus',level))}`;
   if(key==='runExp')return `跑步 ${statLevelValue(key,'warmup',level)} 秒後，每 ${statLevelValue(key,'interval',level)} 秒 EXP +${statLevelValue(key,'expPerTick',level)}`;
@@ -1163,6 +1169,8 @@ function renderDebugQuickActions(){
   host.innerHTML='';
   const all=makeDebugButton(TEXT.debug.allWeaponsMax,'all',{background:'rgba(49,199,232,.13)',borderColor:'rgba(101,231,255,.42)'});
   all.onclick=debugSetAllWeaponsMax;
+  const allStats=makeDebugButton(TEXT.debug.allStatsMax||'一鍵升滿所有永久能力','all-stats',{background:'rgba(110,242,164,.12)',borderColor:'rgba(110,242,164,.42)',color:'#c6ffdd'});
+  allStats.onclick=debugSetAllStatsMax;
   const base=makeDebugButton(TEXT.debug.baseOnly,'base-only',{background:'rgba(255,70,116,.1)',borderColor:'rgba(255,98,145,.35)',color:'#ffc0d2'});
   base.onclick=debugResetBaseOnly;
   const time=makeDebugButton(TEXT.debug.advanceMinute,'time');
@@ -1177,7 +1185,7 @@ function renderDebugQuickActions(){
   hpMax.onclick=()=>{game.player.hp=game.player.maxHp;updateHUD(true);renderDebugUI('玩家 HP 已補滿。')};
   const exp=makeDebugButton(TEXT.debug.expPlus100||'EXP +100','exp-plus');
   exp.onclick=()=>{gainExp(100);updateHUD(true);renderDebugUI('已增加 100 EXP。')};
-  host.append(all,base,time,boss,score,hpOne,hpMax,exp);
+  host.append(all,allStats,base,time,boss,score,hpOne,hpMax,exp);
 }
 
 function renderDebugToggles(){
@@ -1370,6 +1378,30 @@ function debugSetAllWeaponsMax(){
   renderDebugUI(TEXT.debug.allWeaponsApplied);
 }
 
+function debugSetAllStatsMax(){
+  if(!game)return;
+  if(!confirm(TEXT.debug.confirmAllStats||'確定要把所有永久能力直接升到最高等級？'))return;
+  const player=game.player;
+  let hpDelta=0;
+  for(const key of Object.keys(STATS)){
+    const current=Math.max(0,Number(player.stats[key])||0),maximum=statMaxLevel(key);
+    if(key==='hp')hpDelta=Math.max(0,maximum-current);
+    player.stats[key]=maximum;
+  }
+  if(hpDelta>0){
+    const gainedHp=(Number(PROG.hpPerUpgrade)||0)*hpDelta;
+    player.maxHp+=gainedHp;
+    player.hp=Math.min(player.maxHp,player.hp+gainedHp);
+  }
+  player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());
+  player.runExpTimer=Math.min(player.runExpTimer||runExpInterval(),runExpInterval());
+  game.nextMapDrop=Math.min(game.nextMapDrop,DROP.nextDropDelayMax*mapDropCooldownMultiplier());
+  invalidateScaledWeaponConfigs();
+  buildWeaponRack();
+  updateHUD(true);
+  renderDebugUI(TEXT.debug.allStatsApplied||'所有永久能力皆已升至最高等級。');
+}
+
 function debugResetBaseOnly(){
   if(!confirm(TEXT.debug.confirmBaseOnly))return;
   game.player.weapons={};
@@ -1455,17 +1487,75 @@ function closeDebugUI(){
 }
 function toggleDebugUI(){if(state==='debug')closeDebugUI();else if(state==='paused')openDebugUI()}
 
+function bossIsAlive(){return !!game?.enemies?.some(enemy=>enemy.type==='boss'&&!enemy.dead)}
+function lastRippleCost(){return Math.max(0,Number(LAST_RIPPLE.scoreCost)||1000)}
+function showLastRipplePrompt(){
+  if(!game||game.ended||game.lastRippleUsed||!game.bossSpawned||game.bossDefeated||!bossIsAlive())return false;
+  const cost=lastRippleCost(),score=scoreBreakdown().score,canAfford=score>=cost;
+  game.player.hp=0;state='lastRipplePrompt';mouse.active=false;mouse.held=false;syncFPSVisibility();
+  if(DOM.lastRippleScore){DOM.lastRippleScore.textContent=canAfford?`目前分數 ${score.toLocaleString('zh-TW')}，啟動後剩餘 ${(score-cost).toLocaleString('zh-TW')} 分。`:`目前只有 ${score.toLocaleString('zh-TW')} 分，還差 ${(cost-score).toLocaleString('zh-TW')} 分。`;DOM.lastRippleScore.classList.toggle('insufficient',!canAfford)}
+  if(DOM.lastRippleAccept)DOM.lastRippleAccept.disabled=!canAfford;
+  DOM.lastRipple?.classList.add('show');updateHUD(true);return true;
+}
+function acceptLastRipple(){
+  if(state!=='lastRipplePrompt'||!game||game.ended)return;
+  const cost=lastRippleCost(),score=scoreBreakdown().score;if(score<cost){if(DOM.lastRippleAccept)DOM.lastRippleAccept.disabled=true;return}
+  game.scoreAdjustment-=cost;game.lastRippleUsed=true;game.lastRippleActive=true;game.lastRippleRemaining=Math.max(0.1,Number(LAST_RIPPLE.durationSeconds)||10);game.lastRippleExpired=false;
+  const player=game.player;player.hp=player.maxHp*clamp(Number(LAST_RIPPLE.restoreRatio) || 1,0,1);player.invuln=Math.max(player.invuln,Number(LAST_RIPPLE.invulnerabilitySeconds)||3);player.stationaryTime=0;
+  DOM.lastRipple?.classList.remove('show');state='playing';last=performance.now();syncFPSVisibility();toast('最後的波紋！十秒內擊敗 Boss！',5000);updateHUD(true);
+}
+function declineLastRipple(){if(state!=='lastRipplePrompt'||!game||game.ended)return;DOM.lastRipple?.classList.remove('show');endGame(false)}
+function clearBossBattleThreats(keepBossRewardGems=false){
+  for(const shot of game.enemyShots)recycleEnemyShot(shot);game.enemyShots.length=0;
+  for(const projectile of game.projectiles)recycleProjectile(projectile);game.projectiles.length=0;
+  for(const enemy of game.enemies)enemy.dead=true;game.enemies.length=0;enemySpatial.clear();
+  compactInPlace(game.gems,gem=>keepBossRewardGems&&gem.bossReward===true,recycleGem);
+  compactInPlace(game.particles,()=>false,recycleParticle);
+  compactInPlace(game.texts,()=>false,recycleText);
+  game.delayedCasts.length=0;
+  game.beams.length=0;game.lightning.length=0;game.boomerangs.length=0;
+  game.meteors.length=0;game.gravityOrbs.length=0;game.zones.length=0;
+  game.mines.length=0;game.wells.length=0;game.waves.length=0;game.drones.length=0;
+  game.mapDrops.length=0;game.denseTargets.length=0;
+  game.globalMagnet=0;game.shakeAmplitude=0;game.shakeRemaining=0;
+  for(const key of Object.keys(game.effects))game.effects[key]=0;
+  if(game.debugModes?.effects)for(const key of Object.keys(game.debugModes.effects))game.debugModes.effects[key]=false;
+  game.player.baseTimer=Number.POSITIVE_INFINITY;game.player.invuln=0;
+  mouse.active=false;mouse.held=false;
+  DOM.damageFlash?.classList.remove('on');DOM.toastLayer?.replaceChildren();
+}
+function startBossRewardPhase(x,y){
+  game.bossDefeated=true;game.bossDefeatElapsed=game.elapsed;game.lastRippleActive=false;game.lastRippleRemaining=0;game.bossRewardPhase=true;game.bossRewardRemaining=Math.max(0.1,Number(BOSS_REWARD.pickupSeconds)||15);
+  clearBossBattleThreats(false);
+  const count=Math.max(1,Math.floor(Number(BOSS_REWARD.gemCount)||200)),value=Math.max(1,Number(BOSS_REWARD.expPerGem)||5),rings=Math.max(1,Math.floor(Number(BOSS_REWARD.rings)||10)),perRing=Math.max(1,Math.floor(Number(BOSS_REWARD.gemsPerRing)||20)),minRadius=Number(BOSS_REWARD.spreadRadiusMin)||180,maxRadius=Math.max(minRadius,Number(BOSS_REWARD.spreadRadiusMax)||640),pickupDelay=Math.max(0,Number(BOSS_REWARD.pickupDelaySeconds)||3),radiusJitter=Math.max(0,Number(BOSS_REWARD.radiusJitter)||32),angleJitter=Math.max(0,Number(BOSS_REWARD.angleJitterRadians)||0.08),ejectionSeconds=Math.max(0.2,Number(BOSS_REWARD.ejectionSeconds)||3),flightMin=Math.max(0.15,Number(BOSS_REWARD.flightDurationMin)||0.7),flightMax=Math.max(flightMin,Number(BOSS_REWARD.flightDurationMax)||1.25);
+  const targets=[];
+  for(let i=0;i<count;i++){const ring=Math.min(rings-1,Math.floor(i/perRing)),slot=i%perRing,baseRadius=rings<=1?minRadius:minRadius+(maxRadius-minRadius)*(ring/(rings-1)),radius=Math.max(minRadius,Math.min(maxRadius,baseRadius+rand(-radiusJitter,radiusJitter))),angle=slot/perRing*TAU+ring*0.31+rand(-angleJitter,angleJitter);targets.push({x:x+Math.cos(angle)*radius,y:y+Math.sin(angle)*radius})}
+  for(let i=targets.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[targets[i],targets[j]]=[targets[j],targets[i]]}
+  for(let i=0;i<count;i++){const flightDuration=rand(flightMin,flightMax),progress=count<=1?0:i/(count-1),launchDelay=progress*Math.max(0,ejectionSeconds-flightDuration),target=targets[i];spawnBossRewardGem(x,y,target.x,target.y,value,launchDelay,flightDuration,pickupDelay)}
+  sound.play('victory');updateHUD(true);
+}
+
 function update(dt){
-  if(state!=='playing'||!game||game.ended)return;game.elapsed+=dt;const p=game.player;
-  game.frameDeathParticleBudget=PERF.meteorDeathParticleBudgetPerFrame;game.frameGemMap.clear();updateEffects(dt);updateScreenShake(dt);p.invuln=Math.max(0,p.invuln-dt);
+  if(state!=='playing'||!game||game.ended)return;
+  const lootPhase=game.bossRewardPhase,p=game.player;
+  game.elapsed+=dt;
+  game.frameDeathParticleBudget=PERF.meteorDeathParticleBudgetPerFrame;game.frameGemMap.clear();if(!lootPhase)updateEffects(dt);else clearBossBattleThreats(true);updateScreenShake(dt);p.invuln=Math.max(0,p.invuln-dt);
   const keyX=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),keyY=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
   let dx=keyX+touch.x,dy=keyY+touch.y,moveScale=1;const manual=Math.hypot(dx,dy)>PLAYER_CFG.keyboardMouseDeadZone;if(manual)mouse.active=false;
   else if(mouse.active){const mx=mouse.targetX-p.x,my=mouse.targetY-p.y,md=Math.hypot(mx,my);if(md<PLAYER_CFG.mouseArrivalDistance){mouse.active=false;dx=dy=0}else{dx=mx/md;dy=my/md;moveScale=clamp(md/PLAYER_CFG.mouseSlowDistance,PLAYER_CFG.mouseMinimumMoveScale,1)}}
   const len=Math.hypot(dx,dy),isMoving=len>PLAYER_CFG.keyboardMouseDeadZone;if(isMoving){dx/=Math.max(1,len);dy/=Math.max(1,len);p.angle=Math.atan2(dy,dx)}
-  const speed=p.baseSpeed*SPEED_MULT[p.stats.speed];p.vx=dx*speed*moveScale;p.vy=dy*speed*moveScale;p.x+=p.vx*dt;p.y+=p.vy*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
+  const rippleMove=game.lastRippleActive?(Number(LAST_RIPPLE.moveSpeedMultiplier)||1.25):1,speed=p.baseSpeed*SPEED_MULT[p.stats.speed]*rippleMove;p.vx=dx*speed*moveScale;p.vy=dy*speed*moveScale;p.x+=p.vx*dt;p.y+=p.vy*dt;game.camera.x+=(p.x-game.camera.x)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);game.camera.y+=(p.y-game.camera.y)*Math.min(1,dt*PLAYER_CFG.cameraFollowRate);
+  if(lootPhase){
+    game.bossRewardRemaining=Math.max(0,game.bossRewardRemaining-dt);updateGems(dt,false);updateParticles(dt);
+    game.hudTimer-=dt;if(game.hudTimer<=0){game.hudTimer=1/PERF.hudUpdatesPerSecond;updateHUD(false)}
+    if(game.bossRewardRemaining<=0){game.bossRewardPhase=false;endGame(true)}return;
+  }
   updatePassiveBonuses(dt,isMoving);
+  if(game.lastRippleActive)game.lastRippleRemaining=Math.max(0,game.lastRippleRemaining-dt);
   updateSpawns(dt);if(game.bossSpawned&&bossFightRemainingExact(game.elapsed)<=0){game.bossTimedOut=true;toast(TEXT.bossTimeoutToast);endGame(false);return}updateEnemies(dt);rebuildEnemySpatial();game.denseTargetTimer-=dt;if(game.denseTargetTimer<=0){game.denseTargetTimer+=PERF.denseTargetRefreshSeconds;refreshDenseTargetCache()}
   updateWeapons(dt);updateDelayedCasts(dt);updateProjectiles(dt);updateEnemyShots(dt);updateSpecials(dt);updateGems(dt);updateMapDrops(dt);updateParticles(dt);
+  if(game.bossRewardPhase){clearBossBattleThreats(true);updateHUD(true);return}
+  if(game.lastRippleActive&&game.lastRippleRemaining<=0&&!game.bossDefeated){game.lastRippleExpired=true;endGame(false);return}
   game.hudTimer-=dt;if(game.hudTimer<=0){game.hudTimer=1/PERF.hudUpdatesPerSecond;updateHUD(false)}
 }
 
@@ -1612,7 +1702,45 @@ if(near){
 }
   else{const angle=Math.random()*TAU,distance=Math.max(W,H)*SPAWN.normalSpawnDistanceScreenMultiplier+rand(SPAWN.normalSpawnExtraMin,SPAWN.normalSpawnExtraMax);x=player.x+Math.cos(angle)*distance;y=player.y+Math.sin(angle)*distance}
   const multiplier=type==='boss'?1:hpMult(game.elapsed),trackingLag=type==='hound'||type==='shadow',init=AI.initial,track=AI[type]||AI.hound;
-  game.enemies.push({type,x,y,r:def.r,hp:def.hp*multiplier,maxHp:def.hp*multiplier,speed:def.speed*speedMult(game.elapsed),damage:def.damage*dmgMult(game.elapsed),exp:def.exp,hitFlash:0,slow:0,slowAmt:0,freeze:0,stun:0,burn:0,burnDps:0,acidTick:0,ai:rand(init.aiMin,init.aiMax),state:'move',charge:0,shot:type==='boss'?BOSS.initialShotTimer:rand(init.shotMin,init.shotMax),dash:rand(init.dashMin,init.dashMax),vx:0,vy:0,bossStage:0,bossNovaTimer:type==='boss'?BOSS.initialNovaTimer:0,bossNovaCharge:0,bossBurstTimer:type==='boss'?BOSS.initialBurstTimer:0,bossBurstShots:0,bossBurstGap:0,bossBurstAngle:0,bossRingOffset:rand(0,TAU),variant:Math.random(),flip:Math.random()<init.flipChance?-1:1,trackingLag,awareness:trackingLag?rand(track.awarenessMin,track.awarenessMax):0,retargetTimer:trackingLag?rand(init.retargetMin,init.retargetMax):0,targetX:player.x,targetY:player.y,searchPause:0,dead:false});
+  const enemy={type,x,y,r:def.r,hp:def.hp*multiplier,maxHp:def.hp*multiplier,speed:def.speed*speedMult(game.elapsed),damage:def.damage*dmgMult(game.elapsed),exp:def.exp,hitFlash:0,slow:0,slowAmt:0,freeze:0,stun:0,burn:0,burnDps:0,acidTick:0,ai:rand(init.aiMin,init.aiMax),state:'move',charge:0,shot:type==='boss'?BOSS.initialShotTimer:rand(init.shotMin,init.shotMax),dash:rand(init.dashMin,init.dashMax),vx:0,vy:0,bossSummonTriggered:Object.create(null),bossNovaTimer:type==='boss'?BOSS.initialNovaTimer:0,bossNovaCharge:0,bossBurstTimer:type==='boss'?BOSS.initialBurstTimer:0,bossBurstShots:0,bossBurstGap:0,bossBurstAngle:0,bossRingOffset:rand(0,TAU),variant:Math.random(),flip:Math.random()<init.flipChance?-1:1,trackingLag,awareness:trackingLag?rand(track.awarenessMin,track.awarenessMax):0,retargetTimer:trackingLag?rand(init.retargetMin,init.retargetMax):0,targetX:player.x,targetY:player.y,searchPause:0,dead:false};
+  game.enemies.push(enemy);
+  if(type==='boss')updateBossSummons(enemy,1,true);
+  return enemy;
+}
+
+function bossSummonWaves(){
+  return Array.isArray(BOSS.summon?.waves)?BOSS.summon.waves:[];
+}
+function summonBossWave(boss,wave,waveIndex){
+  const units=Array.isArray(wave?.units)?wave.units:[];
+  let spawned=0;
+  for(const unit of units){
+    const type=String(unit?.type||'').trim();
+    const count=Math.max(0,Math.floor(Number(unit?.count)||0));
+    if(!type||type==='boss'||!ENEMIES[type]||count<=0)continue;
+    for(let i=0;i<count;i++){spawnEnemy(type,'boss');spawned++}
+  }
+  if(spawned>0){
+    addWave(boss.x,boss.y,BOSS.summon.waveStartRadius,BOSS.summon.waveEndRadius,BOSS.summon.waveDuration,BOSS.summon.waveColor);
+    sound.boom();
+  }
+  return spawned;
+}
+function updateBossSummons(boss,hpRatio,onSpawn=false){
+  if(!boss||boss.dead)return;
+  if(!boss.bossSummonTriggered)boss.bossSummonTriggered=Object.create(null);
+  const waves=bossSummonWaves();
+  for(let index=0;index<waves.length;index++){
+    const wave=waves[index]||{};
+    const key=String(wave.id||`wave-${index}`);
+    if(boss.bossSummonTriggered[key])continue;
+    const spawnWave=wave.onSpawn===true;
+    const threshold=clamp(Number(wave.triggerHpRatio),0,1);
+    const shouldTrigger=spawnWave?onSpawn:(!onSpawn&&hpRatio<=threshold);
+    if(!shouldTrigger)continue;
+    boss.bossSummonTriggered[key]=true;
+    summonBossWave(boss,wave,index);
+  }
 }
 function updateEnemies(dt){
   const p=game.player,freezeAll=game.effects.freeze>0;
@@ -1699,7 +1827,7 @@ if(e.bossBurstShots>0){
 }
       if(e.bossNovaCharge>0){e.bossNovaCharge-=dt;if(e.bossNovaCharge<=0){const count=nova.countByPhase[index];e.bossRingOffset+=nova.ringRotationPerCast;for(let i=0;i<count;i++){const angle=e.bossRingOffset+i/count*TAU;spawnEnemyShot(e.x,e.y,Math.cos(angle),Math.sin(angle),nova.damageBase+phase*nova.damagePerPhase,nova.speedBase+phase*nova.speedPerPhase,'bossOrb')}sound.boom()}}
       else{e.bossNovaTimer-=dt;if(e.bossNovaTimer<=0){e.bossNovaCharge=nova.chargeSeconds;e.bossNovaTimer=nova.cooldownByPhase[index];addWave(e.x,e.y,nova.warningStartRadius,nova.warningEndRadius,nova.warningDuration,nova.warningColor)}}
-      const stage=Math.floor((1-hpRatio)*BOSS.summon.stageCount);if(stage>e.bossStage){e.bossStage=stage;for(let i=0;i<BOSS.summon.rats;i++)spawnEnemy('rat','boss');for(let i=0;i<BOSS.summon.hounds;i++)spawnEnemy('hound','boss');addWave(e.x,e.y,BOSS.summon.waveStartRadius,BOSS.summon.waveEndRadius,BOSS.summon.waveDuration,BOSS.summon.waveColor);sound.boom()}
+      updateBossSummons(e,hpRatio,false);
     }
     const contact=e.r+p.r;if(playerDist<contact){hurtPlayer(e.damage);e.x-=pxn*PLAYER_CFG.contactPushDistance;e.y-=pyn*PLAYER_CFG.contactPushDistance}
   }
@@ -1707,26 +1835,14 @@ if(e.bossBurstShots>0){
 }
 
 function hurtPlayer(amount){
-  const player=game.player;if(game.debugModes?.godMode||player.invuln>0||game.effects.shield>0)return;player.hp-=amount;player.invuln=PLAYER_CFG.contactInvulnerabilitySeconds;startScreenShake(PLAYER_CFG.damageShakeAmplitude,PLAYER_CFG.damageShakeDuration);DOM.damageFlash.classList.remove('on');void DOM.damageFlash.offsetWidth;DOM.damageFlash.classList.add('on');sound.hurt();
+  const player=game.player;if(game.debugModes?.godMode||player.invuln>0||game.effects.shield>0||game.bossRewardPhase)return;player.hp-=amount;player.invuln=PLAYER_CFG.contactInvulnerabilitySeconds;startScreenShake(PLAYER_CFG.damageShakeAmplitude,PLAYER_CFG.damageShakeDuration);DOM.damageFlash.classList.remove('on');void DOM.damageFlash.offsetWidth;DOM.damageFlash.classList.add('on');sound.hurt();
   addText(player.x,player.y+PLAYER_CFG.damageTextYOffset,`-${Math.round(amount)}`,VIS.damage.playerText,PLAYER_CFG.damageTextSize);
   for(let i=0;i<PLAYER_CFG.damageParticleCount;i++)particle(player.x,player.y,rand(PLAYER_CFG.damageParticleVelocityMin,PLAYER_CFG.damageParticleVelocityMax),rand(PLAYER_CFG.damageParticleVelocityMin,PLAYER_CFG.damageParticleVelocityMax),rand(PLAYER_CFG.damageParticleLifeMin,PLAYER_CFG.damageParticleLifeMax),VIS.damage.playerParticle,rand(PLAYER_CFG.damageParticleSizeMin,PLAYER_CFG.damageParticleSizeMax));
-  if(player.hp<=0){
-    if((player.stats.revive||0)>0){
-      player.stats.revive=0;
-      buildWeaponRack();
-      player.hp=Math.max(1,player.maxHp*reviveRestoreRatio());
-      player.invuln=Math.max(player.invuln,reviveInvulnerabilitySeconds());
-      player.stationaryTime=0;
-      toast('復活啟動！');
-      updateHUD(true);
-      return;
-    }
-    endGame(false);
-  }
+  if(player.hp<=0&&!showLastRipplePrompt())endGame(false);
 }
 function damageEnemy(enemy,amount,kind='normal',showText=true,knockback=0,sourceX=game.player.x,sourceY=game.player.y){
   if(enemy.dead)return;if(!Number.isFinite(amount)){console.error('Invalid damage amount:',amount,kind);amount=0}
-  amount*=stationaryDamageMultiplier();
+  amount*=stationaryDamageMultiplier();if(game.lastRippleActive)amount*=Number(LAST_RIPPLE.damageMultiplier)||1.5;
   const previousHp=Math.max(0,enemy.hp),actualDamage=Math.max(0,Math.min(previousHp,amount));enemy.hp-=amount;enemy.hitFlash=VIS.damage.hitFlashSeconds;
   const rate=lifestealRate();if(rate>0&&actualDamage>0){const player=game.player;player.lifestealRemainder=(player.lifestealRemainder||0)+actualDamage*rate;const wholeHeal=Math.floor(player.lifestealRemainder+1e-9);if(wholeHeal>=1){player.lifestealRemainder-=wholeHeal;player.hp=Math.min(player.maxHp,player.hp+wholeHeal)}}
   if(showText&&Math.random()<VIS.damage.textChance){const critical=kind==='crit';addText(enemy.x+rand(-VIS.damage.textJitter,VIS.damage.textJitter),enemy.y-enemy.r,String(Math.round(amount)),critical?VIS.damage.textCritical:VIS.damage.textNormal,critical?VIS.damage.criticalTextSize:VIS.damage.normalTextSize)}
@@ -1734,10 +1850,10 @@ function damageEnemy(enemy,amount,kind='normal',showText=true,knockback=0,source
 }
 function killEnemy(enemy,drop=true){
   if(enemy.dead)return;enemy.dead=true;game.kills++;
-  if(drop){if(enemy.type==='boss')gainExp(enemy.exp,false);else spawnGem(enemy.x,enemy.y,enemy.exp)}
+  if(drop&&enemy.type!=='boss')spawnGem(enemy.x,enemy.y,enemy.exp);
   const d=VIS.damage,desired=Math.min(d.deathParticleMaximum,d.deathParticleBase+enemy.r/d.deathParticleRadiusDivisor),allowed=Math.max(0,Math.min(desired,game.frameDeathParticleBudget||0));game.frameDeathParticleBudget=Math.max(0,(game.frameDeathParticleBudget||0)-allowed);
   for(let i=0;i<allowed;i++)particle(enemy.x,enemy.y,rand(-d.deathParticleVelocity,d.deathParticleVelocity),rand(-d.deathParticleVelocity,d.deathParticleVelocity),rand(d.deathParticleLifeMin,d.deathParticleLifeMax),enemy.type==='spitter'?d.spitterParticle:d.enemyParticle,rand(d.deathParticleSizeMin,d.deathParticleSizeMax));
-  if(enemy.type==='boss'){toast(TEXT.bossKilledToast);endGame(true)}
+  if(enemy.type==='boss')startBossRewardPhase(enemy.x,enemy.y);
 }
 function enemyExplosion(enemy,radius,damage){const visual=VIS.enemyExplosion;addWave(enemy.x,enemy.y,visual.waveStart,radius,visual.waveDuration,visual.waveColor);if(Math.hypot(game.player.x-enemy.x,game.player.y-enemy.y)<radius+game.player.r)hurtPlayer(damage);sound.boom()}
 
@@ -1758,7 +1874,7 @@ function updateDelayedCasts(dt){
 }
 
 function updateWeapons(dt){
-  const player=game.player,temporaryCooldownMultiplier=game.effects.overload>0?CFG.items.overload.cooldownMultiplier:1,cooldownMultiplier=temporaryCooldownMultiplier*permanentWeaponCooldownMultiplier()*fullHpCooldownMultiplier(),areaMultiplier=weaponAreaMultiplier(),sizeMultiplier=weaponSizeMultiplier();player.baseTimer-=dt;
+  const player=game.player,temporaryCooldownMultiplier=game.effects.overload>0?CFG.items.overload.cooldownMultiplier:1,rippleCooldownMultiplier=game.lastRippleActive?(Number(LAST_RIPPLE.cooldownMultiplier)||0.7):1,cooldownMultiplier=temporaryCooldownMultiplier*permanentWeaponCooldownMultiplier()*fullHpCooldownMultiplier()*rippleCooldownMultiplier,areaMultiplier=weaponAreaMultiplier(),sizeMultiplier=weaponSizeMultiplier();player.baseTimer-=dt;
   if(player.baseTimer<=0){player.baseTimer=BASE.cooldown*cooldownMultiplier;const target=nearestEnemy(BASE.targetSearchRange*areaMultiplier);if(target){const damage=BASE.baseDamage*(1+Math.min(game.level-PROG.startLevel,PROG.maxLevelDamageScalingLevel)*PROG.baseAttackDamagePerLevel);fireProjectile(player.x,player.y,target.x,target.y,damage,BASE.projectileSpeed,BASE.projectileRadius*sizeMultiplier,BASE.color,BASE.range*areaMultiplier,0,BASE.type,0,BASE.visualRadius?BASE.visualRadius*sizeMultiplier:undefined)}}
   for(const [key,weapon] of Object.entries(player.weapons)){weapon.timer=(weapon.timer||0)-dt;if(key==='orbit')continue;if(key==='drone'){updateDronesWeapon(weapon,dt,cooldownMultiplier);continue}if(weapon.timer<=0){triggerWeapon(key,weapon.level);weapon.timer=weaponCooldown(key,weapon.level)*cooldownMultiplier}}
 }
@@ -2006,8 +2122,48 @@ function getCachedMeteorSpots(count,minDistance=weaponLevelConfig('meteor',1).mi
 }
 function getDistinctEnemySpots(count,minDistance=weaponLevelConfig('gravity',1).minimumSeparation,minRange=0,maxRange=Infinity){const output=[],minimumSquared=minDistance*minDistance;for(let i=0;i<count;i++){const spot=densestEnemySpot(i*PERF.distinctSpotSkipMultiplier,output,minRange,maxRange);if(!spot)continue;let separated=true;for(const point of output){const dx=point.x-spot.x,dy=point.y-spot.y;if(dx*dx+dy*dy<minimumSquared){separated=false;break}}if(separated)output.push(spot)}const target=nearestEnemy(maxRange===Infinity?PERF.fallbackSearchRange:maxRange)||nearestEnemy(PERF.fallbackSearchRange);if(target&&!output.length)output.push(clampPointToRange(target.x,target.y,minRange,maxRange));while(target&&output.length<count){const anchor=clampPointToRange(target.x,target.y,minRange,maxRange),baseAngle=Math.atan2(anchor.y-game.player.y,anchor.x-game.player.x),distance=Math.hypot(anchor.x-game.player.x,anchor.y-game.player.y);let placed=false;for(let attempt=1;attempt<=PERF.distinctFallbackAttempts&&!placed;attempt++){const side=attempt%2?1:-1,offset=Math.ceil(attempt/2)*PERF.distinctFallbackAngleStep*side,candidate={x:game.player.x+Math.cos(baseAngle+offset)*distance,y:game.player.y+Math.sin(baseAngle+offset)*distance};let separated=true;for(const point of output){const dx=point.x-candidate.x,dy=point.y-candidate.y;if(dx*dx+dy*dy<minimumSquared){separated=false;break}}if(separated){output.push(candidate);placed=true}}if(!placed)break}return output.slice(0,count)}
 
-function spawnGem(x,y,value){const cfg=DROP.exp,cx=Math.floor(x/PERF.gemMergeCellSize),cy=Math.floor(y/PERF.gemMergeCellSize),key=(cx+PERF.spatialKeyOffset)*PERF.spatialKeyMultiplier+(cy+PERF.spatialKeyOffset),existing=PERF.gemMergeEnabled?game.frameGemMap.get(key):null,radiusFor=v=>v>=cfg.largeValue?cfg.radiusLarge:v>=cfg.mediumValue?cfg.radiusMedium:cfg.radiusSmall;if(existing&&!existing.dead){existing.value+=value;existing.r=radiusFor(existing.value);return existing}const gem=objectPools.gems.pop()||{};Object.assign(gem,{x,y,baseX:x,baseY:y,value,r:radiusFor(value),vx:0,vy:0,age:0,spin:rand(0,TAU),dead:false});game.gems.push(gem);if(PERF.gemMergeEnabled)game.frameGemMap.set(key,gem);return gem}
-function updateGems(dt){const player=game.player,radius=PICKUP_RAD[player.stats.pickup],cfg=DROP.exp;for(const gem of game.gems){gem.age+=dt;gem.spin+=dt*cfg.spinSpeed;const dx=player.x-gem.x,dy=player.y-gem.y,distance=Math.hypot(dx,dy)||1;if(game.globalMagnet>0||distance<radius){const force=game.globalMagnet>0?cfg.globalMagnetForce:clamp(cfg.localForceBase+(radius-distance)*cfg.localForcePerPixel,cfg.localForceMin,cfg.localForceMax);gem.vx+=(dx/distance*force-gem.vx)*Math.min(1,dt*cfg.velocityLerpRate);gem.vy+=(dy/distance*force-gem.vy)*Math.min(1,dt*cfg.velocityLerpRate);gem.x+=gem.vx*dt;gem.y+=gem.vy*dt}else{gem.vx*=Math.max(0,1-dt*cfg.idleDragRate);gem.vy*=Math.max(0,1-dt*cfg.idleDragRate);gem.x+=(gem.baseX-gem.x)*Math.min(1,dt*cfg.returnRate);gem.y+=(gem.baseY-gem.y)*Math.min(1,dt*cfg.returnRate)}if(Math.hypot(player.x-gem.x,player.y-gem.y)<player.r+cfg.pickupExtraRadius){gainExp(gem.value);gem.dead=true;sound.pickup()}}game.globalMagnet=Math.max(0,game.globalMagnet-dt);compactInPlace(game.gems,gem=>!gem.dead,recycleGem)}
+function spawnGem(x,y,value,forceSeparate=false,pickupDelay=0,bossReward=false){
+  const cfg=DROP.exp,cx=Math.floor(x/PERF.gemMergeCellSize),cy=Math.floor(y/PERF.gemMergeCellSize),key=(cx+PERF.spatialKeyOffset)*PERF.spatialKeyMultiplier+(cy+PERF.spatialKeyOffset),allowMerge=PERF.gemMergeEnabled&&!forceSeparate,existing=allowMerge?game.frameGemMap.get(key):null,radiusFor=v=>v>=cfg.largeValue?cfg.radiusLarge:v>=cfg.mediumValue?cfg.radiusMedium:cfg.radiusSmall;
+  if(existing&&!existing.dead){existing.value+=value;existing.r=radiusFor(existing.value);return existing}
+  const gem=objectPools.gems.pop()||{};
+  Object.assign(gem,{x,y,baseX:x,baseY:y,value,r:radiusFor(value),vx:0,vy:0,age:0,spin:rand(0,TAU),dead:false,pickupDelay:Math.max(0,Number(pickupDelay)||0),bossReward:bossReward===true,ballistic:false,launched:true,airborne:false,height:0,flightDelay:0,flightDuration:0,flightAge:0,flightGravity:0,flightVx:0,flightVy:0,flightVz:0,launchX:x,launchY:y,groundX:x,groundY:y});
+  game.gems.push(gem);if(allowMerge)game.frameGemMap.set(key,gem);return gem
+}
+function spawnBossRewardGem(originX,originY,targetX,targetY,value,launchDelay,flightDuration,pickupDelay){
+  const gem=spawnGem(originX,originY,value,true,pickupDelay,true),duration=Math.max(0.15,Number(flightDuration)||0.8),gravity=Math.max(1,Number(BOSS_REWARD.gravity)||920),originJitter=Math.max(0,Number(BOSS_REWARD.launchOriginJitter)||16),launchX=originX+rand(-originJitter,originJitter),launchY=originY+rand(-originJitter,originJitter);
+  Object.assign(gem,{x:launchX,y:launchY,baseX:targetX,baseY:targetY,groundX:targetX,groundY:targetY,launchX,launchY,ballistic:true,launched:false,airborne:true,height:0,flightDelay:Math.max(0,Number(launchDelay)||0),flightDuration:duration,flightAge:0,flightGravity:gravity,flightVx:(targetX-launchX)/duration,flightVy:(targetY-launchY)/duration,flightVz:gravity*duration*0.5});
+  return gem
+}
+function updateGems(dt,openReward=true){
+  const player=game.player,radius=PICKUP_RAD[player.stats.pickup],cfg=DROP.exp;
+  for(const gem of game.gems){
+    gem.age+=dt;gem.spin+=dt*cfg.spinSpeed;
+    if(gem.ballistic){
+      if(!gem.launched){
+        if(gem.age<gem.flightDelay)continue;
+        gem.launched=true;gem.flightAge=Math.max(0,gem.age-gem.flightDelay);
+      }else if(gem.airborne)gem.flightAge+=dt;
+      if(gem.airborne){
+        const flightTime=Math.min(gem.flightAge,gem.flightDuration);
+        gem.x=gem.launchX+gem.flightVx*flightTime;
+        gem.y=gem.launchY+gem.flightVy*flightTime;
+        gem.height=Math.max(0,gem.flightVz*flightTime-0.5*gem.flightGravity*flightTime*flightTime);
+        if(gem.flightAge>=gem.flightDuration){gem.airborne=false;gem.height=0;gem.x=gem.groundX;gem.y=gem.groundY;gem.baseX=gem.groundX;gem.baseY=gem.groundY;gem.vx=0;gem.vy=0}
+        else continue;
+      }
+    }
+    if(gem.age<gem.pickupDelay){gem.vx=0;gem.vy=0;if(!gem.ballistic){gem.x=gem.baseX;gem.y=gem.baseY}continue}
+    const dx=player.x-gem.x,dy=player.y-gem.y,distance=Math.hypot(dx,dy)||1;
+    if(game.globalMagnet>0||distance<radius){
+      const force=game.globalMagnet>0?cfg.globalMagnetForce:clamp(cfg.localForceBase+(radius-distance)*cfg.localForcePerPixel,cfg.localForceMin,cfg.localForceMax);
+      gem.vx+=(dx/distance*force-gem.vx)*Math.min(1,dt*cfg.velocityLerpRate);gem.vy+=(dy/distance*force-gem.vy)*Math.min(1,dt*cfg.velocityLerpRate);gem.x+=gem.vx*dt;gem.y+=gem.vy*dt
+    }else{
+      gem.vx*=Math.max(0,1-dt*cfg.idleDragRate);gem.vy*=Math.max(0,1-dt*cfg.idleDragRate);gem.x+=(gem.baseX-gem.x)*Math.min(1,dt*cfg.returnRate);gem.y+=(gem.baseY-gem.y)*Math.min(1,dt*cfg.returnRate)
+    }
+    if(Math.hypot(player.x-gem.x,player.y-gem.y)<player.r+cfg.pickupExtraRadius){gainExp(gem.value,openReward);gem.dead=true;sound.pickup()}
+  }
+  game.globalMagnet=Math.max(0,game.globalMagnet-dt);compactInPlace(game.gems,gem=>!gem.dead,recycleGem)
+}
 function randomMapDropKey(){const entries=Object.entries(DROP.mapItemWeights||{}).filter(([key,weight])=>ITEMS[key]&&Number(weight)>0);if(!entries.length)return 'heal';const total=entries.reduce((sum,[,weight])=>sum+Number(weight),0);let roll=Math.random()*total;for(const [key,weight] of entries){roll-=Number(weight);if(roll<=0)return key}return entries[entries.length-1][0]}
 function spawnMapDrop(){const key=randomMapDropKey(),player=game.player,angle=Math.random()*TAU,distance=Math.max(W,H)*(DROP.mapDistanceScreenBase+Math.random()*DROP.mapDistanceScreenRandom),x=player.x+Math.cos(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter),y=player.y+Math.sin(angle)*distance+rand(-DROP.mapPositionJitter,DROP.mapPositionJitter);game.mapDrops.push({x,y,key,r:DROP.mapRadius,age:0,life:DROP.mapLifetime,bob:rand(0,TAU),vx:0,vy:0});while(game.mapDrops.length>DROP.mapMaximumCount)game.mapDrops.shift()}
 function updateMapDrops(dt){game.nextMapDrop-=dt;if(game.nextMapDrop<=0){spawnMapDrop();game.nextMapDrop=rand(DROP.nextDropDelayMin,DROP.nextDropDelayMax)*mapDropCooldownMultiplier()}const player=game.player,radius=PICKUP_RAD[player.stats.pickup]*DROP.mapPickupRadiusMultiplier;for(const drop of game.mapDrops){drop.age+=dt;drop.bob+=dt*DROP.mapBobSpeed;const dx=player.x-drop.x,dy=player.y-drop.y,distance=Math.hypot(dx,dy)||1;if(distance<radius){const force=clamp(DROP.mapAttractForceBase+(radius-distance)*DROP.mapAttractForcePerPixel,DROP.mapAttractForceMin,DROP.mapAttractForceMax);drop.vx+=(dx/distance*force-drop.vx)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.vy+=(dy/distance*force-drop.vy)*Math.min(1,dt*DROP.mapVelocityLerpRate);drop.x+=drop.vx*dt;drop.y+=drop.vy*dt}if(distance<player.r+drop.r-DROP.mapPickupOverlapReduction){applyItem(drop.key);drop.dead=true;sound.pickup()}if(drop.age>drop.life)drop.dead=true}compactInPlace(game.mapDrops,drop=>!drop.dead)}
@@ -2069,26 +2225,15 @@ function openLevelUp(){
 }
 function generateRewards(){const player=game.player,candidates=[];for(const [key,weapon] of Object.entries(WEAPONS)){const level=player.weapons[key]?.level||0;if(level>=SYS.maxUpgradeLevel)continue;if(level===0&&Object.keys(player.weapons).length>=SYS.maxWeaponSlots)continue;candidates.push({type:'weapon',key,name:weapon.name,icon:weapon.icon,color:weapon.color,categoryLabel:TEXT.rewardCategoryWeapon,levelNote:level?formatText(TEXT.rewardLevelTransition,{from:level,to:level+1}):TEXT.rewardNewWeapon,desc:weapon.desc[level]})}
   for(const [key,stat] of Object.entries(STATS)){
+    if(key==='revive')continue;
     const level=player.stats[key]||0,maxLevel=Number(stat.maxLevel)||SYS.maxUpgradeLevel;
     if(level>=maxLevel)continue;
-	// 復活分數不足時，不放進本次三選一候選池
-    if(
-      key==='revive' &&
-      scoreBreakdown().score<reviveScoreCost()
-    ){
-    continue;
-  }
     let description=stat.desc,levelNote=formatText(TEXT.rewardLevelTransition,{from:level,to:Math.min(level+1,maxLevel)});
     if(key==='speed')description=formatText(PROG.speedDescriptionTemplate,{from:SPEED_MULT[level].toFixed(1),to:SPEED_MULT[level+1].toFixed(1)});
-    if(key==='revive'){
-      const cost=reviveScoreCost();
-      levelNote=`消耗 ${Math.round(cost).toLocaleString('zh-TW')} 分購買`;
-      description=`HP 歸 0 時，立即以 ${Math.round(reviveRestoreRatio()*100)}% Max HP 復活一次。購買後直到消耗掉之前，都不會再出現在升級池。`;
-    }
     candidates.push({type:'stat',key,name:stat.name,icon:stat.icon,color:stat.color,categoryLabel:TEXT.rewardCategoryBoost,levelNote,desc:description,maxLevel});
   }
   const output=[];if(candidates.length)output.push(pick(candidates));const pool=candidates.filter(entry=>!output.some(existing=>existing.type===entry.type&&existing.key===entry.key));while(output.length<SYS.rewardChoiceCount&&pool.length){const index=(Math.random()*pool.length)|0;output.push(pool.splice(index,1)[0])}return output.sort(()=>Math.random()-0.5)}
-function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){if(reward.key==='revive'){const cost=reviveScoreCost(),currentScore=scoreBreakdown().score;if(currentScore<cost){toast(`分數不足，需要 ${Math.round(cost).toLocaleString('zh-TW')} 分`);return}player.stats[reward.key]=1;game.scoreAdjustment-=cost;toast(`購買 ${reward.name}（-${Math.round(cost).toLocaleString('zh-TW')} 分）`)}else{player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}if(reward.key==='dropCooldown')game.nextMapDrop*=Math.max(0.05,1-(Number(PROG.mapDropCooldownReductionPerLevel)||0));if(reward.key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());invalidateScaledWeaponConfigs();toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}}game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();updateHUD(true);if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';last=performance.now()}}
+function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}if(reward.key==='dropCooldown')game.nextMapDrop*=Math.max(0.05,1-(Number(PROG.mapDropCooldownReductionPerLevel)||0));if(reward.key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());invalidateScaledWeaponConfigs();toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();updateHUD(true);if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';last=performance.now()}}
 function applyItem(key){const player=game.player,effects=game.effects,item=CFG.items[key];if(key==='heal')player.hp=Math.min(player.maxHp,player.hp+item.heal);else if(key==='regen')effects.regen=item.duration;else if(key==='shield')effects.shield=item.duration;else if(key==='magnet')game.globalMagnet=item.duration;else if(key==='freeze')effects.freeze=item.duration;else if(key==='doublexp')effects.doublexp=item.duration;else if(key==='overload')effects.overload=item.duration;else if(key==='bomb'){for(const enemy of game.enemies)damageEnemy(enemy,enemy.type==='boss'?Math.min(item.bossMaximumDamage,enemy.hp*item.bossHPPercent):item.normalDamage,'crit',false)}else if(key==='push'){for(const enemy of game.enemies){const dx=enemy.x-player.x,dy=enemy.y-player.y,distance=Math.hypot(dx,dy)||1;if(distance<Math.max(W,H)*item.screenRangeMultiplier){enemy.x+=dx/distance*item.pushDistance;enemy.y+=dy/distance*item.pushDistance;enemy.stun=item.stunSeconds}}const visual=VIS.itemPushWave;addWave(player.x,player.y,visual.startRadius,Math.max(W,H)*item.waveRangeMultiplier,item.waveDuration,visual.color)}toast(ITEMS[key].name)}
 
 function passiveLevelLabel(level){return formatText(TEXT.pauseLevel||TEXT.weaponLevel||'Lv.{level}',{level})}
@@ -2169,7 +2314,9 @@ function buildWeaponRack(){
   buildPassiveRack();
   if(state==='paused')renderPauseLoadout();
 }
-function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,bossStage=game.bossSpawned||game.elapsed>=game.duration,remaining=fmtTime(bossStage?bossFightRemainingExact(game.elapsed):game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:Math.ceil(Math.max(0,player.hp)),max:player.maxHp}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('timerLabel',DOM.timerLabel,bossStage?(TEXT.bossTimerLabel||'BOSS 戰鬥倒數'):TEXT.timerLabel);setTextIfChanged('score',DOM.score,scoreBreakdown().score.toLocaleString('zh-TW'));setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
+function updateHUD(force=false){if(!game)return;ensureEffectNodes();const player=game.player,bossStage=game.bossSpawned||game.elapsed>=game.duration,loot=game.bossRewardPhase,ripple=game.lastRippleActive,remaining=fmtTime(bossStage?bossFightRemainingExact(game.elapsed):game.duration-game.elapsed),hpPct=`${clamp(player.hp/player.maxHp*100,0,100).toFixed(2)}%`,hpText=formatText(TEXT.hudHp,{current:fmtHp(player.hp),max:fmtHp(player.maxHp)}),expPct=`${clamp(game.exp/game.need*100,0,100).toFixed(2)}%`,expText=formatText(TEXT.hudExp,{current:Math.floor(game.exp),need:game.need});DOM.timerWrap?.classList.toggle('hidden',loot);setTextIfChanged('timer',DOM.timer,remaining);setTextIfChanged('timerLabel',DOM.timerLabel,bossStage?(TEXT.bossTimerLabel||'BOSS 戰鬥倒數'):TEXT.timerLabel);setTextIfChanged('score',DOM.score,scoreBreakdown().score.toLocaleString('zh-TW'));setTextIfChanged('level',DOM.levelText,game.level);setTextIfChanged('kills',DOM.kills,game.kills);setStyleIfChanged('hpPct',DOM.hpFill,'width',hpPct);setTextIfChanged('hpText',DOM.hpText,hpText);setStyleIfChanged('expPct',DOM.expFill,'width',expPct);setTextIfChanged('expText',DOM.expText,expText);
+  if(DOM.phaseBanner){const visible=loot||ripple;DOM.phaseBanner.classList.toggle('hidden',!visible);DOM.phaseBanner.classList.toggle('loot',loot);if(visible){if(loot){DOM.phaseBannerTitle.textContent=`${Math.max(0,Math.ceil(game.bossRewardRemaining))}秒後進行遊戲結算`;DOM.phaseBannerTime.textContent='';DOM.phaseBannerCopy.textContent=''}else{DOM.phaseBannerTitle.textContent='最後的波紋';DOM.phaseBannerTime.textContent=game.lastRippleRemaining.toFixed(1);DOM.phaseBannerCopy.textContent='傷害 +50%｜移速 +25%｜冷卻 -30%｜擊敗 Boss 即解除死亡倒數。'}}}
+  for(const [key,value] of Object.entries(game.effects)){const item=effectNodes.get(key);if(!item)continue;const active=value>0;if(item.visible!==active){item.visible=active;item.node.style.display=active?'flex':'none'}if(active){const timeText=formatText(TEXT.effectTime,{seconds:Number.isFinite(value)?value.toFixed(1):'∞'});if(item.lastText!==timeText){item.time.textContent=timeText;item.lastText=timeText}}}}
 
 function particle(x,y,vx,vy,life,color,size){
   if(game.particles.length>=MAX_PARTICLES)return;
@@ -2208,8 +2355,22 @@ function draw(){
   ctx.save();ctx.translate(-camX,-camY);drawWorld(camX,camY);ctx.restore();
   if(vignetteCache)ctx.drawImage(vignetteCache,0,0,W,H);ctx.restore();
 }
+function drawGemSprite(gem){
+  if(gem.ballistic&&!gem.launched)return;
+  const height=Math.max(0,Number(gem.height)||0),size=gem.r*VIS.gem.spriteScale,drawY=gem.y-height;
+  if(height>0){
+    const apex=Math.max(1,gem.flightGravity*gem.flightDuration*gem.flightDuration/8),heightRatio=clamp(height/apex,0,1),shadowMin=clamp(Number(BOSS_REWARD.shadowScaleMin)||0.35,0.05,1),shadowMax=clamp(Number(BOSS_REWARD.shadowScaleMax)||0.9,shadowMin,1),shadowScale=shadowMax-(shadowMax-shadowMin)*heightRatio;
+    ctx.save();ctx.globalAlpha=clamp(Number(BOSS_REWARD.shadowAlpha)||0.22,0,1)*(1-heightRatio*0.55);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(gem.x,gem.y,size*0.42*shadowScale,size*0.2*shadowScale,0,0,TAU);ctx.fill();ctx.restore();
+  }
+  drawImageCentered(images.exp,gem.x,drawY,size*(1+Math.min(0.18,height/900)),size*(1+Math.min(0.18,height/900)),gem.spin||game.elapsed*VIS.gem.rotationSpeed);
+}
 function drawWorld(camX,camY){
   const cull=VIS.culling,zoneVisual=VIS.groundZones;
+  if(game.bossRewardPhase){
+    for(const gem of game.gems)if(gem.bossReward&&gem.launched&&isVisibleWorld(gem.x,gem.y-(gem.height||0),gem.r+cull.gemExtra+(gem.height||0)))drawGemSprite(gem);
+    drawPlayer();
+    return;
+  }
   for(const zone of game.zones)if((zone.type==='burn'||zone.type==='acid')&&isVisibleWorld(zone.x,zone.y,zone.r+cull.zoneExtra)){
     const burn=zone.type==='burn',sprite=burn?burnZoneSpriteCache:acidZoneSpriteCache,baseAlpha=zone.visualAlpha??(burn?zoneVisual.burnDrawAlpha:zoneVisual.acidDrawAlpha),alpha=baseAlpha*(1-zone.age/zone.duration);
     if(sprite){ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(sprite,zone.x-zone.r*1.1,zone.y-zone.r*.82,zone.r*2.2,zone.r*1.64);ctx.restore()}
@@ -2217,7 +2378,7 @@ function drawWorld(camX,camY){
   }
   for(const well of game.wells)if(isVisibleWorld(well.x,well.y,well.r+cull.wellExtra))drawWell(well);
   for(const mine of game.mines)if(isVisibleWorld(mine.x,mine.y,cull.mineExtra))drawMine(mine);
-  for(const gem of game.gems)if(isVisibleWorld(gem.x,gem.y,gem.r+cull.gemExtra))drawImageCentered(images.exp,gem.x,gem.y,gem.r*VIS.gem.spriteScale,gem.r*VIS.gem.spriteScale,gem.spin||game.elapsed*VIS.gem.rotationSpeed);
+  for(const gem of game.gems)if((!gem.ballistic||gem.launched)&&isVisibleWorld(gem.x,gem.y-(gem.height||0),gem.r+cull.gemExtra+(gem.height||0)))drawGemSprite(gem);
   for(const drop of game.mapDrops)if(isVisibleWorld(drop.x,drop.y,cull.mapDropExtra))drawMapDrop(drop);
   drawEnemies();
   for(const orb of game.gravityOrbs)if(isVisibleWorld(orb.x,orb.y,cull.gravityOrbExtra))drawGravityOrb(orb);
@@ -2229,7 +2390,7 @@ function drawWorld(camX,camY){
   for(const beam of game.beams)drawBeam(beam);
   for(const lightning of game.lightning)drawLightning(lightning);
   for(const wave of game.waves)if(isVisibleWorld(wave.x,wave.y,wave.r+cull.waveExtra))drawWave(wave);
-  drawOrbit();drawDrones();drawMouseTarget();drawPlayer();
+  if(!game.bossRewardPhase){drawOrbit();drawDrones()}drawMouseTarget();drawPlayer();
   for(const particleItem of game.particles)if(isVisibleWorld(particleItem.x,particleItem.y,particleItem.size+cull.particleExtra)){ctx.save();ctx.globalAlpha=particleItem.life/particleItem.max;ctx.fillStyle=particleItem.color;ctx.shadowBlur=VIS.canvasParticle.shadowBlur;ctx.shadowColor=particleItem.color;ctx.beginPath();ctx.arc(particleItem.x,particleItem.y,particleItem.size,0,TAU);ctx.fill();ctx.restore()}
   for(const textItem of game.texts)if(isVisibleWorld(textItem.x,textItem.y,cull.textExtra)){ctx.save();ctx.globalAlpha=textItem.life/textItem.max;ctx.font=`${VIS.damageText.fontWeight} ${textItem.size}px ${VIS.damageText.fontFamily}`;ctx.textAlign='center';ctx.fillStyle=textItem.color;ctx.shadowColor=VIS.damageText.shadowColor;ctx.shadowBlur=VIS.damageText.shadowBlur;ctx.fillText(textItem.text,textItem.x,textItem.y);ctx.restore()}
 }
@@ -2324,7 +2485,7 @@ window.addEventListener('keydown',e=>{
   if(SYS.preventDefaultKeys.includes(e.code))e.preventDefault();
   if(e.code==='Escape'){
     e.preventDefault();
-    if(state==='debug')closeDebugUI();else togglePause();
+    if(state==='lastRipplePrompt'){declineLastRipple();return}else if(state==='debug')closeDebugUI();else togglePause();
     return;
   }
   if(state==='paused'&&handleDebugSecretKey(e)){
@@ -2337,7 +2498,7 @@ window.addEventListener('keydown',e=>{
   }
 });
 window.addEventListener('keyup',e=>keys[e.code]=false);
-$('#start-btn').onclick=startGame;$('#restart-btn').onclick=startGame;$('#restart-pause-btn').onclick=startGame;$('#pause-btn').onclick=()=>togglePause();$('#resume-btn').onclick=()=>togglePause(false);if(DOM.submitScoreBtn)DOM.submitScoreBtn.onclick=submitOnlineScore;if(DOM.scorePlayerName)DOM.scorePlayerName.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();submitOnlineScore()}});if(DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.onclick=()=>refreshLeaderboard({runId:game?.scoreRunId||'',retryOwn:false});
+$('#start-btn').onclick=startGame;$('#restart-btn').onclick=startGame;$('#restart-pause-btn').onclick=startGame;$('#pause-btn').onclick=()=>togglePause();$('#resume-btn').onclick=()=>togglePause(false);if(DOM.lastRippleAccept)DOM.lastRippleAccept.onclick=acceptLastRipple;if(DOM.lastRippleDecline)DOM.lastRippleDecline.onclick=declineLastRipple;if(DOM.submitScoreBtn)DOM.submitScoreBtn.onclick=submitOnlineScore;if(DOM.scorePlayerName)DOM.scorePlayerName.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();submitOnlineScore()}});if(DOM.leaderboardRefreshBtn)DOM.leaderboardRefreshBtn.onclick=()=>refreshLeaderboard({runId:game?.scoreRunId||'',retryOwn:false});
 DOM.soundBtn.onclick=()=>{sound.enabled=!sound.enabled;DOM.soundBtn.textContent=sound.enabled?TEXT.soundOn:TEXT.soundOff;if(sound.enabled)sound.pickup()};
 
 const joy=$('#joystick-base'),knob=$('#joystick-knob');let joyId=null;

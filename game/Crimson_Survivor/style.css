@@ -202,3 +202,31 @@ button{font:inherit;color:inherit} #game-shell{position:relative;width:100%;heig
   .pause-loadout-item{grid-template-columns:46px minmax(0,1fr);padding:8px;min-height:64px}
   .pause-loadout-item img{width:46px;height:46px}
 }
+
+
+/* R27：最後的波紋與 Boss 戰利品拾取階段 */
+.phase-banner{position:absolute;top:84px;left:50%;z-index:14;transform:translateX(-50%);min-width:min(430px,calc(100vw - 40px));padding:10px 18px;border:1px solid rgba(255,208,120,.42);border-radius:16px;background:linear-gradient(135deg,rgba(89,13,43,.9),rgba(12,10,23,.9));box-shadow:0 14px 40px rgba(0,0,0,.42),0 0 28px rgba(255,55,110,.2);backdrop-filter:blur(10px);text-align:center;pointer-events:none}
+.phase-banner strong{display:block;color:#ff8cac;font-size:12px;letter-spacing:.16em}
+.phase-banner b{display:block;margin:2px 0;color:#fff;font-size:28px;font-variant-numeric:tabular-nums;line-height:1}
+.phase-banner small{display:block;color:#eadce4;font-size:11px}
+.phase-banner.loot{border-color:rgba(92,229,255,.5);background:linear-gradient(135deg,rgba(8,64,83,.9),rgba(12,10,23,.9));box-shadow:0 14px 40px rgba(0,0,0,.42),0 0 30px rgba(92,229,255,.22)}
+.phase-banner.loot strong{color:#77edff}
+.last-ripple-card{width:min(650px,95vw);padding:42px;text-align:center;border-color:rgba(255,76,126,.35)}
+.last-ripple-card:after{content:"";position:absolute;inset:-35% 12% 55%;background:radial-gradient(circle,rgba(255,45,105,.24),transparent 70%);pointer-events:none}
+.last-ripple-card h2{position:relative;margin:4px 0 12px;font-size:clamp(38px,7vw,66px);letter-spacing:.08em;text-shadow:0 0 34px rgba(255,55,110,.55)}
+.last-ripple-lead{position:relative;color:#e7dce2;font-size:16px;line-height:1.7}
+.last-ripple-lead strong{color:var(--gold);font-size:20px}
+.last-ripple-effects{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:24px 0 18px}
+.last-ripple-effects span{padding:13px 7px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);color:var(--muted);font-size:10px}
+.last-ripple-effects b{display:block;margin-bottom:5px;color:white;font-size:17px}
+.last-ripple-score{min-height:24px;margin:6px 0;color:#78efff;font-weight:900}
+.last-ripple-score.insufficient{color:#ff789d}
+.last-ripple-warning{color:#ff9ab7;font-size:12px;line-height:1.7}
+.last-ripple-actions{display:flex;gap:12px;justify-content:center;margin-top:24px}
+.last-ripple-actions button{flex:1}
+.last-ripple-actions button:disabled{cursor:not-allowed;opacity:.42;transform:none;box-shadow:none}
+@media (max-width:720px){.last-ripple-card{padding:28px 20px}.last-ripple-effects{grid-template-columns:repeat(2,1fr)}.last-ripple-actions{flex-direction:column}.phase-banner{top:130px}}
+
+/* R29：Boss 戰利品階段只保留單行整數倒數提示。 */
+.phase-banner.loot strong{font-size:20px;letter-spacing:.04em;line-height:1.35}
+.phase-banner.loot b,.phase-banner.loot small{display:none}

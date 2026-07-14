@@ -37,6 +37,12 @@
       <div id="weapon-rack" class="weapon-rack"></div>
       <div id="effect-rack" class="effect-rack"></div>
       <button id="pause-btn" class="icon-button"></button>
+
+      <div id="phase-banner" class="phase-banner hidden" aria-live="assertive">
+        <strong id="phase-banner-title"></strong>
+        <b id="phase-banner-time"></b>
+        <small id="phase-banner-copy"></small>
+      </div>
     </section>
 
     <section id="start-screen" class="modal-screen show">
@@ -70,6 +76,28 @@
         </div>
         <button id="resume-btn" class="primary-btn"></button>
         <button id="restart-pause-btn" class="secondary-btn"></button>
+      </div>
+    </section>
+
+
+    <section id="last-ripple-screen" class="modal-screen" role="dialog" aria-modal="true" aria-labelledby="last-ripple-title">
+      <div class="last-ripple-card panel">
+        <p class="eyebrow">BOSS 戰死亡確認</p>
+        <h2 id="last-ripple-title">最後的波紋</h2>
+        <p class="last-ripple-lead">消耗 <strong>1,000 分</strong>，在死亡邊緣釋放最後一次波紋。</p>
+        <div class="last-ripple-effects">
+          <span><b>10 秒</b>決死時間</span>
+          <span><b>+50%</b>傷害</span>
+          <span><b>+25%</b>移動速度</span>
+          <span><b>3 秒</b>無敵</span>
+          <span><b>-30%</b>冷卻時間</span>
+        </div>
+        <p id="last-ripple-score" class="last-ripple-score"></p>
+        <p class="last-ripple-warning">10 秒內沒有擊敗 Boss，角色將立即死亡。Boss 不會回復生命。</p>
+        <div class="last-ripple-actions">
+          <button id="last-ripple-accept" class="primary-btn" type="button">消耗 1,000 分並復活</button>
+          <button id="last-ripple-decline" class="secondary-btn" type="button">放棄，結束本局</button>
+        </div>
       </div>
     </section>
 
