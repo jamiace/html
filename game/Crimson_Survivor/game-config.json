@@ -2,8 +2,8 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R34 PERFORMANCE LOG EXPORT FIX",
-    "configVersion": 18,
+    "build": "R36 MULTI CANVAS FIXED 60 FPS + SPEAR AIM FIX + LOG V4",
+    "configVersion": 20,
     "language": "zh-Hant"
   },
   "system": {
@@ -24,6 +24,7 @@
     "maxWeaponSlots": 6,
     "maxUpgradeLevel": 5,
     "rewardChoiceCount": 3,
+	
     "offscreenDespawnDistance": 2600,
     "projectileDespawnDistance": 1800,
     "worldCullMargin": 90,
@@ -246,7 +247,16 @@
       "profilerCriticalFrameThresholdMs": "極端卡頓幀門檻。",
       "profilerSuspensionThresholdMs": "超過此間隔視為分頁切換或系統暫停，不納入 FPS 平均。",
       "profilerLogMaxSamples": "JSON Log 最多保留的每秒取樣筆數。",
-      "profilerLogMaxEvents": "JSON Log 最多保留的長幀與瀏覽器事件數。"
+      "profilerLogMaxEvents": "JSON Log 最多保留的長幀與瀏覽器事件數。",
+      "spriteRenderMode": "子彈與粒子繪製模式：multiCanvas、direct 或 atlas。",
+      "spriteAtlasPageSize": "Atlas 模式每張圖集的邊長。",
+      "spriteAtlasPadding": "Atlas 圖塊之間的保留像素。",
+      "canvasDesynchronized": "要求瀏覽器使用低延遲 Canvas 呈現路徑；瀏覽器可忽略。",
+      "targetFps": "畫面呈現最高更新率；本版固定為 60 FPS。",
+      "fixedUpdateHz": "遊戲邏輯固定更新率。60 代表所有移動、武器、敵人與倒數以每秒 60 次固定步進運算。",
+      "maxCatchUpSteps": "單次畫面最多補算的固定更新步數，避免偶發長幀造成遊戲時間、冷卻與移動永久落後。",
+      "maxFrameCatchUpSeconds": "一次可補算的最長真實時間；分頁切換等超長停頓不會瞬間補完。",
+      "renderCapToleranceMs": "60 FPS 排程容許的毫秒誤差，用於吸收 requestAnimationFrame 的小幅抖動。"
     },
     "spatialCellSize": 128,
     "maxEnemyRadius": 70,
@@ -313,7 +323,16 @@
     "profilerCriticalFrameThresholdMs": 100,
     "profilerSuspensionThresholdMs": 1000,
     "profilerLogMaxSamples": 7200,
-    "profilerLogMaxEvents": 2000
+    "profilerLogMaxEvents": 2000,
+    "spriteRenderMode": "multiCanvas",
+    "spriteAtlasPageSize": 2048,
+    "spriteAtlasPadding": 2,
+    "canvasDesynchronized": false,
+    "targetFps": 60,
+    "fixedUpdateHz": 60,
+    "maxCatchUpSteps": 15,
+    "maxFrameCatchUpSeconds": 0.25,
+    "renderCapToleranceMs": 0.25
   },
   "player": {
     "_comment": "玩家初始 HP、移動、滑鼠控制、鏡頭跟隨、受傷無敵與接觸推離參數。",
@@ -4684,7 +4703,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "R34：效能 Log 下載修正／開啟與複製備援",
+    "startBuildNote": "R36：效能優化",
     "features": [
       {
         "value": "12",
@@ -4847,7 +4866,7 @@
     "pauseLevel": "Lv.{level}",
     "lastRippleDefeatEyebrow": "波紋燃盡",
     "lastRippleDefeatTitle": "最後的波紋消散了",
-    "lastRippleDefeatCopy": "十秒已到，Boss 仍未被擊敗。"
+    "lastRippleDefeatCopy": "20秒已到，Boss 仍未被擊敗。"
   },
   "editingGuide": {
     "_comment": "編輯指南；此區只供閱讀，遊戲不會拿來計算。",
@@ -4894,7 +4913,7 @@
   "lastRipple": {
     "_comment": "Boss 戰死亡後可消耗分數啟動一次的決死復活。以 100% Max HP 復活；cooldownMultiplier 0.7 代表冷卻時間縮短 30%。",
     "scoreCost": 1000,
-    "durationSeconds": 10,
+    "durationSeconds": 20,
     "restoreRatio": 1,
     "invulnerabilitySeconds": 3,
     "damageMultiplier": 1.5,
@@ -4902,16 +4921,16 @@
     "cooldownMultiplier": 0.7
   },
   "bossReward": {
-    "_comment": "Boss 死亡時先記錄擊殺時間並徹底清除所有戰鬥物件與舊 EXP；600 顆各 5 EXP 會在 6 秒內分批以拋物線粒子物理噴出並落地，2 秒後才可拾取。其後總共開放 15 秒移動拾取，這段時間不計入 Boss 戰耗時與成績時間。",
+    "_comment": "Boss 死亡時先記錄擊殺時間並徹底清除所有戰鬥物件與舊 EXP；600 顆各 5 EXP 會在 6 秒內分批以拋物線粒子物理噴出並落地，3 秒後才可拾取。其後總共開放 15 秒移動拾取，這段時間不計入 Boss 戰耗時與成績時間。",
     "gemCount": 600,
     "expPerGem": 5,
     "pickupSeconds": 15,
     "rings": 10,
     "gemsPerRing": 20,
-    "spreadRadiusMin": 200,
-    "spreadRadiusMax": 750,
-    "pickupDelaySeconds": 2,
-    "radiusJitter": 100,
+    "spreadRadiusMin": 180,
+    "spreadRadiusMax": 840,
+    "pickupDelaySeconds": 3,
+    "radiusJitter": 32,
     "angleJitterRadians": 0.08,
     "ejectionSeconds": 6,
     "flightDurationMin": 0.7,

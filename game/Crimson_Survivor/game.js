@@ -1,4 +1,4 @@
-/* BUILD R33 - REAL FRAME PROFILER + EXPORTABLE PERFORMANCE LOG - 2026-07-14 */
+/* R36 MULTI CANVAS FIXED 60 FPS + SPEAR AIM FIX + LOG V4 - 2026-07-20 */
 (async () => {
 'use strict';
 
@@ -31,7 +31,15 @@ const levelChoice=(level,base,upgraded,threshold)=>level>=threshold?upgraded:bas
 
 const $ = s => document.querySelector(s);
 const canvas = $('#game');
-const ctx = canvas.getContext('2d', { alpha: false });
+const ctx = canvas.getContext('2d', { alpha: false, desynchronized: !!PERF.canvasDesynchronized });
+const SPRITE_RENDER_MODE=String(PERF.spriteRenderMode||'multiCanvas');
+const TARGET_FPS=Math.max(1,Math.round(Number(PERF.targetFps)||60));
+const TARGET_FRAME_MS=1000/TARGET_FPS;
+const FIXED_UPDATE_HZ=Math.max(1,Math.round(Number(PERF.fixedUpdateHz)||TARGET_FPS));
+const FIXED_STEP_SECONDS=1/FIXED_UPDATE_HZ;
+const MAX_CATCH_UP_STEPS=Math.max(1,Math.round(Number(PERF.maxCatchUpSteps)||15));
+const MAX_FRAME_CATCH_UP_SECONDS=Math.max(FIXED_STEP_SECONDS,Number(PERF.maxFrameCatchUpSeconds)||0.25);
+const RENDER_CAP_TOLERANCE_MS=Math.max(0,Number(PERF.renderCapToleranceMs)||0.25);
 const TAU = Math.PI * 2;
 const U = SYS.unit;
 const BASE_ATTACK_RANGE = BASE.targetSearchRange;
@@ -335,47 +343,82 @@ function createCacheCanvas(width,height){
 }
 function quantized(value,step){const unit=Math.max(0.01,Number(step)||1);return Math.max(unit,Math.round(Number(value||0)/unit)*unit)}
 function cacheContext(canvas){return canvas.getContext('2d',{alpha:true})}
+class SpriteAtlas{
+  constructor(name,size=2048,padding=2){this.name=name;this.size=Math.max(256,Math.floor(size));this.padding=Math.max(0,Math.floor(padding));this.pages=[]}
+  newPage(){const canvas=createCacheCanvas(this.size,this.size),ctx=cacheContext(canvas),page={canvas,ctx,x:this.padding,y:this.padding,rowH:0};this.pages.push(page);return page}
+  allocate(width,height,painter){
+    const w=Math.max(1,Math.ceil(width)),h=Math.max(1,Math.ceil(height)),pad=this.padding;
+    if(w+pad*2>this.size||h+pad*2>this.size){const canvas=createCacheCanvas(w,h),ctx=cacheContext(canvas);painter(ctx);return {canvas,sx:0,sy:0,sw:w,sh:h,standalone:true}}
+    let page=this.pages[this.pages.length-1]||this.newPage();
+    if(page.x+w+pad>this.size){page.x=pad;page.y+=page.rowH+pad;page.rowH=0}
+    if(page.y+h+pad>this.size){page=this.newPage()}
+    const sx=page.x,sy=page.y;page.ctx.save();page.ctx.translate(sx,sy);painter(page.ctx);page.ctx.restore();page.x+=w+pad;page.rowH=Math.max(page.rowH,h);
+    return {canvas:page.canvas,sx,sy,sw:w,sh:h,standalone:false};
+  }
+}
+const atlasSize=Math.max(256,Number(PERF.spriteAtlasPageSize)||2048),atlasPadding=Math.max(0,Number(PERF.spriteAtlasPadding)||2);
+const spriteAtlases={particle:new SpriteAtlas('particle',atlasSize,atlasPadding),projectile:new SpriteAtlas('projectile',atlasSize,atlasPadding),enemyShot:new SpriteAtlas('enemyShot',atlasSize,atlasPadding),trail:new SpriteAtlas('trail',atlasSize,atlasPadding)};
+function spriteAtlasPageCount(){return Object.values(spriteAtlases).reduce((sum,atlas)=>sum+atlas.pages.length,0)}
+function createSpriteEntry(group,width,height,painter){
+  const w=Math.max(1,Math.ceil(width)),h=Math.max(1,Math.ceil(height));
+  if(SPRITE_RENDER_MODE==='atlas')return spriteAtlases[group].allocate(w,h,painter);
+  const canvas=createCacheCanvas(w,h),c=cacheContext(canvas);painter(c);return {canvas,sx:0,sy:0,sw:w,sh:h,standalone:true};
+}
+function drawSpriteEntry(sprite,dx,dy,dw=sprite.sw,dh=sprite.sh){ctx.drawImage(sprite.canvas,sprite.sx,sprite.sy,sprite.sw,sprite.sh,dx,dy,dw,dh);profilerCount('drawImages')}
 function getPlayerProjectileSprite(projectile){
   const visual=VIS.projectile,drawRadius=Math.max(0.5,Number(projectile.visualR??projectile.r)||1),dx=projectile.x-projectile.px,dy=projectile.y-projectile.py,length=quantized(Math.hypot(dx,dy),PERF.bulletTrailLengthQuantization),radius=quantized(drawRadius,0.25),key=`player|${projectile.color}|${radius}|${length}`;
   let sprite=projectileSpriteCache.get(key);if(sprite)return sprite;
-  const lineWidth=radius*visual.trailWidthMultiplier,padding=Math.ceil(visual.shadowBlur+radius*2+lineWidth),width=length+padding*2,height=padding*2,canvas=createCacheCanvas(width,height),c=cacheContext(canvas),centerY=height/2,startX=padding,endX=padding+length;
-  c.strokeStyle=projectile.color;c.lineWidth=lineWidth;c.lineCap='round';c.shadowBlur=visual.shadowBlur;c.shadowColor=projectile.color;c.beginPath();c.moveTo(startX,centerY);c.lineTo(endX,centerY);c.stroke();c.fillStyle=visual.coreColor;c.beginPath();c.arc(endX,centerY,radius*visual.coreRadiusMultiplier,0,TAU);c.fill();
-  sprite={canvas,padding,height,length};projectileSpriteCache.set(key,sprite);return sprite;
+  const lineWidth=radius*visual.trailWidthMultiplier,padding=Math.ceil(visual.shadowBlur+radius*2+lineWidth),width=length+padding*2,height=padding*2,centerY=height/2,startX=padding,endX=padding+length;
+  sprite=createSpriteEntry('projectile',width,height,c=>{c.strokeStyle=projectile.color;c.lineWidth=lineWidth;c.lineCap='round';c.shadowBlur=visual.shadowBlur;c.shadowColor=projectile.color;c.beginPath();c.moveTo(startX,centerY);c.lineTo(endX,centerY);c.stroke();c.fillStyle=visual.coreColor;c.beginPath();c.arc(endX,centerY,radius*visual.coreRadiusMultiplier,0,TAU);c.fill()});
+  Object.assign(sprite,{padding,height,length});projectileSpriteCache.set(key,sprite);return sprite;
 }
 function getParticleSprite(color,size){
   const visual=VIS.canvasParticle,radius=quantized(size,PERF.particleSizeQuantization),key=`${color}|${radius}`;let sprite=particleSpriteCache.get(key);if(sprite)return sprite;
-  const padding=Math.ceil((Number(visual.shadowBlur)||0)+radius*2),dimension=padding*2,canvas=createCacheCanvas(dimension,dimension),c=cacheContext(canvas),center=dimension/2;
-  c.fillStyle=color;c.shadowBlur=visual.shadowBlur;c.shadowColor=color;c.beginPath();c.arc(center,center,radius,0,TAU);c.fill();sprite={canvas,center,radius};particleSpriteCache.set(key,sprite);return sprite;
+  const padding=Math.ceil((Number(visual.shadowBlur)||0)+radius*2),dimension=padding*2,center=dimension/2;
+  sprite=createSpriteEntry('particle',dimension,dimension,c=>{c.fillStyle=color;c.shadowBlur=visual.shadowBlur;c.shadowColor=color;c.beginPath();c.arc(center,center,radius,0,TAU);c.fill()});
+  Object.assign(sprite,{center,radius});particleSpriteCache.set(key,sprite);return sprite;
 }
 function getTrailSprite(key,length,blackColor,blackWidth,color,lineWidth,shadowBlur,shadowColor){
   const quantizedLength=quantized(length,PERF.bulletTrailLengthQuantization),cacheKey=`${key}|${quantizedLength}`;let sprite=trailSpriteCache.get(cacheKey);if(sprite)return sprite;
-  const padding=Math.ceil(Math.max(blackWidth,lineWidth,shadowBlur)*1.5+4),width=quantizedLength+padding*2,height=padding*2,canvas=createCacheCanvas(width,height),c=cacheContext(canvas),cy=height/2;
-  c.lineCap='round';c.strokeStyle=blackColor;c.lineWidth=blackWidth;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke();c.strokeStyle=color;c.lineWidth=lineWidth;c.shadowBlur=shadowBlur;c.shadowColor=shadowColor;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke();sprite={canvas,padding,height,length:quantizedLength};trailSpriteCache.set(cacheKey,sprite);return sprite;
+  const padding=Math.ceil(Math.max(blackWidth,lineWidth,shadowBlur)*1.5+4),width=quantizedLength+padding*2,height=padding*2,cy=height/2;
+  sprite=createSpriteEntry('trail',width,height,c=>{c.lineCap='round';c.strokeStyle=blackColor;c.lineWidth=blackWidth;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke();c.strokeStyle=color;c.lineWidth=lineWidth;c.shadowBlur=shadowBlur;c.shadowColor=shadowColor;c.beginPath();c.moveTo(padding,cy);c.lineTo(padding+quantizedLength,cy);c.stroke()});
+  Object.assign(sprite,{padding,height,length:quantizedLength});trailSpriteCache.set(cacheKey,sprite);return sprite;
+}
+function drawDirectTrail(x1,y1,x2,y2,style){
+  const dx=x2-x1,dy=y2-y1;if(dx*dx+dy*dy<=0.0001)return;ctx.save();ctx.lineCap='round';ctx.strokeStyle=style.blackColor;ctx.lineWidth=style.blackWidth;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.strokeStyle=style.color;ctx.lineWidth=style.lineWidth;ctx.shadowBlur=style.shadowBlur;ctx.shadowColor=style.shadowColor;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();
 }
 function drawCachedTrail(styleKey,x1,y1,x2,y2,style){
+  if(SPRITE_RENDER_MODE==='direct'){drawDirectTrail(x1,y1,x2,y2,style);return}
   const dx=x2-x1,dy=y2-y1,length=Math.hypot(dx,dy);if(length<=0.01)return;
-  const sprite=getTrailSprite(styleKey,length,style.blackColor,style.blackWidth,style.color,style.lineWidth,style.shadowBlur,style.shadowColor);ctx.save();ctx.translate(x1,y1);ctx.rotate(Math.atan2(dy,dx));ctx.drawImage(sprite.canvas,-sprite.padding,-sprite.height/2);ctx.restore();profilerCount('drawImages');
+  const sprite=getTrailSprite(styleKey,length,style.blackColor,style.blackWidth,style.color,style.lineWidth,style.shadowBlur,style.shadowColor);ctx.save();ctx.translate(x1,y1);ctx.rotate(Math.atan2(dy,dx));drawSpriteEntry(sprite,-sprite.padding,-sprite.height/2);ctx.restore();
 }
-function getEnemyShotBodySprite(shot){
-  const styles=VIS.enemyShotStyles,type=shot.type,radius=Math.max(1,Number(shot.r)||1),rotationFrames=Math.max(1,PERF.enemyShotRotationFrames|0),pulseFrames=Math.max(1,PERF.enemyShotPulseFrames|0);let rotationFrame=0,pulseFrame=0,styleKey=type;
-  if(type==='bossOrb'){rotationFrame=Math.floor((game.elapsed*styles.bossOrb.rotationSpeed/TAU)*rotationFrames)%rotationFrames}
+function enemyShotFrames(shot){
+  const styles=VIS.enemyShotStyles,type=shot.type,rotationFrames=Math.max(1,PERF.enemyShotRotationFrames|0),pulseFrames=Math.max(1,PERF.enemyShotPulseFrames|0);let rotationFrame=0,pulseFrame=0,styleKey=type;
+  if(type==='bossOrb')rotationFrame=Math.floor((game.elapsed*styles.bossOrb.rotationSpeed/TAU)*rotationFrames)%rotationFrames;
   else if(type==='bossBolt'){rotationFrame=Math.floor((game.elapsed*styles.bossBolt.rotationSpeed/TAU)*rotationFrames)%rotationFrames;pulseFrame=Math.floor((game.elapsed*styles.bossBolt.ringPulseSpeed/TAU)*pulseFrames)%pulseFrames}
-  else if(type==='orb'){pulseFrame=Math.floor((game.elapsed*styles.spitterOrb.ringPulseSpeed/TAU)*pulseFrames)%pulseFrames}
+  else if(type==='orb')pulseFrame=Math.floor((game.elapsed*styles.spitterOrb.ringPulseSpeed/TAU)*pulseFrames)%pulseFrames;
   else if(type!=='bossSpear'){rotationFrame=Math.floor((game.elapsed*styles.default.rotationSpeed/TAU)*rotationFrames)%rotationFrames;styleKey=type==='wave'?'wave':'default'}
-  const key=`${styleKey}|${radius}|${rotationFrame}|${pulseFrame}`;let sprite=enemyShotSpriteCache.get(key);if(sprite)return sprite;
-  let extent=radius+40;if(type==='bossSpear')extent=70;const canvas=createCacheCanvas(extent*2,extent*2),c=cacheContext(canvas),center=extent;c.translate(center,center);
+  return {rotationFrames,pulseFrames,rotationFrame,pulseFrame,styleKey};
+}
+function paintEnemyShotBody(c,shot,originX=0,originY=0){
+  const styles=VIS.enemyShotStyles,type=shot.type,radius=Math.max(1,Number(shot.r)||1),f=enemyShotFrames(shot);c.save();c.translate(originX,originY);
   if(type==='bossSpear'){
     const v=styles.bossSpear;c.lineCap='round';c.strokeStyle=v.blackColor;c.lineWidth=v.blackWidth;c.beginPath();c.moveTo(v.trailStart,0);c.lineTo(v.trailEnd,0);c.stroke();c.strokeStyle=v.color;c.lineWidth=v.lineWidth;c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.beginPath();c.moveTo(v.trailStart,0);c.lineTo(v.trailEnd,0);c.stroke();c.shadowBlur=0;c.fillStyle=v.tipColor;c.beginPath();c.moveTo(v.tipX,0);c.lineTo(v.tipBackX,-v.tipHalfHeight);c.lineTo(v.tipBackX,v.tipHalfHeight);c.closePath();c.fill();
   }else if(type==='bossOrb'){
-    const v=styles.bossOrb;c.rotate(rotationFrame/rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();
+    const v=styles.bossOrb;c.rotate(f.rotationFrame/f.rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();
   }else if(type==='bossBolt'){
-    const v=styles.bossBolt,pulse=Math.sin(pulseFrame/pulseFrames*TAU)*v.ringPulseAmount;c.rotate(rotationFrame/rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
+    const v=styles.bossBolt,pulse=Math.sin(f.pulseFrame/f.pulseFrames*TAU)*v.ringPulseAmount;c.rotate(f.rotationFrame/f.rotationFrames*TAU);c.fillStyle=v.fillColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.shadowBlur=v.shadowBlur;c.shadowColor=v.shadowColor;c.fill();c.stroke();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
   }else if(type==='orb'){
-    const v=styles.spitterOrb,pulse=Math.sin(pulseFrame/pulseFrames*TAU)*v.ringPulseAmount;c.fillStyle=v.bodyColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;c.beginPath();c.arc(0,0,radius+v.bodyRadiusPadding,0,TAU);c.fill();c.stroke();c.fillStyle=v.coreColor;c.shadowBlur=v.coreShadowBlur;c.shadowColor=v.coreShadowColor;c.beginPath();c.arc(v.coreOffsetX,v.coreOffsetY,radius*v.coreRadiusMultiplier,0,TAU);c.fill();c.fillStyle=v.highlightColor;c.beginPath();c.arc(v.highlightOffsetX,v.highlightOffsetY,v.highlightRadius,0,TAU);c.fill();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
+    const v=styles.spitterOrb,pulse=Math.sin(f.pulseFrame/f.pulseFrames*TAU)*v.ringPulseAmount;c.fillStyle=v.bodyColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;c.beginPath();c.arc(0,0,radius+v.bodyRadiusPadding,0,TAU);c.fill();c.stroke();c.fillStyle=v.coreColor;c.shadowBlur=v.coreShadowBlur;c.shadowColor=v.coreShadowColor;c.beginPath();c.arc(v.coreOffsetX,v.coreOffsetY,radius*v.coreRadiusMultiplier,0,TAU);c.fill();c.fillStyle=v.highlightColor;c.beginPath();c.arc(v.highlightOffsetX,v.highlightOffsetY,v.highlightRadius,0,TAU);c.fill();c.strokeStyle=v.ringColor;c.lineWidth=v.ringWidth;c.beginPath();c.arc(0,0,radius+v.ringPadding+pulse,0,TAU);c.stroke();
   }else{
-    const v=styles.default;c.rotate(rotationFrame/rotationFrames*TAU);c.shadowBlur=v.shadowBlur;c.shadowColor=type==='wave'?v.waveShadowColor:v.normalShadowColor;c.fillStyle=type==='wave'?v.waveColor:v.normalColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.fill();c.stroke();
+    const v=styles.default;c.rotate(f.rotationFrame/f.rotationFrames*TAU);c.shadowBlur=v.shadowBlur;c.shadowColor=type==='wave'?v.waveShadowColor:v.normalShadowColor;c.fillStyle=type==='wave'?v.waveColor:v.normalColor;c.strokeStyle=v.outlineColor;c.lineWidth=v.outlineWidth;drawStar(c,radius,v.starPoints,v.innerRadiusMultiplier);c.fill();c.stroke();
   }
-  sprite={canvas,extent};enemyShotSpriteCache.set(key,sprite);return sprite;
+  c.restore();
+}
+function getEnemyShotBodySprite(shot){
+  const type=shot.type,radius=Math.max(1,Number(shot.r)||1),f=enemyShotFrames(shot),key=`${f.styleKey}|${radius}|${f.rotationFrame}|${f.pulseFrame}`;let sprite=enemyShotSpriteCache.get(key);if(sprite)return sprite;
+  let extent=radius+40;if(type==='bossSpear')extent=70;
+  sprite=createSpriteEntry('enemyShot',extent*2,extent*2,c=>paintEnemyShotBody(c,shot,extent,extent));Object.assign(sprite,{extent});enemyShotSpriteCache.set(key,sprite);return sprite;
 }
 function buildFlameCoreCache(){
   const v=VIS.flame,padding=Math.ceil((Number(v.coreShadowBlur)||0)+12),minX=Math.min(0,v.coreStartX)-padding,maxX=Math.max(v.coreEndX,v.coreControlX)+padding,minY=-Math.max(v.coreHalfWidth,v.coreStartHalfWidth)-padding,maxY=Math.max(v.coreHalfWidth,v.coreStartHalfWidth)+padding,canvas=createCacheCanvas(maxX-minX,maxY-minY),c=cacheContext(canvas);
@@ -499,22 +542,36 @@ function readMemorySnapshot(){
 }
 
 const performanceLog={
-  recording:false,startedAt:'',startedMonotonic:0,stoppedAt:'',metadata:null,samples:[],events:[],sessionId:'',lastDownloadName:''
+  recording:false,startedAt:'',startedMonotonic:0,stoppedAt:'',stoppedMonotonic:0,metadata:null,samples:[],events:[],sessionId:'',lastDownloadName:'',
+  lastStateMark:0,lastState:'',stateDurationsMs:Object.create(null)
 };
 const profiler={
   enabled:PERF.profilerEnabled!==false,visible:!!PERF.profilerVisibleByDefault,
   frameStart:0,currentFrameInterval:0,current:Object.create(null),counters:Object.create(null),
   sums:Object.create(null),counterSums:Object.create(null),runtimeSums:Object.create(null),runtimeMax:Object.create(null),
-  frames:0,sampleStart:0,frameIntervals:[],workTimes:[],outsideTimes:[],last:Object.create(null),lastCounters:Object.create(null),
+  frames:0,sampleStart:0,activeElapsedMs:0,frameIntervals:[],workTimes:[],outsideTimes:[],last:Object.create(null),lastCounters:Object.create(null),
   ignoredFrames:0,clampedFrames:0,long16:0,long25:0,long33:0,long50:0,long100:0
 };
 function profilerActive(){return profiler.enabled&&state==='playing'&&(profiler.visible||performanceLog.recording)}
 function profilerStart(){return profilerActive()?performance.now():0}
 function profilerEnd(name,start){if(!start||!profilerActive())return;profiler.current[name]=(profiler.current[name]||0)+(performance.now()-start)}
 function profilerCount(name,value=1){if(!profilerActive())return;profiler.counters[name]=(profiler.counters[name]||0)+value}
+function resetPerformanceStateAccounting(now=performance.now()){
+  performanceLog.lastStateMark=now;performanceLog.lastState=String(state||'unknown');performanceLog.stateDurationsMs=Object.create(null);
+}
+function updatePerformanceStateAccounting(now=performance.now()){
+  if(!performanceLog.recording)return;
+  const current=String(state||'unknown');
+  if(!performanceLog.lastStateMark){performanceLog.lastStateMark=now;performanceLog.lastState=current;return}
+  const delta=Math.max(0,now-performanceLog.lastStateMark),previous=performanceLog.lastState||current;
+  performanceLog.stateDurationsMs[previous]=(performanceLog.stateDurationsMs[previous]||0)+delta;performanceLog.lastStateMark=now;performanceLog.lastState=current;
+}
+function performanceStateDurationsSeconds(){
+  const result={};for(const [key,value] of Object.entries(performanceLog.stateDurationsMs))result[key]=roundMetric(value/1000,3);return result;
+}
 function resetProfilerAggregation(now=performance.now()){
   profiler.sums=Object.create(null);profiler.counterSums=Object.create(null);profiler.runtimeSums=Object.create(null);profiler.runtimeMax=Object.create(null);
-  profiler.frames=0;profiler.sampleStart=now;profiler.frameIntervals.length=0;profiler.workTimes.length=0;profiler.outsideTimes.length=0;
+  profiler.frames=0;profiler.sampleStart=now;profiler.activeElapsedMs=0;profiler.frameIntervals.length=0;profiler.workTimes.length=0;profiler.outsideTimes.length=0;
   profiler.ignoredFrames=0;profiler.clampedFrames=0;profiler.long16=0;profiler.long25=0;profiler.long33=0;profiler.long50=0;profiler.long100=0;
 }
 function profilerBeginFrame(rafNow,frameIntervalMs,workStart){
@@ -525,9 +582,7 @@ function profilerBeginFrame(rafNow,frameIntervalMs,workStart){
 function recordPerformanceEvent(type,data={}){
   if(!performanceLog.recording)return;
   if(performanceLog.events.length>=PERF_LOG_MAX_EVENTS)return;
-  performanceLog.events.push({
-    type,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),...data
-  });
+  performanceLog.events.push({type,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),state,...data});
 }
 function makeProfilerSample(rafNow){
   const frameValues=profiler.frameIntervals,workValues=profiler.workTimes,outsideValues=profiler.outsideTimes,divisor=Math.max(1,profiler.frames);
@@ -542,7 +597,7 @@ function makeProfilerSample(rafNow){
   last.long16=profiler.long16;last.long25=profiler.long25;last.long33=profiler.long33;last.long50=profiler.long50;last.long100=profiler.long100;last.clampedFrames=profiler.clampedFrames;last.ignoredFrames=profiler.ignoredFrames;
   const memory=readMemorySnapshot();
   const sample={
-    sampleIndex:performanceLog.samples.length,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),state,
+    sampleIndex:performanceLog.samples.length,wallTimeMs:roundMetric(performance.now()-performanceLog.startedMonotonic,1),activePlayingMs:roundMetric(profiler.activeElapsedMs,1),gameTime:roundMetric(game?.elapsed||0,3),phase:performancePhase(),state,spriteRenderMode:SPRITE_RENDER_MODE,
     frames:frameValues.length,frameTotalMs:roundMetric(frameTotal),fps:roundMetric(last.fps,2),frameMs:{avg:roundMetric(last.frameAvg),min:roundMetric(last.frameMin),p50:roundMetric(last.frameP50),p95:roundMetric(last.frameP95),p99:roundMetric(last.frameP99),max:roundMetric(last.frameMax)},
     jsWorkMs:{avg:roundMetric(last.workAvg),p95:roundMetric(last.workP95),p99:roundMetric(last.workP99),max:roundMetric(last.workMax)},
     outsideMeasuredJsMs:{avg:roundMetric(last.outsideAvg),p95:roundMetric(last.outsideP95)},jsUtilizationPercent:roundMetric(last.jsUtilization,2),
@@ -550,34 +605,25 @@ function makeProfilerSample(rafNow){
     sections:Object.fromEntries(Object.entries(last).filter(([key])=>key.includes('.')).map(([key,value])=>[key,roundMetric(value)])),
     counters:Object.fromEntries(Object.entries(lastCounters).map(([key,value])=>[key,roundMetric(value,2)])),
     runtimeAvg:Object.fromEntries(Object.entries(runtimeAvg).map(([key,value])=>[key,roundMetric(value,2)])),runtimeMax,
-    drawCache:{particleSprites:particleSpriteCache.size,projectileSprites:projectileSpriteCache.size,enemyShotSprites:enemyShotSpriteCache.size,trailSprites:trailSpriteCache.size},
+    drawCache:{mode:SPRITE_RENDER_MODE,particleSprites:particleSpriteCache.size,projectileSprites:projectileSpriteCache.size,enemyShotSprites:enemyShotSpriteCache.size,trailSprites:trailSpriteCache.size,atlasPages:spriteAtlasPageCount()},
     viewport:{cssWidth:W,cssHeight:H,dpr:DPR,canvasWidth:canvas.width,canvasHeight:canvas.height},memory,
     level:game?.level||0,kills:game?.kills||0,loadout:performanceLoadout(),passives:performancePassives()
   };
-  profiler.last=last;profiler.lastCounters=lastCounters;profiler.lastRuntimeAvg=runtimeAvg;profiler.lastRuntimeMax=runtimeMax;
-  return sample;
+  profiler.last=last;profiler.lastCounters=lastCounters;profiler.lastRuntimeAvg=runtimeAvg;profiler.lastRuntimeMax=runtimeMax;return sample;
 }
 function profilerEndFrame(rafNow,workEnd){
   if(!profilerActive())return;
   const interval=profiler.currentFrameInterval,workMs=Math.max(0,workEnd-profiler.frameStart);
-  if(!(interval>0)||document.visibilityState!=='visible'||interval>PERF_SUSPEND_MS){
-    profiler.ignoredFrames++;
-    if(interval>PERF_SUSPEND_MS)recordPerformanceEvent('raf_suspension',{frameIntervalMs:roundMetric(interval),visibility:document.visibilityState});
-    return;
-  }
-  profiler.frames++;profiler.frameIntervals.push(interval);profiler.workTimes.push(workMs);profiler.outsideTimes.push(Math.max(0,interval-workMs));
+  if(!(interval>0)||document.visibilityState!=='visible'||interval>PERF_SUSPEND_MS){profiler.ignoredFrames++;if(interval>PERF_SUSPEND_MS)recordPerformanceEvent('raf_suspension',{frameIntervalMs:roundMetric(interval),visibility:document.visibilityState});return}
+  profiler.frames++;profiler.activeElapsedMs+=interval;profiler.frameIntervals.push(interval);profiler.workTimes.push(workMs);profiler.outsideTimes.push(Math.max(0,interval-workMs));
   if(interval>PERF_LONG_16)profiler.long16++;if(interval>PERF_LONG_25)profiler.long25++;if(interval>PERF_LONG_33)profiler.long33++;if(interval>PERF_LONG_50)profiler.long50++;if(interval>PERF_LONG_100)profiler.long100++;
   if(interval>SYS.maxDeltaSeconds*1000+0.25)profiler.clampedFrames++;
   for(const [key,value] of Object.entries(profiler.current))profiler.sums[key]=(profiler.sums[key]||0)+value;
   for(const [key,value] of Object.entries(profiler.counters))profiler.counterSums[key]=(profiler.counterSums[key]||0)+value;
   const runtime=collectRuntimeCounts();for(const [key,value] of Object.entries(runtime)){profiler.runtimeSums[key]=(profiler.runtimeSums[key]||0)+value;profiler.runtimeMax[key]=Math.max(profiler.runtimeMax[key]||0,value)}
-  if(performanceLog.recording&&interval>=PERF_LONG_50)recordPerformanceEvent('long_frame',{
-    frameIntervalMs:roundMetric(interval),jsWorkMs:roundMetric(workMs),outsideMeasuredJsMs:roundMetric(Math.max(0,interval-workMs)),sections:Object.fromEntries(Object.entries(profiler.current).map(([key,value])=>[key,roundMetric(value)])),counts:runtime
-  });
-  const intervalMs=Math.max(250,Number(PERF.profilerSampleIntervalMs)||1000);
-  if(rafNow-profiler.sampleStart<intervalMs)return;
-  const sample=makeProfilerSample(rafNow);
-  if(performanceLog.recording){performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift()}
+  if(performanceLog.recording&&interval>=PERF_LONG_50)recordPerformanceEvent('long_frame',{frameIntervalMs:roundMetric(interval),jsWorkMs:roundMetric(workMs),outsideMeasuredJsMs:roundMetric(Math.max(0,interval-workMs)),sections:Object.fromEntries(Object.entries(profiler.current).map(([key,value])=>[key,roundMetric(value)])),counts:runtime});
+  const intervalMs=Math.max(250,Number(PERF.profilerSampleIntervalMs)||1000);if(profiler.activeElapsedMs<intervalMs)return;
+  const sample=makeProfilerSample(rafNow);if(performanceLog.recording){performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift()}
   updateProfilerUI();syncPerformanceLogButtons();resetProfilerAggregation(rafNow);
 }
 function ensureProfilerUI(){
@@ -604,82 +650,57 @@ function syncPerformanceLogButtons(){
 }
 function createPerformanceMetadata(){
   return {
-    schemaVersion:2,game:'Crimson Survivor',build:String(CFG.meta?.build||''),configVersion:String(CFG.meta?.configVersion||''),startedAt:performanceLog.startedAt,
+    schemaVersion:3,game:'Crimson Survivor',build:String(CFG.meta?.build||''),configVersion:String(CFG.meta?.configVersion||''),startedAt:performanceLog.startedAt,spriteRenderMode:SPRITE_RENDER_MODE,
     userAgent:navigator.userAgent,platform:navigator.platform||'',language:navigator.language||'',hardwareConcurrency:navigator.hardwareConcurrency||null,deviceMemoryGB:navigator.deviceMemory||null,
     viewport:{cssWidth:W,cssHeight:H,dpr:DPR,canvasWidth:canvas.width,canvasHeight:canvas.height},
+    renderSettings:{spriteRenderMode:SPRITE_RENDER_MODE,targetFps:TARGET_FPS,fixedUpdateHz:FIXED_UPDATE_HZ,fixedStepSeconds:FIXED_STEP_SECONDS,maxCatchUpSteps:MAX_CATCH_UP_STEPS,maxFrameCatchUpSeconds:MAX_FRAME_CATCH_UP_SECONDS,atlasPageSize:atlasSize,atlasPadding,canvasAlpha:false,canvasDesynchronized:!!PERF.canvasDesynchronized},
     profilerSettings:{sampleIntervalMs:Number(PERF.profilerSampleIntervalMs)||1000,frameBudgetMs:PERF_LONG_16,longFrameMs:PERF_LONG_33,severeFrameMs:PERF_LONG_50,criticalFrameMs:PERF_LONG_100,suspensionMs:PERF_SUSPEND_MS,maxDeltaSeconds:SYS.maxDeltaSeconds},
-    notes:{
-      fps:'由相鄰 requestAnimationFrame callback timestamp 的真實間隔計算。',
-      jsWork:'只包含被遊戲 Profiler 包住的 JavaScript update、draw 與相關程式工作。',
-      outsideMeasuredJs:'frame interval 減去已測得 JS work；可能包含 VSync 等待、Canvas/GPU/合成、瀏覽器工作、GC、作業系統排程與未包入監測的 JS。'
-    }
+    notes:{fps:'以實際完成的 60 FPS 上限畫面之間的 requestAnimationFrame 時間差計算。',fixedUpdate:'遊戲邏輯使用固定 60Hz 步進；顯示器更新率高於 60Hz 時會跳過多餘的 rAF callback。',jsWork:'只包含被遊戲 Profiler 包住的 JavaScript update、draw 與相關程式工作。',outsideMeasuredJs:'frame interval 減去已測得 JS work；可能包含 VSync、Canvas 光柵化、GPU 合成、瀏覽器工作、GC、系統排程與未包入監測的 JS。',samples:'每累積約一秒有效 playing 畫面，就寫入一筆 Sample；暫停時間不會取代 playing 取樣。'}
   };
 }
 function startPerformanceRecording(){
-  performanceLog.recording=true;performanceLog.startedAt=new Date().toISOString();performanceLog.startedMonotonic=performance.now();performanceLog.stoppedAt='';performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId=makeRunId();performanceLog.metadata=createPerformanceMetadata();resetProfilerAggregation(performance.now());recordPerformanceEvent('recording_started');syncPerformanceLogButtons();syncEndPerformanceDownloadButton();toast('效能 Log 開始錄製。完成測試後請暫停並下載 Log。',4500);
+  const now=performance.now();performanceLog.recording=true;performanceLog.startedAt=new Date().toISOString();performanceLog.startedMonotonic=now;performanceLog.stoppedAt='';performanceLog.stoppedMonotonic=0;performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId=makeRunId();performanceLog.lastDownloadName='';resetPerformanceStateAccounting(now);performanceLog.metadata=createPerformanceMetadata();resetProfilerAggregation(now);recordPerformanceEvent('recording_started',{spriteRenderMode:SPRITE_RENDER_MODE});syncPerformanceLogButtons();syncEndPerformanceDownloadButton();toast(`效能 Log 開始錄製：${SPRITE_RENDER_MODE}。回到遊戲執行至少 10 秒。`,5000);
 }
 function flushPerformanceLogSample(){
-  if(!performanceLog.recording||profiler.frames<=0)return;
-  const sample=makeProfilerSample(performance.now());performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift();resetProfilerAggregation(performance.now());
+  if(!performanceLog.recording||profiler.frames<=0)return;const now=performance.now(),sample=makeProfilerSample(now);performanceLog.samples.push(sample);if(performanceLog.samples.length>PERF_LOG_MAX_SAMPLES)performanceLog.samples.shift();resetProfilerAggregation(now);
 }
 function stopPerformanceRecording(){
-  if(!performanceLog.recording)return;flushPerformanceLogSample();recordPerformanceEvent('recording_stopped');performanceLog.recording=false;performanceLog.stoppedAt=new Date().toISOString();syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast(`效能 Log 已停止，共 ${performanceLog.samples.length} 筆取樣。`,3500);
+  if(!performanceLog.recording)return;const now=performance.now();updatePerformanceStateAccounting(now);flushPerformanceLogSample();recordPerformanceEvent('recording_stopped');performanceLog.stoppedMonotonic=now;performanceLog.stoppedAt=new Date().toISOString();performanceLog.recording=false;syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast(`效能 Log 已停止，共 ${performanceLog.samples.length} 筆取樣。`,3500);
 }
 function togglePerformanceRecording(){performanceLog.recording?stopPerformanceRecording():startPerformanceRecording()}
 function clearPerformanceLog(){
-  performanceLog.recording=false;performanceLog.startedAt='';performanceLog.stoppedAt='';performanceLog.metadata=null;performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId='';resetProfilerAggregation(performance.now());syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast('效能 Log 已清除。',2500);
+  performanceLog.recording=false;performanceLog.startedAt='';performanceLog.startedMonotonic=0;performanceLog.stoppedAt='';performanceLog.stoppedMonotonic=0;performanceLog.metadata=null;performanceLog.samples=[];performanceLog.events=[];performanceLog.sessionId='';performanceLog.lastDownloadName='';performanceLog.lastStateMark=0;performanceLog.lastState='';performanceLog.stateDurationsMs=Object.create(null);resetProfilerAggregation(performance.now());syncPerformanceLogButtons();syncEndPerformanceDownloadButton();updateProfilerUI();toast('效能 Log 已清除。',2500);
 }
 function ensurePerformanceLogDataForExport(){
-  if(performanceLog.recording)flushPerformanceLogSample();
+  if(performanceLog.recording){updatePerformanceStateAccounting(performance.now());flushPerformanceLogSample()}
   if(performanceLog.samples.length||performanceLog.events.length)return {ok:true,snapshot:false};
-  if(profiler.frames<=0){
-    toast('目前沒有可匯出的效能資料。請先按「效能記錄：開始」，回到遊戲執行幾秒後再下載。',5000);
-    return {ok:false,snapshot:false};
-  }
-  const now=performance.now();
-  performanceLog.recording=false;
-  performanceLog.startedMonotonic=profiler.sampleStart||now;
-  performanceLog.startedAt=new Date(Date.now()-Math.max(0,now-performanceLog.startedMonotonic)).toISOString();
-  performanceLog.stoppedAt=new Date().toISOString();
-  performanceLog.sessionId=performanceLog.sessionId||makeRunId();
-  performanceLog.metadata=performanceLog.metadata||createPerformanceMetadata();
-  performanceLog.samples.push(makeProfilerSample(now));
-  resetProfilerAggregation(now);
-  syncPerformanceLogButtons();syncEndPerformanceDownloadButton();
-  return {ok:true,snapshot:true};
+  if(profiler.frames<=0){toast('目前沒有可匯出的效能資料。請先按「效能記錄：開始」，回到遊戲執行至少 10 秒。',5000);return {ok:false,snapshot:false}}
+  const now=performance.now(),active=Math.max(1,profiler.activeElapsedMs||sumValues(profiler.frameIntervals));performanceLog.recording=false;performanceLog.startedMonotonic=now-active;performanceLog.stoppedMonotonic=now;performanceLog.startedAt=new Date(Date.now()-active).toISOString();performanceLog.stoppedAt=new Date().toISOString();performanceLog.sessionId=makeRunId();performanceLog.stateDurationsMs=Object.assign(Object.create(null),{playing:active});performanceLog.metadata=createPerformanceMetadata();performanceLog.samples=[makeProfilerSample(now)];resetProfilerAggregation(now);syncPerformanceLogButtons();syncEndPerformanceDownloadButton();return {ok:true,snapshot:true};
 }
 function ensureEndPerformanceDownloadButton(){
-  if(endPerfDownloadButton)return endPerfDownloadButton;
-  const card=DOM.end?.querySelector('.end-card'),restart=$('#restart-btn');if(!card)return null;
+  if(endPerfDownloadButton)return endPerfDownloadButton;const card=DOM.end?.querySelector('.end-card'),restart=$('#restart-btn');if(!card)return null;
   const download=document.createElement('button');download.id='end-perf-download-btn';download.className='secondary-btn';download.type='button';download.textContent='下載效能 Log（JSON）';download.onclick=downloadPerformanceLog;download.style.marginBottom='10px';download.style.display='none';
   const open=document.createElement('button');open.id='end-perf-open-btn';open.className='secondary-btn';open.type='button';open.textContent='開啟效能 Log';open.onclick=openPerformanceLog;open.style.marginBottom='10px';open.style.display='none';
-  if(restart){card.insertBefore(download,restart);card.insertBefore(open,restart)}else{card.append(download,open)}
-  endPerfDownloadButton=download;endPerfOpenButton=open;return download;
+  if(restart){card.insertBefore(download,restart);card.insertBefore(open,restart)}else{card.append(download,open)}endPerfDownloadButton=download;endPerfOpenButton=open;return download;
 }
-function syncEndPerformanceDownloadButton(){
-  const button=ensureEndPerformanceDownloadButton();if(!button)return;
-  const visible=(performanceLog.samples.length||performanceLog.events.length)?'block':'none';
-  button.style.display=visible;if(endPerfOpenButton)endPerfOpenButton.style.display=visible;
-}
+function syncEndPerformanceDownloadButton(){const button=ensureEndPerformanceDownloadButton();if(!button)return;const visible=(performanceLog.samples.length||performanceLog.events.length)?'block':'none';button.style.display=visible;if(endPerfOpenButton)endPerfOpenButton.style.display=visible}
 function buildPerformanceSummary(){
+  if(performanceLog.recording)updatePerformanceStateAccounting(performance.now());
   const samples=performanceLog.samples,totalFrames=samples.reduce((sum,sample)=>sum+(sample.frames||0),0),totalFrameMs=samples.reduce((sum,sample)=>sum+(sample.frameTotalMs||0),0);
-  const maxOf=(path,fallback=0)=>samples.reduce((max,sample)=>Math.max(max,path(sample)||fallback),fallback),sumOf=path=>samples.reduce((sum,sample)=>sum+(path(sample)||0),0);
-  const weighted=(path)=>totalFrames?samples.reduce((sum,sample)=>sum+(path(sample)||0)*(sample.frames||0),0)/totalFrames:0;
-  const started=Number(performanceLog.startedMonotonic)||performance.now();
+  const maxOf=(path,fallback=0)=>samples.reduce((max,sample)=>Math.max(max,path(sample)||fallback),fallback),sumOf=path=>samples.reduce((sum,sample)=>sum+(path(sample)||0),0),weighted=path=>totalFrames?samples.reduce((sum,sample)=>sum+(path(sample)||0)*(sample.frames||0),0)/totalFrames:0;
+  const end=performanceLog.stoppedMonotonic||performance.now(),started=performanceLog.startedMonotonic||end,stateSeconds=performanceStateDurationsSeconds(),playingSeconds=Number(stateSeconds.playing||0),pausedSeconds=Number(stateSeconds.paused||0),otherSeconds=Math.max(0,Object.entries(stateSeconds).filter(([key])=>key!=='playing'&&key!=='paused').reduce((sum,[,value])=>sum+Number(value||0),0));
   return {
-    durationSeconds:roundMetric(Math.max(0,(performance.now()-started)/1000),2),samples:samples.length,frames:totalFrames,actualAverageFps:roundMetric(totalFrameMs>0?totalFrames*1000/totalFrameMs:0,2),
-    minimumOneSecondFps:roundMetric(samples.length?Math.min(...samples.map(sample=>sample.fps||Infinity)):0,2),maximumFrameMs:roundMetric(maxOf(sample=>sample.frameMs?.max)),maximumP99FrameMs:roundMetric(maxOf(sample=>sample.frameMs?.p99)),
-    averageJsWorkMs:roundMetric(weighted(sample=>sample.jsWorkMs?.avg)),averageOutsideMeasuredJsMs:roundMetric(weighted(sample=>sample.outsideMeasuredJsMs?.avg)),
+    durationSeconds:roundMetric(Math.max(0,(end-started)/1000),3),recordingWallSeconds:roundMetric(Math.max(0,(end-started)/1000),3),playingSeconds:roundMetric(playingSeconds,3),pausedSeconds:roundMetric(pausedSeconds,3),otherStateSeconds:roundMetric(otherSeconds,3),capturedFrameSeconds:roundMetric(totalFrameMs/1000,3),exportDelaySeconds:roundMetric(performanceLog.stoppedMonotonic?Math.max(0,(performance.now()-performanceLog.stoppedMonotonic)/1000):0,3),stateDurationsSeconds:stateSeconds,
+    samples:samples.length,frames:totalFrames,actualAverageFps:roundMetric(totalFrameMs>0?totalFrames*1000/totalFrameMs:0,2),minimumSampleFps:roundMetric(samples.length?Math.min(...samples.map(sample=>sample.fps||Infinity)):0,2),maximumFrameMs:roundMetric(maxOf(sample=>sample.frameMs?.max)),maximumP99FrameMs:roundMetric(maxOf(sample=>sample.frameMs?.p99)),averageJsWorkMs:roundMetric(weighted(sample=>sample.jsWorkMs?.avg)),averageOutsideMeasuredJsMs:roundMetric(weighted(sample=>sample.outsideMeasuredJsMs?.avg)),
     longFrames:{frameBudgetMs:PERF_LONG_16,overFrameBudget:sumOf(sample=>sample.longFrames?.overFrameBudget),over25:sumOf(sample=>sample.longFrames?.over25),over33_34:sumOf(sample=>sample.longFrames?.over33_34),over50:sumOf(sample=>sample.longFrames?.over50),over100:sumOf(sample=>sample.longFrames?.over100),simulationDtClamped:sumOf(sample=>sample.longFrames?.simulationDtClamped)},
     maximumCounts:{enemies:maxOf(sample=>sample.runtimeMax?.enemies),playerProjectiles:maxOf(sample=>sample.runtimeMax?.playerProjectiles),enemyShots:maxOf(sample=>sample.runtimeMax?.enemyShots),particles:maxOf(sample=>sample.runtimeMax?.particles),weaponFx:maxOf(sample=>sample.runtimeMax?.weaponFx)},
-    slowestSamples:[...samples].sort((a,b)=>(b.frameMs?.p99||0)-(a.frameMs?.p99||0)).slice(0,20).map(sample=>({sampleIndex:sample.sampleIndex,wallTimeMs:sample.wallTimeMs,gameTime:sample.gameTime,phase:sample.phase,fps:sample.fps,frameMs:sample.frameMs,jsWorkMs:sample.jsWorkMs,outsideMeasuredJsMs:sample.outsideMeasuredJsMs,runtimeMax:sample.runtimeMax,loadout:sample.loadout}))
+    slowestSamples:[...samples].sort((a,b)=>(b.frameMs?.p99||0)-(a.frameMs?.p99||0)).slice(0,20).map(sample=>({sampleIndex:sample.sampleIndex,wallTimeMs:sample.wallTimeMs,activePlayingMs:sample.activePlayingMs,gameTime:sample.gameTime,phase:sample.phase,fps:sample.fps,frameMs:sample.frameMs,jsWorkMs:sample.jsWorkMs,outsideMeasuredJsMs:sample.outsideMeasuredJsMs,runtimeMax:sample.runtimeMax,loadout:sample.loadout}))
   };
 }
 function createPerformanceExport(){
-  const ready=ensurePerformanceLogDataForExport();if(!ready.ok)return null;
-  const payload={metadata:performanceLog.metadata||createPerformanceMetadata(),sessionId:performanceLog.sessionId,stoppedAt:performanceLog.stoppedAt||null,exportedAt:new Date().toISOString(),snapshotOnly:ready.snapshot,summary:buildPerformanceSummary(),samples:performanceLog.samples,events:performanceLog.events};
-  const text=JSON.stringify(payload,null,2),stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
-  return {payload,text,filename:`deep_crimson_performance_${stamp}.json`};
+  const ready=ensurePerformanceLogDataForExport();if(!ready.ok)return null;const nowIso=new Date().toISOString(),summary=buildPerformanceSummary();
+  const payload={metadata:performanceLog.metadata||createPerformanceMetadata(),sessionId:performanceLog.sessionId,stoppedAt:performanceLog.stoppedAt||null,exportedAt:nowIso,snapshotOnly:ready.snapshot,summary,samples:performanceLog.samples,events:performanceLog.events};
+  const text=JSON.stringify(payload,null,2),stamp=nowIso.replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z'),mode=SPRITE_RENDER_MODE.replace(/[^a-z0-9_-]/gi,'_');return {payload,text,filename:`deep_crimson_${mode}_${stamp}.json`};
 }
 function downloadPerformanceLog(){
   const exported=createPerformanceExport();if(!exported)return;
@@ -727,7 +748,8 @@ function updateProfilerUI(){
     `長幀 >${fmt(PERF_LONG_16)}:${count(t.long16)} >${fmt(PERF_LONG_25)}:${count(t.long25)} >${fmt(PERF_LONG_33)}:${count(t.long33)} >${fmt(PERF_LONG_50)}:${count(t.long50)} >${fmt(PERF_LONG_100)}:${count(t.long100)} Clamp:${count(t.clampedFrames)}`,
     `Avg E:${count(r.enemies)} P:${count(r.playerProjectiles)} ES:${count(r.enemyShots)} Part:${count(r.particles)} FX:${count(r.weaponFx)}`,
     `Grid Q enemy:${count(c.enemyGridQueries)} projectile:${count(c.projectileGridQueries)} candidates:${count((c.enemyGridCandidates||0)+(c.projectileGridCandidates||0))}`,
-    `DrawImage ${count(c.drawImages)} | Cache Part:${particleSpriteCache.size} Bullet:${projectileSpriteCache.size+enemyShotSpriteCache.size+trailSpriteCache.size}`,
+    `Render ${SPRITE_RENDER_MODE} | DrawImage ${count(c.drawImages)} | Atlas pages ${spriteAtlasPageCount()}`,
+    `Cache Part:${particleSpriteCache.size} Bullet:${projectileSpriteCache.size+enemyShotSpriteCache.size+trailSpriteCache.size}`,
     `Log ${performanceLog.recording?'REC':'STOP'} | Samples ${performanceLog.samples.length} | Events ${performanceLog.events.length}`
   ];
   profilerUI.textContent=rows.join('\n');
@@ -1127,7 +1149,7 @@ async function submitOnlineScore(){
 
 function startGame(){
   sound.ensure();ensurePauseDebugButton();ensureFPSUI();ensureEndPerformanceDownloadButton();syncEndPerformanceDownloadButton();resetOnlineScoreUI();resetGame();mouse.active=false;mouse.held=false;state='playing';syncFPSVisibility();DOM.start.classList.remove('show');DOM.end.classList.remove('show');DOM.pause.classList.remove('show');DOM.level.classList.remove('show');DOM.lastRipple?.classList.remove('show');DOM.phaseBanner?.classList.add('hidden');DOM.hud.classList.remove('hidden');
-  last = performance.now();
+  resetFrameClock();
 // 遊戲開始後，將開始說明顯示 6 秒
 toast(TEXT.startLead, 6000);
 }
@@ -1146,7 +1168,7 @@ function togglePause(force){
   game.paused=on;
   debugSecretBuffer='';
   debugSecretLast=0;
-  last=performance.now();
+  resetFrameClock();
   syncFPSVisibility();
   if(on)renderPauseLoadout();
   if(!on&&game.pendingLevels>0)setTimeout(()=>{if(state==='playing'&&game.pendingLevels>0)openLevelUp()},0);
@@ -1867,7 +1889,7 @@ function closeDebugUI(){
   DOM.pause.classList.add('show');syncFPSVisibility();
   buildWeaponRack();
   renderPauseLoadout();
-  last=performance.now();
+  resetFrameClock();
 }
 function toggleDebugUI(){if(state==='debug')closeDebugUI();else if(state==='paused')openDebugUI()}
 
@@ -1886,7 +1908,7 @@ function acceptLastRipple(){
   const cost=lastRippleCost(),score=scoreBreakdown().score;if(score<cost){if(DOM.lastRippleAccept)DOM.lastRippleAccept.disabled=true;return}
   game.scoreAdjustment-=cost;game.lastRippleUsed=true;game.lastRippleActive=true;game.lastRippleRemaining=Math.max(0.1,Number(LAST_RIPPLE.durationSeconds)||10);game.lastRippleExpired=false;
   const player=game.player;player.hp=player.maxHp*clamp(Number(LAST_RIPPLE.restoreRatio) || 1,0,1);player.invuln=Math.max(player.invuln,Number(LAST_RIPPLE.invulnerabilitySeconds)||3);player.stationaryTime=0;
-  DOM.lastRipple?.classList.remove('show');state='playing';last=performance.now();syncFPSVisibility();toast('最後的波紋！十秒內擊敗 Boss！',5000);updateHUD(true);
+  DOM.lastRipple?.classList.remove('show');state='playing';resetFrameClock();syncFPSVisibility();toast('最後的波紋！十秒內擊敗 Boss！',5000);updateHUD(true);
 }
 function declineLastRipple(){if(state!=='lastRipplePrompt'||!game||game.ended)return;DOM.lastRipple?.classList.remove('show');endGame(false)}
 function clearBossBattleThreats(keepBossRewardGems=false){
@@ -2442,7 +2464,7 @@ function predictiveAimAngle(
 }
 
 function spawnEnemyShot(x,y,nx,ny,damage,speed,type){
-  const radii=VIS.enemyShots.radius,radius=type==='bossSpear'?radii.bossSpear:type==='bossBolt'?radii.bossBolt:type==='bossOrb'?radii.bossOrb:type==='orb'?radii.spitterOrb:type==='wave'?radii.wave:radii.default,shot=objectPools.enemyShots.pop()||{};Object.assign(shot,{x,y,px:x,py:y,vx:nx*speed,vy:ny*speed,r:radius,damage,age:0,type});game.enemyShots.push(shot);
+  const radii=VIS.enemyShots.radius,radius=type==='bossSpear'?radii.bossSpear:type==='bossBolt'?radii.bossBolt:type==='bossOrb'?radii.bossOrb:type==='orb'?radii.spitterOrb:type==='wave'?radii.wave:radii.default,shot=objectPools.enemyShots.pop()||{},angle=Math.atan2(ny,nx);Object.assign(shot,{x,y,px:x,py:y,vx:nx*speed,vy:ny*speed,angle,r:radius,damage,age:0,type});game.enemyShots.push(shot);
 }
 function updateEnemyShots(dt){
   const player=game.player,life=VIS.enemyShots.life;for(const shot of game.enemyShots){shot.px=shot.x;shot.py=shot.y;shot.x+=shot.vx*dt;shot.y+=shot.vy*dt;shot.age+=dt;if((shot.x-player.x)**2+(shot.y-player.y)**2<(shot.r+player.r)**2){hurtPlayer(shot.damage);shot.age=life.boss+life.default}}
@@ -2598,7 +2620,7 @@ function openLevelUp(){
     DOM.level.classList.remove('show');
 
     state='playing';
-    last=performance.now();
+    resetFrameClock();
 
     toast('所有武器與永久升級皆已達上限');
     updateHUD(true);
@@ -2647,7 +2669,7 @@ function generateRewards(){const player=game.player,candidates=[];for(const [key
     candidates.push({type:'stat',key,name:stat.name,icon:stat.icon,color:stat.color,categoryLabel:TEXT.rewardCategoryBoost,levelNote,desc:description,maxLevel});
   }
   const output=[];if(candidates.length)output.push(pick(candidates));const pool=candidates.filter(entry=>!output.some(existing=>existing.type===entry.type&&existing.key===entry.key));while(output.length<SYS.rewardChoiceCount&&pool.length){const index=(Math.random()*pool.length)|0;output.push(pool.splice(index,1)[0])}return output.sort(()=>Math.random()-0.5)}
-function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}if(reward.key==='dropCooldown')game.nextMapDrop*=Math.max(0.05,1-(Number(PROG.mapDropCooldownReductionPerLevel)||0));if(reward.key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());invalidateScaledWeaponConfigs();toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();updateHUD(true);if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';last=performance.now()}}
+function chooseReward(index){if(state!=='level'||!game.rewardChoices[index])return;const reward=game.rewardChoices[index],player=game.player;if(reward.type==='weapon'){if(!player.weapons[reward.key])player.weapons[reward.key]={level:1,timer:0};else player.weapons[reward.key].level++;triggerWeapon(reward.key,player.weapons[reward.key].level);toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.weapons[reward.key].level}))}else if(reward.type==='stat'){player.stats[reward.key]++;if(reward.key==='hp'){player.maxHp+=PROG.hpPerUpgrade;player.hp=Math.min(player.maxHp,player.hp+PROG.hpPerUpgrade)}if(reward.key==='dropCooldown')game.nextMapDrop*=Math.max(0.05,1-(Number(PROG.mapDropCooldownReductionPerLevel)||0));if(reward.key==='hpRegen')player.regenTimer=Math.min(player.regenTimer||hpRegenInterval(),hpRegenInterval());invalidateScaledWeaponConfigs();toast(formatText(TEXT.rewardToast,{name:reward.name,level:player.stats[reward.key]}))}game.pendingLevels--;DOM.level.classList.remove('show');buildWeaponRack();updateHUD(true);if(game.pendingLevels>0)setTimeout(openLevelUp,PROG.nextLevelDelayMs);else{state='playing';resetFrameClock()}}
 function applyItem(key){const player=game.player,effects=game.effects,item=CFG.items[key];if(key==='heal')player.hp=Math.min(player.maxHp,player.hp+item.heal);else if(key==='regen')effects.regen=item.duration;else if(key==='shield')effects.shield=item.duration;else if(key==='magnet')game.globalMagnet=item.duration;else if(key==='freeze')effects.freeze=item.duration;else if(key==='doublexp')effects.doublexp=item.duration;else if(key==='overload')effects.overload=item.duration;else if(key==='bomb'){for(const enemy of game.enemies)damageEnemy(enemy,enemy.type==='boss'?Math.min(item.bossMaximumDamage,enemy.hp*item.bossHPPercent):item.normalDamage,'crit',false)}else if(key==='push'){for(const enemy of game.enemies){const dx=enemy.x-player.x,dy=enemy.y-player.y,distance=Math.hypot(dx,dy)||1;if(distance<Math.max(W,H)*item.screenRangeMultiplier){enemy.x+=dx/distance*item.pushDistance;enemy.y+=dy/distance*item.pushDistance;enemy.stun=item.stunSeconds}}const visual=VIS.itemPushWave;addWave(player.x,player.y,visual.startRadius,Math.max(W,H)*item.waveRangeMultiplier,item.waveDuration,visual.color)}toast(ITEMS[key].name)}
 
 function passiveLevelLabel(level){return formatText(TEXT.pauseLevel||TEXT.weaponLevel||'Lv.{level}',{level})}
@@ -2804,7 +2826,7 @@ function drawWorld(camX,camY){
   for(const wave of game.waves)if(isVisibleWorld(wave.x,wave.y,wave.r+cull.waveExtra))drawWave(wave);
   drawOrbit();drawDrones();drawMouseTarget();drawPlayer();profilerEnd('draw.weaponFx',section);
   section=profilerStart();
-  for(const particleItem of game.particles)if(isVisibleWorld(particleItem.x,particleItem.y,particleItem.size+cull.particleExtra)){const sprite=getParticleSprite(particleItem.color,particleItem.size);ctx.save();ctx.globalAlpha=particleItem.life/particleItem.max;ctx.drawImage(sprite.canvas,particleItem.x-sprite.center,particleItem.y-sprite.center);ctx.restore();profilerCount('drawImages')}
+  for(const particleItem of game.particles)if(isVisibleWorld(particleItem.x,particleItem.y,particleItem.size+cull.particleExtra)){ctx.save();ctx.globalAlpha=particleItem.life/particleItem.max;if(SPRITE_RENDER_MODE==='direct'){const visual=VIS.canvasParticle;ctx.fillStyle=particleItem.color;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=particleItem.color;const radius=quantized(particleItem.size,PERF.particleSizeQuantization);ctx.beginPath();ctx.arc(particleItem.x,particleItem.y,radius,0,TAU);ctx.fill()}else{const sprite=getParticleSprite(particleItem.color,particleItem.size);drawSpriteEntry(sprite,particleItem.x-sprite.center,particleItem.y-sprite.center)}ctx.restore()}
   for(const textItem of game.texts)if(isVisibleWorld(textItem.x,textItem.y,cull.textExtra)){ctx.save();ctx.globalAlpha=textItem.life/textItem.max;ctx.font=`${VIS.damageText.fontWeight} ${textItem.size}px ${VIS.damageText.fontFamily}`;ctx.textAlign='center';ctx.fillStyle=textItem.color;ctx.shadowColor=VIS.damageText.shadowColor;ctx.shadowBlur=VIS.damageText.shadowBlur;ctx.fillText(textItem.text,textItem.x,textItem.y);ctx.restore()}profilerEnd('draw.particles',section);
 }
 
@@ -2830,17 +2852,33 @@ function drawPlayer(){
   if(game.effects.shield>0){ctx.save();ctx.strokeStyle=visual.shieldRingColor;ctx.lineWidth=visual.shieldRingWidth;ctx.shadowBlur=visual.shieldRingShadowBlur;ctx.shadowColor=visual.shieldRingShadowColor;ctx.beginPath();ctx.arc(player.x,player.y,visual.shieldRingRadius+Math.sin(game.elapsed*visual.shieldRingPulseSpeed)*visual.shieldRingPulseAmount,0,TAU);ctx.stroke();ctx.restore()}
 }
 function drawProjectile(projectile){
-  const dx=projectile.x-projectile.px,dy=projectile.y-projectile.py,sprite=getPlayerProjectileSprite(projectile);ctx.save();ctx.translate(projectile.px,projectile.py);ctx.rotate(Math.atan2(dy,dx));ctx.drawImage(sprite.canvas,-sprite.padding,-sprite.height/2);ctx.restore();profilerCount('drawImages');
+  const visual=VIS.projectile,dx=projectile.x-projectile.px,dy=projectile.y-projectile.py,drawRadius=quantized(Math.max(0.5,Number(projectile.visualR??projectile.r)||1),0.25);
+  if(SPRITE_RENDER_MODE==='direct'){
+    ctx.save();ctx.strokeStyle=projectile.color;ctx.lineWidth=drawRadius*visual.trailWidthMultiplier;ctx.lineCap='round';ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=projectile.color;ctx.beginPath();ctx.moveTo(projectile.px,projectile.py);ctx.lineTo(projectile.x,projectile.y);ctx.stroke();ctx.fillStyle=visual.coreColor;ctx.beginPath();ctx.arc(projectile.x,projectile.y,drawRadius*visual.coreRadiusMultiplier,0,TAU);ctx.fill();ctx.restore();return;
+  }
+  const sprite=getPlayerProjectileSprite(projectile);ctx.save();ctx.translate(projectile.px,projectile.py);ctx.rotate(Math.atan2(dy,dx));drawSpriteEntry(sprite,-sprite.padding,-sprite.height/2);ctx.restore();
 }
 
 function drawStar(ctx,radius,points,innerMultiplier){ctx.beginPath();for(let i=0;i<points;i++){const angle=i/points*TAU,r=i%2?radius*innerMultiplier:radius,x=Math.cos(angle)*r,y=Math.sin(angle)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath()}
 function drawEnemyShot(shot){
   const styles=VIS.enemyShotStyles;
-  if(shot.type==='bossSpear'){const sprite=getEnemyShotBodySprite(shot);ctx.save();ctx.translate(shot.x,shot.y);ctx.rotate(Math.atan2(shot.vy,shot.vx));ctx.drawImage(sprite.canvas,-sprite.extent,-sprite.extent);ctx.restore();profilerCount('drawImages');return}
+  if(shot.type==='bossSpear'){
+    const angle=Number.isFinite(shot.angle)?shot.angle:Math.atan2(shot.vy,shot.vx);
+    ctx.save();ctx.translate(shot.x,shot.y);ctx.rotate(angle);
+    if(SPRITE_RENDER_MODE==='direct')paintEnemyShotBody(ctx,shot,0,0);
+    else{const sprite=getEnemyShotBodySprite(shot);drawSpriteEntry(sprite,-sprite.extent,-sprite.extent)}
+    ctx.restore();return;
+  }
+  if(SPRITE_RENDER_MODE==='direct'){
+    if(shot.type==='bossOrb')drawDirectTrail(shot.px,shot.py,shot.x,shot.y,styles.bossOrb);
+    else if(shot.type==='bossBolt')drawDirectTrail(shot.px,shot.py,shot.x,shot.y,styles.bossBolt);
+    else if(shot.type==='orb')drawDirectTrail(shot.px,shot.py,shot.x,shot.y,styles.spitterOrb);
+    paintEnemyShotBody(ctx,shot,shot.x,shot.y);return;
+  }
   if(shot.type==='bossOrb')drawCachedTrail('bossOrb',shot.px,shot.py,shot.x,shot.y,styles.bossOrb);
   else if(shot.type==='bossBolt')drawCachedTrail('bossBolt',shot.px,shot.py,shot.x,shot.y,styles.bossBolt);
   else if(shot.type==='orb')drawCachedTrail('spitterOrb',shot.px,shot.py,shot.x,shot.y,styles.spitterOrb);
-  const sprite=getEnemyShotBodySprite(shot);ctx.drawImage(sprite.canvas,shot.x-sprite.extent,shot.y-sprite.extent);profilerCount('drawImages');
+  const sprite=getEnemyShotBodySprite(shot);drawSpriteEntry(sprite,shot.x-sprite.extent,shot.y-sprite.extent);
 }
 
 function drawBoomerang(boomerang){const visual=VIS.boomerang;ctx.save();ctx.translate(boomerang.x,boomerang.y);ctx.rotate(boomerang.rot);ctx.strokeStyle=visual.color||CFG.weapons.boomerang.color;ctx.lineWidth=visual.lineWidth;ctx.shadowBlur=visual.shadowBlur;ctx.shadowColor=visual.shadowColor||CFG.weapons.boomerang.color;ctx.beginPath();ctx.arc(0,0,boomerang.r,visual.arcStart,visual.arcEnd);ctx.stroke();ctx.restore()}
@@ -2860,21 +2898,34 @@ function drawMapDrop(drop){const visual=VIS.mapDrop,assetKeys={heal:'healDrop',r
 function drawImageCentered(image,x,y,width,height,rotation=0){if(!image)return;ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.drawImage(image,-width/2,-height/2,width,height);ctx.restore();profilerCount('drawImages')}
 function roundRect(context,x,y,width,height,radius){context.beginPath();context.roundRect(x,y,width,height,radius);return context}
 
-let previousAnimationFrameTimestamp=0;
+let previousAnimationFrameTimestamp=0,lastRenderedFrameTimestamp=0,nextRenderTimestamp=0,simulationAccumulatorSeconds=0;
+function resetFrameClock(){
+  previousAnimationFrameTimestamp=0;lastRenderedFrameTimestamp=0;nextRenderTimestamp=0;simulationAccumulatorSeconds=0;last=performance.now();
+}
 function loop(now){
-  const realFrameIntervalMs=previousAnimationFrameTimestamp>0?Math.max(0,now-previousAnimationFrameTimestamp):0;
-  previousAnimationFrameTimestamp=now;
-  const dt=Math.min(SYS.maxDeltaSeconds,(now-last)/1000||0);last=now;
-  const callbackStart=performance.now();profilerBeginFrame(now,realFrameIntervalMs,callbackStart);
-  let section=profilerStart();update(dt);profilerEnd('update.total',section);
+  const callbackStart=performance.now();updatePerformanceStateAccounting(callbackStart);
+  if(!previousAnimationFrameTimestamp){previousAnimationFrameTimestamp=now;if(!nextRenderTimestamp)nextRenderTimestamp=now}
+  let elapsedMs=Math.max(0,now-previousAnimationFrameTimestamp);previousAnimationFrameTimestamp=now;
+  if(document.visibilityState!=='visible'||elapsedMs>PERF_SUSPEND_MS){elapsedMs=0;simulationAccumulatorSeconds=0;nextRenderTimestamp=now;lastRenderedFrameTimestamp=0}
+  const catchUpSeconds=Math.min(elapsedMs/1000,MAX_FRAME_CATCH_UP_SECONDS);
+  simulationAccumulatorSeconds+=catchUpSeconds;
+  if(now+RENDER_CAP_TOLERANCE_MS<nextRenderTimestamp){requestAnimationFrame(loop);return}
+  const missedRenderSlots=Math.max(0,Math.floor((now-nextRenderTimestamp)/TARGET_FRAME_MS));nextRenderTimestamp+=(missedRenderSlots+1)*TARGET_FRAME_MS;
+  const realFrameIntervalMs=lastRenderedFrameTimestamp>0?Math.max(0,now-lastRenderedFrameTimestamp):TARGET_FRAME_MS;lastRenderedFrameTimestamp=now;
+  profilerBeginFrame(now,realFrameIntervalMs,callbackStart);
+  let section=profilerStart(),updateSteps=0;
+  while(simulationAccumulatorSeconds+1e-9>=FIXED_STEP_SECONDS&&updateSteps<MAX_CATCH_UP_STEPS){update(FIXED_STEP_SECONDS);simulationAccumulatorSeconds-=FIXED_STEP_SECONDS;updateSteps++}
+  if(simulationAccumulatorSeconds>=FIXED_STEP_SECONDS){
+    const droppedSeconds=simulationAccumulatorSeconds-FIXED_STEP_SECONDS;simulationAccumulatorSeconds=FIXED_STEP_SECONDS;
+    profilerCount('fixedStepBacklogDrops');recordPerformanceEvent('fixed_step_backlog_dropped',{droppedSeconds:roundMetric(droppedSeconds,4),updateSteps});
+  }
+  profilerCount('fixedUpdateSteps',updateSteps);profilerEnd('update.total',section);
   section=profilerStart();draw();profilerEnd('draw.total',section);
-  updateFPSDisplay(now);
-  profilerEndFrame(now,performance.now());
-  requestAnimationFrame(loop);
+  updateFPSDisplay(now);profilerEndFrame(now,performance.now());requestAnimationFrame(loop);
 }
 
 document.addEventListener('visibilitychange',()=>{
-  previousAnimationFrameTimestamp=0;last=performance.now();fpsMonitor.frames=0;fpsMonitor.lastSample=performance.now();
+  resetFrameClock();fpsMonitor.frames=0;fpsMonitor.lastSample=performance.now();
   if(performanceLog.recording)recordPerformanceEvent('visibility_changed',{visibility:document.visibilityState});
 });
 
