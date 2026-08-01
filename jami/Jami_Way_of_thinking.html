@@ -151,7 +151,7 @@
     </div>
 
     <header class="hero">
-      <span class="eyebrow">JAMI'S PHILOSOPHY · 2026</span>
+      <span class="eyebrow">Jami'S Way of thinking · 2026</span>
       <h1>Jami 的思想全景</h1>
       <p class="subtitle">
         一套由長期自學、技術實作、產品工作、政治思考、生命經驗與小說創作共同淬鍊而成的個人哲學：
@@ -705,12 +705,12 @@
 
   <script>
     const root=document.documentElement,themeBtn=document.getElementById('themeBtn');
-    const saved=localStorage.getItem('jami-philosophy-theme');
+    const saved=localStorage.getItem('jami-Wayofthinking-theme');
     if(saved==='dark'){root.setAttribute('data-theme','dark');themeBtn.textContent='切換淺色'}
     themeBtn.addEventListener('click',()=>{
       const dark=root.getAttribute('data-theme')==='dark';
-      if(dark){root.removeAttribute('data-theme');localStorage.setItem('jami-philosophy-theme','light');themeBtn.textContent='切換深色'}
-      else{root.setAttribute('data-theme','dark');localStorage.setItem('jami-philosophy-theme','dark');themeBtn.textContent='切換淺色'}
+      if(dark){root.removeAttribute('data-theme');localStorage.setItem('jami-Wayofthinking-theme','light');themeBtn.textContent='切換深色'}
+      else{root.setAttribute('data-theme','dark');localStorage.setItem('jami-Wayofthinking-theme','dark');themeBtn.textContent='切換淺色'}
     });
     const sections=[...document.querySelectorAll('main section[id]')],links=[...document.querySelectorAll('#tocNav a')];
     const byId=Object.fromEntries(links.map(a=>[a.getAttribute('href').slice(1),a]));
