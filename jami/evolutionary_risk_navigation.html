@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>避險的演進｜如何保留通往下一階段的可能</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --paper:#ffffff;
+      --ink:#1c2433;
+      --muted:#667085;
+      --line:#dfe5ef;
+      --blue:#3158d8;
+      --green:#0d8f70;
+      --amber:#b66b00;
+      --red:#c84450;
+      --soft-blue:#eef3ff;
+      --soft-green:#edf9f5;
+      --soft-amber:#fff7e8;
+      --shadow:0 18px 56px rgba(30,42,80,.11);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;
+      color:var(--ink);
+      line-height:1.78;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(49,88,216,.14),transparent 28rem),
+        radial-gradient(circle at 94% 8%,rgba(13,143,112,.12),transparent 26rem),
+        linear-gradient(180deg,#fbfcff 0%,var(--bg) 52%,#edf1f8 100%);
+    }
+    .page{
+      width:min(1120px,calc(100% - 32px));
+      margin:0 auto;
+      padding:48px 0 84px;
+    }
+    .hero{
+      padding:54px 46px;
+      color:white;
+      border-radius:30px;
+      background:
+        radial-gradient(circle at 88% 16%,rgba(255,255,255,.13),transparent 17rem),
+        linear-gradient(135deg,#182238 0%,#294a8f 52%,#0b8068 100%);
+      box-shadow:0 28px 80px rgba(21,34,63,.24);
+    }
+    .eyebrow{
+      display:inline-block;
+      margin-bottom:18px;
+      padding:6px 12px;
+      border:1px solid rgba(255,255,255,.34);
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.08em;
+      color:rgba(255,255,255,.86);
+    }
+    h1{
+      margin:0;
+      max-width:850px;
+      font-size:clamp(38px,6vw,68px);
+      line-height:1.08;
+      letter-spacing:-.045em;
+    }
+    .hero p{
+      max-width:850px;
+      margin:24px 0 0;
+      color:rgba(255,255,255,.86);
+      font-size:20px;
+    }
+    .section{
+      margin-top:30px;
+      padding:34px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.9);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+    }
+    h2{
+      margin:0 0 14px;
+      font-size:30px;
+      line-height:1.28;
+      letter-spacing:-.025em;
+    }
+    h3{
+      margin:0 0 8px;
+      font-size:20px;
+    }
+    p{margin:0 0 14px}
+    .lead{
+      color:#46536a;
+      font-size:18px;
+    }
+    .statement{
+      margin-top:22px;
+      padding:24px 26px;
+      border-left:6px solid var(--blue);
+      border-radius:18px;
+      background:var(--soft-blue);
+      font-size:24px;
+      line-height:1.5;
+      font-weight:850;
+    }
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:12px;
+      margin-top:22px;
+    }
+    .flow-card{
+      position:relative;
+      min-height:150px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .flow-card small{
+      display:block;
+      color:var(--blue);
+      font-weight:900;
+      margin-bottom:6px;
+    }
+    .flow-card b{
+      display:block;
+      font-size:18px;
+      margin-bottom:8px;
+    }
+    .flow-card span{
+      color:var(--muted);
+      font-size:14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+    .card{
+      padding:22px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+    }
+    .danger{border-top:5px solid var(--red)}
+    .safe{border-top:5px solid var(--green)}
+    .warn{border-top:5px solid var(--amber)}
+    .principles{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-top:20px;
+    }
+    .principle{
+      padding:20px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .principle b{
+      display:block;
+      margin-bottom:6px;
+      font-size:17px;
+    }
+    .principle span{
+      color:var(--muted);
+      font-size:14px;
+    }
+    .quote{
+      margin-top:22px;
+      padding:28px;
+      border-radius:22px;
+      color:#fff;
+      background:linear-gradient(135deg,#1f2a44,#3158d8);
+      font-size:24px;
+      font-weight:850;
+      line-height:1.5;
+    }
+    .compare{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:20px;
+    }
+    .compare article{
+      padding:22px;
+      border-radius:20px;
+      border:1px solid var(--line);
+    }
+    .compare .left{background:var(--soft-amber)}
+    .compare .right{background:var(--soft-green)}
+    ul{
+      margin:12px 0 0;
+      padding-left:22px;
+    }
+    li{margin:7px 0}
+    .ending{
+      margin-top:30px;
+      padding:38px;
+      border-radius:26px;
+      background:#182238;
+      color:white;
+      box-shadow:var(--shadow);
+    }
+    .ending h2{color:white}
+    .ending p{color:rgba(255,255,255,.82)}
+    .ending strong{color:#fff}
+    footer{
+      padding:28px 0 0;
+      color:var(--muted);
+      text-align:center;
+      font-size:13px;
+    }
+    @media(max-width:900px){
+      .flow{grid-template-columns:1fr 1fr}
+      .principles{grid-template-columns:1fr}
+    }
+    @media(max-width:680px){
+      .page{width:min(100% - 20px,1120px);padding-top:16px}
+      .hero,.section,.ending{padding:24px}
+      .flow,.grid,.compare{grid-template-columns:1fr}
+      .hero p{font-size:17px}
+    }
+    @media print{
+      body{background:#fff}
+      .page{width:100%;padding:0}
+      .hero,.section,.ending{box-shadow:none;break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <span class="eyebrow">Evolution Risk Framework</span>
+      <h1>避險的演進</h1>
+      <p>演進的重點，不只是找到成功方法，而是在未知與變動之中，避開最可能中斷未來的重大失誤，保留通往下一個演進階段的能力。</p>
+    </header>
+
+    <section class="section">
+      <h2>核心主張</h2>
+      <p class="lead">真正值得研究的，不只是「如何成功」，而是個人、產品、企業、制度或文明在演進過程中，如何降低錯誤選擇造成的不可逆損害。</p>
+      <div class="statement">
+        先確保這一步不會奪走下一步，再追求這一步能帶來的最大進展。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>演進的五個選擇階段</h2>
+      <div class="flow">
+        <article class="flow-card">
+          <small>01</small>
+          <b>看見現況</b>
+          <span>辨識當前能力、限制、風險與依賴，不把暫時成功誤認為成熟。</span>
+        </article>
+        <article class="flow-card">
+          <small>02</small>
+          <b>展開選項</b>
+          <span>先建立完整問題空間，避免只在眼前幾個功能或方案中做選擇。</span>
+        </article>
+        <article class="flow-card">
+          <small>03</small>
+          <b>排除致命路徑</b>
+          <span>優先避開會耗盡資源、破壞信任、封死修正能力的不可逆失誤。</span>
+        </article>
+        <article class="flow-card">
+          <small>04</small>
+          <b>小步驗證</b>
+          <span>允許可承受、可回復、可學習的失敗，以多輪演進取代一次豪賭。</span>
+        </article>
+        <article class="flow-card">
+          <small>05</small>
+          <b>保留下一步</b>
+          <span>每次選擇都要留下資源、知識、彈性與戰略選項，讓系統能繼續變化。</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>避險，不等於保守</h2>
+      <div class="compare">
+        <article class="left">
+          <h3>消極避險</h3>
+          <ul>
+            <li>害怕所有失敗</li>
+            <li>避免未知與改變</li>
+            <li>只維持現狀</li>
+            <li>因風險而停止探索</li>
+          </ul>
+        </article>
+        <article class="right">
+          <h3>演進型避險</h3>
+          <ul>
+            <li>允許大量小型試錯</li>
+            <li>控制單次失敗代價</li>
+            <li>保護核心資源與修正能力</li>
+            <li>用多輪學習提高下一次選擇品質</li>
+          </ul>
+        </article>
+      </div>
+      <div class="quote">
+        避險的目的不是停止冒險，而是避免一次錯誤就失去再次演進的資格。
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>真正需要避開的，是不可逆失誤</h2>
+      <div class="grid">
+        <article class="card danger">
+          <h3>耗盡未來</h3>
+          <p>現金、信用、人才、時間與技術資源被一次押上，失敗後沒有第二次機會。</p>
+        </article>
+        <article class="card danger">
+          <h3>破壞信任</h3>
+          <p>為短期結果犧牲使用者、團隊、供應商或社會信任，使後續合作成本急遽上升。</p>
+        </article>
+        <article class="card danger">
+          <h3>封死修正</h3>
+          <p>制度、技術或權力結構僵化，讓錯誤即使被看見，也無法被修正。</p>
+        </article>
+        <article class="card danger">
+          <h3>誤判成功</h3>
+          <p>把時機、紅利、壟斷或個人天賦造成的成功，誤認為可複製的系統能力。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>成熟演進需要保留的能力</h2>
+      <div class="principles">
+        <article class="principle">
+          <b>可理解</b>
+          <span>知道結果為何發生，能區分自身能力與外部偶然。</span>
+        </article>
+        <article class="principle">
+          <b>可修正</b>
+          <span>錯誤出現後，仍能調整方向、制度與方法。</span>
+        </article>
+        <article class="principle">
+          <b>可承受</b>
+          <span>失敗代價在系統能消化的範圍內，不至於中斷整體演進。</span>
+        </article>
+        <article class="principle">
+          <b>可複製</b>
+          <span>成功不只依賴單一人物、單一時機或不可說明的直覺。</span>
+        </article>
+        <article class="principle">
+          <b>可延伸</b>
+          <span>既有成果能成為下一個產品、制度、能力或文明階段的基礎。</span>
+        </article>
+        <article class="principle">
+          <b>可傳承</b>
+          <span>經驗能轉化為組織與群體共同擁有的知識，而不是隨個人消失。</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>模型的真正用途</h2>
+      <p class="lead">模型不是保證成功，也不是要求所有案例完全符合。它的價值，是提供一套更成熟的選擇方式，讓偶發成功逐漸變成可持續能力。</p>
+      <div class="grid">
+        <article class="card safe">
+          <h3>不是預言</h3>
+          <p>模型不宣稱未來必然如此，而是整理較成熟、較能降低重大失誤的路徑。</p>
+        </article>
+        <article class="card safe">
+          <h3>不是功能清單</h3>
+          <p>模型先完整描述問題空間，再讓產品依目的、資源與時機選擇最適切的內容。</p>
+        </article>
+        <article class="card warn">
+          <h3>反例的作用</h3>
+          <p>反例用來辯證模型、確認適用範圍、辨識替代條件，而不是憑單一異常值推翻整套成熟路徑。</p>
+        </article>
+        <article class="card warn">
+          <h3>真正的成功</h3>
+          <p>不只是抵達某個結果，而是抵達之後，仍保有繼續理解、修正、選擇與演進的能力。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ending">
+      <h2>最後的判準</h2>
+      <p>一個選擇是否成熟，不只看它現在能帶來多少成果，更要看它完成之後，還留下多少未來。</p>
+      <p><strong>演進的成果，不只是進入下一個階段，而是獲得更強的演進能力。</strong></p>
+    </section>
+
+    <footer>避險的演進｜演進路徑中的選擇品質與未來能力</footer>
+  </main>
+</body>
+</html>

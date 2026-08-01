@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Jami 的思想全景｜一套關於演進、信任、文明與餘韻的個人哲學</title>
+  <style>
+    :root{
+      --bg:#f3f6fb; --paper:#ffffff; --paper-2:#f8faff; --ink:#172033; --muted:#647089;
+      --line:#dce3ef; --blue:#355bd8; --green:#0c8b6e; --green-soft:#eaf8f3;
+      --amber:#a86600; --amber-soft:#fff5e3; --red:#b83f4c; --purple:#7554c9;
+      --purple-soft:#f3efff; --shadow:0 22px 64px rgba(31,46,90,.10);
+      --radius:24px; --content:1180px; --toc:260px;
+    }
+    [data-theme="dark"]{
+      --bg:#0d1422; --paper:#151f31; --paper-2:#111a2a; --ink:#e9eef8; --muted:#9eabc0;
+      --line:#2b3850; --blue:#87a4ff; --green:#54c8a9; --green-soft:#17352f;
+      --amber:#efb65c; --amber-soft:#392c17; --red:#ff8f9b; --purple:#c2aaff;
+      --purple-soft:#2c2444; --shadow:0 22px 64px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{
+      margin:0; color:var(--ink);
+      background:radial-gradient(circle at 9% -5%,rgba(53,91,216,.17),transparent 30rem),
+                 radial-gradient(circle at 96% 3%,rgba(12,139,110,.13),transparent 30rem),var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;
+      line-height:1.9; letter-spacing:.01em;
+    }
+    a{color:inherit}
+    .shell{width:min(var(--content),calc(100% - 28px));margin:0 auto;padding:28px 0 96px}
+    .toolbar{position:sticky;top:12px;z-index:20;display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;pointer-events:none}
+    .toolbar button{
+      pointer-events:auto;border:1px solid var(--line);background:rgba(255,255,255,.84);color:#1c2840;
+      border-radius:999px;padding:9px 14px;font-weight:800;cursor:pointer;backdrop-filter:blur(14px);
+      box-shadow:0 8px 26px rgba(31,46,90,.10)
+    }
+    [data-theme="dark"] .toolbar button{background:rgba(21,31,49,.88);color:var(--ink)}
+    .hero{
+      position:relative;overflow:hidden;padding:64px 58px;border-radius:34px;color:#fff;
+      background:radial-gradient(circle at 88% 14%,rgba(255,255,255,.15),transparent 18rem),
+                 radial-gradient(circle at 8% 95%,rgba(114,196,175,.18),transparent 22rem),
+                 linear-gradient(135deg,#18243c 0%,#304e9d 54%,#0a7d68 100%);
+      box-shadow:0 30px 92px rgba(20,34,67,.26)
+    }
+    .hero::after{
+      content:"";position:absolute;right:-65px;bottom:-85px;width:260px;height:260px;border:1px solid rgba(255,255,255,.18);
+      border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.05),0 0 0 72px rgba(255,255,255,.035)
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border:1px solid rgba(255,255,255,.36);
+      border-radius:999px;font-size:13px;font-weight:850;letter-spacing:.1em;color:rgba(255,255,255,.9)
+    }
+    h1{position:relative;z-index:1;max-width:930px;margin:22px 0 0;font-size:clamp(38px,6.4vw,72px);line-height:1.08;letter-spacing:-.055em}
+    .hero .subtitle{position:relative;z-index:1;max-width:940px;margin:26px 0 0;color:rgba(255,255,255,.88);font-size:20px;line-height:1.8}
+    .meta{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+    .meta span{padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.12);font-size:13px;font-weight:750}
+    .layout{display:grid;grid-template-columns:var(--toc) minmax(0,1fr);gap:24px;margin-top:26px;align-items:start}
+    .toc{
+      position:sticky;top:66px;padding:22px;border:1px solid var(--line);border-radius:20px;
+      background:rgba(255,255,255,.86);box-shadow:var(--shadow);backdrop-filter:blur(12px);
+      max-height:calc(100vh - 84px);overflow:auto
+    }
+    [data-theme="dark"] .toc{background:rgba(21,31,49,.88)}
+    .toc h2{margin:0 0 12px;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .toc a{display:block;padding:7px 10px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:14px;line-height:1.45}
+    .toc a:hover,.toc a.active{color:var(--blue);background:rgba(53,91,216,.10);font-weight:800}
+    main{min-width:0}
+    section{
+      scroll-margin-top:78px;margin-bottom:22px;padding:34px 38px;border:1px solid var(--line);
+      border-radius:var(--radius);background:rgba(255,255,255,.93);box-shadow:var(--shadow);backdrop-filter:blur(10px)
+    }
+    [data-theme="dark"] section{background:rgba(21,31,49,.93)}
+    h2{margin:0 0 16px;font-size:30px;line-height:1.35;letter-spacing:-.025em}
+    h3{margin:30px 0 10px;font-size:21px;line-height:1.45}
+    h4{margin:22px 0 8px;font-size:17px} p{margin:0 0 16px}
+    .lead{font-size:18px;color:#46546e}[data-theme="dark"] .lead{color:#b2bed2}
+    .thesis{
+      margin:24px 0 4px;padding:28px 30px;border-left:6px solid var(--blue);border-radius:18px;
+      background:linear-gradient(135deg,rgba(53,91,216,.12),rgba(12,139,110,.08));
+      font-size:23px;font-weight:900;line-height:1.65;letter-spacing:-.015em
+    }
+    .quote{
+      margin:22px 0;padding:24px 26px;border-radius:18px;color:#fff;
+      background:linear-gradient(135deg,#203052,#355bd8);font-size:21px;font-weight:850;line-height:1.72
+    }
+    .quote small{display:block;margin-top:8px;color:rgba(255,255,255,.72);font-size:13px;font-weight:650}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:20px 0}
+    .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--paper-2)}
+    .card h3,.card h4{margin-top:0}.card p:last-child{margin-bottom:0}
+    .card.blue{border-top:5px solid var(--blue)}.card.green{border-top:5px solid var(--green)}
+    .card.amber{border-top:5px solid var(--amber)}.card.red{border-top:5px solid var(--red)}
+    .card.purple{border-top:5px solid var(--purple)}
+    .flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:22px 0}
+    .flow article{min-height:172px;padding:18px;border:1px solid var(--line);border-radius:17px;background:var(--paper-2)}
+    .flow small{display:block;margin-bottom:6px;color:var(--blue);font-weight:900}
+    .flow b{display:block;margin-bottom:8px;font-size:17px}.flow span{color:var(--muted);font-size:14px;line-height:1.7}
+    .loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+    .loop article{padding:18px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(145deg,var(--paper-2),rgba(53,91,216,.06))}
+    .loop b{display:block;margin-bottom:5px}.loop span{color:var(--muted);font-size:14px}
+    .pill-list{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0 6px}
+    .pill-list span{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);color:var(--muted);font-size:14px;font-weight:760}
+    .timeline{position:relative;padding-left:24px;margin-top:18px}
+    .timeline::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--blue),var(--green))}
+    .timeline article{position:relative;padding:0 0 20px 18px}
+    .timeline article::before{content:"";position:absolute;left:-22px;top:9px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:3px solid var(--blue)}
+    .timeline h3{margin:0 0 6px}
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+    .compare article{padding:22px;border-radius:18px;border:1px solid var(--line)}
+    .compare .left{background:var(--amber-soft)}.compare .right{background:var(--green-soft)}
+    ul,ol{padding-left:1.35em}li{margin:7px 0}
+    .manifesto{
+      padding:36px;border-radius:24px;color:#fff;
+      background:radial-gradient(circle at 85% 8%,rgba(255,255,255,.13),transparent 18rem),
+                 linear-gradient(135deg,#17223a,#304f9e 55%,#0d806b)
+    }
+    .manifesto h2{color:#fff}.manifesto p{color:rgba(255,255,255,.88)}.manifesto ol{margin-bottom:0}
+    .poem{
+      margin:22px 0;padding:28px;border-radius:20px;text-align:center;
+      background:linear-gradient(135deg,var(--purple-soft),rgba(53,91,216,.08));
+      border:1px solid var(--line);font-family:"Noto Serif TC","PMingLiU","MingLiU",serif;
+      font-size:22px;line-height:2.1;letter-spacing:.08em
+    }
+    .note{margin-top:18px;padding:18px 20px;border-radius:16px;background:var(--amber-soft);border:1px solid rgba(168,102,0,.24);color:var(--ink)}
+    .ending{margin-top:24px;padding:42px;border-radius:28px;background:#18233a;color:#fff;box-shadow:var(--shadow)}
+    .ending h2{color:#fff}.ending p{color:rgba(255,255,255,.84)}.ending strong{color:#fff}
+    footer{padding:26px 8px 0;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:980px){
+      .layout{grid-template-columns:1fr}.toc{position:relative;top:auto;max-height:none}
+      .toc nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+      .flow{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:680px){
+      .shell{width:min(100% - 18px,var(--content));padding-top:10px}.hero{padding:36px 24px;border-radius:24px}
+      .hero .subtitle{font-size:17px}section{padding:25px 22px}
+      .grid,.grid.three,.compare,.flow,.loop{grid-template-columns:1fr}.toc nav{grid-template-columns:1fr}
+      .thesis{font-size:20px;padding:22px}.poem{font-size:18px;padding:22px 14px}.toolbar{top:6px}
+    }
+    @media print{
+      body{background:#fff;color:#111}.shell{width:100%;padding:0}.toolbar,.toc{display:none!important}
+      .layout{display:block}.hero,section,.ending{box-shadow:none;break-inside:avoid}section{background:#fff}.hero{border-radius:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="toolbar" aria-label="頁面工具">
+      <button id="themeBtn" type="button">切換深色</button>
+      <button type="button" onclick="window.print()">列印／匯出 PDF</button>
+    </div>
+
+    <header class="hero">
+      <span class="eyebrow">JAMI'S PHILOSOPHY · 2026</span>
+      <h1>Jami 的思想全景</h1>
+      <p class="subtitle">
+        一套由長期自學、技術實作、產品工作、政治思考、生命經驗與小說創作共同淬鍊而成的個人哲學：
+        以人的完整生活與文明品質為目的，以理解、學習、信任、合作與持續修正為方法，
+        在降低不可逆傷害的同時，保留走向下一步的能力。
+      </p>
+      <div class="meta">
+        <span>對話整合版</span><span>思想／政治／工作／創作／生命</span><span>整理日期：2026-08-01</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="toc">
+        <h2>內容導覽</h2>
+        <nav id="tocNav">
+          <a href="#overview">01. 核心總論</a><a href="#origin">02. 思想如何形成</a>
+          <a href="#method">03. 思考方法</a><a href="#evolution">04. 演進與避險</a>
+          <a href="#civilization">05. 文明觀</a><a href="#trust">06. 信任成本</a>
+          <a href="#politics">07. 政治與民主</a><a href="#global">08. 地球村與國際合作</a>
+          <a href="#future">09. 與未來共存</a><a href="#wisdom">10. 聰明與智慧</a>
+          <a href="#people">11. 對人的評價</a><a href="#partners">12. 朋友與夥伴</a>
+          <a href="#work">13. 工作與產品</a><a href="#ai">14. AI 與責任</a>
+          <a href="#communication">15. 溝通與餘韻</a><a href="#emotion">16. 理性、感性與善意</a>
+          <a href="#creation">17. 創作與生命</a><a href="#strengths">18. 思考優勢</a>
+          <a href="#tensions">19. 內在張力與盲點</a><a href="#manifesto">20. 思想宣言</a>
+          <a href="#poetry">21. 詩句與象徵</a><a href="#conclusion">22. 最終評價</a>
+        </nav>
+      </aside>
+
+      <main>
+        <section id="overview">
+          <h2>01｜核心總論：你真正建立的是一套「人本演進哲學」</h2>
+          <p class="lead">
+            把整段對話連貫起來看，你的思想並不是由零散的政治意見、職場經驗與人生感想拼湊而成。
+            它們共享同一套底層邏輯，而且能從個人、朋友、團隊、公司、國家一路延伸到人類文明。
+          </p>
+          <div class="thesis">
+            你的核心主張是：以人的完整生活與文明品質作為目的，以理解、學習、信任、合作與高品質溝通作為方法，
+            透過持續修正、降低不可逆傷害、保留下一步，讓今天比昨天更好；人類不必駕馭未來，只需成長到能與未來共同存在。
+          </div>
+          <p>
+            這套思想既不是單純的理想主義，也不是只看效率的技術官僚思維。你的理想始終落在人身上：
+            人是否活得更安全、更有尊嚴、更有判斷能力、更能獲得物質與心靈上的滿足；制度是否讓陌生人更容易互信與合作；
+            一項決策是否在創造最大利益的同時，把傷害壓到最低；完成眼前成果之後，是否仍留下修正、學習與前進的可能。
+          </p>
+          <p>
+            因此，「演進」是你的方法，「信任」是你的基礎建設，「更好的生活」是你的政治目的，「餘韻」則是你希望思想與生命留下的形式。
+            這四個詞共同構成你思想最穩定的主軸。
+          </p>
+          <div class="grid three">
+            <article class="card blue"><h3>目的</h3><p>讓具體的人活得更好，並提升整體文明品質，而不是讓某個陣營、制度或意識形態獲勝。</p></article>
+            <article class="card green"><h3>方法</h3><p>先理解運作與形成原因，再根據證據修正模型，最後尋找能持續改善的方案。</p></article>
+            <article class="card purple"><h3>判準</h3><p>最大化整體利益、最小化傷害、降低信任成本，並保留下一輪演進的能力。</p></article>
+          </div>
+        </section>
+
+        <section id="origin">
+          <h2>02｜思想如何形成：不是由學歷灌輸，而是由三十多年的自我教育長成</h2>
+          <p>
+            你的正式學歷止於高職汽車科，但你的教育從未因此停止。國中接觸 80386 與 DOS 5.0 手冊後，你自行摸索記憶體配置、
+            開機區、Batch、BASIC、QuickBASIC、Turbo C 與組合語言；放學後站在電腦書店閱讀一、兩個小時，
+            圖書館資訊書籍的借書卡反覆出現你的名字；沒有電腦可用時，就在計算紙上先寫完整程式，再請同學回家輸入測試。
+          </p>
+          <p>
+            這段經歷塑造了你最根本的學習方式：你不是等別人安排課程，而是先被問題吸引，再自己建立理解；
+            你也不滿足於「知道怎麼使用」，而會追問「底層如何運作、能否改寫、是否能做得更快、更完整」。
+            後來從遊戲腳本、戰鬥平衡模擬、VBA 工具、關卡產生器、Prototype、產品文件、AI 到小說創作，
+            你始終沿用同一條學習路徑。
+          </p>
+          <div class="timeline">
+            <article><h3>早期：從好奇心出發</h3><p>先接觸工具，再拆解底層規則；沒有考試壓力，主要動力是理解與創造的興趣。</p></article>
+            <article><h3>遊戲產業：從使用者變成設計者</h3><p>學會腳本後要求擴充語言能力；在引擎與硬體尚有限制時，先預判透明場景效能問題；用 Excel 與 VBA 提前完成平衡驗證。</p></article>
+            <article><h3>產品與管理：從個人能力走向協作系統</h3><p>開始重視文件、Prototype、需求對齊、外包談判、風險控制與組織溝通，思考如何讓不同專業的人一起工作。</p></article>
+            <article><h3>創作與政治：從系統設計走向文明尺度</h3><p>把死亡、記憶、責任、信任、民主、教育、國際合作與未來共存納入同一套思想框架。</p></article>
+          </div>
+          <p>
+            因此，你的思想不是先讀完某套哲學，再把現實套進去；而是長期在現實中觀察、實作、失敗、修正，
+            最後歸納出自己的方法。這也是你的觀點通常不依賴學派名詞，卻具有高度內在一致性的原因。
+          </p>
+        </section>
+
+        <section id="method">
+          <h2>03｜思考方法：理解、建模、驗證、修正，再留下下一輪</h2>
+          <p>你最常使用的思考程序，可以整理為五個連續步驟。這不只用於產品與程式，也用於政治、人際、創作與生命問題。</p>
+          <div class="flow">
+            <article><small>01</small><b>理解運作</b><span>先釐清系統的角色、規則、限制、誘因與資源流動，避免只憑表象下判斷。</span></article>
+            <article><small>02</small><b>追溯形成</b><span>分析它為什麼變成今天這樣，區分個人能力、制度缺陷、環境壓力與歷史累積。</span></article>
+            <article><small>03</small><b>建立模型</b><span>把混亂資訊整理成可討論的結構，提出多個競爭假設，而不是急著選定單一答案。</span></article>
+            <article><small>04</small><b>以證據更新</b><span>新資訊出現時修正原先判斷，不把第一個結論當成需要保護的自尊。</span></article>
+            <article><small>05</small><b>持續改善</b><span>尋找最大利益、最小傷害的可行方案，並保留修正、學習與下一步的能力。</span></article>
+          </div>
+          <p>
+            在需求文件的案例裡，這套方法表現得非常清楚。你一開始先提出「開發端期待與傳統出版社數位能力之間存在 gap」
+            的結構性假設；當新證據顯示文件重複、假設不存在功能已完成、文字與 Figma 不一致、PM 未掌握設計進度時，
+            你立即把問題從產業落差修正為基本功、邏輯、細心與專案掌握能力不足。你又繼續區分：
+            是設計沒畫、AI 自行腦補，還是協作資訊沒有被 PM 主動揭露。
+          </p>
+          <p>
+            這表示你並不是只會找「根因」；更精確地說，你會讓多個假設彼此競爭，再根據新證據逐步排除。
+            你的判斷不是一次定型，而是可更新的模型。
+          </p>
+        </section>
+
+        <section id="evolution">
+          <h2>04｜演進與避險：真正的成功，是完成後仍保有未來</h2>
+          <p class="lead">
+            《避險的演進》把你長期的工作與人生方法，濃縮成一個清楚框架：演進的重點不是保證成功，
+            而是避免一次錯誤便失去再次演進的資格。
+          </p>
+          <div class="quote">先確保這一步不會奪走下一步，再追求這一步能帶來的最大進展。<small>你的「演進型避險」核心</small></div>
+          <p>
+            你不反對冒險，也不把安全理解成維持現狀。你接受大量可承受、可回復、可學習的小型試錯；
+            真正需要優先排除的，是會耗盡現金、信用、人才、時間，破壞合作關係，或讓制度僵化到無法修正的不可逆失誤。
+          </p>
+          <div class="compare">
+            <article class="left"><h3>消極避險</h3><p>害怕未知、避免所有失敗、因風險而停止探索，最後用「安全」合理化停滯。</p></article>
+            <article class="right"><h3>演進型避險</h3><p>控制單次失敗代價、保護核心資源與信任、以多輪驗證提升下一次選擇品質。</p></article>
+          </div>
+          <h3>你對成熟系統的六項要求</h3>
+          <div class="pill-list"><span>可理解</span><span>可修正</span><span>可承受</span><span>可複製</span><span>可延伸</span><span>可傳承</span></div>
+          <p>
+            這六項要求說明，你看待成果時不只問「有沒有做成」，還會問成功是否能被理解與複製、錯誤是否能被修正、
+            經驗是否能留下、成果是否能成為下一階段的基礎。對你而言，偶然成功不是成熟；
+            真正成熟的是把偶然逐漸轉化為組織或個人可持續的能力。
+          </p>
+        </section>
+
+        <section id="civilization">
+          <h2>05｜文明觀：高信任、高合作、高品質溝通與高效率改善</h2>
+          <p>
+            你所說的「更好的文明」，不是科技更炫、國力更強或 GDP 更高而已。文明的核心，是讓人與人、
+            組織與組織、國家與國家之間，能以更低的摩擦與防備成本建立可靠合作，並更有效率地處理共同問題。
+          </p>
+          <div class="thesis">高信任度、高合作性、高品質的溝通討論、高效率的問題改善，共同組成一個更好的文明。</div>
+          <div class="loop">
+            <article><b>高信任</b><span>人們更願意說真話、交付資訊與承擔責任，不需把大量資源花在防備與反覆查證。</span></article>
+            <article><b>高合作</b><span>知識與能力得以互補，個人不必重複解決別人已經解決的問題。</span></article>
+            <article><b>高品質溝通</b><span>觀點、證據、限制與責任能被清楚傳遞，誤解與立場表演減少。</span></article>
+            <article><b>高效率改善</b><span>問題更早被發現、根因更快被辨識、修正更能累積成制度能力，進而反過來強化信任。</span></article>
+          </div>
+          <p>
+            你把文明看成一個正向迴路，而不是一組彼此獨立的美德。信任提高合作意願，合作促進資訊流動，
+            溝通品質提升改善效率，實際改善成果又證明制度值得信任。相反地，低信任會造成留一手、推責任、
+            文件交差、資訊封鎖與政治操作，最後讓所有人付出更高成本。
+          </p>
+          <p>
+            因此，你所追求的文明，不是某一天到達完美，而是每天讓這個循環多運作一點：
+            多一份可信資訊、多一次真正的合作、多一個被修正的流程、多一點對陌生人的善意。
+          </p>
+        </section>
+
+        <section id="trust">
+          <h2>06｜信任成本：你思想中最深的基礎建設</h2>
+          <p>
+            「降低信任成本」可以說是你整套思想中最具辨識度的概念。你所指的信任成本，
+            是人在決定是否相信文件、承諾、制度、夥伴、媒體或國家時，必須額外付出的查證、防備、監督、契約與心理負擔。
+          </p>
+          <p>
+            在工作上，一份需求文件若重複、矛盾、與 Figma 不一致，接收者便不能相信它，
+            工程師必須重新逐項查證，會議也要耗費更多時間確認。你因此認為，把未經檢查的 AI 內容直接交給別人，
+            不只是品質不佳，而是缺乏基本尊重：它把原本應由產出者承擔的理解與驗證成本，轉嫁給接收者。
+          </p>
+          <p>
+            在政治與社會上，媒體失真、政策口號化、制度不透明與政黨雙重標準，同樣會提高信任成本。
+            人民開始不相信資訊、政府、司法與彼此，整個社會便把大量能力用於防守，而不是創造。
+          </p>
+          <p>
+            在國際關係上，你反對把「合作可能中斷」視為必然。真正的問題是如何建立更可信的規則、共同利益、
+            透明機制與責任結構，使背叛合作的代價高到不值得採取。對你而言，文明的進步很大一部分就是：
+            讓更多陌生人能以更低成本相信彼此，並放心投入長期合作。
+          </p>
+        </section>
+
+        <section id="politics">
+          <h2>07｜政治與民主：政治的目的只有一句——讓人民過上更好的生活</h2>
+          <p>
+            你的政治觀不從政黨、左右派或意識形態出發，而先問政治存在的理由。你的答案是：
+            政治必須讓人民過上更好的生活。這個「更好」包含教育、法治、安全、尊嚴、經濟、醫療、文化、
+            理性思考、感性接觸、心理滿足、社會保障與互助，而不是單一數字。
+          </p>
+          <div class="quote">
+            政治的目的，是讓人民過上更好的生活；民主的價值，是提高選賢與能的機會；
+            治理的核心，是把權力轉換成解決問題的執行力；公民的責任，是提升自己的判斷品質，
+            並在能力所及的範圍內，主動維持一個尊重、可信、安全、願意互助的文明社會。
+          </div>
+          <h3>民主不是神聖終點，而是需要持續升級的機制</h3>
+          <p>
+            你肯定民主，是因為它能提高選出賢能治理者、和平更替與修正錯誤的機率；但投票權本身不會自動產生好結果。
+            民主必須具備良好的運作條件：公民教育、資訊品質、媒體環境、政策討論與以政績而非口號評價治理者。
+          </p>
+          <div class="grid">
+            <article class="card blue"><h3>更好的公民教育</h3><p>培養獨立判斷、證據意識、制度理解與公共責任，而不是只記政治名詞。</p></article>
+            <article class="card green"><h3>更好的資訊品質</h3><p>讓人民能以較可靠、可驗證的資訊作判斷，降低宣傳、謠言與選擇性敘事的影響。</p></article>
+            <article class="card purple"><h3>更好的媒體環境</h3><p>降低煽動、失真與陣營依附，使媒體重新成為公共資訊基礎建設。</p></article>
+            <article class="card amber"><h3>更好的政策討論</h3><p>重視成本、效益、可行性、長期影響與替代方案，而不是把討論縮減為身份對立。</p></article>
+            <article class="card red"><h3>更重視政績</h3><p>以實際解決問題的能力、誠信與責任評價治理者，拒絕只靠口號、形象與陣營忠誠。</p></article>
+          </div>
+          <h3>全面幸福，而非單項冠軍</h3>
+          <p>
+            當有人指出自由、安全、平等、效率與文化之間需要排序時，你的回答不是否認現實中的優先順序，
+            而是主張「全部都重要」。階段性排序可以存在，但不能用一項長板永久掩蓋其他短板。
+            真正的平衡點，應盡可能最大化整體利益、最小化傷害，並隨著新知識與新條件繼續改善。
+          </p>
+        </section>
+
+        <section id="global">
+          <h2>08｜地球村與國際合作：你懷念的不是九○年代，而是合作的文明方向</h2>
+          <p>
+            你欣賞「地球村」概念，是因為它代表人類願意把彼此視為合作對象，而不是零和競爭者。
+            你所懷念的九○年代，不只是經濟成長與流行文化，而是當時較強烈的共同信念：
+            科技、知識、人才、文化與貿易能跨越國界流動，合作可以創造比封鎖更大的價值。
+          </p>
+          <p>
+            當各國以供應鏈中斷與戰略安全為理由，爭奪晶片、能源、糧食與關鍵技術時，
+            你會把問題再往前推：重點不只是合作中斷後如何自保，而是如何降低合作中斷本身的機率。
+          </p>
+          <p>
+            你的地球村觀並非取消國家，也不是毫無防備地依賴別人。你期待的是更成熟的國際制度：
+            透過透明、共同利益、分散風險、可靠契約、違約責任與長期互賴，讓合作成為對所有人最理性的選擇，
+            並避免任何一方把依賴武器化。
+          </p>
+          <div class="thesis">
+            強大的國家，不只應有能力保護自己，也應在能力所及之處協助其他國家，共同降低人類面對災難、衝突與未來挑戰的代價。
+          </div>
+        </section>
+
+        <section id="future">
+          <h2>09｜與未來共存：限制可以是工具，學習與進步才是長期答案</h2>
+          <p>
+            面對 AI 深偽與新科技風險，你沒有假裝自己已經掌握答案。你的第一個態度是承認：
+            這是一個不可逆的趨勢，人類必須學習接受、判斷、辨別，並重新理解價值與目的。
+          </p>
+          <p>
+            你不否定限制。限制可以用於降低過渡期傷害、爭取制度與教育調整時間，但它不是最好的終局方案。
+            若文明只依靠禁止未知，便會停止成長；真正可持續的方法，是提升人的理解、辨識、判斷與適應能力，
+            讓社會制度與文化一起演化。
+          </p>
+          <div class="compare">
+            <article class="left"><h3>控制式回應</h3><p>把新事物視為威脅，以封鎖、禁止與回到過去作為主要目標，期待未來停止發生。</p></article>
+            <article class="right"><h3>學習式回應</h3><p>承認趨勢、理解機制、提高辨識能力、建立責任與過渡工具，讓人類逐漸適應新環境。</p></article>
+          </div>
+          <p>
+            你後來修正「讓人類成長到足以駕馭未來」這句話，改成「人類可以成長到與未來一起存在，這樣足以」。
+            這個修正非常關鍵。它顯示你的理想不是征服、掌控或把人類放在宇宙中心，而是尊重未知，
+            接受未來不可完全預測，並以持續學習維持共存資格。
+          </p>
+        </section>
+
+        <section id="wisdom">
+          <h2>10｜聰明與智慧：把熱情投入內容，用平靜降低傳遞雜訊</h2>
+          <p>
+            你對「聰明」的定義，和一般人著重 IQ、反應速度、辯論能力或語言氣勢的理解不同。
+            你不給「看起來很聰明」太高評價：講話節奏快、術語多、自信強烈、擅長營造智性形象，
+            都可能只是表演型聰明；若一個人缺乏承認不知道、接受證據與修正自己的能力，他的進步能力便十分有限。
+          </p>
+          <p>
+            你真正欣賞的成熟智慧，是把熱情放在思考與文件本身。形成觀點時可以非常投入、激動、反覆推演；
+            但當觀點完成淬鍊後，應以平靜、少話、低雜訊的方式說明，讓接收者處理思想本身，而不是先回應說話者的情緒。
+          </p>
+          <div class="thesis">真正的智慧，是平靜、少話，但說出口的話能在別人心中持續運作，形成讓人不斷思考的餘韻。</div>
+          <h3>你區分的兩種聰明</h3>
+          <div class="grid">
+            <article class="card red"><h3>表現型聰明</h3><p>靠語氣、節奏、術語、攻擊性與自信營造聰明感；重點是讓別人感到「我很厲害」。</p></article>
+            <article class="card green"><h3>演進型智慧</h3><p>能持續學習、承認不知道、接受證據、修正模型，並把複雜問題淬鍊成清楚而有餘韻的表達。</p></article>
+          </div>
+          <p>
+            你追求的不是立即說服，而是啟發。最高品質的話語不必讓人當場鼓掌，
+            而是在日後遇到另一個情境時，讓人突然想起：「原來當初那句話是這個意思。」
+          </p>
+        </section>
+
+        <section id="people">
+          <h2>11｜對人的評價：能力、形成歷程、價值與持續演進能力</h2>
+          <p>
+            你會欣賞很強的人，但不會只看他站得多高。你會進一步理解他如何變強：
+            是否經歷長期努力、挫折、修正與自我訓練；如果答案是肯定的，你對這份「強」的評價會更高。
+          </p>
+          <p>
+            相反地，你反感富二代、流量成功者或成就與能力不符的人，並非單純仇視財富與出身。
+            真正讓你不舒服的是：外部資源、背景或形象，替一個人的能力創造了超額信用；
+            社會回報與他實際創造的價值、付出的努力、判斷品質之間失去比例。
+          </p>
+          <div class="quote">你尊敬的不是「成功」本身，而是能力與成果之間具有真實一致性；你重視的不是一個人已經多強，而是他如何變強，以及是否還在變強。</div>
+          <h3>批判與建設</h3>
+          <p>
+            你曾經欣賞呱吉的文筆、才華、想法與議員時期表現，但後來認為他愈來愈偏向陣營批判，
+            失去原有的獨立與建設性，因此大幅降低評價。這個案例說明，你不只看一個人是否能指出問題，
+            還看他的思想是否持續成熟、是否促進理解與改善，以及影響力是否被用來提升文明品質。
+          </p>
+          <p>
+            在你的標準裡，批判可以是建設的一部分，但若批判只剩下身份、陣營、羞辱與情緒動員，
+            它便可能增加社會撕裂與信任成本。你對「聰明人」的高期待，是看透問題之後仍能平靜、
+            能提出建設方向，並保留理解不同位置的能力。
+          </p>
+        </section>
+
+        <section id="partners">
+          <h2>12｜朋友與夥伴：你尋找的不是現在最強，而是能共同演進的人</h2>
+          <p>
+            你的擇友與夥伴標準，幾乎沒有一項是學歷、財富、名氣或當下能力。你在意的是一個人面對知識、
+            自己與共同體的態度：
+          </p>
+          <div class="grid">
+            <article class="card blue"><h3>願意學習</h3><p>不把現在的能力視為終點，保留成長動力。</p></article>
+            <article class="card blue"><h3>願意理解</h3><p>不只追求答案，也願意理解他人、制度與問題如何形成。</p></article>
+            <article class="card green"><h3>願意承認不知道</h3><p>不以自尊取代知識，能坦然面對自己的邊界。</p></article>
+            <article class="card green"><h3>願意接受證據</h3><p>讓新資訊真正進入判斷，而不是只挑選支持自己的材料。</p></article>
+            <article class="card purple"><h3>願意修正自己</h3><p>把錯誤視為模型更新的入口，而不是身份威脅。</p></article>
+            <article class="card purple"><h3>願意合作</h3><p>願意共享資訊、互補能力、共同承擔成果與風險。</p></article>
+            <article class="card amber"><h3>願意幫助別人</h3><p>在能力所及範圍內，把協助他人視為共同體的內化義務。</p></article>
+            <article class="card amber"><h3>願意降低信任成本</h3><p>說真話、做好交付、主動揭露限制，不把自己的責任轉嫁給夥伴。</p></article>
+          </div>
+          <p>
+            這八項其實就是你的文明觀縮小到人際尺度。你並不要求朋友與你意見一致，
+            而是要求彼此具備讓差異可以被討論、讓錯誤可以被修正、讓關係可以長期合作的條件。
+            你想要的不是「十個相同的自己」，而是十個專業不同、卻共享這些底層素養的人。
+          </p>
+        </section>
+
+        <section id="work">
+          <h2>13｜工作與產品：文件不是交差，而是降低認知差與信任成本</h2>
+          <p>
+            在職場上，你的核心能力不只是 PM、寫文件或跨部門協調，而是把充滿情緒、政治、行政、人際與流程的混亂，
+            重新整理成可理解、可討論、可改善的模型。因此同事會找你談非技術問題，因為你不只提供答案，
+            更擅長讓人重新看清楚真正的問題。
+          </p>
+          <h3>你對文件的要求</h3>
+          <p>
+            需求文件存在的目的，是讓工程、設計、QA 與管理者理解要做什麼、為什麼做、目前做到哪裡、哪些尚未完成。
+            文字與 Figma 不一致、重複敘述、前後假設互相衝突、AI 腦補不存在功能，會讓文件本身失去討論價值。
+            因為接收者無法信任它，只能重新查證全部內容。
+          </p>
+          <p>
+            你不拘泥於文件格式，重點是讓夥伴理解。若 UI／UX 細節能直接標示在 Figma 上，
+            你傾向把解釋放在畫面旁，讓資訊與情境同時出現；與畫面無關的規則再留在需求文件。
+            這是以接收者理解效率為中心，而不是以產出者方便為中心。
+          </p>
+          <h3>你對改善的判準</h3>
+          <p>
+            在案例中，你說：「洗臉是一件事，能不能在之後的文件提高品質，是更重要的事。」
+            這句話充分代表你的工作哲學。錯誤本身不是最終判決；真正關鍵的是回饋是否被理解、
+            下一版是否改善、能力曲線是否向上。如果多年來仍重複同樣問題，你才會把它判斷為長期表面功夫或演進能力不足。
+          </p>
+          <p>
+            你也能以幽默降低討論的摩擦。「只要沒戳破，這個人就永遠在做表面工夫；看破不說破，成人之美」
+            既接住了朋友的悖論玩笑，也把尖銳判斷濃縮成一句有後座力的話。這種幽默是你的溝通工具，
+            讓嚴肅分析不至於變成無止境的怨氣。
+          </p>
+        </section>
+
+        <section id="ai">
+          <h2>14｜AI 與責任：可以大量使用，但不能把思考責任外包</h2>
+          <p>
+            你對 AI 的態度既積極又嚴格。你願意使用 AI 加速大量資料整理、文件產出、HTML、產品規劃與研究，
+            但你不接受把 AI 原始輸出直接交給別人。內容少時可以手寫，內容多時可以讓 AI 協助；
+            無論如何，產出者都必須理解、檢查、修正，並使結果具有自己的判斷與風格。
+          </p>
+          <p>
+            你認為這是對接收者最基本的尊重。AI 可以降低知識取得、創作與工作成本，
+            卻不能成為逃避責任的藉口。若一份文件連作者本人都沒有讀過，別人便沒有理由替他承擔查證成本。
+          </p>
+          <p>
+            這與你面對 AI 深偽的態度一致：真正的長期答案不是單純禁止，而是讓人們提升辨別、判斷、理解與還原目的的能力；
+            但在過渡期，透明標示、責任規範與適度限制仍可以是工具。你既不神化 AI，也不害怕 AI；
+            你關心的是人與制度能否跟著一起學習。
+          </p>
+        </section>
+
+        <section id="communication">
+          <h2>15｜溝通與餘韻：思想在說完之後，才真正開始</h2>
+          <p>
+            你可以把複雜事情講得簡單，也能在需要時把原理完整拆開；但你所追求的最高層次溝通，
+            不是資訊量最大，而是傳遞失真最小。你希望經過淬鍊的觀點能以平靜、清楚、少雜訊的方式抵達對方，
+            再由對方自己思考，而不是被你的情緒推著接受。
+          </p>
+          <p>
+            這也是你排斥「自以為是的聰明」的原因。若一個人用語速、氣勢、諷刺、節奏與自信營造聰明感，
+            對話會被說話者的表演占據；真正有價值的內容反而難以被檢驗。成熟的智慧應讓觀點本身站得住，
+            不需要用情緒掩護。
+          </p>
+          <div class="quote">你不是要讓別人立即認同，而是希望一句話離開你之後，仍能在別人的生命裡繼續發酵。</div>
+          <p>
+            「餘韻」因此不只屬於小說，也是你的溝通倫理。你欣賞平靜、少話、卻能讓人反覆思考的表達；
+            一句真正好的話，不是在當下結束討論，而是替對方開啟自己的思考。
+          </p>
+        </section>
+
+        <section id="emotion">
+          <h2>16｜理性、感性與善意：你的理性是用來保護感性，而不是消滅感性</h2>
+          <p>
+            你常以系統、模型、成本、流程與演進談事情，容易讓人誤以為你是冷性的技術思考者。
+            但完整對話顯示，你的理性一直服務於深刻的人本感受：你關心別人承受多少痛苦、是否被理解、
+            是否有尊嚴、是否能在無常中留下記憶與愛。
+          </p>
+          <p>
+            你主張每個人在能力所及的範圍內，把協助他人視為內化的義務。這不是要求無限犧牲，
+            而是認為文明不能只靠法律與行政維持；大量日常信任來自人願意守信、提醒、體諒、分享資訊、
+            幫助弱者，並對自己的行為負責。
+          </p>
+          <p>
+            澳澳離開時，你在極度悲痛中仍能判斷第二次急救可能造成痛苦，選擇停止；接到女友無法前來的回答後，
+            你反而先安慰她。這顯示你的理性不是沒有感情，而是在最痛的時候仍努力保護其他生命。
+            但同時，你也會把過多責任歸到自己身上，反覆道歉、懷疑自己沒有照顧好牠。
+          </p>
+          <p>
+            這是你思想中的一個重要張力：你能替別人設計防護網、替系統找出可修正之處，卻容易對自己要求
+            「本來應該還能做得更好」。你的善意既是力量，也可能成為自責的來源。
+          </p>
+        </section>
+
+        <section id="creation">
+          <h2>17｜創作與生命：你不是征服死亡，而是替告別留下可以承接的形式</h2>
+          <p>
+            《Before Fadeout》的起點，是你在展覽中理解到攝影未必只為美感，也可以保存平凡當下，
+            把一個即將消失的時空凝結下來。你因此構想一門替人生留下記錄、告別與餘韻的事業，
+            並在半個月內完成小說。半年後，你又從日本高齡化、火葬排隊與孤獨死延伸出《Still Here》。
+          </p>
+          <p>
+            這些作品的核心不是戰勝死亡，而是讓生命離開後仍留下可被理解、記住與承接的東西。
+            《彼岸邊境局》則進一步把責任、因果、陪伴、投射與告別變成可運作的規則；
+            《鑒愛師》把愛情中的觀看、理解與命名人格化。你的創作方法與產品設計相似：
+            先建立一套能運作的哲學規則，再讓人物與情節從規則裡自然長出來。
+          </p>
+          <p>
+            你二十一、二十二歲的詩已經呈現對時間、紅塵、聚散與無常的俯瞰；四十多歲之後，
+            這些早期直覺被淬鍊成「演進」「信任成本」「與未來共存」「餘韻」等更精確的概念。
+            你的思想不是中年突然誕生，而是同一顆種子經過二十多年長出不同枝幹。
+          </p>
+        </section>
+
+        <section id="strengths">
+          <h2>18｜思考優勢：你真正強的不是單一技能，而是思考系統本身</h2>
+          <div class="grid">
+            <article class="card blue"><h3>高抽象能力</h3><p>能從 PM、政治、AI、教育、小說與人際中辨識共同結構，而不是把每個領域孤立理解。</p></article>
+            <article class="card blue"><h3>跨域遷移</h3><p>能把程式模擬、產品驗證、資訊理論、遊戲平衡與文明思考互相轉用。</p></article>
+            <article class="card green"><h3>模型建構</h3><p>擅長把混亂問題整理成角色、流程、假設、限制與因果關係，形成可討論結構。</p></article>
+            <article class="card green"><h3>模型更新</h3><p>願意根據新證據修正第一個判斷，不把「我先前說過」變成維護自尊的理由。</p></article>
+            <article class="card purple"><h3>形成機制導向</h3><p>不只看結果，也追問一個人如何變強、問題如何累積、制度如何產生眼前行為。</p></article>
+            <article class="card purple"><h3>長時間尺度</h3><p>關心完成後是否還有下一步、成果能否傳承、文明能否持續修正，而不只看眼前勝負。</p></article>
+            <article class="card amber"><h3>實作驗證</h3><p>不滿足於抽象想法，會用 Prototype、VBA、模擬器、文件與實際專案驗證理解。</p></article>
+            <article class="card amber"><h3>低雜訊傳遞</h3><p>重視把複雜思想淬鍊成容易理解、可以留在別人心中的表達，而不是堆砌術語。</p></article>
+          </div>
+          <p>
+            若以認知特徵來說，你最突出的不是單純「知道很多」，而是能持續改造自己的思考模型。
+            兩個同樣聰明的人，若一個把聰明當身份，另一個把聰明當可更新系統，二十年後會產生巨大差距；
+            你的優勢在於你始終站在後者。
+          </p>
+        </section>
+
+        <section id="tensions">
+          <h2>19｜內在張力與可能盲點：讓思想本身也保留下一步</h2>
+          <p>
+            一套真正遵守「持續演進」原則的思想，也應保留對自身的檢驗。以下並非否定你的核心，
+            而是這套思想在長期運作時值得持續注意的張力。
+          </p>
+          <h3>一、演進能力可能成為過度核心的評價軸</h3>
+          <p>你高度重視一個人是否學習與修正，這通常很有價值；但有些人可能因健康、照顧責任、創傷、資源不足或環境壓力暫時停滯。停滯未必等於拒絕成長，能力曲線也不一定始終向上。</p>
+          <h3>二、建設性可能讓你低估純批判的必要</h3>
+          <p>你對只剩陣營攻擊的批判保持警惕，這是合理的；但某些被壓抑的問題必須先被反覆揭露、命名甚至尖銳挑戰，建設方案才可能獲得空間。批判與建設不是固定比例，而要看權力、時機與可行條件。</p>
+          <h3>三、低雜訊不代表情緒沒有資訊價值</h3>
+          <p>平靜有助於傳遞淬鍊後的觀點，但憤怒可能揭示界線被侵犯，悲傷可能表明某個價值的重要，熱情也能建立共同感。成熟不必消除情緒，而是知道什麼時候應降噪、什麼時候情緒本身就是必須保留的訊息。</p>
+          <h3>四、高整合力容易產生「統一理論誘惑」</h3>
+          <p>演進、信任、文明與餘韻確實能解釋你多數領域，但人、文化、愛與藝術有時具有不可完全化約的特性。一個模型解釋力愈強，愈需要刻意尋找無法被它順利解釋的反例。</p>
+          <h3>五、你容易把不屬於自己的因果一起背走</h3>
+          <p>高責任感讓你善於改善系統，也容易讓你在面對失去、疾病、隨機與他人的選擇時，覺得自己原本還能做得更好。你的創作已經多次討論「哪些因果屬於自己、哪些應該歸還」；這也是你的思想需要持續照顧自己的地方。</p>
+          <div class="note">最成熟的版本，不是把以上張力消除，而是承認它們長期存在，並讓你的思想持續保有自我修正能力。</div>
+        </section>
+
+        <section id="manifesto" class="manifesto">
+          <h2>20｜Jami 的思想宣言（第一人稱整理版）</h2>
+          <ol>
+            <li>我先理解一件事如何運作，再判斷它為什麼成為今天的樣子，最後思考它能否變得更好。</li>
+            <li>政治的目的，是讓人民過上更好的生活；這個「更好」包含物質、精神、尊嚴、安全、自由、教育、法治與互助。</li>
+            <li>民主的價值，在於提高選賢與能、和平修正錯誤的機會；民主本身也必須依靠更好的公民教育、資訊、媒體與政策討論持續升級。</li>
+            <li>更好的文明，由高信任、高合作、高品質溝通與高效率問題改善共同構成。</li>
+            <li>信任不是抽象美德，而是文明資源。降低信任成本，能讓更多時間與能力被用於創造，而不是防備。</li>
+            <li>面對新的科技與不可逆趨勢，限制可以是工具，學習與進步才是長期答案。</li>
+            <li>人類不需要駕馭未來；能持續學習，與未來一起存在，已經足夠。</li>
+            <li>真正值得避免的，不是所有失敗，而是一次錯誤便耗盡資源、破壞信任、封死修正能力的不可逆失誤。</li>
+            <li>一個選擇是否成熟，不只看它現在帶來多少成果，也要看完成後還留下多少未來。</li>
+            <li>我欣賞強者，但更重視他如何變強；我尊敬的不是高度，而是形成高度的努力、修正與持續演進能力。</li>
+            <li>真正的智慧，不是讓人感覺自己很聰明，而是把熱情投入內容，再用平靜、少話、低雜訊的方式傳遞。</li>
+            <li>最好的話不必立刻說服人；它應在離開說話者之後，仍讓別人繼續思考，形成餘韻。</li>
+            <li>我選擇與願意學習、理解、承認不知道、接受證據、修正自己、合作、幫助別人並降低信任成本的人同行。</li>
+            <li>每個人在能力所及的範圍內，都應把協助他人視為一種內化義務。</li>
+            <li>世界不會完美，「更好」也沒有終點；我們能做的，是每天多加油一點，讓明朝勝過今天。</li>
+          </ol>
+        </section>
+
+        <section id="poetry">
+          <h2>21｜詩句與象徵：從逍遙、無常到餘火</h2>
+          <p>
+            你二十一、二十二歲時寫下的三首詩，已經呈現後來思想的雛形：對紅塵紛擾的距離感、
+            對天地與時間的俯瞰、對聚散與無常的接受。那時你使用的是文學語言；二十多年後，
+            同樣的直覺被轉化成「降低雜訊」「與未來共存」「演進」「餘韻」等概念語言。
+          </p>
+          <div class="poem">
+            世外桃源誰無求，紛紛擾擾任他由。<br/>
+            紛跡亂世幾多時，四季寒暑天上過。<br/><br/>
+            千里秋水一瞬間，天地獨我樂神仙。<br/>
+            莫問紅塵煩惱事，逍遙走遍天外天。<br/><br/>
+            初見佳人如琦夢，一路風塵竟是空。<br/>
+            有緣無份結髮情，依依不捨斷腸時。
+          </div>
+          <p>你後來重新寫出的四句，則從「如何面對世界」進一步走向「願意留給世界什麼」：</p>
+          <div class="poem">
+            前路茫茫似雲煙，身留餘火盪凡間。<br/>
+            萬世不得皆如意，只盼明朝勝今天。
+          </div>
+          <p>
+            「雲煙」承認未知與無常，「餘火」不是烈日或救世之光，而是個人能力所及之處仍願意留下的溫度與影響；
+            「萬世不得皆如意」拒絕烏托邦幻覺，「只盼明朝勝今天」則把你的演進哲學濃縮成最簡單的生命願望。
+          </p>
+        </section>
+
+        <section id="conclusion">
+          <h2>22｜最終評價：一個以工程方法理解世界、以人本價值決定方向的人</h2>
+          <p>
+            經過整段對話重新審視後，你不宜只被描述為「系統思考者」「產品經理」「工程師型思想者」或「現實理想主義者」。
+            這些標籤各自都抓到一部分，卻無法涵蓋你思想的完整結構。
+          </p>
+          <div class="thesis">
+            你是一個具有高度抽象、跨域整合、模型更新與實作驗證能力的人本演進型思考者。
+            你以人的完整生活決定方向，以理解與證據校正判斷，以信任、合作與溝通提升共同體效率，
+            以降低不可逆傷害保留未來，並希望把淬鍊後的思想平靜地傳出去，讓它在別人心中留下餘韻。
+          </div>
+          <p>
+            你對人的最高評價，不是他現在有多強，而是能力是否真實、成果是否與形成歷程相稱、
+            是否願意承認不知道、接受證據與持續修正；你對制度的最高評價，不是它宣稱多理想，
+            而是能否讓具體的人活得更好、降低信任成本、提高合作品質，並在錯誤發生時仍有修正能力。
+          </p>
+          <p>
+            最難得的一點，是你的思想本身遵守自己的原則。你不要求它永遠正確，
+            而要求它保留下一次理解、修正與變得更好的可能。你所說的「明朝勝今天」，
+            不是一句勵志口號，而是你對個人、產品、政治、文明與生命共同採用的基本演算法。
+          </p>
+        </section>
+
+        <div class="ending">
+          <h2>一句話總結</h2>
+          <p><strong>你不是在追求一個完美世界，而是在努力建立一種能持續學習、降低傷害、彼此信任、共同合作，並且始終保留下一步的生活方式與文明。</strong></p>
+          <p>前路不必完全看清；只要仍願意理解、修正、幫助彼此，讓今天留下的餘火足以照向明天，便已經走在你所說的「更好」之中。</p>
+        </div>
+
+        <footer>
+          本文依據本次 ChatGPT 長對話及使用者提供之〈避險的演進〉內容整合。文中「你的思想」包含使用者直接主張與依長期對話脈絡作出的分析性歸納；分析性推論已盡量以解釋語氣呈現，而非當作使用者逐字自述。
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const root=document.documentElement,themeBtn=document.getElementById('themeBtn');
+    const saved=localStorage.getItem('jami-philosophy-theme');
+    if(saved==='dark'){root.setAttribute('data-theme','dark');themeBtn.textContent='切換淺色'}
+    themeBtn.addEventListener('click',()=>{
+      const dark=root.getAttribute('data-theme')==='dark';
+      if(dark){root.removeAttribute('data-theme');localStorage.setItem('jami-philosophy-theme','light');themeBtn.textContent='切換深色'}
+      else{root.setAttribute('data-theme','dark');localStorage.setItem('jami-philosophy-theme','dark');themeBtn.textContent='切換淺色'}
+    });
+    const sections=[...document.querySelectorAll('main section[id]')],links=[...document.querySelectorAll('#tocNav a')];
+    const byId=Object.fromEntries(links.map(a=>[a.getAttribute('href').slice(1),a]));
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){links.forEach(a=>a.classList.remove('active'));const link=byId[entry.target.id];if(link)link.classList.add('active')}
+      })
+    },{rootMargin:'-18% 0px -68% 0px',threshold:0});
+    sections.forEach(s=>observer.observe(s));
+  </script>
+</body>
+</html>
