@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KALM B2C｜商業模式、行銷策略、品質管理</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --panel: rgba(255,255,255,.88);
+      --solid: #ffffff;
+      --text: #1e2735;
+      --muted: #667186;
+      --line: #dfe5ee;
+      --blue: #315f86;
+      --green: #2d725a;
+      --purple: #694d8e;
+      --orange: #b2612d;
+      --shadow: 0 18px 60px rgba(35, 45, 72, .12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+                   "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.72;
+      background:
+        radial-gradient(circle at 6% 0%, rgba(49,95,134,.15), transparent 31rem),
+        radial-gradient(circle at 92% 7%, rgba(45,114,90,.13), transparent 29rem),
+        radial-gradient(circle at 48% 58%, rgba(105,77,142,.09), transparent 33rem),
+        linear-gradient(180deg, #fbfcfe 0%, var(--bg) 50%, #edf0f6 100%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .hero {
+      padding: 72px 28px 38px;
+      border-bottom: 1px solid rgba(223,229,238,.86);
+      background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,255,255,.38));
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-inner, .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border: 1px solid rgba(49,95,134,.23);
+      border-radius: 999px;
+      background: rgba(255,255,255,.76);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+
+    h1 {
+      margin: 22px 0 14px;
+      max-width: 970px;
+      font-size: clamp(36px, 5.5vw, 64px);
+      line-height: 1.08;
+      letter-spacing: -.05em;
+    }
+
+    .subtitle {
+      max-width: 960px;
+      margin: 0;
+      color: #465269;
+      font-size: 19px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--text);
+      font-weight: 800;
+      box-shadow: 0 8px 28px rgba(30,42,80,.06);
+      transition: .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: var(--text);
+      border-color: var(--text);
+    }
+
+    .container {
+      padding: 30px 28px 44px;
+    }
+
+    .section {
+      margin: 28px 0;
+      padding: 27px;
+      border: 1px solid rgba(223,229,238,.9);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 29px;
+      letter-spacing: -.025em;
+    }
+
+    .section-lead {
+      max-width: 980px;
+      margin: 0 0 20px;
+      color: #4b576d;
+    }
+
+    .relationship {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .rel {
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .rel .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      margin-bottom: 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .rel:nth-child(2) .num { background: var(--green); }
+    .rel:nth-child(3) .num { background: var(--purple); }
+
+    .rel b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .rel span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .report-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 360px;
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: 0 12px 34px rgba(30,42,80,.08);
+      transition: .2s ease;
+    }
+
+    .report-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 44px rgba(30,42,80,.13);
+    }
+
+    .report-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 7px;
+      background: var(--blue);
+    }
+
+    .report-card.marketing::before { background: var(--green); }
+    .report-card.quality::before { background: var(--purple); }
+
+    .report-card small {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #edf4fa;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .report-card.marketing small {
+      color: var(--green);
+      background: #edf7f3;
+    }
+
+    .report-card.quality small {
+      color: var(--purple);
+      background: #f2eef9;
+    }
+
+    .report-card h3 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.28;
+      letter-spacing: -.025em;
+    }
+
+    .report-card .en {
+      margin-top: 2px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .report-card p {
+      margin: 14px 0;
+      color: #526078;
+    }
+
+    .question {
+      margin-top: auto;
+      padding: 14px;
+      border: 1px solid #e8edf4;
+      border-radius: 16px;
+      background: #f8faff;
+      color: #35405a;
+      font-weight: 800;
+    }
+
+    .open-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .marketing .open-link { background: var(--green); }
+    .quality .open-link { background: var(--purple); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .note {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .note b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .note p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .callout {
+      padding: 23px;
+      border: 1px solid rgba(49,95,134,.18);
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(49,95,134,.10), rgba(45,114,90,.10));
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 22px;
+    }
+
+    .callout p {
+      margin: 8px 0 0;
+      color: #40506a;
+    }
+
+    .footer {
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1080px) {
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-arrow {
+        min-height: 16px;
+        transform: rotate(90deg);
+      }
+
+      .relationship, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .hero { padding: 44px 18px 26px; }
+      .container { padding: 20px 18px 34px; }
+      .section { padding: 18px; }
+      .report-card { min-height: auto; }
+    }
+
+    @media print {
+      body { background: #fff; }
+
+      .hero, .section, .report-card {
+        box-shadow: none;
+        background: #fff;
+        border-color: #ddd;
+      }
+
+      .hero-actions, .open-link { display: none; }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">KALM / B2C Learning Agent</span>
+      <h1>KALM B2C 專案文件入口</h1>
+      <p class="subtitle">
+        這個入口頁串接 KALM B2C 的三份核心文件：商業模式、Marketing 策略、品質管理與驗收。
+        三份文件分別回答「產品如何創造與回收價值」、「如何找到使用者並形成成長循環」，
+        以及「如何確保角色、知識與整段學習互動真的達到品質標準」。
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="#reports">查看三份文件</a>
+        <a class="btn" href="KALM_B2C_business_model.html">01 商業模式</a>
+        <a class="btn" href="KALM_B2C_marketing_strategy.html">02 Marketing 策略</a>
+        <a class="btn" href="KALM_B2C_quality_management_acceptance.html">03 品質管理與驗收</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h2>三份文件的定位</h2>
+      <p class="section-lead">
+        三份文件不是互相獨立的提案，而是同一個 B2C 產品從「價值成立」、「市場成長」到「品質可持續」的完整經營架構。
+      </p>
+
+      <div class="relationship">
+        <div class="rel">
+          <span class="num">01</span>
+          <b>B2C Business Model<br>商業模式</b>
+          <span>產品賣什麼、誰願意付費，以及如何形成持續收入？</span>
+        </div>
+
+        <div class="rel">
+          <span class="num">02</span>
+          <b>B2C Marketing Strategy<br>市場行銷策略</b>
+          <span>如何打中不同 TA，並讓內容、分享與創作者帶來成長？</span>
+        </div>
+
+        <div class="rel">
+          <span class="num">03</span>
+          <b>Quality Management & Acceptance<br>品質管理與驗收</b>
+          <span>如何確認知識、角色與互動真的自然、有效、值得參與？</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reports">
+      <h2>文件入口</h2>
+      <p class="section-lead">
+        建議閱讀順序是 01 → 02 → 03。先理解產品與收入結構，再看如何找到使用者、擴大內容與形成病毒循環，最後建立能持續維持產品體驗的品質制度。
+      </p>
+
+      <div class="flow">
+        <a class="report-card business" href="KALM_B2C_business_model.html">
+          <small>01 / BUSINESS MODEL</small>
+          <h3>KALM B2C 商業模式</h3>
+          <div class="en">KALM B2C Business Model</div>
+          <p>
+            定義 KALM 是一套由 AI 角色、互動任務、多角色討論、遊戲化練習與反向教授構成的學習平台。
+            內容包含產品定位、TA、免費與付費結構、Learning World、Mission、會員方案、家庭方案、
+            AI 成本控制、內容供給、創作者商城與 MVP 驗證方式。
+          </p>
+          <div class="question">KALM 的 B2C 產品，如何讓使用者願意開始、付費、持續使用？</div>
+          <span class="open-link">開啟商業模式</span>
+        </a>
+
+        <div class="flow-arrow">→</div>
+
+        <a class="report-card marketing" href="KALM_B2C_marketing_strategy.html">
+          <small>02 / MARKETING</small>
+          <h3>KALM B2C Marketing 策略</h3>
+          <div class="en">KALM B2C Marketing Strategy</div>
+          <p>
+            把角色內容、產品互動、病毒式分享與創作者分潤組成一套可執行的成長系統。
+            內容涵蓋高中生、家長、大學生與社會人士的差異化訊息，AI Vtuber 固定節目、
+            高光片段、Remix、互動分享頁、User Upload、分潤制度、渠道、預算與 12 週啟動計畫。
+          </p>
+          <div class="question">如何讓每一次有趣的學習，都有機會帶來下一位使用者？</div>
+          <span class="open-link">開啟 Marketing 策略</span>
+        </a>
+
+        <div class="flow-arrow">→</div>
+
+        <a class="report-card quality" href="KALM_B2C_quality_management_acceptance.html">
+          <small>03 / QUALITY</small>
+          <h3>KALM B2C 品質管理與驗收</h3>
+          <div class="en">KALM B2C Quality Management & Acceptance</div>
+          <p>
+            建立一套不只檢查單句回答，而是驗收完整互動場景的品質制度。
+            內容涵蓋正確性、知識深度、易讀易懂、角色人格、當下角色功能、互動編排、
+            學習推進、場景合約、角色聖經、成熟度分級、問題分類與持續監控。
+          </p>
+          <div class="question">如何確認角色、知識與整段互動真的自然、有效、值得參與？</div>
+          <span class="open-link">開啟品質管理</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>三份文件如何一起使用</h2>
+      <div class="grid-2">
+        <div class="note">
+          <b>對產品與商務討論</b>
+          <p>
+            先用商業模式文件確認商品、定價與營運邏輯，再用 Marketing 文件規劃 TA、內容與成長方式，
+            最後回到品質文件確認承諾出去的體驗是否真的做得到。
+          </p>
+        </div>
+
+        <div class="note">
+          <b>對內容、角色與 Agent 設計</b>
+          <p>
+            先從商模確認哪種互動最有價值，再從 Marketing 找出最值得展示與分享的高光，
+            最後用場景合約、角色聖經與品質門檻，將內容變成可穩定交付的產品。
+          </p>
+        </div>
+
+        <div class="note">
+          <b>對專案排程與 MVP</b>
+          <p>
+            三份文件可共同拆成 MVP：選一個高價值主題、建立少量核心角色、完成一段可分享的互動，
+            驗證是否有人想看、願意參與、能真正學會，以及願不願意付費。
+          </p>
+        </div>
+
+        <div class="note">
+          <b>對長期營運</b>
+          <p>
+            商模負責收入與成本，Marketing 負責獲客與內容供給，品質制度負責信任、留存與防止退化。
+            三者缺少任何一項，都很難把 KALM 經營成長期產品。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="callout">
+        <strong>KALM B2C 的整體核心</strong>
+        <p>
+          KALM 用 AI 角色與互動形式讓人願意接近知識，用任務、討論與教授模式讓人真正參與，
+          再用個人學習記憶、成果分享、創作者內容與品質制度，形成可以持續收費、持續成長、
+          也能維持信任的學習平台。
+        </p>
+        <p>
+          最終目標不是讓 AI 更會回答，而是讓使用者在一段自然、有趣、可信的互動裡，
+          從「看懂」走到「能應用」，最後走到「能教會別人」。
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    KALM B2C｜Documentation Index
+  </footer>
+</body>
+</html>

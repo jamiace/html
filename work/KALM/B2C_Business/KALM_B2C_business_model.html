@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KALM B2C 商業模式企劃｜角色式互動學習平台</title>
+  <style>
+    :root{
+      --bg:#f4f1eb;
+      --paper:#fffdf9;
+      --ink:#20242a;
+      --muted:#66707d;
+      --line:#ded8cf;
+      --soft:#f7f2ea;
+      --blue:#315f86;
+      --blue-soft:#eaf3fb;
+      --green:#2d725a;
+      --green-soft:#eaf6f0;
+      --orange:#b2612d;
+      --orange-soft:#fff1e5;
+      --purple:#694d8e;
+      --purple-soft:#f2ecfa;
+      --red:#9d4545;
+      --red-soft:#faecec;
+      --gold:#987225;
+      --gold-soft:#f8f1dc;
+      --shadow:0 18px 50px rgba(45,39,31,.08);
+      --radius:24px;
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(49,95,134,.12), transparent 27%),
+        radial-gradient(circle at 92% 4%, rgba(105,77,142,.10), transparent 24%),
+        var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+      line-height:1.75;
+    }
+
+    a{color:var(--blue);text-decoration:none}
+    .page{max-width:var(--max);margin:0 auto;padding:34px 24px 84px}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:52px 52px 46px;
+      border-radius:32px;
+      background:linear-gradient(135deg,#17212c 0%,#25394c 58%,#4d3d64 100%);
+      color:#fff;
+      box-shadow:0 26px 70px rgba(22,29,38,.20);
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-100px;
+      bottom:-140px;
+      width:360px;
+      height:360px;
+      border-radius:50%;
+      background:rgba(255,255,255,.07);
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border:1px solid rgba(255,255,255,.28);
+      border-radius:999px;
+      color:rgba(255,255,255,.82);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.06em;
+    }
+    h1{
+      max-width:900px;
+      margin:18px 0 18px;
+      font-size:clamp(36px,6vw,66px);
+      line-height:1.08;
+      letter-spacing:-.045em;
+    }
+    .hero p{
+      max-width:880px;
+      margin:0;
+      color:rgba(255,255,255,.84);
+      font-size:20px;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:32px;
+    }
+    .hero-card{
+      position:relative;
+      z-index:1;
+      min-height:124px;
+      padding:18px;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:18px;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(10px);
+    }
+    .hero-card strong{display:block;margin-bottom:6px;font-size:17px}
+    .hero-card span{color:rgba(255,255,255,.72);font-size:14px}
+
+    .nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      gap:6px;
+      overflow-x:auto;
+      margin:18px 0 28px;
+      padding:9px;
+      border:1px solid rgba(222,216,207,.8);
+      border-radius:999px;
+      background:rgba(255,253,249,.88);
+      box-shadow:0 10px 30px rgba(45,39,31,.08);
+      backdrop-filter:blur(16px);
+    }
+    .nav a{
+      flex:0 0 auto;
+      padding:8px 12px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+    .nav a:hover{background:var(--soft);color:var(--ink)}
+
+    section{margin-top:24px}
+    .card{
+      padding:34px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,253,249,.96);
+      box-shadow:var(--shadow);
+    }
+    .card + .card{margin-top:16px}
+    h2{
+      margin:0 0 18px;
+      font-size:clamp(27px,3.5vw,40px);
+      line-height:1.2;
+      letter-spacing:-.035em;
+    }
+    h3{
+      margin:0 0 10px;
+      font-size:22px;
+      line-height:1.35;
+      letter-spacing:-.02em;
+    }
+    h4{margin:18px 0 8px;font-size:17px}
+    p{margin:0 0 14px}
+    .lead{font-size:20px;color:#333a43}
+    .muted{color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .kicker{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin-bottom:10px;
+      color:var(--green);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.06em;
+    }
+    .kicker:before{
+      content:"";
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 5px rgba(45,114,90,.10);
+    }
+
+    .statement{
+      margin:22px 0;
+      padding:24px 26px;
+      border-left:6px solid var(--blue);
+      border-radius:18px;
+      background:var(--blue-soft);
+      font-size:23px;
+      font-weight:800;
+      line-height:1.55;
+    }
+    .statement.green{border-left-color:var(--green);background:var(--green-soft)}
+    .statement.purple{border-left-color:var(--purple);background:var(--purple-soft)}
+    .statement.orange{border-left-color:var(--orange);background:var(--orange-soft)}
+
+    .grid-2,.grid-3,.grid-4{display:grid;gap:16px}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+
+    .mini{
+      padding:20px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .mini strong{display:block;margin-bottom:7px;font-size:17px}
+    .mini p{margin:0;color:var(--muted)}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 9px;
+      margin-bottom:12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .tag.blue{color:var(--blue);background:var(--blue-soft)}
+    .tag.green{color:var(--green);background:var(--green-soft)}
+    .tag.orange{color:var(--orange);background:var(--orange-soft)}
+    .tag.purple{color:var(--purple);background:var(--purple-soft)}
+    .tag.gold{color:var(--gold);background:var(--gold-soft)}
+    .tag.red{color:var(--red);background:var(--red-soft)}
+
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:9px;
+      margin-top:20px;
+    }
+    .step{
+      position:relative;
+      min-height:150px;
+      padding:15px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    .step:not(:last-child):after{
+      content:"→";
+      position:absolute;
+      right:-11px;
+      top:46%;
+      color:var(--blue);
+      font-weight:900;
+      z-index:2;
+    }
+    .step .num{
+      display:inline-grid;
+      place-items:center;
+      width:28px;
+      height:28px;
+      margin-bottom:8px;
+      border-radius:50%;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:12px;
+      font-weight:900;
+    }
+    .step b{display:block;margin-bottom:4px}
+    .step span{display:block;color:var(--muted);font-size:13px}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    th,td{
+      padding:14px 15px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      background:#eee9e1;
+      color:#30363e;
+      font-size:14px;
+    }
+    tr:last-child td{border-bottom:0}
+    td:first-child{font-weight:800;color:#2d333b}
+    .price{white-space:nowrap;color:var(--orange);font-weight:900}
+
+    .pricing{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:15px;
+      margin-top:20px;
+    }
+    .plan{
+      position:relative;
+      padding:22px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+    }
+    .plan.recommended{
+      border:2px solid var(--blue);
+      box-shadow:0 16px 38px rgba(49,95,134,.13);
+    }
+    .ribbon{
+      position:absolute;
+      top:14px;
+      right:14px;
+      padding:4px 8px;
+      border-radius:999px;
+      color:#fff;
+      background:var(--blue);
+      font-size:11px;
+      font-weight:900;
+    }
+    .plan h3{padding-right:48px}
+    .plan .money{
+      margin:12px 0 14px;
+      color:var(--orange);
+      font-size:27px;
+      font-weight:900;
+    }
+    .plan ul{padding-left:1.2em;margin:0}
+    .plan li{margin:6px 0;color:var(--muted)}
+
+    .economics{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:16px;
+    }
+    .formula{
+      padding:22px;
+      border-radius:18px;
+      background:#1e2731;
+      color:#fff;
+    }
+    .formula b{display:block;margin-bottom:9px;font-size:19px}
+    .formula p{margin:0;color:rgba(255,255,255,.78)}
+
+    .warning,.success,.danger{
+      padding:20px 22px;
+      border-radius:18px;
+      border:1px solid;
+    }
+    .warning{border-color:#ead39e;background:#fff8e7;color:#6e5520}
+    .success{border-color:#bcdcca;background:#edf8f2;color:#245b47}
+    .danger{border-color:#e3bebe;background:#fbefef;color:#7f3838}
+
+    ul{margin:10px 0 0;padding-left:1.25em}
+    li{margin:6px 0}
+
+    .scorecard{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .score{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    .score b{display:block;margin-bottom:6px;font-size:20px;color:var(--blue)}
+    .score span{color:var(--muted);font-size:13px}
+
+    .footer{
+      margin-top:30px;
+      padding:24px;
+      border-radius:20px;
+      background:#202933;
+      color:#fff;
+      text-align:center;
+    }
+    .footer strong{display:block;margin-bottom:6px;font-size:23px}
+    .footer span{color:rgba(255,255,255,.75)}
+
+    @media (max-width:980px){
+      .hero{padding:34px 28px}
+      .hero-grid,.grid-2,.grid-3,.grid-4,.pricing,.scorecard,.economics{grid-template-columns:1fr}
+      .flow{grid-template-columns:1fr}
+      .step{min-height:auto}
+      .step:not(:last-child):after{content:"↓";right:50%;top:auto;bottom:-18px;transform:translateX(50%)}
+    }
+    @media (max-width:700px){
+      .page{padding:18px 14px 50px}
+      .card{padding:24px 19px}
+      h1{font-size:38px}
+      .hero p,.lead{font-size:17px}
+      .statement{font-size:19px;padding:20px}
+      table,thead,tbody,tr,th,td{display:block}
+      thead{display:none}
+      tr{border-bottom:1px solid var(--line)}
+      td{border:0;padding:10px 14px}
+      td:before{
+        content:attr(data-label);
+        display:block;
+        margin-bottom:4px;
+        color:var(--muted);
+        font-size:12px;
+        font-weight:900;
+      }
+    }
+    @media print{
+      body{background:#fff}
+      .page{max-width:none;padding:0}
+      .nav{display:none}
+      .hero,.card,.mini,.plan,.step,.score,.formula,.footer{box-shadow:none;break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">KALM B2C BUSINESS MODEL</div>
+      <h1>讓學習不只是被教，而是走到能教會別人</h1>
+      <p>KALM 是一套由 AI 角色、互動任務、多角色討論、遊戲化練習與「反向教授」共同構成的學習平台。它不把學習限制在課程、問答或測驗，而是把知識轉成一段可以觀看、參與、遊玩、說明、應用與分享的體驗。</p>
+      <div class="hero-grid">
+        <div class="hero-card"><strong>角色帶人進來</strong><span>用有個性、有聲音、有表情的 AI 角色降低學習門檻。</span></div>
+        <div class="hero-card"><strong>任務讓人學下去</strong><span>把知識轉成討論、情境、遊戲、挑戰與練習。</span></div>
+        <div class="hero-card"><strong>教授證明學會</strong><span>讓使用者教 AI 學生，驗證是否真的理解與內化。</span></div>
+        <div class="hero-card"><strong>記憶形成長期價值</strong><span>KALM 持續記住程度、弱點、偏好與學習成果。</span></div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="#summary">商模總結</a>
+      <a href="#product">產品賣什麼</a>
+      <a href="#experience">學習體驗</a>
+      <a href="#segments">使用者</a>
+      <a href="#revenue">收費模式</a>
+      <a href="#operation">營運結構</a>
+      <a href="#quality">品質與安全</a>
+      <a href="#mvp">MVP</a>
+      <a href="#metrics">驗證指標</a>
+    </nav>
+
+    <section id="summary">
+      <div class="card">
+        <div class="kicker">核心結論</div>
+        <h2>KALM 最適合的不是單一訂閱制，而是「免費入口＋會員底座＋主題任務包」</h2>
+        <p class="lead">免費內容負責讓人開始，有趣的角色與互動負責讓人留下，具體任務負責第一次付費，長期個人化與學習記憶負責續訂。高價值的完整學習路線則以單次購買或會員折扣販售。</p>
+
+        <div class="statement">
+          KALM 真正販售的不是 AI、Token、角色皮膚或一堆課程，而是「一段讓使用者願意進入、願意完成，而且真的留下能力的學習經驗」。
+        </div>
+
+        <div class="grid-4">
+          <div class="mini">
+            <span class="tag blue">獲客</span>
+            <strong>有趣、可觀看、可分享</strong>
+            <p>AI Vtuber 對談、爭論、情境短劇與免費任務，讓原本沒有強烈學習動機的人也願意點進來。</p>
+          </div>
+          <div class="mini">
+            <span class="tag orange">轉換</span>
+            <strong>解決眼前的學習任務</strong>
+            <p>考試、報告、面試、簡報、工作能力與重大決策，讓使用者願意第一次付費。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">留存</span>
+            <strong>愈用愈懂使用者</strong>
+            <p>記住程度、錯誤、偏好、角色關係與學習成果，讓下一次學習可以接續，而不是重來。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">擴張</span>
+            <strong>主題世界與創作者供給</strong>
+            <p>平台成熟後，讓教師、出版社與專家製作通過品質規範的 Learning World。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="product">
+      <div class="card">
+        <div class="kicker">產品定義</div>
+        <h2>KALM 是「角色式互動學習平台」，不是另一個聊天機器人</h2>
+        <p>一般 AI 產品常從「你想問什麼」開始，使用者取得答案後便離開。KALM 應該從一個已經被整理好的主題、任務或情境開始，讓使用者知道自己為什麼進來、過程要做什麼、最後能得到什麼。</p>
+
+        <div class="statement green">
+          使用者可以看角色討論、加入辯論、完成任務、解決案例、玩互動挑戰，最後再把所學教給 AI 學生，用「教得會」證明自己真的學會。
+        </div>
+
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">Learning World</span>
+            <strong>學習世界</strong>
+            <p>一個完整主題空間，包含知識內容、角色群、情境、任務、練習、評量與進度。</p>
+          </div>
+          <div class="mini">
+            <span class="tag orange">Learning Mission</span>
+            <strong>學習任務</strong>
+            <p>一段有明確目標與結果的體驗，例如七天考前救援、英文面試模擬或買房決策訓練。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">Mastery Proof</span>
+            <strong>內化證明</strong>
+            <p>使用者能說明、舉例、應用、回應反例並教會 AI 學生，才算真正掌握。</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:24px">角色不是換皮，而是不同的教學人格</h3>
+        <p class="muted">角色差異必須真的影響觀點、提問方式、回饋方式與教學策略。冷靜研究員會要求證據，創業家重視應用，懷疑型角色尋找漏洞，天真學生提出基礎問題，務實教練把知識拉回真實情境。角色之間的討論與爭執，應該幫助使用者看見不同前提與不同價值選擇，而不是只做娛樂性的互嗆。</p>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="card">
+        <div class="kicker">核心學習循環</div>
+        <h2>從旁觀到參與，再從學會走到能教</h2>
+        <p class="lead">整個產品最重要的循環，不是「看完內容再答題」，而是讓使用者逐步從低壓力觀看，走到能夠自己說明、應用與教授。</p>
+
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>觀看</b><span>旁觀 AI 角色聊天、爭論、示範與演出。</span></div>
+          <div class="step"><span class="num">2</span><b>參與</b><span>插話、提問、選邊、主持或要求角色提出證據。</span></div>
+          <div class="step"><span class="num">3</span><b>練習</b><span>完成案例、遊戲、情境模擬、選擇與實作任務。</span></div>
+          <div class="step"><span class="num">4</span><b>教授</b><span>使用者成為老師，把知識教給 AI 學生。</span></div>
+          <div class="step"><span class="num">5</span><b>被追問</b><span>AI 學生提出誤解、反例、為什麼與延伸問題。</span></div>
+          <div class="step"><span class="num">6</span><b>確認掌握</b><span>系統產生理解、應用與教學能力回饋。</span></div>
+          <div class="step"><span class="num">7</span><b>分享</b><span>把精彩教學片段、知識卡或成果證明分享出去。</span></div>
+        </div>
+
+        <div class="grid-2" style="margin-top:22px">
+          <div class="mini">
+            <span class="tag purple">AI Vtuber 學習劇場</span>
+            <strong>負責吸引力與情緒黏著</strong>
+            <p>角色有造型、聲線、表情、人設與關係。使用者可以旁觀、參與、主持，甚至觀察角色因立場不同而發生衝突。這讓知識不再只是文字，而是發生在角色之間的事件。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">AI Student Simulator</span>
+            <strong>負責學習內化與成果驗證</strong>
+            <p>AI 扮演不同程度與個性的學生，要求使用者重新組織知識、說明原因、舉例、修正誤解並處理反例。這比單純答對選擇題更接近真正理解。</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:24px">AI 學生必須有不同的理解障礙</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>學生類型</th>
+              <th>互動方式</th>
+              <th>主要檢驗能力</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="學生類型">完全初學者</td>
+              <td data-label="互動方式">一直追問名詞、概念與最基本的原因。</td>
+              <td data-label="主要檢驗能力">能否用簡單清楚的方式說明。</td>
+            </tr>
+            <tr>
+              <td data-label="學生類型">容易混淆者</td>
+              <td data-label="互動方式">故意把相似概念、因果與例外混在一起。</td>
+              <td data-label="主要檢驗能力">能否辨識並修正常見誤解。</td>
+            </tr>
+            <tr>
+              <td data-label="學生類型">懷疑型學生</td>
+              <td data-label="互動方式">要求證據、反例、限制與不同立場。</td>
+              <td data-label="主要檢驗能力">能否建立完整論證，而不是背答案。</td>
+            </tr>
+            <tr>
+              <td data-label="學生類型">實務型學生</td>
+              <td data-label="互動方式">不斷問「現實裡怎麼用」與「遇到例外怎麼辦」。</td>
+              <td data-label="主要檢驗能力">能否把知識轉移到新情境。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="segments">
+      <div class="card">
+        <div class="kicker">市場切分</div>
+        <h2>底層可以全齡共用，商業入口必須分開</h2>
+        <p>高中生、大學生與社會人士都可以使用同一套角色引擎、學習記憶、知識庫與評量系統，但三群人的學習理由、付費者與可接受價格不同。因此產品願景可以是全齡，對外銷售時必須從具體需求切入。</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>族群</th>
+              <th>最強需求</th>
+              <th>主要付費者</th>
+              <th>適合商品</th>
+              <th>避免的錯誤</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="族群">高中生</td>
+              <td data-label="最強需求">段考、學測、課程理解、持續學習與探索興趣。</td>
+              <td data-label="主要付費者">家長為主，學生為使用決策者。</td>
+              <td data-label="適合商品">家庭方案、學科任務包、學期通行證、考前救援。</td>
+              <td data-label="避免的錯誤">只討好家長，做成學生不願意打開的補教工具。</td>
+            </tr>
+            <tr>
+              <td data-label="族群">大學生</td>
+              <td data-label="最強需求">期中期末、報告、專業課程、語言與求職。</td>
+              <td data-label="主要付費者">學生本人，也可能由家長支持。</td>
+              <td data-label="適合商品">低價訂閱、學期方案、課程任務、報告與面試訓練。</td>
+              <td data-label="避免的錯誤">只賣泛用工具，與大量免費 AI 產品正面競爭。</td>
+            </tr>
+            <tr>
+              <td data-label="族群">社會人士</td>
+              <td data-label="最強需求">工作能力、轉職、語言、生活決策、興趣與自我成長。</td>
+              <td data-label="主要付費者">使用者本人。</td>
+              <td data-label="適合商品">任務包、Mastery Track、專業主題世界與成果型訓練。</td>
+              <td data-label="避免的錯誤">要求長期訂閱，卻沒有立刻可感受的成果。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="statement orange">
+          對外不要先說「任何人都能學任何東西」。先讓使用者看見一個具體承諾，例如「三週救回高中物理」、「完成第一次英文簡報」、「在買房前搞懂貸款、合約與風險」。
+        </div>
+
+        <h3>第一輪驗證應以學習動機切分</h3>
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag red">救急型</span>
+            <strong>我現在必須學會</strong>
+            <p>考試、面試、簡報、報告、證照或工作任務。適合驗證單次付費與高轉換率。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">成長型</span>
+            <strong>我想持續變得更好</strong>
+            <p>英文、程式、邏輯、理財、歷史與職場能力。適合驗證訂閱與長期留存。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">探索型</span>
+            <strong>這東西讓我突然想學</strong>
+            <p>角色辯論、科學調查、歷史模擬與思想實驗。適合免費傳播、社群分享與獲客。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="revenue">
+      <div class="card">
+        <div class="kicker">收費模式</div>
+        <h2>價格不是一次定死，而是先建立清楚的付費理由</h2>
+        <p class="lead">免費版讓人真的可以學；會員版販售長期記憶、完整互動與持續陪伴；高價值的主題任務則以單次購買處理。以下價格是第一輪測試區間，不是永久定價。</p>
+
+        <div class="pricing">
+          <div class="plan">
+            <h3>免費版</h3>
+            <div class="money">NT$0</div>
+            <ul>
+              <li>每日免費學習任務</li>
+              <li>部分公開 Learning World</li>
+              <li>基本角色與文字互動</li>
+              <li>簡易學習記錄</li>
+              <li>少量教授挑戰</li>
+            </ul>
+          </div>
+
+          <div class="plan recommended">
+            <div class="ribbon">主力方案</div>
+            <h3>KALM Plus</h3>
+            <div class="money">NT$249／月</div>
+            <ul>
+              <li>完整個人學習記憶</li>
+              <li>多角色討論與完整教授模式</li>
+              <li>進階聲音、角色與互動形式</li>
+              <li>每月 Mission 額度</li>
+              <li>跨主題掌握地圖</li>
+              <li>年繳建議 NT$2,390</li>
+            </ul>
+          </div>
+
+          <div class="plan">
+            <h3>家庭方案</h3>
+            <div class="money">NT$449／月</div>
+            <ul>
+              <li>4 個獨立學習檔案</li>
+              <li>家長可看的進度摘要</li>
+              <li>年齡與內容適配</li>
+              <li>家庭共用 Mission 額度</li>
+              <li>年繳建議 NT$4,290</li>
+            </ul>
+          </div>
+
+          <div class="plan">
+            <h3>主題商品</h3>
+            <div class="money">NT$99 起</div>
+            <ul>
+              <li>輕量 Mission：99～199 元</li>
+              <li>Learning World：299～699 元</li>
+              <li>Mastery Track：990～2,490 元</li>
+              <li>會員享折扣或額度折抵</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:26px">每一種收入負責不同的商業問題</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>收入來源</th>
+              <th>使用者為什麼付費</th>
+              <th>平台得到什麼</th>
+              <th>營運注意事項</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="收入來源">會員訂閱</td>
+              <td data-label="使用者為什麼付費">KALM 愈來愈懂我，能持續陪我學。</td>
+              <td data-label="平台得到什麼">穩定經常性收入與長期使用資料。</td>
+              <td data-label="營運注意事項">不能只賣高額用量，必須讓個人化與記憶真的有感。</td>
+            </tr>
+            <tr>
+              <td data-label="收入來源">Mission 單次購買</td>
+              <td data-label="使用者為什麼付費">我現在有一個明確問題需要解決。</td>
+              <td data-label="平台得到什麼">承接不願訂閱但有高意圖的使用者。</td>
+              <td data-label="營運注意事項">商品名稱必須說清楚結果，不要只寫主題名稱。</td>
+            </tr>
+            <tr>
+              <td data-label="收入來源">Learning World</td>
+              <td data-label="使用者為什麼付費">我想完整進入一個有角色、內容、任務與成果的學習世界。</td>
+              <td data-label="平台得到什麼">建立內容資產與可重複販售的數位商品。</td>
+              <td data-label="營運注意事項">不能只是把一堆影片、題目與聊天功能包在一起。</td>
+            </tr>
+            <tr>
+              <td data-label="收入來源">Mastery Track</td>
+              <td data-label="使用者為什麼付費">我要在有限時間內真正掌握一項能力並留下成果。</td>
+              <td data-label="平台得到什麼">提高客單價，切入成人與大學生市場。</td>
+              <td data-label="營運注意事項">必須有明確起點、終點、評量與可展示成果。</td>
+            </tr>
+            <tr>
+              <td data-label="收入來源">角色與互動擴充</td>
+              <td data-label="使用者為什麼付費">我偏好特定角色、聲線或互動方式。</td>
+              <td data-label="平台得到什麼">增加黏著與非內容型收入。</td>
+              <td data-label="營運注意事項">應採直接購買或會員解鎖，避免抽卡、賭博式課金與未成年人壓力。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="warning" style="margin-top:18px">
+          <strong>角色可以收費，但不能讓角色商業化破壞學習。</strong><br>
+          角色外觀、聲線、關係記憶與特殊互動可以成為付費內容；核心學習能力、基本回饋與正確知識不能故意做差，迫使使用者課金。
+        </div>
+      </div>
+    </section>
+
+    <section id="operation">
+      <div class="card">
+        <div class="kicker">持續營運</div>
+        <h2>商模能不能活下去，取決於內容供給、AI 成本與留存能否同時成立</h2>
+
+        <div class="economics">
+          <div>
+            <h3>不要用 Token 當商品，要用「有效學習任務」管理成本</h3>
+            <p class="muted">使用者不需要理解模型成本。內部則必須知道每完成一次有效學習任務，花了多少推論、語音、內容與營運成本，以及這次任務是否帶來留存、分享或付費。</p>
+
+            <div class="formula">
+              <b>核心單位經濟：每次有效學習完成成本</b>
+              <p>模型推論＋語音與動畫＋內容授權與製作＋品質審核＋客服營運，除以真正完成學習並留下結果的任務數。</p>
+            </div>
+          </div>
+
+          <div class="success">
+            <strong>成本控制原則</strong>
+            <ul>
+              <li>固定劇情與知識說明預先生成或快取。</li>
+              <li>日常引導使用較小模型。</li>
+              <li>關鍵回饋與複雜判斷才使用高階模型。</li>
+              <li>多 Agent 對話採部分編排、部分即時生成。</li>
+              <li>語音、長篇模擬與高成本功能納入額度。</li>
+              <li>會員方案設合理公平使用上限。</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:26px">內容供給採三階段發展</h3>
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">第一階段</span>
+            <strong>官方自製</strong>
+            <p>先由 KALM 團隊與既有教材資產製作少量高品質主題，建立內容格式、角色規則與驗收標準。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">第二階段</span>
+            <strong>合作製作</strong>
+            <p>與教師、出版社、專家和品牌共同製作，平台提供引擎、製作工具與品質框架。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">第三階段</span>
+            <strong>審核型商城</strong>
+            <p>開放合格創作者上架 Learning World，平台抽取分潤，但必須通過知識、版權、安全與體驗審核。</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:26px">真正能形成護城河的四種能力</h3>
+        <div class="grid-4">
+          <div class="mini">
+            <span class="tag blue">角色教學人格</span>
+            <strong>不是換皮</strong>
+            <p>每個角色有不同的觀點、提問、回饋與教學策略。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">學習者模型</span>
+            <strong>愈用愈懂</strong>
+            <p>持續知道使用者懂什麼、誤解什麼、喜歡怎麼學。</p>
+          </div>
+          <div class="mini">
+            <span class="tag orange">AI 學生模擬</span>
+            <strong>真的會問</strong>
+            <p>能模擬不同程度與理解障礙，而不是只會稱讚老師。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">內化驗證</span>
+            <strong>不只答對</strong>
+            <p>能判斷使用者是否會說明、應用、處理反例並教授。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quality">
+      <div class="card">
+        <div class="kicker">品質管理與信任</div>
+        <h2>學習產品可以有戲劇效果，但不能拿正確性與安全換娛樂</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>品質層</th>
+              <th>必須管理的內容</th>
+              <th>驗收方式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="品質層">知識正確性</td>
+              <td data-label="必須管理的內容">來源、版本、爭議標示、適用範圍、錯誤與過時資訊。</td>
+              <td data-label="驗收方式">來源可追溯、人工抽查、專家審核、錯誤回報與版本更新。</td>
+            </tr>
+            <tr>
+              <td data-label="品質層">角色一致性</td>
+              <td data-label="必須管理的內容">人設、語氣、觀點邊界、教學方法與不應出現的行為。</td>
+              <td data-label="驗收方式">角色測試集、長對話一致性、不同情境回應與越界測試。</td>
+            </tr>
+            <tr>
+              <td data-label="品質層">學習有效性</td>
+              <td data-label="必須管理的內容">任務是否真的讓使用者理解、應用與內化。</td>
+              <td data-label="驗收方式">前後測、延後測、教授挑戰、錯誤修正率與實際任務完成。</td>
+            </tr>
+            <tr>
+              <td data-label="品質層">未成年人安全</td>
+              <td data-label="必須管理的內容">角色依賴、付費壓力、不當內容、個資與情緒互動。</td>
+              <td data-label="驗收方式">年齡適配、家長控制、內容分級、敏感情境與付費限制。</td>
+            </tr>
+            <tr>
+              <td data-label="品質層">分享內容可信度</td>
+              <td data-label="必須管理的內容">使用者教授的內容可能仍有錯誤或爭議。</td>
+              <td data-label="驗收方式">標示個人觀點、AI 檢查、來源驗證與專家認證等不同等級。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="danger" style="margin-top:18px">
+          <strong>最需要避免的五件事</strong>
+          <ul>
+            <li>角色很華麗，但所有角色實際上說著同一套答案。</li>
+            <li>AI 學生只會配合稱讚，無法真正指出錯誤。</li>
+            <li>用遊戲化掩蓋內容薄弱，讓學習只剩打卡與獎勵。</li>
+            <li>多 Agent 對話沒經過編排，成本很高又沒有學習結果。</li>
+            <li>過度依賴抽卡、稀有角色與付費壓力，破壞教育品牌信任。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="mvp">
+      <div class="card">
+        <div class="kicker">第一階段產品</div>
+        <h2>MVP 不做萬能平台，只驗證三件事：有人想看、有人能學會、有人願意付錢</h2>
+        <p class="lead">第一版應控制在少量角色、少量主題與清楚任務內，先證明核心循環成立，再擴張到更多年齡與內容。</p>
+
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag purple">探索型原型</span>
+            <strong>多角色學習劇場</strong>
+            <p>選一個容易產生觀點碰撞的題目，讓 3 個角色討論，使用者可旁觀、插話與選邊。驗證觀看完成率、參與率與分享率。</p>
+          </div>
+          <div class="mini">
+            <span class="tag red">救急型原型</span>
+            <strong>七日任務包</strong>
+            <p>針對考試、面試或簡報設計七日任務，明確承諾完成結果。驗證第一次付費與任務完成率。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">內化型原型</span>
+            <strong>教會 AI 學生</strong>
+            <p>使用者完成學習後，教授一名會追問、會誤解的 AI 學生。驗證使用者是否願意完成，以及回饋是否真的有幫助。</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:25px">建議的 12 週推進方式</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>階段</th>
+              <th>主要工作</th>
+              <th>需要得到的答案</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="階段">第 1～3 週</td>
+              <td data-label="主要工作">建立 3 個角色、1 個 Learning World、角色規則與知識來源。</td>
+              <td data-label="需要得到的答案">角色是否有辨識度？內容是否值得看完？</td>
+            </tr>
+            <tr>
+              <td data-label="階段">第 4～6 週</td>
+              <td data-label="主要工作">完成旁觀、插話、選邊、練習與基本進度紀錄。</td>
+              <td data-label="需要得到的答案">使用者是否願意從觀看進入參與？</td>
+            </tr>
+            <tr>
+              <td data-label="階段">第 7～9 週</td>
+              <td data-label="主要工作">加入 AI 學生、教授挑戰、追問與掌握回饋。</td>
+              <td data-label="需要得到的答案">教授模式是否能指出理解缺口並帶來成就感？</td>
+            </tr>
+            <tr>
+              <td data-label="階段">第 10～12 週</td>
+              <td data-label="主要工作">測試免費版、149～299 元訂閱與 99～399 元任務包。</td>
+              <td data-label="需要得到的答案">使用者究竟願意為角色、結果、記憶還是完整世界付費？</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="warning" style="margin-top:18px">
+          <strong>第一版不要同時做高中、大學與成人三套完整產品。</strong><br>
+          先選一個題目，分別測試「探索型內容」、「救急型任務」與「教授型內化」。這樣才能判斷是哪一種價值真正帶來觀看、學習、付費與續用。
+        </div>
+      </div>
+    </section>
+
+    <section id="metrics">
+      <div class="card">
+        <div class="kicker">商模驗證</div>
+        <h2>不能只看註冊與聊天次數，要看完整學習結果</h2>
+
+        <div class="scorecard">
+          <div class="score"><b>開始率</b><span>看見主題後，願意啟動任務的人數比例。</span></div>
+          <div class="score"><b>完成率</b><span>是否完成一段有明確結果的學習任務。</span></div>
+          <div class="score"><b>教授通過率</b><span>是否能說明、應用並回應 AI 學生追問。</span></div>
+          <div class="score"><b>回訪率</b><span>隔日、七日與三十日是否主動回來。</span></div>
+          <div class="score"><b>付費率</b><span>免費使用者是否購買會員、Mission 或完整主題。</span></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>指標類型</th>
+              <th>建議觀察內容</th>
+              <th>判讀方式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="指標類型">吸引力</td>
+              <td data-label="建議觀察內容">角色短片完成率、討論觀看時間、主題啟動率、分享點擊。</td>
+              <td data-label="判讀方式">判斷角色與內容是否能把人帶進產品。</td>
+            </tr>
+            <tr>
+              <td data-label="指標類型">參與度</td>
+              <td data-label="建議觀察內容">插話率、選邊率、主持操作、練習完成與主動提問。</td>
+              <td data-label="判讀方式">判斷使用者是否從被動觀看轉成主動思考。</td>
+            </tr>
+            <tr>
+              <td data-label="指標類型">學習效果</td>
+              <td data-label="建議觀察內容">前後測、延後測、錯誤修正、教授表現與新情境應用。</td>
+              <td data-label="判讀方式">確認產品不是只有娛樂與使用時數。</td>
+            </tr>
+            <tr>
+              <td data-label="指標類型">商業效果</td>
+              <td data-label="建議觀察內容">試用轉付費、任務包購買、會員續訂、客單價與退款率。</td>
+              <td data-label="判讀方式">判斷哪一個付費理由真正成立。</td>
+            </tr>
+            <tr>
+              <td data-label="指標類型">單位經濟</td>
+              <td data-label="建議觀察內容">每次完成任務成本、每位付費者模型成本、內容回收期。</td>
+              <td data-label="判讀方式">避免使用量愈大、虧損愈多。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="statement purple">
+          最理想的成長循環是：有趣內容帶來觀看與分享，具體任務帶來第一次付費，個人記憶與角色關係帶來回訪，教授與成果證明帶來成就感，再把成果分享給下一批使用者。
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="kicker">最終定位</div>
+        <h2>KALM 應該成為一個「學習體驗平台」，而不是 AI 功能集合</h2>
+        <p class="lead">它用角色與故事讓人願意接近知識，用互動、任務與多角度討論讓人真正參與，再用反向教授確認知識已經內化。商業上則用免費入口擴大使用者、會員訂閱建立穩定收入、主題任務提高轉換與客單價，最後用經過審核的內容生態擴張。</p>
+
+        <div class="statement green">
+          最適合 KALM 的一句話：<br>
+          「進入由 AI 角色構成的學習世界，看到有趣、參與其中，最後學到能教會別人。」
+        </div>
+
+        <div class="footer">
+          <strong>KALM 不只是教你，而是陪你學到能教會別人。</strong>
+          <span>角色帶來興趣，任務帶來成果，記憶帶來留存，教授帶來真正的內化。</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

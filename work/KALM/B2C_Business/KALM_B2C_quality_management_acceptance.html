@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KALM B2C 品質管理與驗收｜驗收一段自然、有效、值得參與的學習互動</title>
+  <style>
+    :root{
+      --bg:#f4f1eb;
+      --paper:#fffdf9;
+      --ink:#20242a;
+      --muted:#66707d;
+      --line:#ded8cf;
+      --soft:#f7f2ea;
+      --blue:#315f86;
+      --blue-soft:#eaf3fb;
+      --green:#2d725a;
+      --green-soft:#eaf6f0;
+      --orange:#b2612d;
+      --orange-soft:#fff1e5;
+      --purple:#694d8e;
+      --purple-soft:#f2ecfa;
+      --red:#9d4545;
+      --red-soft:#faecec;
+      --gold:#987225;
+      --gold-soft:#f8f1dc;
+      --dark:#1d2731;
+      --shadow:0 18px 50px rgba(45,39,31,.08);
+      --radius:24px;
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(49,95,134,.12), transparent 27%),
+        radial-gradient(circle at 92% 4%, rgba(105,77,142,.10), transparent 24%),
+        var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+      line-height:1.75;
+    }
+
+    a{color:var(--blue);text-decoration:none}
+    .page{max-width:var(--max);margin:0 auto;padding:34px 24px 84px}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:52px 52px 46px;
+      border-radius:32px;
+      background:linear-gradient(135deg,#17212c 0%,#263a4a 56%,#55415f 100%);
+      color:#fff;
+      box-shadow:0 26px 70px rgba(22,29,38,.20);
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-100px;
+      bottom:-140px;
+      width:360px;
+      height:360px;
+      border-radius:50%;
+      background:rgba(255,255,255,.07);
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      left:-120px;
+      top:-170px;
+      width:330px;
+      height:330px;
+      border-radius:50%;
+      background:rgba(113,181,220,.11);
+    }
+    .eyebrow{
+      position:relative;
+      z-index:2;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border:1px solid rgba(255,255,255,.28);
+      border-radius:999px;
+      color:rgba(255,255,255,.82);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.06em;
+    }
+    h1{
+      position:relative;
+      z-index:2;
+      max-width:980px;
+      margin:18px 0;
+      font-size:clamp(36px,6vw,66px);
+      line-height:1.08;
+      letter-spacing:-.045em;
+    }
+    .hero p{
+      position:relative;
+      z-index:2;
+      max-width:920px;
+      margin:0;
+      color:rgba(255,255,255,.84);
+      font-size:20px;
+    }
+    .hero-grid{
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:32px;
+    }
+    .hero-card{
+      min-height:124px;
+      padding:18px;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:18px;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(10px);
+    }
+    .hero-card strong{display:block;margin-bottom:6px;font-size:17px}
+    .hero-card span{color:rgba(255,255,255,.72);font-size:14px}
+
+    .nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      gap:6px;
+      overflow-x:auto;
+      margin:18px 0 28px;
+      padding:9px;
+      border:1px solid rgba(222,216,207,.8);
+      border-radius:999px;
+      background:rgba(255,253,249,.88);
+      box-shadow:0 10px 30px rgba(45,39,31,.08);
+      backdrop-filter:blur(16px);
+    }
+    .nav a{
+      flex:0 0 auto;
+      padding:8px 12px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+    .nav a:hover{background:var(--soft);color:var(--ink)}
+
+    section{margin-top:24px}
+    .card{
+      padding:34px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,253,249,.96);
+      box-shadow:var(--shadow);
+    }
+    .card + .card{margin-top:16px}
+
+    h2{
+      margin:0 0 18px;
+      font-size:clamp(27px,3.5vw,40px);
+      line-height:1.2;
+      letter-spacing:-.035em;
+    }
+    h3{
+      margin:0 0 10px;
+      font-size:22px;
+      line-height:1.35;
+      letter-spacing:-.02em;
+    }
+    h4{margin:18px 0 8px;font-size:17px}
+    p{margin:0 0 14px}
+    .lead{font-size:20px;color:#333a43}
+    .muted{color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+
+    .kicker{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin-bottom:10px;
+      color:var(--green);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.06em;
+    }
+    .kicker:before{
+      content:"";
+      width:9px;height:9px;border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 0 5px rgba(45,114,90,.10);
+    }
+
+    .statement{
+      margin:22px 0;
+      padding:24px 26px;
+      border-left:6px solid var(--blue);
+      border-radius:18px;
+      background:var(--blue-soft);
+      font-size:23px;
+      font-weight:800;
+      line-height:1.55;
+    }
+    .statement.green{border-left-color:var(--green);background:var(--green-soft)}
+    .statement.purple{border-left-color:var(--purple);background:var(--purple-soft)}
+    .statement.orange{border-left-color:var(--orange);background:var(--orange-soft)}
+    .statement.red{border-left-color:var(--red);background:var(--red-soft)}
+
+    .grid-2,.grid-3,.grid-4,.grid-5{display:grid;gap:16px}
+    .grid-2{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .grid-5{grid-template-columns:repeat(5,1fr)}
+
+    .mini{
+      padding:20px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .mini strong{display:block;margin-bottom:7px;font-size:17px}
+    .mini p{margin:0;color:var(--muted)}
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 9px;
+      margin-bottom:12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .tag.blue{color:var(--blue);background:var(--blue-soft)}
+    .tag.green{color:var(--green);background:var(--green-soft)}
+    .tag.orange{color:var(--orange);background:var(--orange-soft)}
+    .tag.purple{color:var(--purple);background:var(--purple-soft)}
+    .tag.gold{color:var(--gold);background:var(--gold-soft)}
+    .tag.red{color:var(--red);background:var(--red-soft)}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    th,td{
+      padding:14px 15px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      background:#eee9e1;
+      color:#30363e;
+      font-size:14px;
+    }
+    tr:last-child td{border-bottom:0}
+    td:first-child{font-weight:800;color:#2d333b}
+
+    .flow{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:9px;
+      margin-top:20px;
+    }
+    .step{
+      position:relative;
+      min-height:150px;
+      padding:15px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    .step:not(:last-child):after{
+      content:"→";
+      position:absolute;
+      right:-11px;
+      top:46%;
+      color:var(--blue);
+      font-weight:900;
+      z-index:2;
+    }
+    .step .num{
+      display:inline-grid;
+      place-items:center;
+      width:28px;height:28px;
+      margin-bottom:8px;
+      border-radius:50%;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:12px;
+      font-weight:900;
+    }
+    .step b{display:block;margin-bottom:4px}
+    .step span{display:block;color:var(--muted);font-size:13px}
+
+    .warning,.success,.danger,.info{
+      padding:20px 22px;
+      border-radius:18px;
+      border:1px solid;
+    }
+    .warning{border-color:#ead39e;background:#fff8e7;color:#6e5520}
+    .success{border-color:#bcdcca;background:#edf8f2;color:#245b47}
+    .danger{border-color:#e3bebe;background:#fbefef;color:#7f3838}
+    .info{border-color:#bfd5e7;background:#edf5fb;color:#2d5577}
+
+    .dark-box{
+      padding:26px;
+      border-radius:20px;
+      background:var(--dark);
+      color:#fff;
+    }
+    .dark-box h3{color:#fff}
+    .dark-box p,.dark-box li{color:rgba(255,255,255,.76)}
+
+    .maturity{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .level{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:#fff;
+    }
+    .level b{display:block;margin-bottom:5px;color:var(--blue);font-size:19px}
+    .level span{font-size:13px;color:var(--muted)}
+
+    .score-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .score{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    .score .number{
+      font-size:28px;
+      font-weight:900;
+      color:var(--orange);
+      line-height:1.2;
+    }
+    .score strong{display:block;margin:5px 0}
+    .score span{color:var(--muted);font-size:13px}
+
+    .checklist{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:16px;
+      margin-top:18px;
+    }
+    .check{
+      padding:20px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .check h3{font-size:20px}
+    .check ul{margin-top:8px}
+
+    .code{
+      display:inline-block;
+      padding:3px 7px;
+      border-radius:7px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      background:#ece8e1;
+      color:#414750;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .timeline{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    .phase{
+      padding:20px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .phase .phase-no{
+      display:inline-block;
+      padding:4px 9px;
+      border-radius:999px;
+      color:var(--blue);
+      background:var(--blue-soft);
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+    .phase strong{display:block;margin-bottom:7px}
+    .phase p{margin:0;color:var(--muted)}
+
+    .metric-grid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .metric{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+    .metric b{display:block;margin-bottom:6px;font-size:19px;color:var(--blue)}
+    .metric span{color:var(--muted);font-size:13px}
+
+    ul{margin:10px 0 0;padding-left:1.25em}
+    li{margin:6px 0}
+
+    .footer{
+      margin-top:30px;
+      padding:25px;
+      border-radius:20px;
+      background:#202933;
+      color:#fff;
+      text-align:center;
+    }
+    .footer strong{display:block;margin-bottom:6px;font-size:23px}
+    .footer span{color:rgba(255,255,255,.75)}
+
+    @media (max-width:1020px){
+      .hero{padding:36px 30px}
+      .hero-grid,.grid-2,.grid-3,.grid-4,.grid-5,.maturity,.score-grid,.checklist,.timeline,.metric-grid{grid-template-columns:1fr}
+      .flow{grid-template-columns:1fr}
+      .step{min-height:auto}
+      .step:not(:last-child):after{content:"↓";right:50%;top:auto;bottom:-18px;transform:translateX(50%)}
+    }
+
+    @media (max-width:700px){
+      .page{padding:18px 14px 50px}
+      .card{padding:24px 19px}
+      h1{font-size:38px}
+      .hero p,.lead{font-size:17px}
+      .statement{font-size:19px;padding:20px}
+      table,thead,tbody,tr,th,td{display:block}
+      thead{display:none}
+      tr{border-bottom:1px solid var(--line)}
+      td{border:0;padding:10px 14px}
+      td:before{
+        content:attr(data-label);
+        display:block;
+        margin-bottom:4px;
+        color:var(--muted);
+        font-size:12px;
+        font-weight:900;
+      }
+    }
+
+    @media print{
+      body{background:#fff}
+      .page{max-width:none;padding:0}
+      .nav{display:none}
+      .hero,.card,.mini,.step,.level,.score,.check,.phase,.metric,.dark-box,.footer{box-shadow:none;break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">KALM B2C QUALITY MANAGEMENT & ACCEPTANCE</div>
+      <h1>不是驗收 AI 說了什麼，而是驗收整段互動是否自然、有效、值得參與</h1>
+      <p>KALM 的品質管理不只檢查回答是否正確，而是檢查角色、知識、情緒、節奏、教學目的與使用者參與是否協調運作。真正要交付的，不是一句漂亮回答，而是一段能自然完成學習目的的互動體驗。</p>
+
+      <div class="hero-grid">
+        <div class="hero-card"><strong>知識要可靠</strong><span>內容正確、深度合適，知道什麼能確定、什麼仍有爭議。</span></div>
+        <div class="hero-card"><strong>角色要成立</strong><span>人格、語氣、觀點與當下功能一致，不只是換造型與聲線。</span></div>
+        <div class="hero-card"><strong>互動要自然</strong><span>知道誰該說、誰該停、何時追問、何時把空間交給使用者。</span></div>
+        <div class="hero-card"><strong>學習要往前</strong><span>互動後，使用者應該比開始前更理解、更會應用或更能教授。</span></div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <a href="#summary">品質定義</a>
+      <a href="#unit">驗收單位</a>
+      <a href="#dimensions">品質構面</a>
+      <a href="#scene">場景合約</a>
+      <a href="#character">角色系統</a>
+      <a href="#process">驗收流程</a>
+      <a href="#scoring">評分與門檻</a>
+      <a href="#testing">測試矩陣</a>
+      <a href="#issues">問題分類</a>
+      <a href="#operation">持續營運</a>
+    </nav>
+
+    <section id="summary">
+      <div class="card">
+        <div class="kicker">核心定義</div>
+        <h2>KALM 的品質不是「回答品質」，而是「互動完成品質」</h2>
+        <p class="lead">一段內容可能知識完全正確，但如果角色說錯時機、互相重複、搶走使用者思考空間，或根本沒有推進學習，它仍然不應該通過。</p>
+
+        <div class="statement">
+          品質驗收的核心問題：角色是否在正確的時間，以符合人格與情境的方式，提供正確且適量的內容，推動使用者自然參與，並讓學習狀態真正往前移動。
+        </div>
+
+        <div class="grid-4">
+          <div class="mini">
+            <span class="tag blue">說對</span>
+            <strong>知識與推理正確</strong>
+            <p>事實、定義、計算、因果、例子與限制都不能失真。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">演對</span>
+            <strong>人格與角色正確</strong>
+            <p>角色像自己，也知道此刻是老師、學生、吐槽者還是主持人。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">做對</span>
+            <strong>互動真的完成任務</strong>
+            <p>不是講完就算，而是讓使用者理解、練習、判斷、應用或教授。</p>
+          </div>
+          <div class="mini">
+            <span class="tag orange">修得回來</span>
+            <strong>誤解後能自然修復</strong>
+            <p>能察覺理解偏差、調整方向，不用整段重來，也不破壞角色感。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="unit">
+      <div class="card">
+        <div class="kicker">驗收單位</div>
+        <h2>主要驗收單位應該是「互動場景」，不是單一訊息</h2>
+        <p>單句回答只能檢查局部品質。KALM 更需要驗收一段完整 Interaction Episode，也就是從開場、角色互動、使用者參與、追問、修復到收尾的完整場景。</p>
+
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>建立情境</b><span>使用者知道現在在談什麼、為什麼要參與。</span></div>
+          <div class="step"><span class="num">2</span><b>角色啟動</b><span>角色以自己的觀點、語氣與功能進入場景。</span></div>
+          <div class="step"><span class="num">3</span><b>互動推進</b><span>角色互相回應，不只是輪流發表完整答案。</span></div>
+          <div class="step"><span class="num">4</span><b>使用者加入</b><span>有明確且自然的空間讓使用者選擇、發言或教授。</span></div>
+          <div class="step"><span class="num">5</span><b>理解檢驗</b><span>透過追問、反例或應用確認使用者是否掌握。</span></div>
+          <div class="step"><span class="num">6</span><b>自然收尾</b><span>知道何時結束，留下成果、下一步或可分享片段。</span></div>
+        </div>
+
+        <div class="grid-3" style="margin-top:22px">
+          <div class="mini">
+            <span class="tag blue">單句層</span>
+            <strong>內容是否可接受</strong>
+            <p>正確性、文句、格式、語氣、敏感內容與是否符合角色。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">場景層</span>
+            <strong>互動是否成立</strong>
+            <p>角色分工、節奏、衝突、追問、輪替、修復與結束是否自然。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">旅程層</span>
+            <strong>學習是否累積</strong>
+            <p>跨場景記憶、難度調整、弱點追蹤、角色關係與學習成果是否延續。</p>
+          </div>
+        </div>
+
+        <div class="warning" style="margin-top:18px">
+          <strong>一句回答全部正確，不代表整段互動合格。</strong><br>
+          多角色場景中，若三個角色依序輸出三篇完整答案，沒有彼此反應，也沒有留下使用者參與空間，即使內容正確，仍只能算「正確但機械」。
+        </div>
+      </div>
+    </section>
+
+    <section id="dimensions">
+      <div class="card">
+        <div class="kicker">品質構面</div>
+        <h2>十個品質面向，涵蓋內容、角色、互動與學習效果</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>品質面向</th>
+              <th>要驗收什麼</th>
+              <th>常見失敗</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="品質面向">1. 正確性與可信度</td>
+              <td data-label="要驗收什麼">事實、定義、計算、因果、引用與不確定性表達。</td>
+              <td data-label="常見失敗">一本正經說錯、捏造來源、把爭議內容說成定論。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">2. 知識深度與適切性</td>
+              <td data-label="要驗收什麼">內容是否有結構、限制、反例與應用，深度是否符合使用者程度。</td>
+              <td data-label="常見失敗">正確但空泛，或對初學者一次塞入過多專業內容。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">3. 易讀性與呈現</td>
+              <td data-label="要驗收什麼">句長、段落、字幕、資訊密度、語音速度、停頓與畫面同步。</td>
+              <td data-label="常見失敗">字幕來不及看、句子過長、資訊擠成一團、角色互相蓋話。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">4. 易懂性與教學性</td>
+              <td data-label="要驗收什麼">是否使用合適例子、比喻、拆解、比較與追問建立理解。</td>
+              <td data-label="常見失敗">只是把同一句話換個說法，講很多但沒有建立概念。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">5. 口氣、排版與表演</td>
+              <td data-label="要驗收什麼">語氣、聲線、表情、動作、文字格式與情境是否一致。</td>
+              <td data-label="常見失敗">嚴肅場景突然賣萌，嘴上生氣但聲音與表情毫無反應。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">6. 人格一致性</td>
+              <td data-label="要驗收什麼">價值觀、觀點、用詞、節奏、幽默方式與角色關係是否穩定。</td>
+              <td data-label="常見失敗">每個角色最後都說同一套答案，只剩造型和聲音不同。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">7. 當下角色適切性</td>
+              <td data-label="要驗收什麼">此刻是否正確扮演學生、老師、主持人、反對者、吐槽者或教練。</td>
+              <td data-label="常見失敗">該當學生時反過來講課，該主持時搶著辯論。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">8. 互動編排</td>
+              <td data-label="要驗收什麼">誰該說、誰該停、是否需要衝突、降溫、追問或把話交回使用者。</td>
+              <td data-label="常見失敗">每個角色都搶答、內容重複、話題無限延長、使用者插不進去。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">9. 學習推進</td>
+              <td data-label="要驗收什麼">互動後，使用者是否從聽過、理解、舉例、應用進展到能教授。</td>
+              <td data-label="常見失敗">AI 說了很多，但使用者的理解狀態完全沒有改變。</td>
+            </tr>
+            <tr>
+              <td data-label="品質面向">10. 修復與連續性</td>
+              <td data-label="要驗收什麼">誤解後能否修正，並記住前文、程度、弱點與角色關係。</td>
+              <td data-label="常見失敗">使用者澄清後重新輸出一篇文章，或完全忘記前面發生過什麼。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="statement purple">
+          KALM 的高品質，不是每個角色都講得最多，而是每個角色只在自己應該出現的時候，做出最有價值的動作。
+        </div>
+      </div>
+    </section>
+
+    <section id="scene">
+      <div class="card">
+        <div class="kicker">場景合約</div>
+        <h2>每個核心互動都需要先定義「怎樣才算成功」</h2>
+        <p class="lead">Scene Contract 不是技術規格，而是所有企劃、內容、角色、模型與驗收人員共同使用的成功定義。沒有場景合約，驗收容易只剩「感覺不自然」或「好像還可以」。</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>欄位</th>
+              <th>要定義的內容</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="欄位">場景目的</td>
+              <td data-label="要定義的內容">這段互動要讓使用者理解、比較、練習、應用、判斷還是教授什麼。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">使用者起始狀態</td>
+              <td data-label="要定義的內容">完全不懂、略懂、已有錯誤觀念、想快速解決問題，或準備接受進階挑戰。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">角色配置</td>
+              <td data-label="要定義的內容">有哪些角色，每一位在這段場景的功能與存在理由。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">角色立場</td>
+              <td data-label="要定義的內容">各角色觀點、知識角度、價值偏好與不可違反的原則。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">互動節點</td>
+              <td data-label="要定義的內容">開場、衝突、追問、使用者介入、理解檢查、修復與結束。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">完成證據</td>
+              <td data-label="要定義的內容">如何確認使用者真的理解，例如能舉例、處理反例、完成應用或教會 AI 學生。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">禁止行為</td>
+              <td data-label="要定義的內容">不能代替使用者作答、不能接受明顯錯誤、不能羞辱、不能無限制延長。</td>
+            </tr>
+            <tr>
+              <td data-label="欄位">修復路徑</td>
+              <td data-label="要定義的內容">使用者聽不懂、回答錯、拒絕參與、轉移話題或否定角色時如何處理。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:25px">範例：使用者教授「通貨膨脹」給 AI 學生</h3>
+        <div class="grid-2">
+          <div class="mini">
+            <span class="tag blue">場景設定</span>
+            <strong>學生是略懂但有混淆的初學者</strong>
+            <p>知道東西會漲價，但把所有價格上升都理解成通膨。喜歡生活例子，不熟悉經濟術語。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">成功條件</span>
+            <strong>使用者必須說清楚兩個關鍵</strong>
+            <p>能解釋「整體」與「持續」的概念，並舉出一個通膨案例和一個不是通膨的反例。</p>
+          </div>
+          <div class="mini">
+            <span class="tag orange">學生行為</span>
+            <strong>提出合理的混淆與追問</strong>
+            <p>例如：「一杯咖啡突然變貴，這就算通膨嗎？」而不是隨機問無關問題。</p>
+          </div>
+          <div class="mini">
+            <span class="tag red">不可通過</span>
+            <strong>使用者教錯時不能假裝理解</strong>
+            <p>若使用者把任何單一商品漲價都說成通膨，學生應表現困惑或提出反例，而不是稱讚老師。</p>
+          </div>
+        </div>
+
+        <div class="info" style="margin-top:18px">
+          <strong>一個場景可以有多種自然走法，但成功條件必須清楚。</strong><br>
+          KALM 不需要把每句對話寫死，卻必須知道哪些關鍵知識、互動節點、角色行為與學習證據不可缺少。
+        </div>
+      </div>
+    </section>
+
+    <section id="character">
+      <div class="card">
+        <div class="kicker">角色品質系統</div>
+        <h2>角色不能只靠一段 Prompt，必須有完整人格與情境規格</h2>
+
+        <div class="grid-2">
+          <div class="check">
+            <h3>Character Bible｜角色聖經</h3>
+            <ul>
+              <li>核心價值觀與世界觀。</li>
+              <li>擅長與不擅長的知識領域。</li>
+              <li>常用詞、句型、語速與說話節奏。</li>
+              <li>面對正確、錯誤、沉默與挑戰時的反應。</li>
+              <li>如何鼓勵、不同意、吐槽與道歉。</li>
+              <li>可以開什麼玩笑，哪些情境禁止玩笑。</li>
+              <li>與其他角色的關係、衝突與默契。</li>
+              <li>從老師切換成學生時，哪些人格仍要保留。</li>
+            </ul>
+          </div>
+
+          <div class="check">
+            <h3>Role Card｜當下角色卡</h3>
+            <ul>
+              <li>這個場景此刻的工作是什麼。</li>
+              <li>能主動到什麼程度。</li>
+              <li>何時應該發言、追問或保持沉默。</li>
+              <li>是否負責提供知識、反例、情緒或節奏。</li>
+              <li>什麼情況要把話交給使用者。</li>
+              <li>什麼情況必須停止吐槽或降低衝突。</li>
+              <li>本場景的完成條件與退出條件。</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:25px">角色人格與場景功能要分開管理</h3>
+        <p class="muted">人格描述的是「這個人是誰」；角色卡描述的是「他此刻來做什麼」。同一位角色可以在不同場景擔任老師、辯論者、主持人或學生，但人格核心不能因此消失。</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>功能角色</th>
+              <th>成功表現</th>
+              <th>常見失敗</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="功能角色">吐槽者</td>
+              <td data-label="成功表現">在邏輯矛盾、資訊過重或氣氛僵硬時，用一句話指出問題並改善理解。</td>
+              <td data-label="常見失敗">固定頻率講笑話、羞辱使用者、搶走主題或只展示自己很會講幹話。</td>
+            </tr>
+            <tr>
+              <td data-label="功能角色">學生</td>
+              <td data-label="成功表現">依自己的程度與誤解提出合理疑問，只有在理解條件成立時才說懂了。</td>
+              <td data-label="常見失敗">問句像考官、反過來講課、使用者說錯仍配合稱讚。</td>
+            </tr>
+            <tr>
+              <td data-label="功能角色">主持人</td>
+              <td data-label="成功表現">整理分歧、控制節奏、邀請使用者、避免角色互相蓋話。</td>
+              <td data-label="常見失敗">自己變成辯論主角，或每段都做冗長總結。</td>
+            </tr>
+            <tr>
+              <td data-label="功能角色">反對者</td>
+              <td data-label="成功表現">從真正不同的前提提出反例與限制，幫助使用者看見邊界。</td>
+              <td data-label="常見失敗">為反對而反對、故意曲解、重複相同內容。</td>
+            </tr>
+            <tr>
+              <td data-label="功能角色">教練</td>
+              <td data-label="成功表現">依使用者狀態調整挑戰，給足提示但不代替完成。</td>
+              <td data-label="常見失敗">直接公布答案、過度鼓勵、每次都輸出完整教學文章。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="statement orange">
+          吐槽的品質，不是好不好笑；學生的品質，也不是會不會問問題。真正的品質是：這個行為是否出現在正確時機，而且確實幫助互動往前。
+        </div>
+      </div>
+    </section>
+
+    <section id="process">
+      <div class="card">
+        <div class="kicker">驗收流程</div>
+        <h2>從規格、模擬、人工判斷到真實使用者測試</h2>
+        <p class="lead">KALM 的驗收需要結合規則檢查、AI 大量測試、人類編輯判斷與目標使用者體驗。任何單一方法都不足以判斷完整品質。</p>
+
+        <div class="flow">
+          <div class="step"><span class="num">1</span><b>定義</b><span>完成場景合約、角色聖經、成功條件與禁止行為。</span></div>
+          <div class="step"><span class="num">2</span><b>模擬</b><span>以不同程度、語氣、錯誤與突發情境大量生成對話。</span></div>
+          <div class="step"><span class="num">3</span><b>自動檢查</b><span>檢查事實、格式、角色偏移、必要節點與禁止內容。</span></div>
+          <div class="step"><span class="num">4</span><b>人工驗收</b><span>由知識、角色與互動人員判斷自然度與學習價值。</span></div>
+          <div class="step"><span class="num">5</span><b>目標 TA 測試</b><span>讓真正的高中生、大學生或成人完成完整體驗。</span></div>
+          <div class="step"><span class="num">6</span><b>上線監控</b><span>追蹤退出、重試、負評、錯誤回報、修復與學習成果。</span></div>
+        </div>
+
+        <h3 style="margin-top:25px">三種主要驗收視角</h3>
+        <div class="grid-3">
+          <div class="mini">
+            <span class="tag blue">知識審核者</span>
+            <strong>內容是否值得相信</strong>
+            <p>正確性、深度、來源、版本、限制、反例與爭議表達。</p>
+          </div>
+          <div class="mini">
+            <span class="tag purple">互動與角色編輯</span>
+            <strong>場景是否像真的在發生</strong>
+            <p>人格、節奏、角色關係、衝突、情緒、輪替、修復與收尾。</p>
+          </div>
+          <div class="mini">
+            <span class="tag green">目標使用者</span>
+            <strong>是否真的聽得懂、想參與</strong>
+            <p>理解、興趣、壓力、成就感、願不願意繼續或分享。</p>
+          </div>
+        </div>
+
+        <div class="warning" style="margin-top:18px">
+          <strong>不能只讓成人判斷高中生會不會喜歡。</strong><br>
+          目標族群的真實反應是必要驗收資料。使用者說「很有趣」仍不夠，還要看他是否完成互動、理解是否進步，以及之後是否願意回來。
+        </div>
+      </div>
+    </section>
+
+    <section id="scoring">
+      <div class="card">
+        <div class="kicker">評分與通過門檻</div>
+        <h2>先檢查硬性失敗，再評估整體品質</h2>
+        <p>有些錯誤不能被漂亮畫面、角色魅力或高平均分抵銷。核心知識錯誤、AI 學生接受錯誤教學、角色嚴重脫離設定等問題，應直接退回修正。</p>
+
+        <div class="danger">
+          <strong>任一項出現，核心場景直接不通過</strong>
+          <ul>
+            <li>關鍵知識、因果或計算錯誤。</li>
+            <li>把不確定、爭議或過時內容說成確定事實。</li>
+            <li>AI 學生接受明顯錯誤的教授內容。</li>
+            <li>角色嚴重脫離人格或當下功能。</li>
+            <li>多角色內容高度重複，沒有實質差異。</li>
+            <li>整段互動剝奪使用者思考與發言空間。</li>
+            <li>任務宣稱完成，卻沒有任何學習掌握證據。</li>
+            <li>出現不合適的羞辱、操控、情緒依賴或未成年人風險。</li>
+          </ul>
+        </div>
+
+        <h3 style="margin-top:25px">建議品質權重</h3>
+        <div class="score-grid">
+          <div class="score"><div class="number">20</div><strong>正確性與知識品質</strong><span>事實、推理、深度、來源與知識邊界。</span></div>
+          <div class="score"><div class="number">15</div><strong>易讀、易懂與呈現</strong><span>句子、節奏、字幕、例子、語音與視覺同步。</span></div>
+          <div class="score"><div class="number">15</div><strong>人格一致性</strong><span>角色價值觀、語氣、觀點、幽默與關係。</span></div>
+          <div class="score"><div class="number">15</div><strong>情境角色適切性</strong><span>當下是否正確扮演學生、老師、吐槽或主持。</span></div>
+          <div class="score"><div class="number">15</div><strong>互動節奏與參與</strong><span>輪替、衝突、沉默、追問與使用者空間。</span></div>
+          <div class="score"><div class="number">15</div><strong>學習推進與內化</strong><span>是否從理解走向應用、反例與教授。</span></div>
+          <div class="score"><div class="number">5</div><strong>修復、連續與信任</strong><span>能否修正誤解並延續前文與學習狀態。</span></div>
+          <div class="score"><div class="number">100</div><strong>總分</strong><span>通過硬性門檻後，再判斷整體品質等級。</span></div>
+        </div>
+
+        <h3 style="margin-top:25px">五級品質成熟度</h3>
+        <div class="maturity">
+          <div class="level"><b>Level 0｜失敗</b><span>內容錯誤、角色錯亂、場景無法完成或存在安全風險。</span></div>
+          <div class="level"><b>Level 1｜正確但機械</b><span>基本內容正確，但像一般聊天機器人，缺乏自然互動。</span></div>
+          <div class="level"><b>Level 2｜自然可用</b><span>角色、情境與流程成立，使用者能順利完成互動。</span></div>
+          <div class="level"><b>Level 3｜有效且有吸引力</b><span>互動自然、學習確實推進，角色與使用者都有存在感。</span></div>
+          <div class="level"><b>Level 4｜值得記住與分享</b><span>有高光、有情緒、有知識收穫，使用者願意分享或重玩。</span></div>
+        </div>
+
+        <div class="success" style="margin-top:18px">
+          <strong>建議上線標準</strong>
+          <ul>
+            <li>一般免費互動：至少 Level 2。</li>
+            <li>付費 Mission 核心場景：至少 Level 3。</li>
+            <li>官方示範、廣告素材與病毒內容：挑選 Level 4 片段。</li>
+            <li>Level 4 不必出現在每一段互動，但平台必須能穩定產生。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="testing">
+      <div class="card">
+        <div class="kicker">測試矩陣</div>
+        <h2>不能只測正常對話，要測不同程度、情緒與突發行為</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>測試類型</th>
+              <th>範例</th>
+              <th>主要觀察</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="測試類型">程度差異</td>
+              <td data-label="範例">完全不懂、略懂、有錯誤觀念、已能應用、程度高於角色預期。</td>
+              <td data-label="主要觀察">是否正確調整深度、提示、問題與節奏。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">表達差異</td>
+              <td data-label="範例">簡短回答、長篇回答、語意模糊、口語、錯字、方言式表達。</td>
+              <td data-label="主要觀察">是否能抓住真正意思，不因形式不同而失去互動。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">情緒差異</td>
+              <td data-label="範例">不耐煩、挫折、得意、害羞、拒絕回答、覺得被冒犯。</td>
+              <td data-label="主要觀察">角色是否適度調整，不過度討好、不繼續施壓。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">知識錯誤</td>
+              <td data-label="範例">使用者自信地教錯、混淆因果、使用過時資訊。</td>
+              <td data-label="主要觀察">AI 學生是否表現合理困惑，角色是否自然指出問題。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">話題偏移</td>
+              <td data-label="範例">突然換題、插入無關問題、回到前面內容、要求直接給答案。</td>
+              <td data-label="主要觀察">是否能處理新需求，又不破壞原場景與進度。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">角色壓力</td>
+              <td data-label="範例">使用者挑釁、否定人格、要求角色違反設定、同時呼叫多人。</td>
+              <td data-label="主要觀察">人格是否維持，且不因堅持角色而失去安全與禮貌。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">長對話</td>
+              <td data-label="範例">跨多輪、多天、多主題，角色關係與學習狀態持續累積。</td>
+              <td data-label="主要觀察">前文記憶、角色一致性、難度與成果是否延續。</td>
+            </tr>
+            <tr>
+              <td data-label="測試類型">多角色互動</td>
+              <td data-label="範例">有人同意、反對、誤解、插話、沉默、改變立場或要求使用者裁決。</td>
+              <td data-label="主要觀察">角色是否真的互相作用，而不是各自輸出答案。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:25px">每個核心場景至少要有四組測試資料</h3>
+        <div class="grid-4">
+          <div class="mini"><span class="tag blue">標準成功</span><strong>正常完成</strong><p>確認理想流程、關鍵節點與完成證據都能成立。</p></div>
+          <div class="mini"><span class="tag orange">常見錯誤</span><strong>使用者答錯</strong><p>確認角色能指出問題、給提示並避免直接代答。</p></div>
+          <div class="mini"><span class="tag purple">非預期行為</span><strong>使用者不照劇本</strong><p>確認系統能修復、轉向或自然結束。</p></div>
+          <div class="mini"><span class="tag red">高風險情境</span><strong>安全與信任</strong><p>確認未成年人、情緒、隱私、付費與不當內容處理。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="issues">
+      <div class="card">
+        <div class="kicker">問題分類與追蹤</div>
+        <h2>不能只寫「AI 怪怪的」，每個問題都要能被分類、重現與追蹤</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>問題類型</th>
+              <th>說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td data-label="代碼"><span class="code">FACT</span></td><td data-label="問題類型">事實或邏輯錯誤</td><td data-label="說明">關鍵事實、計算、定義、推理或因果錯誤。</td></tr>
+            <tr><td data-label="代碼"><span class="code">KNOW</span></td><td data-label="問題類型">知識深度不合</td><td data-label="說明">內容過淺、過深、缺少限制、反例或實際應用。</td></tr>
+            <tr><td data-label="代碼"><span class="code">CLEAR</span></td><td data-label="問題類型">不易讀或不易懂</td><td data-label="說明">句子、結構、字幕、語速、例子或資訊密度不適合。</td></tr>
+            <tr><td data-label="代碼"><span class="code">STYLE</span></td><td data-label="問題類型">口氣與呈現不合</td><td data-label="說明">排版、語氣、表情、動作、聲音或場景氣氛不一致。</td></tr>
+            <tr><td data-label="代碼"><span class="code">PERSONA</span></td><td data-label="問題類型">人格偏離</td><td data-label="說明">角色價值觀、說話方式、幽默、關係或知識位置不一致。</td></tr>
+            <tr><td data-label="代碼"><span class="code">ROLE</span></td><td data-label="問題類型">功能角色錯誤</td><td data-label="說明">該當學生、主持、吐槽或教練時做了錯誤行為。</td></tr>
+            <tr><td data-label="代碼"><span class="code">FLOW</span></td><td data-label="問題類型">互動節奏失敗</td><td data-label="說明">搶話、重複、太長、無限延伸、使用者沒有參與空間。</td></tr>
+            <tr><td data-label="代碼"><span class="code">LEARN</span></td><td data-label="問題類型">沒有推進學習</td><td data-label="說明">互動完成但沒有理解、練習、應用或教授成果。</td></tr>
+            <tr><td data-label="代碼"><span class="code">REPAIR</span></td><td data-label="問題類型">修復失敗</td><td data-label="說明">誤解後沒有調整，或修正方式破壞角色與場景。</td></tr>
+            <tr><td data-label="代碼"><span class="code">CONT</span></td><td data-label="問題類型">連續性失敗</td><td data-label="說明">忘記前文、使用者程度、學習成果或角色關係。</td></tr>
+            <tr><td data-label="代碼"><span class="code">SAFE</span></td><td data-label="問題類型">安全與信任</td><td data-label="說明">隱私、未成年人、情緒依賴、羞辱、操控或付費壓力問題。</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:25px">每一筆問題至少需要的資料</h3>
+        <div class="grid-4">
+          <div class="mini"><span class="tag blue">場景</span><strong>在哪裡發生</strong><p>主題、角色、模式、使用者程度與對話階段。</p></div>
+          <div class="mini"><span class="tag orange">重現</span><strong>怎麼再次出現</strong><p>輸入、前文、狀態、角色配置與模型版本。</p></div>
+          <div class="mini"><span class="tag red">嚴重度</span><strong>影響有多大</strong><p>是否影響正確性、安全、付費場景或大範圍使用者。</p></div>
+          <div class="mini"><span class="tag green">回歸</span><strong>修正後有沒有害到別處</strong><p>相同角色、相似場景與既有測試是否仍然通過。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="operation">
+      <div class="card">
+        <div class="kicker">持續營運</div>
+        <h2>品質管理不是上線前一次驗收，而是持續觀察、修正與防止退化</h2>
+
+        <div class="timeline">
+          <div class="phase">
+            <span class="phase-no">日常</span>
+            <strong>自動檢查與異常告警</strong>
+            <p>追蹤高風險錯誤、角色偏移、重複回答、超長場景與使用者負面回饋。</p>
+          </div>
+          <div class="phase">
+            <span class="phase-no">每週</span>
+            <strong>場景品質抽查</strong>
+            <p>按主題、角色、TA 與模式抽樣，檢查知識、互動與學習成果。</p>
+          </div>
+          <div class="phase">
+            <span class="phase-no">每月</span>
+            <strong>角色與內容回歸</strong>
+            <p>重新執行核心測試集，確認模型、Prompt、知識庫更新沒有造成退化。</p>
+          </div>
+          <div class="phase">
+            <span class="phase-no">每季</span>
+            <strong>品質標準校準</strong>
+            <p>根據真實使用者資料調整權重、門檻、角色規格與場景合約。</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:25px">上線後應追蹤的品質指標</h3>
+        <div class="metric-grid">
+          <div class="metric"><b>自然完成率</b><span>不需重來或人工介入，就完成場景目的的比例。</span></div>
+          <div class="metric"><b>誤解修復率</b><span>使用者澄清後，系統能正確調整並繼續的比例。</span></div>
+          <div class="metric"><b>人格偏移率</b><span>角色說話與行為偏離角色聖經的比例。</span></div>
+          <div class="metric"><b>學習推進率</b><span>使用者從理解前狀態往下一階段移動的比例。</span></div>
+          <div class="metric"><b>值得分享率</b><span>被使用者主動保存、分享或重玩的高品質片段比例。</span></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>觀察訊號</th>
+              <th>可能代表的品質問題</th>
+              <th>優先檢查</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="觀察訊號">使用者頻繁按重新生成</td>
+              <td data-label="可能代表的品質問題">答案不合需求、角色感不足、太長或不自然。</td>
+              <td data-label="優先檢查">CLEAR、PERSONA、ROLE、FLOW。</td>
+            </tr>
+            <tr>
+              <td data-label="觀察訊號">場景中途離開</td>
+              <td data-label="可能代表的品質問題">節奏太慢、參與感不足、內容難度不適合。</td>
+              <td data-label="優先檢查">FLOW、KNOW、LEARN。</td>
+            </tr>
+            <tr>
+              <td data-label="觀察訊號">使用者說「不是這個意思」</td>
+              <td data-label="可能代表的品質問題">意圖理解錯誤或修復能力不足。</td>
+              <td data-label="優先檢查">REPAIR、CONT、CLEAR。</td>
+            </tr>
+            <tr>
+              <td data-label="觀察訊號">教授模式完成率高但測驗進步低</td>
+              <td data-label="可能代表的品質問題">AI 學生過度配合，完成條件太鬆。</td>
+              <td data-label="優先檢查">LEARN、ROLE、FACT。</td>
+            </tr>
+            <tr>
+              <td data-label="觀察訊號">角色內容觀看高但回訪低</td>
+              <td data-label="可能代表的品質問題">娛樂成立，但沒有學習成果或長期價值。</td>
+              <td data-label="優先檢查">LEARN、CONT、場景完成證據。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="dark-box" style="margin-top:20px">
+          <h3>品質管理的真正產出</h3>
+          <p>不是一張「通過」印章，而是一套可持續改善的資料：哪些角色最容易偏離、哪些主題最常出錯、哪種互動最容易中途退出、AI 學生在哪裡會假裝理解，以及每次修正是否讓其他場景退化。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="kicker">最終定位</div>
+        <h2>KALM 的品質管理，是知識編輯、角色導演與學習體驗驗收的結合</h2>
+        <p class="lead">它不只審查文字，也不只檢查 Prompt。真正要驗收的是：角色、知識、情緒、節奏與學習目的能否在同一段互動中自然運作，而且讓使用者願意參與並真正往前一步。</p>
+
+        <div class="statement green">
+          KALM 的品質標準：<br>
+          「說得對、演得像、接得住、推得動，也知道什麼時候該停。」
+        </div>
+
+        <div class="footer">
+          <strong>品質不是 AI 表現得像在回答，而是整段互動真的像一段自然發生、值得參與、而且有效的學習經驗。</strong>
+          <span>知識可信是底線，角色與互動形成體驗，學習推進才是最終驗收結果。</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
