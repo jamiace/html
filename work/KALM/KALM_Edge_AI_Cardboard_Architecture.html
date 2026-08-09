@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KALM：降低邊緣 AI 硬體與運算門檻的卡匣式架構</title>
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#121a2d;
+  --panel2:#17213a;
+  --line:#2a3657;
+  --text:#edf2ff;
+  --muted:#aeb9d4;
+  --accent:#76a7ff;
+  --accent2:#65d4b5;
+  --warn:#ffd37a;
+  --danger:#ff9a9a;
+  --shadow:0 14px 40px rgba(0,0,0,.22);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% -5%,rgba(118,167,255,.18),transparent 30%),
+    radial-gradient(circle at 85% 5%,rgba(101,212,181,.12),transparent 25%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  line-height:1.78;
+}
+main{max-width:1120px;margin:auto;padding:54px 24px 80px}
+.hero{
+  padding:38px 38px 34px;
+  border:1px solid var(--line);
+  background:linear-gradient(135deg,rgba(23,33,58,.96),rgba(14,21,38,.96));
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+.kicker{color:var(--accent2);font-weight:800;letter-spacing:.08em;font-size:.85rem}
+h1{font-size:clamp(2rem,4vw,3.35rem);line-height:1.18;margin:.45rem 0 1rem}
+h2{font-size:1.65rem;margin:3.2rem 0 1rem}
+h3{font-size:1.18rem;margin:0 0 .65rem}
+p{margin:.65rem 0;color:#e6ecfb}
+.lead{font-size:1.16rem;color:#dbe5ff;max-width:900px}
+.em{
+  margin-top:24px;padding:18px 20px;border-left:4px solid var(--accent);
+  background:rgba(118,167,255,.09);border-radius:10px;font-size:1.08rem
+}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{
+  background:linear-gradient(180deg,var(--panel),rgba(18,26,45,.75));
+  border:1px solid var(--line);border-radius:18px;padding:20px;
+}
+.card p{color:#cdd7ee}
+.num{
+  width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:10px;background:rgba(118,167,255,.15);color:#aecdff;
+  font-weight:900;margin-bottom:10px
+}
+.flow{
+  display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:stretch;
+  margin:22px 0
+}
+.node{
+  min-height:132px;background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:18px;display:flex;flex-direction:column;justify-content:center
+}
+.node strong{font-size:1.05rem}
+.node span{color:var(--muted);font-size:.92rem;margin-top:6px}
+.arrow{display:flex;align-items:center;color:var(--accent);font-size:1.5rem;font-weight:900}
+.stack{
+  margin:20px 0;border:1px solid var(--line);border-radius:18px;overflow:hidden
+}
+.layer{padding:16px 20px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:190px 1fr;gap:18px}
+.layer:last-child{border-bottom:none}
+.layer .name{font-weight:900;color:#fff}
+.layer .desc{color:#cbd6ee}
+.good{color:var(--accent2);font-weight:800}
+.warn{color:var(--warn);font-weight:800}
+.bad{color:var(--danger);font-weight:800}
+table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--panel);border-radius:14px;overflow:hidden}
+th,td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{background:var(--panel2);color:#fff}
+td{color:#d8e0f4}
+tr:last-child td{border-bottom:none}
+.tag{
+  display:inline-block;padding:3px 9px;border-radius:999px;background:rgba(101,212,181,.12);
+  border:1px solid rgba(101,212,181,.28);color:#9be7d3;font-size:.82rem;font-weight:800
+}
+.callout{
+  padding:20px;border:1px solid rgba(255,211,122,.35);
+  background:rgba(255,211,122,.07);border-radius:16px;margin:18px 0
+}
+.example{
+  background:#0a0f1c;border:1px solid var(--line);border-radius:16px;padding:18px 20px;
+  color:#d8e3fa;font-family:"Microsoft JhengHei",sans-serif
+}
+.example .step{margin:7px 0}
+.small{font-size:.91rem;color:var(--muted)}
+.refs li{margin:.7rem 0;color:#cbd6ee}
+.refs a{color:#9fc1ff;text-decoration:none}
+.refs a:hover{text-decoration:underline}
+.footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+@media(max-width:820px){
+  .grid,.grid3{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}
+  .arrow{justify-content:center;transform:rotate(90deg)}
+  .layer{grid-template-columns:1fr;gap:4px}
+  .hero{padding:28px 22px}
+  main{padding:28px 16px 60px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<section class="hero">
+  <div class="kicker">KALM · 邊緣 AI 架構構想</div>
+  <h1>降低邊緣 AI 硬體與運算門檻：用「小核心＋專業卡匣」取代「全部能力一起塞進機器」</h1>
+  <p class="lead">
+    真正要降低邊緣 AI 的門檻，不是想辦法讓一台普通電腦硬扛一個超大型模型，而是重新設計整個系統：
+    <strong>平常只讓一個較小的通用模型常駐；遇到數學、物理、程式、文學等專業問題時，只載入這次真正需要的專業能力、知識與工具。</strong>
+  </p>
+  <div class="em">
+    最核心的原則：<strong>系統可以擁有很多能力，但任何一個時間點，只讓少數必要能力進入記憶體並參與運算。</strong>
+  </div>
+</section>
+
+<h2>一、先看問題：為什麼現在的邊緣 AI 很容易把硬體門檻拉高？</h2>
+<div class="grid">
+  <div class="card">
+    <div class="num">1</div>
+    <h3>模型太大</h3>
+    <p>如果希望同一個模型什麼都很會，往往就必須增加參數量。模型越大，儲存空間、記憶體、記憶體頻寬與運算需求通常都跟著上升。</p>
+  </div>
+  <div class="card">
+    <div class="num">2</div>
+    <h3>上下文塞得太多</h3>
+    <p>如果每次都把所有教材、角色設定、歷史對話、專業資料全部送進模型，即使模型本身沒有變大，處理上下文的成本也會變高。</p>
+  </div>
+  <div class="card">
+    <div class="num">3</div>
+    <h3>很多能力其實當下根本用不到</h3>
+    <p>學生今天問高中物理，歷史、文學、法律、程式等能力沒有必要同時佔用主要運算資源。把全部能力長期常駐，是一種浪費。</p>
+  </div>
+  <div class="card">
+    <div class="num">4</div>
+    <h3>所有問題都交給大型模型，也是一種浪費</h3>
+    <p>查公式、做四則運算、搜尋教材段落、讀取既有資料，很多工作可以交給更便宜的工具，不必每次都動用完整語言模型推理。</p>
+  </div>
+</div>
+
+<h2>二、核心方案：把 AI 拆成「主機」與「卡匣」</h2>
+<p>
+  可以把邊緣 AI 想成遊戲主機。主機本身提供基本運算與共通能力，但不需要把所有遊戲內容都永久塞在主機的工作記憶體裡。
+  需要玩哪個遊戲，就載入哪張卡匣。AI 也可以採用相同思路。
+</p>
+
+<div class="flow">
+  <div class="node">
+    <strong>通用核心模型</strong>
+    <span>負責語言理解、一般推理、對話、任務判斷與基本代理能力。</span>
+  </div>
+  <div class="arrow">→</div>
+  <div class="node">
+    <strong>專業能力卡匣</strong>
+    <span>只在需要時載入，例如數學、物理、程式、文學等專業能力。</span>
+  </div>
+  <div class="arrow">→</div>
+  <div class="node">
+    <strong>知識與工具卡匣</strong>
+    <span>再載入該任務真正需要的教材、題庫、文件、計算器或其他工具。</span>
+  </div>
+</div>
+
+<p>
+  這樣的目標不是讓小模型憑空變成超大型模型，而是把「一個超大的通才」改造成
+  <strong>「一個夠好的通用核心＋可以替換的專業模組」</strong>。
+</p>
+
+<h2>三、整體可拆成六層</h2>
+
+<div class="stack">
+  <div class="layer">
+    <div class="name">第 1 層：任務判斷</div>
+    <div class="desc">先判斷使用者現在到底在做什麼：閒聊、查資料、算數學、寫程式、學物理、討論文學，還是跨領域問題。</div>
+  </div>
+  <div class="layer">
+    <div class="name">第 2 層：通用核心</div>
+    <div class="desc">常駐一個較小且通用的模型，處理大多數語言、理解、規劃與互動工作。它是「主機」，不是所有專業知識的倉庫。</div>
+  </div>
+  <div class="layer">
+    <div class="name">第 3 層：專業能力</div>
+    <div class="desc">遇到專業問題才載入對應的能力模組，例如數學推理、物理推理、程式分析。這類模組可採低秩調整、介接模組或其他參數效率高的技術製作。</div>
+  </div>
+  <div class="layer">
+    <div class="name">第 4 層：技能</div>
+    <div class="desc">決定「怎麼處理」：教學、出題、蘇格拉底式追問、辯論、除錯、摘要、論證檢查等。技能本身不必等於一整個模型。</div>
+  </div>
+  <div class="layer">
+    <div class="name">第 5 層：知識</div>
+    <div class="desc">只把此次任務需要的教材、文件、題庫、名師內容或企業資料檢索出來，而不是把所有知識永久塞進上下文。</div>
+  </div>
+  <div class="layer">
+    <div class="name">第 6 層：難題升級</div>
+    <div class="desc">如果地端模型判斷自己能力不足，再把少數真正困難的問題交給更大的本機模型或雲端模型。簡單問題永遠留在低成本路徑。</div>
+  </div>
+</div>
+
+<h2>四、專業能力卡匣到底是什麼？</h2>
+<p>
+  它不是再準備一顆完整的「數學模型」、「物理模型」與「文學模型」。那樣只是把很多大模型分開放，硬體需求仍然很高。
+  比較合理的方式，是讓所有專業能力共享同一個通用核心，只保存各領域相對於核心模型的「專業增量」。
+</p>
+
+<div class="example">
+  <div class="step"><strong>傳統做法：</strong>通用模型 + 完整数學模型 + 完整物理模型 + 完整程式模型</div>
+  <div class="step">↓</div>
+  <div class="step"><strong>卡匣式做法：</strong>共用核心模型 + 數學能力增量 + 物理能力增量 + 程式能力增量</div>
+</div>
+
+<p>
+  這裡可利用「低秩調整」一類的參數效率技術。這種方法不是重新訓練並保存整顆模型，而是在既有模型旁增加相對少量的可訓練參數，
+  用來改變模型在特定任務上的行為。原始 LoRA 研究的重點，就是在凍結基礎模型權重的情況下，只訓練低秩更新矩陣，顯著減少需要訓練與保存的參數量。
+</p>
+
+<div class="callout">
+  <strong>要特別注意：</strong>「小型專業增量」不代表一定能補足所有專業能力。越複雜、越需要深層專業推理的領域，越可能需要較大的專家模組、專用工具，甚至更強的基礎模型。因此它是一種降低平均門檻的方法，不是把所有大型模型能力免費縮小。
+</div>
+
+<h2>五、專業能力與知識必須分開</h2>
+<p>
+  這是整個架構很重要的設計。以物理為例，「怎麼做物理推理」和「這次要用哪一本物理教材」不是同一件事情。
+</p>
+
+<table>
+  <thead>
+    <tr><th>模組</th><th>負責內容</th><th>例子</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="tag">專業能力</span></td>
+      <td>讓模型更擅長某種領域的推理方式與表達方式</td>
+      <td>物理推理、數學推理、程式除錯</td>
+    </tr>
+    <tr>
+      <td><span class="tag">技能</span></td>
+      <td>決定解題或互動方法</td>
+      <td>教學、出題、辯論、錯誤診斷</td>
+    </tr>
+    <tr>
+      <td><span class="tag">知識</span></td>
+      <td>提供這次需要的內容與事實</td>
+      <td>高中物理教材、題庫、教師講義</td>
+    </tr>
+    <tr>
+      <td><span class="tag">工具</span></td>
+      <td>處理不必交給語言模型硬算的工作</td>
+      <td>計算器、程式執行器、資料搜尋器</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  這樣做之後，同一個「物理專業能力」可以搭配不同出版社教材、不同老師內容、不同年級；同一套「教學技能」也可以搭配物理、歷史或文學。
+  系統會因此具有很高的重用性，而不是每增加一個內容就重新訓練一整顆模型。
+</p>
+
+<h2>六、不要每個字都切換專家，邊緣設備更適合「整段任務先選好」</h2>
+<p>
+  DeepSeek 的混合專家架構，是模型內部針對每個詞元選擇少數專家參與計算。這種設計在大型伺服器上可以有效降低每個詞元真正啟用的參數量：
+  DeepSeek-V2 公布為總計約 2360 億參數、每個詞元啟用約 210 億；DeepSeek-V3 則是總計約 6710 億、每個詞元啟用約 370 億。
+</p>
+
+<p>
+  但邊緣設備的問題不只是「算多少」，還包括「資料要搬多少」。如果每產生一小段文字就頻繁把不同專家從儲存裝置搬進記憶體，
+  可能反而造成延遲。因此更適合的做法，是在一段任務開始時先決定主要領域，讓同一組專家在這段會話裡保持載入。
+</p>
+
+<div class="example">
+  <div class="step">使用者：「我要複習高中力學。」</div>
+  <div class="step">↓</div>
+  <div class="step">系統判定：高中物理／教學任務</div>
+  <div class="step">↓</div>
+  <div class="step"><strong>一次載入：</strong>物理專業能力 + 教學技能 + 高中力學知識包</div>
+  <div class="step">↓</div>
+  <div class="step">接下來整段學習過程持續使用這組配置，不必反覆更換。</div>
+</div>
+
+<h2>七、很多工作根本不應交給語言模型</h2>
+<p>
+  如果目標是降低硬體與運算門檻，就必須把 AI 看成「系統」，而不是只看成「一顆模型」。
+  最便宜的運算永遠是：<strong>能不用大型模型，就不要用大型模型。</strong>
+</p>
+
+<div class="grid3">
+  <div class="card">
+    <h3>純計算</h3>
+    <p>例如乘除、統計、單位換算，直接交給計算工具，通常比要求語言模型逐步推理更準也更省。</p>
+  </div>
+  <div class="card">
+    <h3>找資料</h3>
+    <p>先用搜尋與檢索系統找出必要段落，再把少量內容送給模型，不必把整份教材長期塞在上下文。</p>
+  </div>
+  <div class="card">
+    <h3>固定流程</h3>
+    <p>能以規則、程式或工作流程處理的事情，就讓程式處理；語言模型只負責真正需要理解與推理的部分。</p>
+  </div>
+</div>
+
+<h2>八、真正的節省，是一層一層把不必要的成本拿掉</h2>
+
+<table>
+<thead>
+<tr><th>層級</th><th>做法</th><th>主要降低什麼</th></tr>
+</thead>
+<tbody>
+<tr><td>模型層</td><td>較小的通用核心、量化</td><td>常駐記憶體與運算量</td></tr>
+<tr><td>專家層</td><td>只載入必要的專業能力</td><td>不需要讓所有專業參數同時工作</td></tr>
+<tr><td>知識層</td><td>只檢索此次需要的教材與文件</td><td>上下文長度與資料處理量</td></tr>
+<tr><td>工具層</td><td>計算、搜尋、程式執行交給專門工具</td><td>語言模型推理工作量</td></tr>
+<tr><td>快取層</td><td>已處理過的固定內容盡可能重用</td><td>重複計算</td></tr>
+<tr><td>升級層</td><td>只有真正困難的問題才用大型模型</td><td>平均硬體需求與平均運算成本</td></tr>
+</tbody>
+</table>
+
+<h2>九、一個具體案例：同一台邊緣設備如何處理不同專業問題？</h2>
+
+<div class="grid">
+  <div class="card">
+    <h3>情境 A：高中物理</h3>
+    <p>
+      系統載入通用核心、物理專業能力、教學技能、高中力學教材與計算器。
+      文學、歷史、法律等模組完全不需要進入主要工作記憶體。
+    </p>
+  </div>
+  <div class="card">
+    <h3>情境 B：《小王子》討論</h3>
+    <p>
+      系統卸下物理專業能力，改載入文學分析能力、蘇格拉底式提問技能與《小王子》知識包。
+      同一顆通用核心繼續工作，只換專業卡匣。
+    </p>
+  </div>
+  <div class="card">
+    <h3>情境 C：程式除錯</h3>
+    <p>
+      載入程式分析能力與除錯技能，必要時呼叫真正的程式執行環境驗證結果，而不是只靠語言模型猜程式是否正確。
+    </p>
+  </div>
+  <div class="card">
+    <h3>情境 D：跨領域難題</h3>
+    <p>
+      如果同時需要物理與數學，可以暫時載入兩個專業能力；若超出地端模型可靠範圍，再升級到更大的本機或雲端模型。
+    </p>
+  </div>
+</div>
+
+<h2>十、這套架構與 DeepSeek 的關係</h2>
+<p>
+  兩者最相似的地方，是都採用<strong>「稀疏使用能力」</strong>的思想：系統可以擁有大量能力，但一次只啟動一小部分。
+  DeepSeek 的混合專家是在一顆大型模型內，對每個詞元選少數專家；這份邊緣架構則把這種思想往外推到整個系統層級。
+</p>
+
+<table>
+<thead><tr><th></th><th>DeepSeek 混合專家</th><th>卡匣式邊緣架構</th></tr></thead>
+<tbody>
+<tr><td>選擇單位</td><td>每個詞元</td><td>一次任務或一段會話</td></tr>
+<tr><td>選擇內容</td><td>模型內部專家</td><td>專業能力、技能、知識、工具</td></tr>
+<tr><td>未使用模組</td><td>通常仍屬於整顆模型的一部分</td><td>可以不載入主要記憶體，甚至不必預先安裝</td></tr>
+<tr><td>最主要目的</td><td>降低大型模型每個詞元的實際計算量</td><td>降低邊緣裝置的平均記憶體、運算與內容載入壓力</td></tr>
+</tbody>
+</table>
+
+<h2>十一、最值得採用的版本：四級處理路徑</h2>
+
+<div class="stack">
+  <div class="layer">
+    <div class="name">等級 1：工具直接處理</div>
+    <div class="desc">計算、查表、搜尋、固定規則，不動用完整語言模型推理。</div>
+  </div>
+  <div class="layer">
+    <div class="name">等級 2：通用核心處理</div>
+    <div class="desc">一般問答、整理、簡單推理，由常駐的小型通用模型完成。</div>
+  </div>
+  <div class="layer">
+    <div class="name">等級 3：專業卡匣處理</div>
+    <div class="desc">需要專業能力時，才載入一至兩個專業能力模組，再加必要知識與技能。</div>
+  </div>
+  <div class="layer">
+    <div class="name">等級 4：大型模型升級</div>
+    <div class="desc">高風險、高複雜、跨領域或地端信心不足時，才交給更大型的模型。</div>
+  </div>
+</div>
+
+<p>
+  這個設計真正降低的是<strong>平均門檻</strong>。使用者不需要為了偶爾才出現的高難度問題，平常就準備一台足以承載最大模型的硬體。
+  大部分工作在低成本路徑完成，只有少部分需求才升級。
+</p>
+
+<h2>十二、實作時最需要注意的限制</h2>
+<div class="grid">
+  <div class="card">
+    <h3>專家卡匣不是魔法</h3>
+    <p>小型增量模組只能在共用核心已具備的能力基礎上調整與強化。如果核心模型本身太弱，單靠小卡匣不一定補得回來。</p>
+  </div>
+  <div class="card">
+    <h3>專家切得太碎也會出問題</h3>
+    <p>如果每個小主題都做一張卡匣，系統會花大量時間判斷、載入與管理模組。領域切分必須兼顧專業度與管理成本。</p>
+  </div>
+  <div class="card">
+    <h3>跨領域問題需要組合機制</h3>
+    <p>真實問題常常同時涉及多個領域，因此系統必須允許少量專家共同工作，而不能把每個問題硬塞成單一分類。</p>
+  </div>
+  <div class="card">
+    <h3>必須有可靠度判斷</h3>
+    <p>地端模型需要知道什麼時候自己不夠可靠，否則「為了省算力而留在小模型」可能換來更高的錯誤率。</p>
+  </div>
+</div>
+
+<h2>十三、最後收斂成一句話</h2>
+<div class="em">
+  <strong>降低邊緣 AI 門檻的關鍵，不是把一顆超大型 AI 硬塞進小電腦，而是把 AI 拆成「共用核心、專業能力、技能、知識與工具」，只在需要時載入必要部分；簡單工作用低成本路徑，真正困難的工作才升級到大型模型。</strong>
+</div>
+
+<p>
+  如果套回「主機＋遊戲卡匣」的比喻：<strong>主機負責共通運算；專業能力決定它擅長什麼；技能決定它怎麼做；知識卡匣提供這次真正需要的內容。</strong>
+  系統能力可以持續增加，但單次任務的硬體負擔不必跟著等比例增加。這才是卡匣式邊緣 AI 架構最有價值的地方。
+</p>
+
+<h2>技術依據與查證來源</h2>
+<ol class="refs">
+  <li>
+    DeepSeek-V2 技術論文：提出多頭潛在注意力與 DeepSeekMoE；論文列出總參數約 2360 億、每個詞元啟用約 210 億。
+    <a href="https://arxiv.org/abs/2405.04434" target="_blank" rel="noopener">arXiv: 2405.04434</a>
+  </li>
+  <li>
+    DeepSeek-V3 技術報告：列出總參數約 6710 億、每個詞元啟用約 370 億，延續多頭潛在注意力與混合專家架構。
+    <a href="https://arxiv.org/abs/2412.19437" target="_blank" rel="noopener">arXiv: 2412.19437</a>
+  </li>
+  <li>
+    LoRA 原始研究：凍結預訓練模型權重，以低秩矩陣訓練少量新增參數，用較低的參數成本進行模型適配。
+    <a href="https://arxiv.org/abs/2106.09685" target="_blank" rel="noopener">arXiv: 2106.09685</a>
+  </li>
+</ol>
+
+<div class="footer">
+  文件定位：這是一份系統架構構想，不是已完成的產品規格。文中的「專業能力卡匣」是一種可採多種技術實作的抽象設計；實際效果仍須依基礎模型、硬體、量化方式、專家模組形式、載入延遲與任務準確率進行原型測試。
+</div>
+
+</main>
+</body>
+</html>
