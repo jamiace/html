@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KALM × Jeff Dean 訪談：可參考、研究與延伸方向</title>
+<style>
+:root{
+  --bg:#0b1020;
+  --bg2:#10182b;
+  --panel:#131d33;
+  --panel2:#18243d;
+  --line:#2b3a5f;
+  --text:#eef4ff;
+  --muted:#b6c2db;
+  --blue:#7fb1ff;
+  --cyan:#75d9d0;
+  --green:#8fe0b2;
+  --gold:#ffd27d;
+  --orange:#ffad7d;
+  --red:#ff9b9b;
+  --purple:#c4a7ff;
+  --shadow:0 20px 60px rgba(0,0,0,.28);
+  --radius:22px;
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  line-height:1.78;
+  background:
+    radial-gradient(circle at 12% -5%,rgba(127,177,255,.17),transparent 28%),
+    radial-gradient(circle at 88% 2%,rgba(117,217,208,.12),transparent 25%),
+    linear-gradient(180deg,var(--bg),#090d18 70%);
+}
+a{color:var(--blue);text-decoration:none}
+.wrap{max-width:var(--max);margin:auto;padding:38px 24px 88px}
+.hero{
+  position:relative;
+  overflow:hidden;
+  padding:54px 50px 46px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  background:linear-gradient(135deg,rgba(27,42,73,.97),rgba(14,23,43,.98));
+  box-shadow:var(--shadow);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  width:360px;height:360px;
+  right:-130px;top:-150px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(127,177,255,.25),transparent 68%);
+}
+.eyebrow{
+  position:relative;z-index:2;
+  display:inline-block;
+  padding:7px 12px;
+  border:1px solid rgba(117,217,208,.38);
+  border-radius:999px;
+  color:var(--cyan);
+  font-size:.84rem;
+  font-weight:850;
+  letter-spacing:.06em;
+}
+h1{
+  position:relative;z-index:2;
+  margin:16px 0 16px;
+  max-width:970px;
+  font-size:clamp(2.25rem,5.8vw,4.55rem);
+  line-height:1.08;
+  letter-spacing:-.04em;
+}
+.lead{
+  position:relative;z-index:2;
+  margin:0;
+  max-width:940px;
+  color:#dbe6fb;
+  font-size:1.16rem;
+}
+.hero-grid{
+  position:relative;z-index:2;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:13px;
+  margin-top:28px;
+}
+.stat{
+  padding:17px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  background:rgba(0,0,0,.18);
+}
+.stat b{display:block;font-size:1.08rem;margin-bottom:5px}
+.stat span{color:var(--muted);font-size:.9rem}
+nav{
+  position:sticky;top:10px;z-index:10;
+  margin:18px 0 32px;
+  padding:12px;
+  display:flex;flex-wrap:wrap;gap:8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  background:rgba(10,15,28,.86);
+  backdrop-filter:blur(14px);
+}
+nav a{
+  padding:8px 11px;
+  border-radius:10px;
+  color:#dce7ff;
+  font-size:.88rem;
+}
+nav a:hover{background:rgba(127,177,255,.12)}
+section{margin-top:32px}
+.section-head{margin-bottom:16px}
+.kicker{color:var(--cyan);font-size:.84rem;font-weight:850;letter-spacing:.06em}
+h2{font-size:clamp(1.7rem,3.5vw,2.45rem);line-height:1.2;margin:7px 0 8px}
+h3{font-size:1.14rem;line-height:1.35;margin:0 0 8px}
+p{margin:.55rem 0;color:#dce5f8}
+.muted{color:var(--muted)}
+.card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:26px;
+  background:linear-gradient(180deg,rgba(19,29,51,.98),rgba(14,22,40,.98));
+  box-shadow:0 12px 34px rgba(0,0,0,.15);
+}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.mini{
+  height:100%;
+  padding:20px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:17px;
+  background:var(--panel2);
+}
+.mini p{font-size:.95rem;color:#cbd7ec}
+.tag{
+  display:inline-block;
+  margin-bottom:10px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:850;
+}
+.blue{background:rgba(127,177,255,.13);color:#afd0ff}
+.green{background:rgba(143,224,178,.13);color:#b4f0cb}
+.gold{background:rgba(255,210,125,.13);color:#ffe1a4}
+.purple{background:rgba(196,167,255,.13);color:#d7c4ff}
+.orange{background:rgba(255,173,125,.13);color:#ffc19b}
+.red{background:rgba(255,155,155,.13);color:#ffb7b7}
+.statement{
+  margin-top:18px;
+  padding:19px 21px;
+  border-left:4px solid var(--blue);
+  border-radius:12px;
+  background:rgba(127,177,255,.08);
+  font-size:1.06rem;
+}
+.statement.greenline{border-left-color:var(--green);background:rgba(143,224,178,.07)}
+.statement.goldline{border-left-color:var(--gold);background:rgba(255,210,125,.07)}
+.statement.purpleline{border-left-color:var(--purple);background:rgba(196,167,255,.07)}
+.flow{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.step{
+  position:relative;
+  min-height:136px;
+  padding:19px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:var(--panel2);
+}
+.step small{display:block;color:var(--blue);font-weight:850;margin-bottom:7px}
+.step strong{display:block;font-size:1.05rem;margin-bottom:7px}
+.step span{color:var(--muted);font-size:.91rem}
+.arch{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.arch-row{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:14px;
+  align-items:stretch;
+}
+.arch-label{
+  display:flex;align-items:center;
+  padding:16px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(127,177,255,.09);
+  font-weight:850;
+}
+.arch-body{
+  padding:16px 18px;
+  border-radius:15px;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:#dbe5f7;
+}
+.split{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.route{
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:var(--panel2);
+}
+.route h3{color:#fff}
+.route ul{margin:.5rem 0 0 1.1rem;padding:0}
+.route li{margin:.38rem 0;color:#cbd7ec}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--panel);
+}
+th,td{padding:15px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:#1a2742;color:#eaf1ff;font-size:.9rem}
+td{color:#cfd9ee;font-size:.94rem}
+tr:last-child td{border-bottom:0}
+.priority{
+  display:inline-flex;
+  width:28px;height:28px;
+  align-items:center;justify-content:center;
+  border-radius:9px;
+  background:rgba(127,177,255,.14);
+  color:#cde0ff;
+  font-weight:900;
+}
+.callout{
+  padding:24px;
+  border:1px solid rgba(117,217,208,.28);
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(117,217,208,.08),rgba(127,177,255,.06));
+}
+.callout b{color:#fff}
+.quote{
+  font-size:1.35rem;
+  line-height:1.6;
+  color:#fff;
+  font-weight:800;
+}
+.timeline{display:grid;gap:12px}
+.timeline-item{
+  display:grid;
+  grid-template-columns:110px 1fr;
+  gap:14px;
+}
+.timeline-key{
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  background:rgba(127,177,255,.1);
+  border:1px solid rgba(127,177,255,.18);
+  font-weight:850;
+}
+.timeline-body{
+  padding:15px 17px;
+  border-radius:14px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+}
+.foot{
+  margin-top:36px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  color:#8998b6;
+  font-size:.84rem;
+}
+@media(max-width:900px){
+  .hero-grid,.grid4,.grid3,.flow{grid-template-columns:1fr 1fr}
+  .arch-row{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .wrap{padding:20px 14px 55px}
+  .hero{padding:34px 23px}
+  .hero-grid,.grid4,.grid3,.grid2,.flow,.split{grid-template-columns:1fr}
+  .timeline-item{grid-template-columns:1fr}
+  nav{position:static}
+  table{display:block;overflow-x:auto}
+}
+@media print{
+  body{background:#fff;color:#111}
+  nav{display:none}
+  .wrap{max-width:none;padding:0}
+  .hero,.card,.mini,.route,.arch-body,.arch-label,.step,.callout,.timeline-body,.timeline-key{
+    box-shadow:none;
+    break-inside:avoid;
+  }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">KALM 團隊研究整理</div>
+  <h1>從 Jeff Dean 訪談看 KALM：可參考、研究與延伸的方向</h1>
+  <p class="lead">
+    這場訪談對 KALM 最有價值的地方，不是提供某個單一新技術，而是提供一套更完整的系統觀：
+    不要把 AI 產品等同於模型本身，而要把模型、技能、知識、工具、記憶、流程、評估與硬體調度整合成一套可持續進化的系統。
+  </p>
+  <div class="hero-grid">
+    <div class="stat"><b>模型不是產品全部</b><span>真正競爭力來自完整系統。</span></div>
+    <div class="stat"><b>技能是可累積資產</b><span>把成熟方法轉成 AI 可執行流程。</span></div>
+    <div class="stat"><b>個人學習狀態是護城河</b><span>通用模型沒有使用者長期學習歷史。</span></div>
+    <div class="stat"><b>低成本來自聰明調度</b><span>不是把最大模型硬塞進所有裝置。</span></div>
+  </div>
+</header>
+
+<nav>
+  <a href="#core">核心判斷</a>
+  <a href="#system">系統定位</a>
+  <a href="#skill">技能系統</a>
+  <a href="#memory">學習記憶</a>
+  <a href="#multi">多角色</a>
+  <a href="#edge">邊緣 AI</a>
+  <a href="#architecture">新架構</a>
+  <a href="#priority">優先研究</a>
+</nav>
+
+<section id="core">
+  <div class="section-head">
+    <div class="kicker">01｜核心判斷</div>
+    <h2>這場訪談真正幫 KALM 補上的，是「共同主軸」</h2>
+  </div>
+  <div class="card">
+    <p>
+      KALM 現在已有多條研究線：邊緣 AI 卡匣架構、多角色學習、對話導演、學習訊號、長期學習記憶、品質驗收與 B2C 商業模式。
+      這些原本看起來像不同模組，但其實可以被收斂成同一件事：
+    </p>
+    <div class="statement">
+      <strong>KALM 應該是一個「根據學習者當下狀態，自動調度能力、方法、角色、知識與工具，並持續驗證與累積學習成果」的學習智慧系統。</strong>
+    </div>
+    <p class="muted">
+      重點不再是「模型有多大」，而是「系統能不能知道現在該用什麼能力、怎麼教、何時介入，以及如何確認真的學會」。
+    </p>
+  </div>
+</section>
+
+<section id="system">
+  <div class="section-head">
+    <div class="kicker">02｜產品定位</div>
+    <h2>從「AI 學伴」升級成「完整學習系統」</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="tag red">不建議作為核心競爭</span>
+      <h3>只和通用模型比回答能力</h3>
+      <p>例如：解高中物理、摘要教材、出題、一般問答。這些能力很容易隨著大型通用模型進步而被追平。</p>
+    </div>
+    <div class="card">
+      <span class="tag green">更值得投入</span>
+      <h3>建立通用模型天然缺少的系統能力</h3>
+      <p>例如：長期學習狀態、個人錯誤模式、教材可信來源、教學流程、角色關係、學習結果驗證與持續修正。</p>
+    </div>
+  </div>
+
+  <div class="statement greenline">
+    <strong>建議產品核心：</strong>不要把 KALM 定義成「一顆會教學的模型」，而是定義成「一套會選擇何時用模型、何時用工具、何時用不同教法，並持續記住學習進展的系統」。
+  </div>
+</section>
+
+<section id="skill">
+  <div class="section-head">
+    <div class="kicker">03｜技能系統</div>
+    <h2>技能應正式成為 KALM 的核心資產</h2>
+  </div>
+
+  <div class="grid3">
+    <div class="mini">
+      <span class="tag blue">專業能力</span>
+      <h3>它「會不會」</h3>
+      <p>例如物理推理、程式分析、法律判讀、文學解析。</p>
+    </div>
+    <div class="mini">
+      <span class="tag gold">知識卡匣</span>
+      <h3>它「知道什麼」</h3>
+      <p>例如高中力學教材、特定出版社內容、某本書、某課程知識庫。</p>
+    </div>
+    <div class="mini">
+      <span class="tag purple">技能</span>
+      <h3>它「怎麼做」</h3>
+      <p>例如反例教學、錯誤診斷、類比說明、提問引導、反向教授、驗證流程。</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>技能的真正價值：把人類成熟方法轉成可重複執行的流程</h3>
+    <div class="flow" style="margin-top:16px">
+      <div class="step"><small>步驟 1</small><strong>辨認問題</strong><span>現在是概念混淆、程序錯誤，還是只是粗心？</span></div>
+      <div class="step"><small>步驟 2</small><strong>選擇方法</strong><span>使用反例、類比、拆步驟或重新定義。</span></div>
+      <div class="step"><small>步驟 3</small><strong>執行驗證</strong><span>用變形題、反向教授或實際工具檢查。</span></div>
+      <div class="step"><small>步驟 4</small><strong>依結果迭代</strong><span>若沒有真正理解，就換另一種方法。</span></div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:16px">
+    <div class="quote">新的研究方向：建立「技能工坊」</div>
+    <p>
+      系統不只執行既有技能，也可以從大量成功與失敗案例中產生新的教學方法，
+      透過測試與學習成效比較，保留有效版本、淘汰無效版本。
+    </p>
+  </div>
+</section>
+
+<section id="memory">
+  <div class="section-head">
+    <div class="kicker">04｜長期學習記憶</div>
+    <h2>真正難複製的，不是模型，而是「知道這個人怎麼學會」</h2>
+  </div>
+
+  <div class="card">
+    <p>
+      一般聊天紀錄只能回答「之前聊過什麼」；KALM 更應該累積的是「這個人如何理解、在哪裡犯錯、用什麼方法可以修正」。
+    </p>
+
+    <div class="grid4" style="margin-top:17px">
+      <div class="mini"><h3>概念掌握</h3><p>哪些真的會、哪些只是表面答對。</p></div>
+      <div class="mini"><h3>錯誤模式</h3><p>同類錯誤是否重複、錯在哪一層。</p></div>
+      <div class="mini"><h3>信心落差</h3><p>是否「以為自己會」，但變形題就失敗。</p></div>
+      <div class="mini"><h3>有效教法</h3><p>哪種解釋、角色或方法最容易促成理解。</p></div>
+    </div>
+
+    <div class="statement purpleline">
+      建議把目前的 Learning Ledger 進一步發展成「學習狀態圖」：不是存聊天，而是存概念、信心、錯誤、修正、遷移能力與有效教法之間的關係。
+    </div>
+  </div>
+</section>
+
+<section id="multi">
+  <div class="section-head">
+    <div class="kicker">05｜多角色學習</div>
+    <h2>多角色不只是「多人聊天」，而可以是「認知路徑搜尋」</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="tag red">表面做法</span>
+      <h3>五個角色輪流發表意見</h3>
+      <p>角色只是換語氣，知識與推理方式差不多，容易變成冗長、重複、表演化的聊天。</p>
+    </div>
+    <div class="card">
+      <span class="tag green">值得研究的做法</span>
+      <h3>不同角色代表不同認知程序</h3>
+      <p>有人找反例、有人查證、有人檢查現實限制、有人做類比、有人負責收斂。導演只讓真正有價值的路徑進入公開對話。</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>新的理解：把「思考過程」外化成可參與的對話</h3>
+    <p>
+      使用者看到的不是模型內部不可見的推理，而是由不同角色分別承擔「反例、證據、現實限制、類比、整合」等認知功能。
+      角色之間的衝突與修正，本身就成為學習內容。
+    </p>
+    <div class="statement">
+      <strong>多角色的真正產品價值：</strong>讓使用者能觀看、介入、質疑與修正不同的認知路徑，最後把角色背後的方法內化成自己的思考能力。
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">06｜學習規格</div>
+    <h2>把一場對話從「聊天題目」升級成「可驗收的學習任務」</h2>
+  </div>
+
+  <div class="card">
+    <div class="grid2">
+      <div class="mini">
+        <span class="tag blue">輸入</span>
+        <h3>不是只有題目</h3>
+        <p>還要定義起始狀態、可能迷思、學習目標、允許方法、成功條件與失敗條件。</p>
+      </div>
+      <div class="mini">
+        <span class="tag green">輸出</span>
+        <h3>不是「聊完了」</h3>
+        <p>而是能驗證使用者是否理解、能否遷移、是否仍存在錯誤與下一步應該做什麼。</p>
+      </div>
+    </div>
+
+    <div class="statement goldline">
+      這能讓 KALM 從「看起來很會聊天」變成「老師、出版社、學校可以驗收的學習產品」。
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">07｜即時品質控制</div>
+    <h2>品質驗收不應只發生在開發結束，而要存在於每次執行中</h2>
+  </div>
+
+  <div class="grid3">
+    <div class="mini"><span class="tag blue">知識</span><h3>內容是否可信？</h3><p>是否需要查證、是否有不確定性、是否誤導。</p></div>
+    <div class="mini"><span class="tag purple">流程</span><h3>對話是否推進？</h3><p>是否重複、角色是否該講、是否需要換方法。</p></div>
+    <div class="mini"><span class="tag green">成果</span><h3>使用者是否真的理解？</h3><p>是否需要變形題、反向教授或下一輪修正。</p></div>
+  </div>
+
+  <div class="statement">
+    建議把品質評估器從「事後檢查表」升級成「執行中的控制系統」，持續判斷下一步是否需要查證、反駁、換角色、換教法或結束。
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">08｜KALM 基準測試</div>
+    <h2>建立自己的量化測試，不再只靠「感覺這個提示詞比較好」</h2>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>比較項目</th><th>可測試版本</th><th>建議指標</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>模型</td><td>小型地端模型 / 大型模型</td><td>正確率、延遲、成本、記憶體</td></tr>
+        <tr><td>技能</td><td>無技能 / 技能 A / 技能 B</td><td>修正成功率、變形題成功率</td></tr>
+        <tr><td>知識</td><td>一般知識 / 專用知識卡匣</td><td>引用正確度、內容可信度</td></tr>
+        <tr><td>教學方式</td><td>直接回答 / 提問 / 多角色 / 反向教授</td><td>理解率、參與率、完成率</td></tr>
+        <tr><td>長期效果</td><td>單次學習 / 有長期記憶</td><td>同類錯誤下降、回補效果、遷移能力</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="edge">
+  <div class="section-head">
+    <div class="kicker">09｜邊緣 AI</div>
+    <h2>真正要省的不只是算力，還有資料搬運、載入與等待</h2>
+  </div>
+
+  <div class="card">
+    <p>
+      KALM 現有「任務開始時先決定主要領域，整段任務維持同一組能力與知識」的方向是合理的。
+      對邊緣設備而言，頻繁切換能力模組可能造成額外載入與記憶體壓力，因此要把「資料搬多少、切換多久」當成正式工程問題。
+    </p>
+
+    <div class="grid4" style="margin-top:16px">
+      <div class="mini"><h3>首次回應</h3><p>開始學習後多久能給第一個有效回覆。</p></div>
+      <div class="mini"><h3>卡匣載入</h3><p>專業能力、知識、技能載入需要多久。</p></div>
+      <div class="mini"><h3>記憶體峰值</h3><p>任務執行時最高記憶體占用。</p></div>
+      <div class="mini"><h3>切換成本</h3><p>跨領域或換任務時是否需要大量重載。</p></div>
+    </div>
+
+    <div class="statement greenline">
+      邊緣 AI 的核心價值不是「所有事情都地端做」，而是「大多數日常學習工作以低成本、低延遲、可保護隱私的方式完成，真正困難的少數情況再升級」。
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">10｜共享核心</div>
+    <h2>多角色不等於多模型</h2>
+  </div>
+
+  <div class="card">
+    <div class="arch">
+      <div class="arch-row"><div class="arch-label">共享核心模型</div><div class="arch-body">負責共通理解、生成、基本推理與工具呼叫。</div></div>
+      <div class="arch-row"><div class="arch-label">角色狀態</div><div class="arch-body">人格、價值排序、知識範圍、關係、情緒、當前信心與發言動機。</div></div>
+      <div class="arch-row"><div class="arch-label">認知技能</div><div class="arch-body">反例、查證、類比、現實檢查、定義、收斂、挑戰、教授等。</div></div>
+      <div class="arch-row"><div class="arch-label">共享知識</div><div class="arch-body">當前教材、課程內容、文件與工具結果，不需要每個角色各存一份。</div></div>
+      <div class="arch-row"><div class="arch-label">導演與評估</div><div class="arch-body">決定誰該講、用什麼方法、是否需要查證、是否應停止或升級。</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">11｜雙重調度</div>
+    <h2>建議新增兩個「路由器」：決定用什麼算，也決定用什麼方式教</h2>
+  </div>
+
+  <div class="split">
+    <div class="route">
+      <span class="tag blue">運算路由</span>
+      <h3>決定「用什麼處理」</h3>
+      <ul>
+        <li>工具直接處理</li>
+        <li>小型通用模型</li>
+        <li>專業能力卡匣</li>
+        <li>大型本機模型</li>
+        <li>雲端高能力模型</li>
+      </ul>
+    </div>
+    <div class="route">
+      <span class="tag purple">教學路由</span>
+      <h3>決定「用什麼方式教」</h3>
+      <ul>
+        <li>直接說明</li>
+        <li>一對一引導</li>
+        <li>多角色討論</li>
+        <li>反例與類比</li>
+        <li>讓使用者反向教授</li>
+        <li>測驗、模擬與實作</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="statement goldline">
+    不是每個問題都需要多角色，也不是每個問題都需要大型模型。真正成熟的系統，應該知道「現在不需要動用什麼」。
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">12｜長時間學習任務</div>
+    <h2>Agent 的任務週期可以是三個月，而不是一次聊天</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item"><div class="timeline-key">目標建立</div><div class="timeline-body">例如：三個月後準備學測物理，不只是今天解完一題。</div></div>
+    <div class="timeline-item"><div class="timeline-key">現況診斷</div><div class="timeline-body">盤點概念、前置知識、錯誤類型、信心與學習節奏。</div></div>
+    <div class="timeline-item"><div class="timeline-key">動態規劃</div><div class="timeline-body">每日任務、複習間隔、前置知識回補、模擬測驗與個人化路線。</div></div>
+    <div class="timeline-item"><div class="timeline-key">持續修正</div><div class="timeline-body">每次互動都更新學習狀態，而不是下一次重新從零開始。</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">13｜雲端與地端分工</div>
+    <h2>雲端負責研發教法，地端負責日常陪伴</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="tag purple">雲端高能力模型</span>
+      <h3>像「教授與研究室」</h3>
+      <p>分析困難失敗案例、設計新技能、產生測試、調整評量規則、整理知識卡匣與高階推理。</p>
+    </div>
+    <div class="card">
+      <span class="tag green">地端學習夥伴</span>
+      <h3>像「每天陪伴的助教」</h3>
+      <p>執行成熟技能、日常互動、個人記憶、低延遲回饋、隱私敏感的個人資料處理。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">14｜真正值得押注的問題</div>
+    <h2>KALM 不應該只解「AI 會不會教」，而是解「為什麼這個人一直學不會」</h2>
+  </div>
+
+  <div class="callout">
+    <div class="quote">值得長期研究的三個問題</div>
+    <p><b>第一層：</b>系統能不能知道一個人「為什麼一直學不會」？</p>
+    <p><b>第二層：</b>系統能不能知道「用什麼方式，這個人最容易真正理解」？</p>
+    <p><b>第三層：</b>系統能不能讓不同認知方法互相挑戰，自動找到更有效的理解路徑？</p>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">15｜內容與行銷</div>
+    <h2>高光片段不只來自角色吵架，也可以來自「理解突破」</h2>
+  </div>
+
+  <div class="card">
+    <p>
+      KALM 最有價值的傳播內容，不一定是角色很有戲，而可能是使用者在多角色挑戰、反例與類比之後，
+      突然發現自己的理解錯在哪裡。
+    </p>
+    <div class="statement greenline">
+      可以建立「理解突破」標記：當使用者完成關鍵模型修正、說出新的因果結構、成功教回 AI，系統就把該片段標記為可分享的學習高光。
+    </div>
+    <p class="muted">
+      這會讓 KALM 的內容傳播不只是娛樂，而是讓外部觀眾直接看到「一個人真正理解某件事情的瞬間」。
+    </p>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="section-head">
+    <div class="kicker">16｜KALM 下一版架構</div>
+    <h2>把現有研究線整合成同一個運作閉環</h2>
+  </div>
+
+  <div class="card">
+    <div class="arch">
+      <div class="arch-row"><div class="arch-label">① 使用者</div><div class="arch-body">提出問題、學習、觀看角色、挑戰、回答、反向教授。</div></div>
+      <div class="arch-row"><div class="arch-label">② 學習狀態圖</div><div class="arch-body">知道目前會什麼、不會什麼、錯在哪、信心如何、哪種方法有效。</div></div>
+      <div class="arch-row"><div class="arch-label">③ 學習任務規格</div><div class="arch-body">定義這一次要產生什麼成果、怎麼算成功、有哪些迷思與限制。</div></div>
+      <div class="arch-row"><div class="arch-label">④ KALM 調度器</div><div class="arch-body">同時決定運算方式與教學方式。</div></div>
+      <div class="arch-row"><div class="arch-label">⑤ 能力組合</div><div class="arch-body">模型＋專業能力＋技能＋知識＋工具＋角色。</div></div>
+      <div class="arch-row"><div class="arch-label">⑥ 即時評估</div><div class="arch-body">檢查事實、對話、角色、學習推進與是否真的理解。</div></div>
+      <div class="arch-row"><div class="arch-label">⑦ 學習訊號</div><div class="arch-body">蒐集行為、認知、情緒、成績、互動與節奏訊號。</div></div>
+      <div class="arch-row"><div class="arch-label">⑧ 狀態更新</div><div class="arch-body">更新個人學習記憶，形成下一次更準確的教學。</div></div>
+      <div class="arch-row"><div class="arch-label">⑨ 技能工坊</div><div class="arch-body">從成功與失敗案例產生、測試、保留新的教學技能。</div></div>
+      <div class="arch-row"><div class="arch-label">⑩ KALM 基準測試</div><div class="arch-body">用數據比較新版技能、模型與教學策略是否真的更有效。</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="priority">
+  <div class="section-head">
+    <div class="kicker">17｜建議優先順序</div>
+    <h2>先做最能驗證價值、也最容易累積成資產的項目</h2>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th style="width:72px">優先</th><th>研究項目</th><th>原因</th><th>短期產出</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="priority">1</span></td><td><b>技能規格化＋KALM 基準測試</b></td><td>最容易立即驗證，而且能直接改善不同模型。</td><td>技能模板、測試集、量化指標。</td></tr>
+        <tr><td><span class="priority">2</span></td><td><b>學習狀態圖</b></td><td>可能成為 KALM 最重要的長期個人化資料資產。</td><td>資料結構、更新規則、狀態可信度。</td></tr>
+        <tr><td><span class="priority">3</span></td><td><b>運算路由＋教學路由</b></td><td>把邊緣 AI、多角色、工具與教學策略真正接起來。</td><td>決策規則、升級條件、原型流程。</td></tr>
+        <tr><td><span class="priority">4</span></td><td><b>即時評估＋多角色認知搜尋</b></td><td>讓多角色從娛樂形式升級成真正的認知工具。</td><td>角色候選生成、價值評分、路徑淘汰。</td></tr>
+        <tr><td><span class="priority">5</span></td><td><b>技能工坊／自動教學實驗</b></td><td>研究價值最高，也最可能形成難以複製的長期能力。</td><td>候選技能生成、實驗比較、版本治理。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="kicker">18｜團隊討論建議</div>
+    <h2>下一次會議可以直接問的五個問題</h2>
+  </div>
+
+  <div class="grid2">
+    <div class="mini"><span class="tag blue">問題 1</span><h3>什麼叫「真的學會」？</h3><p>如果無法定義，後面的 Agent、技能與個人化都無法可靠評估。</p></div>
+    <div class="mini"><span class="tag purple">問題 2</span><h3>哪些能力應由技能補，而不是換更大模型？</h3><p>建立模型、技能、工具的責任邊界。</p></div>
+    <div class="mini"><span class="tag green">問題 3</span><h3>哪些個人學習資料值得長期保存？</h3><p>找出真正能改善下一次學習的狀態資料。</p></div>
+    <div class="mini"><span class="tag gold">問題 4</span><h3>什麼問題值得啟動多角色？</h3><p>避免把所有學習都做成角色聊天。</p></div>
+    <div class="mini"><span class="tag orange">問題 5</span><h3>哪些工作一定要在地端？</h3><p>從隱私、延遲、成本與長期使用判斷，而不是為 Edge 而 Edge。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="callout">
+    <div class="kicker">最終結論</div>
+    <div class="quote" style="margin-top:8px">
+      KALM 真正的方向，不是打造「比較會回答問題的 AI」，而是打造「比較會理解學習者、選擇方法、驗證成效並持續進化的學習智慧系統」。
+    </div>
+    <p>
+      如果這套系統成立，邊緣 AI、多角色、技能、知識卡匣、學習訊號與長期記憶就不再是幾個獨立功能，
+      而會形成一個完整閉環：知道使用者現在怎麼了 → 選擇最適合的能力與教法 → 驗證是否有效 → 累積成下一次更好的學習。
+    </p>
+  </div>
+</section>
+
+<div class="foot">
+  <div>文件用途：KALM 團隊內部研究與方向討論。</div>
+  <div>內容基礎：Jeff Dean 訪談逐字整理，以及現有 KALM PMF、邊緣 AI 卡匣架構、多角色學習、Learning Signal、Learning Evolution、B2C 商業與品質管理文件。</div>
+  <div>註：訪談中的技術數字在本文件主要作為設計思考背景，未另外作為硬體採購或工程規格依據。</div>
+</div>
+
+</main>
+</body>
+</html>
