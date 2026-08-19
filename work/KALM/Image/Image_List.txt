@@ -1,0 +1,51 @@
+Image/Head_Alice_001.png
+Image/Head_Alice_002.png
+Image/Head_Alice_003.png
+Image/Head_Alice_004.png
+Image/Head_Alice_005.png
+Image/Head_Alice_006.png
+Image/Head_Alice_007.png
+Image/Head_Alice_008.png
+Image/Head_Annabelle_001.png
+Image/Head_Annabelle_002.png
+Image/Head_Annabelle_003.png
+Image/Head_Annabelle_004.png
+Image/Head_Annabelle_005.png
+Image/Head_Annabelle_006.png
+Image/Head_Annabelle_007.png
+Image/Head_Annabelle_008.png
+Image/Head_Aurelia_001.png
+Image/Head_Aurelia_002.png
+Image/Head_Aurelia_003.png
+Image/Head_Aurelia_004.png
+Image/Head_Aurelia_005.png
+Image/Head_Aurelia_006.png
+Image/Head_Aurelia_007.png
+Image/Head_Aurelia_008.png
+Image/Head_Camila_001.png
+Image/Head_Camila_002.png
+Image/Head_Camila_003.png
+Image/Head_Camila_004.png
+Image/Head_Camila_005.png
+Image/Head_Camila_006.png
+Image/Head_Camila_007.png
+Image/Head_Camila_008.png
+Image/Head_Liv_001.png
+Image/Head_Liv_002.png
+Image/Head_Liv_003.png
+Image/Head_Liv_004.png
+Image/Head_Liv_005.png
+Image/Head_Liv_006.png
+Image/Head_Liv_007.png
+Image/Head_Liv_008.png
+Image/Jami_png
+
+
+1  一般
+2  歡笑
+3  皺眉
+4  激動
+5  鄙視
+6  賭氣
+7  被打敗
+8  哭泣
