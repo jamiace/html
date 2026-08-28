@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KALM Multi-VTuber Learning｜五角色上半身 Live2D + AI 情緒控制｜六個月製作規劃 v0.3</title>
+<style>
+:root{
+  --bg:#f5f7fb; --panel:#fff; --text:#1f2937; --muted:#687386; --line:#e6e9ef;
+  --primary:#4338ca; --primary2:#6366f1; --soft:#eef2ff; --good:#047857; --goodbg:#ecfdf5;
+  --warn:#92400e; --warnbg:#fffbeb; --blue:#075985; --bluebg:#f0f9ff; --shadow:0 10px 28px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#fafbff,var(--bg));
+  color:var(--text);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  line-height:1.72;
+}
+header{
+  background:linear-gradient(135deg,#312e81,#4338ca 56%,#6366f1);
+  color:#fff;
+  padding:48px 20px 46px;
+}
+.wrap{width:min(1180px,calc(100% - 36px));margin:auto}
+.kicker{font-size:13px;letter-spacing:.12em;font-weight:800;opacity:.82}
+h1{font-size:clamp(30px,4.8vw,48px);line-height:1.16;margin:8px 0 14px}
+.subtitle{font-size:17px;max-width:940px;margin:0;opacity:.93}
+main{padding:32px 0 72px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:-22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.metric{padding:20px}
+.metric .label{font-size:13px;font-weight:800;color:var(--muted)}
+.metric .value{font-size:28px;font-weight:900;margin-top:2px}
+.metric .note{font-size:12px;color:var(--muted);margin-top:3px}
+.section{margin-top:22px;padding:28px}
+h2{font-size:25px;margin:0 0 12px}
+h3{font-size:18px;margin:24px 0 8px}
+.lead{font-size:17px;color:#374151}
+.callout{padding:16px 18px;border-radius:14px;margin:16px 0;border:1px solid}
+.good{background:var(--goodbg);border-color:#a7f3d0;color:#065f46}
+.info{background:var(--soft);border-color:#c7d2fe;color:#312e81}
+.warn{background:var(--warnbg);border-color:#fde68a;color:#78350f}
+.blue{background:var(--bluebg);border-color:#bae6fd;color:#0c4a6e}
+table{width:100%;border-collapse:collapse;margin:15px 0 6px;font-size:14px}
+th,td{padding:12px 11px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{background:#f8fafc;color:#374151;font-weight:800}
+tr:last-child td{border-bottom:0}
+.money{text-align:right!important;white-space:nowrap}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800}
+.internal{background:#ede9fe;color:#5b21b6}
+.out{background:#ecfeff;color:#155e75}
+.part{background:#f0fdf4;color:#166534}
+.arch{display:grid;grid-template-columns:1fr 48px 1fr 48px 1fr;gap:8px;align-items:center;margin:18px 0}
+.archbox{padding:17px;border:1px solid var(--line);border-radius:14px;background:#fafafa;min-height:145px}
+.arrow{text-align:center;font-size:28px;color:var(--primary);font-weight:900}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;background:var(--primary);color:#fff;border-radius:50%;font-weight:900;margin-bottom:7px}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#111827;color:#e5e7eb;border-radius:14px;padding:18px;overflow:auto;font-size:13px;line-height:1.6}
+.expression-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.exp{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafafa;font-size:13px}
+.exp b{color:var(--primary)}
+.timeline{display:grid;gap:11px;margin-top:14px}
+.phase{display:grid;grid-template-columns:105px 1fr;gap:15px;padding:14px 16px;border:1px solid var(--line);border-radius:13px}
+.month{font-weight:900;color:var(--primary)}
+.total{font-weight:900;background:#eef2ff}
+.small{font-size:12px;color:var(--muted)}
+ul{padding-left:1.25em}
+li{margin:.35em 0}
+.footer{font-size:12px;color:var(--muted);margin-top:20px}
+@media(max-width:900px){
+  .grid4{grid-template-columns:repeat(2,1fr)}
+  .arch{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg)}
+  .expression-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:620px){
+  .wrap{width:calc(100% - 20px)}
+  .grid4{grid-template-columns:1fr}
+  .section{padding:21px 17px}
+  .phase{grid-template-columns:1fr}
+  .expression-grid{grid-template-columns:1fr}
+  table{font-size:13px}
+  th,td{padding:9px 7px}
+}
+@media print{
+  body{background:#fff}
+  .card{box-shadow:none}
+  header{background:#fff;color:#111827;border-bottom:2px solid #111827}
+  .grid4{margin-top:18px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+  <div class="kicker">KALM / MULTI-VTUBER LEARNING</div>
+  <h1>五角色上半身 Live2D + AI 情緒控制<br>六個月製作規劃 v0.3</h1>
+  <p class="subtitle">目標：半年內完成 Alice、Anna、Liv、Aurelia、Camila 五隻上半身 Live2D VTuber。既有人物設定直接沿用，外包重點放在立繪重製／拆件、Live2D 骨架、每種情緒 2～3 組動態變化、固定 AI 音色，並整合至 Multi‑VTuber Learning，由 AI 根據對話內容與情緒強度自動呼叫合適的表情／動作版本。</p>
+</div>
+</header>
+
+<main><div class="wrap">
+
+<section class="grid4">
+  <div class="card metric"><div class="label">角色數量</div><div class="value">5 隻</div><div class="note">既有人物設定，不重做角色概念設計</div></div>
+  <div class="card metric"><div class="label">模型規格</div><div class="value">上半身</div><div class="note">適合多人對話與學習畫面</div></div>
+  <div class="card metric"><div class="label">情緒變化</div><div class="value">每類 2～3 組</div><div class="note">避免每次同情緒都重複同一表演</div></div>
+  <div class="card metric"><div class="label">建議外部預算</div><div class="value">約 120～160 萬</div><div class="note">不含任何內部人力成本</div></div>
+</section>
+
+<section class="card section">
+<h2>一、這一版的規劃前提</h2>
+<p class="lead">這次不再把產品負責人或任何內部人員薪資納入成本，也不再估內部月薪；只列「專案需要哪些職能」，真正的預算只計算外包、工具、語音、授權與預備金。</p>
+<ul>
+  <li>五位角色的人物設定、性格與基本形象方向已經存在，不需要重新做完整角色企劃。</li>
+  <li>Live2D 只做上半身，重點放在臉部、頭部、肩頸、上半身姿態、頭髮與服裝動態。</li>
+  <li>每個情緒不是只有一個表情，而是每類準備 2～3 組變化。</li>
+  <li>AI 不直接控制骨架，而是依對話語意、角色人格與情緒強度選擇對應的表情／動作編號。</li>
+  <li>每位角色包含固定音色，讓語音、表情與角色人格一致。</li>
+</ul>
+<div class="callout good"><strong>核心方向：</strong>把角色表演先做成一個「可控、可驗收、可重複呼叫的表情／動作庫」，再讓 AI 做判斷與選擇。這比讓 AI 即時自由控制骨架穩定很多，也更容易在半年內做到成熟。</div>
+</section>
+
+<section class="card section">
+<h2>二、專案需要的內部職能</h2>
+<table>
+<thead><tr><th>職能</th><th>主要工作</th><th>建議方式</th></tr></thead>
+<tbody>
+<tr><td><strong>產品／學習設計</strong></td><td>角色設定、學習流程、情緒分類、對話規則、驗收與整體方向</td><td><span class="badge internal">既有內部負責</span></td></tr>
+<tr><td><strong>AI／後端工程</strong></td><td>角色對話、情緒判斷、表情編號選擇、狀態管理、TTS 呼叫</td><td><span class="badge internal">內部核心</span></td></tr>
+<tr><td><strong>互動前端／Live2D 整合</strong></td><td>Cubism SDK、多人同屏、Motion 呼叫、嘴型同步、角色切換與效能</td><td><span class="badge internal">內部核心</span></td></tr>
+<tr><td><strong>UI/UX</strong></td><td>多人對話畫面、角色配置、字幕、互動流程</td><td><span class="badge part">內部支援</span></td></tr>
+<tr><td><strong>QA／測試</strong></td><td>表情選擇錯誤、動作衝突、嘴型、語音、多人場景與長時間穩定性</td><td><span class="badge part">內部支援</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card section">
+<h2>三、每隻 VTuber 的完整規格</h2>
+<p>由於已經有人物設定，外包不需要從零進行角色世界觀與人物概念設計，但仍需要把既有設定整理成適合 Live2D 使用的上半身正式立繪與拆件檔。</p>
+
+<table>
+<thead><tr><th>項目</th><th>內容</th><th class="money">每隻估算</th></tr></thead>
+<tbody>
+<tr><td>上半身正式立繪／拆件</td><td>依既有人物設定重製或整理成 Live2D 規格，包含臉、眼、眉、嘴、頭髮、肩頸、上身服裝等分層</td><td class="money">2～3.5 萬</td></tr>
+<tr><td>Live2D 上半身骨架</td><td>頭部 XYZ、眼睛、嘴型、呼吸、肩膀、身體小幅轉向、髮絲與服裝物理</td><td class="money">2.5～4 萬</td></tr>
+<tr><td>情緒／動作庫</td><td>約 10～12 類情緒，每類 2～3 組變化，約 20～30 組可呼叫的表演版本</td><td class="money">3～5 萬</td></tr>
+<tr><td>固定 AI 音色</td><td>合法可商用的角色聲線、TTS 調校、語速／語氣測試與角色適配</td><td class="money">2～4 萬</td></tr>
+<tr class="total"><td>單隻完整估算</td><td>上半身立繪＋骨架＋多變化表情／動作＋音色</td><td class="money">約 9.5～16.5 萬</td></tr>
+<tr class="total"><td>五隻完整估算</td><td>五角色統一規格製作</td><td class="money">約 48～83 萬</td></tr>
+</tbody>
+</table>
+
+<p class="small">若既有角色立繪本身已符合 Live2D 拆件需求，實際成本還可再降低；反之，如果原圖需要大量重繪、重新整理服裝與髮型結構，則會靠近高標。</p>
+</section>
+
+<section class="card section">
+<h2>四、情緒不是一張表情，而是一組「表演池」</h2>
+<p>如果每次角色進入同一種情緒都播放完全相同的 Motion，很快就會有機械感。比較合理的方式是讓每一種情緒都有 2～3 個版本，再由 AI 依情境、強度與角色關係選擇不同變化。</p>
+
+<div class="expression-grid">
+  <div class="exp"><b>一般／自然</b><br>自然待機、輕微微笑、較專注</div>
+  <div class="exp"><b>開心</b><br>微笑、笑出來、帶得意的笑</div>
+  <div class="exp"><b>驚訝</b><br>輕微愣住、明顯驚訝、帶笑的驚訝</div>
+  <div class="exp"><b>疑惑</b><br>歪頭、皺眉、半信半疑</div>
+  <div class="exp"><b>思考</b><br>低頭思考、看旁邊、沉思後回神</div>
+  <div class="exp"><b>認真</b><br>正視對象、專注解說、稍微前傾</div>
+  <div class="exp"><b>不耐煩</b><br>輕吐槽、白眼、明顯嫌棄</div>
+  <div class="exp"><b>生氣</b><br>壓著火、明顯不爽、短暫爆發</div>
+  <div class="exp"><b>難過</b><br>低落、失落、較明顯傷心</div>
+  <div class="exp"><b>關心</b><br>柔和注視、微微擔心、認真關切</div>
+  <div class="exp"><b>同意／否定</b><br>點頭、輕微點頭、搖頭或否定</div>
+  <div class="exp"><b>旁聽反應</b><br>看向說話者、忍笑、皺眉、移開視線</div>
+</div>
+
+<div class="callout info"><strong>建議總量：</strong>每隻角色約 20～30 組實際可呼叫表演版本。不是每隻都完全相同，而是共用「情緒分類」，再依角色人格做不同表現。</div>
+</section>
+
+<section class="card section">
+<h2>五、AI 的控制方式</h2>
+<p class="lead">AI 的工作是「理解這句話現在該怎麼演」，而不是直接操控 Live2D 骨架。</p>
+
+<div class="arch">
+  <div class="archbox">
+    <div class="num">1</div>
+    <strong>產生角色台詞</strong>
+    <p>依 Character、Topic Skill、前後文與角色關係產生自然對話。</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="archbox">
+    <div class="num">2</div>
+    <strong>判斷情緒與變化</strong>
+    <p>AI 判斷情緒類型、強度、對象，再從該情緒的 2～3 種版本中挑選最合適的一組。</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="archbox">
+    <div class="num">3</div>
+    <strong>呼叫預製 Motion</strong>
+    <p>前端依角色 ID、情緒 ID 與 Variant 編號播放對應 Live2D 動態，並同步固定音色 TTS。</p>
+  </div>
+</div>
+
+<h3>建議控制資料</h3>
+<div class="code">{
+  "speaker": "Anna",
+  "emotion": "annoyed",
+  "emotion_id": 8,
+  "variant": 2,
+  "intensity": 0.72,
+  "target": "Aurelia",
+  "voice_style": "light_annoyed"
+}</div>
+
+<p>例如 Anna 對 Aurelia 說：「妳今天是不是專門負責把答案弄爛的？」AI 可以判斷這是熟人間的輕度不耐煩，不是認真生氣，因此選擇「不耐煩」中的第 2 種變化，而不是每次都播放同一個白眼動作。</p>
+
+<div class="callout blue"><strong>這個架構的優點：</strong>品質可預先驗收、角色不容易失控、同一情緒仍有變化，而且未來新增角色時只要沿用相同情緒分類與 Motion 命名規格，就能直接接入。</div>
+</section>
+
+<section class="card section">
+<h2>六、旁聽角色的動態</h2>
+<p>Multi‑VTuber 最重要的不是只有「誰講話誰動」，而是其他角色也要像真的坐在旁邊。建議旁聽者使用小幅度、低頻率反應，例如看向說話者、短暫點頭、忍笑、皺眉、翻白眼、微微驚訝或移開視線。</p>
+<p>不需要讓五個人每一句都一起動。Director 可以只在明顯情緒事件時挑 0～2 位旁聽角色反應，這會比所有人同步動作自然得多。</p>
+</section>
+
+<section class="card section">
+<h2>七、外包與內部工作分工</h2>
+<table>
+<thead><tr><th>工作</th><th>建議方式</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>上半身正式立繪與拆件</td><td><span class="badge out">外包</span></td><td>既有人物設定可直接交付，外包負責轉成 Live2D 可用素材</td></tr>
+<tr><td>Live2D 上半身骨架</td><td><span class="badge out">外包</span></td><td>專業性高、一次性工作量大</td></tr>
+<tr><td>每種情緒 2～3 組動態變化</td><td><span class="badge out">外包</span></td><td>最好由同一 Rig 團隊完成，避免 Motion 規格不一致</td></tr>
+<tr><td>AI 音色建立／TTS 供應</td><td><span class="badge out">外包／供應商</span></td><td>需要處理音色合法性與商用權</td></tr>
+<tr><td>Live2D 規格與驗收</td><td><span class="badge out">顧問／約聘</span></td><td>統一五隻角色的參數、Motion 命名與交付規格</td></tr>
+<tr><td>AI 情緒判斷與表情選擇</td><td><span class="badge internal">內部</span></td><td>屬於產品核心能力</td></tr>
+<tr><td>多人畫面與 SDK 整合</td><td><span class="badge internal">內部</span></td><td>與後續產品維護直接相關</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card section">
+<h2>八、六個月時程</h2>
+<div class="timeline">
+  <div class="phase"><div class="month">第 1 月</div><div><strong>規格定義與首隻啟動。</strong>整理既有人物設定，建立上半身拆件規格、共用情緒分類、Motion 命名、TTS 介面，先啟動第一隻角色。</div></div>
+  <div class="phase"><div class="month">第 2 月</div><div><strong>第一隻完整跑通。</strong>完成上半身模型、至少 10 組表演變化，跑通「對話 → 情緒 → Variant → Motion → TTS → 嘴型」。</div></div>
+  <div class="phase"><div class="month">第 3 月</div><div><strong>擴展到三隻。</strong>完成多人同屏、情緒切換、旁聽反應與音色整合；其餘角色同步製作。</div></div>
+  <div class="phase"><div class="month">第 4 月</div><div><strong>五隻全部進系統。</strong>每隻角色達到約 20～30 組可呼叫表演版本，開始真正跑 Multi‑VTuber Learning。</div></div>
+  <div class="phase"><div class="month">第 5 月</div><div><strong>大量調校。</strong>改善情緒誤判、表情重複、角色差異、語音節奏、嘴型同步與多人效能。</div></div>
+  <div class="phase"><div class="month">第 6 月</div><div><strong>穩定與驗收。</strong>停止擴需求，專注 QA、學習情境、角色表演自然度與正式展示版本。</div></div>
+</div>
+</section>
+
+<section class="card section">
+<h2>九、外部新增成本估算</h2>
+<table>
+<thead><tr><th>項目</th><th class="money">估算</th><th>說明</th></tr></thead>
+<tbody>
+<tr><td>五隻上半身 VTuber 完整製作</td><td class="money">48～83 萬</td><td>立繪／拆件、Live2D 骨架、每類情緒 2～3 組變化、固定音色</td></tr>
+<tr><td>技術美術／Live2D 規格顧問</td><td class="money">8～12 萬</td><td>五隻角色的規格統一、外包驗收與工程整合支援</td></tr>
+<tr><td>TTS 使用量與音色測試</td><td class="money">5～10 萬</td><td>六個月開發測試期</td></tr>
+<tr><td>LLM、雲端、開發工具</td><td class="money">8～15 萬</td><td>依實際測試量與模型選擇浮動</td></tr>
+<tr><td>外包追加修改與返工</td><td class="money">8～12 萬</td><td>角色細修、Motion 補強、Rig 問題與最後整合</td></tr>
+<tr><td>商用授權預備</td><td class="money">10～18 萬</td><td>Live2D 與語音供應商正式方案另行確認</td></tr>
+<tr><td>風險預備金</td><td class="money">12～18 萬</td><td>約 10～15% 彈性</td></tr>
+<tr class="total"><td><strong>建議外部專案預算</strong></td><td class="money"><strong>約 120～160 萬</strong></td><td><strong>完全不含內部人力成本</strong></td></tr>
+</tbody>
+</table>
+
+<div class="callout good"><strong>建議公司正式抓 140 萬外部預算。</strong>如果既有立繪能直接使用、音色採現成合法商用 TTS，可壓到 120 萬附近；如果五位角色都要做更細緻的表情變化或專屬 AI 音色，則往 160 萬靠近比較合理。</div>
+</section>
+
+<section class="card section">
+<h2>十、最終建議</h2>
+<p>這個版本已經不需要把成本放在「角色設計」本身，而應集中在三件事：第一，五隻上半身 Live2D 的品質；第二，每一種情緒有 2～3 種自然變化；第三，AI 能否穩定判斷何時該呼叫哪一組。</p>
+<p>真正值得留下來的長期資產，也不是五隻角色，而是「角色 ID + 情緒分類 + Variant + Motion + 音色」這一套控制架構。第一批五隻做完之後，未來第 6、第 10、第 20 隻角色都只需要照相同規格補素材，不必重新發明控制方式。</p>
+</section>
+
+<section class="card section">
+<h2>十一、管理層一句話版本</h2>
+<p class="lead"><strong>半年內完成五隻上半身 Live2D VTuber，沿用既有人物設定，每隻包含完整骨架、約 10～12 類情緒且每類 2～3 組變化，以及固定 AI 音色；AI 根據對話內容、角色人格與情緒強度選擇不同表情版本，整合至 Multi‑VTuber Learning，外部新增預算建議抓約 140 萬元。</strong></p>
+</section>
+
+<p class="footer">本文件為產品規劃級估算。實際費用仍會受到既有立繪是否可直接使用、Rig 複雜度、情緒 Motion 數量、AI 音色授權方式與正式商用條款影響。</p>
+
+</div></main>
+</body>
+</html>
