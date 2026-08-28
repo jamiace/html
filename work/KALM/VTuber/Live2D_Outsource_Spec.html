@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KALM Multi-VTuber Learning｜五角色上半身 Live2D 外包製作規格</title>
+<style>
+:root{
+  --bg:#f5f7fb; --panel:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+  --primary:#4338ca; --soft:#eef2ff; --good:#065f46; --goodbg:#ecfdf5;
+  --warn:#92400e; --warnbg:#fffbeb; --blue:#075985; --bluebg:#f0f9ff; --shadow:0 10px 30px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#fafbff,var(--bg));
+  color:var(--text);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  line-height:1.72;
+}
+header{
+  background:linear-gradient(135deg,#312e81,#4338ca 58%,#6366f1);
+  color:#fff;
+  padding:48px 20px 44px;
+}
+.wrap{width:min(1160px,calc(100% - 36px));margin:auto}
+.kicker{font-size:13px;letter-spacing:.12em;font-weight:800;opacity:.82}
+h1{font-size:clamp(30px,4.6vw,46px);line-height:1.18;margin:8px 0 14px}
+.subtitle{font-size:17px;max-width:930px;margin:0;opacity:.93}
+main{padding:30px 0 70px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:28px;
+  margin-top:20px;
+}
+h2{font-size:25px;margin:0 0 12px}
+h3{font-size:18px;margin:23px 0 8px}
+.lead{font-size:17px;color:#374151}
+.callout{padding:16px 18px;border-radius:14px;margin:16px 0;border:1px solid}
+.info{background:var(--soft);border-color:#c7d2fe;color:#312e81}
+.good{background:var(--goodbg);border-color:#a7f3d0;color:#064e3b}
+.warn{background:var(--warnbg);border-color:#fde68a;color:#78350f}
+.blue{background:var(--bluebg);border-color:#bae6fd;color:#0c4a6e}
+table{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:14px}
+th,td{padding:12px 11px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{background:#f8fafc;color:#374151;font-weight:800}
+tr:last-child td{border-bottom:0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.box{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fafafa}
+.box b{color:var(--primary)}
+.timeline{display:grid;gap:11px;margin-top:14px}
+.phase{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:15px 16px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.week{font-weight:900;color:var(--primary)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;background:#eef2ff;color:#4338ca}
+.code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:#111827;color:#e5e7eb;border-radius:14px;padding:17px;overflow:auto;font-size:13px;line-height:1.55
+}
+ul{padding-left:1.25em}
+li{margin:.35em 0}
+.small{font-size:12px;color:var(--muted)}
+.footer{font-size:12px;color:var(--muted);margin-top:20px}
+@media(max-width:850px){.grid3{grid-template-columns:1fr}.phase{grid-template-columns:1fr}}
+@media(max-width:620px){.wrap{width:calc(100% - 20px)}.card{padding:21px 17px}table{font-size:13px}th,td{padding:9px 7px}}
+@media print{body{background:#fff}.card{box-shadow:none}header{background:#fff;color:#111827;border-bottom:2px solid #111827}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+  <div class="kicker">KALM / MULTI-VTUBER LEARNING</div>
+  <h1>五角色上半身 Live2D<br>外包製作規格與工作週期</h1>
+  <p class="subtitle">本文件供外包製作團隊作為需求確認、工期評估與交付依據。專案共包含五位既有角色，需完成上半身 Live2D 模型、多人對話用動態表情庫、固定 AI 音色與系統整合所需標準化素材。</p>
+</div>
+</header>
+
+<main><div class="wrap">
+
+<section class="card">
+<h2>一、專案目標</h2>
+<p class="lead">完成 5 位可直接整合至 KALM Multi-VTuber Learning 的上半身 Live2D 角色。</p>
+<p>五位角色的人物設定、性格與基本視覺方向已由委託方提供，外包團隊不需重新建立世界觀或角色人格。製作重點是把既有角色轉換成品質一致、可程式控制、可長時間用於多人對話場景的 Live2D 角色。</p>
+
+<div class="callout good"><strong>最終使用情境：</strong>角色會由 AI 產生對話，系統依照對話內容判斷角色當下情緒，再呼叫已預先製作好的表情／動作版本。因此本案的重點不是自由即時動作生成，而是建立一套完整、自然且可被程式穩定呼叫的「角色表演素材庫」。</div>
+</section>
+
+<section class="card">
+<h2>二、製作範圍</h2>
+<table>
+<thead><tr><th>項目</th><th>工作內容</th><th>交付結果</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>上半身正式立繪與拆件</strong></td>
+  <td>依既有人物設定整理或重製適合 Live2D 使用的上半身立繪，完成臉部、眼睛、眉毛、嘴型、頭髮、肩頸、服裝、飾品等必要分層。</td>
+  <td>完整分層 PSD 與最終確認立繪</td>
+</tr>
+<tr>
+  <td><strong>Live2D 骨架</strong></td>
+  <td>完成頭部 XYZ、眼球、眨眼、眉毛、嘴型、呼吸、肩膀、上半身小幅轉向、髮絲、服裝與飾品物理。</td>
+  <td>Cubism 原始工程檔、moc3、物理設定與相關模型檔案</td>
+</tr>
+<tr>
+  <td><strong>情緒／動作庫</strong></td>
+  <td>每位角色建立約 10～12 類主要情緒，每類至少 2～3 組變化，避免同一情緒永遠播放同一個動作。</td>
+  <td>每位角色約 20～30 組可被程式直接呼叫的表演版本</td>
+</tr>
+<tr>
+  <td><strong>旁聽反應</strong></td>
+  <td>製作適合非發言狀態使用的細微反應，例如看向發言者、點頭、忍笑、皺眉、翻白眼、驚訝、移開視線。</td>
+  <td>可獨立呼叫的 Listener Motion</td>
+</tr>
+<tr>
+  <td><strong>嘴型與語音適配</strong></td>
+  <td>模型須能接受即時 TTS 嘴型控制，避免嘴型僅能配固定錄音。</td>
+  <td>可由程式輸入音量／音素資料驅動的嘴型設定</td>
+</tr>
+<tr>
+  <td><strong>固定 AI 音色</strong></td>
+  <td>依角色設定建立或選定可商用的固定聲線，確認音色、語速、情緒變化與 TTS 穩定性。</td>
+  <td>五位角色各自固定聲線、測試音檔、使用方式與商用授權文件</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>三、角色模型規格</h2>
+<div class="grid3">
+  <div class="box"><b>模型範圍</b><br>頭部至胸／腰部附近，上半身構圖即可，不需製作完整腿部與下半身步行動畫。</div>
+  <div class="box"><b>主要使用畫面</b><br>多人同屏、半身對話、角色彼此互動，以及學習內容旁的長時間顯示。</div>
+  <div class="box"><b>表演方向</b><br>以臉部表情、頭部動作、肩膀、上半身傾斜、視線與髮絲物理為主要表演來源。</div>
+</div>
+
+<h3>最低必要控制項目</h3>
+<ul>
+  <li>頭部左右、上下與適度傾斜。</li>
+  <li>上半身左右與前後小幅度動作。</li>
+  <li>雙眼眨眼、視線移動、瞳孔微調。</li>
+  <li>眉毛高低、角度與情緒變化。</li>
+  <li>嘴巴開合、嘴形變化與 TTS 嘴型同步。</li>
+  <li>呼吸與自然待機。</li>
+  <li>頭髮、衣物、飾品的基礎物理效果。</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>四、情緒／動作設計方式</h2>
+<p>本案不採「一個情緒只對應一個表情」。每一類情緒至少應有 2～3 個不同版本，由系統依照語境與情緒強度選擇，降低長時間使用時的重複感。</p>
+
+<div class="grid3">
+  <div class="box"><b>一般／自然</b><br>自然待機、輕微微笑、較專注</div>
+  <div class="box"><b>開心</b><br>微笑、笑出來、帶得意的笑</div>
+  <div class="box"><b>驚訝</b><br>輕微愣住、明顯驚訝、帶笑的驚訝</div>
+  <div class="box"><b>疑惑</b><br>歪頭、皺眉、半信半疑</div>
+  <div class="box"><b>思考</b><br>低頭思考、看旁邊、沉思後回神</div>
+  <div class="box"><b>認真</b><br>正視對象、專注解說、稍微前傾</div>
+  <div class="box"><b>不耐煩</b><br>輕吐槽、白眼、明顯嫌棄</div>
+  <div class="box"><b>生氣</b><br>壓著火、明顯不爽、短暫爆發</div>
+  <div class="box"><b>難過</b><br>低落、失落、較明顯傷心</div>
+  <div class="box"><b>關心</b><br>柔和注視、微微擔心、認真關切</div>
+  <div class="box"><b>同意／否定</b><br>點頭、輕微點頭、搖頭、否定反應</div>
+  <div class="box"><b>旁聽反應</b><br>看向發言者、忍笑、皺眉、驚訝、移開視線</div>
+</div>
+
+<div class="callout info"><strong>角色差異：</strong>五位角色共用同一套「情緒分類」，但不要求動作完全相同。每位角色應依其個性做不同表演。例如較冷靜的角色可使用較細微的眼神與眉毛變化；活潑角色則可以有更明顯的上半身與頭部動作。</div>
+</section>
+
+<section class="card">
+<h2>五、Motion 命名與程式呼叫規格</h2>
+<p>五隻角色必須共用一致的命名規則，讓系統可以透過角色 ID、情緒 ID 與變化編號直接呼叫。</p>
+
+<div class="code">Character_Emotion_Variant
+
+範例：
+Anna_Annoyed_01
+Anna_Annoyed_02
+Anna_Annoyed_03
+
+Alice_Thinking_01
+Alice_Thinking_02
+
+Liv_Listener_Skeptical_01
+Liv_Listener_Skeptical_02</div>
+
+<h3>建議共同分類</h3>
+<table>
+<thead><tr><th>ID</th><th>分類</th><th>說明</th></tr></thead>
+<tbody>
+<tr><td>01</td><td>Neutral</td><td>一般、自然、待機</td></tr>
+<tr><td>02</td><td>Happy</td><td>開心、微笑</td></tr>
+<tr><td>03</td><td>Laugh</td><td>明顯笑、被逗笑</td></tr>
+<tr><td>04</td><td>Surprised</td><td>驚訝</td></tr>
+<tr><td>05</td><td>Confused</td><td>疑惑、不理解</td></tr>
+<tr><td>06</td><td>Thinking</td><td>思考、沉思</td></tr>
+<tr><td>07</td><td>Serious</td><td>認真、解說</td></tr>
+<tr><td>08</td><td>Annoyed</td><td>不耐煩、吐槽</td></tr>
+<tr><td>09</td><td>Angry</td><td>生氣</td></tr>
+<tr><td>10</td><td>Sad</td><td>難過、低落</td></tr>
+<tr><td>11</td><td>Concerned</td><td>擔心、關心</td></tr>
+<tr><td>12</td><td>Agree / Disagree</td><td>點頭、搖頭、認同或否定</td></tr>
+<tr><td>13</td><td>Listener</td><td>旁聽與非發言反應</td></tr>
+</tbody>
+</table>
+<p class="small">實際分類可在第一隻角色 Prototype 階段微調，確定後五隻角色必須沿用同一分類架構。</p>
+</section>
+
+<section class="card">
+<h2>六、AI 端的使用方式</h2>
+<p>外包方不需要開發 AI 判斷邏輯，但製作素材時需理解最終呼叫方式。AI 會根據角色台詞與前後文輸出情緒分類、強度與 Variant，再由前端播放對應 Motion。</p>
+
+<div class="code">{
+  "speaker": "Anna",
+  "emotion": "annoyed",
+  "variant": 2,
+  "intensity": 0.72,
+  "target": "Aurelia"
+}</div>
+
+<p>因此 Motion 必須能被獨立、穩定地觸發，也需要考慮從待機切換到各種情緒、情緒結束後回到自然待機的過渡是否順暢。</p>
+</section>
+
+<section class="card">
+<h2>七、聲音與音色交付</h2>
+<p>每位角色需擁有固定且可長期使用的聲線。音色可以由外包團隊整合既有商用 TTS，也可以由聲音供應商／聲優另外製作，但最終必須完成統一交付。</p>
+
+<h3>每位角色至少需要確認</h3>
+<ul>
+  <li>基本音色與年齡感。</li>
+  <li>語速與發音清晰度。</li>
+  <li>一般、開心、認真、不耐煩、難過等主要語氣差異。</li>
+  <li>長篇學習內容下的自然度與聽覺疲勞。</li>
+  <li>可供即時 TTS 呼叫，而非只能使用預錄固定台詞。</li>
+  <li>商業使用、AI 合成與後續產品使用權利需明確。</li>
+</ul>
+
+<div class="callout warn"><strong>授權文件必須一併交付：</strong>不得使用來源不明、未取得 AI 合成權或僅限個人使用的聲線。</div>
+</section>
+
+<section class="card">
+<h2>八、建議外包工作週期</h2>
+<p class="lead">建議外包製作週期約 16 週，並採「先完成一隻 Prototype，再平行製作其餘四隻」的方式，避免五隻全部做完後才發現規格需要修改。</p>
+
+<div class="timeline">
+  <div class="phase">
+    <div class="week">第 1～2 週</div>
+    <div><strong>需求確認與統一規格。</strong>確認五位角色既有設定、上半身構圖、拆件需求、Live2D 參數、情緒分類、Motion 命名、嘴型需求與音色方向。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 3～5 週</div>
+    <div><strong>第一隻 Prototype。</strong>完成第一隻角色的正式立繪／拆件、基本 Rig、約 8～10 組代表性情緒變化與一組音色測試，交由委託方進行系統串接。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 6 週</div>
+    <div><strong>Prototype 驗收與規格定版。</strong>依實際程式呼叫結果修正 Motion、嘴型、表情幅度與命名規格。此階段確認後，後續四隻角色沿用同一標準。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 7～10 週</div>
+    <div><strong>第二、第三隻角色製作。</strong>平行完成兩隻角色的拆件、Rig、完整情緒／動作庫與音色。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 9～12 週</div>
+    <div><strong>第四、第五隻角色製作。</strong>與前一批交錯進行，完成其餘兩隻角色。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 13～14 週</div>
+    <div><strong>五角色整體一致性調整。</strong>檢查模型比例、表情幅度、Motion 命名、待機、旁聽反應、嘴型與音色一致性。</div>
+  </div>
+  <div class="phase">
+    <div class="week">第 15～16 週</div>
+    <div><strong>最終驗收與修改。</strong>依實際 Multi‑VTuber 系統測試結果進行必要調整，完成正式交付。</div>
+  </div>
+</div>
+
+<div class="callout blue"><strong>工期原則：</strong>外包製作應盡量在整體六個月專案的前四個月完成，保留後續約兩個月讓內部團隊進行 AI 情緒判斷、多人互動、效能、QA 與整體產品驗收。</div>
+</section>
+
+<section class="card">
+<h2>九、階段驗收方式</h2>
+<table>
+<thead><tr><th>驗收點</th><th>主要確認內容</th></tr></thead>
+<tbody>
+<tr><td><span class="badge">角色立繪確認</span></td><td>造型是否符合既有人物設定、上半身構圖是否適合多人畫面、拆件是否足以支援預定動作。</td></tr>
+<tr><td><span class="badge">Prototype 確認</span></td><td>第一隻角色能否被程式正常載入、表情能否依名稱呼叫、TTS 嘴型是否自然。</td></tr>
+<tr><td><span class="badge">表情庫確認</span></td><td>同一情緒不同 Variant 是否真的存在可辨識變化，而不是只改非常細微的參數。</td></tr>
+<tr><td><span class="badge">角色個性確認</span></td><td>五位角色即使使用相同情緒分類，表演方式仍能符合各自個性。</td></tr>
+<tr><td><span class="badge">多人畫面確認</span></td><td>五隻角色比例、動作幅度與待機表現放在同一畫面時不互相搶戲。</td></tr>
+<tr><td><span class="badge">正式交付確認</span></td><td>原始檔、模型檔、Motion、音色、授權文件與規格表全部齊全。</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>十、最終交付清單</h2>
+<ul>
+  <li>五位角色的上半身正式立繪。</li>
+  <li>五份完整分層 PSD。</li>
+  <li>五份 Live2D Cubism 原始工程檔。</li>
+  <li>五組可正式載入的 moc3 模型。</li>
+  <li>每位角色約 20～30 組表情／動作 Motion。</li>
+  <li>每位角色的基本待機與旁聽反應。</li>
+  <li>統一的參數與 Motion 命名表。</li>
+  <li>五位角色固定 AI 音色與測試音檔。</li>
+  <li>語音與模型相關的合法商用授權文件。</li>
+  <li>必要的整合說明與外包期間的技術問題修正。</li>
+</ul>
+
+<div class="callout good"><strong>完成標準：</strong>不是「五隻角色看起來會動」即視為完成，而是五隻角色必須能以統一規格被系統直接呼叫，並且在實際多人 AI 對話中穩定呈現不同情緒、不同 Variant、旁聽反應與固定角色音色。</div>
+</section>
+
+<section class="card">
+<h2>十一、外包方需回覆的資訊</h2>
+<p>請外包團隊依本規格回覆以下內容，以利後續排程與合作確認：</p>
+<ul>
+  <li>可承接的工作範圍：立繪／拆件、Live2D Rig、Motion、音色，可單項或完整承接。</li>
+  <li>五隻角色是否可平行製作，以及實際可投入人力。</li>
+  <li>第一隻 Prototype 預計所需週期。</li>
+  <li>其餘四隻角色的預計製作週期。</li>
+  <li>每位角色可提供的情緒／動作數量與修改次數。</li>
+  <li>是否具備 Live2D 程式整合經驗。</li>
+  <li>聲音／AI 音色的來源與可提供之商用授權形式。</li>
+  <li>最終可交付的原始檔與授權範圍。</li>
+</ul>
+</section>
+
+<p class="footer">文件用途：外包需求說明與製作排程評估。實際角色視覺細節、表情表與音色設定，於合作啟動後另提供角色設定資料確認。</p>
+
+</div></main>
+</body>
+</html>
