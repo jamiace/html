@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jami｜收藏與設備完整清單</title>
+<style>
+:root{
+  --bg:#0d1016; --panel:#151a22; --panel2:#1b2230; --text:#eef2f7; --muted:#9ca8b8;
+  --line:#2b3442; --accent:#e7b75b; --accent2:#7cc7ff; --good:#7ed9a7; --warn:#f5c56b;
+  --chip:#232c3a; --shadow:0 18px 55px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(180deg,#0b0e13 0%,#10151d 45%,#0d1016 100%);color:var(--text);font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.72}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1500px;margin:0 auto;padding:34px 26px 70px}
+.hero{position:relative;overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,rgba(231,183,91,.13),rgba(124,199,255,.06) 45%,rgba(255,255,255,.02));border-radius:28px;padding:42px 44px;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;right:-130px;top:-220px;background:radial-gradient(circle,rgba(231,183,91,.18),transparent 66%)}
+.kicker{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:800}
+h1{font-size:clamp(34px,5vw,64px);line-height:1.07;margin:10px 0 16px;letter-spacing:-.035em}
+.lead{max-width:980px;color:#c9d3df;font-size:17px;margin:0}
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:28px;max-width:1050px}
+.stat{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:17px;padding:15px 16px}
+.stat b{display:block;font-size:22px;color:#fff}.stat span{font-size:12px;color:var(--muted)}
+.toolbar{position:sticky;top:12px;z-index:20;margin:20px 0;padding:11px;border:1px solid var(--line);border-radius:18px;background:rgba(14,18,25,.88);backdrop-filter:blur(14px);display:flex;gap:10px;align-items:center;box-shadow:0 10px 35px rgba(0,0,0,.23)}
+#search{flex:1;min-width:200px;background:#111721;border:1px solid #303b4a;color:#fff;border-radius:12px;padding:12px 14px;font-size:14px;outline:none}
+#search:focus{border-color:#6eaee0;box-shadow:0 0 0 3px rgba(124,199,255,.09)}
+.btn{border:1px solid #334052;background:#171e29;color:#d9e2ec;border-radius:12px;padding:10px 13px;cursor:pointer;font-weight:700}
+.btn:hover{background:#222b39}
+.layout{display:grid;grid-template-columns:265px minmax(0,1fr);gap:22px}
+.sidebar{position:sticky;top:82px;align-self:start;max-height:calc(100vh - 105px);overflow:auto;border:1px solid var(--line);border-radius:20px;background:#11161e;padding:14px}
+.sidebar .label{font-size:11px;color:#748195;text-transform:uppercase;letter-spacing:.16em;font-weight:800;padding:6px 10px 10px}
+.sidebar a{display:block;padding:8px 10px;border-radius:10px;color:#bac5d2;font-size:13px}
+.sidebar a:hover{background:#1d2632;color:#fff}
+main{min-width:0}
+section{scroll-margin-top:96px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#151a22,#121720);padding:26px;margin-bottom:18px;box-shadow:0 8px 26px rgba(0,0,0,.14)}
+.section-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:18px}
+h2{font-size:25px;margin:0;letter-spacing:-.02em}h3{font-size:18px;margin:25px 0 9px;color:#fff}
+.desc{color:var(--muted);font-size:14px;max-width:850px;margin-top:5px}
+.count{white-space:nowrap;border:1px solid #354152;border-radius:999px;padding:5px 10px;color:#aeb9c6;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{border:1px solid #2b3544;border-radius:16px;background:#171e28;padding:16px 17px;transition:.18s ease}
+.card:hover{transform:translateY(-1px);border-color:#405169;background:#1a222e}
+.card h4{margin:0 0 5px;font-size:16px;letter-spacing:-.01em}.card p{margin:0;color:#aeb9c7;font-size:13px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tag{font-size:11px;color:#c5d0dc;background:var(--chip);border:1px solid #334052;padding:3px 8px;border-radius:999px}
+.tag.gold{color:#ffdc93;border-color:#5f4f30;background:#292418}.tag.blue{color:#bfe6ff;border-color:#34556d;background:#182631}.tag.green{color:#b9f3ce;border-color:#365945;background:#18271f}.tag.red{color:#ffb9b9;border-color:#613c3c;background:#2a1d1d}
+.tablewrap{overflow:auto;border:1px solid #2c3543;border-radius:15px}table{width:100%;border-collapse:collapse;min-width:760px;background:#151b24}th,td{padding:11px 13px;border-bottom:1px solid #27313e;text-align:left;vertical-align:top;font-size:13px}th{color:#cbd4df;background:#1b2330;font-size:12px;letter-spacing:.04em}td{color:#b7c2cf}tr:last-child td{border-bottom:0}.strong{color:#fff;font-weight:800}.note{border-left:3px solid var(--accent);background:#1b1a16;color:#d8cfbc;padding:13px 15px;border-radius:0 12px 12px 0;font-size:13px;margin-top:14px}
+.timeline{display:grid;gap:10px}.row{display:grid;grid-template-columns:180px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed #2c3543}.row:last-child{border-bottom:0}.row .name{font-weight:800;color:#fff}.row .detail{color:#adb8c5;font-size:13px}
+.quote{font-size:19px;line-height:1.55;padding:20px;border:1px solid #50452d;border-radius:15px;background:linear-gradient(135deg,#211f19,#171b22);color:#f4e3bd;margin-top:14px}
+.small{font-size:12px;color:#8794a5}.footer{color:#7d8997;text-align:center;font-size:12px;margin-top:30px}.hidden{display:none!important}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;border-radius:999px;padding:5px 9px;background:#202936;color:#cbd6e2;border:1px solid #344154}
+.badge:before{content:"";width:6px;height:6px;background:var(--good);border-radius:50%}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{display:none}.hero-grid{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:2px}}
+@media(max-width:600px){.wrap{padding:18px 12px 46px}.hero{padding:28px 22px;border-radius:20px}.hero-grid{grid-template-columns:1fr 1fr}.toolbar{top:6px}.btn{display:none}section{padding:19px 15px}.section-head{display:block}.count{display:inline-block;margin-top:9px}}
+@media print{body{background:white;color:#111}.wrap{max-width:none;padding:0}.toolbar,.sidebar{display:none!important}.layout{display:block}.hero,section{box-shadow:none;background:white;border-color:#ccc;color:#111}.lead,.desc,.card p,td,.row .detail,.small{color:#444}.card,.tablewrap,table,th{background:white}.card h4,h1,h2,h3,.strong,.row .name{color:#111}.tag{color:#333;background:#f5f5f5;border-color:#ccc}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">Personal Collection & Equipment Inventory</div>
+    <h1>Jami｜收藏與設備完整清單</h1>
+    <p class="lead">這份清單整理 Jami 目前持有的實車、重機、攝影與空拍設備、AR／VR、電腦與遊戲平台、音響耳機、Airsoft、Gunpla、汽車模型、Ducati 模型、文具與各類桌面收藏。重點保留每件物品的型號、版本、顏色、用途、收藏脈絡與特殊故事，呈現整套收藏跨領域但高度一致的設計與文化偏好。</p>
+    <div class="hero-grid">
+      <div class="stat"><b>13+</b><span>主要收藏／設備領域</span></div>
+      <div class="stat"><b>2</b><span>實際交通工具</span></div>
+      <div class="stat"><b>11</b><span>已列名 Gunpla</span></div>
+      <div class="stat"><b>30+</b><span>已辨識汽車模型／影視車／特殊車</span></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="搜尋型號、品牌、版本、關鍵字，例如：Sazabi、P90、F40、ROG、夏亞…" aria-label="搜尋收藏" />
+    <button class="btn" onclick="window.print()">列印／另存 PDF</button>
+    <button class="btn" onclick="document.getElementById('search').value='';filterCards();">清除搜尋</button>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="label">目錄</div>
+      <a href="#vehicles">01｜實車與重機</a>
+      <a href="#photo">02｜攝影・空拍・FPV</a>
+      <a href="#xr">03｜AR・VR・穿戴科技</a>
+      <a href="#computer">04｜電腦・遊戲平台</a>
+      <a href="#audio">05｜音響・耳機</a>
+      <a href="#airsoft">06｜Airsoft／槍型收藏</a>
+      <a href="#gunpla">07｜鋼彈／Gunpla</a>
+      <a href="#cars">08｜汽車模型收藏</a>
+      <a href="#diorama">09｜停車場・Starbucks 場景</a>
+      <a href="#ducati">10｜Ducati 模型</a>
+      <a href="#stationery">11｜文具・夏亞收藏</a>
+      <a href="#other">12｜其他模型・桌面收藏</a>
+      <a href="#office">13｜辦公室裝備配置</a>
+      <a href="#wishlist">14｜明確想要但尚未列入持有</a>
+      <a href="#taste">15｜收藏脈絡與審美軸線</a>
+    </aside>
+
+    <main>
+      <section id="vehicles" data-section>
+        <div class="section-head"><div><h2>01｜實車與重機</h2><div class="desc">不是模型，而是實際擁有、實際駕駛／騎乘的交通工具。這兩台也是整份收藏審美最直接的現實投射。</div></div><span class="count">2 台</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>MINI Cooper S R56</h4><p>2012 年式，N18 引擎，自排。實際日常用車；偏好它的緊湊、敏捷、英式設計感與「性能足夠但不是純規格競賽」的個性。</p><div class="meta"><span class="tag gold">實車</span><span class="tag">2012</span><span class="tag">N18</span><span class="tag">Cooper S</span></div></article>
+          <article class="card" data-item><h4>Ducati Monster 696</h4><p>實際持有的 Ducati 重機。Monster 系列的鋼管車架、裸車比例與機械感，也直接對應到辦公室的大比例 Monster 696 模型。</p><div class="meta"><span class="tag gold">實車</span><span class="tag red">Ducati</span><span class="tag">Monster</span><span class="tag">696</span></div></article>
+        </div>
+      </section>
+
+      <section id="photo" data-section>
+        <div class="section-head"><div><h2>02｜攝影・空拍・FPV・影像輸出</h2><div class="desc">從全片幅相機、運動攝影、一般空拍、FPV，到實體相片輸出，涵蓋「拍攝 → 特殊視角 → 飛行 → 輸出」完整鏈條。</div></div><span class="count">7 項</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Sony α7C</h4><p>全片幅無反相機；屬於主要影像設備之一。</p><div class="meta"><span class="tag blue">攝影</span><span class="tag">Sony</span><span class="tag">α7C</span></div></article>
+          <article class="card" data-item><h4>AntiGravity A1</h4><p>特殊視角／全景取向的空拍影像設備，補足傳統相機、運動相機與 FPV 之外的特殊拍攝方式。</p><div class="meta"><span class="tag blue">空拍／影像</span><span class="tag">A1</span></div></article>
+          <article class="card" data-item><h4>DJI Neo 2</h4><p>小型空拍設備。</p><div class="meta"><span class="tag blue">空拍</span><span class="tag">DJI</span></div></article>
+          <article class="card" data-item><h4>Insta360 Ace Pro 2</h4><p>運動／隨身影像設備。</p><div class="meta"><span class="tag blue">運動相機</span><span class="tag">Insta360</span></div></article>
+          <article class="card" data-item><h4>DJI Avata 1</h4><p>FPV 飛行平台。</p><div class="meta"><span class="tag blue">FPV</span><span class="tag">DJI</span><span class="tag">Avata</span></div></article>
+          <article class="card" data-item><h4>DJI 二代眼鏡</h4><p>搭配 DJI Avata 的 FPV 第一人稱視角顯示設備，負責沉浸式飛行觀看與操控體驗。</p><div class="meta"><span class="tag blue">FPV</span><span class="tag">Goggles</span></div></article>
+          <article class="card" data-item><h4>Canon SELPHY CP1500</h4><p>小型熱昇華相片印表機；放在辦公室，可把數位影像直接輸出成實體照片。</p><div class="meta"><span class="tag blue">相片輸出</span><span class="tag">Canon</span><span class="tag">CP1500</span></div></article>
+        </div>
+      </section>
+
+      <section id="xr" data-section>
+        <div class="section-head"><div><h2>03｜AR・VR・穿戴科技</h2><div class="desc">這一區不是單純 3C，而是明顯偏向「把運算、顯示或環境控制穿在身上」的設備。</div></div><span class="count">5 項</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Meta Quest 3</h4><p>VR／MR 頭戴裝置；遊戲與沉浸式影音平台。</p><div class="meta"><span class="tag green">VR / MR</span><span class="tag">Meta</span></div></article>
+          <article class="card" data-item><h4>ROG XREAL R1</h4><p>AR／隨身顯示眼鏡，主要用途包含接手機、電腦觀看影片與遊戲。</p><div class="meta"><span class="tag green">AR 顯示</span><span class="tag">ROG</span><span class="tag">XREAL</span><span class="tag">R1</span></div></article>
+          <article class="card" data-item><h4>ROG Control Dock</h4><p>與 ROG XREAL R1 搭配的連接／控制裝置；辦公桌上可見。</p><div class="meta"><span class="tag green">AR 配件</span><span class="tag">ROG</span></div></article>
+          <article class="card" data-item><h4>Rokid AR AI 眼鏡</h4><p>另一套 AR／AI 穿戴眼鏡，收納於辦公室抽屜。</p><div class="meta"><span class="tag green">AR / AI</span><span class="tag">Rokid</span></div></article>
+          <article class="card" data-item><h4>TORRAS COOLiFY Cyber</h4><p>穿戴式個人冷卻設備，屬於「日常用品的進階科技版本」路線。</p><div class="meta"><span class="tag green">穿戴科技</span><span class="tag">TORRAS</span><span class="tag">COOLiFY Cyber</span></div></article>
+        </div>
+      </section>
+
+      <section id="computer" data-section>
+        <div class="section-head"><div><h2>04｜電腦・遊戲平台・控制器</h2><div class="desc">PC、家機、掌機三條線都有，辦公室亦配置成完整的高階工作／娛樂工作站。</div></div><span class="count">8+ 項</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>ROG Strix G614</h4><p>i9-13980HX、32GB RAM、RTX 4080 Laptop 12GB，儲存容量約 2.79TB。現為主要高階工作／遊戲筆電之一。</p><div class="meta"><span class="tag blue">Gaming Laptop</span><span class="tag">RTX 4080</span><span class="tag">i9-13980HX</span></div></article>
+          <article class="card" data-item><h4>Razer RTX 3070 筆電</h4><p>Razer Gaming Laptop，搭載 NVIDIA GeForce RTX 3070 級獨立顯示核心，作為另一套高效能 PC 遊戲／運算平台。</p><div class="meta"><span class="tag blue">Gaming Laptop</span><span class="tag">Razer</span><span class="tag">RTX 3070</span></div></article>
+          <article class="card" data-item><h4>PlayStation 5</h4><p>Sony 家用遊戲主機。</p><div class="meta"><span class="tag">PS5</span><span class="tag">Console</span></div></article>
+          <article class="card" data-item><h4>Nintendo Switch 1</h4><p>第一代 Switch。</p><div class="meta"><span class="tag">Nintendo</span><span class="tag">Switch</span></div></article>
+          <article class="card" data-item><h4>Nintendo Switch 2</h4><p>第二代 Switch。</p><div class="meta"><span class="tag">Nintendo</span><span class="tag">Switch 2</span></div></article>
+          <article class="card" data-item><h4>Steam Deck</h4><p>掌上型 PC 遊戲平台。</p><div class="meta"><span class="tag">Handheld PC</span><span class="tag">Steam</span></div></article>
+          <article class="card" data-item><h4>DualSense Edge</h4><p>PlayStation 5 高階控制器，提供比標準 DualSense 更高的按鍵配置與操作自由度；平時收納於辦公室抽屜。</p><div class="meta"><span class="tag">Controller</span><span class="tag">PlayStation</span></div></article>
+          <article class="card" data-item><h4>黑色遊戲控制器</h4><p>額外的黑色遊戲控制器，與 DualSense Edge 一起收納，作為不同平台或備用操作裝置。</p><div class="meta"><span class="tag">Controller</span><span class="tag">Black</span></div></article>
+        </div>
+        <div class="note">辦公室工作站另包含：ROG 筆電、外接鍵盤、滑鼠、直立副螢幕與外接顯示器。這些屬於工作環境配置，不另外灌水計入「主收藏數」。</div>
+      </section>
+
+      <section id="audio" data-section>
+        <div class="section-head"><div><h2>05｜音響・耳機・個人聆聽</h2><div class="desc">從家庭劇院、可攜式精品音響、真無線耳機到頭戴式耳機都有；不是單一品牌體系，而是依不同使用場景選擇。</div></div><span class="count">6 型號／7 件以上</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Devialet Mania Opéra de Paris</h4><p>白／金 Opéra de Paris 版本；辦公桌上的視覺中心之一，也是目前最具精品感的可攜式音響收藏。</p><div class="meta"><span class="tag gold">Opéra de Paris</span><span class="tag">Devialet</span><span class="tag">Mania</span></div></article>
+          <article class="card" data-item><h4>Bose Soundbar 700</h4><p>家庭劇院主聲道系統。</p><div class="meta"><span class="tag">Bose</span><span class="tag">Soundbar</span></div></article>
+          <article class="card" data-item><h4>Bose Bass Module 700</h4><p>搭配 Soundbar 700 的重低音模組。</p><div class="meta"><span class="tag">Bose</span><span class="tag">Subwoofer</span></div></article>
+          <article class="card" data-item><h4>Apple AirPods Max</h4><p>Apple 頭戴式無線耳機，辦公桌上配置專用耳機架，作為個人影音與音樂聆聽設備之一。</p><div class="meta"><span class="tag">Headphone</span><span class="tag">Apple</span></div></article>
+          <article class="card" data-item><h4>Bowers &amp; Wilkins PI7</h4><p>B&amp;W 真無線耳機，以偏重音色質感、低頻控制與整體音樂性的聆聽取向，補足 AirPods Max 之外的隨身音訊配置。</p><div class="meta"><span class="tag">TWS</span><span class="tag">B&amp;W</span></div></article>
+          <article class="card" data-item><h4>Xiaomi Sound Party ×2</h4><p>兩台可互相連線使用，屬於日常藍牙喇叭配置。</p><div class="meta"><span class="tag">Bluetooth Speaker</span><span class="tag">×2</span><span class="tag">Xiaomi</span></div></article>
+        </div>
+        <h3>過往明確提過的耳機器材（非現役清單）</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Audio-Technica ATH-W1000</h4><p>曾擁有／過往器材。</p><div class="meta"><span class="tag">歷史持有</span><span class="tag">Audio-Technica</span></div></article>
+          <article class="card" data-item><h4>Audio-Technica ATH-L3000</h4><p>曾擁有／過往器材。</p><div class="meta"><span class="tag">歷史持有</span><span class="tag">Audio-Technica</span></div></article>
+        </div>
+      </section>
+
+      <section id="airsoft" data-section>
+        <div class="section-head"><div><h2>06｜Airsoft／槍型收藏</h2><div class="desc">整體不是「制式軍警裝備派」，而是以經典設計、特殊結構、高辨識度與機械造型為核心。P90、Curve、Rhino、PX4C、1911 與 G18 彼此的設計語言差異很大，形成一組很鮮明的工業設計型收藏。</div></div><span class="count">6 種槍型</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Tokyo Marui P90</h4><p>電動連發 BB 槍，原廠內紅點版本，初速約 90 m/s。平時放在公司桌下；同事間暱稱為「開會效率器」。</p><div class="meta"><span class="tag gold">Tokyo Marui</span><span class="tag">P90</span><span class="tag">內紅點</span><span class="tag">約 90 m/s</span><span class="tag red">開會效率器</span></div></article>
+          <article class="card" data-item><h4>1911｜銀色</h4><p>經典 1911 槍型，銀色外觀；掛在家中電腦桌旁牆面。</p><div class="meta"><span class="tag">1911</span><span class="tag">銀色</span></div></article>
+          <article class="card" data-item><h4>G18＋30 發長彈匣</h4><p>G18 槍型，搭配長彈匣；與 1911、Curve、PX4C 一起形成家中牆面收藏。</p><div class="meta"><span class="tag">G18</span><span class="tag">30 發長彈匣</span></div></article>
+          <article class="card" data-item><h4>Curve</h4><p>以極特殊的弧形／貼身攜帶設計著名；在整套收藏中最能代表「異端工業設計」的一支。</p><div class="meta"><span class="tag">Curve</span><span class="tag">特殊設計</span></div></article>
+          <article class="card" data-item><h4>PX4C</h4><p>PX4 Compact 槍型；造型圓潤、具有高度辨識度的現代設計語言。</p><div class="meta"><span class="tag">PX4C</span><span class="tag">Compact</span></div></article>
+          <article class="card" data-item><h4>Rhino 60D｜銀色</h4><p>犀牛左輪 60D，銀色；與銀色 1911 形成「經典金屬感 vs. 現代異形設計」的強烈對照。</p><div class="meta"><span class="tag">Rhino</span><span class="tag">60D</span><span class="tag">銀色</span></div></article>
+        </div>
+      </section>
+
+      <section id="gunpla" data-section>
+        <div class="section-head"><div><h2>07｜鋼彈／Gunpla 收藏</h2><div class="desc">Sazabi、ν 系、Unicorn、Strike Freedom、Z Gundam 與 RX-78-2 都有，而且偏好特殊透明色、角色主題配色與高階 Grade。</div></div><span class="count">11 台已列名</span></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Grade</th><th>機體／版本</th><th>數量／狀態</th><th>收藏特徵</th></tr></thead>
+          <tbody>
+            <tr data-item><td class="strong">RG</td><td>MSN-04 Sazabi 普通版</td><td>1</td><td>與透明紅版構成 RG Sazabi 雙版本。</td></tr>
+            <tr data-item><td class="strong">RG</td><td>MSN-04 Sazabi 透明紅版</td><td>1</td><td>特殊透明色版本。</td></tr>
+            <tr data-item><td class="strong">MG</td><td>MSN-04 Sazabi 普通版</td><td>1</td><td>Sazabi 的較大比例主力收藏。</td></tr>
+            <tr data-item><td class="strong">RG</td><td>RX-78-2 Gundam 2.0｜初音版</td><td>1</td><td>角色／主題配色版本。</td></tr>
+            <tr data-item><td class="strong">RG</td><td>RX-78-2 Gundam 2.0｜紅夏亞版</td><td>1</td><td>夏亞紅主題版本。</td></tr>
+            <tr data-item><td class="strong">PG</td><td>Z Gundam｜迪坦斯藍黑配色</td><td>1</td><td>非標準配色，強調 Titans 藍黑視覺。</td></tr>
+            <tr data-item><td class="strong">MGEX</td><td>Unicorn Gundam</td><td>1</td><td>MGEX 高階產品線。</td></tr>
+            <tr data-item><td class="strong">MGEX</td><td>Strike Freedom｜透明金版</td><td>1</td><td>特殊透明金版本。</td></tr>
+            <tr data-item><td class="strong">PG</td><td>Unicorn Gundam 03 Phenex／鳳凰</td><td>1</td><td>大型高階 Unicorn 系收藏。</td></tr>
+            <tr data-item><td class="strong">RG</td><td>ν Gundam</td><td>1</td><td>ν 系主力之一。</td></tr>
+            <tr data-item><td class="strong">RG</td><td>Hi-ν Gundam</td><td>1</td><td>與 RG ν Gundam 構成 ν 系雙收藏。</td></tr>
+          </tbody>
+        </table></div>
+        <div class="note">Sazabi 是最明確的核心支線之一：RG 普通、RG 透明紅、MG 均已持有；並另有非常明確但尚未列入持有的終極目標，見「願望清單」。</div>
+      </section>
+
+      <section id="cars" data-section>
+        <div class="section-head"><div><h2>08｜汽車模型收藏</h2><div class="desc">這一區不是單純堆疊超跑，而是 JDM、Rally、Ferrari、歐洲性能車、美式經典、MINI、影視名車、警用／郵務／日常車輛並存；重點在車款本身的歷史位置、設計辨識度與文化故事。</div></div><span class="count">30+ 台已辨識／可分類</span></div>
+
+        <h3>JDM／日本性能車／Rally</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Toyota Supra A80｜Fast &amp; Furious</h4><p>橘色電影塗裝、大尾翼；對應 Brian 的《玩命關頭》經典 Supra。另有近期購入的 Tomica Unlimited 版本。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">JDM</span><span class="tag">A80</span></div></article>
+          <article class="card" data-item><h4>Toyota Sprinter Trueno AE86</h4><p>白黑雙色 AE86 Hatchback；Starbucks JDM 停車區的重要成員。</p><div class="meta"><span class="tag">JDM</span><span class="tag">AE86</span></div></article>
+          <article class="card" data-item><h4>Mazda RX-7 FD3S｜黃色</h4><p>90 年代日系跑車核心車款之一。</p><div class="meta"><span class="tag">JDM</span><span class="tag">FD3S</span></div></article>
+          <article class="card" data-item><h4>Nissan Skyline GT-R R32｜深灰</h4><p>Godzilla 世代代表車；Starbucks JDM 場景中可清楚辨識。</p><div class="meta"><span class="tag">JDM</span><span class="tag">R32</span></div></article>
+          <article class="card" data-item><h4>Honda NSX｜白色</h4><p>第一代 NSX，代表 1990 年代日本中置引擎跑車與日系超跑思維；配置於 Starbucks JDM 車聚場景前景。</p><div class="meta"><span class="tag">JDM</span><span class="tag">NSX</span></div></article>
+          <article class="card" data-item><h4>Subaru Impreza WRX STI｜藍／金輪</h4><p>藍色車身搭配金色輪圈，具有非常典型的 Subaru Rally／WRX STI 視覺語彙，整體為 GC8 世代風格。</p><div class="meta"><span class="tag">JDM</span><span class="tag">Rally</span><span class="tag">Subaru</span></div></article>
+          <article class="card" data-item><h4>Toyota Celica GT-Four RC｜ST185</h4><p>近期購入的 Tomica Premium。原本鎖定 ST205，但實際買到 ST185；目前收藏中以 ST185 計。</p><div class="meta"><span class="tag">JDM</span><span class="tag">Rally</span><span class="tag gold">ST185</span></div></article>
+          <article class="card" data-item><h4>Toyota 2000GT｜白色</h4><p>日本經典 GT；Starbucks 場景中可清楚辨識。</p><div class="meta"><span class="tag">Classic JDM</span><span class="tag">2000GT</span></div></article>
+          <article class="card" data-item><h4>Toyota GR Yaris｜Rally／WRC 風格</h4><p>白紅競技塗裝的 GR Yaris，強調其 Rally 血統與小型高性能四驅車的角色。</p><div class="meta"><span class="tag">Rally</span><span class="tag">GR Yaris</span></div></article>
+          <article class="card" data-item><h4>Toyota GR Yaris HKS 賽車｜PANDEM 寬體</h4><p>黑色 HKS／PANDEM 競技風格車身，搭配金色輪圈與寬體空力套件，是 GR Yaris 支線中更偏改裝賽車文化的一台。</p><div class="meta"><span class="tag">JDM</span><span class="tag">GR Yaris</span><span class="tag">HKS</span><span class="tag">PANDEM</span></div></article>
+          <article class="card" data-item><h4>Mazda MX-5｜紅色敞篷</h4><p>輕量雙座敞篷跑車，代表 Mazda 對「小、輕、直接」駕駛樂趣的經典路線。</p><div class="meta"><span class="tag">JDM</span><span class="tag">Mazda</span><span class="tag">MX-5</span><span class="tag">Roadster</span></div></article>
+          <article class="card" data-item><h4>Toyota GR Supra｜紅色・現行世代</h4><p>新世代 Toyota Supra，與 1990 年代 A80「牛魔王」分屬不同世代；在收藏中形成 Supra 新舊世代的對照。</p><div class="meta"><span class="tag">JDM</span><span class="tag">Toyota</span><span class="tag">GR Supra</span><span class="tag">Modern</span></div></article>
+        </div>
+
+        <h3>歐洲超跑／性能車</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Aston Martin Valkyrie｜女武神</h4><p>極端空氣力學導向的英國超級跑車，車身比例與空力通道非常接近賽車思維；「Valkyrie／女武神」本身也具有強烈命名與文化辨識度。</p><div class="meta"><span class="tag gold">Aston Martin</span><span class="tag">Valkyrie</span><span class="tag">女武神</span></div></article>
+          <article class="card" data-item><h4>Lamborghini Aventador Roadster｜藍色敞篷</h4><p>Lamborghini V12 中置引擎旗艦跑車的敞篷版本，低扁車身、楔形輪廓與銳利折線具有高度辨識度。</p><div class="meta"><span class="tag">Lamborghini</span><span class="tag">Aventador</span><span class="tag">Roadster</span></div></article>
+          <article class="card" data-item><h4>McLaren F1 GTR｜紅／黃競賽塗裝</h4><p>大型尾翼與賽車塗裝，屬於 McLaren 經典賽車脈絡。</p><div class="meta"><span class="tag">McLaren</span><span class="tag">F1 GTR</span><span class="tag">Race</span></div></article>
+          <article class="card" data-item><h4>Mercedes-AMG GT R｜綠色</h4><p>招牌綠色 AMG GT 系車型。</p><div class="meta"><span class="tag">Mercedes-AMG</span><span class="tag">GT R</span></div></article>
+          <article class="card" data-item><h4>Porsche 911｜白色 GT／賽道風格</h4><p>白色 911 搭配大型固定尾翼，整體走 GT／賽道性能取向，代表 911 系列偏競技的一端。</p><div class="meta"><span class="tag">Porsche</span><span class="tag">911</span><span class="tag">GT</span></div></article>
+        </div>
+
+        <h3>Ferrari 支線</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Ferrari F40</h4><p>90 年代前後超級跑車歷史核心；位於 Ferrari 專層。</p><div class="meta"><span class="tag red">Ferrari</span><span class="tag">F40</span></div></article>
+          <article class="card" data-item><h4>Ferrari F50</h4><p>固定大尾翼、圓潤 1990s Ferrari 比例；與 F40、Enzo 同層呈現世代脈絡。</p><div class="meta"><span class="tag red">Ferrari</span><span class="tag">F50</span></div></article>
+          <article class="card" data-item><h4>Ferrari Enzo</h4><p>尖銳 F1 式鼻型與三角視覺語彙明顯。</p><div class="meta"><span class="tag red">Ferrari</span><span class="tag">Enzo</span></div></article>
+          <article class="card" data-item><h4>Ferrari F355</h4><p>1990 年代 Ferrari 中置 V8 跑車代表之一，延續古典 Ferrari 比例，同時銜接進入更現代化的超跑世代。</p><div class="meta"><span class="tag red">Ferrari</span><span class="tag">F355</span></div></article>
+          <article class="card" data-item><h4>Ferrari SF90｜紅色</h4><p>Ferrari 現代混合動力高性能車款，與 F40、F50、Enzo、F355 等較早世代車型放在同一收藏脈絡中，形成明顯的新舊世代對照。</p><div class="meta"><span class="tag red">Ferrari</span><span class="tag">SF90</span><span class="tag">Hybrid</span></div></article>
+        </div>
+
+        <h3>MINI／英倫小車支線</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Classic Mini｜紅色＋Union Jack 車頂</h4><p>位於停車場底層；英倫符號非常明確。</p><div class="meta"><span class="tag">Classic Mini</span><span class="tag">Union Jack</span></div></article>
+          <article class="card" data-item><h4>MINI Hatch F56｜黑紅</h4><p>F56 世代 MINI Hatch，黑紅配色延續 MINI／JCW 常見的運動化視覺語彙，與 Classic Mini 及 Countryman 形成不同世代的 MINI 支線。</p><div class="meta"><span class="tag">MINI</span><span class="tag">F56</span><span class="tag">Hatch</span></div></article>
+          <article class="card" data-item><h4>現代 MINI｜紅黑</h4><p>紅黑配色的現代 MINI，與黑紅 F56、Classic Mini 及 Countryman 一起構成英倫小車支線。</p><div class="meta"><span class="tag">MINI</span><span class="tag">Modern MINI</span></div></article>
+          <article class="card" data-item><h4>MINI Cooper SE Countryman ALL4</h4><p>Tomica No.52，2026 新車款；近期購入。</p><div class="meta"><span class="tag">MINI</span><span class="tag">Countryman</span><span class="tag">ALL4</span></div></article>
+        </div>
+
+        <h3>美式經典／Muscle／Pony Car</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>1970 Dodge Charger R/T｜Dominic Toretto</h4><p>《Fast &amp; Furious》唐老大代表車；黑色、外露機械增壓器，是影視名車支線的重要角色。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">Dodge</span><span class="tag">Charger R/T</span></div></article>
+          <article class="card" data-item><h4>Pontiac Firebird Trans Am｜KITT</h4><p>《Knight Rider／霹靂遊俠》KITT；不是普通 Firebird，而是「車本身就是角色」的代表。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">KITT</span><span class="tag">Firebird Trans Am</span></div></article>
+          <article class="card" data-item><h4>Ford Mustang｜紅色</h4><p>立體停車場上層的現代 Mustang。</p><div class="meta"><span class="tag">Mustang</span><span class="tag">Ford</span></div></article>
+          <article class="card" data-item><h4>Ford Mustang｜藍色</h4><p>另一層可見的藍色 Mustang。</p><div class="meta"><span class="tag">Mustang</span><span class="tag">Ford</span></div></article>
+          <article class="card" data-item><h4>1959 Cadillac 敞篷車｜粉紅</h4><p>巨大尾鰭、50 年代美式豪華車氣質明顯；細版本以 Cadillac Eldorado／Biarritz 風格辨識。</p><div class="meta"><span class="tag">Cadillac</span><span class="tag">1959</span><span class="tag red">細型未完全確認</span></div></article>
+          <article class="card" data-item><h4>Shelby GT500｜1967</h4><p>獨立展示盒中可見，盒上標示 1967 Shelby GT500。</p><div class="meta"><span class="tag">Shelby</span><span class="tag">GT500</span><span class="tag">1967</span></div></article>
+          <article class="card" data-item><h4>Shelby Cobra｜紅／白</h4><p>Fine Works 64 Christmas 展示中的紅白 Cobra。</p><div class="meta"><span class="tag">Shelby</span><span class="tag">Cobra</span></div></article>
+        </div>
+
+        <h3>影視／科幻名車</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>DeLorean DMC-12｜Back to the Future Time Machine</h4><p>銀色車身，後方具時間機械裝置細節；《回到未來》代表性收藏。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">DeLorean</span><span class="tag">BTTF</span></div></article>
+          <article class="card" data-item><h4>Toyota Supra A80｜Brian</h4><p>同時屬於 JDM 與《Fast &amp; Furious》影視車支線。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">F&amp;F</span></div></article>
+          <article class="card" data-item><h4>Dodge Charger R/T｜Dom</h4><p>同時屬於美式 Muscle 與《Fast &amp; Furious》影視車支線。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">F&amp;F</span></div></article>
+          <article class="card" data-item><h4>KITT｜Knight Industries Two Thousand</h4><p>同時屬於 Pontiac Firebird Trans Am 與 1980s 電視汽車文化。</p><div class="meta"><span class="tag red">影視車</span><span class="tag">Knight Rider</span></div></article>
+        </div>
+
+        <h3>特殊用途／日常／地方文化車輛</h3>
+        <div class="grid">
+          <article class="card" data-item><h4>Nissan GT-R R35｜栃木縣警察 POLICE</h4><p>白黑日本警車塗裝，車身有「栃木県警察 POLICE」。</p><div class="meta"><span class="tag">Police</span><span class="tag">R35</span><span class="tag">Japan</span></div></article>
+          <article class="card" data-item><h4>Mitsubishi Lancer Fortis｜台灣警車</h4><p>黑白台灣警用塗裝的 Lancer Fortis，將台灣日常街道上具有辨識度的公務車元素納入收藏。</p><div class="meta"><span class="tag">Police</span><span class="tag">Taiwan</span><span class="tag">Lancer Fortis</span></div></article>
+          <article class="card" data-item><h4>中華郵政郵務車｜綠色</h4><p>停車場底層；把地方日常交通文化納入收藏，而不是只收性能車。</p><div class="meta"><span class="tag">Postal</span><span class="tag">Taiwan</span></div></article>
+          <article class="card" data-item><h4>Suzuki Kei Van｜綠色</h4><p>小型廂式車，停車場底層。</p><div class="meta"><span class="tag">Suzuki</span><span class="tag">Kei Van</span></div></article>
+          <article class="card" data-item><h4>Suzuki Jimny｜萊姆綠</h4><p>位於上層停車場；小型越野車支線。</p><div class="meta"><span class="tag">Suzuki</span><span class="tag">Jimny</span></div></article>
+          
+          <article class="card" data-item><h4>灰／綠改裝車</h4><p>底層側邊的改裝風格車款，作為停車場場景中的街頭改裝文化元素。</p><div class="meta"><span class="tag">Modified</span><span class="tag">Street Culture</span></div></article>
+        </div>
+      </section>
+
+      <section id="diorama" data-section>
+        <div class="section-head"><div><h2>09｜汽車場景・立體停車場・Starbucks Diorama</h2><div class="desc">你的汽車模型不是單純排櫃，而是被放進「有生活感的汽車世界」。這也是整套收藏辨識度最高的部分。</div></div><span class="count">2 大主場景＋配件</span></div>
+        <div class="timeline">
+          <div class="row" data-item><div class="name">多層立體停車場</div><div class="detail">多層停車格、不同主題車層、Ferrari 專層、MINI／超跑／警車／郵務與日常車混搭。它不是展示架，而是把車放回「停車場」語境中。</div></div>
+          <div class="row" data-item><div class="name">Starbucks Diorama</div><div class="detail">JDM、影視車、重機與人物場景的重要聚落；AE86、FD、R32、NSX、Impreza、Celica、Supra、KITT、Charger、DeLorean 等在這裡形成「車聚」感。</div></div>
+          <div class="row" data-item><div class="name">停車格／人物／店面</div><div class="detail">包含無障礙停車格、店面入口、行人與小型街景元素，讓收藏從「模型」變成「城市切片」。</div></div>
+          <div class="row" data-item><div class="name">Hogwarts Express｜哈利波特蒸汽火車</div><div class="detail">《Harry Potter》霍格華茲特快車模型，擺在立體停車場前方；把汽車、機車之外的影視交通工具也納入整體場景。</div></div>
+        </div>
+      </section>
+
+      <section id="ducati" data-section>
+        <div class="section-head"><div><h2>10｜Ducati 模型收藏</h2><div class="desc">不是三台紅色機車「湊景」，而是一個有明確品牌脈絡的小型 Ducati 區。</div></div><span class="count">4 台 Ducati＋場景機車</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Ducati Monster 696｜大比例</h4><p>與實際持有的 Monster 696 直接對應；目前是 Ducati 模型中最具私人意義的一台。</p><div class="meta"><span class="tag red">Ducati</span><span class="tag gold">對應實車</span><span class="tag">696</span></div></article>
+          <article class="card" data-item><h4>Ducati Diavel｜小比例</h4><p>低長比例、粗後胎的 Power Cruiser 路線。</p><div class="meta"><span class="tag red">Ducati</span><span class="tag">Diavel</span></div></article>
+          <article class="card" data-item><h4>Ducati Monster 1200｜小比例</h4><p>與 Monster 696 形成同車系、不同世代／排量性格對照。</p><div class="meta"><span class="tag red">Ducati</span><span class="tag">Monster 1200</span></div></article>
+          <article class="card" data-item><h4>Ducati Panigale｜小比例</h4><p>Superbike／全整流罩性能路線，補足 Ducati 的仿賽端。</p><div class="meta"><span class="tag red">Ducati</span><span class="tag">Panigale</span></div></article>
+          <article class="card" data-item><h4>Starbucks 場景中的紅色 Vespa／Scooter</h4><p>紅色復古速克達造型，停在 Starbucks 店面附近，負責補足場景中的都市日常交通感。</p><div class="meta"><span class="tag">Scooter</span><span class="tag">Urban</span></div></article>
+        </div>
+      </section>
+
+      <section id="stationery" data-section>
+        <div class="section-head"><div><h2>11｜文具・夏亞／Char Aznable 收藏</h2><div class="desc">這一區特別能看出「收藏品負責收藏，日用品也要帶私人故事」的使用方式。</div></div><span class="count">2 支</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Pentel ENERGEL ES 極速鋼珠筆 0.5mm｜紅色</h4><p>霧面金屬紅色筆身，另外刻字「Char Aznable」。不是官方聯名，而是把日常書寫工具私人化成夏亞專用版本。</p><div class="meta"><span class="tag red">紅色</span><span class="tag gold">Char Aznable 刻字</span><span class="tag">Pentel</span></div></article>
+          <article class="card" data-item><h4>夏亞官方聯名 #3776 鋼筆</h4><p>紅色筆身、18K 金尖；屬於正式官方聯名、收藏層級明顯高於一般角色周邊。</p><div class="meta"><span class="tag red">Char Aznable</span><span class="tag gold">18K 金尖</span><span class="tag">#3776</span><span class="tag">官方聯名</span></div></article>
+        </div>
+      </section>
+
+      <section id="other" data-section>
+        <div class="section-head"><div><h2>12｜其他模型・桌面收藏・場景物件</h2><div class="desc">除了汽車、Ducati 與 Gunpla 之外，桌面與展示區還混合科幻、電影、遊戲與城市裝飾元素，讓整體收藏空間更像私人世界而不是單一主題陳列櫃。</div></div><span class="count">多項</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>Tesla Cybertruck 模型</h4><p>以極端幾何折線與不鏽鋼感車身為核心的現代汽車設計符號，與其他偏好特殊工業設計的收藏相呼應。</p><div class="meta"><span class="tag">Tesla</span><span class="tag">Cybertruck</span></div></article>
+          <article class="card" data-item><h4>巴黎鐵塔模型</h4><p>曾與 Ducati Monster 模型、Cybertruck 同框。</p><div class="meta"><span class="tag">Eiffel Tower</span><span class="tag">Decor</span></div></article>
+          <article class="card" data-item><h4>Star Wars AT-ST</h4><p>Starbucks 場景附近可見的科幻模型元素。</p><div class="meta"><span class="tag">Star Wars</span><span class="tag">AT-ST</span></div></article>
+          <article class="card" data-item><h4>Godzilla 收藏物</h4><p>怪獸電影文化支線收藏，與車、機械、科幻類物件共同構成展示櫃中的跨題材內容。</p><div class="meta"><span class="tag">Godzilla</span></div></article>
+          <article class="card" data-item><h4>Dragon Quest Slime 收藏物</h4><p>展示櫃中的遊戲文化收藏。</p><div class="meta"><span class="tag">Dragon Quest</span><span class="tag">Slime</span></div></article>
+          <article class="card" data-item><h4>人物／小型場景配件</h4><p>分布在停車場、Starbucks 與桌面展示區，用來補足比例、生活感與場景敘事，不讓模型只是單純排隊陳列。</p><div class="meta"><span class="tag">Diorama</span><span class="tag">Scene Props</span></div></article>
+        </div>
+      </section>
+
+      <section id="office" data-section>
+        <div class="section-head"><div><h2>13｜辦公室中的實際裝備配置</h2><div class="desc">不是新增一批「收藏」，而是把上述器材如何實際進入辦公空間整理出來。你的座位不是單純展示櫃，而是工作站、個人裝備庫與收藏空間共存。</div></div><span class="badge">使用中</span></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>區域</th><th>目前已確認的物件／設備</th><th>空間功能</th></tr></thead>
+          <tbody>
+            <tr data-item><td class="strong">中央工作區</td><td>ROG Strix G614、外接鍵盤、滑鼠、直立副螢幕、外接顯示器、大桌墊</td><td>主要工作與多工區，實際操作面保持相對乾淨。</td></tr>
+            <tr data-item><td class="strong">音訊／影音區</td><td>Devialet Mania Opéra de Paris、AirPods Max、ROG XREAL R1、ROG Control Dock</td><td>音樂、私人顯示與娛樂延伸。</td></tr>
+            <tr data-item><td class="strong">抽屜</td><td>DualSense Edge、另一支黑色控制器、Rokid AR AI 眼鏡、3C 配件與線材</td><td>把高頻但不需常駐桌面的設備集中收納。</td></tr>
+            <tr data-item><td class="strong">桌下／側邊</td><td>Tokyo Marui P90、鞋子等</td><td>個人物品與「開會效率器」收納區。</td></tr>
+            <tr data-item><td class="strong">後方展示區</td><td>立體停車場、Starbucks Diorama、汽車模型、Ducati 模型、其他角色／科幻收藏</td><td>主要收藏展示，與工作桌面分離。</td></tr>
+            <tr data-item><td class="strong">周邊機能</td><td>Canon SELPHY CP1500、風扇、多孔充電裝置等</td><td>影像輸出、散熱、充電與日常便利。</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="wishlist" data-section>
+        <div class="section-head"><div><h2>14｜明確想要，但尚未列入「已持有」</h2><div class="desc">為避免把願望誤寫成收藏，單獨隔離記錄。</div></div><span class="count">2 個明確目標</span></div>
+        <div class="grid">
+          <article class="card" data-item><h4>解體匠機 Sazabi</h4><p>目前最明確、最核心的模型終極目標。曾表達若擁有這一隻，對 Sazabi／模型收藏會產生「心滿意足」的終點感。</p><div class="meta"><span class="tag gold">Wishlist</span><span class="tag">Sazabi</span></div></article>
+          <article class="card" data-item><h4>Toyota Celica GT-Four ST205 模型</h4><p>原本真正想買的是 ST205；目前手上的 Tomica Premium 是 ST185，因此 ST205 仍屬於未補上的車型。</p><div class="meta"><span class="tag gold">Wishlist</span><span class="tag">ST205</span><span class="tag">Rally</span></div></article>
+        </div>
+      </section>
+
+      <section id="taste" data-section>
+        <div class="section-head"><div><h2>15｜整套收藏的共同脈絡</h2><div class="desc">這不是新的收藏品項，而是從已持有物中可以看出的選擇邏輯。用來解釋為什麼看似橫跨很多領域，實際上卻有高度一致性。</div></div></div>
+        <div class="grid">
+          <article class="card" data-item><h4>① 辨識度高於「安全牌」</h4><p>P90、Curve、Rhino、Monster、R56 MINI、Valkyrie、Mania Opéra、Cybertruck 都是「遠看輪廓就知道不是普通版本」的東西。</p></article>
+          <article class="card" data-item><h4>② 經典可以很經典；現代就不要普通</h4><p>1911、F40、F50、AE86、R32、2000GT、F-14D 類型的經典可以保留原味；但到了現代或實驗設計，會偏好真正有主張的形態。</p></article>
+          <article class="card" data-item><h4>③ 不只收「最強」，而是收「有性格」</h4><p>實車選 R56 Cooper S、重機選 Monster 696；音響選 Mania Opéra；槍型會選 P90／Curve／Rhino。性能重要，但不會壓過設計與使用體驗。</p></article>
+          <article class="card" data-item><h4>④ 喜歡版本差異與故事性</h4><p>透明紅 Sazabi、透明金 Strike Freedom、夏亞版 RX-78-2、夏亞官方 #3776、KITT、F&amp;F Supra／Charger，都不是「同款任一版本即可」的收法。</p></article>
+          <article class="card" data-item><h4>⑤ 收藏不是只看，而是進入生活</h4><p>Monster 696 有實車對應；P90 直接進公司；Mania、XREAL、AirPods Max 都在辦公桌使用；模型車被放進停車場與 Starbucks 場景。</p></article>
+          <article class="card" data-item><h4>⑥ 跨領域，但不是毫無關聯</h4><p>車、重機、槍型、航空器、鋼彈、3C、音響、AR/VR、攝影與文具，看似分散；共同點其實是「工程設計、機械性格、文化符號、版本故事與操作體驗」。</p></article>
+        </div>
+        <div class="quote">「你真正收集的，不只是車、槍、鋼彈或 3C；更接近是在收：<strong>『我覺得這東西有意思。』</strong>」</div>
+
+        <h3>非持有物，但能補充理解審美的飛機偏好</h3>
+        <div class="timeline">
+          <div class="row" data-item><div class="name">最喜歡的戰鬥機</div><div class="detail">Grumman X-29。</div></div>
+          <div class="row" data-item><div class="name">現代戰機偏好</div><div class="detail">Su-47 Berkut，亦偏好 Su-57；核心審美集中在具有強烈輪廓、非常規設計與明確工程主張的現代戰機。</div></div>
+          <div class="row" data-item><div class="name">不以性能為首要時</div><div class="detail">A-10 Thunderbolt II、F-14D Tomcat。</div></div>
+          <div class="row" data-item><div class="name">Ace Combat 最喜歡</div><div class="detail">X-02 Wyvern，明確指定「不是 Strike」。</div></div>
+          <div class="row" data-item><div class="name">Ace Combat 高戰力最愛</div><div class="detail">CFA-44 Nosferatu＋ADMM。</div></div>
+        </div>
+      </section>
+
+
+    </main>
+  </div>
+
+  <div class="footer">Jami Collection & Equipment Inventory · 2026</div>
+</div>
+<script>
+function filterCards(){
+  const q=(document.getElementById('search').value||'').trim().toLowerCase();
+  document.querySelectorAll('[data-item]').forEach(el=>{
+    el.classList.toggle('hidden', q && !el.innerText.toLowerCase().includes(q));
+  });
+  document.querySelectorAll('[data-section]').forEach(sec=>{
+    const items=[...sec.querySelectorAll('[data-item]')];
+    if(!q || items.length===0){sec.classList.remove('hidden');return;}
+    sec.classList.toggle('hidden', items.every(x=>x.classList.contains('hidden')));
+  });
+}
+document.getElementById('search').addEventListener('input',filterCards);
+</script>
+</body>
+</html>
