@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台南奇美法老展 ＆ 台中美食藝文 3 天 2 夜行程（全備選方案版）</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #eff6ff;
+      --secondary: #d97706;
+      --accent: #b45309;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #4b5563;
+      --border: #e5e7eb;
+      --opt-main: #2563eb;
+      --opt-alt: #059669;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #fff;
+      padding: 28px 24px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .alert-box {
+      background-color: #fef2f2;
+      border-left: 5px solid #dc2626;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 28px;
+      color: #7f1d1d;
+    }
+
+    .alert-box h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .alert-box ul {
+      margin-left: 20px;
+      font-size: 0.9rem;
+    }
+
+    .day-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .day-header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .day-header h2 {
+      font-size: 1.35rem;
+      color: var(--primary);
+    }
+
+    .day-tag {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .time-slot {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .time-slot:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .time-badge {
+      display: inline-block;
+      background: #374151;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .slot-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 12px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fafafa;
+    }
+
+    .opt-card.preferred {
+      border-color: #93c5fd;
+      background: #f8faff;
+    }
+
+    .opt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .opt-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .opt-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tag-main { background: #dbeafe; color: #1e40af; }
+    .tag-alt { background: #d1fae5; color: #065f46; }
+
+    .opt-desc {
+      font-size: 0.9rem;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+
+    .opt-tip {
+      font-size: 0.82rem;
+      color: #6b7280;
+      border-left: 3px solid #cbd5e1;
+      padding-left: 8px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 32px;
+      padding-bottom: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .opt-card.full-width {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>台南奇美法老展 ＆ 台中美食藝文 3 天 2 夜</h1>
+    <p>自駕行程彈性手冊 ｜ 2026/09/28 (一) ～ 2026/09/30 (三)</p>
+  </header>
+
+  <!-- 夜市提醒 -->
+  <div class="alert-box">
+    <h3>⚠️ 台南夜市口訣提醒（大大武花大武花）</h3>
+    <ul>
+      <li><strong>週一（9/28）與週二（9/29）</strong>：花園夜市（四、六、日）與武聖夜市（三、五、六）<strong>皆未營業</strong>。</li>
+      <li>這兩晚若想逛夜市，首選營業場地為 <strong>大東夜市 / 大東東夜市</strong>（週一、週二皆有開）。</li>
+    </ul>
+  </div>
+
+  <!-- Day 1 -->
+  <div class="day-card">
+    <div class="day-header">
+      <h2>Day 1 ｜ 2026/09/28 (一) 台北出發 ➔ 台南府城</h2>
+      <span class="day-tag">抵達南台灣・午餐小吃・安平夕陽・夜間饗宴</span>
+    </div>
+
+    <!-- 09:00 - 13:00 -->
+    <div class="time-slot">
+      <span class="time-badge">09:00 – 13:00</span>
+      <div class="slot-title">台北出發 ➔ 國道南下抵達台南</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">國道 1 號直達（經泰安／西螺）</span>
+            <span class="opt-tag tag-main">首選</span>
+          </div>
+          <p class="opt-desc">車程約 3.5～4 小時，路網直接且服務區密集，中途停靠泰安或西螺補給上洗手間最順路。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">國道 3 號轉 84 或 86 快速道路</span>
+            <span class="opt-tag tag-alt">備選 1</span>
+          </div>
+          <p class="opt-desc">若週一國道 1 號中北部路段車流偏多，走國 3 車流通常較平穩，可停靠清水或東山服務區。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13:00 - 15:30 -->
+    <div class="time-slot">
+      <span class="time-badge">13:00 – 15:30</span>
+      <div class="slot-title">抵達台南後的首發午餐 ＆ 散策（4 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：國華街友愛商圈 ＋ 神農街</span>
+            <span class="opt-tag tag-main">首選小吃</span>
+          </div>
+          <p class="opt-desc">集結富盛號碗粿、金得春捲、阿松割包、邱家小卷米粉，吃飽後散步至神農街老屋巷弄拍照。</p>
+          <p class="opt-tip">停車停海安路地下停車場最省心。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：保安路美食街 ＋ 藍晒圖園區</span>
+            <span class="opt-tag tag-alt">備選（排隊分散）</span>
+          </div>
+          <p class="opt-desc">阿村牛肉湯、阿卿杏仁茶、醇酵白糖粿、阿娟咖哩飯，順道步行至藍晒圖文創園區吹風看壁畫。</p>
+          <p class="opt-tip">停車可停客家文化會館地下或新光三越周邊停車場。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：鴨母寮市場周邊 ＋ 赤崁樓街區</span>
+            <span class="opt-tag tag-alt">備選（道地古早味）</span>
+          </div>
+          <p class="opt-desc">品嚐泉成點心店炸物、炭火麵、民族路八寶冰，享受赤崁樓周遭的老牌歷史氛圍。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 D：台南南美館 2 館景觀午餐／咖啡</span>
+            <span class="opt-tag tag-alt">備選（舒適冷氣文藝）</span>
+          </div>
+          <p class="opt-desc">直接停南美館 2 館地下停車場，於館內「南美春室 The POOL」享受採光玻璃屋午餐或甜點，免排路邊攤。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16:00 Check In -->
+    <div class="time-slot">
+      <span class="time-badge">16:00</span>
+      <div class="slot-title">允頌汽車旅館 Check-in ＆ 放行李稍歇</div>
+      <div class="opt-card preferred full-width">
+        <p class="opt-desc">位於安平區，開車出入與專屬車位極為便利，長途車程後可先沖涼或休息 40 分鐘。</p>
+      </div>
+    </div>
+
+    <!-- 16:45 - 18:00 -->
+    <div class="time-slot">
+      <span class="time-badge">16:45 – 18:00</span>
+      <div class="slot-title">安平近郊午後漫遊（4 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：安平運河畔 ＋ 大魚的祝福（港濱歷史公園）</span>
+            <span class="opt-tag tag-main">首選（就近吹風）</span>
+          </div>
+          <p class="opt-desc">離旅館近，沿著安平港濱歷史公園散步，看著名鯨魚裝置藝術與港口夕陽晚霞。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：漁光島月牙灣踏浪看落日</span>
+            <span class="opt-tag tag-alt">備選（自然海景）</span>
+          </div>
+          <p class="opt-desc">車程約 10 分鐘，穿過林蔭木棧道抵達開闊的月牙灣海灘，台南最著名夕陽打卡點。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：安平古堡 ＋ 延平老街黃昏漫步</span>
+            <span class="opt-tag tag-alt">備選（歷史街巷）</span>
+          </div>
+          <p class="opt-desc">傍晚人潮逐漸散去的老街多了一分愜意，買買安平蝦餅、蜜餞等伴手禮剛剛好。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 D：德陽艦園區（安平定情碼頭）</span>
+            <span class="opt-tag tag-alt">備選（軍艦展覽）</span>
+          </div>
+          <p class="opt-desc">登上海軍除役的陽字號驅逐艦實體甲板，登高遠眺安平夕陽港景，硬派軍事感十足。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18:30 - 21:00 -->
+    <div class="time-slot">
+      <span class="time-badge">18:30 – 21:00</span>
+      <div class="slot-title">週一晚餐覓食方案（4 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：大東夜市 / 大東東夜市（週一有開）</span>
+            <span class="opt-tag tag-main">夜市首選</span>
+          </div>
+          <p class="opt-desc">原花園、武聖攤商多轉戰於此，地瓜球、膳品香酥排骨、原住民烤肉、水果茶一次滿足。</p>
+          <p class="opt-tip">車程約 15 分鐘，後方有收費停車場。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：文章牛肉湯 安平總店（免遠行）</span>
+            <span class="opt-tag tag-alt">在地方案</span>
+          </div>
+          <p class="opt-desc">就在安平區，全新旗艦店乾淨好停車。招牌溫體牛肉湯湯頭甘甜，搭配牛肉肉燥飯與熱炒蔥爆牛肉。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：海安路串燒熱炒 ＋ 神農街夜燈酒吧</span>
+            <span class="opt-tag tag-alt">露天放鬆</span>
+          </div>
+          <p class="opt-desc">海安路中軸的露天啤酒吧、燒烤店、鹹酥雞，夜晚吹著涼風聊天小酌，極具台南夜間活力。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 D：經典老字號台菜（阿美飯店或阿霞飯店）</span>
+            <span class="opt-tag tag-alt">傳統正餐</span>
+          </div>
+          <p class="opt-desc">品嚐經典砂鍋鴨、紅蟳米糕、鱔魚意麵等傳統府城大菜，適合喜歡坐下來好好享用桌菜的選擇（建議提早訂位）。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day 2 -->
+  <div class="day-card">
+    <div class="day-header">
+      <h2>Day 2 ｜ 2026/09/29 (二) 奇美特展日 ＆ 文藝巡禮</h2>
+      <span class="day-tag">10:20 出發・法老特展・常設展沉浸・多元夜間備案</span>
+    </div>
+
+    <!-- 10:20 出發與奇美報到 -->
+    <div class="time-slot">
+      <span class="time-badge">10:20 – 11:30</span>
+      <div class="slot-title">10:20 出發 ➔ 抵達奇美博物館從容報到</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">台 17 線 ➔ 台 86 線快速道路</span>
+            <span class="opt-tag tag-main">推薦路徑</span>
+          </div>
+          <p class="opt-desc">車程約 25–30 分鐘，約 10:50 抵達台南都會公園停車場（建議停 P1 或 P2 停車場）。</p>
+          <p class="opt-tip">提早抵達可從容穿過奧林帕斯橋、阿波羅噴泉，完成 VR 展櫃檯驗票與租借個人語音導覽機。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">替代路徑：市區中華西路 ➔ 國民路</span>
+            <span class="opt-tag tag-alt">平面備選</span>
+          </div>
+          <p class="opt-desc">若 86 快速道路遇道路施工，可改走南區平面林蔭道路直達都會公園南側停車場。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11:30 - 13:00 -->
+    <div class="time-slot">
+      <span class="time-badge">11:30 – 13:00</span>
+      <div class="slot-title">《埃及之王：法老》特展 ＆ VR 沉浸體驗</div>
+      <div class="opt-card preferred full-width">
+        <p class="opt-desc">準時進入 11:30 VR 場次，以第一視角穿越千年金字塔與古埃及神廟；隨後細細品味來自大英博物館的王權象徵文物、雕像與黃金珠寶飾品。</p>
+      </div>
+    </div>
+
+    <!-- 13:00 - 14:00 -->
+    <div class="time-slot">
+      <span class="time-badge">13:00 – 14:00</span>
+      <div class="slot-title">奇美午餐方案（3 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：館內用餐（克里蒙納咖啡 / 義薩芭蒂）</span>
+            <span class="opt-tag tag-main">免曬太陽首選</span>
+          </div>
+          <p class="opt-desc">館內直接享用義大利麵、燉飯或輕食沙拉咖啡，完全不出園區，省時省力。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：十鼓文創園區「糖蜜罐咖啡館 / 輕食」</span>
+            <span class="opt-tag tag-alt">特色老廠空間</span>
+          </div>
+          <p class="opt-desc">步行 5 分鐘至緊鄰的十鼓園區，在巨大老舊糖蜜儲罐中改建的咖啡館用餐，極具工業風視覺。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：保安車站周邊在地美食（阿裕牛肉涮涮鍋）</span>
+            <span class="opt-tag tag-alt">極致牛肉備選</span>
+          </div>
+          <p class="opt-desc">開車約 8 分鐘前往崑崙路阿裕牛肉千坪新旗艦店，中午吃現切頂級溫體牛火鍋（需留意平日候位時間）。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14:00 - 17:30 -->
+    <div class="time-slot">
+      <span class="time-badge">14:00 – 17:30</span>
+      <div class="slot-title">下午深度藝文與周邊探訪（3 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：奇美常設展全巡禮 ＋ 都會公園湖畔漫步</span>
+            <span class="opt-tag tag-main">藝文首選</span>
+          </div>
+          <p class="opt-desc">必訪世界級名琴樂器廳（定時自動樂器演奏）、兵器廳、動物廳標本，傍晚至繆思廣場欣賞歐式建築倒影。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：十鼓仁糖文創園區（極限體驗與工業風）</span>
+            <span class="opt-tag tag-alt">動態備選</span>
+          </div>
+          <p class="opt-desc">奇美步行即可達。百年舊糖廠改建，有高空滑索、煙囪溜滑梯、魔法工廠書牆與震撼鼓樂演出，適合拍照走動。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：提前回市區 ➔ 林百貨與孔廟文化園區散策</span>
+            <span class="opt-tag tag-alt">街區文創備選</span>
+          </div>
+          <p class="opt-desc">若奇美在 15:30 前逛完，驅車回市區逛全台首座指針電梯的古蹟林百貨、登頂鳥居，並在對面孔廟老樹下漫步。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18:00 - 21:00 -->
+    <div class="time-slot">
+      <span class="time-badge">18:00 – 21:00</span>
+      <div class="slot-title">週二晚間覓食（4 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：大東夜市 / 大東東夜市（週二有開）</span>
+            <span class="opt-tag tag-main">夜市首選</span>
+          </div>
+          <p class="opt-desc">週一若沒去成大東夜市，今晚就是最佳朝聖時機，牛排、滷味、拔絲地瓜、木瓜牛奶應有盡有。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：安平老街私廚或海鮮炭烤（慶平海產／土城海產）</span>
+            <span class="opt-tag tag-alt">安平在地海味</span>
+          </div>
+          <p class="opt-desc">台南老饕愛店，點盤鮮炒處女蟳、烏魚子炒飯與時令現撈野生魚，享受正港台南海產鮮度。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：小北觀光夜市／小北成功夜市周邊店面</span>
+            <span class="opt-tag tag-alt">北區古早味</span>
+          </div>
+          <p class="opt-desc">鄰近西門路北段，品嚐老字號鱔魚意麵、榮吉炒牛肉、阿輝炒鱔魚，口味傳統道地。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 D：友愛街旅館旁 UIJ 露台啤酒 ＆ 深夜甜點咖啡</span>
+            <span class="opt-tag tag-alt">都會放鬆氛圍</span>
+          </div>
+          <p class="opt-desc">在中西區尋找一家獨立深夜甜點吧或日式喫茶館（如林家茂森、或巷弄老酒吧），享受台南慢調夜生活。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day 3 -->
+  <div class="day-card">
+    <div class="day-header">
+      <h2>Day 3 ｜ 2026/09/30 (三) 台中精誠牛肉麵 ➔ 城市藝文 ➔ 悠閒北返</h2>
+      <span class="day-tag">精誠牛肉麵館・室內建築・綠意街區・不趕路晚歸</span>
+    </div>
+
+    <!-- 10:00 - 12:30 -->
+    <div class="time-slot">
+      <span class="time-badge">10:00 – 12:30</span>
+      <div class="slot-title">退房北上台中直奔精誠路</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">國道 1 號直上台中（車程約 2 小時）</span>
+            <span class="opt-tag tag-main">首選路線</span>
+          </div>
+          <p class="opt-desc">睡到自然醒後辦理退房，建議最遲於 10:30 上高速公路，約 12:30 抵達台中，避開精誠牛肉麵午間休息。</p>
+          <p class="opt-tip">停車停「精誠十二街停車場」或「大忠立體停車場」，步行約 3 分鐘。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">中途短暫停靠：彰化扇形車庫（30 分鐘）</span>
+            <span class="opt-tag tag-alt">順路小景點備選</span>
+          </div>
+          <p class="opt-desc">若 09:30 就醒來提早出發，途中可從彰化交流道下短暫參觀全台唯一的百年扇形車庫，再進台中市區。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12:30 - 14:00 -->
+    <div class="time-slot">
+      <span class="time-badge">12:30 – 14:00</span>
+      <div class="slot-title">午餐朝聖：精誠牛肉麵館</div>
+      <div class="opt-card preferred full-width">
+        <p class="opt-desc"><strong>指定必吃：</strong>大塊牛腱厚切豪邁、燉至軟嫩化口，湯頭濃醇且帶有中藥香氣，搭配特製辣牛油與酸菜更添層次！（營業至 14:00，請準時抵達）。</p>
+      </div>
+    </div>
+
+    <!-- 14:15 - 16:00 -->
+    <div class="time-slot">
+      <span class="time-badge">14:15 – 16:00</span>
+      <div class="slot-title">午後藝文與建築景點（4 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：台中國家歌劇院（七期建築巡禮）</span>
+            <span class="opt-tag tag-main">建築首選</span>
+          </div>
+          <p class="opt-desc">車程 10 分鐘，地下好停車。欣賞伊東豊雄曲牆「美聲涵洞」建築結構，逛各樓層文創選品與 6 樓火山口空中花園，冷氣舒適。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：國立台灣美術館（國美館）＆ 綠園道</span>
+            <span class="opt-tag tag-alt">文藝室內備選</span>
+          </div>
+          <p class="opt-desc">就在西區精誠路旁！免費參觀當期現代藝術特展，館內空間挑高寬敞，戶外雕塑公園綠意盎然。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：自然科學博物館（科博館）</span>
+            <span class="opt-tag tag-alt">沉浸知識備選</span>
+          </div>
+          <p class="opt-desc">恐龍館、生命科學廳與立體劇場，老字號但展品精緻豐富，大熱天室內散步最佳去處。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 D：精明一街 ＆ 精誠小巷歐風喫茶</span>
+            <span class="opt-tag tag-alt">極度悠閒免開車</span>
+          </div>
+          <p class="opt-desc">吃完麵直接在精誠商圈特色老宅咖啡、甜點小店漫步，享受歐風人行道林蔭與一杯精緻單品手沖。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16:15 - 18:00 -->
+    <div class="time-slot">
+      <span class="time-badge">16:15 – 18:00</span>
+      <div class="slot-title">台中傍晚街區散策 ＆ 甜點伴手禮（3 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：審計新村 ＋ 范特喜綠光計畫聚落</span>
+            <span class="opt-tag tag-main">文創市集首選</span>
+          </div>
+          <p class="opt-desc">老宿舍改建的藝文聚落，逛手作攤位、喝杯成真咖啡或品嚐旅禾泡芙，傍晚陽光斜射極具老宅風情。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：PARK2 草悟廣場 ＋ 勤美綠園道</span>
+            <span class="opt-tag tag-alt">城市綠洲備選</span>
+          </div>
+          <p class="opt-desc">非傳統公園，充滿巨型多肉植物與潮流風格店家，下沉式廣場集結特色點心、選物店，散步極為舒服放鬆。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 C：第四信用合作社 ＋ 宮原眼科老建築巡禮</span>
+            <span class="opt-tag tag-alt">復古甜點伴手禮</span>
+          </div>
+          <p class="opt-desc">由早期銀行金庫改建的冰淇淋甜點店，挑選包裝精美的手工鳳梨酥、日出乳酪蛋糕帶回台北當伴手禮。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18:00 後啟程北返 -->
+    <div class="time-slot">
+      <span class="time-badge">18:00 – 21:00</span>
+      <div class="slot-title">啟程北返 ➔ 順暢返回台北（2 選 1）</div>
+      <div class="options-grid">
+        <div class="opt-card preferred">
+          <div class="opt-header">
+            <span class="opt-name">備選 A：台中市區稍用輕食後啟程（約 18:30 出發）</span>
+            <span class="opt-tag tag-main">晚歸放鬆首選</span>
+          </div>
+          <p class="opt-desc">在台中喝完咖啡或打包輕食，於 18:30 後上國道 1 號，剛好避開下班尖峰時段，約 20:30–21:00 從容抵達台北。</p>
+        </div>
+        <div class="opt-card">
+          <div class="opt-header">
+            <span class="opt-name">備選 B：中途停靠苗栗或新竹享用在地客家晚餐</span>
+            <span class="opt-tag tag-alt">途中順吃備案</span>
+          </div>
+          <p class="opt-desc">沿國道 1 號開 40 分鐘，在苗栗三義或公館交流道下吃客家粄條、薑絲大腸，吃飽後再開一小時回台北。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>自駕行程靈活由心 ｜ 祝台南奇美法老展收穫滿滿・美食旅程愉快！</p>
+  </footer>
+</div>
+
+</body>
+</html>
