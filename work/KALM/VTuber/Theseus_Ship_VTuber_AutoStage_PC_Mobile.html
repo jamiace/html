@@ -228,6 +228,11 @@ body:before{background:radial-gradient(ellipse at 10% 10%,#fffaf0,transparent 45
 }
 @media(max-height:700px) and (min-width:681px){.actor{height:62%;bottom:150px}.speech-position{top:33%}.composer{height:127px}}
 
+/* v6 — both desktop and phone support two-line dialogue; keep closing punctuation attached. */
+/* Geometry must settle before text is paginated when switching desktop/phone. */
+.app{transition:border-radius .3s ease!important}
+.speech-bubble{white-space:normal!important;overflow-wrap:anywhere;word-break:normal;line-break:strict;text-wrap:wrap}
+
 /* v4 — mobile speech ergonomics and contextual player input. */
 .composer{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility .18s ease}
 .composer.typing,.composer.sent{opacity:1;visibility:visible;pointer-events:auto}
@@ -403,9 +408,10 @@ function setPortrait(el,record){
   if(imageStates.get(source)===false){photo.src=fallbackPortrait(record.who)}
   else {photo.onload=()=>{if(photo.src.endsWith(source))imageStates.set(source,true)};photo.src=source}
  }
- // Keep the user portrait unchanged; correct the imported non-user portraits when assigning stage sides.
- const originalFlip=Boolean(record.flip) !== el.classList.contains('right');
- const flip=record.who==='Jami'?originalFlip:!originalFlip;
+ // Every original VTuber image faces LEFT by default.
+ // Stage LEFT -> mirror so the character faces RIGHT (toward the other speaker).
+ // Stage RIGHT -> use the original LEFT-facing image. Jami is never mirrored.
+ const flip=record.who==='Jami'?false:el.classList.contains('left');
  photo.style.transform=flip?'scaleX(-1)':'scaleX(1)';
  el.querySelector('.plate-name').textContent=record.label;
  el.style.setProperty('--actor-accent',(palette[record.who]||palette.Anna).acc);
@@ -413,32 +419,102 @@ function setPortrait(el,record){
 }
 let mobileLayout=false,beats=[],index=0,playing=false,started=false,speed=1,room=1,timer=0,typingTimer=0,typingState=null;
 function widthUnits(str){let x=0;for(const ch of str){x+=/[\u3000-\u9fff\uf900-\ufaff\uff01-\uff60]/u.test(ch)?1:/[A-Z]/.test(ch)?.65:/[\u{1F300}-\u{1FAFF}]/u.test(ch)?1.5:.52}return x}
-function splitText(text,maxUnits){
- // Greedy meaningful breaks: punctuation and original paragraph boundaries take precedence.
- text=String(text).replace(/\s+/g,' ').trim();if(!text)return [];
- let units=[],tokens=text.match(/[^，。！？；：、,!?;:]+[，。！？；：、,!?;:]?[」』”]?|[，。！？；：、,!?;:]+/gu)||[text];
- for(let t of tokens){t=t.trim();if(!t)continue;
-  while(widthUnits(t)>maxUnits){
-    // use a split near the boundary, but prefer a word boundary when possible
-    let k=0;for(let i=0;i<t.length;i++){if(widthUnits(t.slice(0,i+1))>maxUnits){k=i;break;}}
-    if(k<1)k=Math.min(t.length,Math.floor(maxUnits));
-    let before=t.slice(0,k),tail=t.slice(k);
-    let split=before.lastIndexOf(' ');if(split>Math.floor(before.length*.65)){tail=before.slice(split).trimStart()+tail;before=before.slice(0,split)}
-    units.push(before.trim());t=tail.trimStart();
+// A TWO-LINE dialogue layout, on both PC and mobile. Pixel-based, rather than
+// a fixed number of characters; does not create punctuation-only or tiny tails.
+const dialogueCanvas=document.createElement('canvas');
+const dialogueMeasure=dialogueCanvas.getContext('2d');
+let dialogueLetterSpacing=0;
+const OPENING_PUNCT=/[「『“‘（(【《〈\[{]$/u;
+const CLOSING_PUNCT=/^[，。！？、；：,.!?;:%％」』”’）)】》〉\]}…—]/u;
+const LATIN_WORD=/[A-Za-z0-9_]/u;
+function safePhraseBreak(chars,k){
+ if(k<=0||k>=chars.length)return true;
+ const previous=chars[k-1],next=chars[k];
+ if(OPENING_PUNCT.test(previous)||CLOSING_PUNCT.test(next))return false;
+ // Do not tear a word/number in two (New T, Old T, dates, identifiers).
+ if(LATIN_WORD.test(previous)&&LATIN_WORD.test(next))return false;
+ if((previous==='.'||previous==='-'||previous==='/')&&LATIN_WORD.test(next))return false;
+ if(LATIN_WORD.test(previous)&&(next==='.'||next==='-'||next==='/'))return false;
+ return true;
+}
+function dialogueCapacity(){
+ const cs=getComputedStyle(speechBubble);
+ dialogueMeasure.font=cs.font;
+ dialogueLetterSpacing=parseFloat(cs.letterSpacing)||0;
+ const isNarrow=isSmall();
+ const maxPercent=stage.clientWidth<=360?0.94:isNarrow?0.92:0.51;
+ const available=stage.clientWidth*maxPercent-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-2;
+ // Reserve a little room for differences between Canvas metrics and CSS wrapping.
+ return Math.max(105,available*2*.90);
+}
+function measuredWidth(s){
+ // text width for a line (fonts and real glyph width, not pseudo-CJK units)
+ return dialogueMeasure.measureText(s).width+Math.max(0,Array.from(s).length-1)*dialogueLetterSpacing;
+}
+function splitText(text,maxPixelWidth){
+ text=String(text).replace(/[\t ]+/gu,' ').trim();
+ if(!text)return [];
+ if(measuredWidth(text)<=maxPixelWidth)return [text];
+ const chars=Array.from(text),n=chars.length;
+ // Lowercase Latin sequences remain intact, and punctuation stays with its sentence.
+ const safe=Array.from({length:n+1},(_,k)=>safePhraseBreak(chars,k));
+ // Avoid splitting inside a quoted thought when a boundary outside the quotes fits.
+ // Opening and closing marks still stay attached even if a long quotation must split.
+ const inQuote=Array(n+1).fill(0);let quoteDepth=0;
+ for(let k=0;k<n;k++){
+  if(/[「『“‘]/u.test(chars[k]))quoteDepth++;
+  else if(/[」』”’]/u.test(chars[k]))quoteDepth=Math.max(0,quoteDepth-1);
+  inQuote[k+1]=quoteDepth;
+ }
+ const dp=Array(n+1).fill(Infinity),prev=Array(n+1).fill(-1);
+ dp[0]=0;
+ for(let j=1;j<=n;j++){
+  if(j<n&&!safe[j])continue;
+  for(let i=j-1;i>=0;i--){
+   if(i>0&&!safe[i])continue;
+   let candidate=chars.slice(i,j).join('').trim();
+   if(!candidate)continue;
+   let w=measuredWidth(candidate);
+   if(w>maxPixelWidth){
+    // Even a single unbreakable Latin token may exceed the capacity.
+    if(i===j-1&&Number.isFinite(dp[i])){}else continue;
+   }
+   if(!Number.isFinite(dp[i]))continue;
+   const filling=Math.min(1,w/maxPixelWidth);
+   // Primary priority: minimum number of bubbles. Secondary: no short
+   // stranded last pieces; favour balanced chunks and natural punctuation.
+   let cost=dp[i]+1000+110*Math.pow(1-filling,2);
+   if(j<n&&/[。！？!?；;，,：:]/u.test(chars[j-1]))cost-=9;
+   if(j<n&&inQuote[j]>0)cost+=145;
+   if(w<maxPixelWidth*.20&&i>0)cost+=65;
+   if(cost<dp[j]){dp[j]=cost;prev[j]=i}
   }
-  if(t)units.push(t);
  }
- // Join short clauses without exceeding the bubble's strictly limited single-line budget.
- let result=[];
- for(const bit of units){const last=result[result.length-1];const join=(/[A-Za-z0-9]$/.test(last||'')&&/^[A-Za-z0-9]/.test(bit))?' ':'';
-  if(last&&widthUnits(last+join+bit)<=maxUnits && !/[。！？!?]$/.test(last)){result[result.length-1]=last+join+bit}
-  else result.push(bit);
+ if(prev[n]<0){ // Fallback only for an indivisible long foreign token.
+  return [text];
  }
- return result.filter(Boolean);
+ const parts=[];
+ for(let j=n;j>0;){let i=prev[j];parts.push(chars.slice(i,j).join('').trim());j=i;}
+ parts.reverse();
+ // Extra safeguard: no isolated closing punctuation / broken quotes / near-empty
+ // last fragment. If needed, rebalance adjoining bubbles (still within 2 lines).
+ for(let j=1;j<parts.length;j++){
+  if(CLOSING_PUNCT.test(parts[j])||measuredWidth(parts[j])<maxPixelWidth*.16){
+   const combined=parts[j-1]+parts[j];
+   if(measuredWidth(combined)<=maxPixelWidth){parts.splice(j-1,2,combined);j--;}
+  }
+ }
+ return parts;
+}
+// Original <p> boundaries are stored in separate paras entries, and <br> as newlines.
+// Only explicit newlines or paragraph boundaries count as authored dialogue breaks.
+// Ordinary spaces (including those inside names, English, or abbreviations) do NOT.
+function splitAuthoredPhrases(paras){
+ return paras.flatMap(p=>String(p).split(/\r\n|\r|\n/u).map(x=>x.trim()).filter(Boolean));
 }
 function compileBeats(){
- // Spaces, original <br> line breaks and original <p> boundaries are authored speech rests.
- const limit=mobileLayout?Math.min(36,Math.max(24,Math.floor((stage.clientWidth*.92-38)/17.6*2)-2)):25.2;
+ // Split only on authored paragraph/line boundaries. Do not split on spaces.
+ const limit=dialogueCapacity();
  const next=[];
  let lastSide='right';
  for(let m=0;m<records.length;m++){
@@ -446,9 +522,9 @@ function compileBeats(){
   if(r.who==='Jami')side='right';
   else {side=lastSide==='left'?'right':'left';if(m>0&&records[m-1].who===r.who)side=lastSide}
   lastSide=side;
-  // Each explicit whitespace separator closes one phrase; only oversized phrases
-  // are further broken to fit the stage's available bubble width.
-  const phrases=r.paras.flatMap(p=>String(p).split(/\s+/u).filter(Boolean));
+  // A space stays inside the sentence; only a source newline/<p> ends a phrase.
+  // Every authored phrase is first fitted into ONE or TWO display lines. Split only when necessary.
+  const phrases=splitAuthoredPhrases(r.paras);
   const chunks=[];
   for(let n=0;n<phrases.length;n++){
     const fitted=splitText(phrases[n],limit);
