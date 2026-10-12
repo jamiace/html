@@ -46,7 +46,7 @@ body:before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse
 .actor:not(.active){opacity:.64;filter:drop-shadow(0 16px 18px #08111a69) saturate(.7) brightness(.77);transform:scale(.94)}
 .actor.active{opacity:1;filter:drop-shadow(0 16px 22px #08111a8e);transform:translateY(-5px)}
 .actor.hidden{opacity:0;visibility:hidden}
-.actor-photo{width:100%;height:100%;position:absolute;inset:0;display:block;object-fit:contain;object-position:center bottom;user-select:none;transition:transform .25s ease;mask-image:linear-gradient(to bottom,black 0%,black 90%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,black 0%,black 90%,transparent 100%)}
+.actor-photo{width:100%;height:100%;position:absolute;inset:0;display:block;object-fit:contain;object-position:center bottom;user-select:none;transition:transform .25s ease;mask-image:linear-gradient(to bottom,black 0%,black 76%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,black 0%,black 76%,transparent 100%)}
 .nameplate{position:absolute;bottom:20px;display:flex;align-items:center;min-width:126px;max-width:98%;height:43px;padding:0 17px 0 12px;gap:10px;border:1px solid #d3e0f15a;background:linear-gradient(135deg,#0c1b2df0,#263a4be2);box-shadow:0 7px 24px #07121be0, inset 0 1px 1px #ffffff2a;border-radius:8px;backdrop-filter:blur(13px);color:#edf4fb;font-size:14px;font-weight:760;white-space:nowrap;letter-spacing:.035em}
 .nameplate .accent{width:4px;height:19px;background:var(--actor-accent,#9ae0d5);box-shadow:0 0 11px var(--actor-accent,#9ae0d5);border-radius:4px}
 .nameplate small{display:block;color:#b1c2d0;font-size:9px;letter-spacing:.14em;font-weight:600}
@@ -227,6 +227,30 @@ body:before{background:radial-gradient(ellipse at 10% 10%,#fffaf0,transparent 45
  .round-btn,.round-btn.primary{box-shadow:none}
 }
 @media(max-height:700px) and (min-width:681px){.actor{height:62%;bottom:150px}.speech-position{top:33%}.composer{height:127px}}
+
+/* v4 — mobile speech ergonomics and contextual player input. */
+.composer{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility .18s ease}
+.composer.typing,.composer.sent{opacity:1;visibility:visible;pointer-events:auto}
+/* Bigger two-line dialogue, wider bubbles, and enough vertical separation from portraits. */
+.app.preview-mobile .speech-position{top:18%;max-width:92%}
+.app.preview-mobile .speech-position.left{left:4%}
+.app.preview-mobile .speech-position.right{right:4%}
+.app.preview-mobile .speech-shell{width:100%;max-width:100%}
+.app.preview-mobile .speech-bubble{white-space:normal!important;overflow-wrap:anywhere;word-break:normal;line-height:1.46;max-width:100%;padding:12px 15px 13px}
+@media(max-width:680px){
+ .speech-position{top:18%;max-width:92%}
+ .speech-position.left{left:4%}.speech-position.right{right:4%}
+ .speech-shell{width:100%;max-width:100%}
+ .speech-bubble{white-space:normal!important;overflow-wrap:anywhere;word-break:normal;line-height:1.46;max-width:100%;padding:12px 15px 13px}
+}
+@media(max-width:680px) and (max-height:710px){
+ .actor{height:35%;bottom:90px}
+ .speech-position{top:14%}
+}
+@media(max-width:360px){
+ .scene-id{display:none} /* header already holds the title; keep compact stage clear */
+ .speech-position{max-width:94%}.speech-position.left{left:3%}.speech-position.right{right:3%}
+}
 </style>
 </head>
 <body>
@@ -354,7 +378,7 @@ function splitText(text,maxUnits){
  return result.filter(Boolean);
 }
 function compileBeats(){
- const limit=mobileLayout?12.6:25.2;
+ const limit=mobileLayout?Math.min(36,Math.max(24,Math.floor((stage.clientWidth*.92-38)/17.6*2)-2)):25.2;
  const next=[];
  let lastSide='right';
  for(let m=0;m<records.length;m++){
@@ -373,7 +397,7 @@ function isSmall(){return window.innerWidth<=680 || app.classList.contains('prev
 function isAlreadyMobile(){return mobileLayout}
 let previousImageBySide={left:'',right:''};
 function displayBeat(i,options={}){
- clearTimeout(timer);clearInterval(typingTimer);
+ clearTimeout(timer);clearTimeout(typingTimer);
  $('endingCover').classList.remove('visible');
  index=Math.max(0,Math.min(beats.length-1,i));
  const beat=beats[index],r=records[beat.m],prev=beat.m>0?records[beat.m-1]:null;
@@ -429,29 +453,47 @@ function typingPage(glyphs,count){
  return lines.slice(page*3,page*3+3).join('\n');
 }
 function startTyping(beat,instant,resume=false){
- const txt=beat.text;const composer=$('composer'),composerText=$('composerText');
+ const txt=beat.text,composer=$('composer'),composerText=$('composerText');
  if(!resume||!typingState||typingState.beat!==index){typingState={beat:index,glyphs:Array.from(txt),j:0,done:false}}
  const state=typingState;
  const paint=()=>{
-  const shown=typingPage(state.glyphs,state.j);
-  composerText.textContent=shown;
+  composerText.textContent=typingPage(state.glyphs,state.j);
   if(state.j>=state.glyphs.length){
-   state.done=true;clearInterval(typingTimer);composer.className='composer sent';$('composerLabel').textContent='玩家 · 訊息已送出';
-   if(playing)timer=setTimeout(advance,650/speed);
+   state.done=true;
+   composer.className='composer sent';$('composerLabel').textContent='玩家 · 訊息已送出';
   }else{
    composer.className='composer typing';$('composerLabel').textContent='玩家 · 正在輸入';
   }
  };
+ const tick=()=>{
+  if(!playing||state.beat!==index)return;
+  if(state.j>=state.glyphs.length){
+   paint();timer=setTimeout(advance,1800/speed);return;
+  }
+  state.j++;
+  paint();
+  if(state.done){timer=setTimeout(advance,1800/speed);return}
+  // A full stop or strong sentence-ending mark gets a visible pause.
+  // Commas slow the rhythm slightly; playback speed still applies.
+  const justTyped=state.glyphs[state.j-1];
+  const delay=/[。！？!?]/u.test(justTyped)?1450:/[；;]/u.test(justTyped)?800:/[，,]/u.test(justTyped)?240:75;
+  typingTimer=setTimeout(tick,Math.max(24,delay/speed));
+ };
  if(instant)state.j=state.glyphs.length;
- paint();if(state.done||!playing)return;
- // One complete Unicode character each tick, including during accelerated playback.
- typingTimer=setInterval(()=>{state.j=Math.min(state.glyphs.length,state.j+1);paint()},Math.max(22,75/speed));
+ paint();
+ if(!playing)return;
+ if(state.done)timer=setTimeout(advance,1800/speed);
+ else {
+  const previous=state.j>0?state.glyphs[state.j-1]:'';
+  const resumeDelay=/[。！？!?]/u.test(previous)?1450:/[；;]/u.test(previous)?800:/[，,]/u.test(previous)?240:75;
+  typingTimer=setTimeout(tick,Math.max(24,resumeDelay/speed));
+ }
 }
 function advance(){if(!playing)return;if(index>=beats.length-1){playing=false;updatePlayButton();$('endingCover').classList.add('visible');return}displayBeat(index+1)}
 function setPlay(next){
  if(next&&!started){startShow();return}
  if(playing===next)return;
- playing=next;clearTimeout(timer);clearInterval(typingTimer);
+ playing=next;clearTimeout(timer);clearTimeout(typingTimer);
  updatePlayButton();
  if(playing){const current=beats[index];if(current.type==='typing'){startTyping(current,false,true)}else displayBeat(index)}
 }
@@ -462,7 +504,7 @@ function updatePlayButton(){
 function move(delta){displayBeat(Math.max(0,Math.min(beats.length-1,index+delta)),{instantTyping:true})}
 function setSpeed(value){
  speed=value;document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('selected',Number(b.dataset.speed)===speed));
- if(playing){clearTimeout(timer);clearInterval(typingTimer);if(beats[index].type==='typing')startTyping(beats[index],false,true);else displayBeat(index)}
+ if(playing){clearTimeout(timer);clearTimeout(typingTimer);if(beats[index].type==='typing')startTyping(beats[index],false,true);else displayBeat(index)}
 }
 function applyMode(mode){const old=beats[index]||{m:0,chunk:0,count:1,type:'speech'};const preservedTyping=(typingState&&typingState.beat===index)?typingState.j:null;app.classList.toggle('preview-mobile',mode==='mobile'&&window.innerWidth>680);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('selected',b.dataset.view===mode));mobileLayout=isSmall();compileBeats();
  let newIndex=beats.findIndex(b=>b.m===old.m&&b.type===old.type&&b.chunk/Math.max(b.count,1)>=old.chunk/Math.max(old.count,1));
