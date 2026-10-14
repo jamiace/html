@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>なんでもない日を、君と。 — nøa.</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg-deep: #06090e;
+  --panel: #0d131a;
+  --text: #f0f4f8;
+  --zh: #9fb0bf;
+  --hakana: #7eb3db;
+  --mero: #e88ba9;
+  --duet: #dfb872;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-soft: rgba(255, 255, 255, 0.04);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  padding:48px 16px 90px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(126, 179, 219, 0.12), transparent 32rem),
+    radial-gradient(circle at 88% 18%, rgba(232, 139, 169, 0.10), transparent 34rem),
+    linear-gradient(180deg, #040609 0%, #080d13 50%, #05070b 100%);
+  color:var(--text);
+  font-family:'Noto Sans TC','Noto Sans JP','PingFang TC','Microsoft JhengHei',sans-serif;
+  line-height:1.85;
+}
+main{max-width:880px;margin:auto}
+header{text-align:center;padding:10px 0 42px;border-bottom:1px solid var(--line);margin-bottom:36px;position:relative}
+header::after{
+  content:"";
+  position:absolute;
+  left:50%;bottom:-1px;
+  width:min(420px,80%);height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,var(--hakana),var(--mero),transparent);
+  opacity:0.85;
+}
+.artist{
+  color:#93a4b5;
+  letter-spacing:.28em;
+  font-size:0.95rem;
+  text-transform:none;
+}
+h1{
+  font-family:'Yu Mincho','Hiragino Mincho ProN','Noto Serif CJK JP',serif;
+  font-weight:500;
+  font-size:clamp(2.1rem,6vw,3.6rem);
+  line-height:1.25;
+  margin:14px 0 8px;
+  letter-spacing:0.04em;
+}
+.subtitle{color:#c4d2de;font-size:1.05rem;letter-spacing:0.12em;font-weight:300}
+.legend{margin-top:22px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.badge{
+  display:inline-flex;align-items:center;padding:4px 14px;border-radius:999px;
+  font-size:.78rem;font-weight:700;letter-spacing:.06em;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
+}
+.badge.hakana{color:var(--hakana);border-color:rgba(126,179,219,.4)}
+.badge.mero{color:var(--mero);border-color:rgba(232,139,169,.4)}
+.badge.duet{color:var(--duet);border-color:rgba(223,184,114,.4)}
+
+.section{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-left:4px solid var(--voice, #7eb3db);
+  border-radius:16px;
+  padding:22px 26px 14px;
+  margin-bottom:24px;
+  box-shadow:0 18px 40px rgba(0,0,0,0.3);
+}
+.section.hakana{--voice:var(--hakana)}
+.section.mero{--voice:var(--mero)}
+.section.duet{--voice:var(--duet)}
+
+.label{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.label-text{font-size:.82rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--voice)}
+.singer{font-size:.78rem;font-weight:600;padding:2px 10px;border-radius:6px;background:rgba(255,255,255,0.05);color:var(--voice)}
+
+.pair{padding:10px 0}
+.pair+.pair{border-top:1px solid var(--line-soft)}
+.jp{
+  font-family:'Yu Mincho','Hiragino Mincho ProN','Noto Serif CJK JP',serif;
+  font-size:clamp(1.1rem,2.7vw,1.35rem);
+  line-height:2.05;
+  letter-spacing:.025em;
+  color:#fff;
+}
+.zh{font-size:.98rem;color:var(--zh);margin-top:3px;line-height:1.65}
+ruby{ruby-position:over;ruby-align:center;white-space:nowrap}
+rt{color:#90a3b5;font-size:0.52em;font-weight:500;line-height:1;letter-spacing:0}
+
+a.top{position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:30px;background:#17222e;color:#c0d2e0;text-decoration:none;font-size:.82rem;border:1px solid var(--line)}
+@media(max-width:640px){
+  body{padding:30px 12px 60px}
+  .section{padding:18px 16px 10px}
+}
+</style>
+</head>
+<body>
+<main id="top">
+<header>
+  <div class="artist">nøa.</div>
+  <h1>なんでもない日を、君と。</h1>
+  <div class="subtitle">在所有不確定的明天裡，我想牽著你走回家。</div>
+  <div class="legend">
+    <span class="badge hakana">儚nøa.</span>
+    <span class="badge mero">メロnøa.</span>
+    <span class="badge duet">儚nøa. × メロnøa.</span>
+  </div>
+</header>
+
+<section class="section hakana">
+  <div class="label"><span class="label-text">Verse 1</span><span class="singer">儚nøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>寝癖<rt>ねぐせ</rt></ruby>の<ruby>君<rt>きみ</rt></ruby>が <ruby>笑<rt>わら</rt></ruby>ってくれた<ruby>朝<rt>あさ</rt></ruby></div>
+    <div class="zh">你頂著亂翹的頭髮，對我微笑的早晨</div>
+  </div>
+  <div class="pair">
+    <div class="jp">プリンの<ruby>大<rt>おお</rt></ruby>きいほう <ruby>君<rt>きみ</rt></ruby>に<ruby>譲<rt>ゆず</rt></ruby>るよ</div>
+    <div class="zh">布丁比較大的那一半，就讓給你吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp">そんな<ruby>時間<rt>じかん</rt></ruby>が なぜだか<ruby>愛<rt>いとお</rt></ruby>しくて</div>
+    <div class="zh">那樣的時光，不知為何讓人無比憐惜</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>帰<rt>かえ</rt></ruby>り<ruby>道<rt>みち</rt></ruby>さえ <ruby>宝物<rt>たからもの</rt></ruby>になった</div>
+    <div class="zh">連漫步回家的路，都變成了珍貴的寶物</div>
+  </div>
+</section>
+
+<section class="section mero">
+  <div class="label"><span class="label-text">Pre-Chorus 1</span><span class="singer">メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>特別<rt>とくべつ</rt></ruby>なこと <ruby>何<rt>なに</rt></ruby>ひとつなくたって</div>
+    <div class="zh">即使沒有任何一件轟轟烈烈的大事</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>目<rt>め</rt></ruby>と<ruby>目<rt>め</rt></ruby>が<ruby>合<rt>あ</rt></ruby>えば それだけで<ruby>笑<rt>わら</rt></ruby>える</div>
+    <div class="zh">只要目光相遇，就能自然相視而笑</div>
+  </div>
+</section>
+
+<section class="section duet">
+  <div class="label"><span class="label-text">Chorus 1</span><span class="singer">儚nøa. × メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>君<rt>きみ</rt></ruby>と <ruby>君<rt>きみ</rt></ruby>と <ruby>歩<rt>ある</rt></ruby>いてゆこう</div>
+    <div class="zh">和你、和你，一起走下去吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp">なんでもない<ruby>日<rt>ひ</rt></ruby>を <ruby>重<rt>かさ</rt></ruby>ねてゆこう</div>
+    <div class="zh">把平凡無奇的每一天，一天天累積下去</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>笑<rt>わら</rt></ruby>いながら ゆっくり<ruby>帰<rt>かえ</rt></ruby>ろう</div>
+    <div class="zh">一邊笑著，一邊慢慢走回家吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>明日<rt>あした</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>を <ruby>風<rt>かぜ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>でしよう</div>
+    <div class="zh">在微風之中，再一起聊聊明天的事吧</div>
+  </div>
+</section>
+
+<section class="section mero">
+  <div class="label"><span class="label-text">Verse 2</span><span class="singer">メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>疲<rt>つか</rt></ruby>れ<ruby>果<rt>は</rt></ruby>てた<ruby>夜<rt>よる</rt></ruby> <ruby>沈黙<rt>しずけさ</rt></ruby>に<ruby>逃<rt>に</rt></ruby>げこんで</div>
+    <div class="zh">精疲力竭的夜晚，躲進了漫長的沉默</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>小<rt>ちい</rt></ruby>さなトゲで <ruby>傷<rt>きず</rt></ruby>つけあったりする</div>
+    <div class="zh">偶爾也會用微小的尖刺，不小心刺痛彼此</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>暮<rt>く</rt></ruby>らしも<ruby>夢<rt>ゆめ</rt></ruby>も <ruby>綺麗<rt>きれい</rt></ruby>ごとじゃないけど</div>
+    <div class="zh">生活與夢想，雖然從不是童話般美麗</div>
+  </div>
+  <div class="pair">
+    <div class="jp">それでもこの<ruby>手<rt>て</rt></ruby>を <ruby>離<rt>はな</rt></ruby>したくはないんだ</div>
+    <div class="zh">即使如此，我也絕不想放開這雙手</div>
+  </div>
+</section>
+
+<section class="section hakana">
+  <div class="label"><span class="label-text">Pre-Chorus 2</span><span class="singer">儚nøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>正<rt>ただ</rt></ruby>しさばかり <ruby>競<rt>きそ</rt></ruby>いあうよりも</div>
+    <div class="zh">比起爭論誰才是正確的</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>君<rt>きみ</rt></ruby>の<ruby>痛<rt>いた</rt></ruby>みを ちゃんと<ruby>分<rt>わ</rt></ruby>かりたい</div>
+    <div class="zh">我更想好好讀懂你心裡的痛</div>
+  </div>
+</section>
+
+<section class="section duet">
+  <div class="label"><span class="label-text">Chorus 2</span><span class="singer">儚nøa. × メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>君<rt>きみ</rt></ruby>と <ruby>君<rt>きみ</rt></ruby>と <ruby>歩<rt>ある</rt></ruby>いてゆこう</div>
+    <div class="zh">和你、和你，一起走下去吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp">すれちがう<ruby>夜<rt>よる</rt></ruby>も <ruby>抱<rt>だ</rt></ruby>きしめあおう</div>
+    <div class="zh">就連錯身擦肩的夜晚，也重新緊緊擁抱</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>涙<rt>なみだ</rt></ruby>のあとも そばにいさせて</div>
+    <div class="zh">流過眼淚之後，也請讓我陪在身旁</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>知<rt>し</rt></ruby>らない<ruby>君<rt>きみ</rt></ruby>を ひとつずつ<ruby>知<rt>し</rt></ruby>ろう</div>
+    <div class="zh">去一個一個認識，那些我還不知道的你</div>
+  </div>
+</section>
+
+<section class="section hakana">
+  <div class="label"><span class="label-text">Bridge 1</span><span class="singer">儚nøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>十年後<rt>じゅうねんご</rt></ruby>には どこにいるかな</div>
+    <div class="zh">十年之後，我們會在哪裡呢？</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>眠<rt>ねむ</rt></ruby>る<ruby>猫<rt>ねこ</rt></ruby>と <ruby>小<rt>ちい</rt></ruby>さな<ruby>庭<rt>にわ</rt></ruby>はあるかな</div>
+    <div class="zh">會不會有一隻熟睡的貓，和一座小小的庭院？</div>
+  </div>
+</section>
+
+<section class="section mero">
+  <div class="label"><span class="label-text">Bridge 2</span><span class="singer">メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp">しわが<ruby>増<rt>ふ</rt></ruby>えても <ruby>笑<rt>わら</rt></ruby>いあえるかな</div>
+    <div class="zh">就算皺紋變多了，我們還能這樣相視而笑嗎？</div>
+  </div>
+  <div class="pair">
+    <div class="jp">そんな<ruby>未来<rt>みらい</rt></ruby>が たまらなく<ruby>愛<rt>いとお</rt></ruby>しいよ</div>
+    <div class="zh">光是想像那樣的未來，就覺得無比深愛啊</div>
+  </div>
+</section>
+
+<section class="section duet">
+  <div class="label"><span class="label-text">Final Chorus 1</span><span class="singer">儚nøa. × メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp"><ruby>君<rt>きみ</rt></ruby>と <ruby>君<rt>きみ</rt></ruby>と <ruby>歩<rt>ある</rt></ruby>いてゆこう</div>
+    <div class="zh">和你、和你，一起走下去吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>予定<rt>よてい</rt></ruby>どおりじゃなくても <ruby>笑<rt>わら</rt></ruby>おう</div>
+    <div class="zh">即使一切都不在計畫之中，我們也笑著面對吧</div>
+  </div>
+  <div class="pair">
+    <div class="jp">なんでもない<ruby>日<rt>ひ</rt></ruby>を <ruby>重<rt>かさ</rt></ruby>ねた<ruby>先<rt>さき</rt></ruby>に</div>
+    <div class="zh">在無數平凡日子的堆疊之後</div>
+  </div>
+  <div class="pair">
+    <div class="jp">まだ<ruby>見<rt>み</rt></ruby>ぬ<ruby>明日<rt>あした</rt></ruby>を <ruby>迎<rt>むか</rt></ruby>えにいこう</div>
+    <div class="zh">一起去迎接那未曾謀面的明天吧</div>
+  </div>
+</section>
+
+<section class="section duet">
+  <div class="label"><span class="label-text">Final Chorus 2</span><span class="singer">儚nøa. × メロnøa.</span></div>
+  <div class="pair">
+    <div class="jp">ひとつひとつの <ruby>小<rt>ちい</rt></ruby>さな<ruby>愛<rt>あい</rt></ruby>が</div>
+    <div class="zh">每一個微小零碎的愛意</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>今日<rt>きょう</rt></ruby>のふたりを <ruby>連<rt>つ</rt></ruby>れてきたんだ</div>
+    <div class="zh">才把今天的我們一路引領到了這裡</div>
+  </div>
+  <div class="pair">
+    <div class="jp">どんな<ruby>景色<rt>けしき</rt></ruby>も <ruby>色褪<rt>いろあ</rt></ruby>せないよ</div>
+    <div class="zh">無論怎樣的風景都絕不會褪色</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>君<rt>きみ</rt></ruby>の<ruby>瞳<rt>ひとみ</rt></ruby>に <ruby>映<rt>うつ</rt></ruby>っているなら</div>
+    <div class="zh">只要它依然倒映在你的雙眼之中</div>
+  </div>
+  <div class="pair">
+    <div class="jp"><ruby>愛<rt>あい</rt></ruby>してる <ruby>愛<rt>あい</rt></ruby>してる</div>
+    <div class="zh">我愛著你，我深愛著你</div>
+  </div>
+  <div class="pair">
+    <div class="jp">この<ruby>温<rt>ぬく</rt></ruby>もりを <ruby>離<rt>はな</rt></ruby>さないから</div>
+    <div class="zh">這份溫度，我絕不會放開</div>
+  </div>
+</section>
+
+<section class="section hakana">
+  <div class="label"><span class="label-text">Outro</span><span class="singer">儚nøa.</span></div>
+  <div class="pair">
+    <div class="jp">ねえ、</div>
+    <div class="zh">吶、</div>
+  </div>
+  <div class="pair">
+    <div class="jp">これからも <ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>歩<rt>ある</rt></ruby>こう。</div>
+    <div class="zh">從今以後，也一起走下去吧。</div>
+  </div>
+  <div class="pair">
+    <div class="jp">……その<ruby>手<rt>て</rt></ruby>を、<ruby>離<rt>はな</rt></ruby>さないでね。</div>
+    <div class="zh">……這隻手，不要放開喔。</div>
+  </div>
+</section>
+
+</main>
+<a class="top" href="#top">↑ Top</a>
+</body>
+</html>
