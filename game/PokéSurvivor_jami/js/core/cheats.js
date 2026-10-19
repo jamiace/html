@@ -1,7 +1,8 @@
-/* ============ cheats.js — 繁體中文獨立單機測試工具 ============
- * 隱藏輸入 JAMI（不區分大小寫）開啟。僅在主選單／單人遊戲的暫停畫面接受。
- * 已取消 F9 快捷鍵，僅供 LOCAL 存檔單人模式使用。
- * 不開發/上傳排行榜，不讀寫 Firebase，遊戲每回合的作弊會被 clean() 標記。
+/* ============ cheats.js — 繁體中文 JAMI 作弊工具 ============
+ * 在主選單／單人暫停畫面連續輸入 JAMI（大小寫不拘）開啟，F9 停用。
+ * 支援本地與已登入的 Firebase 雲端帳號；遊客沒有持久存檔。
+ * 雲端資源／收藏透過 G.DB.commit() 寫入本機快取並同步 Firebase。
+ * 本版本原有排行榜關閉；作弊過的戰鬥會被 clean() 標記為不參與排行。
  * 本檔不覆寫玩家原有方法，所有倍率以原始計算結果為基礎即時作用。
  */
 G.Cheats = (() => {
@@ -13,7 +14,8 @@ G.Cheats = (() => {
   const backedUp = new Set();
 
   const $ = id => document.getElementById('ps-cheat-' + id);
-  const safe = () => !!(G.DB && G.DB.mode === 'local' && G.DB.save && !G.DB.guest && G.Game && !G.Coop.active);
+  const safe = () => !!(G.DB && G.DB.save && !G.DB.guest && G.Game && !G.Coop.active &&
+    (G.DB.mode === 'local' || (G.DB.mode === 'cloud' && G.DB.online)));
   const live = () => safe() && ['playing', 'paused', 'levelup', 'choice', 'held'].includes(G.Game.state) && !!G.Game.player;
   const say = (message, error = false) => {
     if (status) { status.textContent = message; status.classList.toggle('err', error); }
@@ -27,7 +29,7 @@ G.Cheats = (() => {
     return n;
   };
   const backup = () => {
-    const id = G.DB.user || "";
+    const id = (G.DB.mode === 'cloud' && G.DB.fb ? G.DB.fb.uid : G.DB.user) || '';
     if (backedUp.has(id)) return;
     // 備份記憶體內目前的存檔，避免既有資料被意外更改。
     // 依月份/秒生成獨立備份鍵，不會覆寫其他玩家 ps.save.*。
@@ -39,9 +41,17 @@ G.Cheats = (() => {
     } catch (e) { throw Error('無法備份存檔，可能是儲存空間不足。已停止修改。'); }
   };
   const save = () => {
-    if (!G.DB.commit(true)) throw Error('寫入本地存檔失敗，請確認不是遊客模式。');
+    if (!G.DB.commit(true)) throw Error('儲存失敗，請確認已登入帳號。');
     G.UI.refreshCoins();
+    // commit() 會立即保存在此瀏覽器；雲端帳號另外嘗試立刻同步。
+    // Firebase 若正在限流／斷線，DB 仍保留待同步狀態並自動重試。
+    if (G.DB.mode === 'cloud') {
+      Promise.resolve().then(() => G.DB.flush()).catch(e => {
+        console.warn('[JAMI Cheat] 雲端同步暫未完成：', e);
+      });
+    }
   };
+  const syncHint = () => G.DB.mode === 'cloud' ? '（已儲存至此瀏覽器，正在同步 Firebase；請等主選單顯示已同步）' : '';
   const close = () => {
     if (!opened) return;
     opened = false;
@@ -49,7 +59,7 @@ G.Cheats = (() => {
   };
   const open = () => {
     if (!safe()) {
-      if (G.UI) G.UI.toast('作弊工具只支援本地單機帳號。');
+      if (G.UI) G.UI.toast('請登入本地或 Firebase 帳號，並在單人模式下使用 JAMI。');
       return;
     }
     opened = true;
@@ -59,7 +69,7 @@ G.Cheats = (() => {
     $('god').checked = vals.god;
     for (const k of ['damage', 'move', 'cooldown', 'xp']) $(k).value = String(vals[k]);
     syncRunAvailability();
-    say('目前帳號：' + G.DB.user + '｜僅修改本地存檔，不連接排行榜。');
+    say('目前帳號：' + G.DB.user + (G.DB.mode === 'cloud' ? '｜Firebase 雲端存檔' : '｜本機存檔') + '｜不使用排行榜。');
     dialog.hidden = false;
   };
   const syncRunAvailability = () => {
@@ -113,7 +123,7 @@ G.Cheats = (() => {
     say('已套用：' + ({god:'無敵',damage:'傷害',move:'移動速度',cooldown:'技能冷卻',xp:'經驗值'}[what]) + (what==='god' ? (next ? '開' : '關') : ' ×' + next));
   };
   function action(name) {
-    if (!safe()) throw Error('僅允許本地單機存檔使用，已中止操作。');
+    if (!safe()) throw Error('請登入本地或 Firebase 帳號，並確認不是多人連線。');
     const s = G.DB.save;
     if (name === 'coins' || name === 't1' || name === 't10') {
       const n = num(name, 999999999);
@@ -121,7 +131,7 @@ G.Cheats = (() => {
       if (name === 'coins') s.coins = n;
       else { s.tickets = s.tickets || { t1: 0, t10: 0 }; s.tickets[name] = n; }
       save();
-      say('已儲存 ' + (name === 'coins' ? '金幣' : name === 't1' ? '一般抽卡券' : '十連抽卡券') + '：' + n.toLocaleString('zh-TW'));
+      say('已儲存 ' + (name === 'coins' ? '金幣' : name === 't1' ? '一般抽卡券' : '十連抽卡券') + '：' + n.toLocaleString('zh-TW') + syncHint());
     } else if (name === 'all' || name === 'shiny') {
       backup();
       let count = 0;
@@ -129,18 +139,18 @@ G.Cheats = (() => {
         const id = mon.dex;
         if (name === 'shiny') {
           if (!G.Sprites.hasShiny(id)) continue;
-          if (!s.shiny[id]) { G.DB.grantShiny(id, 'cheat-local'); count++; }
-        } else if (!G.DB.owns(id)) { G.DB.grant(id, 'cheat-local'); count++; }
+          if (!s.shiny[id]) { G.DB.grantShiny(id, 'cheat-jami'); count++; }
+        } else if (!G.DB.owns(id)) { G.DB.grant(id, 'cheat-jami'); count++; }
       }
       save();
-      say('完成：新增 ' + count + (name === 'shiny' ? ' 隻異色寶可夢' : ' 隻寶可夢') + '。返回收藏畫面重新開啟即可刷新。');
+      say('完成：新增 ' + count + (name === 'shiny' ? ' 隻異色寶可夢' : ' 隻寶可夢') + '。返回收藏畫面重新開啟即可刷新。' + syncHint());
     } else if (name === 'upgrades') {
       if (!s.partner) throw Error('請先選擇一隻夥伴寶可夢。');
       backup();
       const u = G.DB.upgradesOf(s.partner);
       for (const def of G.Upgrades.LIST) u[def.id] = def.max;
       save();
-      say('已將目前夥伴的永久升級全部提升至上限，下次開局生效。');
+      say('已將目前夥伴的永久升級全部提升至上限，下次開局生效。' + syncHint());
     } else if (name === 'heal') {
       if (!live()) throw Error('請先開始一場單人戰鬥。');
       const p = G.Game.player;
@@ -178,8 +188,8 @@ G.Cheats = (() => {
     dialog.id = 'ps-cheat-overlay';
     dialog.hidden = true;
     dialog.innerHTML = `
-      <div class="ps-cheat-window" role="dialog" aria-modal="true" aria-label="單機作弊工具">
-        <header class="ps-cheat-head"><div><strong>PokéSurvivor · 單機作弊工具</strong><small>在主選單或暫停畫面輸入 JAMI 開啟 · 僅限本機存檔</small></div><button type="button" id="ps-cheat-close" aria-label="關閉">×</button></header>
+      <div class="ps-cheat-window" role="dialog" aria-modal="true" aria-label="JAMI 作弊工具">
+        <header class="ps-cheat-head"><div><strong>PokéSurvivor · JAMI 作弊工具</strong><small>在主選單或暫停畫面輸入 JAMI 開啟 · 支援本地／Firebase 帳號</small></div><button type="button" id="ps-cheat-close" aria-label="關閉">×</button></header>
         <div class="ps-cheat-body">
           <section><h3>資源與收藏</h3><div class="ps-cheat-grid">
             <label>金幣<input id="ps-cheat-coins" type="number" min="0" max="999999999" step="1"></label><button type="button" data-act="coins">設定金幣</button>
@@ -195,15 +205,18 @@ G.Cheats = (() => {
               <label>經驗值倍率<select id="ps-cheat-xp" data-run-only><option value="1">×1</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option></select></label>
             </div><div class="ps-cheat-actions"><button type="button" data-run-only data-act="heal">生命值全滿</button><button type="button" data-run-only data-act="level">立即升級 1 級</button></div>
           </section>
-          <section><h3>戰鬥測試</h3><div class="ps-cheat-actions"><button type="button" data-run-only data-act="shiny-spawn">立即產生異色敵人（最多 10 隻）</button><button type="button" data-run-only data-act="boss">立即召喚 Boss</button><button type="button" data-act="save-backup">下載本地存檔備份</button></div></section>
+          <section><h3>戰鬥測試</h3><div class="ps-cheat-actions"><button type="button" data-run-only data-act="shiny-spawn">立即產生異色敵人（最多 10 隻）</button><button type="button" data-run-only data-act="boss">立即召喚 Boss</button><button type="button" data-act="save-backup">下載目前存檔備份</button></div></section>
           <p id="ps-cheat-status" class="ps-cheat-status" role="status"></p>
-          <p class="ps-cheat-hint">本地資源與收藏會儲存；戰鬥倍率只作用於目前這一局。作弊回合不提交排行榜。原有資料在第一次修改前會另存本地備份。</p>
+          <p class="ps-cheat-hint">資源與收藏會寫入目前帳號；雲端帳號另會同步到你的 Firebase。戰鬥倍率只作用於目前這一局；作弊回合不提交排行榜。首次修改前會於目前瀏覽器另存備份。</p>
         </div><footer><button type="button" id="ps-cheat-dismiss">關閉面板 · Esc</button></footer>
       </div>`;
     document.body.appendChild(dialog);
     status = $('status');
     $('close').addEventListener('click', close);
     $('dismiss').addEventListener('click', close);
+    G.DB.onSync(state => {
+      if (opened && G.DB.mode === 'cloud' && state === 'ok') say('☁ Firebase 雲端存檔已同步完成。');
+    });
     dialog.addEventListener('pointerdown', e => { if (e.target === dialog) close(); });
     dialog.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => {
       try { action(btn.dataset.act); } catch (e) { say(e.message || String(e), true); console.warn('[單機作弊]', e); }
@@ -214,7 +227,7 @@ G.Cheats = (() => {
     }
     // 捕獲鍵盤輸入：F9 已完全取消；密碼只在指定畫面接受。
     window.addEventListener('keydown', secretKeydown, true);
-    // 開發入口，僅供本地版。發行版 G 仍可保持 private。
+    // 不公開額外的控制台指令；正式版 G 仍可保持 private。
   }
 
   return {
