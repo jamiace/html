@@ -65,7 +65,10 @@ G.LoginUI = (() => {
 
   /** Explica dónde se guarda la partida según el modo de la base de datos. */
   function modeNote() {
-    if (G.DB.mode === 'cloud') return 'Tu partida se guarda en la nube: entra desde cualquier ordenador. Como invitado no se guarda.';
+    if (G.DB.mode === 'cloud') return '已連接你的專屬 Firebase：登入帳號後可跨裝置同步存檔；遊客模式不會保存進度。';
+    if (G.DB.mode === 'setup') return G.DB.localReason === 'host'
+      ? '雲端連線尚未開放給這個網站網域。請管理者設定 CLOUD_ALLOWED_HOSTS 與 Firebase Authentication 授權網域。'
+      : '雲端目前不可用（尚未設定或連線失敗），不提供假裝可同步的本地帳號；請通知網站管理者。';
     const why = G.DB.localReason === 'file'
       ? 'Abierto desde un archivo: la partida sólo se guarda en este navegador. Para guardar en la nube, juega en la versión publicada.'
       : G.DB.localReason === 'host'
@@ -87,7 +90,11 @@ G.LoginUI = (() => {
   function open() {
     G.UI.chrome(false);
     G.UI.show('scr-login');
-    if (!G.DB.storageOk) $('login-err').textContent = 'Este navegador no deja guardar datos: juega como invitado.';
+    if (!G.DB.storageOk) $('login-err').textContent = '瀏覽器無法保存本機備份資料，請確認未關閉網站儲存權限。';
+    if (G.DB.mode === 'setup') {
+      $('login-err').textContent = 'Firebase 尚未連線，請先完成網站的 Firebase 設定。';
+      $('btn-auth').disabled = true;
+    } else { $('btn-auth').disabled = false; }
     $('btn-google').classList.toggle('hidden', G.DB.mode !== 'cloud');
     $('login-mode').textContent = modeNote();
     setTimeout(() => $('f-user').focus(), 50);

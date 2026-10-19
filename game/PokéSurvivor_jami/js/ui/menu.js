@@ -6,6 +6,10 @@ G.MenuUI = (() => {
 
   function init() {
     const ICON = { play: 'ball', dex: 'book', upgrades: 'up', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
+    // 本版本只開放個人雲端存檔，好友／排行榜保留程式碼但不啟用。
+    if (!G.CLOUD_SOCIAL_ENABLED) {
+      document.querySelectorAll('#scr-menu [data-go=\"friends\"], #scr-menu [data-go=\"rank\"]').forEach(b => b.classList.add('hidden'));
+    }
     document.querySelectorAll('#scr-menu [data-go]').forEach(b => {
       b.insertAdjacentHTML('afterbegin', `<span class="mi-ico">${G.Icons.html(ICON[b.dataset.go], 26)}</span>`);
       b.dataset.sfx = b.dataset.go === 'play' ? 'confirm' : 'click';
@@ -23,6 +27,7 @@ G.MenuUI = (() => {
     });
     document.querySelectorAll('[data-back]').forEach(b => { b.onclick = open; });
     G.Social.on(() => { if (G.UI.isOpen('scr-menu')) socialLine(); });
+    G.DB.onSync(() => { if (G.UI.isOpen('scr-menu')) updateSyncLine(); });
     $('btn-logout').onclick = () => {
       if (G.DB.guest && !confirm('Eres invitado: se perderá todo el progreso. ¿Salir?')) return;
       G.Audio.music(null);
@@ -68,6 +73,7 @@ G.MenuUI = (() => {
       `Mejor nivel <b style="color:#fff">${st.bestLevel}</b> · Derrotados <b style="color:#fff">${st.totalKills.toLocaleString('es')}</b>` +
       (G.DB.guest ? '<br><span style="color:#ffb0b8">Modo invitado: no se guarda</span>' : '');
 
+    updateSyncLine();
     socialLine();
     // Premios de misiones por recoger.
     G.Progress.checkAch();
@@ -75,13 +81,31 @@ G.MenuUI = (() => {
     $('menu-goals-sub').textContent = pend ? pend + (pend === 1 ? ' premio por recoger' : ' premios por recoger') : 'Misiones, logros y perfil';
     $('menu-goals-sub').classList.toggle('gold', pend > 0);
     // Con cuenta en la nube: amigos en línea, invitaciones y (una vez) el apodo.
-    if (G.DB.online && !G.Social.started) {
+    if (G.CLOUD_SOCIAL_ENABLED && G.DB.online && !G.Social.started) {
       G.Social.start().then(r => {
         if (r === 'need-nick' && !G.NickUI.skipped && G.UI.isOpen('scr-menu')) G.NickUI.open();
         socialLine();
       });
     }
-    G.InvitePop.refresh();
+    if (G.CLOUD_SOCIAL_ENABLED) G.InvitePop.refresh();
+  }
+
+  /** 顯示真正的雲端存檔狀態，讓玩家知道何時可以關閉或換裝置。 */
+  function updateSyncLine() {
+    let box = document.getElementById('ps-cloud-save-status');
+    const host = document.getElementById('menu-stats');
+    if (!host) return;
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'ps-cloud-save-status';
+      box.style.cssText = 'margin-top:8px;font-size:14px;color:#bcd8ed';
+      host.appendChild(box);
+    }
+    const status = G.DB.guest ? 'guest' : G.DB.syncState;
+    box.textContent = ({ ok:'☁ 已同步到你的 Firebase', syncing:'☁ 同步中…',
+      pending:'☁ 等待同步（換裝置前請等完成）', offline:'☁ 離線：等候恢復連線',
+      setup:'☁ 雲端尚未設定', local:'本機存檔（不會上傳）',
+      guest:'遊客模式：不保存進度' })[status] || '☁ 狀態：' + status;
   }
 
   /** Texto bajo "Amigos" y "Jugar": quién está en línea, solicitudes, sala. */

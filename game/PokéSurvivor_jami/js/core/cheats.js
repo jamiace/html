@@ -1,5 +1,6 @@
 /* ============ cheats.js — 繁體中文獨立單機測試工具 ============
- * F9 開關。僅供 LOCAL 存檔單人模式使用。
+ * 隱藏輸入 JAMI（不區分大小寫）開啟。僅在主選單／單人遊戲的暫停畫面接受。
+ * 已取消 F9 快捷鍵，僅供 LOCAL 存檔單人模式使用。
  * 不開發/上傳排行榜，不讀寫 Firebase，遊戲每回合的作弊會被 clean() 標記。
  * 本檔不覆寫玩家原有方法，所有倍率以原始計算結果為基礎即時作用。
  */
@@ -7,6 +8,7 @@ G.Cheats = (() => {
   const MULT = { damage: 1, move: 1, cooldown: 1, xp: 1 };
   const vals = { ...MULT, god: false };
   let opened = false, usedThisRun = false;
+  let secretBuffer = '', lastSecretKeyAt = 0, lastSecretScreen = null;
   let dialog, status;
   const backedUp = new Set();
 
@@ -65,7 +67,45 @@ G.Cheats = (() => {
     dialog.querySelectorAll('[data-run-only]').forEach(el => { el.disabled = !running; });
     $('run-msg').textContent = running ? '戰鬥中的設定只影響本回合。' : '開始單人戰鬥後可使用戰鬥作弊。';
   };
-  const toggle = () => opened ? close() : open();
+  // 主選單／暫停面板之外一律不監聽密碼，包括戰鬥、升級、抽卡及設定等畫面。
+  const secretScreen = () => {
+    if (!G.Game || !G.UI) return null;
+    // 避免主選單被另一層畫面覆蓋時（例如設定或抽卡）意外觸發。
+    const front = [...document.querySelectorAll('section.scr:not(.hidden)')];
+    if (G.Game.state === 'ui' && front.length === 1 && front[0].id === 'scr-menu') return 'title';
+    if (G.Game.state === 'paused' && front.length === 1 && front[0].id === 'scr-pause' && !G.Coop.active) return 'pause';
+    return null;
+  };
+  const resetSecret = () => { secretBuffer = ''; lastSecretKeyAt = 0; lastSecretScreen = null; };
+
+  function secretKeydown(e) {
+    if (opened) {
+      // 關閉時用 Esc，作弊面板內的文字欄位仍可正常輸入。
+      if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); resetSecret(); return; }
+      if (!['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target?.tagName) && !e.target?.isContentEditable) e.stopPropagation();
+      return;
+    }
+    const screen = secretScreen();
+    if (!screen || e.repeat || e.isComposing || e.ctrlKey || e.altKey || e.metaKey ||
+        ['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target?.tagName) || e.target?.isContentEditable) {
+      resetSecret();
+      return;
+    }
+    // 不限定 Shift/CapsLock；每個字母間隔超過 2.5 秒就從頭輸入。
+    const now = performance.now();
+    if (screen !== lastSecretScreen || now - lastSecretKeyAt > 2500) secretBuffer = '';
+    lastSecretScreen = screen;
+    lastSecretKeyAt = now;
+    const key = (e.key || '').toLowerCase();
+    if (!/^[a-z]$/.test(key)) { secretBuffer = ''; return; }
+    secretBuffer = (secretBuffer + key).slice(-4);
+    if (secretBuffer === 'jami') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      resetSecret();
+      open();
+    }
+  }
   const change = (what, next) => {
     if (!live()) throw Error('請先開始一場單人戰鬥。');
     vals[what] = next;
@@ -108,15 +148,17 @@ G.Cheats = (() => {
       p.hp = p.maxHp;
       taint(); say('已回復全部生命值。');
     } else if (name === 'level') {
-      if (!live() || G.Game.state !== 'playing') throw Error('請在正常戰鬥畫面使用立即升級。');
+      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面使用立即升級。');
       G.Game.debugLevelUp(); taint();
       close();
+      // 暫停時先回到戰鬥，下一個畫格才會顯示升級卡片。
+      if (G.Game.state === 'paused') G.Game.togglePause();
       say('已提升 1 級，關閉面板後進行卡片選擇。');
     } else if (name === 'shiny-spawn') {
-      if (!live() || G.Game.state !== 'playing') throw Error('請在正常戰鬥畫面操作。');
+      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面操作。');
       taint(); G.Spawner.debugForceShiny(10); G.Spawner.burst(10); close();
     } else if (name === 'boss') {
-      if (!live() || G.Game.state !== 'playing') throw Error('請在正常戰鬥畫面操作。');
+      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面操作。');
       if (!G.Spawner.debugSpawnBoss()) throw Error('目前狀態不允許召喚 Boss。');
       taint(); close();
     } else if (name === 'save-backup') {
@@ -137,7 +179,7 @@ G.Cheats = (() => {
     dialog.hidden = true;
     dialog.innerHTML = `
       <div class="ps-cheat-window" role="dialog" aria-modal="true" aria-label="單機作弊工具">
-        <header class="ps-cheat-head"><div><strong>PokéSurvivor · 單機作弊工具</strong><small>按 F9 開啟／關閉 · 不影響原作者的線上服務</small></div><button type="button" id="ps-cheat-close" aria-label="關閉">×</button></header>
+        <header class="ps-cheat-head"><div><strong>PokéSurvivor · 單機作弊工具</strong><small>在主選單或暫停畫面輸入 JAMI 開啟 · 僅限本機存檔</small></div><button type="button" id="ps-cheat-close" aria-label="關閉">×</button></header>
         <div class="ps-cheat-body">
           <section><h3>資源與收藏</h3><div class="ps-cheat-grid">
             <label>金幣<input id="ps-cheat-coins" type="number" min="0" max="999999999" step="1"></label><button type="button" data-act="coins">設定金幣</button>
@@ -156,7 +198,7 @@ G.Cheats = (() => {
           <section><h3>戰鬥測試</h3><div class="ps-cheat-actions"><button type="button" data-run-only data-act="shiny-spawn">立即產生異色敵人（最多 10 隻）</button><button type="button" data-run-only data-act="boss">立即召喚 Boss</button><button type="button" data-act="save-backup">下載本地存檔備份</button></div></section>
           <p id="ps-cheat-status" class="ps-cheat-status" role="status"></p>
           <p class="ps-cheat-hint">本地資源與收藏會儲存；戰鬥倍率只作用於目前這一局。作弊回合不提交排行榜。原有資料在第一次修改前會另存本地備份。</p>
-        </div><footer><button type="button" id="ps-cheat-dismiss">關閉面板 · F9</button></footer>
+        </div><footer><button type="button" id="ps-cheat-dismiss">關閉面板 · Esc</button></footer>
       </div>`;
     document.body.appendChild(dialog);
     status = $('status');
@@ -170,14 +212,8 @@ G.Cheats = (() => {
     for (const k of ['damage','move','cooldown','xp']) {
       $(k).addEventListener('change', e => { try { change(k, Number(e.target.value)); } catch (err) { say(err.message, true); } });
     }
-    // Capture：在遊戲讀取方向鍵/快捷鍵之前處理 F9，避免作弊面板與遊戲輸入互相干擾。
-    window.addEventListener('keydown', e => {
-      if (e.code === 'F9') { e.preventDefault(); e.stopPropagation(); if (!e.repeat) toggle(); return; }
-      if (opened) {
-        if (e.code === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
-        if (!['INPUT','SELECT','TEXTAREA'].includes(e.target?.tagName)) e.stopPropagation();
-      }
-    }, true);
+    // 捕獲鍵盤輸入：F9 已完全取消；密碼只在指定畫面接受。
+    window.addEventListener('keydown', secretKeydown, true);
     // 開發入口，僅供本地版。發行版 G 仍可保持 private。
   }
 

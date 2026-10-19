@@ -137,7 +137,7 @@ G.Game = (() => {
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
     G.Audio.music(G.BIOME_MUSIC[0]);
     // Para el ranking: el servidor apunta cuándo empieza la partida (anti-trampas).
-    if (!coop || G.Coop.isHost) G.Ranking.runStarted(coop ? 'g' : 's');
+    if (G.CLOUD_SOCIAL_ENABLED && (!coop || G.Coop.isHost)) G.Ranking.runStarted(coop ? 'g' : 's');
     deathT = 0;
 
     state = 'playing';
@@ -324,8 +324,9 @@ G.Game = (() => {
     const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills };
     // Si la partida se ha tocado (ver clean()), no sube al ranking (sin avisar); lo demás, sí.
     const ok = clean();
-    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
-               : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
+    const sent = !G.CLOUD_SOCIAL_ENABLED ? null
+      : ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
+      : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
 
     G.RunUI.showOver({

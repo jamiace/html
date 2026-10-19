@@ -26,7 +26,7 @@ G.I18n = (() => {
   const byPath = /\/en(\/|$)/.test(location.pathname) ? 'en' : null;
   const nav = ((navigator.languages && navigator.languages[0]) || navigator.language || 'es').toLowerCase();
   const lang = supported(requested) ? requested : supported(saved) ? saved
-    : byPath || (nav.startsWith('zh') ? 'zh-TW' : nav.startsWith('es') ? 'es' : 'en');
+    : byPath || 'zh-TW';
   document.documentElement.lang = lang;
 
   const exact = new Map(), exactLow = new Map();

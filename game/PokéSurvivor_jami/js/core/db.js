@@ -28,11 +28,11 @@ G.DB = (() => {
   const K_ACC = 'ps.accounts', K_SES = 'ps.session', K_SAVE = 'ps.save.';
   const K_CLOUD = 'ps.cloud.', K_MIGRATED = 'ps.migrated.';
   const VERSION = 3;
-  const START_COINS = 500;
+  const START_COINS = 0;
   const SDK = 'https://www.gstatic.com/firebasejs/13.0.0/';
-  const NAME_DOMAIN = 'jugadores.pokesurvivor.net';   // sólo para el email interno
+  const NAME_DOMAIN = 'players.example.com';   // 網址僅用於 Firebase 內部虛擬帳號；example.com 為保留範例網域   // sólo para el email interno
 
-  let mode = 'local';       // 'cloud' | 'local'
+  let mode = 'local';       // 'cloud' | 'local' (file://) | 'setup' (網站未設定 Firebase)
   let localReason = '';     // por qué no hay nube: 'file' | 'config' | 'host' | 'error'
   let user = null;          // nombre visible
   let key = null;           // clave local (minúsculas) o uid de Firebase
@@ -399,7 +399,7 @@ G.DB = (() => {
   // como mucho cada 30 min:
   // con 2 h, quien abría el juego en otro aparato (o en el navegador de otra
   // app) veía la copia vieja de la nube y creía que lo había perdido.
-  const PUSH_GAP = 2 * 3600 * 1000, PUSH_GAP_URGENT = 15 * 1000, PUSH_GAP_RUN = 30 * 60 * 1000, HIDE_GAP = 30 * 60 * 1000;
+  const PUSH_GAP = 60 * 1000, PUSH_GAP_URGENT = 5 * 1000, PUSH_GAP_RUN = 5 * 1000, HIDE_GAP = 5000;
   let syncState = 'local';           // 'ok' | 'syncing' | 'pending' | 'offline' | 'local'
   const listeners = new Set();
 
@@ -422,12 +422,12 @@ G.DB = (() => {
    * cierra de verdad es la clave de la API restringida a estos dominios en
    * Google Cloud; esto frena las copias que ni lo miran (14-10-2026).
    */
-  const HOSTS = ['pokesurvivor.com', 'www.pokesurvivor.com', 'jpter78.github.io', 'localhost', '127.0.0.1'];
+  const HOSTS = (G.CLOUD_ALLOWED_HOSTS || []).filter(h => typeof h === 'string' && h.trim());
 
   async function initCloud() {
     const cfg = G.FIREBASE_CONFIG;
     if (!/^https?:$/.test(location.protocol)) { localReason = 'file'; return false; }
-    if (cfg && !cfg.emulator && !HOSTS.includes(location.hostname)) { localReason = 'host'; return false; }
+    if (!HOSTS.includes(location.hostname)) { localReason = 'host'; return false; }
     if (!cfg || !cfg.apiKey || !cfg.projectId) { localReason = 'config'; return false; }
     await loadScript(SDK + 'firebase-app-compat.js');
     await loadScript(SDK + 'firebase-auth-compat.js');
@@ -448,7 +448,7 @@ G.DB = (() => {
       if (rtdb) rtdb.useEmulator('127.0.0.1', 9000);
     }
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    auth.languageCode = 'es';
+    auth.languageCode = 'zh-TW';
     addEventListener('online', () => { if (pending) pushNow(); });
     // Al salir de la pestaña o cerrarla se sube lo pendiente, pero no más de una
     // vez cada 10 min: la gente cambia de pestaña a menudo y cada partida se
@@ -548,7 +548,7 @@ G.DB = (() => {
    * firestore.rules), cada guardado tiene que conservarlo: se copia de la nube.
    * Nunca se sube dos veces en menos de 65 s; mientras, todo está en el navegador.
    */
-  const K_OK = 'ps.cloudok.', MIN_GAP = 65000;
+  const K_OK = 'ps.cloudok.', MIN_GAP = 5000;
   const sinceOk = () => Date.now() - (+read(K_OK + uid) || 0);
 
   /** Sube la partida fusionándola con lo que haya en la nube (transacción). */
@@ -659,8 +659,12 @@ G.DB = (() => {
     if (readyP) return readyP;
     readyP = (async () => {
       try { if (await initCloud()) mode = 'cloud'; }
-      catch (e) { console.warn('[DB] sin nube:', e.message); localReason = 'error'; mode = 'local'; }
-      if (mode === 'local') { setSync('local'); return restoreLocal(); }
+      catch (e) { console.warn('[DB] Firebase 初始化失敗:', e.message); localReason = 'error'; mode = 'setup'; }
+      if (mode !== 'cloud') {
+        mode = localReason === 'file' ? 'local' : 'setup';
+        setSync(mode === 'local' ? 'local' : 'setup');
+        return mode === 'local' ? restoreLocal() : false;
+      }
       const u = await new Promise(res => { const off = auth.onAuthStateChanged(x => { off(); res(x); }); });
       if (!u) return false;
       try { await openCloud(u); return true; }
@@ -672,26 +676,27 @@ G.DB = (() => {
   async function register(name, pass) {
     name = (name || '').trim();
     if (!VALID.test(name)) return { ok: false, error: 'El nombre debe tener 3-16 letras, números o _.' };
-    const min = mode === 'cloud' ? 6 : 4;
+    const min = mode !== 'local' ? 6 : 4;
     if ((pass || '').length < min) return { ok: false, error: `La contraseña debe tener al menos ${min} caracteres.` };
     if (mode === 'local') return registerLocal(name, pass);
+    if (mode !== 'cloud') return { ok: false, error: '雲端尚未設定完成，無法建立帳號。請通知網站管理者。' };
     // Tope de cuentas del mes (Firebase cobra a partir de 50.000 al mes).
     try {
-      const legacy = await legacySave(name, pass);
+      // 安全隔離：不自動匯入先前單機／Cheat Mode 的本地存檔。
       const cred = await auth.createUserWithEmailAndPassword(nameToEmail(name), pass);
-      await openCloud(cred.user, { name, legacy });
-      return { ok: true, isNew: !save.partner, imported: !!legacy };
+      await openCloud(cred.user, { name });
+      return { ok: true, isNew: !save.partner, imported: false };
     } catch (e) { return { ok: false, error: authError(e) }; }
   }
 
   async function login(name, pass) {
     name = (name || '').trim();
     if (mode === 'local') return loginLocal(name, pass);
+    if (mode !== 'cloud') return { ok: false, error: '雲端尚未設定完成，無法登入。請通知網站管理者。' };
     try {
-      const legacy = await legacySave(name, pass);
       const cred = await auth.signInWithEmailAndPassword(nameToEmail(name), pass || '');
-      await openCloud(cred.user, { name, legacy });
-      return { ok: true, isNew: !save.partner, imported: !!legacy };
+      await openCloud(cred.user, { name });
+      return { ok: true, isNew: !save.partner, imported: false };
     } catch (e) { return { ok: false, error: authError(e) }; }
   }
 
