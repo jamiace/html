@@ -1,4 +1,4 @@
-/* JAMI CONTROL — player sandbox / training suite v3.0
+/* JAMI CONTROL — player sandbox / training suite v3.1
  * Compatible with the separate-script build (index.html). No external dependencies.
  * Type JAMI, case-insensitive, on ANY game screen. F9 deliberately unused.
  */
@@ -19,7 +19,22 @@ G.Cheats = (() => {
   const owned = () => !!(saveData() && !G.DB.guest && (G.DB.mode === 'local' || (G.DB.mode === 'cloud' && G.DB.online)));
   const requireRun = () => { if (!solo() || !pl() || pl().dead) throw Error('此操作需要單人戰鬥中、尚未倒下的角色。'); return pl(); };
   const requireAccount = () => { if (!owned()) throw Error('請先登入有效的本地或 Firebase 帳號。遊客無法修改永久存檔。'); return G.DB.save; };
-  const numeric = (value,min,max,integer=false) => { const n=Number(value); if (!Number.isFinite(n)||n<min||n>max||(integer&&!Number.isInteger(n))) throw Error(`請輸入 ${min}～${max} 的有效數字。`); return n; };
+  const numeric = (value,min,max,integer=false) => { const n=Number(value); if (value==null || String(value).trim()==='' || !Number.isFinite(n)||n<min||n>max||(integer&&!Number.isInteger(n))) throw Error(`請輸入 ${min}～${max} 的有效數字。`); return n; };
+  // Validate the complete form before mutating player state, and identify invalid fields.
+  const checkedNumber = (id,label,min,max,integer=false) => {
+    const element=$(id);
+    try {
+      const value=numeric(element?.value,min,max,integer);
+      element?.classList.remove('jc-invalid');
+      element?.removeAttribute('aria-invalid');
+      return value;
+    } catch (_) {
+      element?.classList.add('jc-invalid');
+      element?.setAttribute('aria-invalid','true');
+      element?.focus();
+      throw Error(`${label}：請輸入 ${min}～${max} 的${integer?'整數':'有效數值'}。`);
+    }
+  };
   const val = id => $(id)?.value;
   const check = id => !!$(id)?.checked;
   const saveNow = () => {
@@ -64,6 +79,7 @@ G.Cheats = (() => {
   const chooseMon = () => G.DEX_BY[Number(selectedMon)] || G.DEX_BY[25] || G.DEX[0];
   const pickDex = (selected) => `<div class="jc-row"><label class="jc-grow">寶可夢圖鑑（可搜尋）<input id="jc-dex-search" type="search" placeholder="輸入編號或名稱篩選…" autocomplete="off"></label><label class="jc-grow">選擇寶可夢<select id="jc-dex" size="1">${G.DEX.map(m=>`<option value="${m.dex}" ${Number(selected)===m.dex?'selected':''}>${esc(monName(m))}</option>`).join('')}</select></label></div>`;
   const moveOptions = (selected) => `<option value="">— 空欄位 —</option>${G.Moves.ALL.map(m=>`<option value="${esc(m.id)}" ${selected===m.id?'selected':''}>${esc((G.U.TYPE_NAME?.[m.type]||m.type)+' · '+m.name)}</option>`).join('')}`;
+  const groupLabel = (g,i) => `欄位 ${i+1}｜${g.map(m=>m.name||G.Moves.BY_ID[m.id]?.name||m.id).join(' ＋ ')}`;
   const itemOptions = selected => `<option value="">— 無裝備 —</option>${G.Items.LIST.map(it=>`<option value="${it.id}" ${it.id===selected?'selected':''}>${esc(it.name)}</option>`).join('')}`;
   const section = (title,content,note='') => `<section class="jc-card"><div class="jc-cardtop"><h3>${title}</h3>${note?`<span>${note}</span>`:''}</div>${content}</section>`;
   const b=(label,act,kind='')=>`<button type="button" class="jc-btn ${kind}" data-action="${act}">${label}</button>`;
@@ -72,19 +88,19 @@ G.Cheats = (() => {
   const numControls = (ids) => ids.map(([id,label,v,min,max,step])=>field(id,label,v,'number',min,max,step)).join('');
   function content(name){
     const p=pl(),s=saveData();
-    if(name==='home')return `<div class="jc-hero"><div class="jc-eyebrow">YOUR GAME · YOUR RULES</div><h2>無限可能，<br><em>由你定義。</em></h2><p>在任何畫面輸入 JAMI 即可開啟。控制角色、技能、裝備、世界與存檔；關閉後繼續冒險。</p><div class="jc-badges"><span>版本 3.0</span><span>${solo()?'單人遊戲':'多人連線：編輯鎖定'}</span><span>${s?(G.DB.mode==='cloud'?'Firebase 帳號':'本地帳號'):'未登入／遊客'}</span></div></div>
+    if(name==='home')return `<div class="jc-hero"><div class="jc-eyebrow">YOUR GAME · YOUR RULES</div><h2>無限可能，<br><em>由你定義。</em></h2><p>在任何畫面輸入 JAMI 即可開啟。控制角色、技能、裝備、世界與存檔；關閉後繼續冒險。</p><div class="jc-badges"><span>版本 3.1</span><span>${solo()?'單人遊戲':'多人連線：編輯鎖定'}</span><span>${s?(G.DB.mode==='cloud'?'Firebase 帳號':'本地帳號'):'未登入／遊客'}</span></div></div>
       <div class="jc-metrics"><div><span>當前狀態</span><strong>${esc(G.Game?.state||'未知')}</strong></div><div><span>寶可夢</span><strong>${esc(p?.mon?.name|| (s?.partner ? G.DEX_BY[s.partner]?.name : '未選擇')||'未選擇')}</strong></div><div><span>等級</span><strong>${p?'Lv. '+p.level:'—'}</strong></div><div><span>持有金幣</span><strong>${fmt(s?.coins)}</strong></div></div>
       ${section('立即操作',`<div class="jc-actions">${b('回滿生命','heal','primary')}${b('升級一次','level')}${b('無敵切換','god-toggle')}${b('清除敵人','clear-enemies')}${b('下載存檔','backup')}</div><p class="jc-desc">正在戰鬥才能使用角色相關功能。多人連線時禁止修改遊戲狀態，避免影響其他人。</p>`)}
       ${section('兩種模式',`<label class="jc-switch"><input id="jc-experiment" type="checkbox" ${experiment?'checked':''}><span><b>實驗模式</b><small>允許額外裝備效果、突破四技能欄位及擴張測試數值。關閉後仍保留本局已套用的實驗配置。</small></span></label>`)}
       `;
     if(name==='trainer')return `${section('指定寶可夢',`${pickDex(selectedMon)}<div class="jc-actions">${b('立即切換目前角色','swap-mon','primary')}${b('設為下次開局夥伴','partner')}${b('取得這隻寶可夢','grant-one')}${b('取得這隻異色','shiny-one')}</div><label class="jc-switch"><input id="jc-shiny" type="checkbox" ${p?.shiny?'checked':''}><span><b>使用異色外觀</b><small>需要該寶可夢有異色素材</small></span></label>`,'切換角色保留本局技能與位置')}
-      ${section('生命與角色成長',`<div class="jc-grid">${numControls([['level-value','當前等級',p?.level||1,1,999,1],['maxhp','最大生命',Math.round(p?.maxHp||100),1,9999999,1],['hp','目前生命',Math.round(p?.hp||100),0,9999999,1],['baseatk','基礎攻擊',p?.baseAtk||1,1,999999,1],['basespd','基礎速度',p?.baseSpd||1,1,10000,1],['crit','暴擊率（%）',Math.round((p?.critChance||0)*100),0,100,1],['regen','每秒恢復',p?.regenFlat||0,0,10000,0.1],['magnet','吸取半徑',p?.magnet||78,1,5000,1]])}</div><div class="jc-actions">${b('套用角色數值','player-stats','primary')}${b('生命值全滿','heal')}${b('等級 +1','level')}</div>`)}
+      ${section('生命與角色成長',`<div class="jc-grid">${numControls([['level-value','當前等級',p?.level||1,1,999,1],['maxhp','最大生命',Math.round(p?.maxHp||100),1,9999999,1],['hp','目前生命',Math.round(p?.hp||100),0,9999999,1],['baseatk','基礎攻擊',p?.baseAtk??1,0.01,999999,'any'],['basespd','基礎速度',p?.baseSpd??1,0.01,10000,'any'],['crit','暴擊率（%）',Math.round((p?.critChance||0)*100),0,100,1],['regen','每秒恢復',p?.regenFlat??0,0,10000,'any'],['magnet','吸取半徑',p?.magnet??78,1,5000,'any']])}</div><div class="jc-actions">${b('套用角色數值','player-stats','primary')}${b('生命值全滿','heal')}${b('等級 +1','level')}</div><p class="jc-desc">基礎攻擊、基礎速度與吸取半徑可以輸入小數；所有欄位檢查通過後才會一次套用。這些變更僅影響本局。</p>`)}
       `;
     if(name==='moves'){
       const slots=p?.slots||[];
       const maxSlots=experiment?8:4;
-      return `${section('當局技能欄',`<p class="jc-desc">選擇要編輯的欄位，再選擇招式與等級。替換時保留其他欄位；可以任意使用所有屬性的技能。</p><div class="jc-moves">${Array.from({length:maxSlots},(_,i)=>{const m=slots[i]?.[0];return `<div class="jc-slot"><div class="jc-slothead"><b>欄位 ${i+1}</b><small>${m?`Lv.${m.lvl}${m.evolved?' · 已進化':''}`:'空欄'}</small></div><select id="jc-move-${i}">${moveOptions(m?.id||'')}</select><div class="jc-row">${field('mvlevel-'+i,'技能等級',m?.lvl||1,'number',1,5,1)}<div class="jc-slotbuttons">${b('套用','slot-set-'+i,'primary')}${b('啟用','slot-active-'+i)}${b('清除','slot-del-'+i)}</div></div><p>${esc(m?.name||'尚無技能')}${slots[i]?.length>1?' · 羈絆 '+slots[i].length+' 技':''}</p></div>`;}).join('')}</div><div class="jc-actions">${b('全部升到最高級','all-max','primary')}${b('進化可進化的技能','evolve-all')}${b('重新整理彈幕','clear-orbs')}</div>`,'標準四欄／實驗八欄')}
-       ${section('羈絆合成',`<div class="jc-grid">${select('bond-to','合併到哪個欄位',Array.from({length:slots.length},(_,i)=>[i,'欄位 '+(i+1)]),0)}${select('bond-from','取出哪個欄位',Array.from({length:slots.length},(_,i)=>[i,'欄位 '+(i+1)]),Math.min(1,slots.length-1))}</div><div class="jc-actions">${b('合併兩個欄位','bond','primary')}${b('拆開全部羈絆','unbond')}</div><p class="jc-desc">一般模式遵守每組最多四招；實驗模式放寬到每組八招。可隨時拆開重組。</p>`)}
+      return `${section('當局技能欄',`<p class="jc-desc">選擇要編輯的欄位，再選擇招式與等級。替換時保留其他欄位；可以任意使用所有屬性的技能。</p><div class="jc-moves">${Array.from({length:maxSlots},(_,i)=>{const m=slots[i]?.[0];return `<div class="jc-slot"><div class="jc-slothead"><b>欄位 ${i+1}</b><small>${m?`Lv.${m.lvl}${m.evolved?' · 已進化':''}`:'空欄'}</small></div><select id="jc-move-${i}">${moveOptions(m?.id||'')}</select><div class="jc-row">${field('mvlevel-'+i,'技能等級',m?.lvl||1,'number',1,5,1)}<div class="jc-slotbuttons">${b('套用','slot-set-'+i,'primary')}${b('啟用','slot-active-'+i)}${b('清除','slot-del-'+i)}</div></div><div class="jc-groupmoves">${slots[i]?.length?slots[i].map((skill,j)=>`<span class="jc-movechip">${j?'＋ ':''}${esc(skill.name||G.Moves.BY_ID[skill.id]?.name||skill.id)} <small>Lv.${skill.lvl}</small></span>`).join(''):'<span class="jc-empty">尚未裝配技能</span>'}</div>${slots[i]?.length>1?'<p class="jc-bondhint">羈絆已啟動：切到此欄時，上述招式會一起發動</p>':''}</div>`;}).join('')}</div><div class="jc-actions">${b('全部升到最高級','all-max','primary')}${b('進化可進化的技能','evolve-all')}${b('重新整理彈幕','clear-orbs')}</div>`,'標準四欄／實驗八欄')}
+       ${section('羈絆合成',`<div class="jc-bondguide"><strong>什麼是羈絆？</strong><p>把兩個技能欄位合成一組。戰鬥中切換到這一組，就能讓組內所有技能<b>同時自動攻擊</b>，不需要輪流切招。</p><div class="jc-bondexample"><span>欄位 1：火花</span><b>＋</b><span>欄位 2：泡沫</span><b>→</b><span class="jc-result">欄位 1：火花 ＋ 泡沫</span></div><p>原本的欄位 2 會騰出位置。這裡是作弊編輯器，不消耗擊敗傳說寶可夢獲得的羈絆次數。</p></div><div class="jc-grid">${select('bond-to','① 主欄位（合併後保留）',slots.map((g,i)=>[i,groupLabel(g,i)]),0)}${select('bond-from','② 要併進去的欄位',slots.map((g,i)=>[i,groupLabel(g,i)]),Math.min(1,slots.length-1))}</div><div class="jc-bondpreview" id="jc-bond-preview" aria-live="polite"></div><div class="jc-actions">${b('將②合併進①','bond','primary')}${b('拆開①所選的羈絆','bond-break')}${b('拆開所有羈絆','unbond')}</div><p class="jc-desc">普通模式：一組最多四招；實驗模式：一組最多八招。合併後，到上方技能欄位按「啟用」即可立即使用該羈絆。</p>`)}
        ${section('單獨調整技能參數',`<div class="jc-grid">${select('editmove','當前技能',p?.moves?.map(m=>[m.id,m.name+' · Lv.'+m.lvl])||[],p?.moves?.[0]?.id)}${select('move-field','調整參數',[['dmg','傷害'],['cd','冷卻（秒）'],['count','攻擊數量'],['radius','攻擊範圍'],['speed','彈體速度'],['pierce','穿透次數'],['dur','持續時間']], 'dmg')}${field('move-value','新的數值',20,'number',0,100000,0.1)}</div><div class="jc-actions">${b('套用技能參數','move-param','primary')}</div><p class="jc-desc">修改的是技能實例，不會更改其他玩家或原始技能資料。</p>`)}
        `;
     }
@@ -109,13 +125,14 @@ G.Cheats = (() => {
   }
   function render(next=tab){
     if(!overlay)return;
+    const previousTab=tab, previousScroll=$('pane')?.scrollTop || 0;
     if(next==='trainer' && tab!==next) selectedMon=pl()?.dex || saveData()?.partner || selectedMon;
     tab=next;
     const p=pl();
     $('nav').innerHTML=NAV.map(([id,label,icon])=>`<button type="button" class="jc-navitem ${id===tab?'active':''}" data-tab="${id}"><i>${icon}</i><span>${label}</span></button>`).join('');
     $('heading').textContent=NAV.find(([id])=>id===tab)?.[1]||'概覽';
     $('pane').innerHTML=content(tab);
-    $('pane').scrollTop=0;
+    $('pane').scrollTop=next===previousTab?previousScroll:0;
     if(tab==='home'){$('experiment')?.addEventListener('change',e=>{experiment=e.target.checked;status(experiment?'實驗模式已啟用。':'已關閉實驗模式。');});}
     // Combo filter runs entirely in the browser; do not destroy game input listeners.
     $('dex-search')?.addEventListener('input',e=>{
@@ -126,6 +143,12 @@ G.Cheats = (() => {
     });
     $('dex')?.addEventListener('change',e=>{selectedMon=+e.target.value;});
     $('extra-item')?.addEventListener('change',e=>{selectedItem=e.target.value;});
+    if(tab==='moves'){
+      $('bond-to')?.addEventListener('change',updateBondPreview);
+      $('bond-from')?.addEventListener('change',updateBondPreview);
+      updateBondPreview();
+    }
+    for(const input of $('pane').querySelectorAll('.jc-invalid'))input.classList.remove('jc-invalid');
     $('god')?.addEventListener('change',e=>{if(!solo()){e.target.checked=vals.god;return status('多人模式不可使用作弊。',true);}vals.god=e.target.checked;mark();status('無敵模式 '+(vals.god?'已啟用':'已關閉'));});
     status(notice||'準備就緒',noticeError);
   }
@@ -163,23 +186,46 @@ G.Cheats = (() => {
     if(index>= (experiment?8:4))throw Error('請先開啟實驗模式擴張欄位。');
     if(!id){removeSlot(index);return;}
     if(!G.Moves.BY_ID[id])throw Error('技能不存在。');
-    // Remove the same move elsewhere, preserving the identities of other moves.
-    for(let i=p.slots.length-1;i>=0;i--){
-      if(i===index)continue;
-      const group=p.slots[i];const at=group.findIndex(m=>m.id===id);
-      if(at>=0){group.splice(at,1);if(!group.length)p.slots.splice(i,1);}
-    }
+    // Track the actual group object: removing a duplicate from an earlier slot must
+    // not shift the selected target and overwrite an unrelated bonded group.
     const fresh=G.Moves.instance(id,lv);
-    if(index>p.slots.length)index=p.slots.length;
-    if(index===p.slots.length)p.slots.push([fresh]);else p.slots[index]=[fresh];
-    syncMoves(p);p.active=Math.max(0,Math.min(index,p.slots.length-1));mark();
+    const target=p.slots[index] || [];
+    if(!p.slots.includes(target))p.slots.push(target);
+    target[0]=fresh; // Keep all other skills in the bond.
+    for(let i=p.slots.length-1;i>=0;i--){
+      const group=p.slots[i];
+      for(let j=group.length-1;j>=0;j--){
+        if(group===target && j===0)continue;
+        if(group[j].id===id)group.splice(j,1);
+      }
+      if(!group.length)p.slots.splice(i,1);
+    }
+    syncMoves(p);p.active=p.slots.indexOf(target);mark();
   }
   function removeSlot(i){const p=requireRun();if(p.slots.length<=1)throw Error('至少需要保留一個技能欄位。');p.slots.splice(i,1);syncMoves(p);mark();}
   function doBond(){const p=requireRun(),to=+val('bond-to'),from=+val('bond-from');
     if(to===from||!p.slots[to]||!p.slots[from])throw Error('請選擇兩個不同的有效欄位。');
     if(p.slots[to].length+p.slots[from].length>(experiment?8:4))throw Error('羈絆組合超過目前允許的技能數量。');
-    const active=p.slots[p.active],target=p.slots[to];target.push(...p.slots[from]);p.slots.splice(from,1);p.active=p.slots.indexOf(active);syncMoves(p);mark();}
-  function unblockBond(){const p=requireRun();const singles=p.moves.map(m=>[m]);if(singles.length>(experiment?8:4))throw Error('目前有太多技能，請先開啟實驗模式才能拆開所有羈絆。');p.slots=singles;p.active=0;syncMoves(p);mark();}
+    const target=p.slots[to];target.push(...p.slots[from]);p.slots.splice(from,1);
+    p.active=p.slots.indexOf(target);syncMoves(p);mark();}
+  function breakBond(){
+    const p=requireRun(),idx=+val('bond-to'),group=p.slots[idx];
+    if(!group||group.length<2)throw Error('主欄位尚未合成羈絆；請選擇有兩招以上的欄位。');
+    if(p.slots.length+group.length-1>(experiment?8:4))throw Error('拆開後欄位將超過目前容量。請先啟用實驗模式。');
+    const singles=group.map(m=>[m]);p.slots.splice(idx,1,...singles);p.active=idx;syncMoves(p);mark();
+  }
+  function unblockBond(){const p=requireRun();const singles=p.moves.map(m=>[m]);if(singles.length>(experiment?8:4))throw Error('拆開後會超過欄位容量，請先開啟實驗模式。');p.slots=singles;p.active=0;syncMoves(p);mark();}
+  function updateBondPreview(){
+    const p=pl(),el=$('bond-preview');if(!el)return;
+    const to=+val('bond-to'),from=+val('bond-from'),a=p?.slots?.[to],b=p?.slots?.[from];
+    const button=overlay.querySelector('[data-action="bond"]');
+    const ok=!!(a&&b&&to!==from&&a.length+b.length<=(experiment?8:4));
+    if(button)button.disabled=!ok;
+    if(!a||!b){el.textContent='請先進入單人戰鬥，並至少裝備兩個技能欄位。';return;}
+    if(to===from){el.textContent='請分別選擇不同的主欄位與來源欄位。';return;}
+    if(!ok){el.textContent=`兩組合計 ${a.length+b.length} 招，超過單組上限 ${experiment?8:4} 招。`;return;}
+    el.innerHTML=`<small>合併後預覽 · 主欄位 ${to+1} · ${a.length+b.length} 招同時施放</small><div class="jc-combochips">${[...a,...b].map(m=>`<span>${esc(m.name||G.Moves.BY_ID[m.id]?.name||m.id)} <small>Lv.${m.lvl}</small></span>`).join('<b>＋</b>')}</div>`;
+  }
   function accountAction(action){const s=requireAccount();backupBefore();const m=chooseMon();
     if(action==='resources'||action==='resources-zero'){
       const zero=action==='resources-zero';
@@ -234,7 +280,18 @@ G.Cheats = (() => {
     if(a==='multipliers'||a==='multipliers-reset'){requireRun();for(const k of ['damage','move','cooldown','xp'])vals[k]=a==='multipliers-reset'?1:numeric(val(k),k==='move'?0.05:k==='cooldown'?0.01:0,k==='move'?20:k==='cooldown'?10:1000);mark();render(tab);return status('戰鬥倍率已套用。');}
     if(a==='swap-mon'){switchMon(+val('dex'),check('shiny'));render('trainer');return status('目前角色已即時切換。');}
     if(a==='player-stats'){
-      const p=requireRun();p.level=numeric(val('level-value'),1,999,true);p.maxHp=numeric(val('maxhp'),1,9999999,true);p.hp=numeric(val('hp'),0,p.maxHp,true);p.baseAtk=numeric(val('baseatk'),1,999999,true);p.baseSpd=numeric(val('basespd'),1,10000,true);p.critChance=numeric(val('crit'),0,100)/100;p.regenFlat=numeric(val('regen'),0,10000);p.magnet=numeric(val('magnet'),1,5000);p.xpNext=G.Player.xpFor(p.level);mark();return status('角色屬性已套用。');
+      const p=requireRun();
+      const level=checkedNumber('level-value','當前等級',1,999,true);
+      const maxHp=checkedNumber('maxhp','最大生命',1,9999999,true);
+      const hp=checkedNumber('hp','目前生命',0,maxHp,true);
+      const baseAtk=checkedNumber('baseatk','基礎攻擊',0.01,999999);
+      const baseSpd=checkedNumber('basespd','基礎速度',0.01,10000);
+      const critChance=checkedNumber('crit','暴擊率',0,100)/100;
+      const regenFlat=checkedNumber('regen','每秒恢復',0,10000);
+      const magnet=checkedNumber('magnet','吸取半徑',1,5000);
+      Object.assign(p,{level,maxHp,hp,baseAtk,baseSpd,critChance,regenFlat,magnet});
+      p.xpNext=G.Player.xpFor(p.level);mark();
+      render('trainer');return status('全部八項角色數值已成功套用（僅限本局）。');
     }
     if(a==='heal'){const p=requireRun();p.hp=p.maxHp;mark();return status('生命值已回滿。');}
     if(a==='level'||a==='level-ten'){const p=requireRun(),count=a==='level-ten'?10:1;p.level+=count;p.xpNext=G.Player.xpFor(p.level);mark();return status('等級已提升 '+count+' 級（不觸發選卡）。');}
@@ -243,7 +300,8 @@ G.Cheats = (() => {
     if(a.startsWith('slot-active-')){const p=requireRun(),idx=+a.slice(12);if(!p.slots[idx])throw Error('欄位為空。');p.active=idx;G.Projectiles.clearOrbs(p);mark();return status('目前作用技能：欄位 '+(idx+1));}
     if(a==='all-max'){const p=requireRun();for(const m of p.moves)while(G.Moves.levelUp(m)){};mark();render('moves');return status('目前技能全部升到最高。');}
     if(a==='evolve-all'){const p=requireRun();let n=0;for(const m of p.moves)if(G.Moves.evolve(m))n++;mark();render('moves');return status('已進化 '+n+' 個可進化技能。');}
-    if(a==='bond'){doBond();render('moves');return status('技能欄位合併成功。');}
+    if(a==='bond'){doBond();render('moves');return status('羈絆合成成功！現在啟用該欄位，就能同時施放組內所有招式。');}
+    if(a==='bond-break'){breakBond();render('moves');return status('已拆開指定羈絆，每個技能恢復獨立欄位。');}
     if(a==='unbond'){unblockBond();render('moves');return status('已拆開全部羈絆。');}
     if(a==='move-param'){const p=requireRun(),m=p.moves.find(m=>m.id===val('editmove')),key=val('move-field');if(!m||!['dmg','cd','count','radius','speed','pierce','dur'].includes(key))throw Error('請指定有效的技能和參數。');m[key]=numeric(val('move-value'),key==='cd'?0.01:0,100000);mark();return status(m.name+' 的 '+key+' 已調整為 '+m[key]);}
     if(a==='clear-orbs'){const p=requireRun();G.Projectiles.clearOrbs(p);mark();return status('彈幕已重置。');}
