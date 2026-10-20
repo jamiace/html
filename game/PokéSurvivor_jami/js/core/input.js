@@ -11,15 +11,22 @@ G.Input = (() => {
 
   function code(e) { return (e.code || e.key).toLowerCase(); }
 
+  // Captura el teclado ANTES de que otros componentes/overlays puedan detener
+  // la propagación en document o en el elemento con foco. El monitor de teclas
+  // podía ver KeyW, pero el juego (que escuchaba en window/burbuja) no.
+  // input.js carga antes de cheats.js, por eso JAMI sigue funcionando.
   addEventListener('keydown', e => {
+    // El modal de trucos usa Escape para cerrarse: no mandar ese Escape también
+    // al juego (de lo contrario se reanudaría al cerrar el modal).
+    if (G.Cheats && G.Cheats.isOpen && G.Cheats.isOpen()) return;
     const c = code(e);
     if (!down.has(c)) pressed.add(c);
     down.add(c);
     // Evita que el navegador haga scroll con flechas/espacio durante el juego.
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space', 'tab'].includes(c)) e.preventDefault();
-  });
-  addEventListener('keyup', e => down.delete(code(e)));
-  addEventListener('blur', () => { down.clear(); });
+  }, true);
+  addEventListener('keyup', e => down.delete(code(e)), true);
+  addEventListener('blur', () => { down.clear(); pressed.clear(); });
   addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
   addEventListener('mousedown', () => mdown = true);
   addEventListener('mouseup', () => mdown = false);
