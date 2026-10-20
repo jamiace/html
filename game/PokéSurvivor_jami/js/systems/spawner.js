@@ -181,8 +181,8 @@ G.Spawner = (() => {
 
   return { reset, update, ahead, burst, tickBanner, banner, say, rate, SHINY_RATE, CAP,
            debugForceShiny(n = 1) { forceShiny = n; },
-           debugSpawnBoss() {
-             const b = G.Enemies.BOSSES[bossIdx] || G.Enemies.BOSSES[0];
+           debugSpawnBoss(index = bossIdx) {
+             const b = G.Enemies.BOSSES[index] || G.Enemies.BOSSES[0];
              if (!b || !G.Game.player || G.Rift.inArena || G.Judgment.active) return false;
              spawnBoss(G.Game.player, G.Game.st.time, b);
              return true;

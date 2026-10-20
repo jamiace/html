@@ -282,7 +282,7 @@ G.Player = class Player {
   }
 
   // ---------------- objeto equipado ----------------
-  hasItem(id) { return this.item === id; }
+  hasItem(id) { return this.item === id || !!(this._jamiExtraItems && this._jamiExtraItems.has(id)); }
 
   /** Se pone un objeto (y se quita el que llevara). */
   equip(id) {
@@ -293,7 +293,7 @@ G.Player = class Player {
 
   /** Cascabel Concha: un poco de vida por el daño que haces (tope 4/s). */
   onDealt(dmg) {
-    if (this.item === 'shellbell') this.bellHeal = Math.min(4, this.bellHeal + dmg * 0.04);
+    if (this.hasItem('shellbell')) this.bellHeal = Math.min(4, this.bellHeal + dmg * 0.04);
   }
 
   /** Poder de un altar (ver systems/interact.js): se aplica y se quita solo. */

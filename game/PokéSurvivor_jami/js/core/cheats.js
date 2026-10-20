@@ -1,247 +1,282 @@
-/* ============ cheats.js — 繁體中文 JAMI 作弊工具 ============
- * 在主選單／單人暫停畫面連續輸入 JAMI（大小寫不拘）開啟，F9 停用。
- * 支援本地與已登入的 Firebase 雲端帳號；遊客沒有持久存檔。
- * 雲端資源／收藏透過 G.DB.commit() 寫入本機快取並同步 Firebase。
- * 本版本原有排行榜關閉；作弊過的戰鬥會被 clean() 標記為不參與排行。
- * 本檔不覆寫玩家原有方法，所有倍率以原始計算結果為基礎即時作用。
+/* JAMI CONTROL — player sandbox / training suite v3.0
+ * Compatible with the separate-script build (index.html). No external dependencies.
+ * Type JAMI, case-insensitive, on ANY game screen. F9 deliberately unused.
  */
 G.Cheats = (() => {
-  const MULT = { damage: 1, move: 1, cooldown: 1, xp: 1 };
-  const vals = { ...MULT, god: false };
-  let opened = false, usedThisRun = false;
-  let secretBuffer = '', lastSecretKeyAt = 0, lastSecretScreen = null;
-  let dialog, status;
-  const backedUp = new Set();
-
-  const $ = id => document.getElementById('ps-cheat-' + id);
-  const safe = () => !!(G.DB && G.DB.save && !G.DB.guest && G.Game && !G.Coop.active &&
-    (G.DB.mode === 'local' || (G.DB.mode === 'cloud' && G.DB.online)));
-  const live = () => safe() && ['playing', 'paused', 'levelup', 'choice', 'held'].includes(G.Game.state) && !!G.Game.player;
-  const say = (message, error = false) => {
-    if (status) { status.textContent = message; status.classList.toggle('err', error); }
+  const defaults = Object.freeze({ damage:1, move:1, cooldown:1, xp:1, god:false });
+  const vals = { ...defaults };
+  const PRESETS = 'ps.jami.control.presets.v3';
+  let overlay = null, opened = false, usedThisRun = false, buffer = '', keyAt = 0;
+  let tab = 'home', experiment = false, selectedMon = 25, selectedMove = '', selectedItem = '';
+  let notice = '', noticeError = false;
+  const $ = (id) => overlay?.querySelector('#jc-' + id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = n => Number(n || 0).toLocaleString('zh-TW');
+  const session = () => G.Game && G.Game.player && !['ui','over'].includes(G.Game.state);
+  const solo = () => !G.Coop?.active;
+  const pl = () => session() ? G.Game.player : null;
+  const saveData = () => G.DB?.save;
+  const owned = () => !!(saveData() && !G.DB.guest && (G.DB.mode === 'local' || (G.DB.mode === 'cloud' && G.DB.online)));
+  const requireRun = () => { if (!solo() || !pl() || pl().dead) throw Error('此操作需要單人戰鬥中、尚未倒下的角色。'); return pl(); };
+  const requireAccount = () => { if (!owned()) throw Error('請先登入有效的本地或 Firebase 帳號。遊客無法修改永久存檔。'); return G.DB.save; };
+  const numeric = (value,min,max,integer=false) => { const n=Number(value); if (!Number.isFinite(n)||n<min||n>max||(integer&&!Number.isInteger(n))) throw Error(`請輸入 ${min}～${max} 的有效數字。`); return n; };
+  const val = id => $(id)?.value;
+  const check = id => !!$(id)?.checked;
+  const saveNow = () => {
+    if (!G.DB.commit(true)) throw Error('無法保存，請確認是否已登入帳號。');
+    G.UI?.refreshCoins?.();
+    if (G.DB.mode === 'cloud') Promise.resolve().then(() => G.DB.flush()).catch(e => console.warn('[JAMI Control] 雲端等待重新同步',e));
   };
-  const taint = () => { if (G.Game && G.Game.state !== 'ui') usedThisRun = true; };
-  const num = (id, max) => {
-    const input = $(id), text = (input?.value || '').trim();
-    if (!/^\d+$/.test(text)) throw Error('請輸入非負整數。');
-    const n = Number(text);
-    if (!Number.isSafeInteger(n) || n > max) throw Error('最大允許數量為 ' + max.toLocaleString('en-US') + '。');
-    return n;
+  const backupBefore = () => {
+    const s = requireAccount();
+    const k = 'ps.jami.snapshot.' + (G.DB.fb?.uid || G.DB.user || 'player') + '.' + Date.now();
+    try { localStorage.setItem(k, JSON.stringify(s)); } catch(e) { throw Error('無法自動備份原存檔，請清理本地儲存空間後重試。'); }
   };
-  const backup = () => {
-    const id = (G.DB.mode === 'cloud' && G.DB.fb ? G.DB.fb.uid : G.DB.user) || '';
-    if (backedUp.has(id)) return;
-    // 備份記憶體內目前的存檔，避免既有資料被意外更改。
-    // 依月份/秒生成獨立備份鍵，不會覆寫其他玩家 ps.save.*。
-    const s = G.DB.save;
-    const k = 'ps.cheat.backup.' + Date.now() + '.' + String(s.name || 'player').replace(/[^a-z\d_-]/gi, '');
-    try {
-      localStorage.setItem(k, JSON.stringify(s));
-      backedUp.add(id);
-    } catch (e) { throw Error('無法備份存檔，可能是儲存空間不足。已停止修改。'); }
-  };
-  const save = () => {
-    if (!G.DB.commit(true)) throw Error('儲存失敗，請確認已登入帳號。');
-    G.UI.refreshCoins();
-    // commit() 會立即保存在此瀏覽器；雲端帳號另外嘗試立刻同步。
-    // Firebase 若正在限流／斷線，DB 仍保留待同步狀態並自動重試。
-    if (G.DB.mode === 'cloud') {
-      Promise.resolve().then(() => G.DB.flush()).catch(e => {
-        console.warn('[JAMI Cheat] 雲端同步暫未完成：', e);
-      });
-    }
-  };
-  const syncHint = () => G.DB.mode === 'cloud' ? '（已儲存至此瀏覽器，正在同步 Firebase；請等主選單顯示已同步）' : '';
-  const close = () => {
-    if (!opened) return;
-    opened = false;
-    dialog.hidden = true;
-  };
-  const open = () => {
-    if (!safe()) {
-      if (G.UI) G.UI.toast('請登入本地或 Firebase 帳號，並在單人模式下使用 JAMI。');
+  function status(message,error=false){notice=message;noticeError=error;const el=$('status');if(el){el.textContent=message;el.classList.toggle('bad',error);}}
+  function mark(){ if (session()) usedThisRun=true; }
+  function close(){if(!opened)return;opened=false;overlay.hidden=true;buffer='';}
+  function open(){
+    if(!overlay) init();
+    opened=true;
+    overlay.hidden=false;
+    overlay.querySelector('.jc-dialog')?.focus();
+    render(tab);
+    status('已開啟 JAMI CONTROL。戰鬥調整僅影響本局；永久資料將寫入目前登入帳號。');
+  }
+  function keydown(e){
+    if(opened){
+      if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();G.Input?.endFrame?.();close();return;}
       return;
     }
-    opened = true;
-    $('coins').value = G.DB.save.coins;
-    $('t1').value = G.DB.save.tickets?.t1 || 0;
-    $('t10').value = G.DB.save.tickets?.t10 || 0;
-    $('god').checked = vals.god;
-    for (const k of ['damage', 'move', 'cooldown', 'xp']) $(k).value = String(vals[k]);
-    syncRunAvailability();
-    say('目前帳號：' + G.DB.user + (G.DB.mode === 'cloud' ? '｜Firebase 雲端存檔' : '｜本機存檔') + '｜不使用排行榜。');
-    dialog.hidden = false;
-  };
-  const syncRunAvailability = () => {
-    const running = live();
-    dialog.querySelectorAll('[data-run-only]').forEach(el => { el.disabled = !running; });
-    $('run-msg').textContent = running ? '戰鬥中的設定只影響本回合。' : '開始單人戰鬥後可使用戰鬥作弊。';
-  };
-  // 主選單／暫停面板之外一律不監聽密碼，包括戰鬥、升級、抽卡及設定等畫面。
-  const secretScreen = () => {
-    if (!G.Game || !G.UI) return null;
-    // 避免主選單被另一層畫面覆蓋時（例如設定或抽卡）意外觸發。
-    const front = [...document.querySelectorAll('section.scr:not(.hidden)')];
-    if (G.Game.state === 'ui' && front.length === 1 && front[0].id === 'scr-menu') return 'title';
-    if (G.Game.state === 'paused' && front.length === 1 && front[0].id === 'scr-pause' && !G.Coop.active) return 'pause';
-    return null;
-  };
-  const resetSecret = () => { secretBuffer = ''; lastSecretKeyAt = 0; lastSecretScreen = null; };
-
-  function secretKeydown(e) {
-    if (opened) {
-      // 關閉時用 Esc，作弊面板內的文字欄位仍可正常輸入。
-      if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); resetSecret(); return; }
-      if (!['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target?.tagName) && !e.target?.isContentEditable) e.stopPropagation();
-      return;
-    }
-    const screen = secretScreen();
-    if (!screen || e.repeat || e.isComposing || e.ctrlKey || e.altKey || e.metaKey ||
-        ['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target?.tagName) || e.target?.isContentEditable) {
-      resetSecret();
-      return;
-    }
-    // 不限定 Shift/CapsLock；每個字母間隔超過 2.5 秒就從頭輸入。
-    const now = performance.now();
-    if (screen !== lastSecretScreen || now - lastSecretKeyAt > 2500) secretBuffer = '';
-    lastSecretScreen = screen;
-    lastSecretKeyAt = now;
-    const key = (e.key || '').toLowerCase();
-    if (!/^[a-z]$/.test(key)) { secretBuffer = ''; return; }
-    secretBuffer = (secretBuffer + key).slice(-4);
-    if (secretBuffer === 'jami') {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      resetSecret();
-      open();
+    if(e.repeat||e.isComposing||e.ctrlKey||e.metaKey||e.altKey||['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)||e.target?.isContentEditable){buffer='';return;}
+    const c=(e.key||'').toLowerCase();
+    const now=performance.now();
+    if(now-keyAt>2500)buffer='';
+    keyAt=now;
+    if(!/^[a-z]$/.test(c)){buffer='';return;}
+    buffer=(buffer+c).slice(-4);
+    if(buffer==='jami'){
+      buffer=''; e.preventDefault(); e.stopImmediatePropagation();G.Input?.endFrame?.(); open();
     }
   }
-  const change = (what, next) => {
-    if (!live()) throw Error('請先開始一場單人戰鬥。');
-    vals[what] = next;
-    taint();
-    say('已套用：' + ({god:'無敵',damage:'傷害',move:'移動速度',cooldown:'技能冷卻',xp:'經驗值'}[what]) + (what==='god' ? (next ? '開' : '關') : ' ×' + next));
-  };
-  function action(name) {
-    if (!safe()) throw Error('請登入本地或 Firebase 帳號，並確認不是多人連線。');
-    const s = G.DB.save;
-    if (name === 'coins' || name === 't1' || name === 't10') {
-      const n = num(name, 999999999);
-      backup();
-      if (name === 'coins') s.coins = n;
-      else { s.tickets = s.tickets || { t1: 0, t10: 0 }; s.tickets[name] = n; }
-      save();
-      say('已儲存 ' + (name === 'coins' ? '金幣' : name === 't1' ? '一般抽卡券' : '十連抽卡券') + '：' + n.toLocaleString('zh-TW') + syncHint());
-    } else if (name === 'all' || name === 'shiny') {
-      backup();
-      let count = 0;
-      for (const mon of G.DEX) {
-        const id = mon.dex;
-        if (name === 'shiny') {
-          if (!G.Sprites.hasShiny(id)) continue;
-          if (!s.shiny[id]) { G.DB.grantShiny(id, 'cheat-jami'); count++; }
-        } else if (!G.DB.owns(id)) { G.DB.grant(id, 'cheat-jami'); count++; }
-      }
-      save();
-      say('完成：新增 ' + count + (name === 'shiny' ? ' 隻異色寶可夢' : ' 隻寶可夢') + '。返回收藏畫面重新開啟即可刷新。' + syncHint());
-    } else if (name === 'upgrades') {
-      if (!s.partner) throw Error('請先選擇一隻夥伴寶可夢。');
-      backup();
-      const u = G.DB.upgradesOf(s.partner);
-      for (const def of G.Upgrades.LIST) u[def.id] = def.max;
-      save();
-      say('已將目前夥伴的永久升級全部提升至上限，下次開局生效。' + syncHint());
-    } else if (name === 'heal') {
-      if (!live()) throw Error('請先開始一場單人戰鬥。');
-      const p = G.Game.player;
-      if (p.dead) throw Error('角色已倒下，請重新開始戰鬥。');
-      p.hp = p.maxHp;
-      taint(); say('已回復全部生命值。');
-    } else if (name === 'level') {
-      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面使用立即升級。');
-      G.Game.debugLevelUp(); taint();
-      close();
-      // 暫停時先回到戰鬥，下一個畫格才會顯示升級卡片。
-      if (G.Game.state === 'paused') G.Game.togglePause();
-      say('已提升 1 級，關閉面板後進行卡片選擇。');
-    } else if (name === 'shiny-spawn') {
-      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面操作。');
-      taint(); G.Spawner.debugForceShiny(10); G.Spawner.burst(10); close();
-    } else if (name === 'boss') {
-      if (!live() || !['playing','paused'].includes(G.Game.state)) throw Error('請在戰鬥或暫停畫面操作。');
-      if (!G.Spawner.debugSpawnBoss()) throw Error('目前狀態不允許召喚 Boss。');
-      taint(); close();
-    } else if (name === 'save-backup') {
-      // 手動備份，不改動存檔；輸出的檔案可以給使用者人工比對或還原。
-      const blob = new Blob([JSON.stringify(s, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'pokesurvivor-' + String(s.name || 'local').replace(/[^a-z0-9_-]/gi, '') + '-backup.json';
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      say('已匯出目前遊戲存檔。');
+  const NAV=[['home','概覽','◈'],['trainer','寶可夢','◆'],['moves','技能配置','✦'],['gear','裝備實驗室','◇'],['battle','戰鬥數值','⚔'],['world','世界控制','✧'],['account','資源與收藏','▣'],['presets','預設與備份','▤']];
+  const monName = m => m ? `${m.dex} · ${m.name || m.en || 'Pokémon'}` : '未選擇';
+  const chooseMon = () => G.DEX_BY[Number(selectedMon)] || G.DEX_BY[25] || G.DEX[0];
+  const pickDex = (selected) => `<div class="jc-row"><label class="jc-grow">寶可夢圖鑑（可搜尋）<input id="jc-dex-search" type="search" placeholder="輸入編號或名稱篩選…" autocomplete="off"></label><label class="jc-grow">選擇寶可夢<select id="jc-dex" size="1">${G.DEX.map(m=>`<option value="${m.dex}" ${Number(selected)===m.dex?'selected':''}>${esc(monName(m))}</option>`).join('')}</select></label></div>`;
+  const moveOptions = (selected) => `<option value="">— 空欄位 —</option>${G.Moves.ALL.map(m=>`<option value="${esc(m.id)}" ${selected===m.id?'selected':''}>${esc((G.U.TYPE_NAME?.[m.type]||m.type)+' · '+m.name)}</option>`).join('')}`;
+  const itemOptions = selected => `<option value="">— 無裝備 —</option>${G.Items.LIST.map(it=>`<option value="${it.id}" ${it.id===selected?'selected':''}>${esc(it.name)}</option>`).join('')}`;
+  const section = (title,content,note='') => `<section class="jc-card"><div class="jc-cardtop"><h3>${title}</h3>${note?`<span>${note}</span>`:''}</div>${content}</section>`;
+  const b=(label,act,kind='')=>`<button type="button" class="jc-btn ${kind}" data-action="${act}">${label}</button>`;
+  const field=(id,label,value,type='number',min=0,max=999999999,step='any')=>`<label>${label}<input id="jc-${id}" type="${type}" value="${esc(value)}" ${type==='number'?`min="${min}" max="${max}" step="${step}"`:''}></label>`;
+  const select = (id,label,arr,selected) => `<label>${label}<select id="jc-${id}">${arr.map(([v,n])=>`<option value="${esc(v)}" ${String(v)===String(selected)?'selected':''}>${esc(n)}</option>`).join('')}</select></label>`;
+  const numControls = (ids) => ids.map(([id,label,v,min,max,step])=>field(id,label,v,'number',min,max,step)).join('');
+  function content(name){
+    const p=pl(),s=saveData();
+    if(name==='home')return `<div class="jc-hero"><div class="jc-eyebrow">YOUR GAME · YOUR RULES</div><h2>無限可能，<br><em>由你定義。</em></h2><p>在任何畫面輸入 JAMI 即可開啟。控制角色、技能、裝備、世界與存檔；關閉後繼續冒險。</p><div class="jc-badges"><span>版本 3.0</span><span>${solo()?'單人遊戲':'多人連線：編輯鎖定'}</span><span>${s?(G.DB.mode==='cloud'?'Firebase 帳號':'本地帳號'):'未登入／遊客'}</span></div></div>
+      <div class="jc-metrics"><div><span>當前狀態</span><strong>${esc(G.Game?.state||'未知')}</strong></div><div><span>寶可夢</span><strong>${esc(p?.mon?.name|| (s?.partner ? G.DEX_BY[s.partner]?.name : '未選擇')||'未選擇')}</strong></div><div><span>等級</span><strong>${p?'Lv. '+p.level:'—'}</strong></div><div><span>持有金幣</span><strong>${fmt(s?.coins)}</strong></div></div>
+      ${section('立即操作',`<div class="jc-actions">${b('回滿生命','heal','primary')}${b('升級一次','level')}${b('無敵切換','god-toggle')}${b('清除敵人','clear-enemies')}${b('下載存檔','backup')}</div><p class="jc-desc">正在戰鬥才能使用角色相關功能。多人連線時禁止修改遊戲狀態，避免影響其他人。</p>`)}
+      ${section('兩種模式',`<label class="jc-switch"><input id="jc-experiment" type="checkbox" ${experiment?'checked':''}><span><b>實驗模式</b><small>允許額外裝備效果、突破四技能欄位及擴張測試數值。關閉後仍保留本局已套用的實驗配置。</small></span></label>`)}
+      `;
+    if(name==='trainer')return `${section('指定寶可夢',`${pickDex(selectedMon)}<div class="jc-actions">${b('立即切換目前角色','swap-mon','primary')}${b('設為下次開局夥伴','partner')}${b('取得這隻寶可夢','grant-one')}${b('取得這隻異色','shiny-one')}</div><label class="jc-switch"><input id="jc-shiny" type="checkbox" ${p?.shiny?'checked':''}><span><b>使用異色外觀</b><small>需要該寶可夢有異色素材</small></span></label>`,'切換角色保留本局技能與位置')}
+      ${section('生命與角色成長',`<div class="jc-grid">${numControls([['level-value','當前等級',p?.level||1,1,999,1],['maxhp','最大生命',Math.round(p?.maxHp||100),1,9999999,1],['hp','目前生命',Math.round(p?.hp||100),0,9999999,1],['baseatk','基礎攻擊',p?.baseAtk||1,1,999999,1],['basespd','基礎速度',p?.baseSpd||1,1,10000,1],['crit','暴擊率（%）',Math.round((p?.critChance||0)*100),0,100,1],['regen','每秒恢復',p?.regenFlat||0,0,10000,0.1],['magnet','吸取半徑',p?.magnet||78,1,5000,1]])}</div><div class="jc-actions">${b('套用角色數值','player-stats','primary')}${b('生命值全滿','heal')}${b('等級 +1','level')}</div>`)}
+      `;
+    if(name==='moves'){
+      const slots=p?.slots||[];
+      const maxSlots=experiment?8:4;
+      return `${section('當局技能欄',`<p class="jc-desc">選擇要編輯的欄位，再選擇招式與等級。替換時保留其他欄位；可以任意使用所有屬性的技能。</p><div class="jc-moves">${Array.from({length:maxSlots},(_,i)=>{const m=slots[i]?.[0];return `<div class="jc-slot"><div class="jc-slothead"><b>欄位 ${i+1}</b><small>${m?`Lv.${m.lvl}${m.evolved?' · 已進化':''}`:'空欄'}</small></div><select id="jc-move-${i}">${moveOptions(m?.id||'')}</select><div class="jc-row">${field('mvlevel-'+i,'技能等級',m?.lvl||1,'number',1,5,1)}<div class="jc-slotbuttons">${b('套用','slot-set-'+i,'primary')}${b('啟用','slot-active-'+i)}${b('清除','slot-del-'+i)}</div></div><p>${esc(m?.name||'尚無技能')}${slots[i]?.length>1?' · 羈絆 '+slots[i].length+' 技':''}</p></div>`;}).join('')}</div><div class="jc-actions">${b('全部升到最高級','all-max','primary')}${b('進化可進化的技能','evolve-all')}${b('重新整理彈幕','clear-orbs')}</div>`,'標準四欄／實驗八欄')}
+       ${section('羈絆合成',`<div class="jc-grid">${select('bond-to','合併到哪個欄位',Array.from({length:slots.length},(_,i)=>[i,'欄位 '+(i+1)]),0)}${select('bond-from','取出哪個欄位',Array.from({length:slots.length},(_,i)=>[i,'欄位 '+(i+1)]),Math.min(1,slots.length-1))}</div><div class="jc-actions">${b('合併兩個欄位','bond','primary')}${b('拆開全部羈絆','unbond')}</div><p class="jc-desc">一般模式遵守每組最多四招；實驗模式放寬到每組八招。可隨時拆開重組。</p>`)}
+       ${section('單獨調整技能參數',`<div class="jc-grid">${select('editmove','當前技能',p?.moves?.map(m=>[m.id,m.name+' · Lv.'+m.lvl])||[],p?.moves?.[0]?.id)}${select('move-field','調整參數',[['dmg','傷害'],['cd','冷卻（秒）'],['count','攻擊數量'],['radius','攻擊範圍'],['speed','彈體速度'],['pierce','穿透次數'],['dur','持續時間']], 'dmg')}${field('move-value','新的數值',20,'number',0,100000,0.1)}</div><div class="jc-actions">${b('套用技能參數','move-param','primary')}</div><p class="jc-desc">修改的是技能實例，不會更改其他玩家或原始技能資料。</p>`)}
+       `;
     }
+    if(name==='gear')return `${section('裝備配置',`<div class="jc-grid">${select('item','單裝備欄位',G.Items.LIST.map(i=>[i.id,i.name]).concat([['','— 無裝備 —']]),p?.item||'')}${select('extra-item','額外裝備（實驗）',G.Items.LIST.map(i=>[i.id,i.name]),selectedItem||'leftovers')}</div><div class="jc-actions">${b('立即換裝','equip','primary')}${b('卸下主裝備','unequip')}${b('增加額外裝備','extra-add')}${b('移除額外裝備','extra-remove')}${b('清除額外裝備','extra-clear')}</div><p class="jc-desc">主裝備：${esc(G.Items.BY[p?.item]?.name||'無')}　｜　額外裝備：${esc([...p?._jamiExtraItems||[]].map(id=>G.Items.BY[id]?.name||id).join('、')||'無')}</p><p class="jc-desc">額外裝備只有在實驗模式開啟時才能新增；同一件裝備不會重複疊加，卸下時會撤銷對應屬性效果。</p>`)}
+      ${section('裝備圖鑑',`<div class="jc-itemlist">${G.Items.LIST.map(i=>`<div><b>${esc(i.name)}</b><span>${esc(i.desc)}</span></div>`).join('')}</div><div class="jc-actions">${b('解鎖所有裝備發現紀錄','items-discovered')}</div>`)}
+      `;
+    if(name==='battle')return `${section('即時戰鬥倍率',`<div class="jc-grid">${numControls([['damage','傷害倍率',vals.damage,0,1000,0.1],['move','移動速度倍率',vals.move,0.05,20,0.05],['cooldown','技能冷卻倍率',vals.cooldown,0.01,10,0.01],['xp','經驗值倍率',vals.xp,0,1000,0.1]])}</div><div class="jc-actions">${b('套用倍率','multipliers','primary')}${b('恢復正常倍率','multipliers-reset')}</div><label class="jc-switch"><input type="checkbox" id="jc-god" ${vals.god?'checked':''}><span><b>無敵模式</b><small>阻擋受到的傷害，不影響原有攻擊邏輯</small></span></label>`)}
+      ${section('即時角色操作',`<div class="jc-actions">${b('生命全滿','heal','primary')}${b('立即升級','level')}${b('升 10 級','level-ten')}${b('吸收全地圖掉落物','magnet-all')}${b('擊殺畫面中敵人','kill-visible')}</div>`)}
+      `;
+    if(name==='world')return `${section('地圖與時間',`<div class="jc-grid">${select('biome','生態區',[[0,'森林'],[1,'水晶洞窟'],[2,'火山']],0)}${select('weather','天氣', [['','無天氣'],...Object.entries(G.Weather.KINDS).map(([k,v])=>[k,v.name])],'')}${field('weather-dur','天氣持續（秒）',120,'number',5,3600,1)}${field('time','遊戲時間（秒）',Math.round(G.Game.st.time),'number',0,1800,1)}${field('speed','遊戲速度倍率',1,'number',0.1,4,0.1)}</div><div class="jc-actions">${b('套用生態區','biome-set','primary')}${b('套用天氣','weather-set')}${b('設定遊戲時間','time-set')}${b('設定遊戲速度','speed-set')}</div><p class="jc-desc">遊戲時間超過 30 分鐘可能觸發原版最終事件，測試時請留意。</p>`)}
+      ${section('敵潮與世界事件',`<div class="jc-grid">${field('enemy-count','立即產生數量',10,'number',1,64,1)}${select('boss-choice','選擇本局 Boss',G.Enemies.BOSSES.map((b,i)=>[i,(i+1)+' · '+b.name]),0)}${select('event','事件', [['horde','屬性敵潮'],['gold','黃金時間'],['lost','迷路的寶可夢']], 'gold')}</div><div class="jc-actions">${b('召喚敵人','spawn','primary')}${b('召喚異色敵人','spawn-shiny')}${b('立即召喚 Boss','boss')}${b('清除全部敵人','clear-enemies')}${b('觸發特殊事件','event')}${b('召喚寶藏敵人','thief')}</div>`)}
+      ${section('異空間裂縫',`<div class="jc-grid">${select('rift-type','指定屬性',Object.keys(G.U.TYPE_NAME).map(k=>[k,G.U.TYPE_NAME[k]]),'fire')}</div><div class="jc-actions">${b('立即開啟裂縫','rift-open','primary')}${b('指定下一個裂縫屬性','rift-type')}${b('立即進入屬性競技場','rift-arena')}</div><p class="jc-desc">直接進入競技場會啟動原本的傳說對戰流程。</p>`)}
+      `;
+    if(name==='account')return `${section('資源帳本',`<div class="jc-grid">${numControls([['coins','金幣',s?.coins||0,0,999999999,1],['t1','一般抽卡券',s?.tickets?.t1||0,0,999999999,1],['t10','十連抽卡券',s?.tickets?.t10||0,0,999999999,1]])}</div><div class="jc-actions">${b('儲存金幣與抽卡券','resources','primary')}${b('資源全部歸零','resources-zero','danger')}</div><p class="jc-desc">帳號資料會先保留本機備份，再提交到 Firebase。跨裝置合併仍依遊戲原本的帳本規則進行。</p>`)}
+      ${section('收藏與養成',`${pickDex(selectedMon)}<div class="jc-actions">${b('取得指定寶可夢','grant-one','primary')}${b('取得指定異色','shiny-one')}${b('全部寶可夢解鎖','grant-all')}${b('全部可用異色解鎖','grant-all-shiny')}${b('指定寶可夢永久升級全滿','upgrade-one')}${b('目前夥伴永久升級全滿','upgrade-partner')}${b('全裝備發現紀錄','items-discovered')}</div>`)}
+      ${section('分區抽卡保底',`<div class="jc-grid">${select('pity-key','抽卡地區',[[1,'關都'],[2,'城都'],[3,'豐緣'],[4,'神奧'],[5,'合眾'],[6,'卡洛斯'],[7,'阿羅拉'],[8,'伽勒爾'],[9,'帕底亞']],1)}${field('pity-count','累積保底次數',0,'number',0,70,1)}</div><div class="jc-actions">${b('設定保底值','pity')}${b('下一抽必出傳說','pity-next')}</div><div class="jc-row" style="margin-top:14px">${field('shiny-pulls','接下來幾抽必出異色',1,'number',1,100,1)}${b('套用異色測試','gacha-shiny','primary')}</div><p class="jc-desc">使用遊戲原生的 1～9 地區代碼及保底機制。指定異色僅影響目前分頁中的抽卡測試，不直接解鎖收藏。</p>`)}
+      `;
+    if(name==='presets')return `${section('快速配置',`<div class="jc-grid">${field('preset-name','配置名稱','我的測試配置','text')}${select('preset-pick','已儲存的配置',Object.keys(readPresets()).map(k=>[k,k]),Object.keys(readPresets())[0]||'')}</div><div class="jc-actions">${b('儲存目前角色配置','preset-save','primary')}${b('套用已選配置','preset-load')}${b('刪除此配置','preset-delete','danger')}${b('匯出配置 JSON','preset-export')}</div><p class="jc-desc">配置儲存在目前瀏覽器，內容包含寶可夢、技能與欄位組合、裝備、額外裝備、數值及作弊倍率。配置不會自動寫入 Firebase。</p>`)}
+      ${section('安全備份',`<div class="jc-actions">${b('下載目前帳號存檔 JSON','backup','primary')}${b('匯出全部測試配置','preset-export')}${b('重置本局作弊倍率','multipliers-reset')}</div><p class="jc-desc">每次修改永久存檔時會自動建立本機快照。下載的 JSON 僅作備份用途，本版不提供直接覆蓋雲端存檔的危險還原按鈕。</p>`)}
+      `;
+    return '';
   }
-
-  function init() {
-    if (dialog) return;
-    dialog = document.createElement('div');
-    dialog.id = 'ps-cheat-overlay';
-    dialog.hidden = true;
-    dialog.innerHTML = `
-      <div class="ps-cheat-window" role="dialog" aria-modal="true" aria-label="JAMI 作弊工具">
-        <header class="ps-cheat-head"><div><strong>PokéSurvivor · JAMI 作弊工具</strong><small>在主選單或暫停畫面輸入 JAMI 開啟 · 支援本地／Firebase 帳號</small></div><button type="button" id="ps-cheat-close" aria-label="關閉">×</button></header>
-        <div class="ps-cheat-body">
-          <section><h3>資源與收藏</h3><div class="ps-cheat-grid">
-            <label>金幣<input id="ps-cheat-coins" type="number" min="0" max="999999999" step="1"></label><button type="button" data-act="coins">設定金幣</button>
-            <label>一般抽卡券<input id="ps-cheat-t1" type="number" min="0" max="999999999" step="1"></label><button type="button" data-act="t1">設定一般券</button>
-            <label>十連抽卡券<input id="ps-cheat-t10" type="number" min="0" max="999999999" step="1"></label><button type="button" data-act="t10">設定十連券</button>
-          </div><div class="ps-cheat-actions"><button type="button" data-act="all">取得全部寶可夢</button><button type="button" data-act="shiny">取得全部可用異色</button><button type="button" data-act="upgrades">目前夥伴升級全滿</button></div></section>
-          <section><h3>戰鬥設定</h3><p class="ps-cheat-hint" id="ps-cheat-run-msg"></p>
-            <label class="ps-cheat-check"><input type="checkbox" id="ps-cheat-god" data-run-only>無敵模式（不受傷害）</label>
-            <div class="ps-cheat-multipliers">
-              <label>傷害倍率<select id="ps-cheat-damage" data-run-only><option value="1">×1</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option></select></label>
-              <label>移動速度<select id="ps-cheat-move" data-run-only><option value="1">×1</option><option value="1.5">×1.5</option><option value="2">×2</option></select></label>
-              <label>技能冷卻<select id="ps-cheat-cooldown" data-run-only><option value="1">正常</option><option value="0.5">時間減半</option><option value="0.25">時間四分之一</option></select></label>
-              <label>經驗值倍率<select id="ps-cheat-xp" data-run-only><option value="1">×1</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option></select></label>
-            </div><div class="ps-cheat-actions"><button type="button" data-run-only data-act="heal">生命值全滿</button><button type="button" data-run-only data-act="level">立即升級 1 級</button></div>
-          </section>
-          <section><h3>戰鬥測試</h3><div class="ps-cheat-actions"><button type="button" data-run-only data-act="shiny-spawn">立即產生異色敵人（最多 10 隻）</button><button type="button" data-run-only data-act="boss">立即召喚 Boss</button><button type="button" data-act="save-backup">下載目前存檔備份</button></div></section>
-          <p id="ps-cheat-status" class="ps-cheat-status" role="status"></p>
-          <p class="ps-cheat-hint">資源與收藏會寫入目前帳號；雲端帳號另會同步到你的 Firebase。戰鬥倍率只作用於目前這一局；作弊回合不提交排行榜。首次修改前會於目前瀏覽器另存備份。</p>
-        </div><footer><button type="button" id="ps-cheat-dismiss">關閉面板 · Esc</button></footer>
-      </div>`;
-    document.body.appendChild(dialog);
-    status = $('status');
-    $('close').addEventListener('click', close);
-    $('dismiss').addEventListener('click', close);
-    G.DB.onSync(state => {
-      if (opened && G.DB.mode === 'cloud' && state === 'ok') say('☁ Firebase 雲端存檔已同步完成。');
+  function render(next=tab){
+    if(!overlay)return;
+    if(next==='trainer' && tab!==next) selectedMon=pl()?.dex || saveData()?.partner || selectedMon;
+    tab=next;
+    const p=pl();
+    $('nav').innerHTML=NAV.map(([id,label,icon])=>`<button type="button" class="jc-navitem ${id===tab?'active':''}" data-tab="${id}"><i>${icon}</i><span>${label}</span></button>`).join('');
+    $('heading').textContent=NAV.find(([id])=>id===tab)?.[1]||'概覽';
+    $('pane').innerHTML=content(tab);
+    $('pane').scrollTop=0;
+    if(tab==='home'){$('experiment')?.addEventListener('change',e=>{experiment=e.target.checked;status(experiment?'實驗模式已啟用。':'已關閉實驗模式。');});}
+    // Combo filter runs entirely in the browser; do not destroy game input listeners.
+    $('dex-search')?.addEventListener('input',e=>{
+      const q=e.target.value.trim().toLowerCase(),select=$('dex');
+      for(const option of select.options){option.hidden=!option.textContent.toLowerCase().includes(q);}
+      const first=[...select.options].find(o=>!o.hidden);
+      if(first&&!([...select.selectedOptions].some(o=>!o.hidden)))select.value=first.value;
     });
-    dialog.addEventListener('pointerdown', e => { if (e.target === dialog) close(); });
-    dialog.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => {
-      try { action(btn.dataset.act); } catch (e) { say(e.message || String(e), true); console.warn('[單機作弊]', e); }
-    }));
-    $('god').addEventListener('change', e => { try { change('god', e.target.checked); } catch (err) { say(err.message, true); e.target.checked = false; } });
-    for (const k of ['damage','move','cooldown','xp']) {
-      $(k).addEventListener('change', e => { try { change(k, Number(e.target.value)); } catch (err) { say(err.message, true); } });
-    }
-    // 捕獲鍵盤輸入：F9 已完全取消；密碼只在指定畫面接受。
-    window.addEventListener('keydown', secretKeydown, true);
-    // 不公開額外的控制台指令；正式版 G 仍可保持 private。
+    $('dex')?.addEventListener('change',e=>{selectedMon=+e.target.value;});
+    $('extra-item')?.addEventListener('change',e=>{selectedItem=e.target.value;});
+    $('god')?.addEventListener('change',e=>{if(!solo()){e.target.checked=vals.god;return status('多人模式不可使用作弊。',true);}vals.god=e.target.checked;mark();status('無敵模式 '+(vals.god?'已啟用':'已關閉'));});
+    status(notice||'準備就緒',noticeError);
   }
-
-  return {
-    init, isOpen: () => opened, close, resetRun() {
-      usedThisRun = false;
-      for (const k of Object.keys(MULT)) vals[k] = MULT[k];
-      vals.god = false;
-      if (opened) close();
-    },
-    get usedThisRun() { return usedThisRun; },
-    invincible: () => safe() && live() && vals.god,
-    damageMul: () => safe() && live() ? vals.damage : 1,
-    moveMul: () => safe() && live() ? vals.move : 1,
-    cooldownMul: () => safe() && live() ? vals.cooldown : 1,
-    xpMul: () => safe() && live() ? vals.xp : 1
-  };
+  function readPresets(){try { const p=JSON.parse(localStorage.getItem(PRESETS)||'{}');return p&&typeof p==='object'&&!Array.isArray(p)?p:{}; }catch(e){return {};}}
+  function storePresets(d){localStorage.setItem(PRESETS,JSON.stringify(d));}
+  function download(name,data){
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const link=document.createElement('a'); const url=URL.createObjectURL(blob);
+    link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function syncMoves(p){p.moves=p.slots.flat();p.maxMoves=Math.max(p.maxMoves,experiment?8:4);p.active=Math.max(0,Math.min(p.active,p.slots.length-1));G.Projectiles.clearOrbs(p);}
+  function switchMon(id,shiny){
+    const p=requireRun(),m=G.DEX_BY[id];if(!m)throw Error('無效的寶可夢編號。');
+    const before=p.maxHp,ratio=p.hp/Math.max(1,before);
+    const hpBonus=before-p.mon.hp;
+    p.mon=m;p.dex=m.dex;p.shiny=!!shiny&&G.Sprites.hasShiny(m.dex);
+    G.Sprites.preload?.([m.dex]);
+    p.anim=new G.Sprites.Animator(m.dex,1,p.shiny);
+    p.r=G.Sprites.bodyRadius(m.dex);p.bodyH=G.Sprites.bodyHeight(m.dex);
+    p.maxHp=Math.max(1,m.hp+hpBonus);p.hp=Math.max(1,Math.min(p.maxHp,p.maxHp*ratio));
+    p.baseAtk=m.atk;p.baseSpd=m.spd;G.Projectiles.clearOrbs(p);mark();
+  }
+  function extraChange(id,add){
+    const p=requireRun();if(!experiment&&add)throw Error('請先在概覽開啟實驗模式。');
+    const item=G.Items.BY[id];if(!item)throw Error('裝備不存在。');
+    p._jamiExtraItems=p._jamiExtraItems||new Set();
+    if(id===p.item)throw Error('此裝備已在主裝備欄中。');
+    if(add&&!p._jamiExtraItems.has(id)){item.on(p);p._jamiExtraItems.add(id);}
+    else if(!add&&p._jamiExtraItems.has(id)){item.off(p);p._jamiExtraItems.delete(id);}
+    mark();
+  }
+  function clearExtras(p){if(!p?._jamiExtraItems)return;for(const id of [...p._jamiExtraItems]){G.Items.BY[id]?.off(p);p._jamiExtraItems.delete(id);}}
+  function moveSlot(index){
+    const p=requireRun(),id=val('move-'+index),lv=numeric(val('mvlevel-'+index),1,5,true);
+    if(index>= (experiment?8:4))throw Error('請先開啟實驗模式擴張欄位。');
+    if(!id){removeSlot(index);return;}
+    if(!G.Moves.BY_ID[id])throw Error('技能不存在。');
+    // Remove the same move elsewhere, preserving the identities of other moves.
+    for(let i=p.slots.length-1;i>=0;i--){
+      if(i===index)continue;
+      const group=p.slots[i];const at=group.findIndex(m=>m.id===id);
+      if(at>=0){group.splice(at,1);if(!group.length)p.slots.splice(i,1);}
+    }
+    const fresh=G.Moves.instance(id,lv);
+    if(index>p.slots.length)index=p.slots.length;
+    if(index===p.slots.length)p.slots.push([fresh]);else p.slots[index]=[fresh];
+    syncMoves(p);p.active=Math.max(0,Math.min(index,p.slots.length-1));mark();
+  }
+  function removeSlot(i){const p=requireRun();if(p.slots.length<=1)throw Error('至少需要保留一個技能欄位。');p.slots.splice(i,1);syncMoves(p);mark();}
+  function doBond(){const p=requireRun(),to=+val('bond-to'),from=+val('bond-from');
+    if(to===from||!p.slots[to]||!p.slots[from])throw Error('請選擇兩個不同的有效欄位。');
+    if(p.slots[to].length+p.slots[from].length>(experiment?8:4))throw Error('羈絆組合超過目前允許的技能數量。');
+    const active=p.slots[p.active],target=p.slots[to];target.push(...p.slots[from]);p.slots.splice(from,1);p.active=p.slots.indexOf(active);syncMoves(p);mark();}
+  function unblockBond(){const p=requireRun();const singles=p.moves.map(m=>[m]);if(singles.length>(experiment?8:4))throw Error('目前有太多技能，請先開啟實驗模式才能拆開所有羈絆。');p.slots=singles;p.active=0;syncMoves(p);mark();}
+  function accountAction(action){const s=requireAccount();backupBefore();const m=chooseMon();
+    if(action==='resources'||action==='resources-zero'){
+      const zero=action==='resources-zero';
+      s.coins=zero?0:numeric(val('coins'),0,999999999,true);
+      s.tickets=s.tickets||{t1:0,t10:0};
+      s.tickets.t1=zero?0:numeric(val('t1'),0,999999999,true);
+      s.tickets.t10=zero?0:numeric(val('t10'),0,999999999,true);
+    }else if(action==='grant-one'){G.DB.grant(m.dex,'jami-control');}
+    else if(action==='shiny-one'){if(!G.Sprites.hasShiny(m.dex))throw Error('此寶可夢沒有異色素材。');G.DB.grantShiny(m.dex,'jami-control');}
+    else if(action==='grant-all'||action==='grant-all-shiny'){
+      for(const mon of G.DEX){if(action==='grant-all')G.DB.grant(mon.dex,'jami-control');else if(G.Sprites.hasShiny(mon.dex))G.DB.grantShiny(mon.dex,'jami-control');}
+    }else if(action==='partner'){
+      G.DB.grant(m.dex,'jami-control');s.partner=m.dex;s.partnerShiny=check('shiny')&&!!G.DB.ownsShiny(m.dex);
+    }else if(action==='upgrade-one'||action==='upgrade-partner'){
+      const id=action==='upgrade-partner'?s.partner:m.dex;if(!id)throw Error('尚未選擇夥伴。');
+      G.DB.grant(id,'jami-control');const data=G.DB.upgradesOf(id);for(const d of G.Upgrades.LIST)data[d.id]=d.max;
+    }else if(action==='items-discovered'){
+      s.itemsFound=s.itemsFound||{};for(const item of G.Items.LIST)s.itemsFound[item.id]=Date.now();
+    }else if(action==='pity'||action==='pity-next'){
+      s.pity=s.pity||{};s.pity[Number(val('pity-key'))]=action==='pity-next'?69:numeric(val('pity-count'),0,70,true);
+    }
+    saveNow();
+    status('已修改帳號資料並提交儲存。雲端帳號請等待同步完成。');
+  }
+  function getPreset(){const p=requireRun();return {version:3,mon:p.dex,shiny:p.shiny,level:p.level,maxHp:p.maxHp,hp:p.hp,baseAtk:p.baseAtk,baseSpd:p.baseSpd,critChance:p.critChance,regenFlat:p.regenFlat,magnet:p.magnet,item:p.item,extras:[...p._jamiExtraItems||[]],slots:p.slots.map(g=>g.map(m=>({id:m.id,lvl:m.lvl,evolved:!!m.evolved}))),active:p.active,vals:{...vals}};}
+  function applyPreset(cfg){const p=requireRun();if(!cfg||cfg.version!==3||!Array.isArray(cfg.slots)||cfg.slots.length<1||cfg.slots.length>8)throw Error('配置格式不正確。');
+    if(cfg.slots.length>4)experiment=true;
+    switchMon(+cfg.mon,!!cfg.shiny);
+    const next=cfg.slots.map(g=>{
+      if(!Array.isArray(g)||g.length<1||g.length>8)throw Error('技能組合不合法。');
+      return g.map(m=>{if(!G.Moves.BY_ID[m.id])throw Error('無效技能：'+m.id);const instance=G.Moves.instance(m.id,numeric(m.lvl,1,5,true));if(m.evolved)G.Moves.evolve(instance);return instance;});
+    });
+    if(new Set(next.flat().map(m=>m.id)).size!==next.flat().length)throw Error('技能配置包含重複的技能。');
+    clearExtras(p);p.equip(null);p.slots=next;p.active=Math.min(Math.max(0,cfg.active||0),next.length-1);syncMoves(p);
+    for(const k of ['level','maxHp','hp','baseAtk','baseSpd','critChance','regenFlat','magnet'])if(cfg[k]!=null)p[k]=numeric(cfg[k],0,10000000);
+    p.xpNext=G.Player.xpFor(p.level);p.hp=Math.min(p.hp,p.maxHp);
+    if(cfg.item&&G.Items.BY[cfg.item])p.equip(cfg.item);
+    if(Array.isArray(cfg.extras))for(const id of cfg.extras){if(id!==p.item&&G.Items.BY[id]){experiment=true;extraChange(id,true);}}
+    for(const k of ['damage','move','cooldown','xp'])vals[k]=numeric(cfg.vals?.[k]??1,0,1000);
+    vals.god=!!cfg.vals?.god;mark();
+  }
+  function dispatch(a){
+    if(!solo()&&!['backup','preset-export'].includes(a))throw Error('多人連線期間不能修改遊戲狀態或玩家數值。');
+    if(['resources','resources-zero','grant-one','shiny-one','grant-all','grant-all-shiny','partner','upgrade-one','upgrade-partner','items-discovered','pity','pity-next'].includes(a)){accountAction(a);return;}
+    if(a==='gacha-shiny'){G.Gacha.debugForceShiny(numeric(val('shiny-pulls'),1,100,true));return status('已安排後續抽卡的異色測試。');}
+    if(a==='backup'){download('pokesurvivor-jami-backup-'+Date.now()+'.json',requireAccount());return status('存檔已下載。');}
+    if(a==='preset-export'){download('jami-control-presets.json',readPresets());return status('測試配置已匯出。');}
+    if(a==='preset-save'){const name=(val('preset-name')||'').trim();if(!name||name.length>36)throw Error('配置名稱需在 1～36 個字元內。');const data=readPresets();data[name]=getPreset();storePresets(data);render('presets');return status('已保存配置：'+name);}
+    if(a==='preset-delete'){const name=val('preset-pick'),data=readPresets();if(!name||!data[name])throw Error('請選擇配置。');delete data[name];storePresets(data);render('presets');return status('已刪除配置。');}
+    if(a==='preset-load'){const data=readPresets(),name=val('preset-pick');if(!data[name])throw Error('請先儲存配置。');applyPreset(data[name]);render('presets');return status('已套用配置：'+name);}
+    if(a==='god-toggle'){requireRun();vals.god=!vals.god;mark();return status('無敵：'+(vals.god?'開啟':'關閉'));}
+    if(a==='multipliers'||a==='multipliers-reset'){requireRun();for(const k of ['damage','move','cooldown','xp'])vals[k]=a==='multipliers-reset'?1:numeric(val(k),k==='move'?0.05:k==='cooldown'?0.01:0,k==='move'?20:k==='cooldown'?10:1000);mark();render(tab);return status('戰鬥倍率已套用。');}
+    if(a==='swap-mon'){switchMon(+val('dex'),check('shiny'));render('trainer');return status('目前角色已即時切換。');}
+    if(a==='player-stats'){
+      const p=requireRun();p.level=numeric(val('level-value'),1,999,true);p.maxHp=numeric(val('maxhp'),1,9999999,true);p.hp=numeric(val('hp'),0,p.maxHp,true);p.baseAtk=numeric(val('baseatk'),1,999999,true);p.baseSpd=numeric(val('basespd'),1,10000,true);p.critChance=numeric(val('crit'),0,100)/100;p.regenFlat=numeric(val('regen'),0,10000);p.magnet=numeric(val('magnet'),1,5000);p.xpNext=G.Player.xpFor(p.level);mark();return status('角色屬性已套用。');
+    }
+    if(a==='heal'){const p=requireRun();p.hp=p.maxHp;mark();return status('生命值已回滿。');}
+    if(a==='level'||a==='level-ten'){const p=requireRun(),count=a==='level-ten'?10:1;p.level+=count;p.xpNext=G.Player.xpFor(p.level);mark();return status('等級已提升 '+count+' 級（不觸發選卡）。');}
+    if(a.startsWith('slot-set-')){moveSlot(+a.slice(9));render('moves');return status('技能欄位已更新。');}
+    if(a.startsWith('slot-del-')){removeSlot(+a.slice(9));render('moves');return status('技能欄位已移除。');}
+    if(a.startsWith('slot-active-')){const p=requireRun(),idx=+a.slice(12);if(!p.slots[idx])throw Error('欄位為空。');p.active=idx;G.Projectiles.clearOrbs(p);mark();return status('目前作用技能：欄位 '+(idx+1));}
+    if(a==='all-max'){const p=requireRun();for(const m of p.moves)while(G.Moves.levelUp(m)){};mark();render('moves');return status('目前技能全部升到最高。');}
+    if(a==='evolve-all'){const p=requireRun();let n=0;for(const m of p.moves)if(G.Moves.evolve(m))n++;mark();render('moves');return status('已進化 '+n+' 個可進化技能。');}
+    if(a==='bond'){doBond();render('moves');return status('技能欄位合併成功。');}
+    if(a==='unbond'){unblockBond();render('moves');return status('已拆開全部羈絆。');}
+    if(a==='move-param'){const p=requireRun(),m=p.moves.find(m=>m.id===val('editmove')),key=val('move-field');if(!m||!['dmg','cd','count','radius','speed','pierce','dur'].includes(key))throw Error('請指定有效的技能和參數。');m[key]=numeric(val('move-value'),key==='cd'?0.01:0,100000);mark();return status(m.name+' 的 '+key+' 已調整為 '+m[key]);}
+    if(a==='clear-orbs'){const p=requireRun();G.Projectiles.clearOrbs(p);mark();return status('彈幕已重置。');}
+    if(a==='equip'||a==='unequip'){const p=requireRun(),id=a==='unequip'?null:val('item');if(id&&!G.Items.BY[id])throw Error('裝備不存在。');if(p._jamiExtraItems?.has(id)){G.Items.BY[id].off(p);p._jamiExtraItems.delete(id);}p.equip(id);mark();render('gear');return status('主裝備已更新。');}
+    if(a==='extra-add'||a==='extra-remove'){extraChange(val('extra-item'),a==='extra-add');render('gear');return status('額外裝備已更新。');}
+    if(a==='extra-clear'){clearExtras(requireRun());mark();render('gear');return status('額外裝備已清除。');}
+    if(a==='biome-set'){requireRun();G.World.setBiome(+val('biome'));mark();return status('生態區已切換（下次原版輪替仍可能覆蓋）。');}
+    if(a==='weather-set'){requireRun();const k=val('weather');if(!k)G.Weather.clear();else G.Weather.debugStart(k,numeric(val('weather-dur'),5,3600,true));mark();return status('天氣已更新。');}
+    if(a==='time-set'){requireRun();G.Game.debugTime(numeric(val('time'),0,1800,true));mark();return status('遊戲時間已設定。');}
+    if(a==='speed-set'){requireRun();G.Game.debugSpeed(numeric(val('speed'),0.1,4));mark();return status('遊戲速度已設定。');}
+    if(a==='spawn'||a==='spawn-shiny'){requireRun();const n=numeric(val('enemy-count'),1,64,true);if(a==='spawn-shiny')G.Spawner.debugForceShiny(n);G.Spawner.burst(n);mark();return status('已觸發敵群生成。');}
+    if(a==='boss'){requireRun();if(!G.Spawner.debugSpawnBoss(Number(val('boss-choice'))))throw Error('目前不允許召喚 Boss。');mark();return status('Boss 已召喚。');}
+    if(a==='clear-enemies'){requireRun();G.EnemyMgr.clear();mark();return status('敵人已清除。');}
+    if(a==='kill-visible'){const p=requireRun();let n=0;for(const e of [...G.EnemyMgr.all()])if(G.Camera.sees(e.x,e.y,30)){e.hurt(1e9,'#ffce65',0,0,0);n++;}mark();return status('已攻擊畫面中 '+n+' 個敵人。');}
+    if(a==='magnet-all'){requireRun();G.Pickups.pullAll();mark();return status('已吸引地圖掉落物。');}
+    if(a==='event'){requireRun();G.Events.debugStart(val('event'));mark();return status('特殊事件已觸發。');}
+    if(a==='thief'){requireRun();G.Events.debugThief();mark();return status('寶藏敵人已召喚。');}
+    if(a==='rift-open'){requireRun();G.Rift.debugOpen();mark();return status('裂縫已開啟。');}
+    if(a==='rift-type'){requireRun();G.Rift.debugNextType(val('rift-type'));mark();return status('已指定下一個裂縫屬性。');}
+    if(a==='rift-arena'){requireRun();G.Rift.debugArena(val('rift-type'));mark();return status('已進入指定屬性競技場。');}
+    throw Error('尚未支援的操作：'+a);
+  }
+  function init(){if(overlay)return;
+    overlay=document.createElement('div');overlay.id='jc-overlay';overlay.hidden=true;
+    overlay.innerHTML=`<div class="jc-dialog" role="dialog" aria-modal="true" aria-label="JAMI CONTROL 遊戲控制台" tabindex="-1"><header class="jc-header"><div class="jc-brand"><span class="jc-glyph">✦</span><div><div class="jc-brandline">JAMI <b>CONTROL</b></div><small>POKÉSURVIVOR / PLAYER SANDBOX</small></div></div><div class="jc-headright"><span class="jc-hotkey">輸入 <kbd>J</kbd><kbd>A</kbd><kbd>M</kbd><kbd>I</kbd> 開啟</span><button class="jc-x" data-action="close" aria-label="關閉面板">×</button></div></header><div class="jc-layout"><nav class="jc-sidebar" id="jc-nav"></nav><main class="jc-main"><div class="jc-pagehead"><div><small>CONTROL CENTER</small><h1 id="jc-heading"></h1></div><span class="jc-live"><i></i> LIVE EDITOR</span></div><div id="jc-pane" class="jc-pane"></div></main></div><footer class="jc-footer"><div id="jc-status" role="status"></div><button data-action="close" class="jc-btn jc-close">關閉 <kbd>Esc</kbd></button></footer></div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay){close();return;}const button=e.target.closest('[data-tab],[data-action]');if(!button)return;
+      if(button.dataset.tab){render(button.dataset.tab);return;}
+      const a=button.dataset.action;if(a==='close'){close();return;}
+      try{dispatch(a);}catch(err){console.warn('[JAMI Control]',err);status(err.message||String(err),true);}
+    });
+    window.addEventListener('keydown',keydown,true);
+    G.DB?.onSync?.(state=>{if(opened&&G.DB.mode==='cloud'&&state==='ok')status('☁ Firebase 雲端同步完成。');});
+  }
+  return { init, isOpen:()=>opened, close, resetRun(){usedThisRun=false;Object.assign(vals,defaults);close();}, get usedThisRun(){return usedThisRun;},invincible:()=>solo()&&session()&&vals.god,damageMul:()=>solo()&&session()?vals.damage:1,moveMul:()=>solo()&&session()?vals.move:1,cooldownMul:()=>solo()&&session()?vals.cooldown:1,xpMul:()=>solo()&&session()?vals.xp:1 };
 })();
