@@ -77,7 +77,7 @@ const UI = {
     this.buildHud(); this.buildDock(); this.buildMini();
     window.addEventListener('resize', () => this.layout()); this.layout();
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { if (Room.edit) return this.setEdit(false); const top = Object.values(this.wins).filter(w => !w.el.hidden).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0]; if (top) this.closeWin(top.id); }
+      if (e.key === 'Escape') { if (Room.edit) return this.setEdit(false); const top = Object.values(this.wins).filter(w => !w.el.hidden).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0]; if (top && !top.conf.noclose) this.closeWin(top.id); }
     });
     this.renderPins();
     const yp = document.getElementById('ytpanel');
@@ -119,6 +119,7 @@ const UI = {
         this.el.timer = h('button', { class: 'chip timerchip', 'aria-label': '番茄鐘', onclick: () => this.openWin('timer') }, ico('i_tomato', 22), h('b', { class: 'num' }), h('span', { class: 'tm-mode' })),
         this.el.music = h('button', { class: 'chip musicchip', 'aria-label': '音樂', onclick: () => this.openWin('music') }, ico('i_music', 22), h('span', { class: 'mt' }))),
       h('div', { class: 'hud-right' },
+        this.el.cloud = h('button', { class: 'chip cloudchip', 'data-st': 'off', onclick: () => this.toggleWin('account') }, ico('i_cloud', 24), h('span', { class: 'cl-t' })),
         h('button', { class: 'chip icon-only', title: '迷你模式', 'aria-label': '迷你模式', onclick: () => this.setMini(true) }, ico('i_mini', 24)),
         h('button', { class: 'chip icon-only', title: '設定', 'aria-label': '設定', onclick: () => this.toggleWin('settings') }, ico('i_gear', 24))),
     );
@@ -236,7 +237,7 @@ const UI = {
     let w = this.wins[id]; if (w) return w;
     const conf = this.WIN[id];
     const body = h('div', { class: 'win-b' });
-    const head = h('header', { class: 'win-h' }, ico(conf.i, 28), h('h2', { text: conf.t }), h('button', { class: 'xbtn', 'aria-label': '關閉', onclick: () => this.closeWin(id) }, ico('i_close', 22)));
+    const head = h('header', { class: 'win-h' }, ico(conf.i, 28), h('h2', { text: conf.t }), conf.noclose ? null : h('button', { class: 'xbtn', 'aria-label': '關閉', onclick: () => this.closeWin(id) }, ico('i_close', 22)));
     const el = h('section', { class: 'win', 'data-id': id, role: 'dialog', 'aria-label': conf.t, style: `width:${conf.w}px` }, head, body);
     el.hidden = true; this.layer.append(el);
     w = this.wins[id] = { id, el, body, conf, pos: null };
@@ -310,7 +311,7 @@ const UI = {
       h('button', { class: 'cb' + (x.done ? ' on' : ''), role: 'checkbox', 'aria-checked': x.done ? 'true' : 'false', 'aria-label': (x.done ? '取消完成：' : '完成：') + x.t, title: x.done ? '取消完成' : '打勾完成', onclick: () => Game.toggleTodo(x.id) }, ico('i_check', 18)),
       h('span', { class: 'tt', text: x.t, title: x.done ? '點一下取消完成' : '點一下完成', onclick: () => Game.toggleTodo(x.id) }), x.ex ? h('em', { class: 'ex', text: '範例' }) : null,
       h('button', { class: 'del', 'aria-label': '刪除', onclick: () => Game.delTodo(x.id) }, ico('i_trash', 18)));
-    const today = new Date().toDateString(); const left = 15 - (S.stats.todoDay === today ? S.stats.todoToday : 0);
+    const today = gameDate().toDateString(); const left = 15 - (S.stats.todoDay === today ? S.stats.todoToday : 0);
     return [h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), add),
       h('div', { class: 'scroll' }, h('ul', { class: 'todos' }, ...open.map(row)), done.length ? h('div', { class: 'sub', text: `已完成 ${done.length}` }) : null, h('ul', { class: 'todos' }, ...done.map(row))),
       h('p', { class: 'hint' }, `點左邊方框或文字就能打勾完成。完成一件 +3 金幣、+5 經驗（今天還能領 ${Math.max(0, left)} 次）`)];
@@ -383,7 +384,11 @@ const UI = {
     if (tab === 'view') for (const id in VIEWS) { const d = VIEWS[id]; cards.push(card(viewSwatch(id), d.n, d, S.ownViews.includes(id), () => Game.buy('view', id))); }
     else if (tab === 'wallpaper') for (const id in WALLPAPERS) { const d = WALLPAPERS[id]; cards.push(card(swatch(WALL[id], 'wp'), d.n, d, S.ownWP.includes(id), () => Game.buy('wp', id))); }
     else if (tab === 'floor') for (const id in FLOORS) { const d = FLOORS[id]; cards.push(card(swatch(FLOOR[id], 'fl'), d.n, d, S.ownFL.includes(id), () => Game.buy('fl', id))); }
-    else if (tab === 'pet') for (const id in PETS) { const d = PETS[id], [k, c] = id.split(':'); cards.push(card(sprPreview(petCanvas(k, c, 'sit', 0, false), 60, 3), d.n, d, S.pets.includes(id), () => Game.buy('pet', id), '領養')); }
+    else if (tab === 'pet') {
+      const n = Pets.list().length, full = n >= PET_MAX;
+      for (const id in PETS) { const d = PETS[id], [k, c] = id.split(':'), cnt = Pets.list().filter(p => p.sp === id).length; const el = card(sprPreview(petCanvas(k, c, 'sit', 0, false), 60, 3), d.n, Object.assign({}, d, { price: Pets.adoptPrice(id) }), full ? true : cnt, () => Game.buy('pet', id), '領養'); if (full) el.querySelector('.own').textContent = '已滿'; cards.push(el); }
+      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: `已經養了 ${n}/${PET_MAX} 隻，房間裡最多同時 ${PET_ROOM_MAX} 隻。每多養一隻，領養費會多一點。每隻都有自己的個性和喜好。` }), h('div', { class: 'scroll grid' }, ...cards)];
+    }
     else for (const id in ITEMS) { const d = ITEMS[id]; if (d.cat !== tab || d.giftOnly || d.special) continue; const el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(id), () => Game.buy('item', id)); if (this.shopFocus === id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
     this.shopFocus = null;
     return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('div', { class: 'scroll grid' }, ...cards)];
@@ -429,20 +434,6 @@ const UI = {
     return [h('div', { class: 'ava-row' }, h('div', { class: 'ava-stage' }, pv, h('button', { class: 'chip sm', onclick: () => { this.avaView = (this.avaView + 1) % 3; this.refresh('avatar'); } }, ico('i_flip', 18), '轉一圈')),
       h('div', { class: 'ava-opts' }, h('label', { class: 'field' }, h('span', { text: '名字' }), h('div', { class: 'inset' }, h('input', { id: 'ava-name', type: 'text', maxlength: '16', value: a.name, placeholder: '一起專注時顯示', onchange: e => { a.name = e.target.value.trim().slice(0, 16); Game.save(); Cowork.push(); } }))), hairBtns)),
       sw('hairColor', AVATAR_OPTS.hairColor, '髮色'), sw('skin', AVATAR_OPTS.skin, '膚色'), sw('shirt', AVATAR_OPTS.shirt, '上衣'), sw('pants', AVATAR_OPTS.pants, '褲子')];
-  },
-  // ---------- pet ----------
-  w_pet() {
-    const S = Game.S; const [k, c] = S.pet.split(':');
-    const pv = sprPreview(petCanvas(k, c, 'sit', 0, false), 110, 5);
-    const list = h('div', { class: 'grid small' }, ...S.pets.map(id => { const [kk, cc] = id.split(':'); return h('button', { class: 'card pick' + (S.pet === id ? ' cur' : ''), onclick: () => Game.setPet(id) }, h('div', { class: 'pvbox' }, sprPreview(petCanvas(kk, cc, 'sit', 0, false), 48, 2)), h('div', { class: 'cn', text: PETS[id].n })); }));
-    const P = S.life.pet, bar = (label, v, cls) => h('div', { class: 'pstat' }, h('span', { text: label }), h('div', { class: 'pbar ' + cls }, h('i', { style: `width:${Math.round(v)}%` })), h('b', { class: 'num', text: String(Math.round(v)) }));
-    const uses = ['cat_can', 'cat_treat', 'catnip'].map(id => h('button', { class: 'swapbtn', title: SUPPLIES[id].desc, onclick: () => Life.use(id) }, ico(SUPPLIES[id].spr, 32), h('span', { text: SUPPLIES[id].n }), h('em', { class: 'num', text: '×' + (S.life.bag[id] || 0) })));
-    return [h('div', { class: 'ava-row' }, h('div', { class: 'ava-stage pet' }, pv), h('div', { class: 'ava-opts' }, h('label', { class: 'field' }, h('span', { text: '名字' }), h('div', { class: 'inset' }, h('input', { id: 'pet-name', type: 'text', maxlength: '12', value: S.petName, onchange: e => { S.petName = e.target.value.trim().slice(0, 12) || '麻糬'; Game.save(); } }))),
-      bar('飽足', P.hunger, 'food'), bar('心情', P.mood, 'mood'),
-      h('div', { class: 'pstat' }, h('span', { text: `羈絆 Lv ${P.lv}` }), h('div', { class: 'pbar bond' }, h('i', { style: `width:${Math.round(P.bond / Life.bondNeed(P.lv) * 100)}%` })), h('b', { class: 'num', text: `${P.bond}/${Life.bondNeed(P.lv)}` })))),
-      h('div', { class: 'sub', text: '照顧' }), h('div', { class: 'swap' }, ...uses),
-      h('p', { class: 'hint', text: `摸摸、餵食、陪玩都會增加羈絆。羈絆升級會得到金幣和零食，Lv 2 之後${S.petName}偶爾會叼禮物給你。` }),
-      h('div', { class: 'sub', text: '我的寵物' }), list, h('button', { class: 'chip', onclick: () => { this.shopTab = 'pet'; this.openWin('shop'); } }, ico('i_shop', 20), '領養更多')];
   },
   // ---------- cowork ----------
   w_cowork() {

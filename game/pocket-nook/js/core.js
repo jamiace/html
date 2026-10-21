@@ -191,3 +191,8 @@ function hitAlpha(cv, x, y) {
   if (x < 0 || y < 0 || x >= cv.width || y >= cv.height) return false;
   return cv.alpha[(y * cv.width + x) * 4 + 3] > 0;
 }
+// in-game "today" (developer mode can shift days forward)
+function gameDate(offsetDays = 0) { return new Date(Date.now() + ((window.NOOK_DAY_SHIFT || 0) + offsetDays) * 86400000); }
+function dayKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+// ask the cloud layer to write soon (rewards, purchases, quiz results); routine saves are batched
+function saveSoon() { if (typeof Cloud !== 'undefined' && Cloud.soon) Cloud.soon(); }

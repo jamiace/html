@@ -97,3 +97,58 @@ SPR.def('i_task', icon(g => {
 SPR.def('i_speaker', icon(g => { g.rect(2, 6, 3, 4, 'z'); for (let i = 0; i < 4; i++) g.vl(5 + i, 6 - i, 4 + i * 2, 'A'); g.pts([[11, 5], [12, 6], [12, 7], [12, 8], [12, 9], [11, 10]], 'n'); g.pts([[13, 3], [14, 5], [14, 6], [14, 7], [14, 8], [14, 9], [14, 10], [13, 12]], 'o'); }));
 SPR.def('i_bag', icon(g => { g.rect(2, 6, 12, 8, 'c'); g.hl(2, 6, 12, 'd'); g.rect(6, 4, 4, 2, 'b'); g.rect(5, 8, 6, 3, 'b'); g.rect(7, 9, 2, 1, 'w'); g.hl(2, 13, 12, 'b'); g.pts([[5, 3], [10, 3], [6, 2], [9, 2], [7, 2], [8, 2]], 'a'); }));
 SPR.def('i_fire', icon(g => { g.stamp(3, 1, ['....r.....', '...rr.....', '...rvr....', '..rvvr.r..', '..rvwvrr..', '.rvwwvvr..', '.rvwxwvvr.', 'rvwxxxwvr.', 'rvwxxxwvr.', 'rvvwxwvvr.', '.rvvvvvr..', '..rrrrr...']); }));
+SPR.def('i_cloud', icon(g => {
+  g.ellipse(5.5, 9, 3.6, 3, 'p'); g.ellipse(9, 7, 4.2, 4, 'p'); g.ellipse(12, 9.5, 2.8, 2.5, 'p'); g.rect(3, 9, 11, 3, 'p');
+  g.ellipse(8.4, 6.2, 2.4, 2, 'f'); g.ellipse(5, 8.6, 1.6, 1.2, 'f'); g.px(4, 9, 'f');
+  for (let x = 2; x < 15; x++) for (let y = 10; y < 13; y++) if (g.get(x, y) === 'p') g.px(x, y, 'o');
+  g.hl(4, 12, 9, 'n');
+}));
+SPR.def('i_key', icon(g => {
+  g.ellipse(5, 6, 3.4, 3.4, 'w'); g.ellipse(5, 6, 1.2, 1.2, '.'); g.pts([[3, 4], [4, 3]], 'x');
+  g.rect(7, 7, 7, 2, 'w'); g.hl(8, 8, 6, 'v'); g.rect(11, 9, 1, 2, 'v'); g.rect(13, 9, 1, 3, 'v'); g.px(4, 8, 'v'); g.px(6, 8, 'v');
+}));
+SPR.def('i_mail', icon(g => {
+  g.rect(1, 4, 14, 9, 'f'); g.hl(1, 12, 14, 'h'); g.vl(14, 4, 9, 'g');
+  for (let i = 0; i < 7; i++) { g.px(1 + i, 4 + Math.floor(i * 0.75), 'r'); g.px(14 - i, 4 + Math.floor(i * 0.75), 'r'); }
+  g.pts([[2, 11], [3, 10], [13, 11], [12, 10]], 'h');
+}));
+SPR.def('i_back', icon(g => { g.stamp(2, 3, ['....ww......', '...wxw......', '..wxxwwwwww.', '.wxxxxxxxxxw', '..wxxwwwwww.', '...wxw......', '....ww......']); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (g.get(x, y) === 'w' && y > 6) g.px(x, y, 'v'); }));
+SPR.def('i_dev', icon(g => {
+  g.rect(1, 3, 14, 10, 'y'); g.rect(2, 4, 12, 8, 'm'); g.hl(1, 3, 14, 'z');
+  g.pts([[4, 6], [5, 7], [4, 8]], 'l'); g.hl(7, 8, 3, 'x'); g.px(12, 5, 'r'); g.px(11, 5, 'w'); g.px(10, 5, 'k');
+  g.rect(6, 13, 4, 1, 'z'); g.hl(4, 14, 8, 'y');
+}));
+SPR.def('it_fish', item12(g => {
+  g.ellipse(5.5, 6, 4, 2.4, 'A'); g.pts([[9, 6], [10, 5], [11, 4], [10, 7], [11, 8], [10, 6]], 'z'); g.hl(3, 5, 4, 'B'); g.px(3, 6, '0'); g.pts([[5, 8], [6, 8], [7, 7]], 'z'); g.px(6, 4, 'f');
+}));
+SPR.def('it_premium', item12(g => {
+  g.ellipse(6, 8, 5.5, 2.6, 'f'); g.ellipse(6, 7.2, 4.6, 1.6, 'g'); g.hl(2, 10, 8, 'h');
+  g.ellipse(4.5, 5.5, 1.8, 1.4, 'N'); g.ellipse(7.5, 5.2, 1.9, 1.5, 'M'); g.px(6, 4, 'l'); g.px(5, 3, 'k'); g.px(8, 4, 'N'); g.pts([[3, 7], [9, 7]], 'x');
+}));
+SPR.def('it_shampoo', item12(g => {
+  g.rect(5, 0, 2, 2, 'r'); g.rect(4, 2, 4, 1, 's'); g.rect(3, 3, 6, 8, 'H'); g.vl(3, 3, 8, 'B'); g.vl(8, 4, 7, 'G'); g.hl(3, 10, 6, 'G');
+  g.rect(4, 6, 4, 3, 'f'); g.px(5, 7, 'K'); g.px(6, 7, 'K'); g.pts([[10, 1], [11, 3], [10, 5]], 'p'); g.px(1, 2, 'p');
+}));
+SPR.def('it_medicine', item12(g => {
+  g.rect(2, 2, 8, 8, 'f'); g.hl(2, 2, 8, 'Z'); g.vl(9, 3, 7, 'g'); g.hl(2, 9, 8, 'h');
+  g.rect(5, 3, 2, 6, 'r'); g.rect(3, 5, 6, 2, 'r'); g.px(5, 3, 's'); g.px(3, 5, 's');
+}));
+SPR.def('t_brush', item12(g => {
+  g.rect(1, 3, 10, 3, 'c'); g.hl(1, 3, 10, 'd'); g.hl(1, 5, 10, 'b');
+  for (let x = 1; x < 11; x += 1) g.vl(x, 6, x % 2 ? 3 : 4, x % 2 ? 'A' : 'B');
+  g.rect(9, 1, 2, 2, 'b');
+}));
+SPR.def('t_wand', item12(g => {
+  for (let i = 0; i < 8; i++) g.px(1 + i, 11 - i, i < 3 ? 'b' : 'c');
+  g.ellipse(9.5, 2.5, 2.2, 2.2, 's'); g.pts([[11, 0], [11, 1], [8, 0], [10, 0]], 't'); g.px(9, 2, 'r'); g.pts([[7, 3], [8, 4]], 'G'); g.px(11, 4, 'H');
+}));
+SPR.def('t_yarn', item12(g => {
+  g.ellipse(5.5, 6, 4.2, 4.2, 'G'); for (let k = -4; k <= 4; k += 2) for (let t = 0; t < 9; t++) { const x = Math.round(5.5 + t - 4), y = Math.round(6 + k + (t - 4) * 0.45); if (g.get(x, y) === 'G') g.px(x, y, 'H'); }
+  g.px(4, 3, 'f'); g.pts([[9, 9], [10, 10], [11, 10]], 'G');
+}));
+SPR.def('t_ball', item12(g => {
+  g.ellipse(6, 6, 4.6, 4.6, 'r'); for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) if (g.get(x, y) === 'r' && Math.abs(x - y) <= 1) g.px(x, y, 'f');
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) if (g.get(x, y) === 'r' && x + y > 14) g.px(x, y, 'q');
+  g.px(4, 3, 't');
+}));
+SPR.def('n_star', item12(g => { g.stamp(1, 1, ['....w.....', '....w.....', '...wxw....', 'wwwxxxwww.', '.wxxxxxw..', '..wxxxw...', '..wx.xw...', '.ww...ww..']); g.px(4, 4, 'Z'); }));

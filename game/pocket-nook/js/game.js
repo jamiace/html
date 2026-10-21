@@ -2,6 +2,12 @@
    Game: state, economy, timer, saving, co-working, main loop
    ============================================================ */
 const SAVE_KEY = 'pocketnook.save.v1';
+// save schema: bump when the shape of Game.S changes and add a step to MIGRATIONS
+//   1  original release
+//   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
+//   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
+const SAVE_SCHEMA = 3;
+const NOOK_VERSION = '2026.10.22';
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -20,7 +26,7 @@ const Game = {
       stats: { focusMin: 0, sessions: 0, todos: 0, todoDay: '', todoToday: 0 },
       settings: { timeMode: 'auto', rain: false, autoBreak: true, autoMusic: false },
       gifts: [], say: null, savedAt: 0, seenIntro: false,
-      life: Life.newState(), vocab: {}, learn: Learn.newState(),
+      life: Life.newState(), vocab: {}, learn: Learn.newState(), zoo: null, schema: SAVE_SCHEMA,
     };
     S.items = this.buildLayout(THEMES.cozy.layout, () => S.nextUid++, k => k.split('|')[0]);
     return S;
@@ -62,7 +68,7 @@ const Game = {
       S.items = this.buildLayout(th.layout, () => S.nextUid++, take);
       Room.state = S; Room.indexItems(); Room.sel = null;
       if (this.avatar) { this.avatar.x = 120; this.avatar.y = 152; this.avatar.state = 'idle'; this.avatar.timer = 1; }
-      if (this.pet) { this.pet.on = null; this.pet.onOff = null; this.pet.jump = null; this.pet.x = 104; this.pet.y = 156; this.pet.state = 'sit'; this.pet.timer = 1; }
+      Pets.resetActors();
     }
     Room.buildBg(S.wp, S.fl); this.save(); UI.refresh('storage'); UI.refresh('shop');
     UI.toast(mode === 'full' ? `換成「${th.n}」了，原本的家具收進收納箱` : `換上「${th.n}」的牆面、地板和窗景`, 'i_theme', 3.5);
@@ -78,28 +84,45 @@ const Game = {
   },
   load(snapshot) {
     let S = snapshot || null;
-    if (!S) { try { const raw = localStorage.getItem(SAVE_KEY); if (raw) S = JSON.parse(raw); } catch (e) { S = null; } }
+    const first = this.loadedFp == null; let raw0 = null;
+    if (!S) { try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { S = JSON.parse(raw); raw0 = raw; } } catch (e) { S = null; } }
+    if (first) { this.loadedFp = S ? saveHash(raw0 || JSON.stringify(S)) : ''; this.loadedSavedAt = (S && S.savedAt) || 0; }
     const base = this.newState();
     if (!S || S.v !== 1) S = base;
+    // which schema the stored save was written with (saves from before versioning had none)
+    const from = S === base ? SAVE_SCHEMA : (S.schema || (Object.keys(S.vocab || {}).some(k => /^\d+$/.test(k)) ? 1 : S.zoo ? 3 : 2));
+    if (from > SAVE_SCHEMA) this.outdated = true;   // written by a newer version of the game: never migrate or overwrite it
     for (const k in base) if (!(k in S)) S[k] = base[k];
     for (const k in base.timer) if (!(k in S.timer)) S.timer[k] = base.timer[k];
     for (const k in base.settings) if (!(k in S.settings)) S.settings[k] = base.settings[k];
     for (const k in base.avatar) if (!(k in S.avatar)) S.avatar[k] = base.avatar[k];
     for (const k in base.learn) if (!(k in S.learn)) S.learn[k] = base.learn[k];
-    Life.migrate(S);
+    if (!S.flags) S.flags = {};
+    if (!this.outdated) {
+      // MIGRATIONS — each step is idempotent and detects the old shape itself
+      Learn.migrate(S);                                         // 1 → 2  vocabulary keyed by word (no-op when already converted)
+      if (S.savedAt && !S.zoo) S.flags.legacy = true;
+      Life.migrate(S); Pets.migrate(S);                         // 2 → 3  pets, supplies, flags
+      if (from < SAVE_SCHEMA) S.flags.migratedFrom = Math.min(S.flags.migratedFrom || from, from);
+      S.schema = SAVE_SCHEMA; S.appVersion = NOOK_VERSION;
+    }
     for (const list of [S.todos, S.memos]) { const seen = new Set(); for (const x of list || []) { while (seen.has(x.id)) x.id++; seen.add(x.id); } }
     S.items = S.items.filter(it => ITEMS[it.k]);
     this.S = S; this.fixPlacements();
   },
   save() {
+    if (this.outdated) return;
     this.S.savedAt = Date.now();
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.S)); } catch (e) { }
+    if (typeof Dev !== 'undefined') Dev.onSave();
     Cloud.schedule();
   },
   replaceState(S) {
-    this.load(S); Room.buildBg(this.S.wp, this.S.fl);
-    if (this.pet) this.pet.set(this.S.pet);
-    UI.refreshAll(); this.save();
+    this.load(S); Room.state = this.S; Room.sel = null; Room.indexItems();
+    Room.buildBg(this.S.wp, this.S.fl); Room.computeEnv(this.S.settings);
+    if (this.avatar) { Game.pets = []; Pets.syncActors(); }
+    Life.ensureDaily(); Learn.ensureDaily();
+    UI.refreshAll(); UI.badges(); this.save();
   },
   // ---------- economy ----------
   reward(coins, xp, from) {
@@ -133,7 +156,7 @@ const Game = {
     const sup = [Life.randomSupply(), Life.randomSupply()]; for (const k of sup) Life.give(k, 1);
     S.gifts = S.gifts.filter(x => x !== g);
     for (let i = 0; i < 8; i++) Room.puff('p_spark', g.x + 6, g.y - 8, { vx: (Math.random() - 0.5) * 30, vy: -14 - Math.random() * 10, grav: 20, max: 1 });
-    UI.giftModal(item, coins, sup); UI.hud(true); this.save();
+    UI.giftModal(item, coins, sup); UI.hud(true); this.save(); saveSoon();
   },
   // ---------- timer ----------
   T() { return this.S.timer; },
@@ -185,6 +208,7 @@ const Game = {
   },
   // ---------- shop & storage ----------
   buy(kind, id) {
+    if (kind === 'pet') return Pets.adopt(id);
     const S = this.S; let d, price;
     if (kind === 'item') d = ITEMS[id]; else if (kind === 'wp') d = WALLPAPERS[id]; else if (kind === 'fl') d = FLOORS[id]; else if (kind === 'view') d = VIEWS[id]; else d = PETS[id];
     price = d.price;
@@ -195,13 +219,12 @@ const Game = {
     else if (kind === 'wp') { S.ownWP.push(id); this.applyWP(id); UI.toast(`換上了「${d.n}」壁紙`, 'i_wall'); }
     else if (kind === 'fl') { S.ownFL.push(id); this.applyFL(id); UI.toast(`換上了「${d.n}」地板`, 'i_floor'); }
     else if (kind === 'view') { S.ownViews.push(id); this.applyView(id); UI.toast(`窗外換成「${d.n}」`, 'i_view'); }
-    else { S.pets.push(id); this.setPet(id); UI.toast(`領養了${d.n}！`, 'i_paw'); }
     Life.track('buy', 1, { kind, id });
-    UI.hud(true); UI.refresh('shop'); UI.refresh('storage'); UI.refresh('pet'); this.save();
+    UI.hud(true); UI.refresh('shop'); UI.refresh('storage'); UI.refresh('pet'); this.save(); saveSoon();
   },
   applyWP(id) { this.S.wp = id; Room.buildBg(this.S.wp, this.S.fl); UI.refresh('storage'); this.save(); },
   applyFL(id) { this.S.fl = id; Room.buildBg(this.S.wp, this.S.fl); UI.refresh('storage'); this.save(); },
-  setPet(id) { this.S.pet = id; if (this.pet) { this.pet.set(id); this.pet.on = null; this.pet.jump = null; this.pet.state = 'sit'; this.pet.timer = 1; } UI.refresh('pet'); Cowork.push(); this.save(); },
+  setPet(id) { const p = Pets.list().find(x => x.sp === id); if (p) Pets.select(p.id); },
   place(id) {
     const S = this.S; if (!S.inv[id]) return; const d = ITEMS[id];
     S.inv[id]--; if (!S.inv[id]) delete S.inv[id];
@@ -254,7 +277,7 @@ const Game = {
   toggleTodo(id) {
     const S = this.S, td = S.todos.find(x => x.id === id); if (!td) return; td.done = !td.done;
     if (td.done && !td.paid && !td.ex) {
-      const today = new Date().toDateString(); if (S.stats.todoDay !== today) { S.stats.todoDay = today; S.stats.todoToday = 0; }
+      const today = gameDate().toDateString(); if (S.stats.todoDay !== today) { S.stats.todoDay = today; S.stats.todoToday = 0; }
       td.paid = true; S.stats.todos++;
       if (S.stats.todoToday < 15) { S.stats.todoToday++; this.reward(3, 5, 'todo'); }
       Life.track('todo', 1);
@@ -281,30 +304,6 @@ const Game = {
     UI.tickOverlay(dt);
     if (now - this.lastHud > 0.25) { this.lastHud = now; UI.hud(); }
     requestAnimationFrame(t => this.frame(t));
-  },
-};
-
-// ---------- cloud save (per-viewer, private) ----------
-const Cloud = {
-  ref: null, timer: null, busy: false, pending: false,
-  async init() {
-    try {
-      const cl = window.claude; if (!cl || !cl.use) return;
-      const [user, db] = await Promise.all([cl.use('user'), cl.use('db')]); if (!user || !db) return;
-      const id = await user.id(); if (!id) return;
-      const ref = db.doc('data/users/' + id + '/save');
-      const snap = await ref.get(); this.ref = ref;
-      const remote = snap.exists ? (snap.data() || {}).state : null;
-      if (remote && remote.v === 1 && (remote.savedAt || 0) > (Game.S.savedAt || 0)) { Game.replaceState(JSON.parse(JSON.stringify(remote))); UI.toast('已載入你存在雲端的小窩', 'i_sparkle'); }
-      else if (Game.S.savedAt) this.schedule(1500);
-    } catch (e) { this.ref = null; }
-  },
-  schedule(ms = 8000) { if (!this.ref) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), ms); },
-  async flush() {
-    if (!this.ref) return; if (this.busy) { this.pending = true; return; } this.busy = true;
-    try { await this.ref.set({ state: JSON.parse(JSON.stringify(Game.S)), v: 1 }); }
-    catch (e) { if (e && ['not_granted', 'revoked', 'capability_disabled', 'capability_removed'].includes(e.code)) this.ref = null; }
-    this.busy = false; if (this.pending) { this.pending = false; this.schedule(); }
   },
 };
 
@@ -385,7 +384,7 @@ function setupInput(cv) {
     const nb = Life.hitBubble(x, y); if (nb) { UI.needCard(nb.id); return; }
     const h = Room.hit(x, y); if (!h) return;
     if (h.kind === 'actor') {
-      const who = h.a === Game.pet ? 'pet' : h.a === Game.avatar ? 'avatar' : null, nd = who && Life.needOf(who);
+      const isPet = h.a instanceof Pet, who = isPet ? 'pet' : h.a === Game.avatar ? 'avatar' : null, nd = who && Life.needOf(who, isPet ? h.a.pid : undefined);
       if (nd && NEED_DEFS[nd.type].item) { UI.needCard(nd.id); return; }
       h.a.poke();
     } else if (h.kind === 'gift') Game.openGift(h.g); else Game.interact(h.it);
@@ -401,16 +400,16 @@ function boot(data) {
   Room.state = Game.S; Room.indexItems();
   Room.buildBg(Game.S.wp, Game.S.fl); Room.computeEnv(Game.S.settings);
   Game.avatar = new Avatar(() => Game.S.avatar); Game.avatar.x = 112; Game.avatar.y = 148;
-  Game.pet = new Pet(Game.S.pet); Game.pet.x = 124; Game.pet.y = 140;
-  Room.actors = [Game.avatar, Game.pet];
+  Room.actors = [Game.avatar]; Game.pets = []; Pets.syncActors();
   UI.init();
   Music.init();
-  Life.ensureDaily(); Learn.ensureDaily(); UI.badges();
+  Dev.init(); Life.ensureDaily(); Learn.ensureDaily(); UI.badges();
   setupInput(document.getElementById('room'));
   requestAnimationFrame(t => Game.frame(t));
   setInterval(() => { if (document.hidden) { Game.tickTimer(); UI.hud(); } }, 1000);
   Cloud.init(); Cowork.init();
   window.claude?.hot?.snapshot?.(() => ({ S: Game.S }));
   document.addEventListener('visibilitychange', () => { if (document.hidden) { Game.save(); Cloud.flush(); } });
+  if (Game.outdated) UI.toast('這份存檔來自比較新的遊戲版本，請重新整理頁面載入新版；這個版本不會儲存進度', 'i_cloud', 10, { label: '重新整理', fn: () => location.reload() });
   window.addEventListener('pagehide', () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(Game.S)); } catch (e) { } });
 }

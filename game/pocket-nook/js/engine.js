@@ -196,7 +196,7 @@ const Room = {
   env: { h: 12, dark: 0, rain: false },
   computeEnv(settings) {
     const now = new Date(); let h = now.getHours() + now.getMinutes() / 60;
-    if (settings.timeMode === 'day') h = 12; else if (settings.timeMode === 'dusk') h = 18.2; else if (settings.timeMode === 'night') h = 22.5;
+    if (window.NOOK_DEV_HOUR != null) h = window.NOOK_DEV_HOUR; else if (settings.timeMode === 'day') h = 12; else if (settings.timeMode === 'dusk') h = 18.2; else if (settings.timeMode === 'night') h = 22.5;
     const dk = [[0, .6], [5, .6], [6.4, .28], [7.6, 0], [17, 0], [18.4, .26], [19.6, .52], [21, .6], [24, .6]];
     let dark = 0; for (let i = 0; i < dk.length - 1; i++) if (h >= dk[i][0] && h <= dk[i + 1][0]) { const t = (h - dk[i][0]) / (dk[i + 1][0] - dk[i][0]); dark = dk[i][1] + (dk[i + 1][1] - dk[i][1]) * t; break; }
     if (settings.rain && dark < 0.18) dark = Math.max(dark, 0.14);

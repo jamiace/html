@@ -1,0 +1,60 @@
+rules_version = '2';
+
+// 小窩時光：每位玩家一份存檔 saves/{userId}，備份在 saves/{userId}/backups/{backupId}。
+// 只有登入的本人能讀寫；備份只能新增、不能修改；用過開發者模式的存檔（dev: true）不能被改回 false；
+// 每次寫入的 rev 必須是上一次 +1，兩台裝置同時存檔時，慢的那一台會被拒絕，遊戲會讀回雲端存檔再自動合併。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /saves/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && validSave(request.resource.data)
+        && request.resource.data.rev == 1;
+      allow update: if isOwner(userId) && validSave(request.resource.data)
+        && request.resource.data.rev == resource.data.get('rev', 0) + 1
+        && (resource.data.get('dev', false) == false || request.resource.data.dev == true);
+      allow delete: if isOwner(userId);
+
+      match /backups/{backupId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && validBackup(request.resource.data);
+        allow update: if false;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // 其他所有路徑一律拒絕
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function validSave(d) {
+      return d.keys().hasOnly(['v', 'schema', 'rev', 'savedAt', 'device', 'lvl', 'coins', 'email', 'dev', 'sync', 'data', 'updated'])
+        && d.v == 1
+        && d.schema is int && d.schema >= 1
+        && d.rev is int
+        && d.data is string && d.data.size() < 900000
+        && d.savedAt is int
+        && d.device is string && d.device.size() < 64
+        && d.lvl is int && d.coins is int
+        && d.email is string && d.email.size() < 320
+        && d.dev is bool
+        && d.sync is map
+        && d.updated == request.time;
+    }
+
+    function validBackup(d) {
+      return d.keys().hasOnly(['v', 'at', 'reason', 'device', 'savedAt', 'lvl', 'coins', 'data', 'updated'])
+        && d.v == 1
+        && d.data is string && d.data.size() < 900000
+        && d.reason is string && d.reason.size() < 200
+        && d.at is int && d.savedAt is int
+        && d.updated == request.time;
+    }
+  }
+}

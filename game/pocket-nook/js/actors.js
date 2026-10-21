@@ -96,7 +96,7 @@ class Avatar extends Walker {
     if (r < 0.42) { const [x, y] = randFloor(); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'idle'; this.timer = 1.5 + Math.random() * 3; }); return; }
     if (r < 0.58 && seats.length) { const s = seats[Math.floor(Math.random() * seats.length)]; const [w, h2] = itemSize(s); const sp = ITEMS[s.k].seat; const sx = s.flip ? w - sp.x : sp.x; this.state = 'walk'; this.walkTo(s.x + sx, s.y + h2 + 3, () => { if (!Room.uidMap[s.uid]) { this.state = 'idle'; return; } this.state = 'sit'; this.seat = s; this.timer = 8 + Math.random() * 10; }); return; }
     if (r < 0.68 && wins.length) { const w = wins[Math.floor(Math.random() * wins.length)]; this.state = 'walk'; this.walkTo(w.x + 20, 106, () => { this.state = 'idle'; this.face = 'back'; this.timer = 3 + Math.random() * 3; }); return; }
-    if (r < 0.78 && Game.pet) { const p = Game.pet; this.state = 'walk'; this.walkTo(p.x + (p.x > 120 ? -14 : 14), p.y + 2, () => { this.state = 'idle'; this.face = 'side'; this.flip = p.x < this.x; this.timer = 2.5; Room.puff('p_heart', p.x - 2, p.y - 18, { vy: -8 }); }); return; }
+    if (r < 0.78 && Game.pets && Game.pets.length) { const p = Game.pets[Math.floor(Math.random() * Game.pets.length)]; this.state = 'walk'; this.walkTo(p.x + (p.x > 120 ? -14 : 14), p.y + 2, () => { this.state = 'idle'; this.face = 'side'; this.flip = p.x < this.x; this.timer = 2.5; Room.puff('p_heart', p.x - 2, p.y - 18, { vy: -8 }); }); return; }
     if (r < 0.84 && beds.length && Math.random() < 0.4) return this.goSleep(beds[0], 12 + Math.random() * 10);
     this.state = 'idle'; this.face = 'front'; this.timer = 2 + Math.random() * 3;
   }
@@ -168,8 +168,20 @@ class Avatar extends Walker {
 }
 
 class Pet extends Walker {
-  constructor(kindColor) { super(); this.set(kindColor); this.state = 'sit'; this.timer = 2; this.speed = 24; this.x = 150; this.y = 150; this.on = null; this.jump = null; this.happy = 0; }
+  constructor(pid) { super(); this.pid = pid; const d = Pets.get(pid); this.set(d ? d.sp : 'cat:ginger'); this.state = 'sit'; this.timer = 1 + Math.random() * 2; this.speed = 24; this.x = 150; this.y = 150; this.on = null; this.jump = null; this.happy = 0; this.trick = null; }
+  get data() { return Pets.get(this.pid); }
+  baseSpeed() { const d = this.data; return d && Pets.stage(d) === 0 ? 28 : 24; }
   set(kc) { const [k, c] = kc.split(':'); this.kind = k; this.color = c; }
+  others() { return (Game.pets || []).filter(a => a !== this); }
+  goNap() { this.leaveSpot(() => { const sp = this.freeSpots(); const s = sp[Math.floor(Math.random() * sp.length)]; if (s) this.goSpot(s, 'sleep', 40 + Math.random() * 30); else { this.state = 'sleep'; this.timer = 40; } }); }
+  freeSpots() { const taken = new Set(this.others().filter(a => a.on).map(a => a.on.uid)); return this.spots().filter(s => !taken.has(s.it.uid)); }
+  doTrick(id) {
+    this.leaveSpot(() => {
+      this.state = 'trick'; this.trick = id; this.tt = 0; this.timer = id === 'dance' ? 3.2 : id === 'roll' ? 2.2 : 1.8; this.walking = false;
+      const line = { sit: this.kind === 'dog' ? '汪！坐好了' : '喵，坐好了', paw: '握手！', spin: '轉圈圈～', roll: '翻滾！', jump: '跳！', dance: '♪～' }[id];
+      Game.bubble(this, line, 1.8); if (id === 'jump') this.startJump(this.x, this.y, null, 20);
+    });
+  }
   z() { if (this.on && Room.uidMap[this.on.uid]) return Room.base(this.on) + 0.03; return this.y + 0.01; }
   spots() {
     const out = [];
@@ -184,58 +196,66 @@ class Pet extends Walker {
     if (this.on) { const it = this.on, [w, h] = itemSize(it); const fy = Math.min(167, it.y + h + 3); const fx = this.x; this.on = null; this.onOff = null; if (this.y < fy - 6) this.startJump(fx, fy, () => { cb && cb(); }); else cb && cb(); }
     else cb && cb();
   }
-  startJump(x, y, cb) { this.jump = { x0: this.x, y0: this.y, x1: x, y1: y, t: 0, cb }; this.state = 'jump'; this.flip = x < this.x; }
+  startJump(x, y, cb, hgt = 10) { this.jump = { x0: this.x, y0: this.y, x1: x, y1: y, t: 0, cb, hgt }; this.state = this.state === 'trick' ? 'trick' : 'jump'; if (x !== this.x) this.flip = x < this.x; }
   bowl() { return Room.state.items.find(i => ITEMS[i.k] && ITEMS[i.k].bowl && i.p == null); }
   eat() {
-    const bowl = this.bowl(); this.zoomN = 0; this.speed = 24;
+    const bowl = this.bowl(); this.zoomN = 0; this.speed = this.baseSpeed();
     this.leaveSpot(() => {
       if (bowl) {
-        bowl.full = true; const [w, h] = itemSize(bowl); const side = this.x < bowl.x + w / 2 ? -1 : 1;
-        this.state = 'walk'; this.walkTo(bowl.x + w / 2 + side * 11, bowl.y + h - 1, () => { this.state = 'eat'; this.flip = side > 0; this.timer = 4; this.eatBowl = bowl; });
+        bowl.full = true; const [w, h] = itemSize(bowl);
+        const eaters = this.others().filter(a => a.state === 'eat' || a.eatBowl === bowl).length;
+        const side = (eaters % 2 ? -1 : 1) * (this.x < bowl.x + w / 2 ? -1 : 1), off = 11 + Math.floor(eaters / 2) * 10;
+        this.state = 'walk'; this.walkTo(bowl.x + w / 2 + side * off, bowl.y + h - 1 + Math.floor(eaters / 2) * 3, () => { this.state = 'eat'; this.flip = side > 0; this.timer = 4; this.eatBowl = bowl; });
       } else { this.state = 'eat'; this.timer = 3; this.eatBowl = null; }
     });
   }
-  zoom() { this.leaveSpot(() => { this.zoomN = 6; this.speed = 70; this.state = 'zoom'; this.timer = 0; }); }
+  zoom(n = 6) { this.leaveSpot(() => { this.zoomN = n; this.speed = 70; this.state = 'zoom'; this.timer = 0; }); }
   think() {
-    const r = Math.random(), A = Game.avatar;
+    const r = Math.random(), A = Game.avatar, d = this.data;
     const go = (fn) => this.leaveSpot(fn);
     const L = Game.S.life;
-    if (L && L.needs.some(n => n.type === 'cat_hungry') && r < 0.5) {
+    if (L && L.needs.some(n => n.type === 'cat_hungry' && n.pet === this.pid) && r < 0.5) {
       const b = this.bowl(); if (b) { const [w, h] = itemSize(b); return go(() => { this.state = 'walk'; this.walkTo(b.x + w / 2 + 12, b.y + h - 1, () => { this.state = 'sit'; this.flip = true; this.timer = 4 + Math.random() * 3; Game.bubble(this, this.kind === 'dog' ? '汪…餓餓' : '喵…肚子餓', 2); }); }); }
     }
-    if (A && A.state === 'work' && r < 0.6) {
-      const sp = this.spots(); const near = sp.sort((a, b) => Math.abs(a.x - A.x) - Math.abs(b.x - A.x))[0];
+    if (d && (d.energy < 22 || (d.trait === 'sleepy' && r < 0.25) || d.sick) && Math.random() < 0.8) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, 'sleep', 30 + Math.random() * 30)); } }
+    if (A && A.state === 'work' && r < 0.45) {
+      const sp = this.freeSpots(); const near = sp.sort((a, b) => Math.abs(a.x - A.x) - Math.abs(b.x - A.x))[0];
       if (near) return go(() => this.goSpot(near, 'sleep'));
     }
-    if (r < 0.35) return go(() => { const [x, y] = randFloor(10); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'sit'; this.timer = 2 + Math.random() * 4; }); });
-    if (r < 0.6) { const sp = this.spots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, Math.random() < 0.6 ? 'sleep' : 'sit')); } }
-    if (r < 0.75 && A && A.state !== 'sleep' && A.state !== 'work') return go(() => { this.state = 'walk'; this.walkTo(A.x + (Math.random() < 0.5 ? -16 : 16), A.y + 3, () => { this.state = 'sit'; this.flip = A.x < this.x; this.timer = 3 + Math.random() * 3; }); });
+    const os = this.others();
+    if (os.length && r < 0.14) { const o = os[Math.floor(Math.random() * os.length)]; if (!o.on && o.state !== 'sleep') return go(() => { this.state = 'walk'; this.walkTo(o.x + (o.x > this.x ? -13 : 13), o.y + 1, () => { this.state = 'sit'; this.flip = o.x < this.x; this.timer = 2.5 + Math.random() * 2; Room.puff('p_heart', (this.x + o.x) / 2 - 2, this.y - 16, { vy: -8 }); if (Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? '汪？' : '喵？', 1.4); }); }); }
+    const roam = d && (d.trait === 'curious' || d.trait === 'playful') ? 0.45 : 0.35;
+    if (r < roam) return go(() => { const [x, y] = randFloor(10); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'sit'; this.timer = 2 + Math.random() * 4; }); });
+    if (r < roam + 0.25) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, Math.random() < 0.6 ? 'sleep' : 'sit')); } }
+    if (r < roam + 0.4 && A && A.state !== 'sleep' && A.state !== 'work') return go(() => { this.state = 'walk'; this.walkTo(A.x + (Math.random() < 0.5 ? -16 : 16), A.y + 3, () => { this.state = 'sit'; this.flip = A.x < this.x; this.timer = 3 + Math.random() * 3; }); });
     this.state = this.on ? this.state : 'sit'; this.timer = 2 + Math.random() * 4;
   }
-  goSpot(s, mode) {
+  goSpot(s, mode, secs) {
     this.state = 'walk';
     const fy = Math.min(167, s.base + 3);
     this.walkTo(s.x, s.high ? fy : s.y + 2, () => {
       if (!Room.uidMap[s.it.uid]) { this.state = 'sit'; this.timer = 2; return; }
-      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4; };
+      if (this.others().some(a => a.on === s.it)) { this.state = 'sit'; this.timer = 1.5; return; }
+      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4); };
       if (s.high) this.startJump(s.x, s.y + 1, done); else { this.y = s.y + 2; done(); }
     });
   }
   poke() {
-    if (this.state === 'eat' || this.state === 'zoom') return;
-    if (typeof Life !== 'undefined' && Game.S.life) Life.onPet();
+    if (this.state === 'eat' || this.state === 'zoom' || this.state === 'trick') return;
+    if (typeof Pets !== 'undefined') Pets.pet(this.pid);
     this.leaveSpot(() => { }); this.happy = 1.5;
     if (this.state !== 'jump') { this.state = 'sit'; this.timer = 3; }
     for (let i = 0; i < 2; i++) Room.puff('p_heart', this.x - 4 + i * 5, this.y - 18, { vy: -9 - i * 3, vx: (i - 0.5) * 6 });
-    Game.bubble(this, this.kind === 'dog' ? ['汪！', '汪汪～', '摸摸頭！'][Math.floor(Math.random() * 3)] : ['喵～', '喵嗚', '呼嚕呼嚕…'][Math.floor(Math.random() * 3)], 1.8);
+    const d = this.data, nm = d ? d.name : '';
+    Game.bubble(this, this.kind === 'dog' ? ['汪！', '汪汪～', '摸摸頭！', nm + '在這裡！'][Math.floor(Math.random() * 4)] : ['喵～', '喵嗚', '呼嚕呼嚕…', nm + '喵～'][Math.floor(Math.random() * 4)], 1.8);
   }
   headPos() { return [this.x + (this.flip ? -4 : 4), this.y - 16]; }
   update(dt) {
     if (this.happy > 0) this.happy -= dt;
     if (this.jump) {
       const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
-      this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * 10;
-      if (k >= 1) { this.jump = null; this.y = j.y1; this.state = 'sit'; this.timer = 2; j.cb && j.cb(); }
+      this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
+      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb(); }
       return;
     }
     if (this.on && !Room.uidMap[this.on.uid]) { this.on = null; const [x, y] = randFloor(); this.x = x; this.y = y; }
@@ -247,23 +267,40 @@ class Pet extends Walker {
       return;
     }
     if (this.state === 'zoom') {
-      if (!this.walking) { if (this.zoomN-- > 0) { const [x, y] = randFloor(12); this.walkTo(x, y); Room.puff('p_spark', this.x, this.y - 8, { vy: -6, max: 0.6 }); } else { this.speed = 24; this.state = 'sit'; this.happy = 2.5; this.timer = 4; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); } }
+      if (!this.walking) { if (this.zoomN-- > 0) { const [x, y] = randFloor(12); this.walkTo(x, y); Room.puff('p_spark', this.x, this.y - 8, { vy: -6, max: 0.6 }); } else { this.speed = this.baseSpeed(); this.state = 'sit'; this.happy = 2.5; this.timer = 4; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); } }
+      return;
+    }
+    if (this.state === 'trick') {
+      this.tt += dt; this.timer -= dt;
+      if (this.trick === 'roll') this.x = Math.max(16, Math.min(RW - 16, this.x + dt * 14 * (this.flip ? -1 : 1)));
+      if (this.trick === 'dance' && Math.random() < dt * 3) Room.puff('p_note', this.x - 4 + Math.random() * 8, this.y - 18, { vy: -8, max: 1.2 });
+      if (this.timer <= 0 && !this.jump) { this.state = 'sit'; this.trick = null; this.timer = 3; this.happy = 2; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); }
       return;
     }
     if (!this.walking) { this.timer -= dt; if (this.timer <= 0) this.think(); }
     if (this.state === 'sleep' && Math.random() < dt * 0.4) Room.puff('p_z', this.x + (this.flip ? -8 : 6), this.y - 14, { vx: 3, vy: -4, max: 1.8, alpha: 0.7 });
   }
   draw(c) {
-    const t = Room.t; let pose = 'sit', f = Math.floor(t * 1.4) % 2;
+    const t = Room.t; let pose = 'sit', f = Math.floor(t * 1.4) % 2; let flip = this.flip, hop = 0;
     if (this.walking) { pose = 'walk'; f = Math.floor(this.anim * 9) % 4; }
     else if (this.state === 'jump') { pose = 'walk'; f = 1; }
     else if (this.state === 'sleep') { pose = 'sleep'; f = Math.floor(t * 0.8) % 2; }
     else if (this.state === 'eat') { pose = 'sit'; f = Math.floor(t * 6) % 2; }
-    const flip = this.walking || this.state === 'jump' ? this.flip : this.flip;
-    const cv = petCanvas(this.kind, this.color, pose, f, flip);
+    else if (this.state === 'trick') {
+      const k = this.tt;
+      if (this.trick === 'sit') { pose = 'sit'; hop = k > 1.2 ? Math.max(0, Math.round(Math.sin((k - 1.2) * 10) * 2)) : 0; }
+      else if (this.trick === 'paw') { pose = Math.floor(k * 3) % 2 ? 'sit' : 'walk'; f = 1; }
+      else if (this.trick === 'spin') { pose = 'walk'; f = Math.floor(k * 10) % 4; flip = Math.floor(k * 5) % 2 === 0; }
+      else if (this.trick === 'roll') { pose = 'sleep'; f = 0; flip = Math.floor(k * 6) % 2 === 0; hop = Math.floor(k * 6) % 2; }
+      else if (this.trick === 'jump') { pose = this.jump ? 'walk' : 'sit'; f = 1; }
+      else if (this.trick === 'dance') { pose = 'walk'; f = Math.floor(k * 8) % 4; flip = Math.floor(k * 2) % 2 === 0; hop = Math.abs(Math.round(Math.sin(k * 9) * 2)); }
+    }
+    const d = this.data;
+    const cv = petCanvas(this.kind, this.color, pose, f, flip, d && d.acc);
     const x = Math.round(this.x), y = Math.round(this.y);
     if (!this.on && !this.jump) { c.fillStyle = 'rgba(46,34,48,0.2)'; c.fillRect(x - 6, y - 1, 12, 2); }
-    c.drawImage(cv, x - Math.floor(cv.width / 2), y - canvasBottom(cv));
+    c.drawImage(cv, x - Math.floor(cv.width / 2), y - canvasBottom(cv) - hop);
+    if (d && d.sick && Math.floor(t * 2) % 2) { c.fillStyle = '#84cbbd'; c.fillRect(x + (flip ? -9 : 7), y - 17, 2, 2); c.fillRect(x + (flip ? -11 : 9), y - 20, 1, 1); }
   }
   hit(x, y) { return Math.abs(x - this.x) < 10 && y > this.y - 16 && y < this.y + 1; }
 }

@@ -293,12 +293,15 @@ function makeDog(pose, f) {
   return g.outline();
 }
 const PET_CACHE = {};
-function petCanvas(kind, color, pose, f, flip) {
-  const key = [kind, color, pose, f, flip ? 1 : 0].join('|');
+function petCanvas(kind, color, pose, f, flip, acc) {
+  const ak = acc ? (acc.neck || '') + '+' + (acc.head || '') : '';
+  const key = [kind, color, pose, f, flip ? 1 : 0, ak].join('|');
   let c = PET_CACHE[key];
   if (!c) {
     let g = SPR.grid(`${kind}_${pose}${f}`);
-    const map = PET_COLORS[kind][color]; if (map) g = g.recolor(map); if (flip) g = g.flip();
+    const map = PET_COLORS[kind][color]; if (map) g = g.recolor(map);
+    if (ak !== '+' && ak && typeof applyPetAcc === 'function') g = applyPetAcc(g, kind, pose, acc);
+    if (flip) g = g.flip();
     c = PET_CACHE[key] = g.toCanvas();
   }
   return c;
