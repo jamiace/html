@@ -1,0 +1,28 @@
+/* 字型
+ *
+ * 1. LXGW WenKai TC（霞鶩文楷 TC）— 中文介面字，SIL Open Font License 1.1
+ *    預設從 Google Fonts 載入。想完全自架（不依賴外部網站），執行：
+ *        node tools/fetch-fonts.mjs
+ *    腳本會把字型下載到 assets/fonts/wenkai/，並把下一行改成讀本機的 lxgw-wenkai-tc.css。
+ *
+ * 2. Pixelify Sans — 英文的像素字，SIL Open Font License 1.1，已附在這個資料夾。
+ * 3. Silkscreen — 只用在數字 0–9（unicode-range），比較好辨認，SIL Open Font License 1.1，已附在這個資料夾。
+ */
+@import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap");
+
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("PixelifySans-Medium.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Silkscreen";
+  src: url("Silkscreen-Regular.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}

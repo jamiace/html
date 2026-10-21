@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小窩時光 像素圖總覽</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+  :root { --bg: #d9d0e5; --card: #fff7ea; --ink: #3b2a37; --ink-2: #7a657c; --line: #e3cfb4; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 "LXGW WenKai TC", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 16px; background: var(--card); box-shadow: 0 3px 0 #2e2230; }
+  h1 { font-size: 18px; margin: 0 12px 0 0; }
+  button, select, input { font: inherit; border: 3px solid #2e2230; background: #fff; padding: 2px 10px; }
+  main { padding: 16px; }
+  h2 { font-size: 15px; margin: 18px 0 8px; color: var(--ink-2); }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .s { background: var(--card); box-shadow: inset 0 0 0 3px var(--line); padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .s canvas { image-rendering: pixelated; background: repeating-conic-gradient(#efe5d6 0 25%, #fff7ea 0 50%) 0 0 / 8px 8px; }
+  .s small { font-family: ui-monospace, monospace; font-size: 11px; color: var(--ink-2); }
+  .note { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<header>
+  <h1>小窩時光 像素圖總覽</h1>
+  <label>來源 <select id="src"><option value="png">assets/sprites 的 PNG</option><option value="code">程式繪製</option></select></label>
+  <label>放大 <select id="zoom"><option>2</option><option>3</option><option selected>4</option><option>6</option></select></label>
+  <input id="filter" type="search" placeholder="篩選名稱，例如 bed、i_">
+  <button id="zip" type="button">下載目前顯示的 PNG（zip）</button>
+  <span class="note" id="status"></span>
+</header>
+<main id="out"></main>
+<script src="../js/config.js"></script>
+<script src="../js/core.js"></script>
+<script src="../js/sprites_items.js"></script>
+<script src="../js/sprites_chars.js"></script>
+<script src="../js/sprites_ui.js"></script>
+<script src="../js/sprites_themes.js"></script>
+<script src="../js/catalog.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/sprite-loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const GROUPS = [['頭像與身體', /^(head_|body_)/], ['寵物', /^(cat_|dog_)/], ['介面圖示', /^i_/], ['粒子', /^p_/], ['家具與擺飾', /./]];
+const names = () => Object.keys(SPR.defs);
+const status = (t) => { document.getElementById('status').textContent = t; };
+let usePng = true;
+const codeDefs = Object.assign({}, SPR.defs);
+async function setSource(png) {
+  usePng = png; SPR.cache = {};
+  for (const k in codeDefs) { SPR.defs[k] = codeDefs[k]; if (typeof codeDefs[k] === 'function') delete codeDefs[k]._g; }
+  if (png) { if (location.protocol === 'file:') { status('用 file:// 開啟時無法讀 PNG，請用本機伺服器（見 README）'); } else { SpriteFiles.base = '../'; const r = await SpriteFiles.load(); status(`讀到 ${r.loaded || 0} 張 PNG`); } }
+  else status('顯示程式繪製的版本');
+  render();
+}
+function render() {
+  const z = +document.getElementById('zoom').value, f = document.getElementById('filter').value.trim();
+  const out = document.getElementById('out'); out.innerHTML = '';
+  const used = new Set();
+  for (const [title, re] of GROUPS) {
+    const list = names().filter(n => !used.has(n) && re.test(n) && (!f || n.includes(f)));
+    if (!list.length) continue; list.forEach(n => used.add(n));
+    const h = document.createElement('h2'); h.textContent = `${title}（${list.length}）`; out.append(h);
+    const g = document.createElement('div'); g.className = 'grid'; out.append(g);
+    for (const n of list) {
+      let cv; try { cv = SPR.get(n); } catch (e) { continue; }
+      const big = document.createElement('canvas'); big.width = cv.width * z; big.height = cv.height * z;
+      const x = big.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(cv, 0, 0, big.width, big.height);
+      const d = document.createElement('div'); d.className = 's'; const s = document.createElement('small'); s.textContent = `${n}  ${cv.width}×${cv.height}`;
+      d.append(big, s); g.append(d);
+    }
+  }
+}
+document.getElementById('src').onchange = e => setSource(e.target.value === 'png');
+document.getElementById('zoom').onchange = render;
+document.getElementById('filter').oninput = render;
+document.getElementById('zip').onclick = async () => {
+  if (!window.JSZip) { status('載入 JSZip 失敗，請確認網路'); return; }
+  const zip = new JSZip(), list = [];
+  for (const n of names()) { let cv; try { cv = SPR.get(n); } catch (e) { continue; } const b64 = cv.toDataURL('image/png').split(',')[1]; zip.file(n + '.png', b64, { base64: true }); list.push(n); }
+  zip.file('index.json', JSON.stringify({ version: Date.now(), sprites: list }, null, 1));
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = usePng ? 'sprites-png.zip' : 'sprites-code.zip'; a.click();
+  status(`已打包 ${list.length} 張`);
+};
+setSource(true);
+</script>
+</body>
+</html>
