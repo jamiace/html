@@ -307,13 +307,13 @@ const UI = {
     const add = h('button', { class: 'chip', 'aria-label': '新增', onclick: () => { Game.addTodo(inp.value); inp.value = ''; inp.focus(); } }, ico('i_plus', 20));
     const open = S.todos.filter(x => !x.done), done = S.todos.filter(x => x.done);
     const row = (x) => h('li', { class: 'todo' + (x.done ? ' done' : '') },
-      h('button', { class: 'cb' + (x.done ? ' on' : ''), role: 'checkbox', 'aria-checked': x.done ? 'true' : 'false', 'aria-label': x.t, onclick: () => Game.toggleTodo(x.id) }, x.done ? ico('i_check', 18) : null),
-      h('span', { class: 'tt', text: x.t }), x.ex ? h('em', { class: 'ex', text: '範例' }) : null,
+      h('button', { class: 'cb' + (x.done ? ' on' : ''), role: 'checkbox', 'aria-checked': x.done ? 'true' : 'false', 'aria-label': (x.done ? '取消完成：' : '完成：') + x.t, title: x.done ? '取消完成' : '打勾完成', onclick: () => Game.toggleTodo(x.id) }, ico('i_check', 18)),
+      h('span', { class: 'tt', text: x.t, title: x.done ? '點一下取消完成' : '點一下完成', onclick: () => Game.toggleTodo(x.id) }), x.ex ? h('em', { class: 'ex', text: '範例' }) : null,
       h('button', { class: 'del', 'aria-label': '刪除', onclick: () => Game.delTodo(x.id) }, ico('i_trash', 18)));
     const today = new Date().toDateString(); const left = 15 - (S.stats.todoDay === today ? S.stats.todoToday : 0);
     return [h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), add),
       h('div', { class: 'scroll' }, h('ul', { class: 'todos' }, ...open.map(row)), done.length ? h('div', { class: 'sub', text: `已完成 ${done.length}` }) : null, h('ul', { class: 'todos' }, ...done.map(row))),
-      h('p', { class: 'hint' }, `完成一件 +3 金幣、+5 經驗（今天還能領 ${Math.max(0, left)} 次）`)];
+      h('p', { class: 'hint' }, `點左邊方框或文字就能打勾完成。完成一件 +3 金幣、+5 經驗（今天還能領 ${Math.max(0, left)} 次）`)];
   },
   // ---------- memo window ----------
   w_memo() {

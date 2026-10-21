@@ -87,6 +87,7 @@ const Game = {
     for (const k in base.avatar) if (!(k in S.avatar)) S.avatar[k] = base.avatar[k];
     for (const k in base.learn) if (!(k in S.learn)) S.learn[k] = base.learn[k];
     Life.migrate(S);
+    for (const list of [S.todos, S.memos]) { const seen = new Set(); for (const x of list || []) { while (seen.has(x.id)) x.id++; seen.add(x.id); } }
     S.items = S.items.filter(it => ITEMS[it.k]);
     this.S = S; this.fixPlacements();
   },
@@ -248,7 +249,8 @@ const Game = {
     if (d.steam) { for (let i = 0; i < 3; i++) Room.puff('p_steam', cx - 1, it.y - 2, { vy: -6 - i * 2, vx: (Math.random() - 0.5) * 3, max: 1.4, alpha: 0.7 }); return; }
   },
   // ---------- todos ----------
-  addTodo(t) { t = t.trim().slice(0, 140); if (!t) return; const S = this.S; S.todos = S.todos.filter(x => !x.ex); S.todos.unshift({ id: Date.now(), t, done: false }); if (S.todos.length > 100) S.todos.length = 100; UI.refresh('todo'); UI.refresh('timer'); this.save(); },
+  uid(list) { return Math.max(Date.now(), ...list.map(x => (+x.id || 0) + 1)); },
+  addTodo(t) { t = t.trim().slice(0, 140); if (!t) return; const S = this.S; S.todos = S.todos.filter(x => !x.ex); S.todos.unshift({ id: this.uid(S.todos), t, done: false }); if (S.todos.length > 100) S.todos.length = 100; UI.refresh('todo'); UI.refresh('timer'); this.save(); },
   toggleTodo(id) {
     const S = this.S, td = S.todos.find(x => x.id === id); if (!td) return; td.done = !td.done;
     if (td.done && !td.paid && !td.ex) {
@@ -262,7 +264,7 @@ const Game = {
   },
   delTodo(id) { this.S.todos = this.S.todos.filter(x => x.id !== id); UI.refresh('todo'); UI.refresh('timer'); this.save(); },
   // ---------- memos ----------
-  addMemo() { const S = this.S; if (S.memos.length >= 20) return UI.toast('便條最多 20 張'); S.memos.unshift({ id: Date.now(), text: '', color: ['butter', 'rose', 'mint', 'sky', 'lilac'][S.memos.length % 5], pin: false, x: 60 + (S.memos.length % 5) * 24, y: 110 + (S.memos.length % 5) * 18 }); UI.refresh('memo'); this.save(); },
+  addMemo() { const S = this.S; if (S.memos.length >= 20) return UI.toast('便條最多 20 張'); S.memos.unshift({ id: this.uid(S.memos), text: '', color: ['butter', 'rose', 'mint', 'sky', 'lilac'][S.memos.length % 5], pin: false, x: 60 + (S.memos.length % 5) * 24, y: 110 + (S.memos.length % 5) * 18 }); UI.refresh('memo'); this.save(); },
   // ---------- bubbles ----------
   bubble(actor, text, secs = 2) { UI.bubble({ actor }, text, secs); },
   bubbleAt(x, y, text, secs = 2.2) { UI.bubble({ x, y }, text, secs); },
