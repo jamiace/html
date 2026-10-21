@@ -230,3 +230,42 @@ button{font:inherit;color:inherit} #game-shell{position:relative;width:100%;heig
 /* R29：Boss 戰利品階段只保留單行整數倒數提示。 */
 .phase-banner.loot strong{font-size:20px;letter-spacing:.04em;line-height:1.35}
 .phase-banner.loot b,.phase-banner.loot small{display:none}
+
+/* ===== R37 Blood-Moon Gothic UI theme (override layer) ===== */
+:root{--red:#d81e45;--gold:#e2b75a;--line:rgba(226,183,90,.24);--panel:rgba(14,6,10,.86);--gothic-serif:"Cinzel","Noto Serif TC","Source Han Serif TC","Songti TC",Georgia,"Times New Roman",serif}
+body{background:#060305}
+body:before{background:radial-gradient(circle at 82% -6%,rgba(210,24,58,.30),transparent 46%),radial-gradient(circle at 15% 110%,rgba(90,10,30,.25),transparent 50%),linear-gradient(160deg,#0e0609,#030204)!important}
+.modal-screen{background:radial-gradient(circle at 50% 28%,rgba(120,10,32,.34),rgba(2,1,3,.9))}
+.panel{border:1px solid rgba(226,183,90,.38);border-radius:12px;background:linear-gradient(165deg,rgba(32,11,18,.96),rgba(9,4,7,.98));box-shadow:0 30px 90px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.65),inset 0 0 0 5px rgba(226,183,90,.07),inset 0 0 60px rgba(150,10,40,.12)}
+.panel:after{content:"";position:absolute;inset:8px;border:1px solid rgba(226,183,90,.12);border-radius:8px;pointer-events:none}
+h1,h2,.start-card h1,.level-panel h2,#timer,.subtitle,.eyebrow,.feature-grid b,.primary-btn,.reward-card h3{font-family:var(--gothic-serif)}
+.start-card h1{color:#f6e4cc;letter-spacing:.1em;text-shadow:0 0 34px rgba(220,20,60,.6),0 3px 0 #3a0610}
+.subtitle{color:#e2b75a;letter-spacing:.5em}
+.eyebrow{color:#e2b75a;letter-spacing:.32em}
+.lead{color:#dccbc0}
+.feature-grid div{border:1px solid rgba(226,183,90,.24);border-radius:8px;background:linear-gradient(180deg,rgba(80,14,30,.28),rgba(20,6,10,.4))}
+.feature-grid b{color:#e9c06a;text-shadow:0 0 16px rgba(255,170,60,.35)}
+.primary-btn{border:1px solid #e2b75a;border-radius:8px;background:linear-gradient(180deg,#c0173a,#5e0718);color:#fff1dc;letter-spacing:.14em;box-shadow:0 10px 30px rgba(200,20,50,.38),inset 0 1px 0 rgba(255,220,180,.35),inset 0 -2px 0 rgba(0,0,0,.35)}
+.primary-btn:hover{box-shadow:0 14px 40px rgba(230,30,60,.5),inset 0 1px 0 rgba(255,220,180,.4)}
+.secondary-btn{border:1px solid rgba(226,183,90,.42);border-radius:8px;background:rgba(34,12,18,.72);color:#ecdcc4}
+.secondary-btn:hover{background:rgba(70,18,30,.8)}
+.brand-mark{border:1px solid #e2b75a;border-radius:7px;background:linear-gradient(145deg,#b3122f,#3a0410);color:#ffe6bc;font-family:var(--gothic-serif);box-shadow:0 0 14px rgba(220,30,60,.45)}
+.timer-wrap{border:1px solid rgba(226,183,90,.5);border-radius:9px;background:linear-gradient(180deg,rgba(34,10,16,.88),rgba(8,4,6,.88));box-shadow:0 10px 30px rgba(0,0,0,.4),inset 0 0 0 3px rgba(0,0,0,.4)}
+#timer{color:#f6e4cc;text-shadow:0 0 14px rgba(230,30,60,.65)}
+.stats-compact .stat-item{border-color:rgba(226,183,90,.32)!important;border-radius:9px!important;background:linear-gradient(180deg,rgba(30,10,16,.86),rgba(8,4,6,.86))!important}
+.bar{border:1px solid rgba(226,183,90,.55);border-radius:5px;background:rgba(10,4,6,.88);box-shadow:inset 0 2px 7px rgba(0,0,0,.6),0 0 0 2px rgba(0,0,0,.45)}
+.hp-row i{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 50%),linear-gradient(90deg,#5a0616,#c4183a 70%,#ff4a64);color:#ff2a50}
+.exp-row i{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 50%),linear-gradient(90deg,#0a3a6a,#2a9ae0 70%,#8ae8ff);color:#4ad0ff}
+.weapon-slot{border:1px solid rgba(226,183,90,.32);border-radius:9px;background:linear-gradient(180deg,rgba(30,10,16,.82),rgba(8,4,6,.82))}
+.weapon-slot.empty{border-color:rgba(226,183,90,.18)}
+.weapon-slot img{border-radius:4px}
+.icon-button{border:1px solid rgba(226,183,90,.45);border-radius:9px;background:rgba(18,7,11,.85);color:#e2b75a}
+.toast{border:1px solid rgba(226,183,90,.32);border-radius:8px;background:linear-gradient(180deg,rgba(30,10,16,.92),rgba(10,4,7,.92))}
+.toast b{color:#e9c06a}
+.reward-card{border:1px solid rgba(226,183,90,.36);border-radius:12px;background:linear-gradient(170deg,rgba(66,14,26,.6),rgba(12,5,8,.92))}
+.reward-card:hover,.reward-card:focus{border-color:#e2b75a;box-shadow:0 0 34px rgba(220,30,60,.38),inset 0 0 30px rgba(226,183,90,.08)}
+.chest-glow{background:radial-gradient(ellipse,rgba(255,170,60,.5),transparent 70%)}
+.chest-stage img{filter:drop-shadow(0 0 26px rgba(255,150,50,.55))}
+.phase-banner strong{font-family:var(--gothic-serif)}
+#start-build-note{color:#e2b75a!important}
+.level-panel.panel{overflow:visible}

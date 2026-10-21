@@ -2,7 +2,7 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R36 MULTI CANVAS FIXED 60 FPS + SPEAR AIM FIX + LOG V4",
+    "build": "R37 BLOOD-MOON GOTHIC FX",
     "configVersion": 20,
     "language": "zh-Hant"
   },
@@ -24,7 +24,6 @@
     "maxWeaponSlots": 6,
     "maxUpgradeLevel": 5,
     "rewardChoiceCount": 3,
-	
     "offscreenDespawnDistance": 2600,
     "projectileDespawnDistance": 1800,
     "worldCullMargin": 90,
@@ -93,7 +92,25 @@
     "statRevive": "assets/stat_revive.png",
     "statFocus": "assets/stat_focus.png",
     "statRunExp": "assets/stat_run_exp.png",
-    "statFullHpCooldown": "assets/stat_fullhp_cooldown.png"
+    "statFullHpCooldown": "assets/stat_fullhp_cooldown.png",
+    "zoneBurn": "assets/fx_zone_burn.png",
+    "zoneAcid": "assets/fx_zone_acid.png",
+    "meteorWarning": "assets/fx_meteor_warning.png",
+    "vortex": "assets/fx_vortex.png",
+    "shockwave": "assets/fx_shockwave.png",
+    "laserBeam": "assets/fx_laser_beam.png",
+    "laserFlare": "assets/fx_laser_flare.png",
+    "chakram": "assets/fx_chakram.png",
+    "reticle": "assets/fx_reticle.png",
+    "shieldBubble": "assets/fx_shield_bubble.png",
+    "dropAura": "assets/fx_drop_aura.png",
+    "shotSpear": "assets/fx_spear.png",
+    "shotSpit": "assets/fx_shot_spit.png",
+    "shotBossOrb": "assets/fx_shot_bossorb.png",
+    "shotBossBolt": "assets/fx_shot_bossbolt.png",
+    "shotShard": "assets/fx_shot_shard.png",
+    "iceShell": "assets/fx_ice_shell.png",
+    "spark": "assets/fx_spark.png"
   },
   "audio": {
     "_comment": "Web Audio 音效參數。frequency 為 Hz、duration 為秒、volume 為增益。",
@@ -3941,24 +3958,30 @@
     "background": {
       "fill": "#0a0911",
       "patternTile": 512,
-      "patternAlpha": 0.78,
+      "patternAlpha": 0.72,
       "patternOverscan": 1024,
       "vignetteInnerRadius": 70,
       "vignetteOuterMultiplier": 0.72,
       "vignetteStops": [
         [
           0,
-          "rgba(255,32,88,.025)"
+          "rgba(255,32,88,0)"
         ],
         [
           0.55,
-          "rgba(5,5,10,.1)"
+          "rgba(30,0,10,.16)"
         ],
         [
           1,
-          "rgba(0,0,0,.62)"
+          "rgba(12,0,4,.74)"
         ]
-      ]
+      ],
+      "moonGlow": {
+        "x": 0.82,
+        "y": -0.08,
+        "radius": 0.75,
+        "color": "rgba(255,40,70,.13)"
+      }
     },
     "shake": {
       "envelopePower": 1.55,
@@ -4011,8 +4034,8 @@
         "rgba(55,216,132,.28)",
         "rgba(25,170,98,0)"
       ],
-      "burnDrawAlpha": 0.24,
-      "acidDrawAlpha": 0.48,
+      "burnDrawAlpha": 0.6,
+      "acidDrawAlpha": 0.7,
       "fallbackBurnAlpha": 0.09,
       "fallbackAcidAlpha": 0.18,
       "ellipseYMultiplier": 0.75
@@ -4063,8 +4086,8 @@
       "coreShadowBlur": 18,
       "coreLength": 126,
       "coreHalfWidth": 18,
-      "particleAlpha": 0.82,
-      "particleShadowBlur": 11,
+      "particleAlpha": 0.62,
+      "particleShadowBlur": 0,
       "particleWidthMultiplier": 0.8,
       "particleHeightMultiplier": 1.24,
       "fadeInSeconds": 0.1,
@@ -4096,7 +4119,8 @@
       "particleHotShadowColor": "#ff3e15",
       "particleCoolShadowColor": "#ff9a28",
       "particleDrawXMultiplier": 0.4,
-      "particleDrawYMultiplier": 0.62
+      "particleDrawYMultiplier": 0.62,
+      "particleBlend": "lighter"
     },
     "wave": {
       "lineWidth": 5,
@@ -4270,9 +4294,11 @@
     },
     "damageText": {
       "fontWeight": 900,
-      "fontFamily": "system-ui",
+      "fontFamily": "Georgia, 'Times New Roman', serif",
       "shadowColor": "#000",
-      "shadowBlur": 4
+      "shadowBlur": 0,
+      "strokeColor": "rgba(20,0,6,.92)",
+      "strokeWidth": 3.5
     },
     "enemy": {
       "_comment": "敵人貼圖、受擊、凍結提示與 HP 條視覺；R32 已停用敵人 shadowBlur、shadowColor 與橢圓地面陰影。",
@@ -4318,9 +4344,11 @@
         "height": 7,
         "offsetY": 18,
         "cornerRadius": 4,
-        "background": "rgba(0,0,0,.65)",
-        "bossColor": "#ff356d",
-        "golemColor": "#d5aa68"
+        "background": "rgba(10,4,8,.85)",
+        "bossColor": "#e0183f",
+        "golemColor": "#e2a24a",
+        "borderColor": "rgba(226,183,90,.9)",
+        "borderWidth": 1.4
       }
     },
     "player": {
@@ -4439,13 +4467,13 @@
       "expandPhaseMultiplier": 0.5,
       "expandPhaseOffset": 0.5,
       "ringAlpha": 0.2,
-      "ringColor": "rgba(143,231,255,.55)",
+      "ringColor": "rgba(226,183,90,.55)",
       "ringWidthBase": 2,
       "ringWidthLevel4": 4,
       "ringShadowBlur": 12,
-      "ringShadowColor": "#5cddff",
+      "ringShadowColor": "#ff3a5a",
       "trailAlpha": 0.25,
-      "trailColor": "#8deaff",
+      "trailColor": "#ff6a86",
       "trailMinimumWidth": 4,
       "trailWidthMultiplier": 0.11,
       "trailArcLength": 0.16,
@@ -4703,7 +4731,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "R36：效能優化",
+    "startBuildNote": "R37：血月哥德美術",
     "features": [
       {
         "value": "12",
