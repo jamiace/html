@@ -2,7 +2,7 @@
   "_comment": "《深紅倖存者》 集中設定檔。這是標準 JSON，JSON 不允許 // 或 /* */ 註解，因此本檔使用 _comment 與 _fieldNotes 欄位說明。修改後重新整理網頁即可套用。",
   "meta": {
     "_comment": "版本識別與設定檔格式版本。",
-    "build": "R37 BLOOD-MOON GOTHIC FX",
+    "build": "R37.1 BLOOD-MOON GOTHIC FX",
     "configVersion": 20,
     "language": "zh-Hant"
   },
@@ -110,7 +110,8 @@
     "shotBossBolt": "assets/fx_shot_bossbolt.png",
     "shotShard": "assets/fx_shot_shard.png",
     "iceShell": "assets/fx_ice_shell.png",
-    "spark": "assets/fx_spark.png"
+    "spark": "assets/fx_spark.png",
+    "softGlow": "assets/fx_soft_glow.png"
   },
   "audio": {
     "_comment": "Web Audio 音效參數。frequency 為 Hz、duration 為秒、volume 為增益。",
@@ -1726,7 +1727,7 @@
           "returnAfterSeconds": 0.65,
           "range": 375,
           "damage": 18,
-          "radius": 15,
+          "radius": 20.0,
           "rotationSpeed": 9,
           "hitKnockback": 8,
           "catchDistance": 28,
@@ -1745,7 +1746,7 @@
           "returnAfterSeconds": 0.65,
           "range": 375,
           "damage": 22,
-          "radius": 18,
+          "radius": 23.9,
           "rotationSpeed": 9,
           "hitKnockback": 8,
           "catchDistance": 28,
@@ -1764,7 +1765,7 @@
           "returnAfterSeconds": 0.65,
           "range": 375,
           "damage": 22,
-          "radius": 18,
+          "radius": 23.9,
           "rotationSpeed": 9,
           "hitKnockback": 8,
           "catchDistance": 28,
@@ -1783,7 +1784,7 @@
           "returnAfterSeconds": 0.65,
           "range": 375,
           "damage": 22,
-          "radius": 21,
+          "radius": 27.9,
           "rotationSpeed": 9,
           "hitKnockback": 8,
           "catchDistance": 28,
@@ -1802,7 +1803,7 @@
           "returnAfterSeconds": 0.65,
           "range": 375,
           "damage": 22,
-          "radius": 21,
+          "radius": 27.9,
           "rotationSpeed": 9,
           "hitKnockback": 8,
           "catchDistance": 28,
@@ -4069,7 +4070,10 @@
       "arcStart": 0.2,
       "arcEnd": 5.45,
       "color": "#ffc46d",
-      "shadowColor": "#ff9e38"
+      "shadowColor": "#ff9e38",
+      "glowColor": "#ff9e38",
+      "glowScale": 1.55,
+      "glowAlpha": 0.6
     },
     "drone": {
       "spriteSize": 40,
@@ -4349,7 +4353,12 @@
         "golemColor": "#e2a24a",
         "borderColor": "rgba(226,183,90,.9)",
         "borderWidth": 1.4
-      }
+      },
+      "directionalTypes": [
+        "rat",
+        "hound"
+      ],
+      "facingThreshold": 0.25
     },
     "player": {
       "_comment": "玩家貼圖、地面陰影、受傷閃爍與護盾環視覺。",
@@ -4731,7 +4740,7 @@
     "startTitle": "深紅倖存者",
     "startSubtitle": "CRIMSON SURVIVOR",
     "startLead": "在血月廢墟中撐到 15:00；深淵暴君降臨後，你只有 3 分鐘能擊敗牠。",
-    "startBuildNote": "R37：血月哥德美術",
+    "startBuildNote": "R37.1：血月哥德美術",
     "features": [
       {
         "value": "12",
