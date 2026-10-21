@@ -196,3 +196,27 @@ function gameDate(offsetDays = 0) { return new Date(Date.now() + ((window.NOOK_D
 function dayKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 // ask the cloud layer to write soon (rewards, purchases, quiz results); routine saves are batched
 function saveSoon() { if (typeof Cloud !== 'undefined' && Cloud.soon) Cloud.soon(); }
+// extra palette entries (private-use characters so they never clash with the hand-picked keys)
+const PAL_EXTRA_KEYS = {};
+let _palNext = 0xE200;
+function palAdd(hex) {
+  hex = hex.toLowerCase(); if (PAL_EXTRA_KEYS[hex]) return PAL_EXTRA_KEYS[hex];
+  for (const k in PAL) if (PAL[k].toLowerCase && PAL[k].toLowerCase() === hex) return (PAL_EXTRA_KEYS[hex] = k);
+  const k = String.fromCharCode(_palNext++); PAL[k] = hex;
+  const n = parseInt(hex.slice(1), 16); PAL_RGBA[k] = [(n >> 16) & 255, (n >> 8) & 255, n & 255, 255];
+  return (PAL_EXTRA_KEYS[hex] = k);
+}
+// a four-step ramp (dark → light) usable with rampMap(from, name)
+function rampAdd(name, hexes) { RAMP[name] = hexes.map(h => h[0] === '#' ? palAdd(h) : h); return RAMP[name]; }
+rampAdd('navy', ['#1f2b4d', '#2f3f6e', '#4a5f96', '#7d90c4']);
+rampAdd('mustard', ['#8a6418', '#b8892a', '#dcae45', '#f0d07a']);
+rampAdd('coral', ['#9c3b34', '#d4594d', '#ee8071', '#f8b1a5']);
+rampAdd('olive', ['#4a5229', '#6b7638', '#8f9b4f', '#b9c47d']);
+rampAdd('ink', ['#1a1420', '#2e2a36', '#45404f', '#625c6e']);
+rampAdd('snow', ['#b7b3ad', '#d4d0ca', '#ece9e4', '#ffffff']);
+rampAdd('peach', ['#b8664a', '#e08c6c', '#f4b394', '#fbd8c4']);
+rampAdd('aqua', ['#1f6f78', '#2f9aa3', '#5cc4c4', '#a2e3df']);
+rampAdd('berry', ['#5a1f3b', '#8a3459', '#b85582', '#e08fb2']);
+rampAdd('choco', ['#3d261d', '#5e3b2f', '#7d5240', '#a3735a']);
+rampAdd('sky', ['#3c6fa6', '#5c95cf', '#8bbbe8', '#c3dcf5']);
+rampAdd('rose2', ['#7a2e3f', '#a8455a', '#d36f86', '#f2a7b7']);

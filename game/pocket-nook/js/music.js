@@ -14,11 +14,8 @@ const Music = {
     a.addEventListener('pause', () => { if (this.cur && this.cur.type !== 'yt') { this.playing = false; this.changed(); } });
     a.addEventListener('error', () => { if (!this.cur || this.cur.type === 'yt' || !a.src) return; this.playing = false; UI.toast('這首歌無法播放（格式不支援或檔案已失效）', 'i_music', 3.5); this.changed(); });
     const M = this.M; if (M.idx >= 0 && M.list[M.idx]) this.cur = M.list[M.idx];
-    if (window.NOOK_ENV === 'web') fetch('music/playlist.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : []).then(list => {
-      if (!Array.isArray(list)) return; let added = 0;
-      for (const t of list) { const src = typeof t === 'string' ? t : t && t.src; if (!src || M.list.some(e => e.type === 'url' && e.src === src)) continue; M.list.push({ id: 'u' + Math.random().toString(36).slice(2, 9), type: 'url', src, title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }); added++; }
-      if (added) { Game.save(); UI.refresh('music'); }
-    }).catch(() => { });
+    if (M.ctx === 'lib') this.cur = null;
+    this.loadLib(false);
     try {
       const ms = navigator.mediaSession; if (ms) {
         ms.setActionHandler('play', () => this.toggle(true)); ms.setActionHandler('pause', () => this.toggle(false));
@@ -73,47 +70,53 @@ const Music = {
   },
   async srcFor(e) {
     if (e.type === 'url') return e.src;
+    if (e.type === 'drive') return Lib.mediaUrl(e.fid);
     if (this.urls[e.id]) return this.urls[e.id];
     const b = await this.getBlob(e.id).catch(() => null); if (!b) return null;
     return this.urls[e.id] = URL.createObjectURL(b);
   },
   // ---------- playback ----------
-  async playIdx(i) {
-    const M = this.M; if (i < 0 || i >= M.list.length) return;
-    M.idx = i; const e = this.cur = M.list[i]; Game.save();
+  get Q() { return this.M.ctx === 'lib' ? Lib.queue(this.M.libAlbum) : this.M.list; },
+  get qi() { return this.M.ctx === 'lib' ? (this.M.lidx == null ? -1 : this.M.lidx) : this.M.idx; },
+  playIdx(i) { this.M.ctx = 'list'; return this.playAt(i); },
+  playLib(i, album) { const M = this.M; M.ctx = 'lib'; M.libAlbum = album || ''; return this.playAt(i); },
+  async playAt(i) {
+    const M = this.M, Q = this.Q; if (i < 0 || i >= Q.length) return;
+    if (M.ctx === 'lib') M.lidx = i; else M.idx = i;
+    const e = this.cur = Q[i]; Game.save();
     if (e.type === 'yt') { this.audio.pause(); return this.playYT(e); }
     this.stopYT();
     const src = await this.srcFor(e);
-    if (!src) { e.missing = true; this.changed(); if (++this.fails < M.list.length) return this.next(false); this.fails = 0; UI.toast('找不到這首歌的檔案，請重新加入', 'i_music'); return; }
+    if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast('找不到這首歌的檔案，請重新加入', 'i_music'); return; }
     e.missing = false; this.fails = 0;
     this.audio.src = src; this.audio.volume = M.vol;
     try { await this.audio.play(); } catch (err) { this.playing = false; this.changed(); }
   },
   toggle(force) {
     const M = this.M;
-    if (!this.cur) { if (M.list.length) this.playIdx(Math.max(0, M.idx)); else UI.openWin('music'); return; }
+    if (!this.cur) { if (M.ctx === 'lib' && Lib.tracks.length) this.playLib(Math.max(0, Math.min(M.lidx || 0, Lib.queue(M.libAlbum).length - 1)), M.libAlbum); else if (M.list.length) this.playIdx(Math.max(0, M.idx)); else if (Lib.tracks.length) this.playLib(0, ''); else UI.openWin('music'); return; }
     if (this.cur.type === 'yt') {
       if (!this.yt || !this.ytReady) return this.playYT(this.cur);
       const st = this.yt.getPlayerState(); const want = force != null ? force : st !== 1;
       want ? this.yt.playVideo() : this.yt.pauseVideo(); return;
     }
-    if (!this.audio.src) return this.playIdx(M.idx);
+    if (!this.audio.src) return this.playAt(Math.max(0, this.qi));
     const want = force != null ? force : this.audio.paused;
     if (want) this.audio.play().catch(() => { }); else this.audio.pause();
   },
   next(manual) {
-    const M = this.M, n = M.list.length; if (!n) return;
+    const M = this.M, n = this.Q.length; if (!n) return;
     if (manual && this.cur && this.cur.type === 'yt' && this.cur.list && this.yt && this.ytReady) { const pl = this.yt.getPlaylist() || []; if (this.yt.getPlaylistIndex() < pl.length - 1) { this.yt.nextVideo(); return; } }
-    let i = M.idx + 1;
-    if (M.shuffle && n > 1) { do { i = Math.floor(Math.random() * n); } while (i === M.idx); }
+    let i = this.qi + 1;
+    if (M.shuffle && n > 1) { do { i = Math.floor(Math.random() * n); } while (i === this.qi); }
     if (i >= n) { if (M.repeat === 'off' && !manual) { this.stop(); return; } i = 0; }
-    this.playIdx(i);
+    this.playAt(i);
   },
   prev() {
-    const M = this.M, n = M.list.length; if (!n) return;
+    const n = this.Q.length; if (!n) return;
     if (this.cur && this.cur.type !== 'yt' && this.audio.currentTime > 3) { this.audio.currentTime = 0; return; }
     if (this.cur && this.cur.type === 'yt' && this.cur.list && this.yt && this.ytReady && this.yt.getPlaylistIndex() > 0) { this.yt.previousVideo(); return; }
-    this.playIdx((M.idx - 1 + n) % n);
+    this.playAt((this.qi - 1 + n) % n);
   },
   stop() { this.audio.pause(); this.stopYT(); this.playing = false; this.changed(); },
   onEnded() { if (this.M.repeat === 'one') { this.audio.currentTime = 0; this.audio.play().catch(() => { }); return; } this.next(false); },
@@ -134,11 +137,12 @@ const Music = {
     if (this.cur === e) { this.stop(); this.cur = null; this.audio.removeAttribute('src'); }
     M.list.splice(i, 1);
     if (M.idx > i) M.idx--; else if (M.idx === i) M.idx = Math.min(i, M.list.length - 1);
+    if (M.ctx === 'lib' && this.cur && this.cur !== e) { Game.save(); return this.changed(); }
     if (this.urls[id]) { URL.revokeObjectURL(this.urls[id]); delete this.urls[id]; }
     if (e.type === 'file') this.delBlob(id);
     Game.save(); this.changed();
   },
-  move(id, dir) { const M = this.M, i = M.list.findIndex(e => e.id === id), j = i + dir; if (i < 0 || j < 0 || j >= M.list.length) return; const cur = M.list[M.idx]; [M.list[i], M.list[j]] = [M.list[j], M.list[i]]; M.idx = M.list.indexOf(cur); Game.save(); UI.refresh('music'); },
+  move(id, dir) { const M = this.M, i = M.list.findIndex(e => e.id === id), j = i + dir; if (i < 0 || j < 0 || j >= M.list.length) return; const cur = M.list[M.idx]; [M.list[i], M.list[j]] = [M.list[j], M.list[i]]; M.idx = cur ? M.list.indexOf(cur) : M.idx; Game.save(); UI.refresh('music'); },
   // ---------- YouTube ----------
   loadYTApi() {
     if (this.ytApi) return this.ytApi;
@@ -180,8 +184,94 @@ const Music = {
   stopYT() { if (this.yt && this.ytReady) try { this.yt.stopVideo(); } catch (e) { } UI.ytPanel(false); },
   closeYT() { if (this.cur && this.cur.type === 'yt') { this.stopYT(); this.playing = false; this.changed(); } else UI.ytPanel(false); },
   ytWatchUrl(e) { return e.vid ? 'https://www.youtube.com/watch?v=' + e.vid + (e.list ? '&list=' + e.list : '') : 'https://www.youtube.com/playlist?list=' + e.list; },
+  loadLib(force) {
+    return Lib.load(force).then(() => {
+      const M = this.M;
+      if (M.ctx === 'lib' && !this.cur) { const Q = Lib.queue(M.libAlbum); if (Q.length) { M.lidx = Math.max(0, Math.min(M.lidx || 0, Q.length - 1)); this.cur = Q[M.lidx]; } else { M.ctx = 'list'; this.cur = M.list[M.idx] || null; } }
+      UI.refresh('music'); UI.hud(true);
+    });
+  },
   changed() {
     UI.refresh('music'); UI.hud(true);
     try { if (navigator.mediaSession && this.cur && window.MediaMetadata) { navigator.mediaSession.metadata = new MediaMetadata({ title: this.cur.title, artist: '小窩時光' }); navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused'; } } catch (e) { }
+  },
+};
+
+/* ------------------------------------------------------------
+   Built-in library: music/playlist.json (bundled files) plus a
+   public Google Drive folder read with the Drive API v3 and an
+   API key (config: NOOK_DRIVE_FOLDER / NOOK_DRIVE_API_KEY).
+   Kept out of the save file; only the play position is saved.
+   ------------------------------------------------------------ */
+const Lib = {
+  tracks: [], albums: [], status: 'idle', err: '', root: '', at: 0, busy: null,
+  CACHE: 'pocketnook.lib.v1', TTL: 12 * 3600e3, MAX_TRACKS: 3000, MAX_FOLDERS: 200,
+  get key() { return (window.NOOK_DRIVE_API_KEY || '').trim(); },
+  get folder() { const f = (window.NOOK_DRIVE_FOLDER || '').trim(); const m = f.match(/folders\/([\w-]+)/); return m ? m[1] : f; },
+  enabled() { return window.NOOK_ENV !== 'artifact'; },
+  driveOn() { return this.enabled() && !!this.key && !!this.folder; },
+  mediaUrl(fid) { return `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fid)}?alt=media&key=${encodeURIComponent(this.key)}`; },
+  queue(album) { return album ? this.tracks.filter(t => t.album === album) : this.tracks; },
+  sort(list) { const c = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' }); return list.sort((a, b) => c.compare(a.album, b.album) || c.compare(a.title, b.title)); },
+  finish(list) {
+    const seen = new Set(), out = [];
+    for (const t of list) { const k = t.fid ? 'd:' + t.fid : 'u:' + t.src; if (seen.has(k)) continue; seen.add(k); if (t.fid && t.type === 'url') seen.add('d:' + t.fid); out.push(t); }
+    // bundled copies of a Drive file win over streaming it
+    this.tracks = this.sort(out.filter(t => !(t.type === 'drive' && out.some(o => o.type === 'url' && o.fid === t.fid))));
+    const al = {}; for (const t of this.tracks) al[t.album] = (al[t.album] || 0) + 1;
+    this.albums = Object.keys(al).map(n => ({ n, c: al[n] }));
+  },
+  load(force) {
+    if (!this.enabled()) { this.status = 'off'; return Promise.resolve(); }
+    if (this.busy) return this.busy;
+    this.status = 'loading'; this.err = ''; UI.refresh('music');
+    return this.busy = (async () => {
+      const bundled = await this.loadBundled();
+      let drive = [];
+      if (this.driveOn()) {
+        try { drive = await this.loadDrive(force); }
+        catch (e) { this.err = String(e && e.message || e); }
+      }
+      this.finish(bundled.concat(drive));
+      this.status = this.err && !this.tracks.length ? 'err' : 'ok';
+    })().finally(() => { this.busy = null; });
+  },
+  async loadBundled() {
+    try {
+      const r = await fetch('music/playlist.json', { cache: 'no-cache' }); if (!r.ok) return [];
+      const list = await r.json(); if (!Array.isArray(list)) return [];
+      return list.map((t, i) => { const src = typeof t === 'string' ? t : t && t.src; if (!src) return null;
+        return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', album: (t && t.album) || '內建', title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
+    } catch (e) { return []; }
+  },
+  async api(path, params) {
+    const u = new URL('https://www.googleapis.com/drive/v3/' + path); for (const k in params) u.searchParams.set(k, params[k]); u.searchParams.set('key', this.key);
+    const r = await fetch(u.toString()); const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const m = (j.error && j.error.message) || ('HTTP ' + r.status); throw new Error(r.status === 403 ? '金鑰沒有權限或 Drive API 沒有啟用：' + m : r.status === 404 ? '找不到資料夾，請確認已設成「知道連結的人都能檢視」' : m); }
+    return j;
+  },
+  async loadDrive(force) {
+    const root = this.folder;
+    if (!force) try { const c = JSON.parse(localStorage.getItem(this.CACHE) || 'null'); if (c && c.folder === root && Date.now() - c.at < this.TTL && Array.isArray(c.tracks)) { this.root = c.root || ''; this.at = c.at; return c.tracks; } } catch (e) { }
+    const meta = await this.api('files/' + encodeURIComponent(root), { fields: 'name', supportsAllDrives: 'true' }).catch(() => ({}));
+    this.root = meta.name || '雲端資料夾';
+    const out = [], todo = [{ id: root, path: '' }], done = new Set();
+    while (todo.length && done.size < this.MAX_FOLDERS && out.length < this.MAX_TRACKS) {
+      const f = todo.shift(); if (done.has(f.id)) continue; done.add(f.id);
+      let pageToken = '';
+      do {
+        const j = await this.api('files', { q: `'${f.id}' in parents and trashed=false`, fields: 'nextPageToken,files(id,name,mimeType,shortcutDetails)', pageSize: '1000', supportsAllDrives: 'true', includeItemsFromAllDrives: 'true', orderBy: 'name', ...(pageToken ? { pageToken } : {}) });
+        for (const x of j.files || []) {
+          let id = x.id, mt = x.mimeType;
+          if (mt === 'application/vnd.google-apps.shortcut' && x.shortcutDetails) { id = x.shortcutDetails.targetId; mt = x.shortcutDetails.targetMimeType; }
+          if (mt === 'application/vnd.google-apps.folder') todo.push({ id, path: f.path ? f.path + ' / ' + x.name : x.name });
+          else if ((mt || '').startsWith('audio/') || AUDIO_EXT.test(x.name)) out.push({ id: 'd:' + id, type: 'drive', fid: id, album: f.path || this.root, title: x.name.replace(AUDIO_EXT, '') });
+        }
+        pageToken = j.nextPageToken || '';
+      } while (pageToken && out.length < this.MAX_TRACKS);
+    }
+    this.at = Date.now();
+    try { localStorage.setItem(this.CACHE, JSON.stringify({ folder: root, root: this.root, at: this.at, tracks: out })); } catch (e) { }
+    return out;
   },
 };

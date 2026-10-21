@@ -488,7 +488,6 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .devhist { display: flex; flex-direction: column; gap: 4px; }
 .devh { display: flex; align-items: center; gap: 8px; padding: 4px 6px; background: var(--paper-2); font-size: 13px; }
 .devh.auto { opacity: .75; }
-.grow { flex: 1; min-width: 0; }
 .ltier .pbar { min-width: 0; }
 .ltier > span.num.hint { flex: none; min-width: 5.2em; text-align: right; }
 .devjson { width: 100%; box-sizing: border-box; font: 11px/1.4 ui-monospace, monospace; border: 3px solid var(--edge); background: var(--cb-bg); color: var(--ink); resize: vertical; }
@@ -500,3 +499,27 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .cl-opt.dis { opacity: .5; cursor: not-allowed; }
 .cl-opt input { margin-top: 3px; accent-color: #e8973d; }
 .devh b.ok { color: var(--mint); } .devh b.bad { color: var(--rose); }
+.fbar { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.ffams { gap: 3px; }
+.tab.sm { font-size: 12px; padding: 0 6px; min-height: 22px; }
+.fctl { gap: 6px; align-items: center; }
+.fctl select { border: 3px solid var(--edge); background: var(--paper); color: var(--ink); padding: 2px 4px; font-size: 13px; }
+.pnav { gap: 10px; flex: none; }
+.card.fun::after { content: "互動"; position: absolute; top: 4px; left: 4px; font-size: 10px; padding: 0 4px; background: var(--honey); color: #2e2230; }
+/* wardrobe */
+.avatabs { gap: 3px; }
+.avabody { display: flex; flex-direction: column; gap: 6px; max-height: 44vh; }
+.avagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 5px; }
+.avaopt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; border: 0; background: var(--paper-2); box-shadow: inset 0 0 0 3px var(--line); color: var(--ink); font-size: 11px; cursor: pointer; min-width: 0; }
+.avaopt span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avaopt.on { box-shadow: inset 0 0 0 3px var(--honey); background: var(--chip-on); }
+.avaopt.paid em { position: absolute; top: 2px; right: 3px; font-style: normal; font-size: 10px; background: var(--honey); color: #2e2230; padding: 0 3px; }
+.avaopt canvas { image-rendering: pixelated; }
+.avagrid.sets { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.avaopt.set { cursor: default; }
+.avasw { flex-wrap: wrap; gap: 4px; }
+.avasw .sw { width: 22px; height: 22px; }
+.grid > .fbar, .grid > .pnav, .grid > p.hint.center { grid-column: 1 / -1; }
+.hint.warn { color: var(--berry, #b0476a); }
+.mlib-al { gap: 3px; max-height: 92px; overflow-y: auto; }
+.mlib-al .tab { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -431,7 +431,8 @@ const Room = {
     c.drawImage(cv, x, y);
     if (it.dust) Life.drawDust(c, it, x, y, cv);
     if (it.broken && Math.random() < 0.01) this.puff('p_spark', x + cv.width / 2, y + 4, { vy: -4, max: 0.4 });
-    if (d.clock) { const n = new Date(); const cx = x + 8, cy = y + 8; const hA = ((n.getHours() % 12) + n.getMinutes() / 60) / 12 * Math.PI * 2, mA = n.getMinutes() / 60 * Math.PI * 2;
+    if (d.anim) d.anim(c, x, y, it, this.t, cv);
+    if (d.clock) { const n = new Date(); const co = d.clock === true ? { cx: 8, cy: 8 } : d.clock; const cx = x + (it.flip ? cv.width - 1 - co.cx : co.cx), cy = y + co.cy; const hA = ((n.getHours() % 12) + n.getMinutes() / 60) / 12 * Math.PI * 2, mA = n.getMinutes() / 60 * Math.PI * 2;
       c.fillStyle = '#2e2230'; for (let i = 0; i <= 3; i++) c.fillRect(Math.round(cx + Math.sin(mA) * i), Math.round(cy - Math.cos(mA) * i), 1, 1);
       c.fillStyle = '#c4566e'; for (let i = 0; i <= 2; i++) c.fillRect(Math.round(cx + Math.sin(hA) * i), Math.round(cy - Math.cos(hA) * i), 1, 1); }
     if (d.calendar) drawDigits(c, String(new Date().getDate()), x + 8, y + 11, '#7a3045');

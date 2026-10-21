@@ -382,16 +382,46 @@ const UI = {
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: '道具也可以在「學習」複習 5 個單字免費換到。' }), h('div', { class: 'scroll grid' }, ...cards)];
     }
     if (tab === 'view') for (const id in VIEWS) { const d = VIEWS[id]; cards.push(card(viewSwatch(id), d.n, d, S.ownViews.includes(id), () => Game.buy('view', id))); }
-    else if (tab === 'wallpaper') for (const id in WALLPAPERS) { const d = WALLPAPERS[id]; cards.push(card(swatch(WALL[id], 'wp'), d.n, d, S.ownWP.includes(id), () => Game.buy('wp', id))); }
-    else if (tab === 'floor') for (const id in FLOORS) { const d = FLOORS[id]; cards.push(card(swatch(FLOOR[id], 'fl'), d.n, d, S.ownFL.includes(id), () => Game.buy('fl', id))); }
+    else if (tab === 'wallpaper' || tab === 'floor') {
+      const cat = tab === 'wallpaper' ? WALLPAPERS : FLOORS, own = tab === 'wallpaper' ? S.ownWP : S.ownFL;
+      const list = this.filterList('shop:' + tab, Object.keys(cat).map(id => ({ id, d: cat[id], own: own.includes(id) })));
+      for (const e of list.page) cards.push(card(swatch(tab === 'wallpaper' ? WALL[e.id] : FLOOR[e.id], tab === 'wallpaper' ? 'wp' : 'fl'), e.d.n, e.d, e.own, () => Game.buy(tab === 'wallpaper' ? 'wp' : 'fl', e.id)));
+      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
+    }
     else if (tab === 'pet') {
       const n = Pets.list().length, full = n >= PET_MAX;
       for (const id in PETS) { const d = PETS[id], [k, c] = id.split(':'), cnt = Pets.list().filter(p => p.sp === id).length; const el = card(sprPreview(petCanvas(k, c, 'sit', 0, false), 60, 3), d.n, Object.assign({}, d, { price: Pets.adoptPrice(id) }), full ? true : cnt, () => Game.buy('pet', id), '領養'); if (full) el.querySelector('.own').textContent = '已滿'; cards.push(el); }
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: `已經養了 ${n}/${PET_MAX} 隻，房間裡最多同時 ${PET_ROOM_MAX} 隻。每多養一隻，領養費會多一點。每隻都有自己的個性和喜好。` }), h('div', { class: 'scroll grid' }, ...cards)];
     }
-    else for (const id in ITEMS) { const d = ITEMS[id]; if (d.cat !== tab || d.giftOnly || d.special) continue; const el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(id), () => Game.buy('item', id)); if (this.shopFocus === id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
+    else {
+      const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return d.cat === tab && !d.giftOnly && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
+      const list = this.filterList('shop:' + tab, all, this.shopFocus);
+      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(e.id), () => Game.buy('item', e.id)); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
+      this.shopFocus = null;
+      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
+    }
     this.shopFocus = null;
     return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('div', { class: 'scroll grid' }, ...cards)];
+  },
+  // ---------- filter / search / pages for long lists ----------
+  flt: {},
+  filterList(key, entries, focusId, compact) {
+    const F = this.flt[key] || (this.flt[key] = { fam: '', q: '', page: 0, sort: 'lvl', avail: false }), S = Game.S;
+    const fams = [...new Set(entries.map(e => e.d.fam).filter(Boolean))];
+    let list = entries.filter(e => (!F.fam || e.d.fam === F.fam) && (!F.q || e.d.n.includes(F.q.trim())) && (!F.avail || ((e.d.lvl || 1) <= S.lvl && (e.d.price || 0) <= S.coins)));
+    const sorts = { lvl: (a, b) => (a.d.lvl || 1) - (b.d.lvl || 1) || (a.d.price || 0) - (b.d.price || 0), price: (a, b) => (a.d.price || 0) - (b.d.price || 0), name: (a, b) => a.d.n.localeCompare(b.d.n, 'zh-Hant') };
+    if (!compact) list.sort(sorts[F.sort] || sorts.lvl);
+    const PER = 30, pages = Math.max(1, Math.ceil(list.length / PER));
+    if (focusId) { F.fam = ''; F.q = ''; const i = list.findIndex(e => e.id === focusId); if (i >= 0) F.page = Math.floor(i / PER); }
+    F.page = Math.min(F.page, pages - 1);
+    const set = (k, v) => { F[k] = v; if (k !== 'page') F.page = 0; this.refresh(key.startsWith('shop') ? 'shop' : 'storage'); };
+    const bar = h('div', { class: 'fbar' },
+      fams.length > 1 ? h('div', { class: 'tabs wrap ffams' }, h('button', { class: 'tab sm' + (!F.fam ? ' on' : ''), onclick: () => set('fam', '') }, '全部'), ...fams.map(f => h('button', { class: 'tab sm' + (F.fam === f ? ' on' : ''), onclick: () => set('fam', f) }, FAM_NAMES[f] || f))) : null,
+      h('div', { class: 'row fctl' }, h('div', { class: 'inset grow' }, h('input', { id: 'q-' + key, type: 'search', value: F.q, placeholder: `搜尋（共 ${entries.length} 件）`, oninput: e => { F.q = e.target.value; F.page = 0; this.refresh(key.startsWith('shop') ? 'shop' : 'storage'); } })),
+        compact ? null : h('select', { 'aria-label': '排序', onchange: e => set('sort', e.target.value) }, ...[['lvl', '依等級'], ['price', '依價格'], ['name', '依名稱']].map(([v, l]) => h('option', { value: v, selected: F.sort === v }, l))),
+        compact ? null : h('button', { class: 'chip sm' + (F.avail ? ' on' : ''), onclick: () => set('avail', !F.avail) }, '買得起')));
+    const nav = pages > 1 ? h('div', { class: 'row center pnav' }, h('button', { class: 'chip sm', disabled: F.page <= 0, onclick: () => set('page', F.page - 1) }, '上一頁'), h('span', { class: 'num hint', text: `${F.page + 1} / ${pages}（${list.length} 件）` }), h('button', { class: 'chip sm', disabled: F.page >= pages - 1, onclick: () => set('page', F.page + 1) }, '下一頁')) : h('p', { class: 'hint center', text: `${list.length} 件` });
+    return { page: list.slice(F.page * PER, F.page * PER + PER), bar, nav, total: list.length };
   },
   // ---------- storage ----------
   stoTab: 'items',
@@ -413,28 +443,21 @@ const UI = {
     if (tab === 'view') {
       for (const id of S.ownViews) cards.push(h('div', { class: 'card' + (S.view === id ? ' cur' : '') }, h('div', { class: 'pvbox' }, viewSwatch(id)), h('div', { class: 'cn', text: VIEWS[id].n }), h('div', { class: 'cfoot' }, S.view === id ? h('span', { class: 'own', text: '使用中' }) : h('button', { class: 'chip sm', onclick: () => Game.applyView(id) }, '套用'))));
     } else if (tab === 'items') {
-      const ids = Object.keys(S.inv).filter(k => S.inv[k] > 0 && ITEMS[k]);
+      const idsAll = Object.keys(S.inv).filter(k => S.inv[k] > 0 && ITEMS[k]);
+      const list = this.filterList('sto:items', idsAll.map(id => ({ id, d: ITEMS[id] })), null, true); const ids = list.page.map(e => e.id);
+      if (idsAll.length) cards.push(list.bar);
       for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, '擺放')))); }
-      if (!ids.length) cards.push(h('div', { class: 'empty' }, ico('i_box', 48), h('p', { text: '收納箱是空的。到商店買新家具，或在佈置模式把東西收起來。' }), h('button', { class: 'chip', onclick: () => this.openWin('shop') }, ico('i_shop', 20), '去商店')));
+      if (!idsAll.length) cards.push(h('div', { class: 'empty' }, ico('i_box', 48), h('p', { text: '收納箱是空的。到商店買新家具，或在佈置模式把東西收起來。' }), h('button', { class: 'chip', onclick: () => this.openWin('shop') }, ico('i_shop', 20), '去商店')));
+      if (idsAll.length) cards.push(list.nav);
     } else {
-      const list = tab === 'wp' ? S.ownWP : S.ownFL, cat = tab === 'wp' ? WALLPAPERS : FLOORS, cur = tab === 'wp' ? S.wp : S.fl;
-      for (const id of list) cards.push(h('div', { class: 'card' + (cur === id ? ' cur' : '') }, h('div', { class: 'pvbox' }, swatch(tab === 'wp' ? WALL[id] : FLOOR[id], tab)), h('div', { class: 'cn', text: cat[id].n }), h('div', { class: 'cfoot' }, cur === id ? h('span', { class: 'own', text: '使用中' }) : h('button', { class: 'chip sm', onclick: () => tab === 'wp' ? Game.applyWP(id) : Game.applyFL(id) }, '套用'))));
+      const own = tab === 'wp' ? S.ownWP : S.ownFL, cat = tab === 'wp' ? WALLPAPERS : FLOORS, cur = tab === 'wp' ? S.wp : S.fl;
+      const pl = this.filterList('sto:' + tab, own.filter(id => cat[id]).map(id => ({ id, d: cat[id] })), cur, true); if (own.length > 12) cards.push(pl.bar);
+      for (const { id } of pl.page) cards.push(h('div', { class: 'card' + (cur === id ? ' cur' : '') }, h('div', { class: 'pvbox' }, swatch(tab === 'wp' ? WALL[id] : FLOOR[id], tab)), h('div', { class: 'cn', text: cat[id].n }), h('div', { class: 'cfoot' }, cur === id ? h('span', { class: 'own', text: '使用中' }) : h('button', { class: 'chip sm', onclick: () => tab === 'wp' ? Game.applyWP(id) : Game.applyFL(id) }, '套用'))));
+      if (own.length > 12) cards.push(pl.nav);
     }
     return [h('div', { class: 'row between' }, tabs, h('button', { class: 'chip', onclick: () => { this.closeWin('storage'); this.setEdit(true); } }, ico('i_brush', 20), '佈置房間')), h('div', { class: 'scroll grid' }, ...cards)];
   },
   // ---------- avatar ----------
-  avaView: 0,
-  w_avatar() {
-    const a = Game.S.avatar; const views = ['front0', 'side0', 'back0'];
-    const pv = sprPreview(avatarCanvas(views[this.avaView], a, null, 0, false), 150, 6); pv.classList.add('ava-pv');
-    const set = (k, v) => { a[k] = v; Game.save(); Cowork.push(); this.refresh('avatar'); };
-    const PAL_SW = { cocoa: '#6b4030', ink: '#4b4560', honey: '#f6c75a', rose: '#c4566e', sky: '#4a6aa8', lilac: '#7a5aa8', ginger: '#c46a48', snow: '#dcd6e8', peach: '#f6cfae', tan: '#c68a6a', deep: '#9a6249', denim: '#5f86c0', mint: '#7fbf6a', butter: '#f6c75a', oat: '#efdcc0', coal: '#4b4560', teal: '#3f8f8a', navy: '#575070' };
-    const sw = (k, opts, label) => h('div', { class: 'opt' }, h('span', { class: 'ol', text: label }), h('div', { class: 'sws' }, ...Object.keys(opts).map(v => h('button', { class: 'sw' + (a[k] === v ? ' on' : ''), style: `--c:${PAL_SW[v] || '#ccc'}`, 'aria-label': label + ' ' + v, onclick: () => set(k, v) }))));
-    const hairBtns = h('div', { class: 'opt' }, h('span', { class: 'ol', text: '髮型' }), h('div', { class: 'sws' }, ...AVATAR_OPTS.hair.map(st => { const c = sprPreview(avatarCanvas('front0', Object.assign({}, a, { hair: st }), null, 0, false), 60, 2); return h('button', { class: 'hairbtn' + (a.hair === st ? ' on' : ''), 'aria-label': st, onclick: () => set('hair', st) }, c); })));
-    return [h('div', { class: 'ava-row' }, h('div', { class: 'ava-stage' }, pv, h('button', { class: 'chip sm', onclick: () => { this.avaView = (this.avaView + 1) % 3; this.refresh('avatar'); } }, ico('i_flip', 18), '轉一圈')),
-      h('div', { class: 'ava-opts' }, h('label', { class: 'field' }, h('span', { text: '名字' }), h('div', { class: 'inset' }, h('input', { id: 'ava-name', type: 'text', maxlength: '16', value: a.name, placeholder: '一起專注時顯示', onchange: e => { a.name = e.target.value.trim().slice(0, 16); Game.save(); Cowork.push(); } }))), hairBtns)),
-      sw('hairColor', AVATAR_OPTS.hairColor, '髮色'), sw('skin', AVATAR_OPTS.skin, '膚色'), sw('shirt', AVATAR_OPTS.shirt, '上衣'), sw('pants', AVATAR_OPTS.pants, '褲子')];
-  },
   // ---------- cowork ----------
   w_cowork() {
     const st = Cowork.status;
@@ -471,7 +494,7 @@ const UI = {
   // ---------- music ----------
   w_music() {
     const M = Game.S.music, cur = Music.cur, playing = Music.playing;
-    const src = cur ? (cur.type === 'yt' ? (cur.list ? 'YouTube 播放清單' : 'YouTube') : cur.type === 'url' ? '內建曲目' : '本機檔案') : '加入本機音樂檔，或貼上 YouTube 連結';
+    const src = cur ? (cur.type === 'yt' ? (cur.list ? 'YouTube 播放清單' : 'YouTube') : cur.type === 'drive' ? '內建音樂 · ' + cur.album : cur.type === 'url' ? '內建曲目' + (cur.album ? ' · ' + cur.album : '') : '本機檔案') : '聽內建音樂、加入本機音樂檔，或貼上 YouTube 連結';
     const now = h('div', { class: 'now' }, h('div', { class: 'disc' + (playing ? ' spin' : '') }, ico('i_music', 36)),
       h('div', { class: 'now-t' }, h('div', { class: 'now-title', text: cur ? cur.title : '還沒有播放音樂' }), h('div', { class: 'hint', text: src })));
     this.el.mProg = h('input', { type: 'range', id: 'm-prog', min: '0', max: '1000', value: '0', 'aria-label': '播放進度', oninput: e => Music.seek(e.target.value / 1000) });
@@ -492,12 +515,39 @@ const UI = {
       h('button', { class: 'del', 'aria-label': '從清單移除', onclick: () => Music.remove(e.id) }, ico('i_trash', 18)))));
     const ytNote = window.NOOK_ENV === 'artifact' ? h('p', { class: 'hint', text: '這個頁面不能嵌入 YouTube，播放時會提供連結到 YouTube 開啟；GitHub 版可以直接在小視窗播放。' }) : null;
     this.tickMusic();
-    return [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, vol,
+    const tab = this.mTab || (Lib.enabled() && !M.list.length ? 'lib' : 'list');
+    const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (tab === 'lib' ? ' on' : ''), onclick: () => { this.mTab = 'lib'; this.refresh('music'); } }, ico('i_music', 18), '內建音樂'),
+      h('button', { class: 'tab' + (tab === 'list' ? ' on' : ''), onclick: () => { this.mTab = 'list'; this.refresh('music'); } }, ico('i_folder', 18), `我的清單（${M.list.length}）`));
+    const head = [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, vol, tabs];
+    const auto = h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); } }, Game.S.settings.autoMusic ? '開始專注時自動播放：開' : '開始專注時自動播放：關'));
+    if (tab === 'lib') return [...head, ...this.musicLib(), auto];
+    return [...head,
       h('div', { class: 'row wrap' }, h('label', { class: 'chip', for: 'm-file' }, ico('i_folder', 20), '加入本機音樂'), file, h('span', { class: 'hint', text: 'MP3、FLAC、M4A、OGG、WAV，也可以直接拖進來' })),
       h('div', { class: 'row' }, h('div', { class: 'inset grow' }, yt), h('button', { class: 'chip', 'aria-label': '加入 YouTube', onclick: () => { if (Music.addYT(yt.value)) yt.value = ''; } }, ico('i_video', 20), '加入')), ytNote,
-      h('div', { class: 'sub', text: `播放清單（${M.list.length}）` }),
-      M.list.length ? h('div', { class: 'scroll' }, list) : h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '清單是空的。加入你自己的 lo-fi 音樂，專注時一起聽。' })),
-      h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); } }, Game.S.settings.autoMusic ? '開始專注時自動播放：開' : '開始專注時自動播放：關'))];
+      M.list.length ? h('div', { class: 'scroll' }, list) : h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '清單是空的。加入你自己的 lo-fi 音樂，專注時一起聽。' })), auto];
+  },
+  musicLib() {
+    const M = Game.S.music;
+    if (!Lib.enabled()) return [h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '內建音樂要從網站版（GitHub Pages）播放：這個預覽頁面不能連到 Google 雲端硬碟。你仍然可以在「我的清單」加入本機音樂檔。' }))];
+    if (Lib.status === 'loading' || Lib.status === 'idle') return [h('p', { class: 'hint center', text: Lib.driveOn() ? '正在讀取雲端資料夾裡的歌曲…' : '正在讀取內建音樂…' })];
+    const al = this.mAlbum != null ? this.mAlbum : (M.ctx === 'lib' ? M.libAlbum : '');
+    const Q = Lib.queue(al), playingHere = M.ctx === 'lib' && (M.libAlbum || '') === al;
+    const out = [];
+    if (Lib.err) out.push(h('p', { class: 'hint warn', text: '雲端資料夾讀取失敗：' + Lib.err }));
+    if (!Lib.tracks.length) {
+      out.push(h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: Lib.driveOn() ? '資料夾裡沒有找到音樂檔（MP3、FLAC、M4A、OGG、WAV）。' : '還沒有設定內建音樂。網站管理者可以在 js/config.js 填入 Google 雲端硬碟資料夾與 API 金鑰，或把音樂放進 music/ 資料夾（說明見 README）。' })));
+      if (Lib.driveOn()) out.push(h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => Music.loadLib(true) }, ico('i_reset', 16), '重新讀取')));
+      return out;
+    }
+    out.push(h('div', { class: 'tabs wrap mlib-al' }, h('button', { class: 'tab sm' + (!al ? ' on' : ''), onclick: () => { this.mAlbum = ''; this.refresh('music'); } }, `全部 ${Lib.tracks.length}`),
+      ...Lib.albums.map(a => h('button', { class: 'tab sm' + (al === a.n ? ' on' : ''), title: a.n, onclick: () => { this.mAlbum = a.n; this.refresh('music'); } }, `${a.n} ${a.c}`))));
+    out.push(h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => Music.playLib(M.shuffle ? Math.floor(Math.random() * Q.length) : 0, al) }, ico('i_play', 16), al ? '播放這個資料夾' : '全部播放'),
+      h('span', { class: 'hint grow', text: Lib.driveOn() ? `來自雲端資料夾「${Lib.root || '…'}」` : '網站內建' }),
+      Lib.driveOn() ? h('button', { class: 'chip sm', 'aria-label': '重新讀取資料夾', title: '重新讀取資料夾', onclick: () => Music.loadLib(true) }, ico('i_reset', 16)) : null));
+    const curI = playingHere ? M.lidx : -1;
+    out.push(h('div', { class: 'scroll' }, h('ol', { class: 'mlist' }, ...Q.map((e, i) => h('li', { class: (i === curI ? 'cur ' : '') + (e.missing ? 'missing' : '') },
+      h('button', { class: 'mplay', onclick: () => Music.playLib(i, al), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }), al ? null : h('em', { class: 'mb', text: e.album.split(' / ').pop() })))))));
+    return out;
   },
   tickMusic() {
     const p = this.el.mProg; if (!p) return; const [t, d] = Music.progress();

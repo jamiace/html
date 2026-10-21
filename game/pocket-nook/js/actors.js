@@ -129,7 +129,7 @@ class Avatar extends Walker {
     const cfg = this.cfg, t = Room.t;
     if (this.state === 'sleep' && this.bed && Room.uidMap[this.bed.uid]) {
       const bed = this.bed, bc = Room.itemCanvas(bed), b = ITEMS[bed.k].bed, px = bed.flip ? bc.width - b.x : b.x;
-      const head = sleepHeadCanvas(cfg); c.drawImage(head, Math.round(bed.x + px - 10), bed.y + b.y - 8 + (Math.sin(t * 1.5) > 0.6 ? 1 : 0));
+      const head = sleepHeadCanvas(cfg); c.drawImage(head, Math.round(bed.x + px - 10), bed.y + b.y - 8 - AVA_TOP + (Math.sin(t * 1.5) > 0.6 ? 1 : 0));
       const by = b.blanketY || 18; c.drawImage(bc, 0, by, bc.width, bc.height - by, bed.x, bed.y + by, bc.width, bc.height - by);
       return;
     }
@@ -137,11 +137,11 @@ class Avatar extends Walker {
       const [sx, sy] = this.seatPos(), it = this.seat, d = ITEMS[it.k];
       if (d.chair) {
         const fr = Math.floor(t * 4) % 2 ? 'type1' : 'type0';
-        c.drawImage(avatarCanvas(fr, cfg, null, Math.floor(t * 1.2) % 2), Math.round(sx - 10), Math.round(sy));
+        c.drawImage(avatarCanvas(fr, cfg, null, Math.floor(t * 1.2) % 2), Math.round(sx - 10), Math.round(sy) - AVA_TOP);
         c.drawImage(Room.itemCanvas(it), it.x, it.y);
         if (Math.random() < 0.01) Room.puff('p_note', sx + 6, sy + 2, { vx: 4, vy: -7, max: 1.6, alpha: 0.7 });
       } else {
-        c.drawImage(avatarCanvas('sit0', cfg, this.eyeState(), Math.floor(t * 1.1) % 2), Math.round(sx - 10), Math.round(sy));
+        c.drawImage(avatarCanvas('sit0', cfg, this.eyeState(), Math.floor(t * 1.1) % 2), Math.round(sx - 10), Math.round(sy) - AVA_TOP);
       }
       return;
     }
@@ -310,7 +310,7 @@ class Visitor extends Avatar {
   applyPresence(p) {
     p = p || {}; const a = p.ava || {};
     const pick = (v, list, d) => (typeof v === 'string' && (Array.isArray(list) ? list.includes(v) : v in list)) ? v : d;
-    this.pcfg = { hair: pick(a.hair, AVATAR_OPTS.hair, 'short'), hairColor: pick(a.hairColor, AVATAR_OPTS.hairColor, 'cocoa'), skin: pick(a.skin, AVATAR_OPTS.skin, 'peach'), shirt: pick(a.shirt, AVATAR_OPTS.shirt, 'denim'), pants: pick(a.pants, AVATAR_OPTS.pants, 'navy') };
+    this.pcfg = sanitizeAvatar(a);
     this.nick = typeof p.nick === 'string' ? p.nick.slice(0, 16) : '';
     this.st = p.st === 'focus' || p.st === 'break' ? p.st : 'idle'; this.end = typeof p.end === 'number' ? p.end : 0;
     if (p.say && typeof p.say.t === 'string' && typeof p.say.ts === 'number' && p.say.ts !== this.lastSay) { this.lastSay = p.say.ts; if (Date.now() - p.say.ts < 15000) Game.bubble(this, p.say.t.slice(0, 60), 4); }
@@ -319,4 +319,3 @@ class Visitor extends Avatar {
   update(dt) { this.step(dt); if (this.hop > 0) this.hop -= dt; if (this.happy > 0) this.happy -= dt; this.blink -= dt; if (this.blink < -0.13) this.blink = 2.5 + Math.random() * 3; if (!this.walking) { this.timer -= dt; if (this.timer <= 0) this.think(); } }
   poke() { this.hop = 0.45; this.happy = 1.4; Room.puff('p_heart', this.x - 2, this.y - 34, { vy: -10 }); }
 }
-function defaultAvatar() { return { hair: 'short', hairColor: 'cocoa', skin: 'peach', shirt: 'denim', pants: 'navy' }; }

@@ -17,9 +17,9 @@ const Game = {
       v: 1, coins: 150, xp: 0, lvl: 1, nextUid: 1,
       items: [], inv: { rug_runner: 1, cushion: 1, books_stack: 1, calendar: 1 },
       ownWP: ['cream_stripe'], ownFL: ['wood_honey'], wp: 'cream_stripe', fl: 'wood_honey', view: 'city', ownViews: ['city'], themes: ['cozy'],
-      music: { list: [], idx: -1, vol: 0.7, shuffle: false, repeat: 'all' },
+      music: { list: [], idx: -1, vol: 0.7, shuffle: false, repeat: 'all', ctx: 'list', lidx: -1, libAlbum: '' },
       pets: ['cat:ginger'], pet: 'cat:ginger', petName: '麻糬',
-      avatar: { hair: 'bun', hairColor: 'cocoa', skin: 'peach', shirt: 'rose', pants: 'navy', name: '' },
+      avatar: Object.assign(defaultAvatar(), { hairFront: 'short', hairBack: 'bun', topColor: 'rose', bottomColor: 'navy' }), closet: {}, outfits: [],
       todos: [{ id: 1, t: '把今天最重要的一件事寫在這裡', done: false, ex: true }, { id: 2, t: '喝一杯水', done: true, ex: true }],
       memos: [{ id: 1, text: '歡迎來到小窩！\n點點看家具和小貓，按番茄鐘開始專注，就能賺金幣買新家具。', color: 'butter', pin: false, x: 40, y: 120 }],
       timer: { focus: 25, short: 5, long: 15, mode: 'focus', running: false, endsAt: 0, remain: 25 * 60, round: 0, credited: 0 },
@@ -95,7 +95,7 @@ const Game = {
     for (const k in base) if (!(k in S)) S[k] = base[k];
     for (const k in base.timer) if (!(k in S.timer)) S.timer[k] = base.timer[k];
     for (const k in base.settings) if (!(k in S.settings)) S.settings[k] = base.settings[k];
-    for (const k in base.avatar) if (!(k in S.avatar)) S.avatar[k] = base.avatar[k];
+    S.avatar = migrateAvatar(S.avatar);
     for (const k in base.learn) if (!(k in S.learn)) S.learn[k] = base.learn[k];
     if (!S.flags) S.flags = {};
     if (!this.outdated) {
@@ -166,7 +166,7 @@ const Game = {
     const t = this.T(); if (t.running) return; if (t.remain <= 0) t.remain = this.modeLen(t.mode); t.endsAt = Date.now() + t.remain * 1000; t.running = true;
     const task = t.mode === 'focus' && this.S.todos.find(x => String(x.id) === String(this.S.focusTask) && !x.done);
     if (task && this.avatar) this.bubble(this.avatar, '專心做：' + task.t.slice(0, 18), 3);
-    if (t.mode === 'focus' && this.S.settings.autoMusic && !Music.playing && this.S.music.list.length) Music.toggle(true);
+    if (t.mode === 'focus' && this.S.settings.autoMusic && !Music.playing && (this.S.music.list.length || Lib.tracks.length)) Music.toggle(true);
     this.afterTimer();
   },
   pause() { const t = this.T(); if (!t.running) return; t.remain = Math.max(0, Math.round((t.endsAt - Date.now()) / 1000)); t.running = false; this.afterTimer(); },
@@ -255,6 +255,7 @@ const Game = {
     const d = ITEMS[it.k], A = this.avatar; const cv = Room.itemCanvas(it); const cx = it.x + cv.width / 2;
     it.shake = 0.25;
     const nd = Life.needOf('item', it.uid); if (nd && NEED_DEFS[nd.type].item) { UI.needCard(nd.id); return; }
+    if (d.act && Fun[d.act]) return Fun[d.act](it, d, cx);
     if (d.bowl) { UI.openWin('pet'); return; }
     if (d.toggle) { it.on = !it.on; Room.puff('p_spark', cx - 1, it.y - 2, { vy: -6, max: 0.7 }); this.save(); return; }
     if (d.window) { it.closed = !it.closed; this.save(); return; }
@@ -262,6 +263,8 @@ const Game = {
     if (d.seat) { if (this.focusing()) return this.bubbleAt(cx, it.y, '等休息時間再來坐'); A.stand(); const [w, h] = itemSize(it); const sx = it.flip ? w - d.seat.x : d.seat.x; A.state = 'walk'; A.walkTo(it.x + sx, it.y + h + 3, () => { if (!Room.uidMap[it.uid]) { A.state = 'idle'; return; } A.state = 'sit'; A.seat = it; A.timer = 12; }); return; }
     if (d.desk || d.chair) { UI.openWin('timer'); return; }
     const r = d.react;
+    if (r === 'water') return Fun.water(it, d, cx);
+    if (r === 'word') return Fun.word(it, d, cx);
     if (r === 'rustle') { for (let i = 0; i < 3; i++) Room.puff('p_leaf', cx + (Math.random() - 0.5) * cv.width * 0.6, it.y + 4, { vx: (Math.random() - 0.5) * 14, vy: -6, grav: 14, wob: 8, max: 1.4 }); return; }
     if (r === 'notes') { for (let i = 0; i < 3; i++) Room.puff('p_note', cx - 2 + i * 3, it.y - 2, { vx: (i - 1) * 6, vy: -10 - i * 2, wob: 10, max: 1.8 }); return; }
     if (r === 'bubbles') { for (let i = 0; i < 4; i++) Room.puff('p_bubble', cx - 3 + Math.random() * 6, it.y + 3, { vx: 0, vy: -6 - Math.random() * 4, wob: 6, max: 1.2 }); return; }
@@ -323,7 +326,7 @@ const Cowork = {
   presenceObj() {
     const S = Game.S, t = S.timer, a = S.avatar;
     const st = t.running ? (t.mode === 'focus' ? 'focus' : 'break') : 'idle';
-    const o = { nick: (a.name || '').slice(0, 16), ava: { hair: a.hair, hairColor: a.hairColor, skin: a.skin, shirt: a.shirt, pants: a.pants }, st, end: t.running ? t.endsAt : 0, lvl: S.lvl, pet: S.pet };
+    const o = { nick: (a.name || '').slice(0, 16), ava: sanitizeAvatar(a), st, end: t.running ? t.endsAt : 0, lvl: S.lvl, pet: S.pet };
     if (S.say && Date.now() - S.say.ts < 20000) o.say = S.say; else o.say = null;
     return o;
   },
