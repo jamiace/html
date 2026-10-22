@@ -119,7 +119,7 @@ const ActorVisibility = {
   },
   // moving, jumping, showing a trick, eating (a few seconds) and the focus session at the desk are left alone
   protected(a) {
-    return a.walking || a.jump || ['work', 'goingWork', 'deskstand', 'eat', 'trick', 'zoom', 'show', 'jump'].includes(a.state);
+    return a.walking || a.jump || ['work', 'goingWork', 'deskstand', 'eat', 'trick', 'zoom', 'show', 'jump', 'hand', 'inbox'].includes(a.state);
   },
   // hidden behind furniture for a few seconds (also on a sofa, a cat tree or in bed): get up, walk out in front, carry on there
   tick(a, dt) {

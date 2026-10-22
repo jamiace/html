@@ -623,7 +623,7 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 .win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
 .win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
 /* music library: albums and songs scroll on their own; the song list always fits at least 5 songs */
-.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 480px; max-height: 480px; min-height: 70px; }
+.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 486px; max-height: 486px; min-height: 70px; }
 .win[data-id=music] .win-b > .scroll.mlib-al-scroll { flex: 0 0 auto; max-height: 76px; min-height: 0; }
 .win[data-id=music] .win-b > .scroll.mtracks { flex: 1 1 auto; min-height: calc(5 * 36px); max-height: none; }
 .win[data-id=music] .win-b > :not(.scroll) { flex-shrink: 0; }
@@ -709,3 +709,25 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 .msay p { margin: 2px 0 0; }
 .msay .mname { font-size: 15px; gap: 6px; flex-wrap: wrap; }
 @media (max-width: 520px) { .msay { position: static; max-width: none; margin: 6px 0 0; } }
+
+/* ---------- hand tray: pick something up and use it on a pet in the room ---------- */
+.handtray { position: absolute; left: 6px; bottom: 6px; z-index: 6; display: flex; align-items: flex-end; gap: 6px; pointer-events: none; max-width: calc(100% - 12px); }
+.handtray > * { pointer-events: auto; }
+.handtray-t { opacity: .88; }
+.handtray-t.on, .handtray-t:hover { opacity: 1; }
+.handtray-row { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--paper); box-shadow: 0 0 0 3px #2e2230, 0 5px 0 rgba(46, 34, 48, .2); animation: pop .18s steps(3) both; }
+.handbtn { position: relative; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; box-shadow: inset 0 0 0 2px transparent; }
+.handbtn:hover { background: rgba(46, 34, 48, .08); }
+.handbtn.on { background: #fde7b0; box-shadow: inset 0 0 0 2px #2e2230; }
+.handbtn.none { opacity: .38; filter: grayscale(.8); }
+.handbtn em { position: absolute; right: 0; bottom: -1px; font-style: normal; font-size: 11px; line-height: 1; padding: 1px 2px; background: #2e2230; color: #fff7ea; }
+.hand-cur { position: absolute; left: 0; top: 0; z-index: 7; pointer-events: none; filter: drop-shadow(0 2px 0 rgba(46, 34, 48, .35)); }
+.hand-hint { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); z-index: 6; pointer-events: auto; display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; background: var(--paper); color: var(--ink); font-size: 13px; white-space: nowrap; max-width: calc(100% - 12px); box-shadow: 0 0 0 3px #2e2230, 0 5px 0 rgba(46, 34, 48, .2); }
+.hand-hint span { overflow: hidden; text-overflow: ellipsis; }
+body.mini .handtray, body.editing .handtray { display: none; }
+/* on a phone the room is small: the tray sits under the room and the hint above it, so neither covers the pets */
+@media (max-width: 759px) {
+  .handtray { top: calc(100% + 12px); bottom: auto; left: 0; max-width: 100%; }
+  .hand-hint { top: auto; bottom: calc(100% + 8px); font-size: 12px; }
+  .handbtn { width: 30px; height: 30px; }
+}

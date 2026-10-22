@@ -68,7 +68,7 @@ const ACC_ANCHOR = {
   },
 };
 function applyPetAcc(g, kind, pose, acc) {
-  const ap = pose === 'look' || pose === 'groom' ? 'sit' : pose === 'lie' ? 'sleep' : pose;
+  const ap = ['look', 'groom', 'knead', 'beg', 'shake'].includes(pose) ? 'sit' : pose === 'lie' ? 'sleep' : pose;
   const A = ACC_ANCHOR[kind] && ACC_ANCHOR[kind][ap]; if (!A || !acc) return g;
   g = g.clone();
   const inside = (x, y) => { const c = g.get(x, y); return c && c !== '.' && c !== '0'; };
@@ -270,7 +270,8 @@ const Pets = {
     p.known[what] = true; const nm = what === 'food' ? SUPPLIES[id].n : (PET_TOOLS[id] || SUPPLIES[id]).n;
     UI.toast(`發現了！${p.name}最喜歡的${what === 'food' ? '食物' : '玩具'}是${nm}`, 'i_heart', 4); return nm;
   },
-  feed(pid, food, need) {
+  // opts.quiet: the caller animates the pet itself (feeding by hand)
+  feed(pid, food, need, opts) {
     const p = this.get(pid), f = PET_FOODS[food]; if (!p || !f) return false;
     if (!Life.has(food)) { UI.toast(`沒有${SUPPLIES[food].n}了，可以學習換取或到商店買`, SUPPLIES[food].spr, 3.5); return false; }
     if (p.hunger >= 96 && food !== 'cat_treat') { this.say(p, this.voice(p, '喵…吃不下了', '汪…好飽')); UI.toast(`${p.name}現在不餓`, SUPPLIES[food].spr); return false; }
@@ -280,12 +281,12 @@ const Pets = {
     Life.L.bag[food]--; if (!Life.L.bag[food]) delete Life.L.bag[food];
     p.st.fed++; Life.L.stats.fed++;
     const a = this.actor(p);
-    if (a) { if (food === 'cat_treat' || food === 'fish_snack') { a.happy = 2; this.puff(p, 'p_heart', 1); this.say(p, fav > 1 ? this.voice(p, '最愛這個了！', '汪汪！最愛！') : this.voice(p, '好好吃！', '汪！好吃！')); } else a.eat(); }
+    if (a && !(opts && opts.quiet)) { if (food === 'cat_treat' || food === 'fish_snack') { a.happy = 2; this.puff(p, 'p_heart', 1); this.say(p, fav > 1 ? this.voice(p, '最愛這個了！', '汪汪！最愛！') : this.voice(p, '好好吃！', '汪！好吃！')); } else a.eat(); }
     if (need && need.pet === pid && ['cat_treat'].includes(need.type) && food === 'cat_treat') Life.complete(need);
     Life.track('feed', 1); this.checkNeeds(p); UI.refresh('pet'); UI.refresh('storage'); UI.refresh('need'); UI.badges(); Game.save();
     return true;
   },
-  play(pid, toy, need) {
+  play(pid, toy, need, opts) {
     const p = this.get(pid); if (!p) return false; const w = this.why(p, 'play'); if (w) { UI.toast(w, 'i_paw', 3); return false; }
     let mood, energy;
     if (toy === 'catnip') { if (!Life.has('catnip')) { UI.toast('沒有貓薄荷了', 'it_catnip'); return false; } Life.L.bag.catnip--; if (!Life.L.bag.catnip) delete Life.L.bag.catnip; mood = 30; energy = 25; }
@@ -293,7 +294,7 @@ const Pets = {
     const fav = p.fav.toy === toy ? 1.5 : 1, lively = p.trait === 'playful';
     this.mood(p, Math.round(mood * fav * (lively ? 1.25 : 1))); p.energy = clamp100(p.energy - Math.round(energy * (lively ? 0.75 : 1)));
     this.addXp(p, 6); this.addBond(p, 3 + (fav > 1 ? 2 : 0)); this.reveal(p, 'toy', toy); p.st.play++;
-    const a = this.actor(p); if (a) a.zoom(toy === 'catnip' ? 6 : 3, toy);
+    const a = this.actor(p); if (a && !(opts && opts.quiet)) a.zoom(toy === 'catnip' ? 6 : 3, toy);
     if (need && need.pet === pid && need.type === 'cat_play') Life.complete(need);
     this.after(p, 'play'); return true;
   },
@@ -477,21 +478,23 @@ Object.assign(UI, {
             h('div', { class: 'grow' }, h('div', { text: who }), h('div', { class: 'hint', text: `碗裡：${lvlTxt(cur)}，最多 ${BOWL_MAX} 份。肚子餓了會自己去吃，一次吃一點。` })),
             mine ? h('button', { class: 'chip sm', onclick: () => Pets.assignBowl(cur.uid, null) }, '改成共用') : h('button', { class: 'chip sm primary', onclick: () => Pets.assignBowl(cur.uid, p.id) }, `指定給${p.name}`)));
         }
-        if (cur) body.push(h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).filter(f => f !== 'cat_treat').map(f => sbtn(SUPPLIES[f].spr, '放' + SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.fillBowl(cur.uid, f), { title: `把一份${SUPPLIES[f].n}放進碗裡：${SUPPLIES[f].desc}`, disabled: !(bag[f] > 0) || (cur.bq || []).length >= BOWL_MAX }))));
+        if (cur) body.push(h('p', { class: 'hint', text: '拿起下面的食物，到房間裡點這個碗就能放進去。' }));
       }
-      body.push(h('div', { class: 'sub', text: '直接餵' }), h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).map(f => sbtn(SUPPLIES[f].spr, SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.feed(p.id, f), { title: SUPPLIES[f].desc, fav: p.known.food && p.fav.food === f }))));
+      // everything here is picked up and used on the pet in the room
+      const take = (id) => () => { if (PetPlay.pick(id, p.id)) this.closeWin('pet'); };
+      body.push(h('div', { class: 'sub', text: '食物（拿起來，到房間裡餵牠或放進碗裡）' }), h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).map(f => sbtn(SUPPLIES[f].spr, '拿起' + SUPPLIES[f].n, '×' + (bag[f] || 0), take(f), { title: SUPPLIES[f].desc, fav: p.known.food && p.fav.food === f, disabled: !(bag[f] > 0) }))));
       body.push(h('div', { class: 'sub', text: '玩耍' }), h('div', { class: 'swap' }, ...PET_TOYS.map(t => {
-        if (t === 'catnip') return sbtn('it_catnip', '貓薄荷', '×' + (bag.catnip || 0), () => Pets.play(p.id, 'catnip'), { title: SUPPLIES.catnip.desc, fav: p.known.toy && p.fav.toy === t });
+        if (t === 'catnip') return sbtn('it_catnip', '拿起貓薄荷', '×' + (bag.catnip || 0), take('catnip'), { title: SUPPLIES.catnip.desc, fav: p.known.toy && p.fav.toy === t, disabled: !(bag.catnip > 0) });
         const T = PET_TOOLS[t], own = Z.tools[t];
-        return sbtn(T.spr, T.n, own ? '' : T.price + '金', () => own ? Pets.play(p.id, t) : Pets.buyTool(t), { title: own ? T.desc : `買${T.n}（${T.price} 金幣）：${T.desc}`, fav: p.known.toy && p.fav.toy === t });
+        return sbtn(T.spr, own ? '拿起' + T.n : T.n, own ? '' : T.price + '金', () => own ? take(t)() : Pets.buyTool(t), { title: own ? T.desc : `買${T.n}（${T.price} 金幣）：${T.desc}`, fav: p.known.toy && p.fav.toy === t });
       })));
       const brushWait = Math.max(0, Math.ceil((p.brushAt + 20 * 60000 - Date.now()) / 60000));
       body.push(h('div', { class: 'sub', text: '清潔與休息' }), h('div', { class: 'swap' },
-        Z.tools.brush ? sbtn('t_brush', brushWait ? `梳毛（${brushWait} 分）` : '梳毛', '', () => Pets.brush(p.id), { title: PET_TOOLS.brush.desc }) : sbtn('t_brush', '買梳子', '80金', () => Pets.buyTool('brush'), { title: PET_TOOLS.brush.desc }),
-        sbtn('it_shampoo', '洗澡', '×' + (bag.shampoo || 0), () => Pets.bath(p.id), { title: SUPPLIES.shampoo.desc }),
-        sbtn('it_medicine', '吃藥', '×' + (bag.medicine || 0), () => Pets.medicine(p.id), { title: SUPPLIES.medicine.desc, disabled: !p.sick }),
+        Z.tools.brush ? sbtn('t_brush', brushWait ? `拿起梳子（${brushWait} 分後能梳）` : '拿起梳子', '', take('brush'), { title: PET_TOOLS.brush.desc + '在牠身上來回刷幾下。', disabled: brushWait > 0 }) : sbtn('t_brush', '買梳子', '80金', () => Pets.buyTool('brush'), { title: PET_TOOLS.brush.desc }),
+        sbtn('it_shampoo', '拿起洗毛精', '×' + (bag.shampoo || 0), take('shampoo'), { title: SUPPLIES.shampoo.desc, disabled: !(bag.shampoo > 0) }),
+        sbtn('it_medicine', '拿起寵物藥', '×' + (bag.medicine || 0), take('medicine'), { title: SUPPLIES.medicine.desc, disabled: !p.sick || !(bag.medicine > 0) }),
         sbtn('i_moon', '去睡覺', null, () => Pets.sleep(p.id), { title: '讓牠找個地方睡覺，精力恢復得比較快' })));
-      body.push(h('p', { class: 'hint', text: `${TRAITS[p.trait].n}：${TRAITS[p.trait].d} 在房間裡點牠可以摸摸。缺道具時，到「學習」複習單字就能換。` }));
+      body.push(h('p', { class: 'hint', text: `${TRAITS[p.trait].n}：${TRAITS[p.trait].d} 拿起東西後回到房間，對著牠用；按右鍵、Esc 或「放下」可以放下。房間左下角的「手邊」也拿得到這些東西。缺道具時，到「學習」複習單字就能換。` }));
     } else if (this.petTab === 'train') {
       body.push(h('p', { class: 'hint', text: '訓練一次要答 4 題單字小測驗，答對 3 題以上算成功。每次訓練消耗 25 精力，心情要 35 以上。學會的把戲每天第一次表演可以拿金幣。' }));
       for (const t of TRICKS) {
@@ -511,7 +514,7 @@ Object.assign(UI, {
       body.push(h('p', { class: 'hint', text: '配件買一次，所有寵物都可以戴。' }));
     } else {
       const days = Math.max(1, Math.floor((Date.now() - p.at) / 86400000) + 1);
-      body.push(h('dl', { class: 'stats' }, h('dt', { text: '一起生活' }), h('dd', { class: 'num', text: `${days} 天` }), h('dt', { text: '餵食' }), h('dd', { class: 'num', text: `${p.st.fed} 次` }), h('dt', { text: '玩耍' }), h('dd', { class: 'num', text: `${p.st.play} 次` }), h('dt', { text: '梳毛洗澡' }), h('dd', { class: 'num', text: `${p.st.groom} 次` }), h('dt', { text: '訓練' }), h('dd', { class: 'num', text: `${p.st.train} 次` }), h('dt', { text: '摸摸' }), h('dd', { class: 'num', text: `${p.st.pet} 次` }), h('dt', { text: '學會把戲' }), h('dd', { class: 'num', text: `${TRICKS.filter(t => Pets.knows(p, t.id)).length}/${TRICKS.length}` })));
+      body.push(h('dl', { class: 'stats' }, h('dt', { text: '一起生活' }), h('dd', { class: 'num', text: `${days} 天` }), h('dt', { text: '餵食' }), h('dd', { class: 'num', text: `${p.st.fed} 次` }), h('dt', { text: '玩耍' }), h('dd', { class: 'num', text: `${p.st.play} 次` }), h('dt', { text: '梳毛洗澡' }), h('dd', { class: 'num', text: `${p.st.groom} 次` }), h('dt', { text: '訓練' }), h('dd', { class: 'num', text: `${p.st.train} 次` }), h('dt', { text: '摸摸' }), h('dd', { class: 'num', text: `${p.st.pet} 次` }), h('dt', { text: '學會把戲' }), h('dd', { class: 'num', text: `${TRICKS.filter(t => Pets.knows(p, t.id)).length}/${TRICKS.length}` }), h('dt', { text: '最愛的地方' }), h('dd', { text: (() => { const k = PetPlay.favSpot(p); return k ? ITEMS[k].n : '還在找'; })() })));
       body.push(h('div', { class: 'row wrap' },
         h('button', { class: 'chip', onclick: () => Pets.setHome(p.id, !p.home) }, ico(p.home ? 'i_box' : 'i_heart', 18), p.home ? '送去寵物旅館' : '帶回房間'),
         Z.pets.length > 1 ? h('button', { class: 'chip', onclick: () => { if (confirm(`確定要讓${p.name}去新家嗎？這個動作不能復原。`)) Pets.release(p.id); } }, '送養') : null));

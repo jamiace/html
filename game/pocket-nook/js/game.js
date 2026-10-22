@@ -360,6 +360,8 @@ function setupInput(cv) {
       else Room.sel = null;
       UI.editToolbar(); e.preventDefault(); return;
     }
+    // holding food, a brush or a toy: the click is used on the pet / the floor
+    if (PetPlay.held) { PetPlay.down(x, y); if (PetPlay.brushing) cv.setPointerCapture(e.pointerId); down = null; e.preventDefault(); return; }
     down = { x, y, t: performance.now() };
   });
   cv.addEventListener('pointermove', e => {
@@ -374,10 +376,12 @@ function setupInput(cv) {
       return;
     }
     if (Room.edit) { const h = Room.hit(x, y, { itemsOnly: true }); Room.hover = h ? h.it : null; cv.style.cursor = h ? 'grab' : 'default'; return; }
+    if (PetPlay.held) { PetPlay.move(x, y); UI.hoverIt = null; return; }
     const h = Life.hitBubble(x, y) || Room.hit(x, y); cv.style.cursor = h ? 'pointer' : 'default';
     UI.hoverIt = h && h.kind === 'item' ? h.it : null;
   });
   const end = (e) => {
+    if (PetPlay.held || PetPlay.brushing) { PetPlay.up(); down = null; return; }
     if (Room.edit && Room.drag) {
       const d = Room.drag; if (d.moved) { const it = d.it; if (ITEMS[it.k].layer === 'decor') Room.settleDecor(it); else Room.clampItem(it); Room.indexItems(); Life.track('move', 1); Game.save(); }
       Room.drag = null; UI.editToolbar(); return;
@@ -393,7 +397,9 @@ function setupInput(cv) {
     } else if (h.kind === 'gift') Game.openGift(h.g); else Game.interact(h.it);
   };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', () => { Room.drag = null; down = null; });
-  cv.addEventListener('pointerleave', () => { Room.hover = null; UI.hoverIt = null; });
+  cv.addEventListener('pointerleave', () => { Room.hover = null; UI.hoverIt = null; PetPlay.leave(); });
+  // right click puts down what you are holding
+  cv.addEventListener('contextmenu', e => { if (PetPlay.held) { e.preventDefault(); PetPlay.drop(); } });
 }
 
 // ---------- boot ----------
@@ -407,7 +413,7 @@ function boot(data) {
   UI.init();
   Music.init();
   Dev.init(); Life.ensureDaily(); Learn.ensureDaily(); UI.badges();
-  setupInput(document.getElementById('room'));
+  setupInput(document.getElementById('room')); PetPlay.renderTray();
   requestAnimationFrame(t => Game.frame(t));
   setInterval(() => { if (document.hidden) { Game.tickTimer(); UI.hud(); } }, 1000);
   Cloud.init(); Cowork.init();

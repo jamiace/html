@@ -181,6 +181,7 @@ const UI = {
   // ---------------- edit mode ----------------
   setEdit(on) {
     Room.edit = on; Room.sel = null; Room.drag = null; Room.hover = null;
+    if (typeof PetPlay !== 'undefined') { if (on && PetPlay.held) PetPlay.drop(); PetPlay.renderTray(); }
     document.getElementById('editbar').hidden = !on; document.body.classList.toggle('editing', on);
     this.editToolbar(); this.syncDock();
   },
@@ -594,7 +595,7 @@ const UI = {
     const out = [];
     if (Lib.err) out.push(h('p', { class: 'hint warn', text: '雲端資料夾讀取失敗：' + Lib.err }));
     if (!Lib.tracks.length) {
-      out.push(h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: Lib.driveOn() ? '資料夾裡沒有找到音樂檔（MP3、FLAC、M4A、OGG、WAV）。' : '還沒有設定內建音樂。網站管理者可以在 js/config.js 填入 Google 雲端硬碟資料夾與 API 金鑰，或把音樂放進 music/ 資料夾（說明見 README）。' })));
+      out.push(h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: Lib.driveOn() ? '資料夾裡沒有找到音樂檔（MP3、FLAC、M4A、OGG、WAV）。' : '還沒有內建音樂。網站管理者把音樂檔放進 music/ 資料夾（子資料夾就是分類），執行 node tools/make-playlist.mjs 產生清單後推上 GitHub 就會出現（說明見 music/README.md）。' })));
       if (Lib.driveOn()) out.push(h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => Music.loadLib(true) }, ico('i_reset', 16), '重新讀取')));
       return out;
     }

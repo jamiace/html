@@ -252,6 +252,8 @@ class Pet extends Walker {
       const b = this.bowl(); if (b) { const [w, h] = itemSize(b); return go(() => { this.state = 'walk'; this.walkTo(b.x + w / 2 + 12, b.y + h - 1, () => { this.state = 'sit'; this.flip = true; this.timer = 4 + Math.random() * 3; Game.bubble(this, this.kind === 'dog' ? '汪…餓餓' : '喵…肚子餓', 2); }); }); }
     }
     if (d && (d.energy < 22 || (d.trait === 'sleepy' && r < 0.25) || d.sick) && Math.random() < 0.8) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, 'sleep', 30 + Math.random() * 30)); } return go(() => this.floorNap(30 + Math.random() * 30)); }
+    // furniture used in its own way: boxes, soft spots, posts, rugs, plants; dogs at your feet while you focus
+    if (PetPlay.think(this, go)) return;
     if (A && A.state === 'work' && r < 0.45) {
       const sp = this.freeSpots(); const near = sp.sort((a, b) => Math.abs(a.x - A.x) - Math.abs(b.x - A.x))[0];
       if (near) return go(() => this.goSpot(near, 'sleep'));
@@ -279,12 +281,16 @@ class Pet extends Walker {
         this.state = 'sit'; this.timer = 1; return;
       }
       if (this.others().some(a => a.on === s.it)) { if (mode === 'sleep') { const sp = this.freeSpots(); if (sp.length) return this.goSpot(sp[Math.floor(Math.random() * sp.length)], mode, secs); return this.floorNap(secs); } this.state = 'sit'; this.timer = 1.5; return; }
-      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4); if (mode === 'sleep') PetAI.sleepSpin(this); };
+      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4);
+        // on something soft it kneads it a little before curling up
+        if (mode === 'sleep' && PetPlay.isSoft(s.it) && Math.random() < 0.7) { const t = this.timer; PetAI.act(this, 'knead', 1.8 + Math.random(), () => { if (this.on === s.it) { this.state = 'sleep'; this.timer = t; PetAI.sleepSpin(this); } }); return; }
+        if (mode === 'sleep') PetAI.sleepSpin(this); };
       if (s.high) this.startJump(s.x, s.y + 1, done); else { this.y = s.y + 2; done(); }
     }, true);
   }
   poke() {
     if (this.state === 'eat' || this.state === 'zoom' || this.state === 'trick') return;
+    if (this.state === 'hand') { if (typeof Pets !== 'undefined') Pets.pet(this.pid); this.happy = 1.5; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); return; }
     if (typeof Pets !== 'undefined') Pets.pet(this.pid);
     this.leaveSpot(() => { }); this.happy = 1.5;
     if (this.state !== 'jump') { this.state = 'sit'; this.timer = 3; }
@@ -298,12 +304,17 @@ class Pet extends Walker {
     if (this.jump) {
       const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
       this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
-      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb(); }
+      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb(); }
       return;
     }
     PetAI.tick(this, dt);
     if (this.on && !Room.uidMap[this.on.uid]) { this.on = null; const [x, y] = randFloor(); this.x = x; this.y = y; }
     if (this.on && !this.walking && this.onOff) { this.x = this.on.x + this.onOff[0]; this.y = this.on.y + this.onOff[1]; }
+    if (this.on && (this.state === 'sleep' || this.state === 'sit' || this.state === 'inbox')) PetPlay.noteSpot(this, dt);
+    // being cared for or played with by hand, or sitting in a box
+    if (this.hp && this.state !== 'hand') this.hp = null;   // a hand scene that something else interrupted
+    if (this.state === 'hand') { PetPlay.petUpdate(this, dt); return; }
+    if (this.state === 'inbox') { PetPlay.boxUpdate(this, dt); return; }
     this.step(dt);
     if (ActorVisibility.tick(this, dt)) return;
     if (this.state === 'eat' && !this.walking) {
@@ -323,6 +334,7 @@ class Pet extends Walker {
   }
   draw(c) {
     if (this.state === 'trick' && TrickShow.drawPet(c, this)) return;
+    if ((this.state === 'hand' || this.state === 'inbox') && PetPlay.drawPet(c, this)) return;
     const t = Room.t; let pose = 'sit', f = Math.floor(t * 1.4) % 2; let flip = this.flip, hop = 0;
     if (this.walking) { pose = 'walk'; f = Math.floor(this.anim * 9) % 4; }
     else if (this.state === 'jump') { pose = 'walk'; f = 1; }

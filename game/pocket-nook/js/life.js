@@ -386,10 +386,12 @@ Object.assign(UI, {
     if (n.pet != null && !['cat_pet', 'pet_want'].includes(n.type)) { const pp = Pets.get(n.pet); if (pp) out.splice(1, 0, h('button', { class: 'chip sm', onclick: () => { this.closeWin('need'); Pets.select(pp.id, n.type === 'pet_train' ? 'train' : 'care'); } }, ico('i_paw', 16), `打開${pp.name}的照顧頁`)); }
     if (sup) {
       const have = Life.L.bag[def.item] || 0;
-      out.push(h('button', { class: 'chip primary', disabled: !have, onclick: () => { Life.use(def.item, n); } }, ico(sup.spr, 22), have ? `使用${sup.n}（有 ${have} 個）` : `沒有${sup.n}`));
-      for (const alt of def.alt || []) if (Life.L.bag[alt]) out.push(h('button', { class: 'chip', onclick: () => { Life.use(alt, n); } }, ico(SUPPLIES[alt].spr, 22), `改用${SUPPLIES[alt].n}（有 ${Life.L.bag[alt]} 個）`));
-      if (n.type === 'pet_dirty' && Pets.Z.tools.brush) out.push(h('button', { class: 'chip', onclick: () => { Pets.brush(n.pet); } }, ico('t_brush', 22), '用梳子梳一梳'));
-      if (n.type === 'cat_play') for (const t of ['wand', 'yarn', 'ball']) if (Pets.Z.tools[t]) { out.push(h('button', { class: 'chip', onclick: () => { Pets.play(n.pet, t, n); if (UI.needId === n.id && !Life.L.needs.includes(n)) this.closeWin('need'); } }, ico(PET_TOOLS[t].spr, 22), `用${PET_TOOLS[t].n}陪牠玩`)); break; }
+      // pet supplies are picked up and used on the pet in the room; the card closes so the room is visible
+      const forPet = n.pet != null && sup.pet, take = (id) => () => { if (PetPlay.pick(id, n.pet)) this.closeWin('need'); };
+      out.push(h('button', { class: 'chip primary', disabled: !have, onclick: forPet ? take(def.item) : () => { Life.use(def.item, n); } }, ico(sup.spr, 22), !have ? `沒有${sup.n}` : forPet ? `拿起${sup.n}（有 ${have} 個）` : `使用${sup.n}（有 ${have} 個）`));
+      for (const alt of def.alt || []) if (Life.L.bag[alt]) out.push(h('button', { class: 'chip', onclick: forPet && SUPPLIES[alt].pet ? take(alt) : () => { Life.use(alt, n); } }, ico(SUPPLIES[alt].spr, 22), `${forPet ? '改拿' : '改用'}${SUPPLIES[alt].n}（有 ${Life.L.bag[alt]} 個）`));
+      if (n.type === 'pet_dirty' && Pets.Z.tools.brush) out.push(h('button', { class: 'chip', onclick: take('brush') }, ico('t_brush', 22), '拿起梳子幫牠梳一梳'));
+      if (n.type === 'cat_play') for (const t of ['wand', 'yarn', 'ball']) if (Pets.Z.tools[t]) { out.push(h('button', { class: 'chip', onclick: take(t) }, ico(PET_TOOLS[t].spr, 22), `拿起${PET_TOOLS[t].n}陪牠玩`)); break; }
       out.push(h('button', { class: 'chip', onclick: () => { this.closeWin('need'); Learn.start('need', { item: def.item, needId: n.id }); } }, ico('i_learn', 22), `複習 5 個單字換${sup.n}`));
       out.push(h('button', { class: 'chip', disabled: Game.S.coins < sup.price, onclick: () => { Life.buySupply(def.item, 1); } }, ico('i_coin', 20), `用 ${sup.price} 金幣買一個`));
     } else {
