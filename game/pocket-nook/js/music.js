@@ -15,7 +15,7 @@ const Music = {
     a.addEventListener('error', () => { if (!this.cur || this.cur.type === 'yt' || !a.src) return; this.playing = false; UI.toast('這首歌無法播放（格式不支援或檔案已失效）', 'i_music', 3.5); this.changed(); });
     const M = this.M; if (M.idx >= 0 && M.list[M.idx]) this.cur = M.list[M.idx];
     if (M.ctx === 'lib') this.cur = null;
-    this.loadLib(false);
+    this.loadLib(false); MusicCache.init().then(() => UI.refresh('music'));
     try {
       const ms = navigator.mediaSession; if (ms) {
         ms.setActionHandler('play', () => this.toggle(true)); ms.setActionHandler('pause', () => this.toggle(false));
@@ -35,6 +35,7 @@ const Music = {
   // ---------- adding ----------
   async addFiles(files) {
     const M = this.M; let first = -1, n = 0, unsaved = 0;
+    const lrcs = {}; for (const f of files) if (/\.lrc$/i.test(f.name)) lrcs[f.name.replace(/\.lrc$/i, '').toLowerCase()] = f;
     for (const f of files) {
       if (!(f.type && f.type.startsWith('audio/')) && !AUDIO_EXT.test(f.name)) continue;
       if (M.list.length >= 300) { UI.toast('播放清單最多 300 首', 'i_music'); break; }
@@ -42,9 +43,10 @@ const Music = {
       let stored = true; try { await this.putBlob(id, f); } catch (e) { stored = false; unsaved++; }
       this.urls[id] = URL.createObjectURL(f);
       M.list.push({ id, type: 'file', title: f.name.replace(AUDIO_EXT, '').slice(0, 120), stored });
+      const lf = lrcs[f.name.replace(AUDIO_EXT, '').toLowerCase()]; if (lf) { try { MusicCache.small('lrc', 'file:' + id, Lyrics.decode(await lf.arrayBuffer())); } catch (e) { } }
       if (first < 0) first = M.list.length - 1; n++;
     }
-    if (!n) { UI.toast('沒有找到可以播放的音樂檔（支援 MP3、FLAC、M4A、OGG、WAV）', 'i_music', 4); return; }
+    if (!n) { UI.toast(Object.keys(lrcs).length ? '只找到歌詞檔，請和同名的音樂檔一起拖進來' : '沒有找到可以播放的音樂檔（支援 MP3、FLAC、M4A、OGG、WAV）', 'i_music', 4); return; }
     Game.save(); UI.refresh('music');
     UI.toast(`加入了 ${n} 首歌` + (unsaved ? `，其中 ${unsaved} 首太大無法記住，重新整理後要再加一次` : ''), 'i_music', 3.5);
     if (!this.playing) this.playIdx(first);
@@ -68,12 +70,47 @@ const Music = {
     const M = this.M; M.list.push({ id: 'y' + Date.now().toString(36), type: 'yt', vid: p.vid, list: p.list, title: p.list && !p.vid ? 'YouTube 播放清單' : 'YouTube 影片 ' + (p.vid || '') });
     Game.save(); UI.refresh('music'); if (!this.playing) this.playIdx(M.list.length - 1); return true;
   },
+  isLib(e) { return e && (e.type === 'drive' || (e.type === 'url' && String(e.id).startsWith('u:'))); },
+  remote(e) { return e.type === 'drive' ? Lib.mediaUrl(e.fid) : e.src; },
   async srcFor(e) {
+    if (this.isLib(e)) {
+      await MusicCache.init();
+      const b = await MusicCache.get(e.id); if (b) return this.setLibUrl(URL.createObjectURL(b));
+      const got = await this.download(e, false); if (got === 'abort') return 'abort';
+      return got ? this.setLibUrl(URL.createObjectURL(got)) : this.remote(e);   // download failed: stream it this time
+    }
     if (e.type === 'url') return e.src;
-    if (e.type === 'drive') return Lib.mediaUrl(e.fid);
     if (this.urls[e.id]) return this.urls[e.id];
     const b = await this.getBlob(e.id).catch(() => null); if (!b) return null;
     return this.urls[e.id] = URL.createObjectURL(b);
+  },
+  setLibUrl(u) { if (this.libUrl) URL.revokeObjectURL(this.libUrl); return this.libUrl = u; },
+  // whole-file download into the cache, with progress; bg = prefetching the next track
+  dl: null,
+  async download(e, bg) {
+    if (bg && this.dl) return null;
+    if (this.dl && this.dl.ctl) this.dl.ctl.abort();
+    const ctl = new AbortController(), job = this.dl = { id: e.id, got: 0, total: 0, bg, ctl }; UI.refresh('music');
+    try {
+      const r = await fetch(this.remote(e), { signal: ctl.signal }); if (!r.ok) throw new Error('HTTP ' + r.status);
+      job.total = +r.headers.get('content-length') || 0; const type = r.headers.get('content-type') || 'audio/mpeg';
+      let blob;
+      if (r.body && r.body.getReader) {
+        const rd = r.body.getReader(), parts = []; let lastUi = 0;
+        for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); job.got += value.length; if (Date.now() - lastUi > 400) { lastUi = Date.now(); UI.refresh('music'); } }
+        blob = new Blob(parts, { type });
+      } else blob = await r.blob();
+      await MusicCache.put(e.id, blob, { title: e.title, album: e.album });
+      return blob;
+    } catch (err) { return ctl.signal.aborted ? 'abort' : null; }
+    finally { if (this.dl === job) this.dl = null; UI.refresh('music'); }
+  },
+  // quietly download the track that will play next, so it starts instantly
+  prefetch() {
+    const Q = this.Q, n = Q.length; if (!n || this.M.ctx !== 'lib') return;
+    const i = this.M.shuffle ? this.shufNext : (this.qi + 1) % n, e = Q[i];
+    if (!e || !this.isLib(e) || MusicCache.has(e.id) || this.dl) return;
+    this.download(e, true);
   },
   // ---------- playback ----------
   get Q() { return this.M.ctx === 'lib' ? Lib.queue(this.M.libAlbum) : this.M.list; },
@@ -86,11 +123,16 @@ const Music = {
     const e = this.cur = Q[i]; Game.save();
     if (e.type === 'yt') { this.audio.pause(); return this.playYT(e); }
     this.stopYT();
+    if (this.dl && !this.dl.bg && this.dl.id !== e.id) this.dl.ctl.abort();
+    this.audio.pause(); Lyrics.load(e); Covers.get(e, true).then(() => UI.refresh('music'));
     const src = await this.srcFor(e);
+    if (this.cur !== e || src === 'abort') return;   // another track was picked while this one downloaded
     if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast('找不到這首歌的檔案，請重新加入', 'i_music'); return; }
     e.missing = false; this.fails = 0;
     this.audio.src = src; this.audio.volume = M.vol;
+    if (M.shuffle && Q.length > 1) { let j; do { j = Math.floor(Math.random() * Q.length); } while (j === i); this.shufNext = j; }
     try { await this.audio.play(); } catch (err) { this.playing = false; this.changed(); }
+    MusicCache.init().then(() => this.prefetch());
   },
   toggle(force) {
     const M = this.M;
@@ -108,7 +150,7 @@ const Music = {
     const M = this.M, n = this.Q.length; if (!n) return;
     if (manual && this.cur && this.cur.type === 'yt' && this.cur.list && this.yt && this.ytReady) { const pl = this.yt.getPlaylist() || []; if (this.yt.getPlaylistIndex() < pl.length - 1) { this.yt.nextVideo(); return; } }
     let i = this.qi + 1;
-    if (M.shuffle && n > 1) { do { i = Math.floor(Math.random() * n); } while (i === this.qi); }
+    if (M.shuffle && n > 1) { i = this.shufNext != null && this.shufNext < n && this.shufNext !== this.qi ? this.shufNext : this.qi; while (i === this.qi) i = Math.floor(Math.random() * n); this.shufNext = null; }
     if (i >= n) { if (M.repeat === 'off' && !manual) { this.stop(); return; } i = 0; }
     this.playAt(i);
   },
@@ -205,7 +247,7 @@ const Music = {
    ------------------------------------------------------------ */
 const Lib = {
   tracks: [], albums: [], status: 'idle', err: '', root: '', at: 0, busy: null,
-  CACHE: 'pocketnook.lib.v1', TTL: 12 * 3600e3, MAX_TRACKS: 3000, MAX_FOLDERS: 200,
+  CACHE: 'pocketnook.lib.v2', TTL: 12 * 3600e3, MAX_TRACKS: 3000, MAX_FOLDERS: 200,
   get key() { return (window.NOOK_DRIVE_API_KEY || '').trim(); },
   get folder() { const f = (window.NOOK_DRIVE_FOLDER || '').trim(); const m = f.match(/folders\/([\w-]+)/); return m ? m[1] : f; },
   enabled() { return window.NOOK_ENV !== 'artifact'; },
@@ -241,7 +283,7 @@ const Lib = {
       const r = await fetch('music/playlist.json', { cache: 'no-cache' }); if (!r.ok) return [];
       const list = await r.json(); if (!Array.isArray(list)) return [];
       return list.map((t, i) => { const src = typeof t === 'string' ? t : t && t.src; if (!src) return null;
-        return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', album: (t && t.album) || '內建', title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
+        return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', lrc: (t && t.lrc) || '', album: (t && t.album) || '內建', title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
     } catch (e) { return []; }
   },
   async api(path, params) {
@@ -258,17 +300,19 @@ const Lib = {
     const out = [], todo = [{ id: root, path: '' }], done = new Set();
     while (todo.length && done.size < this.MAX_FOLDERS && out.length < this.MAX_TRACKS) {
       const f = todo.shift(); if (done.has(f.id)) continue; done.add(f.id);
-      let pageToken = '';
+      let pageToken = ''; const lrc = {}, here = [];
       do {
         const j = await this.api('files', { q: `'${f.id}' in parents and trashed=false`, fields: 'nextPageToken,files(id,name,mimeType,shortcutDetails)', pageSize: '1000', supportsAllDrives: 'true', includeItemsFromAllDrives: 'true', orderBy: 'name', ...(pageToken ? { pageToken } : {}) });
         for (const x of j.files || []) {
           let id = x.id, mt = x.mimeType;
           if (mt === 'application/vnd.google-apps.shortcut' && x.shortcutDetails) { id = x.shortcutDetails.targetId; mt = x.shortcutDetails.targetMimeType; }
           if (mt === 'application/vnd.google-apps.folder') todo.push({ id, path: f.path ? f.path + ' / ' + x.name : x.name });
-          else if ((mt || '').startsWith('audio/') || AUDIO_EXT.test(x.name)) out.push({ id: 'd:' + id, type: 'drive', fid: id, album: f.path || this.root, title: x.name.replace(AUDIO_EXT, '') });
+          else if (/\.lrc$/i.test(x.name)) lrc[x.name.replace(/\.lrc$/i, '').toLowerCase()] = id;
+          else if ((mt || '').startsWith('audio/') || AUDIO_EXT.test(x.name)) { const t = { id: 'd:' + id, type: 'drive', fid: id, album: f.path || this.root, title: x.name.replace(AUDIO_EXT, '') }; out.push(t); here.push(t); }
         }
         pageToken = j.nextPageToken || '';
       } while (pageToken && out.length < this.MAX_TRACKS);
+      for (const t of here) { const l = lrc[t.title.toLowerCase()]; if (l) t.lrc = l; }
     }
     this.at = Date.now();
     try { localStorage.setItem(this.CACHE, JSON.stringify({ folder: root, root: this.root, at: this.at, tracks: out })); } catch (e) { }

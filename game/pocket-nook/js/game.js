@@ -24,7 +24,7 @@ const Game = {
       memos: [{ id: 1, text: '歡迎來到小窩！\n點點看家具和小貓，按番茄鐘開始專注，就能賺金幣買新家具。', color: 'butter', pin: false, x: 40, y: 120 }],
       timer: { focus: 25, short: 5, long: 15, mode: 'focus', running: false, endsAt: 0, remain: 25 * 60, round: 0, credited: 0 },
       stats: { focusMin: 0, sessions: 0, todos: 0, todoDay: '', todoToday: 0 },
-      settings: { timeMode: 'auto', rain: false, autoBreak: true, autoMusic: false },
+      settings: { timeMode: 'auto', rain: false, autoBreak: true, autoMusic: false, lyrics: true },
       gifts: [], say: null, savedAt: 0, seenIntro: false,
       life: Life.newState(), vocab: {}, learn: Learn.newState(), zoo: null, schema: SAVE_SCHEMA,
     };

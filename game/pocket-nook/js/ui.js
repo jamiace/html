@@ -1,3 +1,10 @@
+/* window position & size, kept per device (not in the save file) */
+const WinLayout = {
+  KEY: 'pocketnook.winlayout', d: null,
+  all() { if (!this.d) { try { this.d = JSON.parse(localStorage.getItem(this.KEY) || '{}') || {}; } catch (e) { this.d = {}; } } return this.d; },
+  get(id) { return this.all()[id] || null; },
+  put(w) { const d = this.all(); d[w.id] = { x: w.pos ? Math.round(w.pos[0]) : null, y: w.pos ? Math.round(w.pos[1]) : null, w: w.size ? Math.round(w.size[0]) : null, h: w.size ? Math.round(w.size[1]) : null }; try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch (e) { } },
+};
 /* ============================================================
    UI: HUD, dock, windows, overlay
    ============================================================ */
@@ -141,6 +148,7 @@ const UI = {
     if (this.wins.timer && !this.wins.timer.el.hidden) this.tickTimerWin();
     const mc = this.el.music; if (mc) { const cur = Music.cur; mc.hidden = !cur; if (cur) { const tt = (Music.playing ? '' : '暫停 · ') + cur.title; if (mc.lastTitle !== tt) { mc.lastTitle = tt; mc.querySelector('.mt').textContent = tt; mc.title = cur.title; } mc.classList.toggle('playing', Music.playing); } }
     if (this.wins.music && !this.wins.music.el.hidden) this.tickMusic();
+    Lyrics.tick();
     if (this.el.miniMusic) this.el.miniMusic.classList.toggle('on', Music.playing);
     if (this.wins.cowork && !this.wins.cowork.el.hidden && Cowork.peers.length) this.tickCowork();
   },
@@ -233,7 +241,7 @@ const UI = {
     pet: { t: '寵物', i: 'i_paw', w: 360, at: ['l', 0] }, cowork: { t: '一起專注', i: 'i_people', w: 360, at: ['r', 1] }, settings: { t: '設定與紀錄', i: 'i_gear', w: 400, at: ['c', 0] },
     gift: { t: '禮物', i: 'i_star', w: 320, at: ['c', 0], modal: true },
     themeask: { t: '套用主題', i: 'i_theme', w: 380, at: ['c', 0], modal: true },
-    music: { t: '音樂', i: 'i_music', w: 400, at: ['r', 2] },
+    music: { t: '音樂', i: 'i_music', w: 460, at: ['r', 2], resize: { minW: 360, minH: 320, h: 600 } },
   },
   getWin(id) {
     let w = this.wins[id]; if (w) return w;
@@ -242,21 +250,35 @@ const UI = {
     const head = h('header', { class: 'win-h' }, ico(conf.i, 28), h('h2', { text: conf.t }), conf.noclose ? null : h('button', { class: 'xbtn', 'aria-label': '關閉', onclick: () => this.closeWin(id) }, ico('i_close', 22)));
     const el = h('section', { class: 'win', 'data-id': id, role: 'dialog', 'aria-label': conf.t, style: `width:${conf.w}px` }, head, body);
     el.hidden = true; this.layer.append(el);
-    w = this.wins[id] = { id, el, body, conf, pos: null };
+    const saved = WinLayout.get(id);
+    w = this.wins[id] = { id, el, body, conf, pos: saved && saved.x != null ? [saved.x, saved.y] : null, size: conf.resize && saved && saved.w ? [saved.w, saved.h] : conf.resize ? [conf.w, conf.resize.h] : null };
+    if (conf.resize) {
+      el.classList.add('resizable');
+      const grip = h('div', { class: 'win-grip', title: '拖曳調整大小', 'aria-hidden': 'true' }); el.append(grip);
+      grip.addEventListener('pointerdown', e => {
+        if (this.narrow()) return; e.preventDefault(); e.stopPropagation(); grip.setPointerCapture(e.pointerId);
+        const r = el.getBoundingClientRect(), sx = e.clientX, sy = e.clientY;
+        const mv = (ev) => { w.size = [Math.max(conf.resize.minW, r.width + ev.clientX - sx), Math.max(conf.resize.minH, r.height + ev.clientY - sy)]; this.placeWin(w); };
+        const up = () => { grip.removeEventListener('pointermove', mv); grip.removeEventListener('pointerup', up); WinLayout.put(w); };
+        grip.addEventListener('pointermove', mv); grip.addEventListener('pointerup', up);
+      });
+    }
     el.addEventListener('pointerdown', () => this.raise(w));
     head.addEventListener('pointerdown', e => {
       if (this.narrow() || e.target.closest('button')) return; const r = el.getBoundingClientRect(); const ox = e.clientX - r.left, oy = e.clientY - r.top;
       head.setPointerCapture(e.pointerId);
       const mv = (ev) => { w.pos = [ev.clientX - ox, ev.clientY - oy]; this.placeWin(w); };
-      const up = () => { head.removeEventListener('pointermove', mv); head.removeEventListener('pointerup', up); };
+      const up = () => { head.removeEventListener('pointermove', mv); head.removeEventListener('pointerup', up); WinLayout.put(w); };
       head.addEventListener('pointermove', mv); head.addEventListener('pointerup', up);
     });
     return w;
   },
   placeWin(w) {
-    const el = w.el; if (this.narrow()) { el.style.left = ''; el.style.top = ''; return; }
-    const W = window.innerWidth, H = window.innerHeight, ww = Math.min(w.conf.w, W - 32), hh = el.offsetHeight || 300;
+    const el = w.el; if (this.narrow()) { el.style.left = ''; el.style.top = ''; el.style.height = ''; return; }
+    const W = window.innerWidth, H = window.innerHeight, ww = Math.min(w.size ? w.size[0] : w.conf.w, W - 32);
     el.style.width = ww + 'px';
+    if (w.size) el.style.height = Math.min(w.size[1], H - 24) + 'px';
+    const hh = el.offsetHeight || 300;
     if (!w.pos) { const [side, slot] = w.conf.at; const top = 76 + slot * 40; w.pos = side === 'r' ? [W - ww - 24, top] : side === 'l' ? [24, top] : [(W - ww) / 2, Math.max(60, (H - hh) / 2 - 20)]; }
     const x = Math.max(8, Math.min(W - ww - 8, w.pos[0])), y = Math.max(8, Math.min(H - 60, w.pos[1]));
     el.style.left = x + 'px'; el.style.top = y + 'px';
@@ -497,8 +519,10 @@ const UI = {
   w_music() {
     const M = Game.S.music, cur = Music.cur, playing = Music.playing;
     const src = cur ? (cur.type === 'yt' ? (cur.list ? 'YouTube 播放清單' : 'YouTube') : cur.type === 'drive' ? '內建音樂 · ' + cur.album : cur.type === 'url' ? '內建曲目' + (cur.album ? ' · ' + cur.album : '') : '本機檔案') : '聽內建音樂、加入本機音樂檔，或貼上 YouTube 連結';
-    const now = h('div', { class: 'now' }, h('div', { class: 'disc' + (playing ? ' spin' : '') }, ico('i_music', 36)),
-      h('div', { class: 'now-t' }, h('div', { class: 'now-title', text: cur ? cur.title : '還沒有播放音樂' }), h('div', { class: 'hint', text: src })));
+    const cover = cur && cur.type !== 'yt' ? Covers.mem[Covers.key(cur)] : null;
+    const dl = Music.dl, dlTxt = dl && cur && dl.id === cur.id ? `下載到這台裝置 ${dl.total ? Math.round(dl.got / dl.total * 100) + '%' : Math.round(dl.got / 1048576) + ' MB'}（之後就不用再下載）` : cur && Music.isLib(cur) && MusicCache.has(cur.id) ? '已存在這台裝置' : '';
+    const now = h('div', { class: 'now' }, cover ? h('img', { class: 'mcover', src: cover, alt: '專輯封面' }) : h('div', { class: 'disc' + (playing ? ' spin' : '') }, ico('i_music', 36)),
+      h('div', { class: 'now-t' }, h('div', { class: 'now-title', text: cur ? cur.title : '還沒有播放音樂' }), h('div', { class: 'hint', text: src }), dlTxt ? h('div', { class: 'hint', text: dlTxt }) : null));
     this.el.mProg = h('input', { type: 'range', id: 'm-prog', min: '0', max: '1000', value: '0', 'aria-label': '播放進度', oninput: e => Music.seek(e.target.value / 1000) });
     this.el.mT = h('span', { text: '0:00' }); this.el.mD = h('span', { text: '0:00' });
     const rep = M.repeat;
@@ -522,6 +546,7 @@ const UI = {
       h('button', { class: 'tab' + (tab === 'list' ? ' on' : ''), onclick: () => { this.mTab = 'list'; this.refresh('music'); } }, ico('i_folder', 18), `我的清單（${M.list.length}）`));
     const head = [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, vol, tabs];
     const auto = h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); } }, Game.S.settings.autoMusic ? '開始專注時自動播放：開' : '開始專注時自動播放：關'));
+    auto.append(h('button', { class: 'chip sm' + (Game.S.settings.lyrics !== false ? ' on' : ''), 'aria-pressed': Game.S.settings.lyrics !== false ? 'true' : 'false', title: '有同名 .lrc 歌詞檔的歌，播放時在畫面上方顯示歌詞', onclick: () => { Game.S.settings.lyrics = Game.S.settings.lyrics === false; Game.save(); Lyrics.render(); this.refresh('music'); } }, Game.S.settings.lyrics !== false ? '畫面上方顯示歌詞：開' : '畫面上方顯示歌詞：關'));
     if (tab === 'lib') return [...head, ...this.musicLib(), auto];
     return [...head,
       h('div', { class: 'row wrap' }, h('label', { class: 'chip', for: 'm-file' }, ico('i_folder', 20), '加入本機音樂'), file, h('span', { class: 'hint', text: 'MP3、FLAC、M4A、OGG、WAV，也可以直接拖進來' })),
@@ -541,14 +566,26 @@ const UI = {
       if (Lib.driveOn()) out.push(h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => Music.loadLib(true) }, ico('i_reset', 16), '重新讀取')));
       return out;
     }
-    out.push(h('div', { class: 'tabs wrap mlib-al' }, h('button', { class: 'tab sm' + (!al ? ' on' : ''), onclick: () => { this.mAlbum = ''; this.refresh('music'); } }, `全部 ${Lib.tracks.length}`),
-      ...Lib.albums.map(a => h('button', { class: 'tab sm' + (al === a.n ? ' on' : ''), title: a.n, onclick: () => { this.mAlbum = a.n; this.refresh('music'); } }, `${a.n} ${a.c}`))));
-    out.push(h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => Music.playLib(M.shuffle ? Math.floor(Math.random() * Q.length) : 0, al) }, ico('i_play', 16), al ? '播放這個資料夾' : '全部播放'),
+    Covers.wantAlbums();
+    const card = (name, label, count, t) => {
+      const c = t ? Covers.mem[Covers.key(t)] : null, all = !t ? Lib.albums.map(a => Covers.mem[Covers.key(Lib.queue(a.n)[0])]).filter(Boolean).slice(0, 4) : [];
+      const art = c ? h('img', { src: c, alt: '' }) : all.length ? h('div', { class: 'mal-mosaic n' + all.length }, ...all.map(u => h('img', { src: u, alt: '' }))) : h('div', { class: 'mal-ph' }, ico('i_music', 36));
+      return h('button', { class: 'malbum' + (al === name ? ' on' : ''), title: name || '全部', onclick: () => { this.mAlbum = name; this.refresh('music'); } },
+        art, h('b', { text: label }), h('span', { class: 'hint', text: `${count} 首` })); };
+    out.push(h('div', { class: 'malbums' }, card('', '全部', Lib.tracks.length, null), ...Lib.albums.map(a => card(a.n, a.n.split(' / ').pop(), a.c, Lib.queue(a.n)[0]))));
+    out.push(h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => Music.playLib(M.shuffle ? Math.floor(Math.random() * Q.length) : 0, al) }, ico('i_play', 16), al ? `播放「${al.split(' / ').pop()}」` : '全部播放'),
       h('span', { class: 'hint grow', text: Lib.driveOn() ? `來自雲端資料夾「${Lib.root || '…'}」` : '網站內建' }),
       Lib.driveOn() ? h('button', { class: 'chip sm', 'aria-label': '重新讀取資料夾', title: '重新讀取資料夾', onclick: () => Music.loadLib(true) }, ico('i_reset', 16)) : null));
-    const curI = playingHere ? M.lidx : -1;
+    const curI = playingHere ? M.lidx : -1, dl = Music.dl;
     out.push(h('div', { class: 'scroll' }, h('ol', { class: 'mlist' }, ...Q.map((e, i) => h('li', { class: (i === curI ? 'cur ' : '') + (e.missing ? 'missing' : '') },
-      h('button', { class: 'mplay', onclick: () => Music.playLib(i, al), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }), al ? null : h('em', { class: 'mb', text: e.album.split(' / ').pop() })))))));
+      h('button', { class: 'mplay', onclick: () => Music.playLib(i, al), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }),
+        e.lrc ? h('em', { class: 'mb', title: '有歌詞', text: '詞' }) : null,
+        dl && dl.id === e.id ? h('em', { class: 'mb', text: dl.total ? Math.round(dl.got / dl.total * 100) + '%' : '下載中' }) : MusicCache.has(e.id) ? h('em', { class: 'mb ok', title: '已存在這台裝置', text: '已下載' }) : null,
+        al ? null : h('em', { class: 'mb', text: e.album.split(' / ').pop() })))))));
+    const used = MusicCache.total, lim = MusicCache.limitMB;
+    out.push(h('div', { class: 'row wrap mcache' }, h('span', { class: 'hint grow', text: `播過的歌會存在這台裝置，下次不用再下載：已用 ${used < 1073741824 ? Math.round(used / 1048576) + ' MB' : (used / 1073741824).toFixed(2) + ' GB'}／上限 ${lim >= 1024 ? lim / 1024 + ' GB' : lim + ' MB'}（超過時刪掉最久沒聽的）` }),
+      h('select', { 'aria-label': '本機快取上限', onchange: e => { MusicCache.limitMB = +e.target.value; this.refresh('music'); } }, ...MCACHE_LIMITS.map(v => h('option', { value: String(v), selected: v === lim ? '' : null }, v >= 1024 ? v / 1024 + ' GB' : v + ' MB'))),
+      h('button', { class: 'chip sm', onclick: async () => { await MusicCache.clear(); UI.toast('已清除這台裝置上的音樂快取', 'i_trash', 2.5); this.refresh('music'); } }, ico('i_trash', 16), '清除')));
     return out;
   },
   tickMusic() {

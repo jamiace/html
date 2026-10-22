@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* 把 Google 雲端硬碟資料夾（含子資料夾）裡的音樂下載到 music/，並寫出 music/playlist.json。
+/* 把 Google 雲端硬碟資料夾（含子資料夾）裡的音樂和同名的 .lrc 歌詞檔下載到 music/，並寫出 music/playlist.json。
  *
  *   node tools/fetch-drive-music.mjs --key 你的API金鑰 [--folder 資料夾網址或ID] [--out music] [--dry]
  *
@@ -31,7 +31,7 @@ const safe = (s) => s.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim() || '_';
 
 const rootName = (await (await api('files/' + ROOT, { fields: 'name', supportsAllDrives: 'true' })).json()).name || 'music';
 console.log(`資料夾：${rootName}`);
-const tracks = [];
+const tracks = [], lyrics = {};
 const queue = [{ id: ROOT, parts: [] }];
 const seen = new Set();
 while (queue.length) {
@@ -43,6 +43,7 @@ while (queue.length) {
       let id = x.id, mt = x.mimeType;
       if (mt === 'application/vnd.google-apps.shortcut' && x.shortcutDetails) { id = x.shortcutDetails.targetId; mt = x.shortcutDetails.targetMimeType; }
       if (mt === 'application/vnd.google-apps.folder') queue.push({ id, parts: [...f.parts, x.name] });
+      else if (/\.lrc$/i.test(x.name)) lyrics[f.parts.join('/') + '/' + x.name.replace(/\.lrc$/i, '').toLowerCase()] = { id, name: x.name, size: +x.size || 0 };
       else if ((mt || '').startsWith('audio/') || AUDIO.test(x.name)) tracks.push({ id, name: x.name, size: +x.size || 0, parts: f.parts });
     }
     pageToken = j.nextPageToken || '';
@@ -56,7 +57,13 @@ for (const t of tracks) {
   const dir = path.join(OUT, ...t.parts.map(safe));
   const file = path.join(dir, safe(t.name));
   const src = file.split(path.sep).map(encodeURIComponent).join('/');
-  list.push({ src, title: t.name.replace(AUDIO, ''), album: t.parts.length ? t.parts.join(' / ') : rootName, drive: t.id });
+  const entry = { src, title: t.name.replace(AUDIO, ''), album: t.parts.length ? t.parts.join(' / ') : rootName, drive: t.id };
+  const ly = lyrics[t.parts.join('/') + '/' + t.name.replace(AUDIO, '').toLowerCase()];
+  if (ly) {
+    const lf = path.join(dir, safe(ly.name)); entry.lrc = lf.split(path.sep).map(encodeURIComponent).join('/');
+    if (!DRY && !(fs.existsSync(lf) && (!ly.size || fs.statSync(lf).size === ly.size))) { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(lf, Buffer.from(await (await api('files/' + ly.id, { alt: 'media', supportsAllDrives: 'true' })).arrayBuffer())); }
+  }
+  list.push(entry);
   if (t.size > 100 * 1024 * 1024) console.warn(`  ! ${t.name} 超過 100 MB，GitHub 不接受這麼大的檔案`);
   if (DRY) continue;
   if (fs.existsSync(file) && (!t.size || fs.statSync(file).size === t.size)) { skipped++; continue; }

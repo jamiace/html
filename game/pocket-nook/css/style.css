@@ -560,3 +560,34 @@ table.board tr.me td { background: var(--chip-on); font-weight: bold; }
 .mlist2 { display: flex; flex-direction: column; gap: 3px; }
 .mrow { display: flex; align-items: center; gap: 8px; padding: 3px 6px; background: var(--paper-2); }
 .mrow canvas { flex: none; }
+/* resizable windows */
+.win.resizable { display: flex; flex-direction: column; }
+.win.resizable .win-b { max-height: none; flex: 1; min-height: 0; }
+.win-grip { position: absolute; right: 2px; bottom: 2px; width: 18px; height: 18px; cursor: nwse-resize; touch-action: none;
+  background: linear-gradient(135deg, transparent 0 50%, var(--line) 50% 58%, transparent 58% 68%, var(--line) 68% 76%, transparent 76% 86%, var(--line) 86% 94%, transparent 94%); }
+@media (max-width: 760px) { .win-grip { display: none; } .win.resizable { height: auto !important; } }
+.win[data-id=music] .win-b > .scroll { flex: 1; min-height: 120px; }
+/* music: covers and albums */
+.mcover { width: 72px; height: 72px; object-fit: cover; flex: none; box-shadow: 0 0 0 3px #2e2230; image-rendering: auto; }
+.malbums { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.malbum { display: flex; flex-direction: column; align-items: stretch; gap: 3px; padding: 6px; border: 0; background: var(--paper-2); box-shadow: inset 0 0 0 3px var(--line); color: var(--ink); cursor: pointer; text-align: left; min-width: 0; }
+.malbum.on { box-shadow: inset 0 0 0 3px var(--honey); background: var(--chip-on); }
+.malbum img, .malbum .mal-ph { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #2e2230; }
+.malbum .mal-ph { display: grid; place-items: center; }
+.malbum b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb.ok { color: var(--leaf, #3f7a4a); border-color: currentColor; }
+.mcache select { font: inherit; }
+/* synced lyrics at the top of the room */
+.lyrics { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 30; pointer-events: none; text-align: center; max-width: min(720px, 92vw);
+  padding: 6px 16px 7px; background: rgba(46, 34, 48, .72); color: #fff4e0; box-shadow: 0 0 0 3px rgba(46, 34, 48, .35); }
+.lyrics .ly-cur { font-size: 20px; font-weight: 700; letter-spacing: .03em; text-shadow: 0 2px 0 #2e2230; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lyrics .ly-next { font-size: 13px; opacity: .65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1em; }
+.lyrics.flip .ly-cur { animation: lyin .35s steps(4); }
+@keyframes lyin { from { opacity: .2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lyrics.flip .ly-cur { animation: none; } }
+.mal-mosaic { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; background: #2e2230; }
+.mal-mosaic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mal-mosaic.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.mal-mosaic.n2 img { grid-row: span 2; }
+.mal-mosaic.n3 img:first-child { grid-row: span 2; }
+.malbum .mal-ph img { filter: brightness(1.6) saturate(.3); }
