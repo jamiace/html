@@ -244,7 +244,9 @@ const Game = {
     S.items = S.items.filter(o => o !== it && !kids.includes(o)); Room.state = S; Room.indexItems();
     if (Room.sel === it) Room.sel = null;
     UI.editToolbar(); UI.refresh('storage'); this.save();
-    UI.toast((kids.length ? `收起了「${ITEMS[it.k].n}」和上面的小物` : `收起了「${ITEMS[it.k].n}」`) + (back ? `，碗裡的 ${back} 份食物放回道具` : ''), 'i_box', 2.4);
+    // the storage box only counts items, so a stored bowl forgets its owner
+    const whose = it.pet != null && Pets.get(it.pet) ? `${Pets.get(it.pet).name}的` : '';
+    UI.toast((kids.length ? `收起了「${ITEMS[it.k].n}」和上面的小物` : `收起了${whose ? whose + ITEMS[it.k].n : '「' + ITEMS[it.k].n + '」'}`) + (back ? `，碗裡的 ${back} 份食物放回道具` : '') + (whose ? '。再擺出來時要重新指定給牠' : ''), 'i_box', whose ? 3.6 : 2.4);
   },
   interact(it) {
     const d = ITEMS[it.k], A = this.avatar; const cv = Room.itemCanvas(it); const cx = it.x + cv.width / 2;
@@ -252,7 +254,7 @@ const Game = {
     const nd = Life.needOf('item', it.uid); if (nd && NEED_DEFS[nd.type].item) { UI.needCard(nd.id); return; }
     if (d.act && Fun[d.act]) return Fun[d.act](it, d, cx);
     if (it.k === 'guestbook') return UI.openFriends('guest');
-    if (d.bowl) { const o = Pets.bowlOwner(it); if (o) Pets.Z.sel = o.id; UI.petBowl = it.uid; UI.petTab = 'care'; UI.openWin('pet'); UI.refresh('pet'); return; }
+    if (d.bowl) { const o = Pets.bowlOwner(it); if (o) Pets.Z.sel = o.id; UI.petBowl = it.uid; UI.petBowlPet = Pets.Z.sel; UI.petTab = 'care'; UI.openWin('pet'); UI.refresh('pet'); return; }
     if (d.toggle) { it.on = !it.on; Room.puff('p_spark', cx - 1, it.y - 2, { vy: -6, max: 0.7 }); this.save(); return; }
     if (d.window) { it.closed = !it.closed; this.save(); return; }
     if (d.bed) { if (this.focusing()) return this.bubbleAt(cx, it.y, '專注時間先不睡喔'); A.stand(); A.goSleep(it); return; }
@@ -373,6 +375,7 @@ function setupInput(cv) {
     }
     if (Room.edit) { const h = Room.hit(x, y, { itemsOnly: true }); Room.hover = h ? h.it : null; cv.style.cursor = h ? 'grab' : 'default'; return; }
     const h = Life.hitBubble(x, y) || Room.hit(x, y); cv.style.cursor = h ? 'pointer' : 'default';
+    UI.hoverIt = h && h.kind === 'item' ? h.it : null;
   });
   const end = (e) => {
     if (Room.edit && Room.drag) {
@@ -390,7 +393,7 @@ function setupInput(cv) {
     } else if (h.kind === 'gift') Game.openGift(h.g); else Game.interact(h.it);
   };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', () => { Room.drag = null; down = null; });
-  cv.addEventListener('pointerleave', () => { Room.hover = null; });
+  cv.addEventListener('pointerleave', () => { Room.hover = null; UI.hoverIt = null; });
 }
 
 // ---------- boot ----------

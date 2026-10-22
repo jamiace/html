@@ -21,7 +21,7 @@ const NEED_DEFS = {
   cat_hungry: { who: 'pet', item: 'cat_can', alt: ['fish_snack', 'premium_food'], t: (n) => `${PETNAME(n)}肚子餓了`, d: '牠一直盯著碗。罐頭、小魚乾、豪華餐都可以。', rw: { c: 12, x: 10, b: 8 } },
   cat_play: { who: 'pet', item: 'catnip', t: (n) => `${PETNAME(n)}好無聊`, d: '想玩！用貓薄荷，或在寵物視窗用逗貓棒、毛線球陪牠玩。', rw: { c: 10, x: 8, b: 8 } },
   cat_treat: { who: 'pet', item: 'cat_treat', t: (n) => `${PETNAME(n)}在撒嬌`, d: '蹭著你的腳，想討點心吃。', rw: { c: 8, x: 6, b: 10 } },
-  cat_pet: { who: 'pet', action: 'pet', count: 3, icon: 'n_heart', t: (n) => `${PETNAME(n)}想被摸摸`, d: '在房間裡點牠三下。', rw: { c: 6, x: 6, b: 6 } },
+  cat_pet: { who: 'pet', action: 'pet', count: 3, icon: 'n_heart', t: (n) => `${PETNAME(n)}想被摸摸`, d: '摸牠三下：在房間裡點牠，或按下面的「摸摸牠」。', rw: { c: 6, x: 6, b: 6 } },
   pet_want: { who: 'pet', action: 'want', icon: 'n_seat', t: (n) => `${PETNAME(n)}想要${ITEMS[n.k] ? ITEMS[n.k].n : '新家具'}`, d: '在房間擺一個給牠，收納箱沒有的話可以到商店買。', rw: { c: 20, x: 15, b: 10 } },
   pet_dirty: { who: 'pet', item: 'shampoo', t: (n) => `${PETNAME(n)}身上髒髒的`, d: '用洗毛精幫牠洗澡，或在寵物視窗用梳子梳一梳。', rw: { c: 10, x: 8, b: 6 } },
   pet_sick: { who: 'pet', item: 'medicine', t: (n) => `${PETNAME(n)}不太舒服`, d: '餓太久或太髒會生病。餵牠吃寵物藥就會好。', rw: { c: 10, x: 10, b: 8 } },
@@ -382,7 +382,8 @@ Object.assign(UI, {
     const def = NEED_DEFS[n.type], sup = def.item && SUPPLIES[def.item];
     const out = [h('div', { class: 'need-head' }, ico(sup ? sup.spr : def.icon, 48), h('div', {}, h('div', { class: 'gift-t', text: def.t(n) }), h('p', { class: 'hint', text: def.d }))),
       h('div', { class: 'task-meta' }, h('span', { class: 'hint', text: '完成獎勵' }), this.rewardChips(def.rw))];
-    if (n.pet != null) { const pp = Pets.get(n.pet); if (pp) out.splice(1, 0, h('button', { class: 'chip sm', onclick: () => { this.closeWin('need'); Pets.select(pp.id, n.type === 'pet_train' ? 'train' : 'care'); } }, ico('i_paw', 16), `打開${pp.name}的照顧頁`)); }
+    // the care page only helps where it can actually do the job (feeding, grooming, playing, training)
+    if (n.pet != null && !['cat_pet', 'pet_want'].includes(n.type)) { const pp = Pets.get(n.pet); if (pp) out.splice(1, 0, h('button', { class: 'chip sm', onclick: () => { this.closeWin('need'); Pets.select(pp.id, n.type === 'pet_train' ? 'train' : 'care'); } }, ico('i_paw', 16), `打開${pp.name}的照顧頁`)); }
     if (sup) {
       const have = Life.L.bag[def.item] || 0;
       out.push(h('button', { class: 'chip primary', disabled: !have, onclick: () => { Life.use(def.item, n); } }, ico(sup.spr, 22), have ? `使用${sup.n}（有 ${have} 個）` : `沒有${sup.n}`));
@@ -392,7 +393,12 @@ Object.assign(UI, {
       out.push(h('button', { class: 'chip', onclick: () => { this.closeWin('need'); Learn.start('need', { item: def.item, needId: n.id }); } }, ico('i_learn', 22), `複習 5 個單字換${sup.n}`));
       out.push(h('button', { class: 'chip', disabled: Game.S.coins < sup.price, onclick: () => { Life.buySupply(def.item, 1); } }, ico('i_coin', 20), `用 ${sup.price} 金幣買一個`));
     } else {
-      if (n.type === 'cat_pet') out.push(h('p', { class: 'hint', text: `已經摸了 ${n.prog || 0} 下，還差 ${Math.max(0, 3 - (n.prog || 0))} 下。` }));
+      if (n.type === 'cat_pet') {
+        const pp = Pets.get(n.pet), a = pp && Pets.actor(pp), busy = a && ['eat', 'zoom', 'trick'].includes(a.state);
+        out.push(h('p', { class: 'hint', text: `已經摸了 ${n.prog || 0} 下，還差 ${Math.max(0, 3 - (n.prog || 0))} 下。` }));
+        // the button only takes you to the pet: the card closes, the pet sits still and asks to be petted; the petting itself happens in the room
+        out.push(h('button', { class: 'chip primary', disabled: !a, onclick: () => { this.closeWin('need'); UI.askPet(n.pet, n.id); } }, ico('n_heart', 20), !a ? `${pp ? pp.name : '牠'}不在房間裡` : busy ? '摸摸牠（牠正在忙，等一下會過來）' : '摸摸牠'));
+      }
       if (n.type === 'pet_want' && ITEMS[n.k]) {
         const own = (Game.S.inv[n.k] || 0) > 0;
         out.push(h('div', { class: 'need-want' }, sprPreview(SPR.get(ITEMS[n.k].spr, ITEMS[n.k].map, false, n.k), 80, 3)));

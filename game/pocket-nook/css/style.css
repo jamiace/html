@@ -90,6 +90,8 @@ body.editing #room { touch-action: none; }
 @keyframes pop { from { transform-origin: bottom; opacity: 0; } }
 .tag { position: absolute; left: 0; top: 0; background: rgba(46, 34, 48, .82); color: #fff7ea; font-size: 12px; padding: 0 6px; white-space: nowrap; z-index: 2; }
 .tag.focus { background: rgba(196, 86, 110, .92); }
+.pet-ask { position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; display: flex; align-items: center; gap: 3px; padding: 1px 7px 1px 3px; background: var(--paper); color: var(--ink); font-size: 13px; box-shadow: 0 0 0 2px #2e2230, 0 3px 0 rgba(46, 34, 48, .25); white-space: nowrap; }
+.tag.owner-tip { z-index: 4; pointer-events: none; font-size: 13px; padding: 1px 7px; }
 .floattext { position: absolute; left: 0; top: 0; font-family: var(--pix); font-weight: 700; font-size: 18px; color: #f6c75a; text-shadow: 2px 0 #2e2230, -2px 0 #2e2230, 0 2px #2e2230, 0 -2px #2e2230; z-index: 4; }
 .etool {
   position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center; gap: 4px; pointer-events: auto; z-index: 5;
@@ -455,6 +457,7 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .pcard.away { opacity: .6; }
 .pcard.away::after { content: "旅館"; position: absolute; top: 2px; left: 2px; font-size: 10px; padding: 0 3px; background: var(--ink-2); color: var(--paper); }
 .pcard.add { justify-content: center; color: var(--ink-2); }
+.pneed { position: absolute; top: -4px; right: -4px; display: flex; align-items: center; gap: 1px; padding: 1px 2px; background: var(--paper); box-shadow: 0 0 0 2px var(--rose); font-size: 11px; line-height: 1; }
 .pwarn { position: absolute; top: 3px; right: 3px; width: 8px; height: 8px; background: var(--rose); box-shadow: 0 0 0 2px #2e2230; }
 .ptraits { display: flex; flex-wrap: wrap; gap: 4px; }
 .ptag { font-size: 12px; padding: 1px 6px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); color: var(--ink); cursor: default; }
@@ -620,7 +623,7 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 .win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
 .win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
 /* music library: albums and songs scroll on their own; the song list always fits at least 5 songs */
-.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 470px; max-height: 470px; min-height: 70px; }
+.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 480px; max-height: 480px; min-height: 70px; }
 .win[data-id=music] .win-b > .scroll.mlib-al-scroll { flex: 0 0 auto; max-height: 76px; min-height: 0; }
 .win[data-id=music] .win-b > .scroll.mtracks { flex: 1 1 auto; min-height: calc(5 * 36px); max-height: none; }
 .win[data-id=music] .win-b > :not(.scroll) { flex-shrink: 0; }

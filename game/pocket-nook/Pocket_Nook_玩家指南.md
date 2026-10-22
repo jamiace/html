@@ -2,15 +2,17 @@
 
 ## 玩家指南與生活攻略
 
-**每天學一點，讓喜歡的小房間慢慢長大。**
+**背幾個單字，餵飽一隻貓，再替今天留一點舒服的時光。**
 
-《小窩時光》把英文單字、番茄鐘與寵物生活放在同一個房間裡。你可以專心讀書或工作，休息時餵餵毛孩、整理盆栽，再用累積的金幣添購家具、換造型，邀朋友來互相照顧小窩。
+桌上有還沒讀完的書，窗邊有剛擺好的盆栽，麻糬正在房間裡晃來晃去。這裡是你的小窩：讀書、工作、聽音樂，也替毛孩準備下一餐。
 
-這裡沒有必須趕完的主線。你可以把「今天學會幾個字」「養大一隻寵物」「存到喜歡的房間主題」當作自己的目標，按照適合的步調遊玩。
+《小窩時光》把英文單字、番茄鐘與房間生活串在一起。多認識幾個字，可以換來罐頭和用品；完成一段專注，便離喜歡的家具更近一點。等朋友來幫盆栽澆過水，留言本又多了一筆值得回訪的小記號。
 
-![小窩時光：寵物照顧與每日任務介面示意](assets/previews/gameplay.png)
+你可以先把目標訂得很小：「今天把麻糬照顧好」「記住幾個老是忘記的字」「存到那張一直想買的椅子」。房間不必第一天就裝潢完；讓它一點一點變得像你，本來就是這款遊戲好玩的地方。
 
-*圖為遊戲隨附的介面示意。你可以一邊看房間、一邊開啟照顧、學習或任務視窗。*
+![小窩時光：寵物照顧與每日任務介面示意](assets/previews/screenshot.png)
+
+*房間是生活的舞台，視窗是手邊的小工具。看看毛孩、查查任務，再回到今天想完成的事。*
 
 ---
 
@@ -37,9 +39,14 @@
 
 ### 你的第一個小窩
 
+| **先認識麻糬** | **留個專心的角落** | **期待下一盒禮物** |
+| --- | --- | --- |
+| <img src="assets/sprites/cat_sit0.png" width="80" alt="先認識麻糬" style="image-rendering: pixelated;"> | <img src="assets/sprites/desk.png" width="80" alt="留個專心的角落" style="image-rendering: pixelated;"> | <img src="assets/sprites/gift_box.png" width="80" alt="期待下一盒禮物" style="image-rendering: pixelated;"> |
+| 第一位毛茸茸的室友。 | 讀書工作，都從這裡開始。 | 玩家升級後，記得回房間找找。 |
+
 新遊戲會提供基本房間、**150 金幣**，以及一隻名叫「麻糬」的橘貓。收納箱裡也有幾件可用來佈置的小物，道具則備有少量食物與用品。先四處點點看，不必急著把起始金幣花完。
 
-房間與角色的成長主要靠三件事連在一起：**學習取得資源、用資源照顧生活、再把生活獎勵投入自己喜歡的收藏。** 番茄鐘則讓你在真正讀書或工作的時候，也能持續累積金幣與經驗。
+先不用急著把每個按鈕研究透。你很快就會遇到第一個小選擇：麻糬想吃東西，要花金幣買罐頭，還是練五個單字換一份？等你真正開始讀書或工作，再開一輪番茄鐘，讓那段專心的時間也成為房間的一部分。
 
 ### 第一次開啟時，可以照這個順序玩
 
@@ -66,15 +73,17 @@
 
 ## 介面與基本操作
 
+**先認識房間，再認識按鈕。** 冒出泡泡時點開看看，想買東西就找商店；一時找不到入口，下方功能列總能帶你回到需要的地方。
+
 ### 上方資訊列
 
 | 畫面位置 | 可以做什麼 |
 | --- | --- |
-| 等級與經驗條 | 看目前等級、升級進度；點擊可打開設定與紀錄。 |
-| 金幣 | 看目前可花用的餘額；點擊進商店。 |
-| 番茄鐘 | 看倒數與目前是專注還是休息；點擊打開控制視窗。 |
-| 音樂資訊 | 打開播放器。 |
-| 帳號／雲朵 | 設定名字、登入、查看雲端同步與備份。 |
+| <img src="assets/sprites/i_star.png" width="28" alt="等級與經驗條" style="image-rendering: pixelated;"> 等級與經驗條 | 看目前等級、升級進度；點擊可打開設定與紀錄。 |
+| <img src="assets/sprites/i_coin.png" width="28" alt="金幣" style="image-rendering: pixelated;"> 金幣 | 看目前可花用的餘額；點擊進商店。 |
+| <img src="assets/sprites/i_tomato.png" width="28" alt="番茄鐘" style="image-rendering: pixelated;"> 番茄鐘 | 看倒數與目前是專注還是休息；點擊打開控制視窗。 |
+| <img src="assets/sprites/i_music.png" width="28" alt="音樂資訊" style="image-rendering: pixelated;"> 音樂資訊 | 打開播放器。 |
+| <img src="assets/sprites/i_cloud.png" width="28" alt="帳號／雲朵" style="image-rendering: pixelated;"> 帳號／雲朵 | 設定名字、登入、查看雲端同步與備份。 |
 | 迷你模式 | 改用精簡的房間與計時操作介面。 |
 | 設定 | 調整番茄鐘、窗外時段、下雨與自動休息。 |
 
@@ -99,6 +108,8 @@
 人物與寵物會自己散步、休息和尋找停留處。偶爾經過家具後面是正常的空間表現，不需要把牠們當成待操控的角色一直移動。
 
 ## 英文學習
+
+**今天的罐頭，可能就藏在這幾個單字裡。** 先把卡片翻一翻、聽一聽，遇到不熟的老實選「還不熟」；這趟複習不是要你假裝都會，而是把還沒記住的字慢慢留下來。
 
 ### 收錄內容與程度選擇
 
@@ -153,7 +164,16 @@
 
 單字本可以搜尋英文或中文，並依 Level 與「全部／還沒學／學習中／熟悉」篩選。每一列可查看詞性、意思與熟練度，也能單獨播放發音。清單很長時會先顯示部分結果，用搜尋更容易找到特定的字。
 
+| **今日單字** | **單字本** | **把今天讀進去** |
+| --- | --- | --- |
+| <img src="assets/sprites/i_learn.png" width="60" alt="今日單字" style="image-rendering: pixelated;"> | <img src="assets/sprites/i_book.png" width="60" alt="單字本" style="image-rendering: pixelated;"> | <img src="assets/sprites/books_stack.png" width="60" alt="把今天讀進去" style="image-rendering: pixelated;"> |
+| 每天一份，慢慢累積。 | 想找哪個字，就回來翻翻。 | 複習之後，再試試小測驗。 |
+
+*學習入口與房間裡的一疊書；單字卡與答題操作仍以學習視窗為主。*
+
 ## 學習換道具
+
+**「麻糬餓了，可是我想把金幣存起來買家具。」** 這時最適合來換道具：先挑需要的用品，再用一小組單字把它帶回家。
 
 想餵寵物、修燈泡或救盆栽，不一定要先存錢。到「學習」選擇需要的用品，完成一組 **5 個單字、5 題測驗**就能換取。
 
@@ -167,7 +187,14 @@
 
 > **缺錢時的實用做法**：日常消耗品優先用單字換，金幣留給想長期使用的家具、玩具、梳子或房間主題。需要什麼就換什麼，不必等寵物出現泡泡才準備。
 
+| **替毛孩備餐** | **把綠意救回來** | **讓小窩亮起來** |
+| --- | --- | --- |
+| <img src="assets/sprites/it_cat_can.png" width="64" alt="替毛孩備餐" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_fertilizer.png" width="64" alt="把綠意救回來" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_bulb.png" width="64" alt="讓小窩亮起來" style="image-rendering: pixelated;"> |
+| 餓了，先想起罐頭。 | 葉子枯黃時的幫手。 | 修好燈，夜晚也舒服。 |
+
 ## 番茄鐘與專注
+
+**替這段時間留一張椅子。** 選好要讀的章節、要做的工作，按下開始，接下來先陪自己專心一輪；等休息時，再回頭看看小窩。
 
 ### 時間設定與循環
 
@@ -201,7 +228,14 @@
 
 **自動開始休息不等於自動無限專注。** 完成一輪、休息結束後，回來確認並重新開始，才是下一段專注。把小窩當成讀書工具時，可以先從待辦清單選好這一輪的目標，結束後再打勾。
 
+| **專心一輪** | **來杯咖啡** | **先吃點東西** |
+| --- | --- | --- |
+| <img src="assets/sprites/i_tomato.png" width="64" alt="專心一輪" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_coffee.png" width="64" alt="來杯咖啡" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_onigiri.png" width="64" alt="先吃點東西" style="image-rendering: pixelated;"> |
+| 開始、暫停、休息，照自己的節奏。 | 替下一輪完整專注準備經驗加成。 | 飯糰準備的是金幣加成。 |
+
 ## 金幣經驗與舒適度
+
+**金幣讓房間換新衣，經驗讓更多選擇打開。** 兩者一起累積，但用途不同；先看懂它們，就能少一點「明明升級了，怎麼還沒拿到家具」的困惑。
 
 ### 三種成長不要混在一起
 
@@ -239,6 +273,8 @@
 
 ## 房間需求
 
+**泡泡是室友遞來的小紙條。** 有時是「我餓了」，有時是「這盞燈壞了」。點開看清楚，再決定拿用品、做個動作，或先去練一小組單字。
+
 需求泡泡是房間裡的人、毛孩與家具在提醒你「現在想要什麼」。點泡泡看說明，也可以從「任務 → 需求」集中查看。
 
 同樣是餵食或清潔，**有沒有完成需求**與**有沒有做過一次動作**是兩回事。寵物的狀態如果還不夠好，做一次照顧不一定就讓泡泡消失；繼續看看狀態條與需求卡。
@@ -275,7 +311,14 @@
 
 ## 寵物生活
 
+**從「房間裡有隻貓」，到「這是我家的麻糬」。** 名字、個性、喜歡的食物和每天的小動作，會讓看起來相同的毛孩，也住出不同的生活感。
+
 ### 可以養幾隻
+
+| **去那邊看看** | **坐著陪你** | **睡一個小覺** | **伸個懶腰** |
+| --- | --- | --- | --- |
+| <img src="assets/sprites/cat_walk0.png" width="88" alt="去那邊看看" style="image-rendering: pixelated;"> | <img src="assets/sprites/dog_sit0.png" width="88" alt="坐著陪你" style="image-rendering: pixelated;"> | <img src="assets/sprites/cat_sleep0.png" width="88" alt="睡一個小覺" style="image-rendering: pixelated;"> | <img src="assets/sprites/dog_stretch0.png" width="88" alt="伸個懶腰" style="image-rendering: pixelated;"> |
+| 房間裡總有值得晃晃的地方。 | 不趕行程的時光也很好。 | 精力慢慢補回來。 | 醒來，再看看你在做什麼。 |
 
 - 總共最多飼養 **10 隻**，同一種類可以領養多隻。
 - 房間裡同時最多 **5 隻**，至少保留 **1 隻**。
@@ -338,6 +381,11 @@
 
 ### 直接餵與放進碗裡，有什麼不同
 
+| **空碗** | **還有一點** | **半滿** | **滿滿一碗** |
+| --- | --- | --- | --- |
+| <img src="assets/sprites/pet_bowl.png" width="88" alt="空碗" style="image-rendering: pixelated;"> | <img src="assets/sprites/pet_bowl_low.png" width="88" alt="還有一點" style="image-rendering: pixelated;"> | <img src="assets/sprites/pet_bowl_half.png" width="88" alt="半滿" style="image-rendering: pixelated;"> | <img src="assets/sprites/pet_bowl_full.png" width="88" alt="滿滿一碗" style="image-rendering: pixelated;"> |
+| 記得看看裡面有沒有食物。 | 毛孩會分次取用。 | 替接下來的生活做準備。 | 仍以份數和食物內容為準。 |
+
 | 方式 | 適合情境 | 你需要做的事 |
 | --- | --- | --- |
 | 直接餵 | 現在要補狀態、完成照顧或回應需求。 | 在寵物照顧頁選擇毛孩，再點食物。 |
@@ -355,39 +403,43 @@
 
 ## 用品查表
 
+**罐頭負責飽足，玩具負責快樂，梳子負責把毛理順。** 這頁可以當成小窩的用品櫃：缺什麼就查什麼，不必每次都重新逛完整間商店。
+
 以下為一般商店原價與基礎效果。實際互動可能受到寵物的個性、喜好或目前狀態影響；各狀態最高不超過 100。
 
 ### 食物與消耗用品
 
-| 道具 | 金幣 | 主要用途 |
-| --- | ---: | --- |
-| 罐頭 | 40 | 飽足 +45、心情 +5，日常正餐。 |
-| 小魚乾 | 25 | 飽足 +20、心情 +8，小份點心。 |
-| 豪華餐 | 75 | 飽足 +70、心情 +15、精力 +10；成長回饋較多。 |
-| 零食 | 30 | 心情 +12、羈絆 +6，並補少量飽足；也用來回應撒嬌需求。 |
-| 貓薄荷 | 45 | 心情 +30、消耗 25 精力，會興奮地跑動。 |
-| 洗毛精 | 35 | 洗澡，清潔回滿。一般貓咪不太喜歡水，愛乾淨的毛孩反應不同。 |
-| 寵物藥 | 60 | 治療不舒服的寵物；健康時不必吃。 |
-| 植物營養液 | 40 | 處理植物枯黃需求。 |
-| 清潔噴霧 | 40 | 處理家具灰塵需求。 |
-| 燈泡 | 45 | 修復燒壞的燈。 |
-| 咖啡 | 30 | 下一輪完整專注結算時，追加該輪基礎分鐘經驗的 30%。 |
-| 飯糰 | 30 | 下一輪完整專注結算時，追加該輪基礎分鐘金幣的 30%。 |
+| 圖鑑 | 道具 | 金幣 | 主要用途 |
+| --- | --- | ---: | --- |
+| <img src="assets/sprites/it_cat_can.png" width="48" alt="罐頭" style="image-rendering: pixelated;"> | 罐頭 | 40 | 飽足 +45、心情 +5，日常正餐。 |
+| <img src="assets/sprites/it_fish.png" width="48" alt="小魚乾" style="image-rendering: pixelated;"> | 小魚乾 | 25 | 飽足 +20、心情 +8，小份點心。 |
+| <img src="assets/sprites/it_premium.png" width="48" alt="豪華餐" style="image-rendering: pixelated;"> | 豪華餐 | 75 | 飽足 +70、心情 +15、精力 +10；成長回饋較多。 |
+| <img src="assets/sprites/it_cat_treat.png" width="48" alt="零食" style="image-rendering: pixelated;"> | 零食 | 30 | 心情 +12、羈絆 +6，並補少量飽足；也用來回應撒嬌需求。 |
+| <img src="assets/sprites/it_catnip.png" width="48" alt="貓薄荷" style="image-rendering: pixelated;"> | 貓薄荷 | 45 | 心情 +30、消耗 25 精力，會興奮地跑動。 |
+| <img src="assets/sprites/it_shampoo.png" width="48" alt="洗毛精" style="image-rendering: pixelated;"> | 洗毛精 | 35 | 洗澡，清潔回滿。一般貓咪不太喜歡水，愛乾淨的毛孩反應不同。 |
+| <img src="assets/sprites/it_medicine.png" width="48" alt="寵物藥" style="image-rendering: pixelated;"> | 寵物藥 | 60 | 治療不舒服的寵物；健康時不必吃。 |
+| <img src="assets/sprites/it_fertilizer.png" width="48" alt="植物營養液" style="image-rendering: pixelated;"> | 植物營養液 | 40 | 處理植物枯黃需求。 |
+| <img src="assets/sprites/it_spray.png" width="48" alt="清潔噴霧" style="image-rendering: pixelated;"> | 清潔噴霧 | 40 | 處理家具灰塵需求。 |
+| <img src="assets/sprites/it_bulb.png" width="48" alt="燈泡" style="image-rendering: pixelated;"> | 燈泡 | 45 | 修復燒壞的燈。 |
+| <img src="assets/sprites/it_coffee.png" width="48" alt="咖啡" style="image-rendering: pixelated;"> | 咖啡 | 30 | 下一輪完整專注結算時，追加該輪基礎分鐘經驗的 30%。 |
+| <img src="assets/sprites/it_onigiri.png" width="48" alt="飯糰" style="image-rendering: pixelated;"> | 飯糰 | 30 | 下一輪完整專注結算時，追加該輪基礎分鐘金幣的 30%。 |
 
 以上用品都可以透過「學習換道具」取得。咖啡、飯糰是準備下一輪的加成，不會一用就直接獲得一整輪的獎勵；同類效果也不會因連續使用而一層層往上疊。
 
 ### 買一次就能重複使用的工具
 
-| 工具 | 原價 | 基礎效果／限制 |
-| --- | ---: | --- |
-| 梳子 | 80 | 清潔 +15、心情 +6；同一隻寵物每 20 分鐘可梳一次。 |
-| 逗貓棒 | 120 | 心情 +18，消耗 20 精力。 |
-| 毛線球 | 90 | 心情 +15，消耗 15 精力。 |
-| 小皮球 | 90 | 心情 +16，消耗 18 精力。 |
+| 圖鑑 | 工具 | 原價 | 基礎效果／限制 |
+| --- | --- | ---: | --- |
+| <img src="assets/sprites/t_brush.png" width="48" alt="梳子" style="image-rendering: pixelated;"> | 梳子 | 80 | 清潔 +15、心情 +6；同一隻寵物每 20 分鐘可梳一次。 |
+| <img src="assets/sprites/t_wand.png" width="48" alt="逗貓棒" style="image-rendering: pixelated;"> | 逗貓棒 | 120 | 心情 +18，消耗 20 精力。 |
+| <img src="assets/sprites/t_yarn.png" width="48" alt="毛線球" style="image-rendering: pixelated;"> | 毛線球 | 90 | 心情 +15，消耗 15 精力。 |
+| <img src="assets/sprites/t_ball.png" width="48" alt="小皮球" style="image-rendering: pixelated;"> | 小皮球 | 90 | 心情 +16，消耗 18 精力。 |
 
 玩具與梳子是共用收藏，買下後不會每用一次就少一個。貓薄荷則是消耗品，和這些長期工具不同。毛孩生病或太累時，先讓牠治療、休息，再安排玩耍。
 
 ## 訓練與把戲
+
+**先學會幾個字，再一起排一場小表演。** 從乖乖坐好到跳過火圈，每個動作都是一點一點練出來的；進度條還沒滿，也代表你們已經走了一段路。
 
 ### 訓練條件
 
@@ -427,7 +479,11 @@
 
 **每隻寵物、每個已學會的把戲，每天第一次表演都各有一次獎勵**，畫面會標示當日是否表演過；重複看仍可以，只是不重複發當天同一把戲的首次獎勵。表演與訓練不同：不必每看一次就重新做四題測驗。
 
+> **排練結束，先歇一會兒。** 如果是剛做完訓練，看看精力條，再決定繼續練還是睡個小覺。想再看一遍已學會的演出，則可以直接按「表演」。
+
 ## 寵物配件
+
+**今天戴鈴鐺，明天換蝴蝶結。** 把同一件小配件交給不同毛色的毛孩，常常就有另一種可愛；先替最常陪你的那隻挑一件也很好。
 
 到「寵物 → 配件」選擇脖子與頭部飾品。**買一次，所有寵物都可以使用**，不必替每隻各買一份；同一隻在同一部位一次配戴一件，再點已戴上的配件可取下。
 
@@ -445,6 +501,8 @@
 配件會顯示在毛孩身上，可配合不同毛色搭配；它們主要是造型收藏，不必為了照顧或完成單字任務而全買。
 
 ## 商店收納與佈置
+
+**逛商店是做夢，從收納箱拿出來才是搬家。** 一張桌子、一盆植物、一盞燈，慢慢拼成你喜歡待著的角落。
 
 ### 先買，再擺
 
@@ -466,13 +524,39 @@
 
 ### 想讓房間舒服，可以先顧這三件事
 
+| **原木書桌** | **小木椅** | **圓坐墊** |
+| --- | --- | --- |
+| <img src="assets/sprites/desk.png" width="88" alt="原木書桌" style="image-rendering: pixelated;"> | <img src="assets/sprites/chair.png" width="88" alt="小木椅" style="image-rendering: pixelated;"> | <img src="assets/sprites/cushion.png" width="88" alt="圓坐墊" style="image-rendering: pixelated;"> |
+| 留給今天最想完成的事。 | 在桌邊，剛剛好的位置。 | 替毛孩留一個舒服角落。 |
+
+| **藍格子床** | **貓跳台** | **龜背芋** |
+| --- | --- | --- |
+| <img src="assets/sprites/bed.png" width="88" alt="藍格子床" style="image-rendering: pixelated;"> | <img src="assets/sprites/cat_tree.png" width="88" alt="貓跳台" style="image-rendering: pixelated;"> | <img src="assets/sprites/plant_monstera.png" width="88" alt="龜背芋" style="image-rendering: pixelated;"> |
+| 休息也算小窩生活的一部分。 | 多一處讓毛孩停留的地方。 | 替木頭與布料加一點綠意。 |
+
 - **工作區**：書桌附近留工作椅，讓專注時有清楚的工作位置。
 - **寵物區**：食碗、休息墊和活動空間不要全擠在畫面邊角；多隻寵物時考慮多個碗與休息點。
 - **動線與觀看**：大型家具放得太滿，會讓毛孩不容易被看見。留一些開闊地板，看散步與互動會更有生活感。
 
 原木書桌、小木椅、寵物碗與圓坐墊在早期即可購買。新遊戲已放好的設施能繼續沿用，不必看到攻略提到就重買一套。
 
+### 先選一面牆，再決定房間的心情
+
+同一張桌子，換了背景就像搬到另一個地方。下列是幾款壁紙與地板的預覽，實際商品名稱、價格與開放條件可到商店查看。
+
+| **奶油條紋** | **障子** | **午夜星星** |
+| --- | --- | --- |
+| <img src="assets/previews/wallpaper_cream_stripe.png" width="180" alt="奶油條紋" style="image-rendering: pixelated;"> | <img src="assets/previews/wallpaper_shoji.png" width="180" alt="障子" style="image-rendering: pixelated;"> | <img src="assets/previews/wallpaper_wp_stars_midnight.png" width="180" alt="午夜星星" style="image-rendering: pixelated;"> |
+| 溫暖又容易搭配。 | 換一點和室氣氛。 | 留給喜歡夜色的房間。 |
+
+| **蜂蜜木地板** | **榻榻米** | **清水模** |
+| --- | --- | --- |
+| <img src="assets/previews/floor_wood_honey.png" width="180" alt="蜂蜜木地板" style="image-rendering: pixelated;"> | <img src="assets/previews/floor_tatami.png" width="180" alt="榻榻米" style="image-rendering: pixelated;"> | <img src="assets/previews/floor_concrete.png" width="180" alt="清水模" style="image-rendering: pixelated;"> |
+| 柔和的木色基底。 | 配矮桌與座布團。 | 試試俐落的工作室風格。 |
+
 ## 主題房間
+
+**想吹海風，還是想窩在壁爐旁？** 主題包替你準備了一套氣氛；你也可以只換背景，讓原本熟悉的家具搬進新的風景裡。
 
 主題包是一組搭配好的壁紙、地板、窗景與指定家具。你可以整套套用，也可以只借它的背景搭配，再混入原本的收藏。
 
@@ -503,7 +587,18 @@
 
 *以上均為遊戲隨附的主題示意圖。你可以自行混搭，不必維持預設擺法。*
 
+### 窗外，也可以有自己的收藏
+
+家具住在房間裡，風景住在窗外。窗景可以在商店購買，買過之後再從收納切換；看膩了城市，也可以換一點海風或櫻花。
+
+| **城市街景** | **海邊** | **櫻花** |
+| --- | --- | --- |
+| <img src="assets/previews/view_city.png" width="160" alt="城市街景" style="image-rendering: pixelated;"> | <img src="assets/previews/view_sea.png" width="160" alt="海邊" style="image-rendering: pixelated;"> | <img src="assets/previews/view_sakura.png" width="160" alt="櫻花" style="image-rendering: pixelated;"> |
+| 熟悉的日常。 | 給眼睛一點遠方。 | 在窗邊留一點春天。 |
+
 ## 角色造型
+
+**房間是你的風格，住在裡面的人當然也是。** 試試不同瀏海、上衣與鞋子，轉到側面再看一眼；喜歡了再買，不用只憑小縮圖想像。
 
 「造型」提供膚色、眼睛、眉毛嘴巴、瀏海與後髮、上衣、褲裙、鞋子、帽子、眼鏡耳飾，以及頸部和背部裝飾。各部位有免費基本款，其餘依玩家等級開放購買。
 
@@ -515,7 +610,14 @@
 
 ## 禮物折價券與扭蛋
 
+**地上多了一盒禮物，今天就多了一個拆箱的理由。** 升級禮物、幫忙換來的抽獎券、房間裡的扭蛋機，各有自己的玩法，別把它們的規則混在一起。
+
 ### 升級禮物盒
+
+| **升級禮物盒** | **抽獎券** | **折價券** |
+| --- | --- | --- |
+| <img src="assets/sprites/gift_box.png" width="72" alt="升級禮物盒" style="image-rendering: pixelated;"> | <img src="assets/sprites/i_ticket.png" width="72" alt="抽獎券" style="image-rendering: pixelated;"> | <img src="assets/sprites/i_coupon.png" width="72" alt="折價券" style="image-rendering: pixelated;"> |
+| 玩家升級後，在房間裡打開。 | 累積幫好友忙獲得。 | 先選券，再買適用商品。 |
 
 玩家升級後，房間裡會出現禮物盒，要點一下打開。可能獲得家具、金幣或折價券。
 
@@ -545,6 +647,10 @@
 
 ### 扭蛋與重複款式
 
+<img src="assets/sprites/fun_gacha.png" width="96" alt="扭蛋機" style="image-rendering: pixelated;">
+
+*這台小機器的驚喜，在按下去之前都還不知道。先看好每次花費，再決定要不要轉一顆。*
+
 扭蛋機是需要先取得並擺進房間的互動家具，不是每次開商店都能直接抽。點房間裡的扭蛋機，每次消耗 **80 金幣**，獲得一件隨機小物或牆面裝飾。
 
 抽到新款會進收納箱；抽到已在房間或收納箱裡的款式，會讓你選：
@@ -555,6 +661,8 @@
 這個賣價看的是**商品原價**，不是 80 金幣扭蛋費。若還沒決定就關掉視窗，下次會再顯示待處理的結果，先完成選擇才能繼續抽。
 
 ## 每日任務與成就
+
+**今天的小清單，和住久了才看得見的足跡。** 每日任務替你提供短程目標；成就則把那些「原來我已經做了這麼多」收進紀錄。
 
 ### 每日任務怎麼看
 
@@ -608,7 +716,16 @@
 
 成就卡會顯示目前進度與下一個目標，不用一次追完。把成就當成生活紀錄，比為了一個數字把每件事都重複點很多次，更能看見自己逐漸累積的成果。
 
+| **學霸獎盃** | **單字達人獎狀** |
+| --- | --- |
+| <img src="assets/sprites/trophy.png" width="88" alt="學霸獎盃" style="image-rendering: pixelated;"> | <img src="assets/sprites/diploma.png" width="88" alt="單字達人獎狀" style="image-rendering: pixelated;"> |
+| 把努力換成房間裡的一件紀念。 | 留一面牆，記住自己的累積。 |
+
+*部分成就階段會送紀念家具；能領什麼、還差多少，看看成就卡就知道。*
+
 ## 好友與名片
+
+**把六碼代碼交給朋友，小窩就有了可以互相串門子的鄰居。** 先認名片、再按接受，之後就能看看彼此把房間住成了什麼模樣。
 
 好友、排行榜與團隊功能，需要登入雲端帳號並完成同步。自己的學習、照顧與房間玩法不必等到找到朋友才開始。
 
@@ -633,7 +750,14 @@
 
 ## 拜訪與互相幫忙
 
+**來都來了，順手替盆栽澆點水。** 好友不必剛好在線，你也能留下幫忙；等對方回來，一個小愛心就會告訴他，你曾經來過。
+
 ### 拜訪的玩法
+
+| **幫忙餵食** | **幫忙澆水** | **幫忙清掃** |
+| --- | --- | --- |
+| <img src="assets/sprites/it_cat_can.png" width="64" alt="幫忙餵食" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_fertilizer.png" width="64" alt="幫忙澆水" style="image-rendering: pixelated;"> | <img src="assets/sprites/it_spray.png" width="64" alt="幫忙清掃" style="image-rendering: pixelated;"> |
+| 對方毛孩真的有飢餓需求時。 | 對方盆栽葉子枯黃時。 | 對方家具真的積灰塵時。 |
 
 在好友列表按「拜訪」，可以看看對方最近分享的小窩與寵物。如果有需要幫忙的項目，就會出現對應操作。拜訪畫面不是雙方必須同時在線的即時共同房間，好友離線時也能留下幫忙。
 
@@ -662,6 +786,10 @@
 
 ### 留言本與愛心
 
+<img src="assets/sprites/guestbook.png" width="80" alt="放在房間裡的留言本" style="image-rendering: pixelated;">
+
+*「今天有人替麻糬添了飯。」把這些小小的照顧留在本子裡，下次換你去他家看看。*
+
 好友幫忙後，對應的寵物或家具旁可能留下小愛心，點它可以查看誰做了什麼，讀完便會收起標記。
 
 「好友 → 留言本」可以查看紀錄，點名字看名片，或按「回訪」去對方家。第一次啟用好友功能時也會收到一本可擺放的留言本，從收納箱拿出來，便能在房間裡直接開啟紀錄。
@@ -669,6 +797,8 @@
 這裡的留言本是**自動記錄好友幫忙**，不是讓玩家任意輸入長篇留言的聊天室；單純逛一圈沒有幫忙，也不代表一定會產生一筆同樣的幫忙紀錄。
 
 ## 每日與每週團隊任務
+
+**各自讀書、各自照顧，進度卻能往同一個目標前進。** 隊友不一定要同時在線，也不必每個人做一樣多；先組好隊，再把今天要做的事慢慢完成。
 
 ### 人數、期限與目標
 
@@ -721,6 +851,8 @@
 
 ## 排行榜
 
+**想較勁時來看看，想安靜過日子時也可以繼續自己的步調。** 這裡記錄的是不同方向的累積；買了一張喜歡的椅子，不會把你曾經賺過的金幣從紀錄裡扣走。
+
 到「好友 → 排行榜」可切換四種榜單，每種只顯示 **前 30 名**。
 
 | 榜單 | 比較的是什麼 |
@@ -736,16 +868,20 @@
 
 ## 旅行商人
 
+**角落的告示牌又有新消息了。** 有人帶著盆景，有人推來古董，也有人惦記你箱子裡用不到的地毯。每週路過攤位看看，收藏就多了一點逛街的樂趣。
+
 每週會有一位商人在家門外擺攤，點房間角落的告示牌就能前往；同一週的玩家會遇到同一位商人。不同商人帶來各自的風格商品，也收購不同類別的多餘擺設。
 
-| 商人 | 風格 | 主要收購類別 |
-| --- | --- | --- |
-| 青苔婆婆 | 植物、盆景與綠意收藏 | 盆栽、花瓶、小擺飾 |
-| 老鐘先生 | 古董與復古物件 | 時鐘、畫、鏡子 |
-| 毛球小姐 | 毛孩家具與可愛用品 | 玩偶、地毯、玩具 |
-| 夜星 | 星象、月光與發光收藏 | 霓虹燈、燈、燈串 |
-| 可可 | 甜點與店鋪風格擺飾 | 杯壺、書桌用品、其他合適小物 |
-| 阿線 | 手作、織品與溫暖家具 | 地毯、椅子、櫃子 |
+| 攤上的一件收藏 | 商人 | 風格 | 主要收購類別 |
+| --- | --- | --- | --- |
+| <img src="assets/sprites/m_pine_bonsai.png" width="72" alt="古松盆景" style="image-rendering: pixelated;"><br>古松盆景 | 青苔婆婆 | 植物、盆景與綠意收藏 | 盆栽、花瓶、小擺飾 |
+| <img src="assets/sprites/m_grandfather.png" width="72" alt="落地老爺鐘" style="image-rendering: pixelated;"><br>落地老爺鐘 | 老鐘先生 | 古董與復古物件 | 時鐘、畫、鏡子 |
+| <img src="assets/sprites/m_cat_condo.png" width="72" alt="貓咪別墅" style="image-rendering: pixelated;"><br>貓咪別墅 | 毛球小姐 | 毛孩家具與可愛用品 | 玩偶、地毯、玩具 |
+| <img src="assets/sprites/m_telescope.png" width="72" alt="黃銅天文望遠鏡" style="image-rendering: pixelated;"><br>黃銅天文望遠鏡 | 夜星 | 星象、月光與發光收藏 | 霓虹燈、燈、燈串 |
+| <img src="assets/sprites/m_cake_stand.png" width="72" alt="三層點心架" style="image-rendering: pixelated;"><br>三層點心架 | 可可 | 甜點與店鋪風格擺飾 | 杯壺、書桌用品、其他合適小物 |
+| <img src="assets/sprites/m_knit_pouf.png" width="72" alt="粗針織坐墩" style="image-rendering: pixelated;"><br>粗針織坐墩 | 阿線 | 手作、織品與溫暖家具 | 地毯、椅子、櫃子 |
+
+*上圖是各商人的代表商品，不是商人肖像。當週實際出售的款式與庫存，請到攤位查看。*
 
 ### 「他在賣」
 
@@ -762,6 +898,15 @@
 旅行商人收購與扭蛋重複款式出售是兩個入口，價格規則不同。適合整理暫時不想擺的收藏，不需要為了賣東西把喜歡的房間拆光。
 
 ## 音樂與歌詞
+
+| **黑膠唱機** | **落地喇叭** | **直立鋼琴** |
+| --- | --- | --- |
+| <img src="assets/sprites/record_player.png" width="88" alt="黑膠唱機" style="image-rendering: pixelated;"> | <img src="assets/sprites/speaker.png" width="88" alt="落地喇叭" style="image-rendering: pixelated;"> | <img src="assets/sprites/fun_piano.png" width="88" alt="直立鋼琴" style="image-rendering: pixelated;"> |
+| 喜歡的歌，配喜歡的角落。 | 房間裡的音樂風景。 | 有空再點一下，看看小反應。 |
+
+*這些是可收藏的家具；使用音樂播放器不必先買齊一套音響。*
+
+**替今天挑一首背景音樂。** 可以是內建曲目，也可以是你自己的歌；窗外下點雨、桌邊放張黑膠，讀書與休息就各有一種氣氛。
 
 音樂不只配合番茄鐘。你可以自由聽歌、調整清單，讓房間陪自己讀書、工作或休息。
 
@@ -797,6 +942,8 @@
 
 ## 待辦便條與環境設定
 
+**把腦袋裡繞來繞去的事，先寫下來。** 待辦用來記「要完成什麼」，便條用來留「別忘了什麼」；至於窗外要白天還是夜晚，今天由你決定。
+
 ### 待辦清單
 
 輸入一件事後按 Enter 或新增，點方框或文字就能完成。完成一項可得基礎 **3 金幣、5 經驗**，每天最多 **15 次**獎勵；同一項反覆取消再打勾，不會一直重領。預先提供的範例待辦不發獎。
@@ -817,24 +964,28 @@
 
 ## 家具裡的小互動
 
+**買回來的不只是擺設，也可能是一個小驚喜。** 有空時多點兩下，看看誰會冒泡泡、誰會報時、誰能替今天泡出一杯咖啡。
+
 不少擺設有生活小反應，不只用來提高房間舒適度。依物件功能，可能出現葉片、泡泡、音符、愛心、時間或日期資訊。
 
-| 物件類型 | 可以嘗試的互動 |
-| --- | --- |
-| 一般植物 | 點一下澆水或看葉片反應；枯黃需求另用營養液處理。 |
-| 魚缸 | 餵魚，看水中與餵食反應。 |
-| 書架或單字相關家具 | 看看會不會出現單字與發音。 |
-| 咖啡機 | 取得當日可沖泡的咖啡。 |
-| 小冰箱 | 看看當日可以拿到什麼食物。 |
-| 直立鋼琴 | 看到演奏文字與音符。 |
-| 街機台 | 玩一次得分小互動、試著刷新紀錄。 |
-| 時鐘與布穀鳥鐘 | 查看現在時間。 |
-| 燈與發光擺設 | 開關照明，欣賞不同時段的效果。 |
-| 音響與相關設備 | 配合音樂呈現播放氣氛。 |
+| 圖鑑 | 物件類型 | 可以嘗試的互動 |
+| --- | --- | --- |
+| <img src="assets/sprites/plant_monstera.png" width="64" alt="龜背芋" style="image-rendering: pixelated;"> | 一般植物 | 點一下澆水或看葉片反應；枯黃需求另用營養液處理。 |
+| <img src="assets/sprites/fun_aquarium.png" width="64" alt="大魚缸" style="image-rendering: pixelated;"> | 魚缸 | 餵魚，看水中與餵食反應。 |
+| <img src="assets/sprites/fun_word_shelf.png" width="64" alt="單字書牆" style="image-rendering: pixelated;"> | 書架或單字相關家具 | 看看會不會出現單字與發音。 |
+| <img src="assets/sprites/fun_coffee_machine.png" width="64" alt="咖啡機" style="image-rendering: pixelated;"> | 咖啡機 | 取得當日可沖泡的咖啡。 |
+| <img src="assets/sprites/fun_fridge.png" width="64" alt="復古小冰箱" style="image-rendering: pixelated;"> | 小冰箱 | 看看當日可以拿到什麼食物。 |
+| <img src="assets/sprites/fun_piano.png" width="64" alt="直立鋼琴" style="image-rendering: pixelated;"> | 直立鋼琴 | 看到演奏文字與音符。 |
+| <img src="assets/sprites/fun_arcade.png" width="64" alt="街機台" style="image-rendering: pixelated;"> | 街機台 | 玩一次得分小互動、試著刷新紀錄。 |
+| <img src="assets/sprites/fun_cuckoo.png" width="64" alt="布穀鳥鐘" style="image-rendering: pixelated;"> | 時鐘與布穀鳥鐘 | 查看現在時間。 |
+| <img src="assets/sprites/m_moon_lamp.png" width="64" alt="月球燈" style="image-rendering: pixelated;"> | 燈與發光擺設 | 開關照明，欣賞不同時段的效果。 |
+| <img src="assets/sprites/record_player.png" width="64" alt="黑膠唱機" style="image-rendering: pixelated;"> | 音響與相關設備 | 配合音樂呈現播放氣氛。 |
 
 部分互動有當日次數限制，重複點擊主要是欣賞反應，不會無限取得資源。這些家具也各有解鎖等級與價格，看到想要的時再把它列進收藏目標即可。
 
 ## 帳號與存檔
+
+**出門前看看門有沒有帶上，換裝置前看看進度有沒有同步。** 把最近的生活好好存下來，下次登入才能接著照顧同一個小窩。
 
 ### 登入與同步
 
@@ -868,6 +1019,8 @@
 
 ## 日常遊玩安排
 
+**不必把所有事情都塞進同一天。** 今天只有一點空檔，就做一點；今天想好好讀書，就讓番茄鐘陪你久一些。下面幾種安排，挑順手的用就好。
+
 下面是幾種可自由選擇的玩法，不是系統額外要求的任務。
 
 ### 只有一點空檔
@@ -898,6 +1051,8 @@
 | 離開前 | 碗的補充、待領獎勵、雲端同步是否完成。 |
 
 ## 常見問題
+
+**小窩生活偶爾也有「咦，怎麼會這樣？」的時候。** 先看看下面有沒有同樣的狀況，通常只差一個入口、一次領取，或一點點等待。
 
 ### 我已經把今天的單字做完，為什麼每日任務還沒拿到金幣？
 
@@ -977,6 +1132,8 @@
 
 ## 操作速查
 
+**手已經放在鍵盤上，就少移動幾次滑鼠。** 這裡收好常用按鍵與重要次數，忘記時回來查一下就行。
+
 ### 學習快捷鍵
 
 | 畫面 | 按鍵 | 動作 |
@@ -1020,4 +1177,6 @@
 
 ---
 
-*把單字練習留給每天一點點，把大塊的時間留給真正想完成的事。休息回來時，房間還在，毛孩也在。*
+![夜晚的溫馨小窩](assets/previews/theme_cozy_night.png)
+
+*今天的字背到這裡，今天的小窩也先照顧到這裡。把進度存好，留一盞喜歡的燈，下次再回來繼續。*

@@ -225,7 +225,34 @@ const UI = {
       if (el.textContent !== txt) el.textContent = txt; el.classList.toggle('focus', v.st === 'focus');
       const [x, y] = v.headPos(); el.style.transform = `translate(${Math.round(x * s)}px, ${Math.round((y + 31) * s)}px) translate(-50%, 0)`;
     }
-    this.posToolbar();
+    this.posToolbar(); this.posOwnerTip(); this.posPetAsk();
+  },
+  // "pet me" hint: the pet waits where it is with a bobbing heart until you pet it in the room (3 pats) or 30 s pass
+  askPet(pid, needId) {
+    const p = Pets.get(pid), a = p && Pets.actor(p); if (!a) return;
+    if (!['eat', 'zoom', 'trick'].includes(a.state)) { a.leaveSpot(() => { }); a.walking = false; a.state = 'sit'; a.timer = 30; }
+    Game.bubble(a, a.kind === 'dog' ? '汪～摸摸我！' : '喵～摸摸我', 2.6);
+    this.petAsk = { pid, needId, until: performance.now() + 30000 };
+  },
+  posPetAsk() {
+    const q = this.petAsk; let el = this._askEl;
+    const a = q && Pets.actor(Pets.get(q.pid)), open = q && Life.L.needs.some(n => n.id === q.needId);
+    if (!q || !a || !open || performance.now() > q.until || Room.edit) { if (el) el.hidden = true; if (q && (!open || performance.now() > q.until)) this.petAsk = null; return; }
+    if (!el) { el = this._askEl = h('div', { class: 'pet-ask' }, ico('n_heart', 22), h('span', { text: '點牠摸摸' })); this.overlay.append(el); }
+    if (a.state === 'sit' && !a.walking) a.timer = Math.max(a.timer || 0, 2);   // keeps waiting for you instead of wandering off
+    el.hidden = false; const s = Game.scale, [x, y] = a.headPos(), bob = Math.round(Math.sin(performance.now() / 220) * 3);
+    el.style.transform = `translate(${Math.round(x * s)}px, ${Math.round((y - 26) * s) + bob}px) translate(-50%, -100%)`;
+  },
+  // whose item this is, under the item: while arranging (hover, drag, selected) and on hover in normal play
+  posOwnerTip() {
+    const it = Room.edit ? ((Room.drag && Room.drag.it) || Room.hover || Room.sel) : this.hoverIt;
+    const txt = it && Room.uidMap[it.uid] && typeof Pets !== 'undefined' ? Pets.ownerTag(it) : null;
+    let el = this._ownTip;
+    if (!txt) { if (el) el.hidden = true; return; }
+    if (!el) { el = this._ownTip = h('div', { class: 'tag owner-tip' }); this.overlay.append(el); }
+    if (el.textContent !== txt) el.textContent = txt; el.hidden = false;
+    const cv = Room.itemCanvas(it), s = Game.scale;
+    el.style.transform = `translate(${Math.round((it.x + cv.width / 2) * s)}px, ${Math.round((it.y + cv.height + 2) * s)}px) translate(-50%, 0)`;
   },
   // ---------------- toasts ----------------
   toast(text, icon, secs = 3, action) {

@@ -219,7 +219,7 @@ class Pet extends Walker {
     else cb && cb();
   }
   startJump(x, y, cb, hgt = 10) { this.jump = { x0: this.x, y0: this.y, x1: x, y1: y, t: 0, cb, hgt }; this.state = this.state === 'trick' ? 'trick' : 'jump'; if (x !== this.x) this.flip = x < this.x; }
-  bowl() { const d = this.data; return (d && (Pets.bowlOf(d) || Pets.bowls().find(b => !Pets.bowlOwner(b)))) || Pets.bowls()[0]; }
+  bowl() { const d = this.data; return (d && (Pets.bowlFor(d) || Pets.bowlShown(d))) || Pets.bowls()[0]; }
   eat() {
     const bowl = this.bowl(); this.zoomN = 0; this.speed = this.baseSpeed();
     this.leaveSpot(() => {

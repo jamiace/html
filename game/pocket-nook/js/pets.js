@@ -179,9 +179,21 @@ const Pets = {
   bowlLeft(b) { return (b.bq || []).reduce((n, q) => n + q.left, 0); },
   bowlLevel(b) { const n = this.bowlLeft(b); return n >= 60 ? 'full' : n > 20 ? 'half' : n > 0 ? 'low' : ''; },
   bowlOwner(b) { return b.pet != null && this.get(b.pet) ? this.get(b.pet) : null; },
+  // who the bowl is kept for right now: its owner while the owner is home; a bowl whose owner is at the pet hotel is shared meanwhile
+  bowlUser(b) { const o = this.bowlOwner(b); return o && o.home ? o : null; },
   bowlOf(p) { return this.bowls().find(b => b.pet === p.id) || null; },
-  // the bowl this pet eats from: its own, otherwise a shared one that has food
-  bowlFor(p) { const own = this.bowlOf(p); if (own) return this.bowlLeft(own) > 0 ? own : null; return this.bowls().find(b => !this.bowlOwner(b) && this.bowlLeft(b) > 0) || null; },
+  // "whose is this?" for anything in the room that belongs to someone (today: food bowls); null for ordinary items
+  ownerTag(it) {
+    const d = it && ITEMS[it.k]; if (!d) return null;
+    const o = it.pet != null ? this.get(it.pet) : null;
+    if (o) return `${o.name}的${d.n}` + (o.home ? '' : '（在寵物旅館，暫時共用）');
+    return d.bowl ? `共用的${d.n}` : null;
+  },
+  sharedBowls() { return this.bowls().filter(b => !this.bowlUser(b)); },
+  // the bowl this pet eats from: its own while it has food, otherwise a shared one that has food
+  bowlFor(p) { const own = this.bowlOf(p); if (own && this.bowlLeft(own) > 0) return own; return this.sharedBowls().find(b => b !== own && this.bowlLeft(b) > 0) || null; },
+  // the bowl shown with this pet in the care tab: its own, otherwise the first shared one
+  bowlShown(p) { return this.bowlOf(p) || this.sharedBowls()[0] || null; },
   assignBowl(uid, pid) {
     const b = Room.uidMap[uid]; if (!b) return;
     if (pid == null) { delete b.pet; UI.toast('這個碗改成大家都能吃', 'i_paw', 2.5); }
@@ -413,6 +425,12 @@ const Pets = {
 };
 
 /* ---------------- pet window ---------------- */
+// what the pet is asking for right now, shown on its card in the roster (the first open need; more are counted)
+function petNeedBadge(q) {
+  const list = (Life.L.needs || []).filter(n => n.pet === q.id && NEED_DEFS[n.type]); if (!list.length) return null;
+  const def = NEED_DEFS[list[0].type], spr = def.item && SUPPLIES[def.item] ? SUPPLIES[def.item].spr : def.icon;
+  return h('span', { class: 'pneed', title: list.map(n => NEED_DEFS[n.type].t(n)).join('、') }, ico(spr, 18), list.length > 1 ? h('b', { class: 'num', text: '+' + (list.length - 1) }) : null);
+}
 Object.assign(UI, {
   petTab: 'care',
   w_pet() {
@@ -421,7 +439,7 @@ Object.assign(UI, {
     const roster = h('div', { class: 'proster' }, ...Z.pets.map(q => {
       const [kk, cc] = q.sp.split(':'), warn = q.sick || q.hunger < 30 || q.clean < 30 || q.mood < 30;
       return h('button', { class: 'pcard' + (q.id === p.id ? ' cur' : '') + (q.home ? '' : ' away'), title: q.name + (q.home ? '' : '（寵物旅館）'), onclick: () => { Z.sel = q.id; this.refresh('pet'); } },
-        sprPreview(petCanvas(kk, cc, 'sit', 0, false, q.acc), 40, 2), h('span', { text: q.name }), warn ? h('i', { class: 'pwarn' }) : null);
+        sprPreview(petCanvas(kk, cc, 'sit', 0, false, q.acc), 40, 2), h('span', { text: q.name }), petNeedBadge(q) || (warn ? h('i', { class: 'pwarn' }) : null));
     }), Z.pets.length < PET_MAX ? h('button', { class: 'pcard add', title: '領養新寵物', onclick: () => { this.shopTab = 'pet'; this.openWin('shop'); } }, ico('i_plus', 22), h('span', { text: '領養' })) : null);
     const pv = sprPreview(petCanvas(k, c, 'sit', 0, false, p.acc), 104, 4);
     const bar = (label, v, cls, tip) => h('div', { class: 'pstat', title: tip || '' }, h('span', { text: label }), h('div', { class: 'pbar ' + cls }, h('i', { style: `width:${Math.round(v)}%` })), h('b', { class: 'num', text: String(Math.round(v)) }));
@@ -441,16 +459,25 @@ Object.assign(UI, {
     if (this.petTab === 'care') {
       const bowls = Pets.bowls();
       if (bowls.length) {
-        const cur = Room.uidMap[this.petBowl] && ITEMS[Room.uidMap[this.petBowl].k].bowl ? Room.uidMap[this.petBowl] : (Pets.bowlOf(p) || bowls.find(b => !Pets.bowlOwner(b)) || bowls[0]);
-        this.petBowl = cur.uid;
+        // the pet and the bowl always go together: a bowl that belongs to another pet is never shown on this pet's page
+        let cur = Room.uidMap[this.petBowl];
+        const fits = (b) => b && ITEMS[b.k] && ITEMS[b.k].bowl && b.p == null && (!Pets.bowlOwner(b) || Pets.bowlOwner(b).id === p.id);
+        if (this.petBowlPet !== p.id || !fits(cur)) cur = Pets.bowlShown(p);
+        this.petBowl = cur ? cur.uid : null; this.petBowlPet = p.id;
         const lvlTxt = (b) => { const n = (b.bq || []).length; return n ? `${n} 份（${b.bq.map(q => SUPPLIES[q.k].n).join('、')}）` : '空的'; };
         body.push(h('div', { class: 'sub', text: '飼料碗' }));
-        if (bowls.length > 1) body.push(h('div', { class: 'tabs wrap' }, ...bowls.map((b, i) => { const o = Pets.bowlOwner(b); return h('button', { class: 'tab sm' + (b === cur ? ' on' : ''), onclick: () => { this.petBowl = b.uid; this.refresh('pet'); } }, `碗 ${i + 1}：${o ? o.name : '共用'}`); })));
-        const owner = Pets.bowlOwner(cur), mine = owner && owner.id === p.id;
-        body.push(h('div', { class: 'pbowl' }, sprPreview(SPR.get(Pets.bowlLevel(cur) ? 'pet_bowl_' + Pets.bowlLevel(cur) : 'pet_bowl'), 44, 2),
-          h('div', { class: 'grow' }, h('div', { text: owner ? `${owner.name}的碗` : '共用的碗（沒有指定的寵物都能吃）' }), h('div', { class: 'hint', text: `碗裡：${lvlTxt(cur)}，最多 ${BOWL_MAX} 份。肚子餓了會自己去吃，一次吃一點。` })),
-          mine ? h('button', { class: 'chip sm', onclick: () => Pets.assignBowl(cur.uid, null) }, '改成共用') : h('button', { class: 'chip sm primary', onclick: () => Pets.assignBowl(cur.uid, p.id) }, `指定給${p.name}`)));
-        body.push(h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).filter(f => f !== 'cat_treat').map(f => sbtn(SUPPLIES[f].spr, '放' + SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.fillBowl(cur.uid, f), { title: `把一份${SUPPLIES[f].n}放進碗裡：${SUPPLIES[f].desc}`, disabled: !(bag[f] > 0) || (cur.bq || []).length >= BOWL_MAX }))));
+        // picking another pet's bowl switches the whole page to that pet; a shared bowl keeps the pet
+        const pickBowl = (b) => { const o = Pets.bowlOwner(b); if (o && o.id !== p.id) Z.sel = o.id; this.petBowl = b.uid; this.petBowlPet = Z.sel; this.refresh('pet'); };
+        if (bowls.length > 1 || !cur) body.push(h('div', { class: 'tabs wrap' }, ...bowls.map((b, i) => { const o = Pets.bowlOwner(b); return h('button', { class: 'tab sm' + (b === cur ? ' on' : ''), title: o && o.id !== p.id ? `切換到${o.name}` : '', onclick: () => pickBowl(b) }, `碗 ${i + 1}：${o ? o.name : '共用'}`); })));
+        if (!cur) body.push(h('p', { class: 'hint', text: `${p.name}還沒有自己的碗，其他碗都指定給別的寵物了。再擺一個碗，或把其中一個改成共用，${p.name}就能吃。` }));
+        else {
+          const owner = Pets.bowlOwner(cur), mine = owner && owner.id === p.id;
+          const who = owner ? (owner.home ? `${owner.name}的碗` : `${owner.name}的碗（${owner.name}在寵物旅館，暫時大家都能吃）`) : '共用的碗（沒有自己碗的寵物，和自己的碗吃完的寵物都能吃）';
+          body.push(h('div', { class: 'pbowl' }, sprPreview(SPR.get(Pets.bowlLevel(cur) ? 'pet_bowl_' + Pets.bowlLevel(cur) : 'pet_bowl'), 44, 2),
+            h('div', { class: 'grow' }, h('div', { text: who }), h('div', { class: 'hint', text: `碗裡：${lvlTxt(cur)}，最多 ${BOWL_MAX} 份。肚子餓了會自己去吃，一次吃一點。` })),
+            mine ? h('button', { class: 'chip sm', onclick: () => Pets.assignBowl(cur.uid, null) }, '改成共用') : h('button', { class: 'chip sm primary', onclick: () => Pets.assignBowl(cur.uid, p.id) }, `指定給${p.name}`)));
+        }
+        if (cur) body.push(h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).filter(f => f !== 'cat_treat').map(f => sbtn(SUPPLIES[f].spr, '放' + SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.fillBowl(cur.uid, f), { title: `把一份${SUPPLIES[f].n}放進碗裡：${SUPPLIES[f].desc}`, disabled: !(bag[f] > 0) || (cur.bq || []).length >= BOWL_MAX }))));
       }
       body.push(h('div', { class: 'sub', text: '直接餵' }), h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).map(f => sbtn(SUPPLIES[f].spr, SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.feed(p.id, f), { title: SUPPLIES[f].desc, fav: p.known.food && p.fav.food === f }))));
       body.push(h('div', { class: 'sub', text: '玩耍' }), h('div', { class: 'swap' }, ...PET_TOYS.map(t => {
