@@ -114,9 +114,10 @@ service cloud.firestore {
     }
 
     // 團隊邀請：只有好友能寄給你；你可以看、可以刪；寄的人也可以收回
+    // 同一隊再寄一次（或隊友也邀請了同一個人）會覆蓋舊的那一封，所以 create 和 update 用同一套檢查
     match /tinv/{userId}/list/{teamId} {
       allow get, list: if isOwner(userId);
-      allow create: if isFriendOf(userId)
+      allow create, update: if isFriendOf(userId)
         && request.resource.data.keys().hasOnly(['from', 'name', 'type', 'period', 'task', 'at'])
         && request.resource.data.from == request.auth.uid && shortText(request.resource.data.name, 40)
         && request.resource.data.type in ['d', 'w'] && shortText(request.resource.data.period, 16)
