@@ -41,7 +41,8 @@ const Dev = {
     this.hist.push({ label, ts: Date.now(), json, auto: !!auto }); if (this.hist.length > DEV_MAX) this.hist.splice(0, this.hist.length - DEV_MAX);
     this.persist();
   },
-  taint() { const f = Game.S.flags || (Game.S.flags = {}); if (!f.dev) { f.dev = true; f.devAt = Date.now(); } delete f.devBoard; },   // only a record; developer saves have no restrictions
+  // marks the save as a developer save; it then leaves the leaderboard at the next update unless the switch below is on
+  taint() { const f = Game.S.flags || (Game.S.flags = {}); if (!f.dev) { f.dev = true; f.devAt = Date.now(); if (Game.S.social) Game.S.social.pubAt = 0; } },
   snap(label) { this.push(label, JSON.stringify(Game.S)); this.redoStack = []; },
   onSave() {
     if (!this.on || this.busy) return;
@@ -168,6 +169,11 @@ Object.assign(UI, {
       const file = h('input', { type: 'file', accept: 'application/json,.json', hidden: true, onchange: e => D.importSave(e.target.files[0]) });
       body.push(row('備份', B(window.NOOK_ENV === 'artifact' ? (D.showJson ? '收起存檔內容' : '顯示存檔內容（JSON）') : '匯出存檔（JSON）', () => D.exportSave()), B('匯入存檔', () => file.click()), file, A('建立還原點', () => { })));
       if (D.showJson && window.NOOK_ENV === 'artifact') body.push(h('label', { class: 'field' }, h('span', { text: '存檔內容（全選後複製，存成 .json 檔，之後可以用「匯入存檔」讀回來）' }), h('textarea', { class: 'devjson', readonly: true, rows: 6, onfocus: e => e.target.select() }, JSON.stringify(Game.S))));
+      // leaderboard switch: off by default; turning it on lists this save at the next leaderboard update
+      const lb = !!(S.flags && S.flags.devBoard);
+      body.push(row('排行榜', h('button', { class: 'chip sm' + (lb ? ' on' : ''), 'aria-pressed': lb ? 'true' : 'false', onclick: () => {
+        S.flags = Object.assign({}, S.flags, { devBoard: !lb }); if (S.social) { S.social.pubAt = 0; S.social.boardGone = false; }
+        Game.save(); saveSoon(); UI.toast(lb ? '已設定不列入排行榜，下次更新時移除' : '已設定列入排行榜，下次更新時排入', 'i_dev', 3); this.refresh('dev'); } }, lb ? '列入排行榜：開' : '列入排行榜：關')));
       body.push(row('重置', danger('只重置單字', '清除所有單字進度與連續天數。', () => D.resetPart('vocab')), danger('只重置房間', '家具、收納箱、壁紙地板、主題都回到一開始。', () => D.resetPart('room')), danger('只重置寵物', '所有寵物會換回一開始的一隻小橘貓。', () => D.resetPart('pets'))));
       body.push(row('', danger('只重置任務與成就', '每日任務重抽、成就領取紀錄與需求清空。', () => D.resetPart('tasks')), danger('只重置金幣與等級', '金幣回到 150、等級回到 Lv 1。', () => D.resetPart('money'))));
       body.push(row('', danger('重置整個帳號', '所有進度都會回到第一次打開的樣子（登入中會一起覆蓋雲端存檔）。', () => D.resetPart('all'))));

@@ -166,6 +166,8 @@ test('團隊：只能改自己的進度，而且只能變多；任務內容不�
 test('團隊：達成時名單固定，名單上的人（包含零貢獻）各領一次', async () => {
   await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), team('alice', { open: true })));
   await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', team('alice', { open: true }))));
+  await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { 'prog.alice': 60, at: now() }));
+  await assertFails(updateDoc(doc(alice(), 'teams/t1'), { doneAt: now(), roster: ['alice', 'bob'], open: false, full: true, at: now() }));   // 60 / 90: not reached yet
   await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { 'prog.alice': 90, at: now() }));
   await assertFails(updateDoc(doc(alice(), 'teams/t1'), { doneAt: now(), roster: ['alice'], open: false, full: true, at: now() }));   // roster must be everyone
   await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { doneAt: now(), roster: ['alice', 'bob'], open: false, full: true, at: now() }));
@@ -199,17 +201,42 @@ test('排行榜：開發者存檔可以選擇列入（dev 標記）', async () =
   await assertSucceeds(setDoc(doc(alice(), 'board/alice'), { ...row, dev: true }));
   await assertFails(setDoc(doc(alice(), 'board/alice'), { ...row, dev: 'yes' }));
 });
-test('團隊邀請：只有好友能寄', async () => {
-  const inv = (from) => ({ from, name: from, type: 'd', period: '2026-10-22', task: 'focus', at: now() });
+test('團隊邀請：只有好友能寄，而且只能邀請進自己所在的隊伍', async () => {
+  const inv = (from, over = {}) => ({ from, name: from, type: 'd', period: '2026-10-22', task: 'focus', at: now(), ...over });
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), team('alice')));
+  await assertSucceeds(setDoc(doc(carol(), 'teams/t3'), team('carol')));
   await assertFails(setDoc(doc(carol(), 'tinv/bob/list/t1'), inv('carol')));
   await befriend();
   await assertSucceeds(setDoc(doc(alice(), 'tinv/bob/list/t1'), inv('alice')));
+  await assertFails(setDoc(doc(alice(), 'tinv/bob/list/t3'), inv('alice')));                       // alice is not in carol's team
+  await assertFails(setDoc(doc(alice(), 'tinv/bob/list/t1'), inv('alice', { type: 'w' })));        // wrong kind of team
   await assertFails(setDoc(doc(alice(), 'tinv/bob/list/t2'), inv('carol')));
   await assertSucceeds(getDocs(collection(bob(), 'tinv/bob/list')));
   await assertFails(getDocs(collection(carol(), 'tinv/bob/list')));
   await assertSucceeds(deleteDoc(doc(bob(), 'tinv/bob/list/t1')));
 });
 
+test('團隊：離隊只能帶走自己的那一筆；加入時不能改別人的名字', async () => {
+  const t = team('alice', { open: true, max: 3 });
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), t));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', t)));
+  await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { 'prog.alice': 40, at: now() }));
+  await assertFails(updateDoc(doc(carol(), 'teams/t1'), { members: ['alice', 'bob', 'carol'], names: { alice: '大笨蛋', bob: 'bob', carol: 'carol' }, prog: { alice: 40, bob: 0, carol: 0 }, full: true, at: now() }));
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 0 }, full: false, open: true, at: now() }));        // zeroes alice
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice', bob: 'bob' }, prog: { alice: 40, bob: 0 }, full: false, open: true, at: now() }));   // keeps own entry
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 40 }, full: false, open: false, at: now() }));     // closes alice's team
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 40 }, full: false, open: true, at: now() }));
+});
+test('一個帳號一台裝置：只能寫自己的登入紀錄', async () => {
+  const sess = (over = {}) => ({ sid: 'abc123', device: 'phone', at: now(), ...over });
+  await assertSucceeds(setDoc(doc(alice(), 'sess/alice'), sess()));
+  await assertSucceeds(setDoc(doc(alice(), 'sess/alice'), sess({ sid: 'def456', device: 'laptop' })));
+  await assertSucceeds(getDoc(doc(alice(), 'sess/alice')));
+  await assertFails(getDoc(doc(bob(), 'sess/alice')));
+  await assertFails(setDoc(doc(bob(), 'sess/alice'), sess()));
+  await assertFails(setDoc(doc(alice(), 'sess/alice'), sess({ extra: 1 })));
+  await assertFails(deleteDoc(doc(alice(), 'sess/alice')));
+});
 test('其他路徑一律拒絕', async () => {
   await assertFails(setDoc(doc(alice(), 'leaderboard/alice'), { score: 1 }));
   await assertFails(getDoc(doc(alice(), 'config/admin')));

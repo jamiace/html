@@ -47,7 +47,9 @@ const Social = {
   db() { return Cloud.fb.store; },
   myName() { return playerName(); },
   // developer-mode saves are treated like every other save (leaderboard, matching, teams)
-  dev() { return false; },
+  dev() { return !!(Game.S.flags && Game.S.flags.dev); },
+  // developer saves join the leaderboard only when the switch in the developer panel is on (off by default)
+  devListed() { return this.dev() && !!Game.S.flags.devBoard; },
   today() { return Life.today(); },
   // ---------- focus minutes (counted in every build, minute by minute, so a session across Monday 06:00 is split) ----------
   addFocus(m) { const Z = this.Z, k = weekKey(); if (Z.wk.k !== k) Z.wk = { k, m: 0 }; Z.wk.m += m; },
@@ -105,8 +107,9 @@ const Social = {
     if (force && now - (this.lastForce || 0) < 60000 && Z.pubAt) return; this.lastForce = now;
     const S = Game.S, c = this.card();
     await this.db().set('profiles/' + this.uid, c);
-    // leaderboard row (every save is listed)
-    await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' });
+    // leaderboard row; a developer save is listed only with the developer switch on (its old row is removed otherwise)
+    if (this.dev() && !this.devListed()) { if (!Z.boardGone) { await this.db().del('board/' + this.uid).catch(() => { }); Z.boardGone = true; } }
+    else { await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' }); Z.boardGone = false; }
     Z.pubAt = now; Game.save();
   },
   // name card of anyone (cached on this device for 3 h)

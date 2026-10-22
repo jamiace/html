@@ -117,12 +117,22 @@ service cloud.firestore {
     // 同一隊再寄一次（或隊友也邀請了同一個人）會覆蓋舊的那一封，所以 create 和 update 用同一套檢查
     match /tinv/{userId}/list/{teamId} {
       allow get, list: if isOwner(userId);
-      allow create, update: if isFriendOf(userId)
+      allow create, update: if isFriendOf(userId) && inviteFromTeam(teamId)
         && request.resource.data.keys().hasOnly(['from', 'name', 'type', 'period', 'task', 'at'])
         && request.resource.data.from == request.auth.uid && shortText(request.resource.data.name, 40)
         && request.resource.data.type in ['d', 'w'] && shortText(request.resource.data.period, 16)
         && request.resource.data.at == request.time;
       allow delete: if isOwner(userId) || (signedIn() && resource.data.from == request.auth.uid);
+    }
+
+    // 同一個帳號只能在一台裝置登入：最後登入的裝置寫下自己的代號，其他裝置讀到不同的代號就會登出
+    match /sess/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['sid', 'device', 'at'])
+        && shortText(request.resource.data.sid, 40) && shortText(request.resource.data.device, 64)
+        && request.resource.data.at == request.time;
+      allow delete: if false;
     }
 
     // 其他所有路徑一律拒絕
@@ -210,6 +220,21 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    // 邀請只能由隊伍裡的人寄出，而且是這一期、還沒完成的隊伍
+    function inviteFromTeam(teamId) {
+      let t = get(/databases/$(database)/documents/teams/$(teamId)).data;
+      return request.auth.uid in t.members && t.doneAt == 0
+        && t.type == request.resource.data.type && t.period == request.resource.data.period;
+    }
+
+    // 隊員貢獻加總（隊伍最多 5 人；只算目前名單上的人）
+    function seat(d, i) {
+      return d.members.size() > i ? d.prog.get(d.members[i], 0) : 0;
+    }
+    function teamTotal(d) {
+      return seat(d, 0) + seat(d, 1) + seat(d, 2) + seat(d, 3) + seat(d, 4);
+    }
+
     function teamJoin(teamId) {
       return !(request.auth.uid in resource.data.members) && request.auth.uid in request.resource.data.members
         && request.resource.data.members.size() == resource.data.members.size() + 1
@@ -218,6 +243,7 @@ service cloud.firestore {
         && (resource.data.open == true || exists(/databases/$(database)/documents/tinv/$(request.auth.uid)/list/$(teamId)))
         && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'at'])
         && request.resource.data.prog.diff(resource.data.prog).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.names.diff(resource.data.names).affectedKeys().hasOnly([request.auth.uid])
         && request.resource.data.prog[request.auth.uid] == 0;
     }
 
@@ -233,7 +259,13 @@ service cloud.firestore {
       return request.auth.uid in resource.data.members && !(request.auth.uid in request.resource.data.members)
         && request.resource.data.members.size() == resource.data.members.size() - 1
         && resource.data.doneAt == 0
-        && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'open', 'at']);
+        && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'open', 'at'])
+        // 只能帶走自己的那一筆：自己的貢獻和名字刪掉，別人的不能動
+        && request.resource.data.prog.diff(resource.data.prog).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.names.diff(resource.data.names).affectedKeys().hasOnly([request.auth.uid])
+        && !(request.auth.uid in request.resource.data.prog) && !(request.auth.uid in request.resource.data.names)
+        && request.resource.data.full == false
+        && (request.resource.data.open == resource.data.open || request.resource.data.members.size() == 0);
     }
 
     // 開關配對；倒數（mAt）只能歸零（立即配對、自動配對、不要自動配對），不能延長
@@ -246,6 +278,7 @@ service cloud.firestore {
       return request.auth.uid in resource.data.members && resource.data.doneAt == 0
         && request.resource.data.doneAt == request.time
         && request.resource.data.roster == resource.data.members
+        && teamTotal(resource.data) >= resource.data.goal
         && teamChanged().hasOnly(['doneAt', 'roster', 'open', 'full', 'at']);
     }
 

@@ -105,6 +105,8 @@ function agoText(ts) {
 // ---------- save helpers shared by both cloud modes ----------
 // write budget: routine changes are merged and written at most every 90 s; important events (rewards, purchases, quiz results) within ~10 s
 const CLOUD_ROUTINE_MS = 90000, CLOUD_SOON_MS = 10000, CLOUD_PULL_MS = 120000;
+// one device per account: the session is checked before cloud writes (at most every 5 min) and when the game comes back to the front (at most every 60 s)
+const SESSION_CHECK_MS = 5 * 60e3, SESSION_FOCUS_MS = 60e3;
 const SAVE_POLICY = () => Object.assign({ devSaves: 'flag' }, window.NOOK_SAVE_POLICY || {});
 const IMPORT_MARK = 'pocketnook.imported';
 function saveHash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ':' + str.length; }
@@ -240,7 +242,7 @@ const Cloud = {
     catch (e) { console.warn('[cloud]', e); return this.set('error', '載入 Firebase 失敗，請檢查網路或 js/firebase-config.js。'); }
     if (this.fb.redirectResult) this.fb.redirectResult().catch(e => { const m = cloudErr(e); if (m) this.set(this.status, m); });
     this.fb.onAuth(u => this.onUser(u));
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.pull(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.checkSession(SESSION_FOCUS_MS).then(ok => { if (ok) this.pull(); }); });
     this.watchNet();
   },
 
@@ -275,7 +277,43 @@ const Cloud = {
     try { remote = await this.fb.get(u.uid); } catch (e) { return this.set('error', cloudErr(e)); }
     this.rev = remote ? (remote.rev || 0) : 0;
     if (remote && (remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
+    // a fresh sign-in on this device takes over the account; a device that only restored an old session checks it is still the active one
+    const fresh = this.explicitAuth || !this.mySid(u.uid); this.explicitAuth = false;
+    if (fresh) await this.claimSession(); else if (!(await this.checkSession(0))) return;
     await this.reconcile(this.parse(remote));
+  },
+  // ---------- one device per account: the newest sign-in wins, other devices are signed out ----------
+  sessKey(uid) { return 'pocketnook.sess.' + uid; },
+  mySid(uid) { try { return localStorage.getItem(this.sessKey(uid)) || ''; } catch (e) { return this.sid || ''; } },
+  async claimSession() {
+    if (!this.fb || !this.fb.store || !this.user) return;
+    const sid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+    try { await this.fb.store.set('sess/' + this.user.uid, { sid, device: DEVICE_ID, at: '__now__' }); this.sid = sid; this.sessAt = Date.now(); try { localStorage.setItem(this.sessKey(this.user.uid), sid); } catch (e) { } }
+    catch (e) { this.sid = ''; }   // rules not deployed yet: no single-device check
+  },
+  // false when another device has signed in since (this device is then signed out)
+  async checkSession(gap = SESSION_CHECK_MS) {
+    if (this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.user || this.kicking) return true;
+    const uid = this.user.uid, mine = this.sid || this.mySid(uid); if (!mine) return true;
+    if (Date.now() - (this.sessAt || 0) < gap) return true;
+    this.sessAt = Date.now();
+    let doc = null; try { doc = await this.fb.store.get('sess/' + uid); } catch (e) { return true; }
+    if (!doc) { await this.claimSession(); return true; }
+    if (doc.sid === mine) { this.sid = mine; return true; }
+    await this.kicked(); return false;
+  },
+  async kicked() {
+    this.kicking = true;
+    try { await Backups.put(Game.S, '同一個帳號在另一台裝置登入，這台裝置被登出前的進度', 'device'); } catch (e) { }
+    clearTimeout(this.timer); this.timer = null; this.dirty = false; this.pending = false;
+    const uid = this.user && this.user.uid; this.user = null; this.choice = null; this.sid = '';
+    try { if (uid) localStorage.removeItem(this.sessKey(uid)); } catch (e) { }
+    try { await this.fb.signOut(); } catch (e) { }
+    Game.replaceState(Game.newState());
+    this.set('signedout', '這個帳號已經在另一台裝置登入，這台裝置自動登出了。重新登入就會換回這台。');
+    UI.closeWin('cloudpick');
+    UI.toast('你的帳號在另一台裝置登入，這台裝置已登出（登出前的進度有備份在「帳號」視窗）', 'i_cloud', 6);
+    this.kicking = false;
   },
   parse(doc) {
     if (!doc || typeof doc.data !== 'string') return null;
@@ -426,6 +464,7 @@ const Cloud = {
     if (this.lastHash && saveHash(JSON.stringify(S)) === this.lastHash) { if (this.status !== 'synced') this.set('synced', ''); return; }
     // safety net: never let a blank save replace real progress in the cloud unless the player reset on purpose
     if (isFreshSave(S) && this.remoteHasProgress && !(S.flags && S.flags.resetAt)) { this.set('error', '這台裝置的進度是空白的，沒有上傳，避免蓋掉雲端存檔。請重新登入。'); return; }
+    if (!(await this.checkSession())) return;
     this.busy = true; this.set('saving');
     try { await this.writeRemote(S); this.dirty = false; this.lastSync = Date.now(); this.busy = false; this.remoteHasProgress = !isFreshSave(S); this.set('synced', ''); }
     catch (e) {
@@ -465,7 +504,7 @@ const Cloud = {
     f.email = email.trim(); f.msg = '';
     if (kind !== 'google' && !f.email) { f.msg = '請輸入 Email。'; return UI.refresh('account'); }
     if ((kind === 'in' || kind === 'up') && pw.length < 6) { f.msg = '密碼至少要 6 個字元。'; return UI.refresh('account'); }
-    this.authBusy = true; this.err = ''; UI.refresh('account');
+    this.authBusy = true; this.err = ''; this.explicitAuth = kind !== 'reset'; UI.refresh('account');
     try {
       if (kind === 'google') await this.fb.google();
       else if (kind === 'in') await this.fb.signIn(f.email, pw);
@@ -479,8 +518,9 @@ const Cloud = {
     if (this.mode === 'claude') return;
     if (Game.S.owner === this.user.uid) { Game.save(); await this.push(); }
     if (this.status === 'error') { if (!confirm('最近的進度還沒成功存到雲端，確定要登出嗎？登出後這台裝置會換回空白的小窩。')) return; }
+    try { localStorage.removeItem(this.sessKey(this.user.uid)); } catch (e) { }
     try { await this.fb.signOut(); } catch (e) { }
-    this.user = null; this.choice = null;
+    this.user = null; this.choice = null; this.sid = '';
     Game.replaceState(Game.newState());
     this.set('signedout', '');
     UI.toast('已登出。你的小窩安全存在雲端，下次登入就會回來', 'i_cloud');

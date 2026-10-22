@@ -140,7 +140,12 @@ const Team = {
   async flush(type) {
     const st = this.inTeam(type); if (!st || !st.dirty) return;
     const uid = this.uid(), n = Math.floor(st.mine || 0);
-    await this.db().update('teams/' + st.id, { ['prog.' + uid]: n, at: '__now__' });
+    try { await this.db().update('teams/' + st.id, { ['prog.' + uid]: n, at: '__now__' }); }
+    catch (e) {
+      // refused: most likely this account left or switched team on another device; read the team again so this device finds out
+      if (e && e.code === 'permission-denied') { st.urgent = false; st.sentAt = Date.now(); if (await Cloud.checkSession(0)) await this.load(type).catch(() => { }); }
+      throw e;
+    }
     st.dirty = false; st.urgent = false; st.sentAt = Date.now(); Game.save();
     const tm = await this.load(type);
     if (tm && !tm.doneAt && this.total(tm) >= tm.goal) await this.complete(type).catch(() => { });
