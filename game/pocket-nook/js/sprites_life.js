@@ -66,6 +66,17 @@ SPR.def('pet_bowl_full', () => {
   g.pts([[7, 2], [9, 2], [11, 2], [8, 1], [10, 1]], 'u'); g.px(9, 1, 'v');
   return g;
 });
+SPR.def('pet_bowl_half', () => {
+  const g = SPR.grid('pet_bowl').clone();
+  for (let x = 0; x < 18; x++) for (let y = 0; y < 6; y++) if (g.get(x, y) === 'Y' && y >= 4) g.px(x, y, ((x + y) % 3) ? 'u' : 'v');
+  g.pts([[7, 3], [10, 3]], 'u');
+  return g;
+});
+SPR.def('pet_bowl_low', () => {
+  const g = SPR.grid('pet_bowl').clone();
+  g.pts([[6, 4], [8, 5], [11, 4], [12, 5]], 'u'); g.px(9, 4, 'v');
+  return g;
+});
 SPR.def('trophy', () => {
   const g = new Grid(16, 18);
   g.rect(4, 1, 8, 2, 'w'); g.ellipse(8, 3.5, 4.4, 4.4, 'w'); for (let y = 0; y < 4; y++) g.hl(0, y, 16, '.');

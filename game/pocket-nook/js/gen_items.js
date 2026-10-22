@@ -555,3 +555,23 @@ const Fun = {
   },
   cuckoo(it, d, cx) { const n = new Date(); Game.bubbleAt(cx, it.y, `咕咕！現在 ${n.getHours()} 點 ${String(n.getMinutes()).padStart(2, '0')} 分`); },
 };
+
+/* ------------------------------------------------------------
+   Level gates: coins buy things, level decides what the shop offers.
+   Generated furniture is spread from Lv 1 to Lv 28 by price, and
+   generated wallpapers / floors from Lv 1 to Lv 25 (price rises with it).
+   ------------------------------------------------------------ */
+(function spreadLevels() {
+  const ids = [...new Set(Object.values(GEN.fams).flat())].filter(id => ITEMS[id] && !ITEMS[id].special && !ITEMS[id].giftOnly);
+  const byPrice = ids.slice().sort((a, b) => (ITEMS[a].price || 0) - (ITEMS[b].price || 0));
+  const rank = {}; let i = 0;
+  while (i < byPrice.length) { let j = i; const p = ITEMS[byPrice[i]].price || 0; while (j < byPrice.length && (ITEMS[byPrice[j]].price || 0) === p) j++; const r = (i + j - 1) / 2 / Math.max(1, byPrice.length - 1); for (let k = i; k < j; k++) rank[byPrice[k]] = r; i = j; }
+  for (const id of ids) { const d = ITEMS[id]; d.lvl = Math.max(d.lvl > 12 ? 12 : 1, 1 + Math.round(Math.pow(rank[id], 1.15) * 27)); }
+  // colourways never come before their original
+  for (const id of ids) { const base = id.split('__')[0]; if (base !== id && ITEMS[base]) ITEMS[id].lvl = Math.max(ITEMS[id].lvl, ITEMS[base].lvl); }
+  const spread = (TABLE, maxLv, free) => {
+    const gen = Object.keys(TABLE).filter(k => TABLE[k].gen && TABLE[k].price), n = gen.length;
+    gen.forEach((k, idx) => { const d = TABLE[k], t = idx / Math.max(1, n - 1); d.lvl = idx < free ? 1 : 1 + Math.round(t * (maxLv - 1)); d.price = Math.round((50 + d.lvl * 12 + (idx % 4) * 5) / 5) * 5; });
+  };
+  spread(WALLPAPERS, 25, 8); spread(FLOORS, 25, 6);
+})();

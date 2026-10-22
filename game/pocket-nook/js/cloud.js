@@ -136,6 +136,8 @@ function mergeSaves(a, b, common) {
   }
   const seenT = new Set((M.todos || []).map(t => t.t)); M.todos = (M.todos || []).filter(t => !t.ex); for (const t of o.todos || []) if (!t.ex && !seenT.has(t.t)) { M.todos.push(Object.assign({}, t, { id: Game.uid(M.todos) })); seenT.add(t.t); }
   const seenM = new Set((M.memos || []).map(m => m.text)); for (const m of o.memos || []) if (m.text && !seenM.has(m.text) && M.memos.length < 20) { M.memos.push(Object.assign({}, m, { id: Game.uid(M.memos) })); }
+  M.closet = Object.assign({}, o.closet || {}, M.closet || {}); M.closetV = Math.max(M.closetV || 0, o.closetV || 0);
+  const seenO = new Set((M.outfits || []).map(x => JSON.stringify(x.a))); M.outfits = M.outfits || []; for (const x of o.outfits || []) if (M.outfits.length < 8 && !seenO.has(JSON.stringify(x.a))) M.outfits.push(x);
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
   M.savedAt = Date.now();
   return M;

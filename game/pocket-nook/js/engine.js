@@ -310,7 +310,7 @@ const Room = {
   def(it) { return ITEMS[it.k]; },
   itemCanvas(it) {
     const d = ITEMS[it.k]; const on = d.onSpr && it.on && !it.broken;
-    if (d.bowl && it.full) return SPR.get('pet_bowl_full', null, it.flip);
+    if (d.bowl) { const lv = Pets.bowlLevel(it); if (lv) return SPR.get('pet_bowl_' + lv, null, it.flip); }
     if (it.wilt) return SPR.get(on ? d.onSpr : d.spr, Object.assign({}, d.map || {}, WILT_MAP), it.flip, d.id + ':wilt');
     return SPR.get(on ? d.onSpr : d.spr, d.map, it.flip, d.id + (on ? ':on' : ''));
   },

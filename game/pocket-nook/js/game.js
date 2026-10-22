@@ -95,7 +95,7 @@ const Game = {
     for (const k in base) if (!(k in S)) S[k] = base[k];
     for (const k in base.timer) if (!(k in S.timer)) S.timer[k] = base.timer[k];
     for (const k in base.settings) if (!(k in S.settings)) S.settings[k] = base.settings[k];
-    S.avatar = migrateAvatar(S.avatar);
+    S.avatar = migrateAvatar(S.avatar); grandfatherCloset(S);
     for (const k in base.learn) if (!(k in S.learn)) S.learn[k] = base.learn[k];
     if (!S.flags) S.flags = {};
     if (!this.outdated) {
@@ -246,17 +246,19 @@ const Game = {
   storeItem(it) {
     const S = this.S; const kids = S.items.filter(o => o.p === it.uid);
     for (const o of [it, ...kids]) { S.inv[o.k] = (S.inv[o.k] || 0) + 1; }
+    // food still in a bowl goes back to the bag (servings already started are finished off by nobody, so only whole ones return)
+    let back = 0; if (it.bq) for (const q of it.bq) if (PET_FOODS[q.k] && q.left >= PET_FOODS[q.k].hunger - 0.5) { Life.give(q.k, 1); back++; }
     S.items = S.items.filter(o => o !== it && !kids.includes(o)); Room.state = S; Room.indexItems();
     if (Room.sel === it) Room.sel = null;
     UI.editToolbar(); UI.refresh('storage'); this.save();
-    UI.toast(kids.length ? `收起了「${ITEMS[it.k].n}」和上面的小物` : `收起了「${ITEMS[it.k].n}」`, 'i_box', 2.4);
+    UI.toast((kids.length ? `收起了「${ITEMS[it.k].n}」和上面的小物` : `收起了「${ITEMS[it.k].n}」`) + (back ? `，碗裡的 ${back} 份食物放回道具` : ''), 'i_box', 2.4);
   },
   interact(it) {
     const d = ITEMS[it.k], A = this.avatar; const cv = Room.itemCanvas(it); const cx = it.x + cv.width / 2;
     it.shake = 0.25;
     const nd = Life.needOf('item', it.uid); if (nd && NEED_DEFS[nd.type].item) { UI.needCard(nd.id); return; }
     if (d.act && Fun[d.act]) return Fun[d.act](it, d, cx);
-    if (d.bowl) { UI.openWin('pet'); return; }
+    if (d.bowl) { const o = Pets.bowlOwner(it); if (o) Pets.Z.sel = o.id; UI.petBowl = it.uid; UI.petTab = 'care'; UI.openWin('pet'); UI.refresh('pet'); return; }
     if (d.toggle) { it.on = !it.on; Room.puff('p_spark', cx - 1, it.y - 2, { vy: -6, max: 0.7 }); this.save(); return; }
     if (d.window) { it.closed = !it.closed; this.save(); return; }
     if (d.bed) { if (this.focusing()) return this.bubbleAt(cx, it.y, '專注時間先不睡喔'); A.stand(); A.goSleep(it); return; }

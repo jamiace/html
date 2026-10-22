@@ -1,3 +1,4 @@
+const BOWL_MAX = 3;
 /* ============================================================
    Pets: several pets at once, growth, personality, care,
    tricks (trained with vocabulary quizzes), accessories
@@ -162,7 +163,48 @@ const Pets = {
   },
   mood(p, n) { p.mood = clamp100(p.mood + n); if (p.sick) p.mood = Math.min(p.mood, 60); },
 
-  // ---------- passive change ----------
+  // ---------- food bowls ----------
+  // a bowl in the room can belong to one pet; it holds up to BOWL_MAX servings that the pet eats bit by bit
+  bowls() { return Room.state.items.filter(i => ITEMS[i.k] && ITEMS[i.k].bowl && i.p == null); },
+  bowlLeft(b) { return (b.bq || []).reduce((n, q) => n + q.left, 0); },
+  bowlLevel(b) { const n = this.bowlLeft(b); return n >= 60 ? 'full' : n > 20 ? 'half' : n > 0 ? 'low' : ''; },
+  bowlOwner(b) { return b.pet != null && this.get(b.pet) ? this.get(b.pet) : null; },
+  bowlOf(p) { return this.bowls().find(b => b.pet === p.id) || null; },
+  // the bowl this pet eats from: its own, otherwise a shared one that has food
+  bowlFor(p) { const own = this.bowlOf(p); if (own) return this.bowlLeft(own) > 0 ? own : null; return this.bowls().find(b => !this.bowlOwner(b) && this.bowlLeft(b) > 0) || null; },
+  assignBowl(uid, pid) {
+    const b = Room.uidMap[uid]; if (!b) return;
+    if (pid == null) { delete b.pet; UI.toast('這個碗改成大家都能吃', 'i_paw', 2.5); }
+    else { for (const o of this.bowls()) if (o !== b && o.pet === pid) delete o.pet; b.pet = pid; const p = this.get(pid); UI.toast(`這個碗現在是${p.name}的`, 'i_paw', 2.5); }
+    Game.save(); UI.refresh('pet');
+  },
+  fillBowl(uid, food) {
+    const b = Room.uidMap[uid], f = PET_FOODS[food]; if (!b || !f) return false;
+    b.bq = b.bq || [];
+    if (b.bq.length >= BOWL_MAX) { UI.toast(`碗已經滿了（最多 ${BOWL_MAX} 份）`, 'i_paw', 2.5); return false; }
+    if (!Life.has(food)) { UI.toast(`沒有${SUPPLIES[food].n}了，可以學習換取或到商店買`, SUPPLIES[food].spr, 3.5); return false; }
+    Life.L.bag[food]--; if (!Life.L.bag[food]) delete Life.L.bag[food];
+    b.bq.push({ k: food, left: f.hunger });
+    const [w] = itemSize(b); Room.puff('p_spark', b.x + w / 2, b.y - 2, { vy: -6, max: 0.8 });
+    Game.save(); UI.refresh('pet'); UI.refresh('storage'); return true;
+  },
+  // eat up to `max` fullness from the bowl; a serving's mood / growth / bond count once it is finished
+  eatFromBowl(p, b, max = 40) {
+    if (!p || !b || !b.bq || !b.bq.length) return 0;
+    let room = Math.min(max, 100 - p.hunger), ate = 0;
+    while (room > 0.5 && b.bq.length) {
+      const q = b.bq[0], bite = Math.min(room, q.left); q.left -= bite; room -= bite; ate += bite;
+      if (q.left <= 0.5) {
+        b.bq.shift(); const f = PET_FOODS[q.k], fav = p.fav.food === q.k ? 1.5 : 1, glut = p.trait === 'glutton' ? 1.2 : 1;
+        this.mood(p, Math.round(f.mood * fav * glut)); if (f.energy) p.energy = clamp100(p.energy + f.energy);
+        this.addXp(p, f.xp); this.addBond(p, f.bond + (fav > 1 ? 3 : 0)); this.reveal(p, 'food', q.k); p.st.fed++; Life.L.stats.fed++; Life.track('feed', 1);
+      }
+    }
+    if (!b.bq.length) delete b.bq;
+    p.hunger = clamp100(p.hunger + ate); this.checkNeeds(p); UI.refresh('pet'); UI.badges(); Game.save();
+    return ate;
+  },
+
   tick(mins) {
     const away = mins > 2, k = away ? 0.35 : 1;
     for (const p of this.Z.pets) {
@@ -174,6 +216,7 @@ const Pets = {
       let md = mins / 8 * k * (p.trait === 'clingy' ? 1.2 : 1); if (p.hunger < 20 || p.clean < 20) md *= 1.8;
       p.mood = clamp100(p.mood - md);
       p.energy = clamp100(p.energy + mins * (sleeping ? 1.2 : 0.25) * (p.trait === 'sleepy' ? 1.5 : 1) * (p.sick ? 0.5 : 1));
+      if (p.hunger < 45 && (away || !a)) { const b = this.bowlFor(p); if (b) this.eatFromBowl(p, b, 100); }
       if (away) { p.hunger = Math.max(Math.min(h0, 15), p.hunger); p.clean = Math.max(Math.min(c0, 15), p.clean); }
       else {
         if (p.hunger < 10 || p.clean < 10) p.low += mins; else p.low = Math.max(0, p.low - mins);
@@ -385,7 +428,20 @@ Object.assign(UI, {
     const bag = Life.L.bag, body = [];
     const sbtn = (spr, label, cnt, fn, opts = {}) => h('button', { class: 'swapbtn' + (opts.fav ? ' fav' : ''), title: opts.title || '', disabled: !!opts.disabled, onclick: fn }, ico(spr, 30), h('span', { text: label }), cnt != null ? h('em', { class: 'num', text: cnt }) : null);
     if (this.petTab === 'care') {
-      body.push(h('div', { class: 'sub', text: '餵食' }), h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).map(f => sbtn(SUPPLIES[f].spr, SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.feed(p.id, f), { title: SUPPLIES[f].desc, fav: p.known.food && p.fav.food === f }))));
+      const bowls = Pets.bowls();
+      if (bowls.length) {
+        const cur = Room.uidMap[this.petBowl] && ITEMS[Room.uidMap[this.petBowl].k].bowl ? Room.uidMap[this.petBowl] : (Pets.bowlOf(p) || bowls.find(b => !Pets.bowlOwner(b)) || bowls[0]);
+        this.petBowl = cur.uid;
+        const lvlTxt = (b) => { const n = (b.bq || []).length; return n ? `${n} 份（${b.bq.map(q => SUPPLIES[q.k].n).join('、')}）` : '空的'; };
+        body.push(h('div', { class: 'sub', text: '飼料碗' }));
+        if (bowls.length > 1) body.push(h('div', { class: 'tabs wrap' }, ...bowls.map((b, i) => { const o = Pets.bowlOwner(b); return h('button', { class: 'tab sm' + (b === cur ? ' on' : ''), onclick: () => { this.petBowl = b.uid; this.refresh('pet'); } }, `碗 ${i + 1}：${o ? o.name : '共用'}`); })));
+        const owner = Pets.bowlOwner(cur), mine = owner && owner.id === p.id;
+        body.push(h('div', { class: 'pbowl' }, sprPreview(SPR.get(Pets.bowlLevel(cur) ? 'pet_bowl_' + Pets.bowlLevel(cur) : 'pet_bowl'), 44, 2),
+          h('div', { class: 'grow' }, h('div', { text: owner ? `${owner.name}的碗` : '共用的碗（沒有指定的寵物都能吃）' }), h('div', { class: 'hint', text: `碗裡：${lvlTxt(cur)}，最多 ${BOWL_MAX} 份。肚子餓了會自己去吃，一次吃一點。` })),
+          mine ? h('button', { class: 'chip sm', onclick: () => Pets.assignBowl(cur.uid, null) }, '改成共用') : h('button', { class: 'chip sm primary', onclick: () => Pets.assignBowl(cur.uid, p.id) }, `指定給${p.name}`)));
+        body.push(h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).filter(f => f !== 'cat_treat').map(f => sbtn(SUPPLIES[f].spr, '放' + SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.fillBowl(cur.uid, f), { title: `把一份${SUPPLIES[f].n}放進碗裡：${SUPPLIES[f].desc}`, disabled: !(bag[f] > 0) || (cur.bq || []).length >= BOWL_MAX }))));
+      }
+      body.push(h('div', { class: 'sub', text: '直接餵' }), h('div', { class: 'swap' }, ...Object.keys(PET_FOODS).map(f => sbtn(SUPPLIES[f].spr, SUPPLIES[f].n, '×' + (bag[f] || 0), () => Pets.feed(p.id, f), { title: SUPPLIES[f].desc, fav: p.known.food && p.fav.food === f }))));
       body.push(h('div', { class: 'sub', text: '玩耍' }), h('div', { class: 'swap' }, ...PET_TOYS.map(t => {
         if (t === 'catnip') return sbtn('it_catnip', '貓薄荷', '×' + (bag.catnip || 0), () => Pets.play(p.id, 'catnip'), { title: SUPPLIES.catnip.desc, fav: p.known.toy && p.fav.toy === t });
         const T = PET_TOOLS[t], own = Z.tools[t];

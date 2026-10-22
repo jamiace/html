@@ -523,3 +523,12 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .hint.warn { color: var(--berry, #b0476a); }
 .mlib-al { gap: 3px; max-height: 92px; overflow-y: auto; }
 .mlib-al .tab { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avaopt.locked canvas { opacity: .55; filter: grayscale(.5); }
+.avaopt em.lock { background: #2e2230; color: #fff4e0; }
+.avaopt.try { box-shadow: inset 0 0 0 3px var(--berry, #b0476a); }
+.avasw .sw.paid { position: relative; opacity: .8; }
+.avasw .sw.paid::after { content: ''; position: absolute; right: 1px; bottom: 1px; width: 6px; height: 6px; background: var(--honey); box-shadow: 0 0 0 1px #2e2230; }
+.avasw .sw.try { outline: 3px solid var(--berry, #b0476a); outline-offset: 1px; }
+.avatry { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
+.pbowl { display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
+.pbowl .ico, .pbowl canvas { flex: none; }

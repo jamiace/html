@@ -124,7 +124,7 @@ Object.assign(UI, {
       body.push(row(`等級（Lv ${S.lvl}，${S.xp}/${Game.need(S.lvl)}）`, A('經驗 +100', () => Game.reward(0, 100, 'raw')), A('升 1 級', () => Game.reward(0, Game.need(S.lvl) - S.xp, 'raw')), A('Lv 10', () => D.setLevel(10)), A('Lv 20', () => D.setLevel(20))));
       body.push(row('設定等級', num('dev-lv', S.lvl), B('套用', () => { const v = +document.getElementById('dev-lv').value; D.act(`等級設為 ${v}`, () => D.setLevel(v)); })));
       body.push(row('道具', A('每種 +5', () => { for (const k in SUPPLIES) Life.give(k, 5); }), A('每種 +20', () => { for (const k in SUPPLIES) Life.give(k, 20); }), A('清空', () => { Life.L.bag = {}; })));
-      body.push(row('家具與外觀', A('每種家具 +1', () => { for (const id in ITEMS) S.inv[id] = (S.inv[id] || 0) + 1; }), A('解鎖全部主題、壁紙、地板、窗景', () => { S.themes = Object.keys(THEMES); S.ownWP = Object.keys(WALLPAPERS); S.ownFL = Object.keys(FLOORS); S.ownViews = Object.keys(VIEWS); })));
+      body.push(row('家具與外觀', A('每種家具 +1', () => { for (const id in ITEMS) S.inv[id] = (S.inv[id] || 0) + 1; }), A('解鎖全部主題、壁紙、地板、窗景', () => { S.themes = Object.keys(THEMES); S.ownWP = Object.keys(WALLPAPERS); S.ownFL = Object.keys(FLOORS); S.ownViews = Object.keys(VIEWS); }), A('解鎖全部造型', () => { S.closet = S.closet || {}; for (const c in AVA_PARTS) for (const id in AVA_PARTS[c]) if (!partFree(c, id)) S.closet[closetKey(c, id)] = 1; }), A('清空已買造型', () => { S.closet = {}; S.closetV = 2; for (const c in AVA_PARTS) if (!partOwned(S.closet, c, S.avatar[c])) S.avatar[c] = defaultAvatar()[c]; })));
       body.push(row('寵物用品', A('全部工具與配件', () => { for (const k in PET_TOOLS) Pets.Z.tools[k] = 1; for (const k in PET_ACCS) Pets.Z.accs[k] = 1; })));
       body.push(row('升級禮物', A('掉一個禮物盒', () => Game.levelUp())));
     } else if (D.tab === 'learn') {

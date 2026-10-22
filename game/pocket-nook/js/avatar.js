@@ -159,7 +159,58 @@ function sanitizeAvatar(a) {
   for (const k in AVA_PARTS) o[k] = typeof a[k] === 'string' && a[k] in AVA_PARTS[k] ? a[k] : d[k];
   return o;
 }
-function partPrice(cat, id) { const P = AVA_PARTS[cat] && AVA_PARTS[cat][id]; return (P && !Array.isArray(P) && P.price) || 0; }
+// ---------- shop rules ----------
+// Each slot has a few free starter options; everything else is bought with coins and unlocked by level.
+// Real skin tones are always free. Clothing colours are bought once as a dye and work in every clothing slot.
+const AVA_FREE = {
+  skin: ['porcelain', 'fair', 'peach', 'warm', 'tan', 'olive', 'caramel', 'brown', 'deep', 'ebony'],
+  eyes: ['round', 'dot', 'bean', 'shiny', 'big'], eyeColor: ['brown', 'dark', 'hazel', 'blue'], brows: ['soft', 'none', 'thin', 'thick'],
+  mouth: ['smile', 'grin', 'happy', 'open'], cheeks: ['blush', 'none', 'wide'],
+  hairFront: ['short', 'none', 'straight', 'sideL', 'center'], hairBack: ['short', 'bob', 'long', 'ponyH', 'bun'], hairColor: ['cocoa', 'ink', 'espresso', 'chestnut', 'blonde'],
+  top: ['tee', 'longtee', 'hoodie', 'shirt', 'sweater'], topColor: ['denim', 'rose', 'cream', 'mint', 'coal'], top2: ['cream', 'snow', 'coal', 'navy'],
+  bottom: ['pants', 'jeans', 'shorts', 'skirt'], bottomColor: ['navy', 'denim', 'coal', 'khaki', 'cocoa'],
+  shoes: ['sneakers', 'canvas', 'boots', 'slippers'], shoesColor: ['coal', 'snow', 'cocoa', 'red'],
+  hat: ['none', 'beanie', 'cap'], hatColor: ['red', 'navy', 'cream', 'coal'], glasses: ['none', 'round', 'square'], glassesColor: ['coal', 'cocoa', 'butter'],
+  ear: ['none', 'stud', 'hoop'], earColor: ['butter', 'snow', 'grey'], neck: ['none', 'scarf', 'tie'], neckColor: ['red', 'navy', 'cream'],
+  back: ['none', 'backpack'], backColor: ['cocoa', 'navy', 'red'],
+};
+// [min level, max level, min price, max price] across each table, in table order
+const AVA_TIER = {
+  skin: [15, 15, 300, 300], eyes: [2, 18, 40, 160], eyeColor: [3, 15, 50, 150], brows: [2, 12, 30, 100], mouth: [2, 16, 30, 120], cheeks: [2, 14, 30, 120],
+  hairFront: [2, 22, 80, 320], hairBack: [3, 25, 100, 400], hairColor: [3, 24, 60, 300],
+  top: [2, 26, 80, 420], bottom: [2, 20, 70, 320], shoes: [2, 20, 60, 280],
+  hat: [3, 28, 60, 500], glasses: [3, 20, 60, 300], ear: [3, 16, 50, 220], neck: [3, 20, 50, 260], back: [6, 30, 150, 800],
+  dye: [2, 14, 40, 160],
+};
+const AVA_DYE = { topColor: 1, top2: 1, bottomColor: 1, shoesColor: 1, hatColor: 1, glassesColor: 1, earColor: 1, neckColor: 1, backColor: 1 };
+const AVA_SHOP = (() => {
+  const out = {}, r5 = (v) => Math.round(v / 5) * 5;
+  const tier = (tab, ids, T, free) => { const paid = ids.filter(id => !free.includes(id)), m = paid.length, o = {};
+    paid.forEach((id, i) => { const t = m > 1 ? i / (m - 1) : 0, P = tab[id], prem = (P && !Array.isArray(P) && P.price) || 0;
+      let lvl = Math.round(T[0] + t * (T[1] - T[0])), price = r5(T[2] + t * (T[3] - T[2]));
+      if (prem) { price = Math.max(price, r5(prem * 2.5)); lvl = Math.max(lvl, Math.min(30, 6 + Math.round(prem / 20))); }
+      o[id] = { price, lvl }; });
+    return o; };
+  out.dye = tier(CLOTH, Object.keys(CLOTH), AVA_TIER.dye, []);
+  for (const cat in AVA_PARTS) { if (AVA_DYE[cat]) continue; out[cat] = tier(AVA_PARTS[cat], Object.keys(AVA_PARTS[cat]), AVA_TIER[cat], AVA_FREE[cat] || []); }
+  return out;
+})();
+function partFree(cat, id) { return (AVA_FREE[cat] || []).includes(id); }
+function closetKey(cat, id) { return AVA_DYE[cat] ? 'dye:' + id : cat + ':' + id; }
+function partInfo(cat, id) { if (partFree(cat, id)) return null; return (AVA_DYE[cat] ? AVA_SHOP.dye : AVA_SHOP[cat] || {})[id] || null; }
+function partPrice(cat, id) { const i = partInfo(cat, id); return i ? i.price : 0; }
+function partLvl(cat, id) { const i = partInfo(cat, id); return i ? i.lvl : 1; }
+function partOwned(closet, cat, id) { return partFree(cat, id) || !!(closet || {})[closetKey(cat, id)]; }
+// everything a player was already wearing before the shop existed stays theirs
+function grandfatherCloset(S) {
+  S.closet = S.closet || {};
+  if (S.closetV >= 2) return 0;
+  let n = 0; const own = (a) => { if (!a) return; for (const cat in AVA_PARTS) { const id = a[cat]; if (id && id in AVA_PARTS[cat] && !partFree(cat, id)) { const k = closetKey(cat, id); if (!S.closet[k]) { S.closet[k] = 1; n++; } } } };
+  // old closet keys for dyes were 'topColor:mint' etc.
+  for (const k of Object.keys(S.closet)) { const [c, id] = k.split(':'); if (AVA_DYE[c]) { S.closet['dye:' + id] = 1; delete S.closet[k]; } }
+  own(S.avatar); for (const o of S.outfits || []) own(o.a);
+  S.closetV = 2; return n;
+}
 
 // ---------- body template ----------
 // labels: t torso, u upper arm, f forearm, h hand, n neck skin, p hips, g shin, k foot; shade 1 dark 2 mid 3 light

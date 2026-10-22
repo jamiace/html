@@ -63,7 +63,7 @@ const ACHS = [
   { id: 'grow', n: '拉拔長大', d: (v) => `一隻寵物成長到 Lv ${v}`, m: () => Pets.maxLv(), tiers: [5, 10, 15, 20] },
   { id: 'trainer', n: '馴獸師', d: (v) => `寵物們一共學會 ${v} 個把戲`, m: () => Pets.trickCount(), tiers: [1, 3, 6, 12, 20, 30] },
   { id: 'decor', n: '佈置高手', d: (v) => `房間裡擺了 ${v} 件東西`, m: () => Game.S.items.length, tiers: [15, 25, 40, 60] },
-  { id: 'rich', n: '小富翁', d: (v) => `累積賺到 ${v} 金幣`, m: () => Life.L.stats.coins, tiers: [500, 2000, 6000, 15000, 40000] },
+  { id: 'rich', n: '小富翁', d: (v) => `累積賺到 ${v} 金幣`, m: () => Life.L.stats.coins, tiers: [500, 2000, 6000, 15000, 40000, 100000, 250000] },
 ];
 const WILT_MAP = { k: 'w', l: 'x', j: 'v', i: 'u' };
 const clamp100 = (v) => Math.max(0, Math.min(100, v));
