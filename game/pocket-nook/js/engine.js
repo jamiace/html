@@ -452,8 +452,40 @@ const Room = {
       } else { c.fillStyle = '#c4566e'; for (const fx of [17, 21, 26, 29]) c.fillRect(x + fx, y + 31, 1, 1); }
     }
     if (d.glow && it.on) { for (let gx = 7; gx < 16; gx += 2) { const k = Math.sin(this.t * 6 + gx) > 0; c.fillStyle = k ? '#ffe07a' : '#e8973d'; c.fillRect(x + (it.flip ? cv.width - 1 - gx : gx), y + 12, 1, 4); } }
-    if (d.music && typeof Music !== 'undefined' && Music.playing && Math.random() < 0.005) this.puff('p_note', x + cv.width / 2 - 2, y - 2, { vx: (Math.random() - 0.5) * 8, vy: -9, wob: 8, max: 1.8, alpha: 0.85 });
-    if (d.flicker && !it.on) { c.fillStyle = '#efdcc0'; c.fillRect(x + 2, y + 1, 3, 3); c.fillStyle = '#2e2230'; c.fillRect(x + 3, y + 3, 1, 1); }
+    // 各家具的音符計時只存在記憶體，不寫進存檔
+if (!this._musicNoteTimes) {
+  this._musicNoteTimes = new WeakMap();
+}
+
+if (d.music && typeof Music !== 'undefined' && Music.playing) {
+  const interval = 1.2; // 每件家具，每隔 1.2 秒產生一個
+  const duration = 2.0; // 每個音符存在 2 秒
+
+  let nextTime = this._musicNoteTimes.get(it);
+
+  // 不同家具稍微錯開，避免全部同時冒音符
+  if (nextTime === undefined) {
+    nextTime = this.t + ((it.uid || 0) % 7) / 7 * interval;
+    this._musicNoteTimes.set(it, nextTime);
+  }
+
+  if (this.t >= nextTime) {
+    this.puff('p_note', x + cv.width / 2 - 2, y - 2, {
+      vx: 0,
+      vy: -7,
+      wob: 2,
+      max: duration,
+      alpha: 0.75
+    });
+
+    // 不補發錯過的音符，避免恢復畫面時突然噴出一堆
+    this._musicNoteTimes.set(it, this.t + interval);
+  }
+} else if (d.music) {
+  this._musicNoteTimes.delete(it);
+}
+	
+	if (d.flicker && !it.on) { c.fillStyle = '#efdcc0'; c.fillRect(x + 2, y + 1, 3, 3); c.fillStyle = '#2e2230'; c.fillRect(x + 3, y + 3, 1, 1); }
   },
   drawGift(c, g) {
     const cv = SPR.get('gift_box'); let y = g.y - cv.height; if (g.drop > 0) { y -= g.drop; g.drop = Math.max(0, g.drop - 2.4); }

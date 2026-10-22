@@ -26,13 +26,17 @@ const PET_TOOLS = {
 };
 const PET_TOYS = ['wand', 'yarn', 'ball', 'catnip'];
 const TRICKS = [
-  { id: 'sit', n: '坐下', lv: 1, need: 3 },
-  { id: 'paw', n: '握手', lv: 3, need: 4 },
-  { id: 'spin', n: '轉圈圈', lv: 5, need: 5 },
-  { id: 'roll', n: '翻滾', lv: 7, need: 6 },
-  { id: 'jump', n: '跳高', lv: 10, need: 7 },
-  { id: 'dance', n: '跳舞', lv: 14, need: 8 },
+  { id: 'sit', n: '坐下', lv: 1, need: 3, d: '乖乖坐好，還會開心地跳一下。' },
+  { id: 'paw', n: '握手', lv: 3, need: 4, d: '主人走過來伸手，牠抬起前腳握一握。' },
+  { id: 'spin', n: '轉圈圈', lv: 5, need: 5, d: '原地轉兩圈，揚起小灰塵。' },
+  { id: 'backflip', n: '後空翻', lv: 7, need: 5, d: '蹲低、起跳，在空中翻一整圈再落地。' },
+  { id: 'bang', n: '中槍', lv: 9, need: 6, d: '主人比出手槍「砰！」，牠搖搖晃晃倒地裝死，再跳起來。' },
+  { id: 'jordan', n: '喬登三段跳', lv: 11, need: 6, d: '小跳、再跳，最後一個超高的滯空飛躍。' },
+  { id: 'firering', n: '跳火圈', lv: 13, need: 7, d: '主人舉起火圈，牠助跑後飛身穿過去。' },
+  { id: 'moonlean', n: '麥可舞步45度傾斜', lv: 15, need: 8, d: '戴上小帽子，在聚光燈下往前傾斜 45 度。' },
 ];
+// older saves: the three tricks that were replaced keep their training progress
+const TRICK_RENAME = { roll: 'backflip', jump: 'jordan', dance: 'moonlean' };
 const PET_ACCS = {
   collar_red: { n: '紅色項圈', slot: 'neck', price: 60, lv: 1, c: ['r', 'q'] },
   collar_blue: { n: '藍色項圈', slot: 'neck', price: 60, lv: 1, c: ['n', 'm'] },
@@ -103,7 +107,10 @@ const Pets = {
     if (S.zoo && Array.isArray(S.zoo.pets)) {
       const base = this.newState(); for (const k in base) if (!(k in S.zoo)) S.zoo[k] = base[k];
       const tpl = this.make({ pets: [], nid: 0 }, 'cat:ginger');
-      for (const p of S.zoo.pets) { for (const k in tpl) if (!(k in p)) p[k] = JSON.parse(JSON.stringify(tpl[k])); if (!PETS[p.sp]) p.sp = 'cat:ginger'; }
+      for (const p of S.zoo.pets) {
+        for (const k in tpl) if (!(k in p)) p[k] = JSON.parse(JSON.stringify(tpl[k])); if (!PETS[p.sp]) p.sp = 'cat:ginger';
+        for (const o in TRICK_RENAME) if (p.tricks[o] != null) { const n = TRICK_RENAME[o], t = TRICKS.find(x => x.id === n); p.tricks[n] = Math.min(t.need, Math.max(p.tricks[n] || 0, p.tricks[o])); delete p.tricks[o]; }
+      }
       if (!S.zoo.pets.length) S.zoo.pets.push(this.make(S.zoo, 'cat:ginger', '麻糬'));
       return;
     }
@@ -347,6 +354,7 @@ const Pets = {
   perform(pid, tid) {
     const p = this.get(pid), t = TRICKS.find(x => x.id === tid); if (!p || !t || !this.knows(p, tid)) return;
     const a = this.actor(p); if (!a) return UI.toast(`${p.name}在寵物旅館，帶牠回房間才能表演`, 'i_paw');
+    if (TrickShow.busy()) return UI.toast('正在表演中，看完再點下一個吧', 'i_paw', 2.4);
     this.dayReset(p); a.doTrick(tid);
     if (!p.day.show[tid]) { p.day.show[tid] = 1; const c = 5 + p.lv + TRICKS.indexOf(t) * 3; Game.reward(c, 4, 'task'); this.mood(p, 5); this.addBond(p, 1); UI.toast(`${p.name}表演了「${t.n}」！今天第一次表演獲得 ${c} 金幣`, 'i_star', 3); }
     UI.refresh('pet'); Game.save(); saveSoon();
@@ -461,7 +469,7 @@ Object.assign(UI, {
       body.push(h('p', { class: 'hint', text: '訓練一次要答 4 題單字小測驗，答對 3 題以上算成功。每次訓練消耗 25 精力，心情要 35 以上。學會的把戲每天第一次表演可以拿金幣。' }));
       for (const t of TRICKS) {
         const prog = p.tricks[t.id] || 0, known = prog >= t.need, locked = p.lv < t.lv;
-        body.push(h('div', { class: 'task' + (known ? ' claimed' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: t.n + (locked ? `（Lv ${t.lv}）` : '') }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${prog}/${t.need}` }), known ? h('span', { class: 'hint', text: p.day.d === Life.today() && p.day.show[t.id] ? '今天表演過了' : '今天還沒表演' }) : null)),
+        body.push(h('div', { class: 'task' + (known ? ' claimed' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: t.n + (locked ? `（Lv ${t.lv}）` : '') }), h('div', { class: 'hint', text: t.d }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${prog}/${t.need}` }), known ? h('span', { class: 'hint', text: p.day.d === Life.today() && p.day.show[t.id] ? '今天表演過了' : '今天還沒表演' }) : null)),
           known ? h('button', { class: 'chip sm primary', onclick: () => Pets.perform(p.id, t.id) }, '表演') : h('button', { class: 'chip sm', disabled: locked, onclick: () => Pets.train(p.id, t.id) }, ico('i_learn', 16), '訓練')));
       }
     } else if (this.petTab === 'acc') {

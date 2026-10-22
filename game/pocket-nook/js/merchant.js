@@ -190,33 +190,70 @@ class MerchantSign {
   poke() { this.hop = 0.35; Merchant.open(); }
 }
 
-// the scene at the top of the merchant window: your front door, the street and the stall
+// the scene at the top of the merchant window: your front door, the lane and the stall.
+// Painted at 1 px = 1 game pixel (same size as the room), then enlarged without smoothing so it stays crisp.
 function merchantScene(mk) {
-  const W = 240, H = 92, M = MERCHANTS[mk], cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-  const c = cv.getContext('2d'), env = Room.env || { h: 12, dark: 0 }, night = env.dark > 0.55, dusk = !night && env.h >= 17 && env.h < 19.5;
-  const sky = c.createLinearGradient(0, 0, 0, 60); const [s1, s2] = night ? ['#1f2348', '#3b3f72'] : dusk ? ['#f0a37a', '#fbd9a0'] : ['#8fc8ec', '#d8f0fa'];
-  sky.addColorStop(0, s1); sky.addColorStop(1, s2); c.fillStyle = sky; c.fillRect(0, 0, W, 64);
-  if (night) { c.fillStyle = '#fff7c2'; for (let i = 0; i < 26; i++) c.fillRect((i * 53) % W, (i * 29) % 40, 1, 1); c.fillRect(196, 10, 6, 6); c.fillStyle = '#3b3f72'; c.fillRect(198, 9, 5, 5); }
-  else { c.fillStyle = '#fff'; for (const [x, y, w] of [[150, 12, 22], [70, 20, 16], [210, 26, 14]]) { c.fillRect(x, y, w, 3); c.fillRect(x + 3, y - 2, w - 8, 2); } }
-  c.fillStyle = night ? '#2a4a3e' : '#7fb77a'; for (let x = 0; x < W; x++) { const hh = 10 + Math.round(Math.sin(x / 23) * 4 + Math.sin(x / 9) * 1.5); c.fillRect(x, 64 - hh, 1, hh); }
-  c.fillStyle = night ? '#335a45' : '#9fd08a'; c.fillRect(0, 60, W, 8);
-  c.fillStyle = night ? '#6b6376' : '#e9d6b4'; c.fillRect(0, 68, W, 24); c.fillStyle = night ? '#5a5366' : '#d6bf98';
-  for (let x = 0; x < W; x += 12) for (let r = 0; r < 3; r++) c.fillRect(x + (r % 2) * 6, 71 + r * 7, 10, 1);
-  // your house: wall, door and doormat on the left
-  c.fillStyle = '#c9a27c'; c.fillRect(0, 8, 64, 62); c.fillStyle = '#b08865'; for (let y = 12; y < 70; y += 6) c.fillRect(0, y, 64, 1);
-  c.fillStyle = '#8f4230'; c.fillRect(0, 2, 70, 8); c.fillStyle = '#c46a48'; c.fillRect(0, 2, 70, 2);
-  c.fillStyle = '#5e3b2f'; c.fillRect(20, 30, 26, 40); c.fillStyle = '#8b5a3c'; c.fillRect(22, 32, 22, 38); c.fillStyle = '#b5794b'; c.fillRect(24, 34, 8, 14); c.fillRect(34, 34, 8, 14); c.fillRect(24, 51, 8, 16); c.fillRect(34, 51, 8, 16);
-  c.fillStyle = '#f6c75a'; c.fillRect(40, 50, 2, 3); c.fillStyle = night ? '#ffe07a' : '#fdeaa0'; c.fillRect(50, 34, 8, 8); c.fillStyle = '#5e3b2f'; c.fillRect(53, 34, 1, 8); c.fillRect(50, 37, 8, 1);
-  c.fillStyle = '#c4566e'; c.fillRect(18, 70, 30, 3);
-  // the stall and the merchant standing next to it
+  const W = 168, H = 78, M = MERCHANTS[mk], cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d'); c.imageSmoothingEnabled = false;
+  const env = Room.env || { h: 12, dark: 0 }, night = env.dark > 0.55, dusk = !night && env.h >= 17 && env.h < 19.5;
+  const px = (x, y, col) => { c.fillStyle = col; c.fillRect(x, y, 1, 1); }, rect = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+  const disc = (cx, cy, rx, ry, col) => { c.fillStyle = col; for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const dx = (x + .5 - cx) / rx, dy = (y + .5 - cy) / ry; if (dx * dx + dy * dy <= 1) c.fillRect(x, y, 1, 1); } };
+  const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
+  // sky in dithered bands
+  const sky = night ? ['#1d2148', '#262b5a', '#30366a', '#3c4378', '#4a4f86'] : dusk ? ['#7b6fb0', '#c487a8', '#ec9f8f', '#f7c08f', '#fbe0a8'] : ['#6fb6e6', '#86c6ee', '#9fd4f3', '#b9e2f7', '#d4eefa'];
+  for (let y = 0; y < 44; y++) { const t = y / 44 * (sky.length - 1), i = Math.floor(t), f = t - i; for (let x = 0; x < W; x++) px(x, y, sky[Math.min(sky.length - 1, i + (f > ((x + y * 2) % 4) / 4 + .12 ? 1 : 0))]); }
+  if (night) { for (let i = 0; i < 40; i++) { const x = (i * 37) % W, y = (i * 23) % 34; px(x, y, i % 5 ? '#c9c4e8' : '#fff7c2'); } disc(146, 11, 6, 6, '#fff3c4'); disc(149, 9, 5, 5, sky[0]); }
+  else { disc(146, 11, 9, 9, dusk ? 'rgba(255,214,150,0.35)' : 'rgba(255,250,210,0.35)'); disc(146, 11, 6, 6, dusk ? '#ffd38a' : '#fff6c8'); disc(146, 11, 4, 4, '#fffbe6'); }
+  // pixel clouds: soft lumps with a lit top and a shaded belly
+  const cloud = (x, y, w) => { const lit = night ? '#5a5f96' : dusk ? '#ffe6cc' : '#ffffff', mid = night ? '#4a4f86' : dusk ? '#f6c7b5' : '#eef7fd', sh = night ? '#3c4378' : dusk ? '#e3a3a3' : '#cfe6f5'; for (let i = 0; i < w; i += 5) disc(x + i, y - (i % 10 ? 1 : 3), 4.5, 3.2, mid); disc(x + w * .4, y - 4, 6, 4, mid); for (let i = 0; i < w; i += 5) disc(x + i, y - (i % 10 ? 2 : 4), 3, 1.6, lit); rect(x - 3, y + 1, w + 5, 2, sh); };
+  cloud(14, 12, 26); cloud(70, 20, 18); cloud(118, 30, 14);
+  if (!night) for (const [bx, by] of [[96, 9], [102, 6], [107, 10]]) { px(bx - 1, by, '#3b4a63'); px(bx + 1, by, '#3b4a63'); px(bx, by + 1, '#3b4a63'); }
+  // far hills, then a row of round trees
+  const hill1 = night ? '#3a4f6e' : dusk ? '#9a86b8' : '#9bc3d9', hill2 = night ? '#2f5248' : dusk ? '#7c8f86' : '#7fb88a';
+  for (let x = 0; x < W; x++) { const h1 = 8 + Math.round(Math.sin(x / 19) * 3 + Math.sin(x / 7) * 1); rect(x, 44 - h1, 1, h1, hill1); const h2 = 5 + Math.round(Math.sin(x / 13 + 2) * 2); rect(x, 47 - h2, 1, h2 + 2, hill2); }
+  const treeC = night ? ['#1f3d33', '#2c5244', '#3b6a55'] : ['#3e7f4a', '#58a35a', '#7fc46c'];
+  for (let i = 0; i < 9; i++) { const tx = 56 + i * 13 + (i % 2) * 4, ty = 41 + (i % 3), r = 5 + (i % 2); rect(tx, ty + r - 1, 2, 4, night ? '#3a2b2b' : '#7a5236'); disc(tx + 1, ty, r, r - .5, treeC[0]); disc(tx, ty - 1, r - 1.5, r - 2, treeC[1]); disc(tx - 1, ty - 2, r - 3.2, r - 3.5, treeC[2]); }
+  // meadow with flowers
+  rect(0, 47, W, 9, night ? '#2f5a45' : '#8fcf74'); for (let x = 0; x < W; x++) if (hash(x, 3) > .55) px(x, 47 + Math.floor(hash(x, 9) * 3), night ? '#3f7058' : '#a9de8a');
+  for (let i = 0; i < 26; i++) { const x = 60 + Math.floor(hash(i, 1) * 106), y = 49 + Math.floor(hash(i, 2) * 6); px(x, y, ['#f6a8c0', '#fff1a8', '#ffffff', '#c9b2f2'][i % 4]); px(x, y + 1, night ? '#2a4a3a' : '#5ea055'); }
+  // picket fence behind the stall
+  for (let x = 58; x < W; x += 6) { rect(x, 45, 3, 10, night ? '#a99fb8' : '#fff4e2'); px(x + 1, 44, night ? '#a99fb8' : '#fff4e2'); rect(x + 2, 46, 1, 9, night ? '#7d748c' : '#e2cfb3'); }
+  rect(56, 48, W - 56, 2, night ? '#8f87a0' : '#f3e4cc'); rect(56, 52, W - 56, 1, night ? '#7d748c' : '#e2cfb3');
+  // cobblestone lane
+  rect(0, 56, W, H - 56, night ? '#5b5468' : '#d9c6a4');
+  for (let row = 0; row < 6; row++) for (let x = -(row % 2) * 5; x < W; x += 10) {
+    const y = 57 + row * 4, w2 = 7 + Math.floor(hash(x, row) * 3), base = night ? ['#7a7188', '#6e667c'][(x + row) & 1] : ['#efe0c4', '#e6d3b2', '#f4e8d2'][Math.floor(hash(row, x) * 3)];
+    rect(x + 1, y, w2, 3, base); rect(x + 2, y - 1 + 1, w2 - 2, 1, night ? '#8a829a' : '#fbf3e4'); rect(x + 1, y + 3, w2, 1, night ? '#4a4456' : '#bfa985');
+  }
+  rect(0, 56, W, 1, night ? '#4a4456' : '#c4ae8a');
+  // your house: shingle roof edge, plank wall, window with a flower box, door with a wreath, lantern, potted plant
+  const wall = night ? ['#7a5a4c', '#6a4c40', '#5a4036'] : ['#e8c39a', '#d9ae84', '#c79a70'];
+  rect(0, 6, 50, 52, wall[0]); for (let y = 9; y < 58; y += 4) { rect(0, y, 50, 1, wall[2]); for (let x = (y % 8 ? 6 : 16); x < 50; x += 22) px(x, y + 1, wall[1]); }
+  rect(50, 6, 2, 52, wall[2]);
+  for (let x = -2; x < 56; x += 4) { rect(x, 0, 4, 4, night ? '#6b3a3a' : '#c4604c'); rect(x, 3, 4, 1, night ? '#4e2a2a' : '#8f4230'); px(x + 1, 0, night ? '#84504a' : '#e58a6e'); }
+  rect(0, 4, 54, 3, night ? '#4e2a2a' : '#8f4230');
+  // window
+  rect(30, 17, 16, 14, '#fff4e2'); rect(31, 18, 14, 12, night ? '#ffd27a' : '#bfe3f5'); rect(37, 18, 2, 12, '#fff4e2'); rect(31, 23, 14, 2, '#fff4e2');
+  if (!night) { px(33, 19, '#ffffff'); px(34, 19, '#ffffff'); px(33, 20, '#ffffff'); } rect(31, 18, 3, 12, night ? '#e9a14f' : '#f5a8b6'); rect(42, 18, 3, 12, night ? '#e9a14f' : '#f5a8b6');
+  rect(29, 31, 18, 4, '#9b6a44'); rect(29, 31, 18, 1, '#c48a5a'); for (let x = 30; x < 46; x += 2) { px(x, 30, ['#f06478', '#ffd36a', '#ffffff', '#c9b2f2'][(x / 2) % 4]); px(x + 1, 30, '#5ea055'); }
+  // door
+  rect(9, 26, 16, 31, '#6b4130'); rect(10, 27, 14, 30, '#9b6038'); rect(12, 29, 4, 11, '#b5794b'); rect(18, 29, 4, 11, '#b5794b'); rect(12, 43, 4, 11, '#b5794b'); rect(18, 43, 4, 11, '#b5794b');
+  rect(21, 41, 2, 2, '#f6c75a'); disc(17, 23, 4, 4, '#4f9a45'); disc(17, 23, 2, 2, wall[0]); px(17, 19, '#f06478'); px(14, 21, '#f06478'); px(20, 21, '#f06478');
+  rect(6, 57, 22, 2, '#a85060'); rect(7, 57, 20, 1, '#c86a78');
+  // lantern
+  rect(27, 30, 1, 3, '#4b4560'); rect(26, 33, 3, 4, night ? '#ffe07a' : '#fff4c4'); rect(26, 33, 3, 1, '#4b4560'); rect(26, 37, 3, 1, '#4b4560');
+  // potted plant by the door
+  rect(1, 51, 7, 6, '#c46a48'); rect(1, 51, 7, 1, '#e59a72'); disc(4.5, 47, 4, 4, '#4f9a45'); disc(3.5, 46, 2.4, 2.4, '#7fc46c');
+  // the stall and the merchant, at the same pixel size as the room
   const map = M.awn === 'green' ? null : rampMap('green', M.awn), st = SPR.get('m_stall', map, false, 'stall_' + M.awn), ava = avatarCanvas('front0', sanitizeAvatar(Object.assign(defaultAvatar(), M.look)), null, 0, false);
-  const big = (img, x, y, s) => c.drawImage(img, x, y, img.width * s, img.height * s);
-  c.fillStyle = 'rgba(46,34,48,0.22)'; c.fillRect(102, 84, 66, 4); c.fillRect(76, 84, 22, 3);
-  big(st, 104, 84 - st.height * 2 + 4, 2);
-  big(ava, 100 - ava.width * 2 + 12, 86 - canvasBottom(ava) * 2 - 2, 2);
-  if (night) { const g = c.createRadialGradient(136, 50, 2, 136, 50, 60); g.addColorStop(0, 'rgba(255,224,122,0.35)'); g.addColorStop(1, 'rgba(255,224,122,0)'); c.fillStyle = g; c.fillRect(90, 0, 150, 92); }
-  const big2 = document.createElement('canvas'); big2.width = W * 2; big2.height = H * 2; big2.className = 'mscene'; const bc = big2.getContext('2d'); bc.imageSmoothingEnabled = false; bc.drawImage(cv, 0, 0, W * 2, H * 2);
-  return big2;
+  const sx = 96, sBase = 71, ax = 86, aBase = 72;
+  c.fillStyle = 'rgba(46,34,48,0.25)'; c.fillRect(sx + 2, sBase - 1, st.width - 4, 2); c.fillRect(ax - 6, aBase - 1, 12, 2);
+  c.drawImage(st, sx, sBase - st.height + 1);
+  c.drawImage(ava, ax - 10, aBase - canvasBottom(ava));
+  if (night) { const g = c.createRadialGradient(111, 56, 2, 111, 56, 30); g.addColorStop(0, 'rgba(255,224,122,0.22)'); g.addColorStop(1, 'rgba(255,224,122,0)'); c.fillStyle = g; c.fillRect(80, 26, 62, 52); }
+  const S = 3, big = document.createElement('canvas'); big.width = W * S; big.height = H * S; big.className = 'mscene';
+  const bc = big.getContext('2d'); bc.imageSmoothingEnabled = false; bc.drawImage(cv, 0, 0, W * S, H * S);
+  return big;
 }
 
 /* ---------------- window ---------------- */
