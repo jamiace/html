@@ -101,7 +101,7 @@ const ITEMS = {
   lifebuoy: { n: '救生圈', cat: 'wall', spr: 'lifebuoy', price: 60, lvl: 2, layer: 'wall' },
   boat_painting: { n: '帆船畫', cat: 'wall', spr: 'boat_painting', price: 80, lvl: 2, layer: 'wall' },
   surfboard: { n: '衝浪板', cat: 'furniture', spr: 'surfboard', price: 120, lvl: 3, layer: 'floor' },
-  rattan_chair: { n: '藤編蛋椅', cat: 'furniture', spr: 'rattan_chair', price: 150, lvl: 3, layer: 'floor', seat: { x: 13, y: 17 }, petSpot: { x: 13, y: 13 } },
+  rattan_chair: { n: '藤編蛋椅', cat: 'furniture', spr: 'rattan_chair', price: 150, lvl: 3, layer: 'floor', seat: { x: 13, y: 17 }, petSpot: { x: 13, y: 17 } },
   shell: { n: '貝殼', cat: 'decor', spr: 'shell', price: 15, lvl: 1, layer: 'decor', react: 'hearts' },
   // ---- forest cabin
   fireplace: { n: '石砌壁爐', cat: 'furniture', spr: 'fireplace', price: 320, lvl: 4, layer: 'floor', surface: { x0: 3, x1: 42, y: 2 }, light: L(23, 26, 72, 'warm', 1), toggle: true, fire: true },

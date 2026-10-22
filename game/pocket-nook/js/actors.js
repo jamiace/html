@@ -188,6 +188,11 @@ class Avatar extends Walker {
 class Pet extends Walker {
   constructor(pid) { super(); this.pid = pid; const d = Pets.get(pid); this.set(d ? d.sp : 'cat:ginger'); this.state = 'sit'; this.timer = 1 + Math.random() * 2; this.speed = 24; this.x = 150; this.y = 150; this.on = null; this.jump = null; this.happy = 0; this.trick = null; }
   get data() { return Pets.get(this.pid); }
+  // every walk starts on the floor: a walk begun while still on furniture would end with the pet snapped back onto it
+  walkTo(x, y, cb, allowHidden) {
+    if (this.on && !this.jump) { const st = this.state; this.leaveSpot(() => { if (this.state === 'sit' && st !== 'sit') this.state = st; super.walkTo(x, y, cb, allowHidden); }); return true; }
+    return super.walkTo(x, y, cb, allowHidden);
+  }
   baseSpeed() { const d = this.data; return d && Pets.stage(d) === 0 ? 28 : 24; }
   set(kc) { const [k, c] = kc.split(':'); this.kind = k; this.color = c; }
   others() { return (Game.pets || []).filter(a => a !== this); }
