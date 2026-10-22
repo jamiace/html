@@ -3,6 +3,7 @@ rules_version = '2';
 // 小窩時光：每位玩家一份存檔 saves/{userId}，備份在 saves/{userId}/backups/{backupId}。
 // 只有登入的本人能讀寫；備份只能新增、不能修改；用過開發者模式的存檔（dev: true）不能被改回 false；
 // 每次寫入的 rev 必須是上一次 +1，兩台裝置同時存檔時，慢的那一台會被拒絕，遊戲會讀回雲端存檔再自動合併。
+// 好友、名片、拜訪、排行榜另外存在 profiles、codes、board、users/{uid}/friends、rooms（說明在各段上方）。
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -24,6 +25,62 @@ service cloud.firestore {
       }
     }
 
+    // ---------- 名片、好友、拜訪、排行榜 ----------
+    // 名片：登入的人都能看單一份（不能列出全部），只能寫自己的
+    match /profiles/{userId} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if isOwner(userId) && validProfile(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+
+    // 好友代碼 → UID：只能用自己的 UID 建立，建立後不能修改
+    match /codes/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() && code.matches('^[A-Z0-9]{6}$')
+        && request.resource.data.keys().hasOnly(['uid', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.at == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // 排行榜：一次最多讀 30 筆；每人只能寫自己的一列
+    match /board/{userId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.query.limit <= 30;
+      allow create, update: if isOwner(userId) && validBoard(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+
+    // 好友名單：兩邊各存一份。s = out（我送出邀請）、in（對方邀請我）、ok（好友）
+    match /users/{userId}/friends/{friendId} {
+      allow get, list: if isOwner(userId);
+      // 本人整理自己的名單：送出邀請（out）、接受邀請（in → ok）
+      allow create: if isOwner(userId) && friendId != userId && validFriend(request.resource.data) && request.resource.data.s == 'out';
+      allow update: if isOwner(userId) && resource.data.s == 'in' && request.resource.data.s == 'ok' && validFriend(request.resource.data);
+      // 對方：送邀請時在我的名單留一筆 in；我接受時把對方名單裡的 out 改成 ok
+      allow create: if isOwner(friendId) && friendId != userId && validFriend(request.resource.data) && request.resource.data.s == 'in';
+      allow update: if isOwner(friendId) && resource.data.s == 'out' && request.resource.data.s == 'ok' && validFriend(request.resource.data);
+      // 任何一方都能解除或拒絕
+      allow delete: if isOwner(userId) || isOwner(friendId);
+    }
+
+    // 房間快照：本人和好友能看；幫忙紀錄只有好友能新增（每個需求一筆，先到先得），只有房間主人能讀和刪
+    match /rooms/{userId} {
+      allow get: if isOwner(userId) || isFriendOf(userId);
+      allow list: if false;
+      allow create, update: if isOwner(userId) && validRoom(request.resource.data);
+      allow delete: if isOwner(userId);
+
+      match /help/{helpId} {
+        allow get, list, delete: if isOwner(userId);
+        allow create: if isFriendOf(userId) && helpId.size() <= 64 && validHelp(request.resource.data) && request.resource.data.need == helpId;
+        allow update: if false;
+      }
+    }
+
     // 其他所有路徑一律拒絕
     match /{document=**} {
       allow read, write: if false;
@@ -31,6 +88,59 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
+    }
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // 房間主人的好友名單裡有我，而且狀態是 ok（一定經過房間主人同意）
+    function isFriendOf(userId) {
+      return signedIn() && request.auth.uid != userId
+        && exists(/databases/$(database)/documents/users/$(userId)/friends/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(userId)/friends/$(request.auth.uid)).data.s == 'ok';
+    }
+
+    function shortText(t, n) {
+      return t is string && t.size() <= n;
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(['name', 'code', 'status', 'ava', 'lvl', 'pets', 'wk', 'wm', 'tm', 'room', 'dev', 'at'])
+        && shortText(d.name, 40) && d.name.size() >= 1
+        && shortText(d.code, 8) && shortText(d.status, 60) && shortText(d.wk, 16)
+        && d.ava is map && d.pets is list && d.pets.size() <= 10
+        && d.lvl is int && d.wm is int && d.tm is int && d.dev is bool
+        && d.room is string && d.room.size() < 120000
+        && d.at == request.time;
+    }
+
+    function validBoard(d) {
+      return d.keys().hasOnly(['name', 'ava', 'lvl', 'lv', 'coins', 'tm', 'w', 'at'])
+        && shortText(d.name, 40) && d.ava is map
+        && d.lvl is int && d.lv is int && d.coins is int && d.coins >= 0 && d.tm is int
+        && d.w is map && d.w.size() <= 1
+        && d.at == request.time;
+    }
+
+    function validFriend(d) {
+      return d.keys().hasOnly(['s', 'name', 'at'])
+        && d.s in ['out', 'in', 'ok'] && shortText(d.name, 40)
+        && d.at == request.time;
+    }
+
+    function validRoom(d) {
+      return d.keys().hasOnly(['name', 'data', 'at'])
+        && shortText(d.name, 40) && d.data is string && d.data.size() < 400000
+        && d.at == request.time;
+    }
+
+    function validHelp(d) {
+      return d.keys().hasOnly(['from', 'name', 'kind', 'need', 'target', 'tname', 'day', 'at'])
+        && d.from == request.auth.uid
+        && d.kind in ['feed', 'water', 'dust']
+        && shortText(d.name, 40) && shortText(d.need, 64) && shortText(d.target, 32) && shortText(d.tname, 60) && shortText(d.day, 16)
+        && d.at == request.time;
     }
 
     function validSave(d) {

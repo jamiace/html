@@ -481,7 +481,7 @@ const Room = {
       c.drawImage(cv, Math.round(p.x), Math.round(p.y)); c.globalAlpha = 1;
     }
     this.drawLighting(c);
-    if (!this.edit && this.state === Game.S && Game.S.life) Life.drawBubbles(c);
+    if (!this.edit && this.state === Game.S && Game.S.life) { Life.drawBubbles(c); if (typeof Social !== 'undefined') Social.drawMarks(c); }
     // edit overlays
     if (this.edit) {
       const tgt = this.sel || this.hover; if (tgt) this.outline(c, tgt, this.sel ? '#ffffff' : 'rgba(255,255,255,0.6)');

@@ -380,6 +380,7 @@ function setupInput(cv) {
       Room.drag = null; UI.editToolbar(); return;
     }
     if (!down || Room.edit) return; const [x, y] = toRoom(e); const moved = Math.hypot(x - down.x, y - down.y) > 3; down = null; if (moved) return;
+    const sm = typeof Social !== 'undefined' && Social.hitMark(x, y); if (sm) { Social.readMark(sm); return; }
     const nb = Life.hitBubble(x, y); if (nb) { UI.needCard(nb.id); return; }
     const h = Room.hit(x, y); if (!h) return;
     if (h.kind === 'actor') {

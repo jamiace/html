@@ -41,7 +41,7 @@ const Dev = {
     this.hist.push({ label, ts: Date.now(), json, auto: !!auto }); if (this.hist.length > DEV_MAX) this.hist.splice(0, this.hist.length - DEV_MAX);
     this.persist();
   },
-  taint() { const f = Game.S.flags || (Game.S.flags = {}); if (!f.dev) { f.dev = true; f.devAt = Date.now(); } },
+  taint() { const f = Game.S.flags || (Game.S.flags = {}); if (!f.dev) { f.dev = true; f.devAt = Date.now(); if (typeof Social !== 'undefined' && Game.S.social) Game.S.social.pubAt = 0; } },   // the leaderboard row is removed on the next social tick
   snap(label) { this.push(label, JSON.stringify(Game.S)); this.redoStack = []; },
   onSave() {
     if (!this.on || this.busy) return;

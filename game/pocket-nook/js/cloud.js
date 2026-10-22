@@ -49,6 +49,7 @@ async function loadFirebase(cfg) {
         del: (path) => F.deleteDoc(F.doc(db, path)),
         add: (path, data) => F.addDoc(F.collection(db, path), stamp(data)),
         async list(path, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.limit(n || 50)))); },
+        batch: (ops) => { const b = F.writeBatch(db); for (const [op, path, data] of ops) { const r = F.doc(db, path); if (op === 'set') b.set(r, stamp(data)); else if (op === 'update') b.update(r, stamp(data)); else b.delete(r); } return b.commit(); },
         async top(path, field, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.orderBy(field, 'desc'), F.limit(n)))); },
       };
     })(),
@@ -161,8 +162,17 @@ function mergeSaves(a, b, common) {
     W.coupons = [...(W.coupons || []), ...(OW.coupons || [])].filter(c => { const k = key(c); if (spent.has(k) || have.has(k)) return false; have.add(k); return true; });
     W.coupons.forEach((c, i) => { c.id = i + 1; }); W.nid = W.coupons.length + 1; W.sel = null; W.spent = [...spent].slice(-200);
   }
-  if (o.social) { const Z = M.social = M.social || {}; Z.total = Math.max(Z.total || 0, o.social.total || 0); if (Z.hd === o.social.hd) Z.hn = Math.max(Z.hn || 0, o.social.hn || 0); else if ((o.social.hd || '') > (Z.hd || '')) { Z.hd = o.social.hd; Z.hn = o.social.hn; Z.helped = o.social.helped; }
-    const seenG = new Set((Z.guest || []).map(g => g.uid + g.at)); Z.guest = [...(Z.guest || []), ...(o.social.guest || []).filter(g => !seenG.has(g.uid + g.at))].sort((x, y) => y.at - x.at).slice(0, 50); if (!Z.code && o.social.code) { Z.code = o.social.code; Z.codeUid = o.social.codeUid; } }
+  if (o.social) {
+    const Z = M.social = M.social || {}, O = o.social;
+    Z.total = Math.max(Z.total || 0, O.total || 0); Z.gid = Math.max(Z.gid || 1, O.gid || 1);
+    if (Z.hd === O.hd) { Z.hn = Math.max(Z.hn || 0, O.hn || 0); Z.helped = Object.assign({}, O.helped, Z.helped); } else if ((O.hd || '') > (Z.hd || '')) { Z.hd = O.hd; Z.hn = O.hn; Z.helped = O.helped; }
+    if (Z.wk && O.wk && O.wk.k === Z.wk.k) Z.wk.m = Math.max(Z.wk.m || 0, O.wk.m || 0); else if (O.wk && (O.wk.k || '') > ((Z.wk || {}).k || '')) Z.wk = O.wk;
+    const gk = (g) => g.uid + ':' + (g.nk || g.at); const seenG = new Map((Z.guest || []).map(g => [gk(g), g]));
+    for (const g of O.guest || []) { const m = seenG.get(gk(g)); if (m) { m.read = m.read || g.read; m.back = m.back || g.back; } else seenG.set(gk(g), g); }
+    Z.guest = [...seenG.values()].sort((x, y) => y.at - x.at).slice(0, 100);
+    const readIds = new Set(Z.guest.filter(g => g.read).map(gk)); Z.marks = (Z.marks || []).filter(m => { const g = Z.guest.find(x => x.id === m.g); return !g || !readIds.has(gk(g)); });
+    if (!Z.code && O.code) { Z.code = O.code; Z.codeUid = O.codeUid; } if (!Z.status && O.status) Z.status = O.status; Z.gb = Z.gb || O.gb;
+  }
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
   M.savedAt = Date.now();
   return M;
@@ -489,7 +499,7 @@ UI.cloudChip = function () {
 UI.w_account = function () {
   const c = Cloud, f = c.form, out = [];
   const status = (txt, cls) => h('p', { class: 'cl-status ' + (cls || '') }, h('i', { class: 'cl-dot', 'data-st': cls || c.status }), h('span', { text: txt }));
-  out.push(UI.nameField());
+  out.push(UI.nameField()); if (typeof Social !== 'undefined' && Social.enabled()) out.push(UI.statusField());
   if (c.mode === 'claude' || window.NOOK_ENV === 'artifact') {
     out.push(status(c.status === 'synced' ? '已自動存到你的 Claude 帳號' : c.status === 'loading' ? '連線中…' : '這個環境沒有雲端儲存，進度只存在這台裝置', c.status === 'synced' ? 'synced' : c.status));
     out.push(h('p', { class: 'hint', text: '在 Claude 上玩時不用另外登入：進度跟著你的 Claude 帳號走，換一台裝置打開同一個頁面就能接著玩。想用 Google 或 Email 帳號登入，請用 GitHub 版本（README 有 Firebase 設定教學）。' }));

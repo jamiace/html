@@ -280,7 +280,7 @@ const UI = {
     if (w.size) el.style.height = Math.min(w.size[1], H - 24) + 'px';
     const hh = el.offsetHeight || 300;
     if (!w.pos) { const [side, slot] = w.conf.at; const top = 76 + slot * 40; w.pos = side === 'r' ? [W - ww - 24, top] : side === 'l' ? [24, top] : [(W - ww) / 2, Math.max(60, (H - hh) / 2 - 20)]; }
-    const x = Math.max(8, Math.min(W - ww - 8, w.pos[0])), y = Math.max(8, Math.min(H - 60, w.pos[1]));
+    const x = Math.max(8, Math.min(W - ww - 8, w.pos[0])), y = Math.max(8, Math.min(H - Math.min(hh, H - 16) - 8, w.pos[1]));   // keep the whole window on screen
     el.style.left = x + 'px'; el.style.top = y + 'px';
   },
   raise(w) { w.el.style.zIndex = ++this.z; },
@@ -301,6 +301,7 @@ const UI = {
     const active = document.activeElement && b.contains(document.activeElement) ? document.activeElement.id : null;
     b.replaceChildren(...[].concat(this['w_' + id]() || []).filter(Boolean));
     const sc = b.querySelector('.scroll'); if (sc) sc.scrollTop = keepScroll;
+    if (!w.el.hidden && !this.narrow()) this.placeWin(w);
     if (active) { const el = document.getElementById(active); if (el) { el.focus(); if (el.setSelectionRange && el.value != null) try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) { } } }
   },
   // ---------- timer window ----------

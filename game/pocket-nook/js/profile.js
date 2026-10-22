@@ -23,6 +23,7 @@ UI.nameField = function () {
     if (!v) { inp.value = a.name || ''; show(inp.value); return UI.toast('名字不能是空白', 'i_people', 2); }
     inp.value = v; show(v); if (v === (a.name || '')) return;
     a.name = v; Game.save(); saveSoon(); if (typeof Cowork !== 'undefined' && Cowork.push) Cowork.push(); UI.refresh('avatar');
+    if (typeof Social !== 'undefined' && Social.ready()) Social.publish(true).catch(() => { });
     UI.toast(`名字改成「${v}」`, 'i_people', 2);
   };
   const inp = h('input', { id: 'acct-name', type: 'text', value: a.name || '', placeholder: NAME_DEFAULT, autocomplete: 'nickname', 'aria-describedby': 'acct-name-hint',
@@ -32,4 +33,17 @@ UI.nameField = function () {
     onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); commit(e.target); } } });
   msg.id = 'acct-name-hint'; show(inp.value);
   return h('label', { class: 'field' }, h('span', { text: '名字' }), h('div', { class: 'inset grow' }, inp), msg);
+};
+
+// short status line on the name card (20 units, same counting as the name, no word filter)
+UI.statusField = function () {
+  const Z = Social.Z, msg = h('span', { class: 'hint' }); let composing = false;
+  const show = (v) => { const left = 20 - nameWidth(cleanName(v)); msg.textContent = left >= 0 ? `名片上的一句話，還可以輸入 ${left} 格` : `超過 ${-left} 格，存檔時會從後面剪掉`; msg.classList.toggle('warn', left < 0); };
+  const commit = (inp) => { const v = clipStatus(inp.value); inp.value = v; show(v); if (v === (Z.status || '')) return; Z.status = v; Game.save(); saveSoon(); if (Social.ready()) Social.publish(true).catch(() => { }); UI.toast(v ? '狀態更新了' : '已清除狀態', 'i_people', 2); };
+  const inp = h('input', { id: 'acct-status', type: 'text', value: Z.status || '', placeholder: '例如：今天要背 40 個單字！', autocomplete: 'off',
+    oncompositionstart: () => { composing = true; }, oncompositionend: e => { composing = false; show(e.target.value); },
+    oninput: e => { if (!composing) show(e.target.value); }, onchange: e => { if (!composing) commit(e.target); },
+    onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); commit(e.target); } } });
+  show(inp.value);
+  return h('label', { class: 'field' }, h('span', { text: '狀態' }), h('div', { class: 'inset grow' }, inp), msg);
 };

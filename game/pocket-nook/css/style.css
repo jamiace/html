@@ -591,3 +591,29 @@ table.board tr.me td { background: var(--chip-on); font-weight: bold; }
 .mal-mosaic.n2 img { grid-row: span 2; }
 .mal-mosaic.n3 img:first-child { grid-row: span 2; }
 .malbum .mal-ph img { filter: brightness(1.6) saturate(.3); }
+/* name cards, friends list, leaderboard */
+.frname { border: 0; background: none; padding: 0; color: var(--ink); text-align: left; cursor: pointer; font: inherit; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.frname:hover b { text-decoration: underline; }
+.frst { flex-basis: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frrow.unread { box-shadow: inset 3px 0 0 var(--berry, #b0476a); }
+.frrow canvas, .frme canvas { flex: none; }
+.win[data-id=friends] .win-b > .scroll { flex: 1; max-height: none; min-height: 120px; }
+ol.board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+ol.board li .brow { width: 100%; display: flex; align-items: center; gap: 8px; padding: 3px 8px; border: 0; background: var(--paper-2); color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
+ol.board li.me .brow { background: var(--chip-on); box-shadow: inset 0 0 0 2px var(--honey); font-weight: 700; }
+ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
+.brank { min-width: 26px; text-align: center; padding: 1px 4px; background: var(--line); color: var(--paper); }
+.bname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bval { white-space: nowrap; }
+.cardtop { display: flex; gap: 12px; align-items: flex-start; }
+.cardtop > canvas, .cardtop > .pv { flex: none; background: var(--paper-2); box-shadow: inset 0 0 0 3px var(--line); padding: 4px; }
+.cardname { display: flex; align-items: center; gap: 8px; font-size: 20px; }
+.cardstatus { margin: 4px 0; padding: 4px 8px; background: var(--paper-2); box-shadow: inset 3px 0 0 var(--honey); }
+.card-room { width: 100%; height: auto; image-rendering: pixelated; display: block; box-shadow: 0 0 0 3px #2e2230; }
+.cardpets { display: flex; flex-wrap: wrap; gap: 6px; }
+.cardpet { display: flex; flex-direction: column; align-items: center; font-size: 12px; padding: 2px 4px; background: var(--paper-2); }
+.vheart { position: absolute; transform: translate(-50%, -100%); animation: vh 1.2s steps(4) infinite; pointer-events: none; }
+@keyframes vh { 50% { transform: translate(-50%, -130%); } }
+@media (prefers-reduced-motion: reduce) { .vheart { animation: none; } }
+.win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
+.win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
