@@ -72,6 +72,7 @@ const Social = {
     await this.applyHelps();
     await this.snapshot(true);
     this.lastHelpPoll = Date.now();
+    if (typeof Team !== 'undefined') { Team.tick(); Team.loadInvites(true); }
   },
   tick() {
     if (!this.ready()) return;
@@ -79,6 +80,7 @@ const Social = {
     if (this.okFriends().length && now - (this.lastHelpPoll || 0) > SOCIAL.helpPollMs) { this.lastHelpPoll = now; this.applyHelps().catch(() => { }); }
     this.snapshot(false).catch(() => { });
     this.publish(false).catch(() => { });
+    if (typeof Team !== 'undefined') Team.tick();
   },
   // ---------- friend code & name card ----------
   async ensureCode() {

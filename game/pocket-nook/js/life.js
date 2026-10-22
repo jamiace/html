@@ -226,6 +226,7 @@ const Life = {
   taskReward(t) { return t.rw || TASK_DEFS[t.k].rw; },
   track(ev, n = 1, data = {}) {
     const L = this.L; this.ensureDaily();
+    if (typeof Team !== 'undefined') Team.onTrack(ev, n);
     const map = { focusMin: 'focus', todo: 'todo', need: 'need', feed: 'feed', pet: 'pet', quizRight: 'quiz', place: 'place', move: 'place', study: 'study', vocab: 'vocab', play: 'play', groom: 'groom', train: 'train' };
     if (ev === 'quizRight') L.stats.quizRight += n;
     for (const t of L.daily.tasks) {
@@ -266,7 +267,7 @@ const Life = {
     UI.refresh('tasks'); UI.refresh('storage'); UI.badges(); Game.save(); saveSoon();
   },
   checkAch() { let n = 0; for (const a of ACHS) if (this.achState(a).ready) n++; this._achReady = n; },
-  claimable() { this.ensureDaily(); const D = this.L.daily; let n = D.tasks.filter(t => !t.claimed && t.prog >= t.need).length; if (!D.bonus && D.tasks.every(t => t.claimed)) n++; return n + (this._achReady || 0); },
+  claimable() { this.ensureDaily(); const D = this.L.daily; let n = D.tasks.filter(t => !t.claimed && t.prog >= t.need).length; if (!D.bonus && D.tasks.every(t => t.claimed)) n++; return n + (typeof Team !== 'undefined' ? Team.claimableN() : 0) + (this._achReady || 0); },
   // ---------- tick ----------
   tick(dt) {
     this._acc += dt; if (this._acc < 1) return; this._acc = 0;
@@ -331,7 +332,7 @@ Object.assign(UI, {
   w_tasks() {
     Life.ensureDaily(); const L = Life.L, tab = this.tasksTab;
     const nNeeds = L.needs.length;
-    const tabs = h('div', { class: 'tabs' }, ...[['daily', '每日任務'], ['needs', `需求${nNeeds ? '（' + nNeeds + '）' : ''}`], ['ach', '成就']].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
+    const tabs = h('div', { class: 'tabs' }, ...[['daily', '每日任務'], ['needs', `需求${nNeeds ? '（' + nNeeds + '）' : ''}`], ['ach', '成就'], ...(typeof Team !== 'undefined' && Social.enabled() ? [['team', '團隊' + (Team.claimableN() ? '（!）' : '')]] : [])].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
     const cl = Life.comfortLv();
     const head = h('div', { class: 'tsum' }, h('span', {}, ico('i_theme', 18), `舒適度 Lv ${cl}`), h('span', { class: 'hint', text: cl ? `金幣收入 +${cl * 3}%` : '多擺些家具提升舒適度，金幣收入會增加' }), h('span', {}, ico('i_fire', 18), `連續 ${Learn.L.streak || 0} 天`));
     const body = [];
@@ -349,6 +350,8 @@ Object.assign(UI, {
       body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: '全部完成獎勵' }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: '＋2 個道具' }))),
         D.bonus ? h('span', { class: 'own', text: '已領取' }) : h('button', { class: 'chip sm primary', disabled: !all, onclick: () => Life.claimBonus() }, '領取')));
       body.push(h('p', { class: 'hint', text: '每天午夜換一批新任務。' }));
+    } else if (tab === 'team') {
+      body.push(...this.w_team());
     } else if (tab === 'needs') {
       if (!L.needs.length) body.push(h('div', { class: 'empty' }, ico('i_sparkle', 40), h('p', { text: '目前沒有需求。房間裡偶爾會冒出泡泡，點泡泡或點對象就能處理。' })));
       for (const n of L.needs) {

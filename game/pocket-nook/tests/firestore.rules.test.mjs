@@ -136,6 +136,56 @@ test('房間：只有本人和好友看得到；只有好友能留幫忙紀錄�
   await assertSucceeds(deleteDoc(doc(bob(), 'rooms/bob/help/12-1792600000000')));
 });
 
+// ---------- 團隊任務 ----------
+const team = (by, over = {}) => ({ type: 'd', period: '2026-10-22', task: 'focus', goal: 90, max: 3, members: [by], names: { [by]: by }, prog: { [by]: 0 }, open: false, full: false, doneAt: 0, roster: [], by, at: now(), ...over });
+const joinAs = (uid, tm) => ({ members: [...tm.members, uid], names: { ...tm.names, [uid]: uid }, prog: { ...tm.prog, [uid]: 0 }, full: tm.members.length + 1 >= tm.max, at: now() });
+test('團隊：開放配對才能被陌生人加入，不能超過人數上限', async () => {
+  const t1 = team('alice', { open: true });
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), t1));
+  await assertFails(setDoc(doc(bob(), 'teams/t2'), team('alice')));                       // can't create a team for someone else
+  await assertSucceeds(getDocs(query(collection(bob(), 'teams'), limit(20))));
+  await assertFails(getDocs(query(collection(bob(), 'teams'), limit(21))));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', t1)));
+  const t1b = { ...t1, ...joinAs('bob', t1) };
+  await assertSucceeds(updateDoc(doc(carol(), 'teams/t1'), joinAs('carol', t1b)));
+  const t1c = { ...t1b, ...joinAs('carol', t1b) };
+  await assertFails(updateDoc(doc(env.authenticatedContext('dave').firestore(), 'teams/t1'), joinAs('dave', t1c)));   // full
+  // closed team: only with an invitation from a friend
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t3'), team('alice')));
+  await assertFails(updateDoc(doc(bob(), 'teams/t3'), joinAs('bob', team('alice'))));
+});
+test('團隊：只能改自己的進度，而且只能變多；任務內容不能改', async () => {
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), team('alice', { open: true })));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', team('alice', { open: true }))));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), { 'prog.bob': 30, at: now() }));
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { 'prog.bob': 10, at: now() }));
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { 'prog.alice': 50, at: now() }));
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { goal: 1, at: now() }));
+  await assertFails(updateDoc(doc(carol(), 'teams/t1'), { 'prog.carol': 5, at: now() }));   // not a member
+});
+test('團隊：達成時名單固定，名單上的人（包含零貢獻）各領一次', async () => {
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), team('alice', { open: true })));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', team('alice', { open: true }))));
+  await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { 'prog.alice': 90, at: now() }));
+  await assertFails(updateDoc(doc(alice(), 'teams/t1'), { doneAt: now(), roster: ['alice'], open: false, full: true, at: now() }));   // roster must be everyone
+  await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { doneAt: now(), roster: ['alice', 'bob'], open: false, full: true, at: now() }));
+  await assertFails(updateDoc(doc(carol(), 'teams/t1'), { members: ['alice', 'bob', 'carol'], names: { alice: 'alice', bob: 'bob', carol: 'carol' }, prog: { alice: 90, bob: 0, carol: 0 }, full: true, at: now() }));
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 90 }, full: false, open: false, at: now() }));   // can't leave after
+  await assertSucceeds(setDoc(doc(bob(), 'teams/t1/claims/bob'), { at: now() }));        // bob did nothing and still gets it
+  await assertFails(setDoc(doc(bob(), 'teams/t1/claims/bob'), { at: now() }));           // only once
+  await assertFails(setDoc(doc(carol(), 'teams/t1/claims/carol'), { at: now() }));       // not on the roster
+});
+test('團隊邀請：只有好友能寄', async () => {
+  const inv = (from) => ({ from, name: from, type: 'd', period: '2026-10-22', task: 'focus', at: now() });
+  await assertFails(setDoc(doc(carol(), 'tinv/bob/list/t1'), inv('carol')));
+  await befriend();
+  await assertSucceeds(setDoc(doc(alice(), 'tinv/bob/list/t1'), inv('alice')));
+  await assertFails(setDoc(doc(alice(), 'tinv/bob/list/t2'), inv('carol')));
+  await assertSucceeds(getDocs(collection(bob(), 'tinv/bob/list')));
+  await assertFails(getDocs(collection(carol(), 'tinv/bob/list')));
+  await assertSucceeds(deleteDoc(doc(bob(), 'tinv/bob/list/t1')));
+});
+
 test('其他路徑一律拒絕', async () => {
   await assertFails(setDoc(doc(alice(), 'leaderboard/alice'), { score: 1 }));
   await assertFails(getDoc(doc(alice(), 'config/admin')));

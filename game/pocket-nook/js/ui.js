@@ -241,7 +241,7 @@ const UI = {
     pet: { t: '寵物', i: 'i_paw', w: 360, at: ['l', 0] }, cowork: { t: '一起專注', i: 'i_people', w: 360, at: ['r', 1] }, settings: { t: '設定與紀錄', i: 'i_gear', w: 400, at: ['c', 0] },
     gift: { t: '禮物', i: 'i_star', w: 320, at: ['c', 0], modal: true },
     themeask: { t: '套用主題', i: 'i_theme', w: 380, at: ['c', 0], modal: true },
-    music: { t: '音樂', i: 'i_music', w: 460, at: ['r', 2], resize: { minW: 360, minH: 320, h: 600 } },
+    music: { t: '音樂', i: 'i_music', w: 460, at: ['r', 1], resize: { minW: 360, minH: 420, h: 720 } },
   },
   getWin(id) {
     let w = this.wins[id]; if (w) return w;
@@ -297,10 +297,10 @@ const UI = {
   refreshAll() { for (const id in this.wins) this.refresh(id); this.hud(true); this.renderPins(); },
   render(id) {
     const w = this.getWin(id), b = w.body;
-    const keepScroll = b.querySelector('.scroll')?.scrollTop || 0;
+    const keepScroll = [...b.querySelectorAll('.scroll')].map(e => e.scrollTop);
     const active = document.activeElement && b.contains(document.activeElement) ? document.activeElement.id : null;
     b.replaceChildren(...[].concat(this['w_' + id]() || []).filter(Boolean));
-    const sc = b.querySelector('.scroll'); if (sc) sc.scrollTop = keepScroll;
+    b.querySelectorAll('.scroll').forEach((e, i) => { if (keepScroll[i]) e.scrollTop = keepScroll[i]; });
     if (!w.el.hidden && !this.narrow()) this.placeWin(w);
     if (active) { const el = document.getElementById(active); if (el) { el.focus(); if (el.setSelectionRange && el.value != null) try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) { } } }
   },
@@ -545,15 +545,19 @@ const UI = {
     const tab = this.mTab || (Lib.enabled() && !M.list.length ? 'lib' : 'list');
     const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (tab === 'lib' ? ' on' : ''), onclick: () => { this.mTab = 'lib'; this.refresh('music'); } }, ico('i_music', 18), '內建音樂'),
       h('button', { class: 'tab' + (tab === 'list' ? ' on' : ''), onclick: () => { this.mTab = 'list'; this.refresh('music'); } }, ico('i_folder', 18), `我的清單（${M.list.length}）`));
-    const head = [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, vol, tabs];
-    const auto = h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); } }, Game.S.settings.autoMusic ? '開始專注時自動播放：開' : '開始專注時自動播放：關'));
-    auto.append(h('button', { class: 'chip sm' + (Game.S.settings.lyrics !== false ? ' on' : ''), 'aria-pressed': Game.S.settings.lyrics !== false ? 'true' : 'false', title: '有同名 .lrc 歌詞檔的歌，播放時在畫面上方顯示歌詞', onclick: () => { Game.S.settings.lyrics = Game.S.settings.lyrics === false; Game.save(); Lyrics.render(); this.refresh('music'); } }, Game.S.settings.lyrics !== false ? '畫面上方顯示歌詞：開' : '畫面上方顯示歌詞：關'));
+    vol.classList.add('mvol'); ctl.append(vol);
+    const head = [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, tabs];
+    const auto = h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); }, title: '開始專注時自動播放音樂' }, ico('i_tomato', 16), Game.S.settings.autoMusic ? '專注自動播放：開' : '專注自動播放：關'));
+    auto.append(h('button', { class: 'chip sm' + (Game.S.settings.lyrics !== false ? ' on' : ''), 'aria-pressed': Game.S.settings.lyrics !== false ? 'true' : 'false', title: '有同名 .lrc 歌詞檔的歌，播放時在畫面上方顯示歌詞', onclick: () => { Game.S.settings.lyrics = Game.S.settings.lyrics === false; Game.save(); Lyrics.render(); this.refresh('music'); } }, Game.S.settings.lyrics !== false ? '歌詞：開' : '歌詞：關'));
+    auto.classList.add('wrap', 'mfoot');
     if (tab === 'lib') return [...head, ...this.musicLib(), auto];
     return [...head,
       h('div', { class: 'row wrap' }, h('label', { class: 'chip', for: 'm-file' }, ico('i_folder', 20), '加入本機音樂'), file, h('span', { class: 'hint', text: 'MP3、FLAC、M4A、OGG、WAV，也可以直接拖進來' })),
       h('div', { class: 'row' }, h('div', { class: 'inset grow' }, yt), h('button', { class: 'chip', 'aria-label': '加入 YouTube', onclick: () => { if (Music.addYT(yt.value)) yt.value = ''; } }, ico('i_video', 20), '加入')), ytNote,
       M.list.length ? h('div', { class: 'scroll' }, list) : h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '清單是空的。加入你自己的 lo-fi 音樂，專注時一起聽。' })), auto];
   },
+  // album covers on/off, kept per device
+  mCovers(v) { try { if (v != null) localStorage.setItem('pocketnook.mcovers', v ? '1' : '0'); return localStorage.getItem('pocketnook.mcovers') !== '0'; } catch (e) { return v != null ? v : true; } },
   musicLib() {
     const M = Game.S.music;
     if (!Lib.enabled()) return [h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '內建音樂要從網站版（GitHub Pages）播放：這個預覽頁面不能連到 Google 雲端硬碟。你仍然可以在「我的清單」加入本機音樂檔。' }))];
@@ -573,20 +577,28 @@ const UI = {
       const art = c ? h('img', { src: c, alt: '' }) : all.length ? h('div', { class: 'mal-mosaic n' + all.length }, ...all.map(u => h('img', { src: u, alt: '' }))) : h('div', { class: 'mal-ph' }, ico('i_music', 36));
       return h('button', { class: 'malbum' + (al === name ? ' on' : ''), title: name || '全部', onclick: () => { this.mAlbum = name; this.refresh('music'); } },
         art, h('b', { text: label }), h('span', { class: 'hint', text: `${count} 首` })); };
-    out.push(h('div', { class: 'malbums' }, card('', '全部', Lib.tracks.length, null), ...Lib.albums.map(a => card(a.n, a.n.split(' / ').pop(), a.c, Lib.queue(a.n)[0]))));
+    const showCov = this.mCovers();
+    out.push(h('div', { class: 'row between' }, h('span', { class: 'sub', text: `專輯（${Lib.albums.length}）` }),
+      h('button', { class: 'chip sm' + (showCov ? ' on' : ''), 'aria-pressed': showCov ? 'true' : 'false', onclick: () => { this.mCovers(!showCov); this.refresh('music'); } }, showCov ? '封面：開' : '封面：關')));
+    if (showCov) out.push(h('div', { class: 'scroll malbum-scroll' }, h('div', { class: 'malbums' }, card('', '全部', Lib.tracks.length, null), ...Lib.albums.map(a => card(a.n, a.n.split(' / ').pop(), a.c, Lib.queue(a.n)[0])))));
+    else out.push(h('div', { class: 'scroll mlib-al-scroll' }, h('div', { class: 'tabs wrap mlib-al' }, h('button', { class: 'tab sm' + (!al ? ' on' : ''), onclick: () => { this.mAlbum = ''; this.refresh('music'); } }, `全部 ${Lib.tracks.length}`),
+      ...Lib.albums.map(a => h('button', { class: 'tab sm' + (al === a.n ? ' on' : ''), title: a.n, onclick: () => { this.mAlbum = a.n; this.refresh('music'); } }, `${a.n.split(' / ').pop()} ${a.c}`)))));
     out.push(h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => Music.playLib(M.shuffle ? Math.floor(Math.random() * Q.length) : 0, al) }, ico('i_play', 16), al ? `播放「${al.split(' / ').pop()}」` : '全部播放'),
       h('span', { class: 'hint grow', text: Lib.driveOn() ? `來自雲端資料夾「${Lib.root || '…'}」` : '網站內建' }),
       Lib.driveOn() ? h('button', { class: 'chip sm', 'aria-label': '重新讀取資料夾', title: '重新讀取資料夾', onclick: () => Music.loadLib(true) }, ico('i_reset', 16)) : null));
     const curI = playingHere ? M.lidx : -1, dl = Music.dl;
-    out.push(h('div', { class: 'scroll' }, h('ol', { class: 'mlist' }, ...Q.map((e, i) => h('li', { class: (i === curI ? 'cur ' : '') + (e.missing ? 'missing' : '') },
+    out.push(h('div', { class: 'scroll mtracks' }, h('ol', { class: 'mlist' }, ...Q.map((e, i) => h('li', { class: (i === curI ? 'cur ' : '') + (e.missing ? 'missing' : '') },
       h('button', { class: 'mplay', onclick: () => Music.playLib(i, al), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }),
         e.lrc ? h('em', { class: 'mb', title: '有歌詞', text: '詞' }) : null,
         dl && dl.id === e.id ? h('em', { class: 'mb', text: dl.total ? Math.round(dl.got / dl.total * 100) + '%' : '下載中' }) : MusicCache.has(e.id) ? h('em', { class: 'mb ok', title: '已存在這台裝置', text: '已下載' }) : null,
         al ? null : h('em', { class: 'mb', text: e.album.split(' / ').pop() })))))));
     const used = MusicCache.total, lim = MusicCache.limitMB;
-    out.push(h('div', { class: 'row wrap mcache' }, h('span', { class: 'hint grow', text: `播過的歌會存在這台裝置，下次不用再下載：已用 ${used < 1073741824 ? Math.round(used / 1048576) + ' MB' : (used / 1073741824).toFixed(2) + ' GB'}／上限 ${lim >= 1024 ? lim / 1024 + ' GB' : lim + ' MB'}（超過時刪掉最久沒聽的）` }),
-      h('select', { 'aria-label': '本機快取上限', onchange: e => { MusicCache.limitMB = +e.target.value; this.refresh('music'); } }, ...MCACHE_LIMITS.map(v => h('option', { value: String(v), selected: v === lim ? '' : null }, v >= 1024 ? v / 1024 + ' GB' : v + ' MB'))),
-      h('button', { class: 'chip sm', onclick: async () => { await MusicCache.clear(); UI.toast('已清除這台裝置上的音樂快取', 'i_trash', 2.5); this.refresh('music'); } }, ico('i_trash', 16), '清除')));
+    const sz = (v) => v < 1073741824 ? Math.round(v / 1048576) + ' MB' : (v / 1073741824).toFixed(2) + ' GB';
+    out.push(h('details', { class: 'mcache', open: this.mCacheOpen ? '' : null, ontoggle: e => { this.mCacheOpen = e.target.open; } },
+      h('summary', { class: 'hint', text: `這台裝置上的音樂：${sz(used)}／${lim >= 1024 ? lim / 1024 + ' GB' : lim + ' MB'}` }),
+      h('div', { class: 'row wrap' }, h('span', { class: 'hint grow', text: '播過的歌會存在這台裝置，下次不用再下載；超過上限時刪掉最久沒聽的。' }),
+        h('select', { 'aria-label': '本機快取上限', onchange: e => { MusicCache.limitMB = +e.target.value; this.refresh('music'); } }, ...MCACHE_LIMITS.map(v => h('option', { value: String(v), selected: v === lim ? '' : null }, v >= 1024 ? v / 1024 + ' GB' : v + ' MB'))),
+        h('button', { class: 'chip sm', onclick: async () => { await MusicCache.clear(); UI.toast('已清除這台裝置上的音樂快取', 'i_trash', 2.5); this.refresh('music'); } }, ico('i_trash', 16), '清除'))));
     return out;
   },
   tickMusic() {

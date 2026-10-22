@@ -81,6 +81,48 @@ service cloud.firestore {
       }
     }
 
+    // ---------- 團隊任務 ----------
+    // 隊伍：登入的人都能讀（配對時一次最多查 20 隊）。可以做的更新只有這幾種：
+    //   加入（隊伍開放配對，或你收到邀請；不能超過人數上限；還沒達成）、更新自己的進度（只能變多）、
+    //   離開（還沒達成）、開關配對、達成時固定名單（roster = 當時的成員）
+    match /teams/{teamId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.query.limit <= 20;
+      allow create: if signedIn() && validTeam(request.resource.data)
+        && request.resource.data.members == [request.auth.uid] && request.resource.data.by == request.auth.uid
+        && request.resource.data.doneAt == 0 && request.resource.data.roster.size() == 0;
+      allow update: if signedIn() && validTeam(request.resource.data) && sameTeam()
+        && (teamJoin(teamId) || teamProgress() || teamLeave() || teamSettings() || teamComplete());
+      allow delete: if false;
+
+      // 領獎紀錄：每位完成名單上的成員一筆，只能建立一次（不會重複領）
+      match /claims/{userId} {
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.roster
+          && request.resource.data.keys().hasOnly(['at']) && request.resource.data.at == request.time;
+        allow update, delete: if false;
+      }
+    }
+
+    // 每個人這一期在哪一隊（登入的人可以查，邀請前用來確認好友還沒有隊伍）
+    match /tm/{userId} {
+      allow get: if signedIn();
+      allow create, update: if isOwner(userId) && request.resource.data.keys().hasOnly(['d', 'w', 'at']) && request.resource.data.at == request.time;
+      allow delete: if isOwner(userId);
+    }
+
+    // 團隊邀請：只有好友能寄給你；你可以看、可以刪；寄的人也可以收回
+    match /tinv/{userId}/list/{teamId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isFriendOf(userId)
+        && request.resource.data.keys().hasOnly(['from', 'name', 'type', 'period', 'task', 'at'])
+        && request.resource.data.from == request.auth.uid && shortText(request.resource.data.name, 40)
+        && request.resource.data.type in ['d', 'w'] && shortText(request.resource.data.period, 16)
+        && request.resource.data.at == request.time;
+      allow delete: if isOwner(userId) || (signedIn() && resource.data.from == request.auth.uid);
+    }
+
     // 其他所有路徑一律拒絕
     match /{document=**} {
       allow read, write: if false;
@@ -141,6 +183,64 @@ service cloud.firestore {
         && d.kind in ['feed', 'water', 'dust']
         && shortText(d.name, 40) && shortText(d.need, 64) && shortText(d.target, 32) && shortText(d.tname, 60) && shortText(d.day, 16)
         && d.at == request.time;
+    }
+
+    function validTeam(d) {
+      return d.keys().hasOnly(['type', 'period', 'task', 'goal', 'max', 'members', 'names', 'prog', 'open', 'full', 'doneAt', 'roster', 'by', 'at'])
+        && d.type in ['d', 'w'] && shortText(d.period, 16) && d.task in ['focus', 'quiz', 'care']
+        && d.goal is int && d.max is int && d.max >= 1 && d.max <= 5
+        && d.members is list && d.members.size() <= d.max
+        && d.names is map && d.prog is map && d.open is bool && d.full is bool
+        && d.roster is list && d.by is string
+        && d.at == request.time;
+    }
+
+    // 隊伍的任務內容、人數上限、建立者都不能改
+    function sameTeam() {
+      return request.resource.data.type == resource.data.type && request.resource.data.period == resource.data.period
+        && request.resource.data.task == resource.data.task && request.resource.data.goal == resource.data.goal
+        && request.resource.data.max == resource.data.max && request.resource.data.by == resource.data.by;
+    }
+
+    function teamChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function teamJoin(teamId) {
+      return !(request.auth.uid in resource.data.members) && request.auth.uid in request.resource.data.members
+        && request.resource.data.members.size() == resource.data.members.size() + 1
+        && request.resource.data.members.size() <= resource.data.max
+        && resource.data.doneAt == 0
+        && (resource.data.open == true || exists(/databases/$(database)/documents/tinv/$(request.auth.uid)/list/$(teamId)))
+        && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'at'])
+        && request.resource.data.prog.diff(resource.data.prog).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.prog[request.auth.uid] == 0;
+    }
+
+    function teamProgress() {
+      return request.auth.uid in resource.data.members
+        && teamChanged().hasOnly(['prog', 'at'])
+        && request.resource.data.prog.diff(resource.data.prog).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.prog[request.auth.uid] is int
+        && request.resource.data.prog[request.auth.uid] >= resource.data.prog.get(request.auth.uid, 0);
+    }
+
+    function teamLeave() {
+      return request.auth.uid in resource.data.members && !(request.auth.uid in request.resource.data.members)
+        && request.resource.data.members.size() == resource.data.members.size() - 1
+        && resource.data.doneAt == 0
+        && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'open', 'at']);
+    }
+
+    function teamSettings() {
+      return request.auth.uid in resource.data.members && resource.data.doneAt == 0 && teamChanged().hasOnly(['open', 'at']);
+    }
+
+    function teamComplete() {
+      return request.auth.uid in resource.data.members && resource.data.doneAt == 0
+        && request.resource.data.doneAt == request.time
+        && request.resource.data.roster == resource.data.members
+        && teamChanged().hasOnly(['doneAt', 'roster', 'open', 'full', 'at']);
     }
 
     function validSave(d) {

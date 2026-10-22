@@ -50,6 +50,15 @@ async function loadFirebase(cfg) {
         add: (path, data) => F.addDoc(F.collection(db, path), stamp(data)),
         async list(path, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.limit(n || 50)))); },
         batch: (ops) => { const b = F.writeBatch(db); for (const [op, path, data] of ops) { const r = F.doc(db, path); if (op === 'set') b.set(r, stamp(data)); else if (op === 'update') b.update(r, stamp(data)); else b.delete(r); } return b.commit(); },
+        async query(path, wheres, n) { return rows(await F.getDocs(F.query(F.collection(db, path), ...wheres.map(([f, op, v]) => F.where(f, op, v)), F.limit(n || 20)))); },
+        newId: (path) => F.doc(F.collection(db, path)).id,
+        // transaction: fn gets { get, set, update, del }; reads must come before writes
+        tx: (fn) => F.runTransaction(db, (t) => fn({
+          async get(path) { const s = await t.get(F.doc(db, path)); return s.exists() ? norm(s.data()) : null; },
+          set: (path, data) => { t.set(F.doc(db, path), stamp(data)); },
+          update: (path, data) => { t.update(F.doc(db, path), stamp(data)); },
+          del: (path) => { t.delete(F.doc(db, path)); },
+        })),
         async top(path, field, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.orderBy(field, 'desc'), F.limit(n)))); },
       };
     })(),
@@ -161,6 +170,12 @@ function mergeSaves(a, b, common) {
     const spent = new Set([...(W.spent || []), ...(OW.spent || [])]), key = (c) => c.got + ':' + c.off, have = new Set();
     W.coupons = [...(W.coupons || []), ...(OW.coupons || [])].filter(c => { const k = key(c); if (spent.has(k) || have.has(k)) return false; have.add(k); return true; });
     W.coupons.forEach((c, i) => { c.id = i + 1; }); W.nid = W.coupons.length + 1; W.sel = null; W.spent = [...spent].slice(-200);
+  }
+  if (o.team) {
+    const T = M.team = M.team || {}, O = o.team;
+    T.claims = Object.assign({}, O.claims, T.claims);
+    for (const type of ['d', 'w']) { const a = T[type], b = O[type]; if (!a && b) T[type] = b; else if (a && b && a.p === b.p && a.id === b.id) a.mine = Math.max(a.mine || 0, b.mine || 0); else if (a && b && b.p > a.p) T[type] = b; }
+    const seen = new Set((T.hist || []).map(x => x.id)); T.hist = [...(T.hist || []), ...(O.hist || []).filter(x => !seen.has(x.id))].filter(x => !T.claims[x.type + ':' + x.p]).slice(0, 12);
   }
   if (o.social) {
     const Z = M.social = M.social || {}, O = o.social;

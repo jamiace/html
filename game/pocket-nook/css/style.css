@@ -617,3 +617,18 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 @media (prefers-reduced-motion: reduce) { .vheart { animation: none; } }
 .win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
 .win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
+/* music library: albums and songs scroll on their own; the song list always fits at least 5 songs */
+.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 230px; max-height: 230px; min-height: 70px; }
+.win[data-id=music] .win-b > .scroll.mlib-al-scroll { flex: 0 0 auto; max-height: 76px; min-height: 0; }
+.win[data-id=music] .win-b > .scroll.mtracks { flex: 1 1 auto; min-height: calc(5 * 36px); max-height: none; }
+.win[data-id=music] .win-b > :not(.scroll) { flex-shrink: 0; }
+.win[data-id=music] .mlib-al { max-height: none; overflow: visible; }
+.malbum-scroll .malbums { padding: 2px; }
+.win[data-id=music] .win-b { gap: 8px; }
+/* team tasks */
+.tmhead { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
+.tmhead b { font-size: 17px; }
+.tmnote { font-size: 13px; font-weight: 700; color: var(--berry, #b0476a); }
+.tmprog { display: flex; align-items: center; gap: 10px; }
+.tmprog .pbar { flex: 1; height: 14px; }
+.pbar.team i { background: var(--honey); }
