@@ -34,4 +34,4 @@ window.NOOK_AUDIO_BASE = '';
  * 想完全不依賴雲端硬碟，可以用 tools/fetch-drive-music.mjs 把歌下載進 music/。
  */
 window.NOOK_DRIVE_FOLDER = '11uJHdrWUOjZBRGfyqc763bUeT6qTfD6w';
-window.NOOK_DRIVE_API_KEY = '';
+window.NOOK_DRIVE_API_KEY = 'AIzaSyCDmAUMuPI1dYgENKhxMQ9hDnOcop6-WSQ';
