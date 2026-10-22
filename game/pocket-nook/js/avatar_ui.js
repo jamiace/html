@@ -15,7 +15,8 @@ const AVA_TABS = [
   ['acc', '頸部背部', [['neck', '頸部', 'grid', 'torso'], ['neckColor', '顏色', 'sw'], ['back', '背部', 'grid', 'full'], ['backColor', '顏色', 'sw']]],
   ['sets', '套裝', null],
 ];
-const AVA_CROP = { face: [3, 13, 16, 9, 'front0'], head: [1, 7, 20, 16, 'front0'], headback: [1, 7, 20, 22, 'back0'], torso: [1, 18, 20, 14, 'front0'], legs: [1, 21, 20, 13, 'front0'],
+// 'full' shows the back (for back items such as wings); saved outfits are shown from the front
+const AVA_CROP = { outfit: [0, 0, 20, 36, 'front0'], face: [3, 13, 16, 9, 'front0'], head: [1, 7, 20, 16, 'front0'], headback: [1, 7, 20, 22, 'back0'], torso: [1, 18, 20, 14, 'front0'], legs: [1, 21, 20, 13, 'front0'],
   feet: [2, 28, 18, 8, 'side0'], hat: [1, 0, 20, 16, 'front0'], full: [0, 0, 20, 36, 'back0'] };
 function avaThumb(cfg, crop) {
   const [x, y, w, h, frame] = AVA_CROP[crop] || AVA_CROP.full, src = avatarCanvas(frame, cfg, null, 0, false);
@@ -83,7 +84,7 @@ Object.assign(UI, {
     } else {
       body.push(h('p', { class: 'hint', text: '把現在的造型存起來，之後一鍵換回來（最多 8 套）。' }));
       body.push(h('div', { class: 'row' }, h('button', { class: 'chip primary', disabled: S.outfits.length >= 8, onclick: () => { S.outfits.push({ n: `套裝 ${S.outfits.length + 1}`, a: sanitizeAvatar(a) }); Game.save(); this.refresh('avatar'); } }, ico('i_plus', 18), '存成新套裝')));
-      body.push(h('div', { class: 'avagrid sets' }, ...S.outfits.map((o, i) => h('div', { class: 'avaopt set' }, avaThumb(Object.assign({}, a, o.a), 'full'), h('span', { text: o.n }),
+      body.push(h('div', { class: 'avagrid sets' }, ...S.outfits.map((o, i) => h('div', { class: 'avaopt set' }, avaThumb(Object.assign({}, a, o.a), 'outfit'), h('span', { text: o.n }),
         h('div', { class: 'row center' }, h('button', { class: 'chip sm primary', onclick: () => { for (const c in o.a) if (c in AVA_PARTS && this.avaOwned(c, o.a[c])) a[c] = o.a[c]; this.avaTry = null; Game.save(); Cowork.push(); this.refresh('avatar'); } }, '換上'), h('button', { class: 'chip sm', 'aria-label': '刪除', onclick: () => { S.outfits.splice(i, 1); Game.save(); this.refresh('avatar'); } }, ico('i_trash', 14)))))));
     }
     let tryBar = null;
