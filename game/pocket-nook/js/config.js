@@ -33,5 +33,5 @@ window.NOOK_AUDIO_BASE = '';
  * 不會寫進存檔，也不會占用 Firestore 用量。
  * 想完全不依賴雲端硬碟，可以用 tools/fetch-drive-music.mjs 把歌下載進 music/。
  */
-window.NOOK_DRIVE_FOLDER = '11uJHdrWUOjZBRGfyqc763bUeT6qTfD6w';
+window.NOOK_DRIVE_FOLDER = '';   // 內建音樂改放在網站的 music/ 資料夾，不再從雲端硬碟播放（原本的資料夾 ID：11uJHdrWUOjZBRGfyqc763bUeT6qTfD6w）
 window.NOOK_DRIVE_API_KEY = 'AIzaSyCDmAUMuPI1dYgENKhxMQ9hDnOcop6-WSQ';

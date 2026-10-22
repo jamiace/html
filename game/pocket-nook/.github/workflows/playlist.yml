@@ -1,0 +1,28 @@
+# 推送 music/ 裡的歌之後，自動重新產生 music/playlist.json 並提交回來
+name: 更新音樂清單
+on:
+  push:
+    paths:
+      - 'music/**'
+      - '!music/playlist.json'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  playlist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/make-playlist.mjs
+      - name: 提交清單（有變動才提交）
+        run: |
+          if [ -n "$(git status --porcelain -- music/playlist.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898732+github-actions[bot]@users.noreply.github.com"
+            git add music/playlist.json
+            git commit -m "更新音樂清單"
+            git push
+          fi
