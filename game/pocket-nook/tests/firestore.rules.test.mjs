@@ -175,6 +175,30 @@ test('團隊：達成時名單固定，名單上的人（包含零貢獻）各�
   await assertFails(setDoc(doc(bob(), 'teams/t1/claims/bob'), { at: now() }));           // only once
   await assertFails(setDoc(doc(carol(), 'teams/t1/claims/carol'), { at: now() }));       // not on the roster
 });
+test('團隊：組隊倒數只能歸零、不能延長；離開後可以再加入；換隊時離開舊隊和加入新隊一起送出', async () => {
+  const t1 = team('alice', { mAt: 1792600000000 });
+  await assertSucceeds(setDoc(doc(alice(), 'teams/t1'), t1));
+  await assertFails(updateDoc(doc(alice(), 'teams/t1'), { mAt: 1792600999999, at: now() }));        // can't extend the lobby
+  await assertFails(updateDoc(doc(bob(), 'teams/t1'), { open: true, mAt: 0, at: now() }));          // not a member
+  await assertSucceeds(updateDoc(doc(alice(), 'teams/t1'), { open: true, mAt: 0, at: now() }));     // match now / auto match
+  const open1 = { ...t1, open: true, mAt: 0 };
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', open1)));
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 0 }, full: false, open: true, at: now() }));   // leave
+  await assertSucceeds(updateDoc(doc(bob(), 'teams/t1'), joinAs('bob', open1)));                   // and come back
+  // bob moves from t1 to carol's open team in one batch
+  const t2 = team('carol', { open: true });
+  await assertSucceeds(setDoc(doc(carol(), 'teams/t2'), t2));
+  const b = writeBatch(bob());
+  b.update(doc(bob(), 'teams/t1'), { members: ['alice'], names: { alice: 'alice' }, prog: { alice: 0 }, full: false, open: true, at: now() });
+  b.update(doc(bob(), 'teams/t2'), joinAs('bob', t2));
+  await assertSucceeds(b.commit());
+  await assertFails(setDoc(doc(alice(), 'teams/t9'), team('alice', { mAt: 'soon' })));
+});
+test('排行榜：開發者存檔可以選擇列入（dev 標記）', async () => {
+  const row = { name: 'a', ava: {}, lvl: 3, lv: 30000000, coins: 10, tm: 5, w: { w20261019: 5 }, at: now() };
+  await assertSucceeds(setDoc(doc(alice(), 'board/alice'), { ...row, dev: true }));
+  await assertFails(setDoc(doc(alice(), 'board/alice'), { ...row, dev: 'yes' }));
+});
 test('團隊邀請：只有好友能寄', async () => {
   const inv = (from) => ({ from, name: from, type: 'd', period: '2026-10-22', task: 'focus', at: now() });
   await assertFails(setDoc(doc(carol(), 'tinv/bob/list/t1'), inv('carol')));

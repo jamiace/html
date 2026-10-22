@@ -84,7 +84,8 @@ service cloud.firestore {
     // ---------- 團隊任務 ----------
     // 隊伍：登入的人都能讀（配對時一次最多查 20 隊）。可以做的更新只有這幾種：
     //   加入（隊伍開放配對，或你收到邀請；不能超過人數上限；還沒達成）、更新自己的進度（只能變多）、
-    //   離開（還沒達成）、開關配對、達成時固定名單（roster = 當時的成員）
+    //   離開（還沒達成；離開後可以再加入別隊）、開關配對、達成時固定名單（roster = 當時的成員）
+    //   換隊（接受邀請或配對時）是同一個交易裡「離開舊隊 + 加入新隊」，兩筆各自照上面的規則檢查
     match /teams/{teamId} {
       allow get: if signedIn();
       allow list: if signedIn() && request.query.limit <= 20;
@@ -158,7 +159,8 @@ service cloud.firestore {
     }
 
     function validBoard(d) {
-      return d.keys().hasOnly(['name', 'ava', 'lvl', 'lv', 'coins', 'tm', 'w', 'at'])
+      return d.keys().hasOnly(['name', 'ava', 'lvl', 'lv', 'coins', 'tm', 'w', 'dev', 'at'])
+        && d.get('dev', false) is bool
         && shortText(d.name, 40) && d.ava is map
         && d.lvl is int && d.lv is int && d.coins is int && d.coins >= 0 && d.tm is int
         && d.w is map && d.w.size() <= 1
@@ -186,7 +188,8 @@ service cloud.firestore {
     }
 
     function validTeam(d) {
-      return d.keys().hasOnly(['type', 'period', 'task', 'goal', 'max', 'members', 'names', 'prog', 'open', 'full', 'doneAt', 'roster', 'by', 'at'])
+      return d.keys().hasOnly(['type', 'period', 'task', 'goal', 'max', 'members', 'names', 'prog', 'open', 'full', 'mAt', 'doneAt', 'roster', 'by', 'at'])
+        && d.get('mAt', 0) is int
         && d.type in ['d', 'w'] && shortText(d.period, 16) && d.task in ['focus', 'quiz', 'care']
         && d.goal is int && d.max is int && d.max >= 1 && d.max <= 5
         && d.members is list && d.members.size() <= d.max
@@ -232,8 +235,10 @@ service cloud.firestore {
         && teamChanged().hasOnly(['members', 'names', 'prog', 'full', 'open', 'at']);
     }
 
+    // 開關配對；倒數（mAt）只能歸零（立即配對、自動配對、不要自動配對），不能延長
     function teamSettings() {
-      return request.auth.uid in resource.data.members && resource.data.doneAt == 0 && teamChanged().hasOnly(['open', 'at']);
+      return request.auth.uid in resource.data.members && resource.data.doneAt == 0 && teamChanged().hasOnly(['open', 'mAt', 'at'])
+        && (request.resource.data.get('mAt', 0) == 0 || request.resource.data.get('mAt', 0) == resource.data.get('mAt', 0));
     }
 
     function teamComplete() {

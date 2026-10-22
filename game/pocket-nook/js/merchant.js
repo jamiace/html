@@ -144,7 +144,7 @@ const Merchant = {
     Game.reward(c, 0, 'raw'); UI.toast(`把「${d.n}」賣給${M.n}，得到 ${c} 金幣`, 'i_coin', 3);
     UI.hud(true); UI.refresh('merchant'); UI.refresh('storage'); Game.save(); saveSoon();
   },
-  // ---------- the merchant standing in the room ----------
+  // ---------- the merchant sets up outside your door; a little sign in the room tells you he is here ----------
   actor: null,
   spawn() { try { this._spawn(); } catch (e) { console.warn('[merchant]', e); } },
   _spawn() {
@@ -152,28 +152,71 @@ const Merchant = {
     const mk = this.id();
     if (this.actor && this.actor.mk === mk && Room.actors.includes(this.actor)) return;
     if (this.actor) Room.actors = Room.actors.filter(a => a !== this.actor);
-    this.actor = new MerchantNPC(mk); Room.actors.push(this.actor);
-    if (!this.S.met) { this.S.met = true; Game.save(); setTimeout(() => UI.toast(`這週的旅行商人「${MERCHANTS[mk].n}」來了，點他看看帶了什麼`, 'i_shop', 5, { label: '看看', fn: () => UI.openWin('merchant') }), 2500); }
+    this.actor = new MerchantSign(mk); Room.actors.push(this.actor);
+    if (!this.S.met) { this.S.met = true; Game.save(); setTimeout(() => UI.toast(`這週的旅行商人「${MERCHANTS[mk].n}」在你家門外擺攤了！點房間角落的告示牌就能去逛逛`, 'i_shop', 5.5, { label: '去看看', fn: () => Merchant.open() }), 2500); }
   },
   check() { if (!this.actor || this.actor.mk !== this.id() || !Room.actors.includes(this.actor)) this.spawn(); },
+  open() { if (!this.S.seen) { this.S.seen = true; Game.save(); } UI.openWin('merchant'); },
 };
 
-class MerchantNPC extends Avatar {
-  constructor(mk) {
-    super(() => this.mcfg); this.mk = mk; this.mcfg = sanitizeAvatar(Object.assign(defaultAvatar(), MERCHANTS[mk].look)); this.speed = 14;
-    // stand near the back-left, next to the cart; fall back to any free spot
-    const spot = freeFloorSpot(44, 14); this.x = Math.max(44, Math.min(196, spot[0])); this.y = Math.max(108, Math.min(150, spot[1])); this.face = 'front'; this.state = 'idle'; this.timer = 3;
-  }
-  think() { const r = Math.random(); this.state = 'idle'; this.face = r < 0.2 ? 'side' : 'front'; this.flip = Math.random() < 0.5; this.timer = 3 + Math.random() * 4; if (r > 0.92) Game.bubble(this, MERCHANTS[this.mk].tag + '，這週限定！', 2.4); }
-  update(dt) { if (this.hop > 0) this.hop -= dt; if (this.happy > 0) this.happy -= dt; this.blink -= dt; if (this.blink < -0.13) this.blink = 2.5 + Math.random() * 3; this.timer -= dt; if (this.timer <= 0) this.think(); }
-  poke() { this.hop = 0.45; this.happy = 1.4; UI.openWin('merchant'); }
+// the sign: a little A-frame board in the merchant's colours, standing in the front-left corner
+SPR.def('m_sign', G(16, 21, g => {
+  g.pts([[3, 17], [3, 18], [2, 19], [2, 20], [12, 17], [12, 18], [13, 19], [13, 20]], 'a');
+  g.rect(2, 4, 12, 13, 'c'); g.hl(2, 4, 12, 'd'); g.hl(2, 16, 12, 'b'); g.vl(2, 5, 11, 'd'); g.vl(13, 5, 11, 'b');
+  g.hl(1, 1, 14, 'i'); for (let x = 1; x < 15; x++) { const c = x % 4 < 2 ? 'j' : 'f'; g.px(x, 2, c); g.px(x, 3, c); }
+  g.rect(5, 7, 6, 6, 'f'); g.hl(5, 7, 6, 'Z'); g.hl(5, 12, 6, 'g');
+  g.ellipse(8, 10, 2.2, 2.2, 'w'); g.vl(8, 9, 2, 'v'); g.hl(4, 14, 8, 'b');
+}));
+class MerchantSign {
+  constructor(mk) { this.mk = mk; this.x = 22; this.y = 163; this.t = Math.random() * 6; this.hop = 0; }
+  z() { return this.y; }
+  headPos() { return [this.x, this.y - 22]; }
+  update(dt) { this.t += dt; if (this.hop > 0) this.hop -= dt; }
+  spr() { const M = MERCHANTS[this.mk], map = M.awn === 'green' ? null : rampMap('green', M.awn); return SPR.get('m_sign', map, false, 'sign_' + M.awn); }
   draw(c) {
-    const M = MERCHANTS[this.mk], map = M.awn === 'green' ? null : rampMap('green', M.awn);
-    const st = SPR.get('m_stall', map, false, 'stall_' + M.awn), sx = Math.round(this.x + 6), sy = Math.round(this.y - st.height + 2);
-    c.drawImage(st, sx, sy);
-    super.draw(c);
+    const sp = this.spr(), jump = this.hop > 0 ? Math.round(Math.sin(this.hop / 0.35 * Math.PI) * 3) : 0;
+    const x = Math.round(this.x - sp.width / 2), y = Math.round(this.y - sp.height) - jump;
+    c.fillStyle = 'rgba(46,34,48,0.18)'; c.fillRect(x + 2, Math.round(this.y) - 1, sp.width - 4, 2);
+    c.drawImage(sp, x, y);
+    // "!" bubble until you have looked this week, then a small bobbing coin
+    const b = Math.round(Math.sin(this.t * 3) * 1.5), bx = Math.round(this.x) - 4, by = y - 11 + b;
+    if (!Merchant.S.seen) {
+      c.fillStyle = '#2e2230'; c.fillRect(bx, by, 9, 9); c.fillRect(bx + 3, by + 9, 3, 2);
+      c.fillStyle = '#fff4e0'; c.fillRect(bx + 1, by + 1, 7, 7); c.fillRect(bx + 4, by + 8, 1, 1);
+      c.fillStyle = '#c4566e'; c.fillRect(bx + 4, by + 2, 1, 3); c.fillRect(bx + 4, by + 6, 1, 1);
+    } else if (Math.sin(this.t * 0.9) > 0.55) c.drawImage(SPR.get('p_spark'), Math.round(this.x) + 4, y - 2 + b);
   }
-  hit(x, y) { return (Math.abs(x - this.x) < 8 && y > this.y - 34 && y < this.y + 1) || (x > this.x + 6 && x < this.x + 36 && y > this.y - 24 && y < this.y + 2); }
+  hit(x, y) { const sp = this.spr(); return Math.abs(x - this.x) <= sp.width / 2 + 1 && y > this.y - sp.height - 12 && y < this.y + 2; }
+  poke() { this.hop = 0.35; Merchant.open(); }
+}
+
+// the scene at the top of the merchant window: your front door, the street and the stall
+function merchantScene(mk) {
+  const W = 240, H = 92, M = MERCHANTS[mk], cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d'), env = Room.env || { h: 12, dark: 0 }, night = env.dark > 0.55, dusk = !night && env.h >= 17 && env.h < 19.5;
+  const sky = c.createLinearGradient(0, 0, 0, 60); const [s1, s2] = night ? ['#1f2348', '#3b3f72'] : dusk ? ['#f0a37a', '#fbd9a0'] : ['#8fc8ec', '#d8f0fa'];
+  sky.addColorStop(0, s1); sky.addColorStop(1, s2); c.fillStyle = sky; c.fillRect(0, 0, W, 64);
+  if (night) { c.fillStyle = '#fff7c2'; for (let i = 0; i < 26; i++) c.fillRect((i * 53) % W, (i * 29) % 40, 1, 1); c.fillRect(196, 10, 6, 6); c.fillStyle = '#3b3f72'; c.fillRect(198, 9, 5, 5); }
+  else { c.fillStyle = '#fff'; for (const [x, y, w] of [[150, 12, 22], [70, 20, 16], [210, 26, 14]]) { c.fillRect(x, y, w, 3); c.fillRect(x + 3, y - 2, w - 8, 2); } }
+  c.fillStyle = night ? '#2a4a3e' : '#7fb77a'; for (let x = 0; x < W; x++) { const hh = 10 + Math.round(Math.sin(x / 23) * 4 + Math.sin(x / 9) * 1.5); c.fillRect(x, 64 - hh, 1, hh); }
+  c.fillStyle = night ? '#335a45' : '#9fd08a'; c.fillRect(0, 60, W, 8);
+  c.fillStyle = night ? '#6b6376' : '#e9d6b4'; c.fillRect(0, 68, W, 24); c.fillStyle = night ? '#5a5366' : '#d6bf98';
+  for (let x = 0; x < W; x += 12) for (let r = 0; r < 3; r++) c.fillRect(x + (r % 2) * 6, 71 + r * 7, 10, 1);
+  // your house: wall, door and doormat on the left
+  c.fillStyle = '#c9a27c'; c.fillRect(0, 8, 64, 62); c.fillStyle = '#b08865'; for (let y = 12; y < 70; y += 6) c.fillRect(0, y, 64, 1);
+  c.fillStyle = '#8f4230'; c.fillRect(0, 2, 70, 8); c.fillStyle = '#c46a48'; c.fillRect(0, 2, 70, 2);
+  c.fillStyle = '#5e3b2f'; c.fillRect(20, 30, 26, 40); c.fillStyle = '#8b5a3c'; c.fillRect(22, 32, 22, 38); c.fillStyle = '#b5794b'; c.fillRect(24, 34, 8, 14); c.fillRect(34, 34, 8, 14); c.fillRect(24, 51, 8, 16); c.fillRect(34, 51, 8, 16);
+  c.fillStyle = '#f6c75a'; c.fillRect(40, 50, 2, 3); c.fillStyle = night ? '#ffe07a' : '#fdeaa0'; c.fillRect(50, 34, 8, 8); c.fillStyle = '#5e3b2f'; c.fillRect(53, 34, 1, 8); c.fillRect(50, 37, 8, 1);
+  c.fillStyle = '#c4566e'; c.fillRect(18, 70, 30, 3);
+  // the stall and the merchant standing next to it
+  const map = M.awn === 'green' ? null : rampMap('green', M.awn), st = SPR.get('m_stall', map, false, 'stall_' + M.awn), ava = avatarCanvas('front0', sanitizeAvatar(Object.assign(defaultAvatar(), M.look)), null, 0, false);
+  const big = (img, x, y, s) => c.drawImage(img, x, y, img.width * s, img.height * s);
+  c.fillStyle = 'rgba(46,34,48,0.22)'; c.fillRect(102, 84, 66, 4); c.fillRect(76, 84, 22, 3);
+  big(st, 104, 84 - st.height * 2 + 4, 2);
+  big(ava, 100 - ava.width * 2 + 12, 86 - canvasBottom(ava) * 2 - 2, 2);
+  if (night) { const g = c.createRadialGradient(136, 50, 2, 136, 50, 60); g.addColorStop(0, 'rgba(255,224,122,0.35)'); g.addColorStop(1, 'rgba(255,224,122,0)'); c.fillStyle = g; c.fillRect(90, 0, 150, 92); }
+  const big2 = document.createElement('canvas'); big2.width = W * 2; big2.height = H * 2; big2.className = 'mscene'; const bc = big2.getContext('2d'); bc.imageSmoothingEnabled = false; bc.drawImage(cv, 0, 0, W * 2, H * 2);
+  return big2;
 }
 
 /* ---------------- window ---------------- */
@@ -183,11 +226,9 @@ Object.assign(UI, {
   w_merchant() {
     const S = Game.S, mk = Merchant.id(), M = MERCHANTS[mk], ws = weekStart(), we = weekEnd();
     const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    const pv = sprPreview(avatarCanvas('front0', sanitizeAvatar(Object.assign(defaultAvatar(), M.look)), null, 0, false), 72, 3);
-    const head = h('div', { class: 'mhead' }, h('div', { class: 'mpv' }, pv), h('div', { class: 'grow' },
-      h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: M.tag })),
-      h('p', { class: 'hint', text: `「${M.hi}」` }),
-      h('p', { class: 'hint', text: `這週在你家：${fmt(ws)} 到 ${fmt(we)}，之後換下一位商人。` })));
+    const head = h('div', { class: 'mstage' }, merchantScene(mk),
+      h('div', { class: 'msay' }, h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: M.tag })), h('p', { text: `「${M.hi}」` })));
+    const when = h('p', { class: 'hint', text: `在你家門外擺攤：${fmt(ws)} 到 ${fmt(we)}，之後換下一位商人。房間角落的告示牌隨時都能打開這裡。` });
     const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (this.merchTab === 'sell' ? ' on' : ''), onclick: () => { this.merchTab = 'sell'; this.refresh('merchant'); } }, '他在賣'), h('button', { class: 'tab' + (this.merchTab === 'buy' ? ' on' : ''), onclick: () => { this.merchTab = 'buy'; this.refresh('merchant'); } }, '他想收購'));
     const wallet = h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }));
     const body = [];
@@ -211,6 +252,6 @@ Object.assign(UI, {
           h('button', { class: 'chip sm', disabled: left <= 0, onclick: () => Merchant.sell(id, i) }, '賣 1 件')))));
       });
     }
-    return [head, h('div', { class: 'row between' }, tabs, wallet), ...body];
+    return [head, when, h('div', { class: 'row between' }, tabs, wallet), ...body];
   },
 });

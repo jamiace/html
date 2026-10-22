@@ -47,6 +47,9 @@ const Social = {
   db() { return Cloud.fb.store; },
   myName() { return playerName(); },
   dev() { return !!(Game.S.flags && Game.S.flags.dev); },
+  // developer saves stay off the leaderboard unless the switch in developer mode is on (off by default)
+  devBoard() { return !!(Game.S.flags && Game.S.flags.devBoard); },
+  onBoard() { return !this.dev() || this.devBoard(); },
   today() { return Life.today(); },
   // ---------- focus minutes (counted in every build, minute by minute, so a session across Monday 06:00 is split) ----------
   addFocus(m) { const Z = this.Z, k = weekKey(); if (Z.wk.k !== k) Z.wk = { k, m: 0 }; Z.wk.m += m; },
@@ -104,9 +107,16 @@ const Social = {
     if (force && now - (this.lastForce || 0) < 60000 && Z.pubAt) return; this.lastForce = now;
     const S = Game.S, c = this.card();
     await this.db().set('profiles/' + this.uid, c);
-    // leaderboard: saves changed with developer mode are never listed (and their old row is removed)
-    if (this.dev()) { if (!Z.boardGone) { await this.db().del('board/' + this.uid).catch(() => { }); Z.boardGone = true; } }
-    else await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' });
+    // leaderboard: saves changed with developer mode are left out (and their old row is removed),
+    // unless the "list on the leaderboard" switch in developer mode is on; those rows carry dev: true
+    if (!this.onBoard()) { if (!Z.boardGone) { await this.db().del('board/' + this.uid).catch(() => { }); Z.boardGone = true; } }
+    else {
+      const row = { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' };
+      if (this.dev()) row.dev = true;
+      try { await this.db().set('board/' + this.uid, row); }
+      catch (e) { if (!row.dev || !e || e.code !== 'permission-denied') throw e; delete row.dev; await this.db().set('board/' + this.uid, row); }   // older rules without the dev field
+      Z.boardGone = false;
+    }
     Z.pubAt = now; Game.save();
   },
   // name card of anyone (cached on this device for 3 h)
@@ -325,7 +335,7 @@ const Social = {
     this.loading.board = tab; UI.refresh('friends');
     try {
       const def = this.BOARDS.find(b => b[0] === tab), field = def[2] || `w.${wk}`;
-      const rows = (await this.db().top('board', field, SOCIAL.boardTop)).map(r => ({ id: r.id, name: clipName(r.name) || '小窩住民', ava: r.ava || null, lvl: r.lvl || 1, lv: r.lv || 0, coins: r.coins || 0, tm: r.tm || 0, week: (r.w || {})[wk] || 0, at: r.at || 0 }));
+      const rows = (await this.db().top('board', field, SOCIAL.boardTop)).map(r => ({ id: r.id, name: clipName(r.name) || '小窩住民', ava: r.ava || null, lvl: r.lvl || 1, lv: r.lv || 0, coins: r.coins || 0, tm: r.tm || 0, week: (r.w || {})[wk] || 0, at: r.at || 0, dev: !!r.dev }));
       const val = (r) => tab === 'lvl' ? r.lv : tab === 'coins' ? r.coins : tab === 'week' ? r.week : r.tm;
       // ties: same value -> who got there first (older update) -> account id
       rows.sort((a, b) => val(b) - val(a) || (a.at || 0) - (b.at || 0) || (a.id < b.id ? -1 : 1));
@@ -430,10 +440,10 @@ Object.assign(UI, {
       if (bt === 'week') { const fmtD = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:00`; out.push(h('p', { class: 'hint', text: `本週：${fmtD(weekStart())} 到 ${fmtD(weekEnd())}（週一早上 6 點換週，總專注不會歸零）` })); }
       if (!B) { out.push(h('p', { class: 'hint', text: Social.loading.board ? '讀取中…' : '還沒有資料' })); if (!Social.loading.board) setTimeout(() => Social.loadBoard(bt), 0); return out; }
       const val = (r) => bt === 'lvl' ? `Lv ${r.lvl}` : bt === 'coins' ? r.coins.toLocaleString() + ' 金幣' : bt === 'week' ? fmtMins(r.week) : fmtMins(r.tm);
-      out.push(h('p', { class: 'hint', text: `前 ${SOCIAL.boardTop} 名${bt === 'coins' ? '（累積賺到的金幣）' : ''}，每位玩家的成績每 3 小時更新一次；這份名單是 ${new Date(B.at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })} 讀取的。用過開發者模式的存檔不列入。` }));
+      out.push(h('p', { class: 'hint', text: `前 ${SOCIAL.boardTop} 名${bt === 'coins' ? '（累積賺到的金幣）' : ''}，每位玩家的成績每 3 小時更新一次；這份名單是 ${new Date(B.at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })} 讀取的。用過開發者模式的存檔預設不列入（自己選擇列入的會標上「開發者」）。` }));
       out.push(h('div', { class: 'scroll' }, h('ol', { class: 'board' }, ...B.list.map((r, i) => h('li', { class: r.id === Social.uid ? 'me' : '' },
-        h('button', { class: 'brow', onclick: () => this.openCard(r.id) }, h('span', { class: 'brank num', text: String(i + 1) }), this.avaPic(r.ava, 32), h('span', { class: 'bname grow', text: r.name }), h('span', { class: 'bval num', text: val(r) })))))));
-      if (!B.list.some(r => r.id === Social.uid)) out.push(h('p', { class: 'hint', text: Social.dev() ? '這份存檔用過開發者模式，不會出現在排行榜上。' : '你目前不在前 30 名，繼續加油！（自己的成績最多 3 小時後才會更新上去）' }));
+        h('button', { class: 'brow', onclick: () => this.openCard(r.id) }, h('span', { class: 'brank num', text: String(i + 1) }), this.avaPic(r.ava, 32), h('span', { class: 'bname grow', text: r.name }), r.dev ? h('span', { class: 'ptag devtag', title: '用過開發者模式的存檔', text: '開發者' }) : null, h('span', { class: 'bval num', text: val(r) })))))));
+      if (!B.list.some(r => r.id === Social.uid)) out.push(h('p', { class: 'hint', text: Social.dev() && !Social.devBoard() ? '這份存檔用過開發者模式，預設不會出現在排行榜上（可以在開發者模式打開「列入排行榜」）。' : '你目前不在前 30 名，繼續加油！（自己的成績最多 3 小時後才會更新上去）' }));
       out.push(h('div', { class: 'row' }, h('button', { class: 'chip sm', disabled: Date.now() - B.at < 60000, onclick: () => Social.loadBoard(bt, true) }, ico('i_reset', 14), '重新讀取')));
     } else {
       const G = Z.guest || [];

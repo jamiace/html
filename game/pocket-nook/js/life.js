@@ -332,7 +332,7 @@ Object.assign(UI, {
   w_tasks() {
     Life.ensureDaily(); const L = Life.L, tab = this.tasksTab;
     const nNeeds = L.needs.length;
-    const tabs = h('div', { class: 'tabs' }, ...[['daily', '每日任務'], ['needs', `需求${nNeeds ? '（' + nNeeds + '）' : ''}`], ['ach', '成就'], ...(typeof Team !== 'undefined' && Social.enabled() ? [['team', '團隊' + (Team.claimableN() ? '（!）' : '')]] : [])].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
+    const tabs = h('div', { class: 'tabs' }, ...[['daily', '每日任務'], ['needs', `需求${nNeeds ? '（' + nNeeds + '）' : ''}`], ['ach', '成就'], ...(typeof Team !== 'undefined' && Social.enabled() ? [['team', '團隊' + (Team.claimableN() + Team.invites.length ? `（${Team.claimableN() + Team.invites.length}）` : '')]] : [])].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
     const cl = Life.comfortLv();
     const head = h('div', { class: 'tsum' }, h('span', {}, ico('i_theme', 18), `舒適度 Lv ${cl}`), h('span', { class: 'hint', text: cl ? `金幣收入 +${cl * 3}%` : '多擺些家具提升舒適度，金幣收入會增加' }), h('span', {}, ico('i_fire', 18), `連續 ${Learn.L.streak || 0} 天`));
     const body = [];
@@ -370,6 +370,8 @@ Object.assign(UI, {
           st.ready ? h('button', { class: 'chip sm primary', onclick: () => Life.claimAch(a.id) }, '領取') : null));
       }
     }
+    // the redeem box only lives on the achievements tab
+    if (tab !== 'ach') return [tabs, head, h('div', { class: 'scroll tasks' }, ...body)];
     const code = h('input', { id: 'redeem-in', type: 'text', maxlength: '24', autocomplete: 'off', spellcheck: 'false', placeholder: '輸入兌換碼', 'aria-label': '兌換碼', onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { Dev.redeem(e.target.value); e.target.value = ''; } } });
     const redeem = h('div', { class: 'row redeem' }, h('div', { class: 'inset grow' }, code), h('button', { class: 'chip sm', onclick: () => { Dev.redeem(code.value); code.value = ''; } }, '兌換'), Dev.on ? h('button', { class: 'chip sm', onclick: () => this.openWin('dev') }, ico('i_dev', 16), '開發者') : null);
     return [tabs, head, h('div', { class: 'scroll tasks' }, ...body), redeem];
@@ -405,7 +407,7 @@ Object.assign(UI, {
   badges() {
     const set = (id, n, dot) => { const b = this.dockBtns && this.dockBtns[id]; if (!b) return; let el = b.querySelector('.badge-dot'); if (!n && !dot) { if (el) el.remove(); return; } if (!el) { el = h('span', { class: 'badge-dot' }); b.append(el); } el.textContent = n ? String(n) : '!'; };
     if (!Game.S || !Game.S.life) return;
-    set('tasks', Life.claimable() + Life.L.needs.length);
+    set('tasks', Life.claimable() + Life.L.needs.length + (typeof Team !== 'undefined' && Team.ready() ? Team.claimableN() + Team.invites.length : 0));
     Learn.ensureDaily(); set('learn', 0, !Learn.L.dailyDone);
     if (Game.S.zoo) set('pet', 0, Pets.home().some(p => p.sick || p.hunger < 30 || p.clean < 25));
   },

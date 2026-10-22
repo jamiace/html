@@ -1,6 +1,6 @@
 /* ============================================================
    Developer mode (cheat panel)
-   Unlock: type the code "jami" into the redeem box at the bottom of the 任務 window.
+   Unlock: type the code "jami" into the redeem box on the 成就 tab of the 任務 window.
    Every change made here takes a snapshot first, so it can be undone / redone.
    While developer mode is on, ordinary play also leaves an automatic restore point
    at most once a minute.
@@ -89,6 +89,18 @@ const Dev = {
     if (part === 'money') { S.coins = base.coins; S.lvl = 1; S.xp = 0; }
     Game.replaceState(S);
   },
+  // list this developer save on the leaderboard (off by default); takes effect on the next leaderboard read
+  setBoard(on) {
+    const f = Game.S.flags || (Game.S.flags = {}); f.devBoard = !!on; Game.save(); saveSoon();
+    if (typeof Social !== 'undefined') {
+      const Z = Game.S.social; if (Z) { Z.pubAt = 0; if (on) Z.boardGone = false; }
+      try { localStorage.removeItem('pocketnook.board.v2'); } catch (e) { } Social.board = null;
+      if (Social.ready()) Social.publish(true).then(() => UI.refresh('friends')).catch(e => UI.toast('排行榜更新失敗：' + cloudErr(e), 'i_dev', 3.5));
+    }
+    const live = typeof Social !== 'undefined' && Social.ready();
+    UI.toast(on ? (live ? '已列入排行榜：下次讀取排行榜時就會出現（會標上「開發者」）' : '已設定列入排行榜，登入雲端帳號後生效') : '已從排行榜移除，之後不會再列入', 'i_dev', 4);
+    UI.refresh('dev'); UI.refresh('friends');
+  },
   exportSave() {
     if (window.NOOK_ENV === 'artifact') { this.showJson = !this.showJson; UI.refresh('dev'); return; }
     const blob = new Blob([JSON.stringify(Game.S, null, 1)], { type: 'application/json' });
@@ -115,6 +127,9 @@ Object.assign(UI, {
       h('button', { class: 'chip primary', disabled: !last, onclick: () => D.undo(), title: last ? '復原：' + last.label : '' }, ico('i_reset', 18), '復原'),
       h('button', { class: 'chip', disabled: !nxt, onclick: () => D.redo(), title: nxt ? '重做：' + nxt.label : '' }, '重做'),
       h('span', { class: 'hint grow', text: last ? `上一步：${last.label}` : '還沒有紀錄' })));
+    const onB = !!(S.flags && S.flags.devBoard);
+    out.push(h('div', { class: 'devbar devboard' }, ico('i_star', 18), h('div', { class: 'grow' }, h('b', { text: '列入排行榜' }), h('div', { class: 'hint', text: onB ? '開：這份存檔的成績會上傳到排行榜，名字旁標上「開發者」。' : '關（預設）：用過開發者模式的存檔不會出現在排行榜上。' })),
+      h('button', { class: 'switch' + (onB ? ' on' : ''), role: 'switch', 'aria-checked': onB ? 'true' : 'false', 'aria-label': '列入排行榜', onclick: () => D.setBoard(!onB) }, h('i'))));
     const tabs = [['res', '資源'], ['learn', '學習'], ['task', '任務需求'], ['pet', '寵物'], ['env', '時間環境'], ['save', '存檔重置'], ['hist', `紀錄（${D.hist.length}）`]];
     out.push(h('div', { class: 'tabs wrap' }, ...tabs.map(([k, l]) => h('button', { class: 'tab' + (D.tab === k ? ' on' : ''), onclick: () => { D.tab = k; this.refresh('dev'); } }, l))));
     const body = [];
@@ -178,7 +193,7 @@ Object.assign(UI, {
       body.push(list, h('div', { class: 'row' }, B('清除紀錄', () => { D.hist = []; D.redoStack = []; D.persist(); this.refresh('dev'); })));
     }
     out.push(h('div', { class: 'scroll devbody' }, ...body));
-    out.push(h('div', { class: 'row between' }, h('span', { class: 'hint', text: '在任務視窗輸入兌換碼可以再打開。' }), h('button', { class: 'chip sm', onclick: () => { if (confirm('關閉開發者模式？')) Dev.enable(false); } }, '關閉開發者模式')));
+    out.push(h('div', { class: 'row between' }, h('span', { class: 'hint', text: '在「任務」→「成就」輸入兌換碼可以再打開。' }), h('button', { class: 'chip sm', onclick: () => { if (confirm('關閉開發者模式？')) Dev.enable(false); } }, '關閉開發者模式')));
     return out;
   },
 });
