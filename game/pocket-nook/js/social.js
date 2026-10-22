@@ -430,17 +430,17 @@ Object.assign(UI, {
     } else if (tab === 'board') {
       const bt = this.boardTab, wk = boardWeek(), B = Social.board && Social.board.rows && Social.board.rows[bt + ':' + (bt === 'week' ? wk : '')];
       out.push(h('div', { class: 'tabs wrap' }, ...Social.BOARDS.map(([id, l]) => h('button', { class: 'tab sm' + (bt === id ? ' on' : ''), onclick: () => { this.boardTab = id; Social.loadBoard(id); this.refresh('friends'); } }, l))));
-      if (bt === 'week') { const fmtD = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:00`; out.push(h('p', { class: 'hint', text: `本週：${fmtD(weekStart())} 到 ${fmtD(weekEnd())}（週一早上 6 點換週，總專注不會歸零）` })); }
+      if (bt === 'week') { const fmtD = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:00`; out.push(h('p', { class: 'hint', text: `本週：${fmtD(weekStart())} 到 ${fmtD(weekEnd())}` })); }
       if (!B) { out.push(h('p', { class: 'hint', text: Social.loading.board ? '讀取中…' : '還沒有資料' })); if (!Social.loading.board) setTimeout(() => Social.loadBoard(bt), 0); return out; }
       const val = (r) => bt === 'lvl' ? `Lv ${r.lvl}` : bt === 'coins' ? r.coins.toLocaleString() + ' 金幣' : bt === 'week' ? fmtMins(r.week) : fmtMins(r.tm);
-      out.push(h('p', { class: 'hint', text: `前 ${SOCIAL.boardTop} 名${bt === 'coins' ? '（累積賺到的金幣）' : ''}，每位玩家的成績每 3 小時更新一次；這份名單是 ${new Date(B.at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })} 讀取的。` }));
+      out.push(h('p', { class: 'hint', text: `前 ${SOCIAL.boardTop} 名${bt === 'coins' ? '（累積賺到的金幣）' : ''}，每 3 小時更新一次；這份名單是 ${new Date(B.at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })} 讀取的。` }));
       out.push(h('div', { class: 'scroll' }, h('ol', { class: 'board' }, ...B.list.map((r, i) => h('li', { class: r.id === Social.uid ? 'me' : '' },
         h('button', { class: 'brow', onclick: () => this.openCard(r.id) }, h('span', { class: 'brank num', text: String(i + 1) }), this.avaPic(r.ava, 32), h('span', { class: 'bname grow', text: r.name }), h('span', { class: 'bval num', text: val(r) })))))));
       if (!B.list.some(r => r.id === Social.uid)) out.push(h('p', { class: 'hint', text: '你目前不在前 30 名，繼續加油！（自己的成績最多 3 小時後才會更新上去）' }));
       out.push(h('div', { class: 'row' }, h('button', { class: 'chip sm', disabled: Date.now() - B.at < 60000, onclick: () => Social.loadBoard(bt, true) }, ico('i_reset', 14), '重新讀取')));
     } else {
       const G = Z.guest || [];
-      out.push(h('p', { class: 'hint', text: `好友來幫忙的紀錄（最多 ${SOCIAL.guestMax} 筆）。點名字看名片，還是好友的話可以回訪。` }));
+      out.push(h('p', { class: 'hint', text: `好友來幫忙的紀錄（最多 ${SOCIAL.guestMax} 筆）。點名字看名片，可以回訪。` }));
       if (!G.length) out.push(h('div', { class: 'empty' }, ico('i_book', 40), h('p', { text: '留言本還是空的。' })));
       out.push(h('div', { class: 'scroll frlist' }, ...G.map(g => h('div', { class: 'frrow' + (g.read ? '' : ' unread') },
         h('span', { class: 'hint', text: new Date(g.at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) }),
