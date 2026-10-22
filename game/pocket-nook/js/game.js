@@ -6,8 +6,8 @@ const SAVE_KEY = 'pocketnook.save.v1';
 //   1  original release
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
 //   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
-const SAVE_SCHEMA = 3;
-const NOOK_VERSION = '2026.10.22';
+const SAVE_SCHEMA = 4;   // 4: coupons & gift pity (wallet), merchant week, pet habits & relationships, wardrobe purchases, food bowls
+const NOOK_VERSION = '2026.10.22.2';
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -146,17 +146,10 @@ const Game = {
     this.save();
   },
   openGift(g) {
-    const S = this.S; const pool = Object.values(ITEMS).filter(d => d.lvl <= S.lvl);
-    const owned = (id) => (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
-    let cands = pool.filter(d => owned(d.id) === 0); if (!cands.length) cands = pool;
-    if (Math.random() < 0.15) cands = [ITEMS.cake];
-    const item = cands[Math.floor(Math.random() * cands.length)];
-    const coins = 20 + g.lvl * 10;
-    S.inv[item.id] = (S.inv[item.id] || 0) + 1; S.coins += coins;
-    const sup = [Life.randomSupply(), Life.randomSupply()]; for (const k of sup) Life.give(k, 1);
-    S.gifts = S.gifts.filter(x => x !== g);
+    const S = this.S; S.gifts = S.gifts.filter(x => x !== g);
+    const p = Rewards.roll({ pity: true, lvl: g.lvl }); Rewards.grant(p);
     for (let i = 0; i < 8; i++) Room.puff('p_spark', g.x + 6, g.y - 8, { vx: (Math.random() - 0.5) * 30, vy: -14 - Math.random() * 10, grav: 20, max: 1 });
-    UI.giftModal(item, coins, sup); UI.hud(true); this.save(); saveSoon();
+    UI.prizeModal(p, '禮物盒'); UI.hud(true); this.save(); saveSoon();
   },
   // ---------- timer ----------
   T() { return this.S.timer; },
@@ -179,7 +172,7 @@ const Game = {
     if (t.mode === 'focus') {
       const elapsed = this.modeLen('focus') - remain; const whole = Math.floor(elapsed / 60);
       let gained = 0; while (t.credited < whole && t.credited < t.focus) { t.credited++; gained++; this.S.stats.focusMin++; }
-      if (gained) { this.reward(gained * 2, gained * 4, 'focus'); Life.track('focusMin', gained); this.save(); }
+      if (gained) { this.reward(gained * 2, gained * 4, 'focus'); Life.track('focusMin', gained); Social.addFocus(gained); this.save(); }
     }
     if (remain <= 0) this.complete(false);
   },
@@ -211,10 +204,10 @@ const Game = {
     if (kind === 'pet') return Pets.adopt(id);
     const S = this.S; let d, price;
     if (kind === 'item') d = ITEMS[id]; else if (kind === 'wp') d = WALLPAPERS[id]; else if (kind === 'fl') d = FLOORS[id]; else if (kind === 'view') d = VIEWS[id]; else d = PETS[id];
-    price = d.price;
+    const cat = kind; price = Rewards.price(d.price, cat);
     if (S.lvl < d.lvl) return UI.toast(`需要 Lv ${d.lvl} 才能購買`, 'i_star');
     if (S.coins < price) return UI.toast(`金幣不夠，還差 ${price - S.coins}`, 'i_coin');
-    S.coins -= price;
+    S.coins -= price; Rewards.consume(d.price, cat, d.n);
     if (kind === 'item') { S.inv[id] = (S.inv[id] || 0) + 1; UI.toast(`買下了「${d.n}」，收在收納箱裡`, 'i_box', 3.2, { label: '馬上擺放', fn: () => this.place(id) }); }
     else if (kind === 'wp') { S.ownWP.push(id); this.applyWP(id); UI.toast(`換上了「${d.n}」壁紙`, 'i_wall'); }
     else if (kind === 'fl') { S.ownFL.push(id); this.applyFL(id); UI.toast(`換上了「${d.n}」地板`, 'i_floor'); }
@@ -240,7 +233,7 @@ const Game = {
     else { const [x, y] = freeFloorSpot(cv.width, 12); it.x = Math.round(x - cv.width / 2); it.y = Math.round(y - cv.height); Room.clampItem(it); }
     UI.setEdit(true); Room.sel = it; UI.editToolbar(); UI.refresh('storage');
     for (const n of this.S.life.needs) if (n.type === 'arrange') n.prog = 1;
-    Life.track('place', 1); this.save();
+    Life.track('place', 1); if (typeof PetAI !== 'undefined') PetAI.noticePlaced(it); this.save();
     UI.closeWin('storage'); UI.closeWin('shop');
   },
   storeItem(it) {
@@ -258,6 +251,7 @@ const Game = {
     it.shake = 0.25;
     const nd = Life.needOf('item', it.uid); if (nd && NEED_DEFS[nd.type].item) { UI.needCard(nd.id); return; }
     if (d.act && Fun[d.act]) return Fun[d.act](it, d, cx);
+    if (it.k === 'guestbook') return UI.openFriends('guest');
     if (d.bowl) { const o = Pets.bowlOwner(it); if (o) Pets.Z.sel = o.id; UI.petBowl = it.uid; UI.petTab = 'care'; UI.openWin('pet'); UI.refresh('pet'); return; }
     if (d.toggle) { it.on = !it.on; Room.puff('p_spark', cx - 1, it.y - 2, { vy: -6, max: 0.7 }); this.save(); return; }
     if (d.window) { it.closed = !it.closed; this.save(); return; }
@@ -405,7 +399,7 @@ function boot(data) {
   Room.state = Game.S; Room.indexItems();
   Room.buildBg(Game.S.wp, Game.S.fl); Room.computeEnv(Game.S.settings);
   Game.avatar = new Avatar(() => Game.S.avatar); Game.avatar.x = 112; Game.avatar.y = 148;
-  Room.actors = [Game.avatar]; Game.pets = []; Pets.syncActors();
+  Room.actors = [Game.avatar]; Game.pets = []; Pets.syncActors(); Merchant.spawn(); setInterval(() => Merchant.check(), 30000);
   UI.init();
   Music.init();
   Dev.init(); Life.ensureDaily(); Learn.ensureDaily(); UI.badges();

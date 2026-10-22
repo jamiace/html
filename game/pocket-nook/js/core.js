@@ -192,7 +192,14 @@ function hitAlpha(cv, x, y) {
   return cv.alpha[(y * cv.width + x) * 4 + 3] > 0;
 }
 // in-game "today" (developer mode can shift days forward)
-function gameDate(offsetDays = 0) { return new Date(Date.now() + ((window.NOOK_DAY_SHIFT || 0) + offsetDays) * 86400000); }
+// the game day starts at 06:00 device time and the game week on Monday 06:00
+const DAY_START_HOUR = 6;
+function gameDate(offsetDays = 0) { return new Date(Date.now() - DAY_START_HOUR * 3600e3 + ((window.NOOK_DAY_SHIFT || 0) + offsetDays) * 86400000); }
+// week id = the game date of that week's Monday, e.g. 'w2026-10-19'
+function weekKey(offsetWeeks = 0) { const d = gameDate(offsetWeeks * 7); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return 'w' + dayKey(d); }
+// real time when the current game week started / ends
+function weekStart() { const d = gameDate(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); d.setHours(0, 0, 0, 0); return new Date(d.getTime() + DAY_START_HOUR * 3600e3 - (window.NOOK_DAY_SHIFT || 0) * 86400000); }
+function weekEnd() { return new Date(weekStart().getTime() + 7 * 86400000); }
 function dayKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 // ask the cloud layer to write soon (rewards, purchases, quiz results); routine saves are batched
 function saveSoon() { if (typeof Cloud !== 'undefined' && Cloud.soon) Cloud.soon(); }

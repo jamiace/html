@@ -54,15 +54,18 @@ const ACC_ANCHOR = {
     sit: { neck: _row(8, 5, 12), dir: [0, 1], bell: [9, 9], head: [13, 0], crown: [9, 0] },
     walk: { neck: _col(12, 6, 10), dir: [-1, 0], bell: [12, 11], head: [18, 1], crown: [15, 3] },
     sleep: { neck: _col(12, 8, 12), dir: [-1, 0], bell: [11, 12], head: [17, 4], crown: [14, 5] },
+    stretch: { neck: _col(13, 8, 12), dir: [-1, 0], bell: [13, 12], head: [18, 3], crown: [15, 5] },
   },
   dog: {
     sit: { neck: _row(8, 9, 15), dir: [0, 1], bell: [12, 9], head: [15, 0], crown: [11, 0] },
     walk: { neck: _col(14, 6, 10), dir: [-1, 0], bell: [14, 11], head: [19, 0], crown: [16, 1] },
     sleep: { neck: _col(14, 9, 13), dir: [-1, 0], bell: [13, 13], head: [19, 5], crown: [16, 6] },
+    stretch: { neck: _col(14, 9, 13), dir: [-1, 0], bell: [14, 14], head: [19, 4], crown: [16, 5] },
   },
 };
 function applyPetAcc(g, kind, pose, acc) {
-  const A = ACC_ANCHOR[kind] && ACC_ANCHOR[kind][pose]; if (!A || !acc) return g;
+  const ap = pose === 'look' || pose === 'groom' ? 'sit' : pose === 'lie' ? 'sleep' : pose;
+  const A = ACC_ANCHOR[kind] && ACC_ANCHOR[kind][ap]; if (!A || !acc) return g;
   g = g.clone();
   const inside = (x, y) => { const c = g.get(x, y); return c && c !== '.' && c !== '0'; };
   const stamp = (x0, y0, rows) => {
@@ -350,13 +353,13 @@ const Pets = {
   },
   // ---------- shop / roster ----------
   buyTool(id) {
-    const t = PET_TOOLS[id]; if (this.Z.tools[id]) return; if (Game.S.coins < t.price) return UI.toast(`金幣不夠，還差 ${t.price - Game.S.coins}`, 'i_coin');
-    Game.S.coins -= t.price; this.Z.tools[id] = 1; Life.track('buy', 1, { kind: 'tool', id }); UI.toast(`買了${t.n}`, t.spr); UI.hud(true); UI.refresh('pet'); Game.save(); saveSoon();
+    const t = PET_TOOLS[id]; if (this.Z.tools[id]) return; const pr = Rewards.price(t.price, 'pettool'); if (Game.S.coins < pr) return UI.toast(`金幣不夠，還差 ${pr - Game.S.coins}`, 'i_coin');
+    Game.S.coins -= pr; Rewards.consume(t.price, 'pettool', t.n); this.Z.tools[id] = 1; Life.track('buy', 1, { kind: 'tool', id }); UI.toast(`買了${t.n}`, t.spr); UI.hud(true); UI.refresh('pet'); Game.save(); saveSoon();
   },
   buyAcc(id) {
     const a = PET_ACCS[id]; if (this.Z.accs[id]) return; if (Game.S.lvl < a.lv) return UI.toast(`需要 Lv ${a.lv}`, 'i_star');
-    if (Game.S.coins < a.price) return UI.toast(`金幣不夠，還差 ${a.price - Game.S.coins}`, 'i_coin');
-    Game.S.coins -= a.price; this.Z.accs[id] = 1; Life.track('buy', 1, { kind: 'acc', id }); UI.toast(`買了${a.n}，所有寵物都可以戴`, 'i_paw'); UI.hud(true);
+    const pr = Rewards.price(a.price, 'petacc'); if (Game.S.coins < pr) return UI.toast(`金幣不夠，還差 ${pr - Game.S.coins}`, 'i_coin');
+    Game.S.coins -= pr; Rewards.consume(a.price, 'petacc', a.n); this.Z.accs[id] = 1; Life.track('buy', 1, { kind: 'acc', id }); UI.toast(`買了${a.n}，所有寵物都可以戴`, 'i_paw'); UI.hud(true);
     const p = this.sel(); if (p && !p.acc[a.slot]) p.acc[a.slot] = id;
     UI.refresh('pet'); Game.save(); saveSoon();
   },
@@ -479,7 +482,7 @@ Object.assign(UI, {
         Z.pets.length > 1 ? h('button', { class: 'chip', onclick: () => { if (confirm(`確定要讓${p.name}去新家嗎？這個動作不能復原。`)) Pets.release(p.id); } }, '送養') : null));
       body.push(h('p', { class: 'hint', text: `房間裡最多同時 ${PET_ROOM_MAX} 隻寵物，最多養 ${PET_MAX} 隻。住在寵物旅館的寵物不會餓，也不會出現需求。` }));
     }
-    return [roster, head, stats, tabs, ...body];
+    return [roster, head, stats, tabs, this.petTab === 'care' || this.petTab === 'acc' ? this.couponBar() : null, ...body];
   },
 });
 UI.WIN.pet.w = 470;

@@ -523,15 +523,7 @@ const Fun = {
     Game.bubbleAt(cx, it.y, `${v.w}  ${v.z.split('；')[0]}`, 3.5);
     if (this.once('word')) { Game.reward(3, 3, 'raw'); }
   },
-  gacha(it, d, cx) {
-    const S = Game.S, cost = 20;
-    if (S.coins < cost) return Game.bubbleAt(cx, it.y, `扭一次要 ${cost} 金幣`);
-    const pool = Object.values(ITEMS).filter(x => !x.special && !x.giftOnly && !x.fun && (x.layer === 'decor' || x.layer === 'wall') && x.price <= 120 && x.lvl <= S.lvl + 3);
-    const got = pool[Math.floor(Math.random() * pool.length)]; if (!got) return;
-    S.coins -= cost; S.inv[got.id] = (S.inv[got.id] || 0) + 1; Life.track('buy', 1, { kind: 'gacha', id: got.id });
-    for (let i = 0; i < 4; i++) Room.puff('p_spark', cx - 4 + i * 3, it.y + 18, { vy: -8 - i, max: 0.9 });
-    UI.toast(`扭到了「${got.n}」！放在收納箱`, 'i_box', 3.5, { label: '馬上擺放', fn: () => Game.place(got.id) }); UI.hud(true); UI.refresh('storage'); Game.save(); saveSoon();
-  },
+  gacha(it, d, cx) { return Rewards.gacha(it, cx); },
   feedfish(it, d, cx) {
     for (let i = 0; i < 4; i++) Room.puff('p_dot', cx - 10 + Math.random() * 20, it.y + 3, { vy: 3, grav: 4, max: 1.4 });
     if (this.once('fish' + it.uid)) { Game.reward(4, 3, 'raw'); Game.bubbleAt(cx, it.y, '魚兒吃飽了 +4 金幣'); Game.save(); } else Game.bubbleAt(cx, it.y, '魚兒今天吃過了');

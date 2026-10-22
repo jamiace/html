@@ -31,7 +31,7 @@ const Learn = {
   countMastered() { let n = 0; for (const k in this.P) if (this.P[k][0] >= 5) n++; return n; },
   countFamiliar() { let n = 0; for (const k in this.P) if (this.P[k][0] >= 3) n++; return n; },
   countSeen() { return Object.keys(this.P).length; },
-  streakNow() { const L = this.L; return (L.lastDone === Life.today() || L.lastDone === this.yesterday()) ? L.streak : 0; },
+  streakNow() { const L = this.L; return L.lastDone && L.lastDone >= this.yesterday() ? L.streak : 0; },
   pick(n, exclude) {
     const today = this.dayNum(), due = [], fresh = [], weak = [], lv = new Set(this.levelsOn());
     for (const v of VOCAB) {
@@ -50,7 +50,7 @@ const Learn = {
     return out.slice(0, n);
   },
   ensureDaily() {
-    const L = this.L, day = Life.today(); if (L.dailyDay === day && L.dailyWords.length) return;
+    const L = this.L, day = Life.today(); if (L.dailyDay && L.dailyDay >= day && L.dailyWords.length) return;   // >=: keeps a day started before the 06:00 rollover existed
     L.dailyDay = day; L.dailyWords = this.pick(20).map(i => VOCAB[i].w); L.dailyDone = false; L.reviewed = 0; L.dailyScore = '';
   },
   tts() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; },
@@ -73,10 +73,10 @@ const Learn = {
     if (kind === 'daily') { words = this.dailyIdx(); nq = 10; }
     else if (kind === 'redo') { words = shuffle(this.dailyIdx()).slice(0, 10); nq = 8; kind = 'practice'; }
     else if (kind === 'need') { words = this.pick(5); nq = 5; }
-    else if (kind === 'train') { words = this.pick(4); nq = 4; }
+    else if (kind === 'train' || kind === 'help') { words = this.pick(4); nq = 4; }
     else { words = this.pick(10); nq = 8; }
     const s = this.sess = { kind, opts, words, nq, step: 'review', ri: kind === 'daily' ? Math.min(this.L.reviewed, words.length) : 0, flip: false, unsure: [], qs: null, qi: 0, ans: null, right: 0, wrong: [], newly: 0, mastered: 0, result: null, spoke: -1 };
-    if (s.ri >= words.length || kind === 'train') this.toQuiz();
+    if (s.ri >= words.length || kind === 'train' || kind === 'help') this.toQuiz();
     UI.openWin('study');
   },
   review(knew) {
@@ -134,11 +134,13 @@ const Learn = {
       res.coins = R * 2 + (R === n ? 15 : 0); L.dailyScore = `${R}/${n}`;
       if (!L.dailyDone) {
         L.dailyDone = true; const day = Life.today();
-        L.streak = L.lastDone === this.yesterday() ? (L.streak || 0) + 1 : (L.lastDone === day ? L.streak : 1); L.lastDone = day; L.best = Math.max(L.best || 0, L.streak);
+        L.streak = L.lastDone === this.yesterday() ? (L.streak || 0) + 1 : (L.lastDone >= day ? L.streak : 1); L.lastDone = day; L.best = Math.max(L.best || 0, L.streak);
         Life.track('vocab', 1); res.msg = `今日單字完成！連續 ${L.streak} 天。到「任務」領取每日獎勵。`;
       } else res.msg = '今天的單字已經完成過了。';
     } else if (s.kind === 'train') {
       res.coins = R; res.xp = R * 2; Object.assign(res, Pets.trainResult(s.opts.pid, s.opts.trick, R, n));
+    } else if (s.kind === 'help') {
+      res.coins = 0; res.xp = R * 2; Object.assign(res, Social.helpResult(s.opts, R, n));
     } else if (s.kind === 'need') {
       const it = s.opts.item, cnt = R >= n ? 2 : R >= 3 ? 1 : 0; res.coins = R;
       if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); res.msg = cnt === 2 ? `全對！得到 2 個${SUPPLIES[it].n}。` : `得到 1 個${SUPPLIES[it].n}，全對可以拿 2 個。`; }
@@ -187,7 +189,7 @@ Object.assign(UI, {
   w_study() {
     const s = Learn.sess;
     if (!s) return [h('div', { class: 'empty' }, h('p', { text: '從「學習」開始一次複習。' }))];
-    const kindName = s.kind === 'daily' ? '今日單字' : s.kind === 'need' ? `換取${SUPPLIES[s.opts.item].n}` : s.kind === 'train' ? Pets.trainTitle(s.opts) : '自由練習';
+    const kindName = s.kind === 'daily' ? '今日單字' : s.kind === 'need' ? `換取${SUPPLIES[s.opts.item].n}` : s.kind === 'train' ? Pets.trainTitle(s.opts) : s.kind === 'help' ? Social.helpTitle(s.opts) : '自由練習';
     const bar = (a, b) => h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(a / b * 100)}%` }));
     if (s.step === 'review') {
       const v = VOCAB[s.words[s.ri]];
@@ -236,6 +238,8 @@ Object.assign(UI, {
         s.kind === 'need' && !r.items.length ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), '再試一次') : null,
         s.kind === 'daily' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '去領獎勵') : null,
         s.kind === 'train' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Pets.select(s.opts.pid, 'train'); } }, ico('i_paw', 20), '回到寵物') : null,
+        s.kind === 'help' && s.right < 3 ? h('button', { class: 'chip primary', onclick: () => Learn.start('help', s.opts) }, ico('i_reset', 20), '再試一次') : null,
+        s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); UI.openWin('visit'); } }, ico('i_people', 20), '回到好友房間') : null,
         h('button', { class: 'chip', onclick: () => this.closeWin('study') }, '完成'))];
   },
   w_words() {

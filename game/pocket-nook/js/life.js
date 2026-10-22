@@ -210,12 +210,12 @@ const Life = {
   },
   // ---------- daily tasks ----------
   ensureDaily() {
-    const L = this.L, day = this.today(); if (L.daily && L.daily.day === day) return;
+    const L = this.L, day = this.today(); if (L.daily && L.daily.day >= day) return;
     const mk = (k, extra = {}) => Object.assign({ k, need: TASK_DEFS[k].need(), prog: 0, claimed: false }, extra);
     const tasks = [mk('vocab')];
     const S = Game.S;
     const own = (id) => S.items.some(i => i.k === id) || (S.inv[id] || 0) > 0;
-    let cands = Object.values(ITEMS).filter(d => !d.giftOnly && !d.special && d.lvl <= S.lvl && d.price >= 25 && d.price <= Math.max(120, S.coins + 160));
+    let cands = Object.values(ITEMS).filter(d => !d.giftOnly && !d.special && !d.merchant && d.lvl <= S.lvl && d.price >= 25 && d.price <= Math.max(120, S.coins + 160));
     const fresh = cands.filter(d => !own(d.id)); if (fresh.length) cands = fresh;
     if (cands.length) { const d = cands[Math.floor(Math.random() * cands.length)]; tasks.push(mk('buy', { item: d.id, rw: { c: Math.round(d.price * 0.35) + 10, x: 20 } })); }
     else tasks.push(mk('buyany'));

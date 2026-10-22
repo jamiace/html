@@ -90,6 +90,7 @@ const UI = {
     document.addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); document.body.classList.add('dropping'); } });
     document.addEventListener('dragleave', e => { if (e.target === document.documentElement || !e.relatedTarget) document.body.classList.remove('dropping'); });
     document.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); document.body.classList.remove('dropping'); const files = [...e.dataTransfer.files]; if (files.length) { this.openWin('music'); Music.addFiles(files); } });
+    setTimeout(() => { if (Game.S.wallet && Game.S.wallet.pend) this.openWin('gacha'); }, 900);   // a gacha result waiting for keep / sell
     if (!Game.S.seenIntro) { Game.S.seenIntro = true; setTimeout(() => this.toast('歡迎！每天到「學習」複習 20 個單字，房間冒出泡泡時點它看看需要什麼', 'i_sparkle', 6), 600); if (window.innerWidth >= 900) { this.openWin('learn'); this.openWin('tasks'); } }
   },
   // ---------------- layout ----------------
@@ -147,10 +148,11 @@ const UI = {
   // ---------------- dock ----------------
   buildDock() {
     const dock = document.querySelector('.dock-inner');
-    const items = [['timer', 'i_tomato', '番茄鐘'], ['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['todo', 'i_list', '待辦'], ['memo', 'i_note', '便條'], ['music', 'i_music', '音樂'], ['shop', 'i_shop', '商店'], ['storage', 'i_box', '收納'], ['edit', 'i_brush', '佈置'], ['avatar', 'i_shirt', '造型'], ['pet', 'i_paw', '寵物'], ['cowork', 'i_people', '一起專注']];
+    const items = [['timer', 'i_tomato', '番茄鐘'], ['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['todo', 'i_list', '待辦'], ['memo', 'i_note', '便條'], ['music', 'i_music', '音樂'], ['shop', 'i_shop', '商店'], ['storage', 'i_box', '收納'], ['edit', 'i_brush', '佈置'], ['avatar', 'i_shirt', '造型'], ['pet', 'i_paw', '寵物'], ['cowork', 'i_people', '一起專注'], ['friends', 'i_people', '好友']];
     this.dockBtns = {};
     for (const [id, ic, label] of items) {
       if (id === 'cowork' && window.NOOK_ENV === 'web') continue;
+      if (id === 'friends' && (!SOCIAL_ON || window.NOOK_ENV !== 'web')) continue;
       const b = h('button', { class: 'dock-btn', 'data-id': id, onclick: () => id === 'edit' ? this.setEdit(!Room.edit) : this.toggleWin(id) }, ico(ic, 32), h('span', { text: label }));
       this.dockBtns[id] = b; dock.append(b);
     }
@@ -354,11 +356,11 @@ const UI = {
     const tabs = h('div', { class: 'tabs wrap' }, ...CATS.map(c => h('button', { class: 'tab' + (tab === c.id ? ' on' : ''), onclick: () => { this.shopTab = c.id; this.refresh('shop'); } }, c.n)));
     const cards = [];
     const owned = (id) => (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
-    const card = (pv, name, d, has, onBuy, extra) => {
+    const card = (pv, name, d, has, onBuy, extra, cat) => {
       const locked = S.lvl < d.lvl;
       return h('div', { class: 'card' + (locked ? ' locked' : '') }, h('div', { class: 'pvbox' }, pv), h('div', { class: 'cn', text: name }),
-        h('div', { class: 'cfoot' }, locked ? h('span', { class: 'lock', text: `Lv ${d.lvl} 解鎖` }) : h('span', { class: 'price' }, ico('i_coin', 18), h('b', { class: 'num', text: String(d.price) })),
-          has === true ? h('span', { class: 'own', text: '已擁有' }) : h('button', { class: 'chip sm', disabled: locked || S.coins < d.price, onclick: onBuy }, extra || '購買')),
+        h('div', { class: 'cfoot' }, locked ? h('span', { class: 'lock', text: `Lv ${d.lvl} 解鎖` }) : h('span', { class: 'price' }, ico('i_coin', 18), this.priceTag(d.price, cat)),
+          has === true ? h('span', { class: 'own', text: '已擁有' }) : h('button', { class: 'chip sm', disabled: locked || S.coins < Rewards.price(d.price, cat), onclick: onBuy }, extra || '購買')),
         typeof has === 'number' && has > 0 ? h('span', { class: 'badge', text: '×' + has }) : null);
     };
     if (tab === 'theme') {
@@ -381,12 +383,12 @@ const UI = {
       }
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: '道具也可以在「學習」複習 5 個單字免費換到。' }), h('div', { class: 'scroll grid' }, ...cards)];
     }
-    if (tab === 'view') for (const id in VIEWS) { const d = VIEWS[id]; cards.push(card(viewSwatch(id), d.n, d, S.ownViews.includes(id), () => Game.buy('view', id))); }
+    if (tab === 'view') for (const id in VIEWS) { const d = VIEWS[id]; cards.push(card(viewSwatch(id), d.n, d, S.ownViews.includes(id), () => Game.buy('view', id), null, 'view')); }
     else if (tab === 'wallpaper' || tab === 'floor') {
       const cat = tab === 'wallpaper' ? WALLPAPERS : FLOORS, own = tab === 'wallpaper' ? S.ownWP : S.ownFL;
       const list = this.filterList('shop:' + tab, Object.keys(cat).map(id => ({ id, d: cat[id], own: own.includes(id) })));
-      for (const e of list.page) cards.push(card(swatch(tab === 'wallpaper' ? WALL[e.id] : FLOOR[e.id], tab === 'wallpaper' ? 'wp' : 'fl'), e.d.n, e.d, e.own, () => Game.buy(tab === 'wallpaper' ? 'wp' : 'fl', e.id)));
-      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
+      for (const e of list.page) cards.push(card(swatch(tab === 'wallpaper' ? WALL[e.id] : FLOOR[e.id], tab === 'wallpaper' ? 'wp' : 'fl'), e.d.n, e.d, e.own, () => Game.buy(tab === 'wallpaper' ? 'wp' : 'fl', e.id), null, tab === 'wallpaper' ? 'wp' : 'fl'));
+      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), this.couponBar(), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
     }
     else if (tab === 'pet') {
       const n = Pets.list().length, full = n >= PET_MAX;
@@ -394,14 +396,14 @@ const UI = {
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: `已經養了 ${n}/${PET_MAX} 隻，房間裡最多同時 ${PET_ROOM_MAX} 隻。每多養一隻，領養費會多一點。每隻都有自己的個性和喜好。` }), h('div', { class: 'scroll grid' }, ...cards)];
     }
     else {
-      const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return d.cat === tab && !d.giftOnly && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
+      const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return d.cat === tab && !d.giftOnly && !d.merchant && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
       const list = this.filterList('shop:' + tab, all, this.shopFocus);
-      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(e.id), () => Game.buy('item', e.id)); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
+      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(e.id), () => Game.buy('item', e.id), null, 'item'); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
       this.shopFocus = null;
-      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
+      return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), this.couponBar(), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
     }
     this.shopFocus = null;
-    return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('div', { class: 'scroll grid' }, ...cards)];
+    return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), this.couponBar(), h('div', { class: 'scroll grid' }, ...cards)];
   },
   // ---------- filter / search / pages for long lists ----------
   flt: {},

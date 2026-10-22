@@ -532,3 +532,31 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .avatry { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
 .pbowl { display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
 .pbowl .ico, .pbowl canvas { flex: none; }
+/* coupons & prizes */
+.cpbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 6px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
+.cpbar .chip em { font-style: normal; font-size: 10px; color: var(--ink-2); }
+s.was { color: var(--ink-2); font-weight: normal; font-size: .85em; }
+.prize-ic { display: flex; justify-content: center; padding: 12px; }
+/* friends */
+.frme { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
+.frcode { font-size: 20px; letter-spacing: 2px; padding: 2px 8px; background: var(--chip-on); box-shadow: inset 0 0 0 2px var(--honey); }
+.frstat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
+.frlist { display: flex; flex-direction: column; gap: 3px; max-height: 40vh; }
+.frrow { display: flex; align-items: center; gap: 6px; padding: 4px 6px; background: var(--paper-2); }
+table.board { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.board th, table.board td { padding: 4px 6px; text-align: left; border-bottom: 2px solid var(--line); }
+table.board tr.me td { background: var(--chip-on); font-weight: bold; }
+.visit-stage { position: relative; line-height: 0; }
+.visit-cv { width: 100%; height: auto; image-rendering: pixelated; display: block; box-shadow: 0 0 0 3px #2e2230; }
+.vmark { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 3px 5px; border: 0; background: #fff8ec; box-shadow: 0 0 0 3px #2e2230, 0 4px 0 rgba(0,0,0,.25); font-size: 12px; line-height: 1.2; color: #2e2230; cursor: pointer; animation: vbob 1.6s ease-in-out infinite; }
+.vmark.done { opacity: .55; animation: none; cursor: default; }
+@keyframes vbob { 50% { transform: translate(-50%, calc(-100% - 4px)); } }
+@media (prefers-reduced-motion: reduce) { .vmark { animation: none; } }
+.hint.warn, span.warn { color: var(--berry, #b0476a); }
+/* travelling merchant */
+.mhead { display: flex; gap: 10px; align-items: flex-start; }
+.mpv { flex: none; background: var(--paper-2); box-shadow: inset 0 0 0 3px var(--line); padding: 4px; }
+.mname { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.mlist2 { display: flex; flex-direction: column; gap: 3px; }
+.mrow { display: flex; align-items: center; gap: 8px; padding: 3px 6px; background: var(--paper-2); }
+.mrow canvas { flex: none; }

@@ -15,7 +15,20 @@ function petBase(kind) { return kind === 'dog' ? { body: 'v', dark: 'u', light: 
 function makeCat(pose, f) {
   const g = new Grid(22, 16);
   const B = 'v', D = 'u', L = 'w', BL = 'x';
-  if (pose === 'walk') {
+  const want = pose; if (pose === 'groom' || pose === 'look') pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
+  if (pose === 'stretch') {
+    // bowing stretch: front paws reaching forward, rear up, tail high
+    const t = f % 2;
+    for (let i = 0; i <= 10; i++) { const x = 5 + i, cy = 7.2 + i * 0.32; for (let y = Math.round(cy - 2.6); y <= Math.round(cy + 2.2); y++) g.px(x, y, B); }
+    for (let x = 6; x < 15; x++) { const yb = Math.round(7.2 + (x - 5) * 0.32 + 2.2); if (g.get(x, yb) === B) g.px(x, yb, BL); }
+    for (const x of [7, 9, 11]) { g.px(x, 6 + Math.round((x - 5) * 0.32), D); }
+    g.rect(5, 9, 2, 5, B); g.rect(7, 10, 1, 4, D); g.pts([[5, 14], [6, 14], [7, 14]], BL);
+    g.hl(13, 13, 7, B); g.hl(13, 14, 7, B); g.pts([[19, 14], [20, 14], [19, 13]], BL);
+    const tail = [[4, 6], [3, 5], [3, 4], [3, 3], [4, 2 - t], [5, 1 - t]]; for (const [x, y] of tail) { g.px(x, y, B); g.px(x + 1, y, B); }
+    g.ellipse(17, 10, 3.6, 3, B);
+    g.pts([[14, 6], [14, 7], [15, 7], [19, 6], [19, 7], [18, 7]], B); g.px(15, 7, 's'); g.px(18, 7, 's');
+    g.pts([[15, 10], [16, 10], [18, 10], [19, 10]], 'Y'); g.pts([[17, 12], [18, 12]], BL); g.px(17, 12, 's');
+  } else if (pose === 'walk') {
     const lift = [[0, 1, 0, 1], [1, 0, 1, 0], [0, 0, 0, 0], [0, 1, 0, 1]][f % 4];
     const sway = [0, 1, 0, -1][f % 4];
     // tail
@@ -65,12 +78,33 @@ function makeCat(pose, f) {
     g.pts([[16, 11], [17, 11]], BL);
     for (let x = 3; x <= 13; x++) g.px(x, 14, B); g.px(2, 13, B); g.px(3, 13, D);
   }
+  if (want === 'look') { g.pts([[9, 6], [12, 6]], B); g.pts([[9, 4], [12, 4]], 'Y'); g.px(10, 7, BL); g.px(11, 7, 's'); }
+  if (want === 'groom') {
+    g.rect(11, 12, 2, 2, BL); g.pts([[11, 14], [12, 14]], B);
+    g.rect(12, 8 + (f % 2), 2, 2, B); g.pts([[12, 10 + (f % 2)], [13, 10 + (f % 2)]], BL);
+    g.pts([[9, 5], [12, 5]], B); g.pts([[9, 6], [12, 6]], D); if (f % 2) g.px(11, 8, 's');
+  }
+  if (want === 'lie') { g.pts([[14, 10], [18, 10]], B); g.pts([[15, 9], [15, 10], [17, 9], [17, 10]], 'Y'); if (f % 2) { g.px(2, 13, '.'); g.px(2, 12, B); } }
   return g.outline();
 }
 function makeDog(pose, f) {
   const g = new Grid(24, 18);
   const B = 'v', D = 'u', C = 'f', N = 'Y';
-  if (pose === 'walk') {
+  const want = pose; if (pose === 'groom' || pose === 'look') pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
+  if (pose === 'stretch') {
+    // play bow
+    const t = f % 2;
+    for (let i = 0; i <= 11; i++) { const x = 5 + i, cy = 8 + i * 0.3; for (let y = Math.round(cy - 2.8); y <= Math.round(cy + 2.4); y++) g.px(x, y, B); }
+    for (let x = 6; x < 16; x++) { const yb = Math.round(8 + (x - 5) * 0.3 + 2.4); if (g.get(x, yb) === B) g.px(x, yb, C); }
+    g.hl(6, 5, 7, D);
+    g.rect(5, 10, 2, 6, B); g.rect(7, 11, 2, 5, D); g.pts([[5, 16], [6, 16], [7, 16], [8, 16]], C);
+    g.hl(14, 14, 8, B); g.hl(14, 15, 8, B); g.pts([[20, 15], [21, 15], [21, 14]], C);
+    g.ellipse(4, 4 - t, 2.4, 2.2, B); g.px(4, 4 - t, C); g.px(3, 4 - t, C);
+    g.ellipse(18.5, 11, 3.8, 3.4, B);
+    g.pts([[15, 6], [15, 7], [16, 7], [16, 8], [15, 8], [21, 6], [21, 7], [20, 7], [20, 8], [21, 8]], B); g.px(16, 7, 's'); g.px(20, 7, 's');
+    g.ellipse(20, 13, 2.6, 1.7, C); g.px(22, 12, N); g.px(22, 13, N);
+    g.pts([[17, 10], [17, 11], [20, 10], [20, 11]], 'Y'); if (t) g.px(19, 15, 's');
+  } else if (pose === 'walk') {
     const lift = [[0, 1, 0, 1], [1, 0, 1, 0], [0, 0, 0, 0], [0, 1, 0, 1]][f % 4];
     // curled tail
     g.ellipse(5, 6.5, 2.4, 2.2, B); g.px(5, 6, C); g.px(5, 7, D); g.px(4, 6, C);
@@ -107,6 +141,9 @@ function makeDog(pose, f) {
     g.ellipse(19, 12.6, 2.3, 1.3, C); g.px(21, 12, N);
     g.pts([[16, 11], [17, 11], [19, 11], [20, 11]], 'Y');
   }
+  if (want === 'look') { g.pts([[10, 6], [15, 6]], B); g.pts([[10, 4], [15, 4]], 'Y'); }
+  if (want === 'groom') { g.pts([[10, 5], [15, 5]], B); g.pts([[10, 6], [11, 6], [14, 6], [15, 6]], D); g.px(12, 9, 's'); g.px(12, 10, 's'); if (f % 2) g.px(13, 10, 's'); }
+  if (want === 'lie') { g.pts([[16, 11], [20, 11]], B); g.pts([[17, 10], [17, 11], [19, 10], [19, 11]], 'Y'); if (f % 2) { g.ellipse(4, 11, 2.2, 2, B); g.px(4, 11, C); } }
   return g.outline();
 }
 const PET_CACHE = {};
@@ -124,7 +161,7 @@ function petCanvas(kind, color, pose, f, flip, acc) {
   return c;
 }
 
-for (const p of ['walk0', 'walk1', 'walk2', 'walk3', 'sit0', 'sit1', 'sleep0', 'sleep1']) {
+for (const p of ['walk0', 'walk1', 'walk2', 'walk3', 'sit0', 'sit1', 'sleep0', 'sleep1', 'look0', 'groom0', 'groom1', 'lie0', 'lie1', 'stretch0', 'stretch1']) {
   SPR.def('cat_' + p, () => makeCat(p.replace(/\d/, ''), +p.slice(-1)));
   SPR.def('dog_' + p, () => makeDog(p.replace(/\d/, ''), +p.slice(-1)));
 }

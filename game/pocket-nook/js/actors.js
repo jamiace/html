@@ -180,11 +180,11 @@ class Pet extends Walker {
   floorNap(secs) {
     const sleepers = this.others().filter(a => a.state === 'sleep' || a.napAt).map(a => a.napAt || [a.x, a.y]);
     const clear = (x, y) => sleepers.every(([px, py]) => Math.abs(px - x) > 18 || Math.abs(py - y) > 10);
-    let pos = clear(this.x, this.y) ? [this.x, this.y] : null;
+    const near = PetAI.napNear(this); let pos = near && clear(near[0], near[1]) ? near : clear(this.x, this.y) ? [this.x, this.y] : null;
     for (let i = 0; !pos && i < 24; i++) { const [x, y] = randFloor(10); if (clear(x, y)) pos = [x, y]; }
     if (!pos) { this.state = 'sit'; this.timer = 3; return; }
     this.napAt = pos; this.state = 'walk';
-    this.walkTo(pos[0], pos[1], () => { this.napAt = null; if (this.others().some(a => a.state === 'sleep' && !a.on && Math.abs(a.x - this.x) <= 18 && Math.abs(a.y - this.y) <= 10)) return this.floorNap(secs); this.state = 'sleep'; this.timer = secs || 20 + Math.random() * 20; });
+    this.walkTo(pos[0], pos[1], () => { this.napAt = null; if (this.others().some(a => a.state === 'sleep' && !a.on && Math.abs(a.x - this.x) <= 18 && Math.abs(a.y - this.y) <= 10)) return this.floorNap(secs); this.state = 'sleep'; this.timer = secs || 20 + Math.random() * 20; PetAI.sleepSpin(this); });
   }
   doTrick(id) {
     this.leaveSpot(() => {
@@ -244,8 +244,10 @@ class Pet extends Walker {
       const sp = this.freeSpots(); const near = sp.sort((a, b) => Math.abs(a.x - A.x) - Math.abs(b.x - A.x))[0];
       if (near) return go(() => this.goSpot(near, 'sleep'));
     }
+    // free time: relationships with the other pets, then this pet's own habits
+    { const rr = Math.random(); if (rr < REL_CHANCE && PetAI.relate(this, go)) return; if (rr < REL_CHANCE + HABIT_CHANCE && PetAI.habit(this, go)) return; }
     const os = this.others();
-    if (os.length && r < 0.14) { const o = os[Math.floor(Math.random() * os.length)]; if (!o.on && o.state !== 'sleep') return go(() => { this.state = 'walk'; this.walkTo(o.x + (o.x > this.x ? -13 : 13), o.y + 1, () => { this.state = 'sit'; this.flip = o.x < this.x; this.timer = 2.5 + Math.random() * 2; Room.puff('p_heart', (this.x + o.x) / 2 - 2, this.y - 16, { vy: -8 }); if (Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? '汪？' : '喵？', 1.4); }); }); }
+    if (os.length && r < 0.14) { const o = os[Math.floor(Math.random() * os.length)]; if (!o.on && o.state !== 'sleep') return go(() => { this.state = 'walk'; this.walkTo(o.x + (o.x > this.x ? -13 : 13), o.y + 1, () => { this.state = 'sit'; this.flip = o.x < this.x; this.timer = 2.5 + Math.random() * 2; if (PetAI.snub(o, this)) return; Room.puff('p_heart', (this.x + o.x) / 2 - 2, this.y - 16, { vy: -8 }); if (Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? '汪？' : '喵？', 1.4); }); }); }
     const roam = d && (d.trait === 'curious' || d.trait === 'playful') ? 0.45 : 0.35;
     if (r < roam) return go(() => { const [x, y] = randFloor(10); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'sit'; this.timer = 2 + Math.random() * 4; }); });
     if (r < roam + 0.25) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, Math.random() < 0.6 ? 'sleep' : 'sit')); } }
@@ -259,7 +261,7 @@ class Pet extends Walker {
       this.target = null;
       if (!Room.uidMap[s.it.uid]) { this.state = 'sit'; this.timer = 2; return; }
       if (this.others().some(a => a.on === s.it)) { if (mode === 'sleep') { const sp = this.freeSpots(); if (sp.length) return this.goSpot(sp[Math.floor(Math.random() * sp.length)], mode, secs); return this.floorNap(secs); } this.state = 'sit'; this.timer = 1.5; return; }
-      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4); };
+      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4); if (mode === 'sleep') PetAI.sleepSpin(this); };
       if (s.high) this.startJump(s.x, s.y + 1, done); else { this.y = s.y + 2; done(); }
     });
   }
@@ -281,14 +283,16 @@ class Pet extends Walker {
       if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb(); }
       return;
     }
+    PetAI.tick(this, dt);
     if (this.on && !Room.uidMap[this.on.uid]) { this.on = null; const [x, y] = randFloor(); this.x = x; this.y = y; }
     if (this.on && !this.walking && this.onOff) { this.x = this.on.x + this.onOff[0]; this.y = this.on.y + this.onOff[1]; }
     this.step(dt);
     if (this.state === 'eat' && !this.walking) {
       this.timer -= dt; if (Math.random() < dt * 5) Room.puff('p_dot', this.x + (this.flip ? -8 : 8), this.y - 6, { vy: -4, vx: (Math.random() - 0.5) * 6, grav: 20, max: 0.5 });
-      if (this.timer <= 0) { this.eatBowl = null; this.state = 'sit'; this.happy = 2; this.timer = 3; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); Game.bubble(this, this.kind === 'dog' ? '汪！好吃！' : '喵～吃飽了', 2); }
+      if (this.timer <= 0) { this.eatBowl = null; this.state = 'sit'; this.happy = 2; this.timer = 3; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); Game.bubble(this, this.kind === 'dog' ? '汪！好吃！' : '喵～吃飽了', 2); PetAI.afterEat(this); }
       return;
     }
+    if (this.state === 'act') { if (!this.walking) PetAI.update(this, dt); PetAI.react(this, dt); return; }
     if (this.state === 'zoom') {
       if (!this.walking) { if (this.zoomN-- > 0) { const [x, y] = randFloor(12); this.walkTo(x, y); Room.puff('p_spark', this.x, this.y - 8, { vy: -6, max: 0.6 }); } else { this.speed = this.baseSpeed(); this.state = 'sit'; this.happy = 2.5; this.timer = 4; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); } }
       return;
@@ -300,14 +304,17 @@ class Pet extends Walker {
       if (this.timer <= 0 && !this.jump) { this.state = 'sit'; this.trick = null; this.timer = 3; this.happy = 2; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); }
       return;
     }
+    if (this.state !== 'sleep') PetAI.react(this, dt);
     if (!this.walking) { this.timer -= dt; if (this.timer <= 0) this.think(); }
-    if (this.state === 'sleep' && Math.random() < dt * 0.4) Room.puff('p_z', this.x + (this.flip ? -8 : 6), this.y - 14, { vx: 3, vy: -4, max: 1.8, alpha: 0.7 });
+    if (this.state === 'sleep' && !(this.preSleep > 0) && Math.random() < dt * 0.4) Room.puff('p_z', this.x + (this.flip ? -8 : 6), this.y - 14, { vx: 3, vy: -4, max: 1.8, alpha: 0.7 });
   }
   draw(c) {
     const t = Room.t; let pose = 'sit', f = Math.floor(t * 1.4) % 2; let flip = this.flip, hop = 0;
     if (this.walking) { pose = 'walk'; f = Math.floor(this.anim * 9) % 4; }
     else if (this.state === 'jump') { pose = 'walk'; f = 1; }
+    else if (this.state === 'sleep' && this.preSleep > 0) { pose = 'walk'; f = Math.floor(this.preSleep * 10) % 4; flip = Math.floor(this.preSleep * 4) % 2 === 0; }
     else if (this.state === 'sleep') { pose = 'sleep'; f = Math.floor(t * 0.8) % 2; }
+    else if (this.state === 'act') { const q = PetAI.pose(this, t); pose = q.pose; f = q.f; if (q.flip != null) flip = q.flip; }
     else if (this.state === 'eat') { pose = 'sit'; f = Math.floor(t * 6) % 2; }
     else if (this.state === 'trick') {
       const k = this.tt;

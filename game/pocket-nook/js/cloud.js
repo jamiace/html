@@ -37,6 +37,21 @@ async function loadFirebase(cfg) {
       badWrite: async (uid) => (await F.addDoc(F.collection(db, 'saves', uid, 'backups'), { v: 1, probe: true })).id,
       delBackup: (uid, id) => F.deleteDoc(F.doc(db, 'saves', uid, 'backups', id)),
     },
+    // generic document access for friends, rooms and the leaderboard (social.js); '__now__' becomes the server time
+    store: (() => {
+      const stamp = (o) => { const r = {}; for (const k in o) r[k] = o[k] === '__now__' ? F.serverTimestamp() : o[k]; return r; };
+      const norm = (o) => { const r = {}; for (const k in o) { const v = o[k]; r[k] = v && typeof v.toMillis === 'function' ? v.toMillis() : v; } return r; };
+      const rows = (r) => r.docs.map(d => Object.assign({ id: d.id }, norm(d.data())));
+      return {
+        async get(path) { const s = await F.getDoc(F.doc(db, path)); return s.exists() ? norm(s.data()) : null; },
+        set: (path, data) => F.setDoc(F.doc(db, path), stamp(data)),
+        update: (path, data) => F.updateDoc(F.doc(db, path), stamp(data)),
+        del: (path) => F.deleteDoc(F.doc(db, path)),
+        add: (path, data) => F.addDoc(F.collection(db, path), stamp(data)),
+        async list(path, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.limit(n || 50)))); },
+        async top(path, field, n) { return rows(await F.getDocs(F.query(F.collection(db, path), F.orderBy(field, 'desc'), F.limit(n)))); },
+      };
+    })(),
     async backups(uid) { const q = F.query(F.collection(db, 'saves', uid, 'backups'), F.orderBy('at', 'desc'), F.limit(10)); const r = await F.getDocs(q); return r.docs.map(d => Object.assign({ id: d.id }, d.data())); },
   };
 }
@@ -138,6 +153,16 @@ function mergeSaves(a, b, common) {
   const seenM = new Set((M.memos || []).map(m => m.text)); for (const m of o.memos || []) if (m.text && !seenM.has(m.text) && M.memos.length < 20) { M.memos.push(Object.assign({}, m, { id: Game.uid(M.memos) })); }
   M.closet = Object.assign({}, o.closet || {}, M.closet || {}); M.closetV = Math.max(M.closetV || 0, o.closetV || 0);
   const seenO = new Set((M.outfits || []).map(x => JSON.stringify(x.a))); M.outfits = M.outfits || []; for (const x of o.outfits || []) if (M.outfits.length < 8 && !seenO.has(JSON.stringify(x.a))) M.outfits.push(x);
+  if (o.wallet) {
+    const W = M.wallet = M.wallet || { coupons: [], usedDay: '', sel: null, giftMiss: 0, tickets: 0, nid: 1 }, OW = o.wallet;
+    W.tickets = Math.max(W.tickets || 0, OW.tickets || 0); if ((OW.usedDay || '') > (W.usedDay || '')) W.usedDay = OW.usedDay; W.nid = Math.max(W.nid || 1, OW.nid || 1);
+    // coupons: keep the ones either device has, minus any either device already used
+    const spent = new Set([...(W.spent || []), ...(OW.spent || [])]), key = (c) => c.got + ':' + c.off, have = new Set();
+    W.coupons = [...(W.coupons || []), ...(OW.coupons || [])].filter(c => { const k = key(c); if (spent.has(k) || have.has(k)) return false; have.add(k); return true; });
+    W.coupons.forEach((c, i) => { c.id = i + 1; }); W.nid = W.coupons.length + 1; W.sel = null; W.spent = [...spent].slice(-200);
+  }
+  if (o.social) { const Z = M.social = M.social || {}; Z.total = Math.max(Z.total || 0, o.social.total || 0); if (Z.hd === o.social.hd) Z.hn = Math.max(Z.hn || 0, o.social.hn || 0); else if ((o.social.hd || '') > (Z.hd || '')) { Z.hd = o.social.hd; Z.hn = o.social.hn; Z.helped = o.social.helped; }
+    const seenG = new Set((Z.guest || []).map(g => g.uid + g.at)); Z.guest = [...(Z.guest || []), ...(o.social.guest || []).filter(g => !seenG.has(g.uid + g.at))].sort((x, y) => y.at - x.at).slice(0, 50); if (!Z.code && o.social.code) { Z.code = o.social.code; Z.codeUid = o.social.codeUid; } }
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
   M.savedAt = Date.now();
   return M;
@@ -177,7 +202,7 @@ const Cloud = {
   user: null, fb: null, ref: null, bref: null, timer: null, busy: false, pending: false, lastSync: 0, lastPull: 0, err: '', authBusy: false,
   form: { tab: 'in', email: '', msg: '' }, choice: null, remoteHasProgress: false, working: false,
   configured() { const c = window.NOOK_FIREBASE; return !!(c && c.apiKey && c.projectId); },
-  set(st, err) { this.status = st; if (err !== undefined) this.err = err; UI.cloudChip(); UI.refresh('account'); UI.refresh('cloudpick'); },
+  set(st, err) { this.status = st; if (err !== undefined) this.err = err; UI.cloudChip(); UI.refresh('account'); UI.refresh('cloudpick'); if (st === 'synced' && typeof Social !== 'undefined') Social.onSynced(); },
   uid() { return this.mode === 'claude' ? (this.user && this.user.uid) : (this.user && this.user.uid); },
   active() { return !!this.uid() && (this.mode === 'firebase' ? !!this.fb : !!this.ref) && !['choose', 'loading'].includes(this.status) && Game.S.owner === this.uid(); },
 
@@ -464,6 +489,7 @@ UI.cloudChip = function () {
 UI.w_account = function () {
   const c = Cloud, f = c.form, out = [];
   const status = (txt, cls) => h('p', { class: 'cl-status ' + (cls || '') }, h('i', { class: 'cl-dot', 'data-st': cls || c.status }), h('span', { text: txt }));
+  out.push(UI.nameField());
   if (c.mode === 'claude' || window.NOOK_ENV === 'artifact') {
     out.push(status(c.status === 'synced' ? '已自動存到你的 Claude 帳號' : c.status === 'loading' ? '連線中…' : '這個環境沒有雲端儲存，進度只存在這台裝置', c.status === 'synced' ? 'synced' : c.status));
     out.push(h('p', { class: 'hint', text: '在 Claude 上玩時不用另外登入：進度跟著你的 Claude 帳號走，換一台裝置打開同一個頁面就能接著玩。想用 Google 或 Email 帳號登入，請用 GitHub 版本（README 有 Firebase 設定教學）。' }));

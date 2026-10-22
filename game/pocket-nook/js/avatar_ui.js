@@ -33,10 +33,10 @@ Object.assign(UI, {
   },
   avaBuy() {
     const S = Game.S, t = this.avaTry; if (!t) return;
-    const price = partPrice(t.cat, t.id), lvl = partLvl(t.cat, t.id), P = AVA_PARTS[t.cat][t.id];
+    const base = partPrice(t.cat, t.id), price = Rewards.price(base, 'closet'), lvl = partLvl(t.cat, t.id);
     if (S.lvl < lvl) return UI.toast(`升到 Lv ${lvl} 才能買`, 'i_star');
     if (S.coins < price) return UI.toast(`這個要 ${price} 金幣，還差 ${price - S.coins}`, 'i_coin');
-    S.coins -= price; S.closet[closetKey(t.cat, t.id)] = 1;
+    S.coins -= price; Rewards.consume(base, 'closet', this.avaName(t.cat, t.id)); S.closet[closetKey(t.cat, t.id)] = 1;
     UI.toast(`買下了「${this.avaName(t.cat, t.id)}」${AVA_DYE[t.cat] ? '（所有衣服都能用這個顏色）' : ''}`, 'i_shirt');
     Life.track('buy', 1, { kind: 'closet', id: t.cat + ':' + t.id }); UI.hud(true); saveSoon();
     this.avaWear(t.cat, t.id);
@@ -88,18 +88,18 @@ Object.assign(UI, {
     }
     let tryBar = null;
     if (t) {
-      const price = partPrice(t.cat, t.id), lv = partLvl(t.cat, t.id), short = Math.max(0, price - S.coins), lowLv = S.lvl < lv;
+      const base = partPrice(t.cat, t.id), price = Rewards.price(base, 'closet'), lv = partLvl(t.cat, t.id), short = Math.max(0, price - S.coins), lowLv = S.lvl < lv;
       tryBar = h('div', { class: 'avatry' }, h('div', { class: 'hint', text: `試穿中：${this.avaName(t.cat, t.id)}` }),
         h('div', { class: 'row center' },
-          h('button', { class: 'chip sm primary', disabled: lowLv || short > 0, onclick: () => this.avaBuy() }, ico('i_coin', 16), lowLv ? `Lv ${lv} 解鎖` : short ? `還差 ${short}` : `${price} 買下`),
+          h('button', { class: 'chip sm primary', disabled: lowLv || short > 0, onclick: () => this.avaBuy() }, ico('i_coin', 16), lowLv ? `Lv ${lv} 解鎖` : short ? `還差 ${short}` : price < base ? `${price}（原 ${base}）買下` : `${price} 買下`),
           h('button', { class: 'chip sm', onclick: () => { this.avaTry = null; this.refresh('avatar'); } }, '脫掉')));
     }
     const paidN = Object.keys(S.closet).length;
     return [h('div', { class: 'ava-row' },
       h('div', { class: 'ava-stage' }, pv, tryBar, h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => { this.avaView = (this.avaView + 1) % 3; this.refresh('avatar'); } }, ico('i_flip', 18), '轉一圈'), h('button', { class: 'chip sm', title: '用已經擁有的款式隨機搭配', onclick: () => this.avaRandom() }, ico('i_sparkle', 18), '隨機'))),
       h('div', { class: 'ava-opts' },
-        h('label', { class: 'field' }, h('span', { text: '名字' }), h('div', { class: 'inset' }, h('input', { id: 'ava-name', type: 'text', maxlength: '16', value: a.name || '', placeholder: '一起專注時顯示', onchange: e => { a.name = e.target.value.trim().slice(0, 16); Game.save(); Cowork.push(); } }))),
+        h('div', { class: 'row' }, h('span', { text: '名字：' }), h('b', { class: 'grow', text: a.name || '（還沒設定）' }), h('button', { class: 'chip sm', onclick: () => this.openWin('account') }, '到帳號設定')),
         h('p', { class: 'hint', text: `每一項都有幾款免費的基本款，其他款式用金幣購買，等級越高能買的越多。點沒有的款式可以先試穿，衣服顏色買一次所有衣服都能用（已收藏 ${paidN} 件）。` }), tabs)),
-      h('div', { class: 'scroll avabody' }, ...body)];
+      h('div', { class: 'scroll avabody' }, this.couponBar(), ...body)];
   },
 });
