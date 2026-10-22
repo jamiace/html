@@ -452,7 +452,7 @@ const Room = {
       } else { c.fillStyle = '#c4566e'; for (const fx of [17, 21, 26, 29]) c.fillRect(x + fx, y + 31, 1, 1); }
     }
     if (d.glow && it.on) { for (let gx = 7; gx < 16; gx += 2) { const k = Math.sin(this.t * 6 + gx) > 0; c.fillStyle = k ? '#ffe07a' : '#e8973d'; c.fillRect(x + (it.flip ? cv.width - 1 - gx : gx), y + 12, 1, 4); } }
-    // 各家具的音符計時只存在記憶體，不寫進存檔
+// 各家具的音符計時只存在記憶體，不寫進存檔
 if (!this._musicNoteTimes) {
   this._musicNoteTimes = new WeakMap();
 }
@@ -484,8 +484,9 @@ if (d.music && typeof Music !== 'undefined' && Music.playing) {
 } else if (d.music) {
   this._musicNoteTimes.delete(it);
 }
-	
-	if (d.flicker && !it.on) { c.fillStyle = '#efdcc0'; c.fillRect(x + 2, y + 1, 3, 3); c.fillStyle = '#2e2230'; c.fillRect(x + 3, y + 3, 1, 1); }
+
+
+    if (d.flicker && !it.on) { c.fillStyle = '#efdcc0'; c.fillRect(x + 2, y + 1, 3, 3); c.fillStyle = '#2e2230'; c.fillRect(x + 3, y + 3, 1, 1); }
   },
   drawGift(c, g) {
     const cv = SPR.get('gift_box'); let y = g.y - cv.height; if (g.drop > 0) { y -= g.drop; g.drop = Math.max(0, g.drop - 2.4); }

@@ -321,7 +321,7 @@ const Cloud = {
     this.choice = { mode: rs ? 'conflict' : 'import', remote: rs, local: L, localSum: saveSummary(L, true), remoteSum: rs ? saveSummary(rs) : null, localSavedAt: Game.loadedSavedAt || L.savedAt, sel: rs ? 'cloud' : 'import' };
     this.set('choose'); UI.openWin('cloudpick');
   },
-  devBlocked(sum) { return sum && sum.dev && SAVE_POLICY().devSaves === 'block'; },
+  devBlocked() { return false; },   // developer-mode saves are never blocked
   async writeRemote(S) {
     const rev = (this.rev || 0) + 1, data = JSON.stringify(S);
     if (data.length > 880000) throw { code: 'too-big' };
@@ -390,7 +390,6 @@ const Cloud = {
   async pick(which) {
     const c = this.choice; if (!c || this.working) return; const uid = this.uid();
     const devSrc = c.localSum.dev;
-    if (which !== 'cloud' && which !== 'fresh' && this.devBlocked(c.localSum)) return UI.toast('這份裝置存檔用過開發者模式，依照遊戲規則不能匯入雲端', 'i_dev', 4);
     this.working = true; this.err = ''; UI.refresh('cloudpick');
     try {
       // the device's original save is always kept as a backup on this device
@@ -599,7 +598,6 @@ UI.backupSection = function () {
   const sy = S.sync;
   out.push(h('div', { class: 'sub', text: '存檔來源與備份' }));
   out.push(h('p', { class: 'hint', text: sy && sy.mode ? `目前存檔：${SYNC_MODES[sy.mode] || sy.mode} · ${saveDate(sy.at)}` + (sy.srcSavedAt ? `（來源存檔修改於 ${saveDate(sy.srcSavedAt)}）` : '') : '這份存檔還沒有移轉紀錄。' }));
-  if (S.flags && S.flags.dev) out.push(h('p', { class: 'cl-msg', text: '這份存檔用過開發者模式，標記為測試存檔：之後如果有排行榜或交易功能，都不會列入。' }));
   const row = (b, label, fn) => h('div', { class: 'devh' }, h('div', { class: 'grow' }, h('div', { text: b.reason || '備份' }), h('div', { class: 'hint num', text: `${saveDate(b.at)} · Lv ${b.lvl || (b.sum || {}).lvl || 1} · ${(b.coins != null ? b.coins : (b.sum || {}).coins) || 0} 金幣` + (b.sum ? ` · 學會 ${b.sum.words} 字` : '') })), h('button', { class: 'chip sm', onclick: fn }, label));
   const loc = c.bk.local.slice(0, 6), cl = c.bk.cloud.slice(0, 6);
   if (loc.length) out.push(h('div', { class: 'hint', text: '這台裝置上的備份' }), h('div', { class: 'devhist' }, ...loc.map(b => row(b, '還原', () => c.restoreBackup(JSON.parse(b.json), b.reason)))));
@@ -622,7 +620,7 @@ UI.w_cloudpick = function () {
       h('dt', { text: '單字' }), h('dd', { class: 'num', text: `學會 ${sum.words}／看過 ${sum.seen}` }), h('dt', { text: '寵物、家具' }), h('dd', { class: 'num', text: `${sum.pets} 隻、${sum.items} 件` }),
       h('dt', { text: '累積專注' }), h('dd', { class: 'num', text: `${sum.focus} 分鐘` })),
     extra);
-  const tags = (sum) => h('div', { class: 'ptraits' }, sum.legacy ? h('span', { class: 'ptag', text: '舊版存檔（已轉成新格式）' }) : null, sum.dev ? h('span', { class: 'ptag sick', text: '用過開發者模式' }) : null);
+  const tags = (sum) => h('div', { class: 'ptraits' }, sum.legacy ? h('span', { class: 'ptag', text: '舊版存檔（已轉成新格式）' }) : null);
   const out = [];
   const localCard = card(ch.localSum, '這台裝置', '這台裝置的瀏覽器（localStorage）', ch.localSavedAt, tags(ch.localSum), ch.mode === 'import');
   if (ch.mode === 'import') {
@@ -637,7 +635,6 @@ UI.w_cloudpick = function () {
       opt('merge', '合併兩份', '以修改日期較新的那份為主（房間擺設、今天的任務）；等級、金幣取較高的；每個單字取熟練度較高的；家具、外觀、道具、寵物用品、成就、待辦合在一起；寵物兩邊都留下（最多 10 隻）。合併前兩份都會備份。', blocked),
       opt('local', '用這台裝置的進度取代雲端', '雲端存檔會先備份到雲端，之後可以還原。', blocked)));
   }
-  if (ch.localSum.dev) out.push(h('p', { class: 'cl-msg', text: blocked ? '這份裝置存檔用過開發者模式。依照遊戲規則，測試存檔不能匯入或合併進雲端帳號。' : '這份裝置存檔用過開發者模式（或這台裝置開過開發者模式）。可以匯入，但雲端存檔會永久標記為測試存檔，之後如果有排行榜或交易功能都不會列入。' }));
   if (Cloud.err) out.push(h('p', { class: 'cl-msg', role: 'status', text: Cloud.err }));
   out.push(h('p', { class: 'hint', text: '不論選哪一種，這台裝置原本的存檔都會先備份，完成後會記下匯入紀錄，下次登入不會再問。' }));
   if (ch.mode === 'import') out.push(h('div', { class: 'row wrap center' },

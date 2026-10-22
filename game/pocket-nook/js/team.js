@@ -104,7 +104,7 @@ const Team = {
     for (const type of ['d', 'w']) {
       const st = this.inTeam(type), tm = st && this.teams[st.id]; if (!tm) continue;
       const ph = this.phase(tm);
-      if (ph === 'due' && !this.busy[type] && !Social.dev() && now - (st.autoErr || 0) > 30e3) this.autoMatch(type, false);
+      if (ph === 'due' && !this.busy[type] && now - (st.autoErr || 0) > 30e3) this.autoMatch(type, false);
       const waiting = ph === 'lobby' || ph === 'match' || ph === 'due';
       if (waiting && UI.teamOpen(type) && now - (st.readAt || 0) > TEAM_CFG.lobbyPollMs && !this.loading['r' + type]) { this.loading['r' + type] = true; this.load(type).catch(() => { }).finally(() => { this.loading['r' + type] = false; }); }
     }
@@ -158,9 +158,9 @@ const Team = {
   },
   // ---------- starting / joining ----------
   newTeam(type, match) {
-    const task = this.task(type), uid = this.uid(), dev = Social.dev();
+    const task = this.task(type), uid = this.uid();
     return { type, period: this.period(type), task, goal: this.goal(type, task), max: TEAM_TYPES[type].max, members: [uid], names: { [uid]: Social.myName() }, prog: { [uid]: 0 },
-      open: !!match && !dev, full: TEAM_TYPES[type].max <= 1, mAt: match || dev ? 0 : Date.now() + TEAM_CFG.lobbyMs, doneAt: 0, roster: [], by: uid, at: '__now__' };
+      open: !!match, full: TEAM_TYPES[type].max <= 1, mAt: match ? 0 : Date.now() + TEAM_CFG.lobbyMs, doneAt: 0, roster: [], by: uid, at: '__now__' };
   },
   mark(type, id, task) { this.T[type] = { p: this.period(type), id, task, mine: 0, end: this.end(type), joinedAt: Date.now() }; this.invOpen = false; Game.save(); saveSoon(); },
   // open teams of this period that still have room, the fullest first
@@ -174,7 +174,6 @@ const Team = {
     if (this.inTeam(type)) return UI.toast('這一期已經在隊伍裡了', 'i_people');
     this.busy[type] = true; UI.refresh('tasks');
     try {
-      if (match && Social.dev()) { UI.toast('用過開發者模式的存檔不能和其他玩家配對，先幫你開一隊；可以邀請好友加入', 'i_people', 4); match = false; }
       if (match) {
         for (const c of await this.candidates(type)) if (await this.join(type, c.id, false, true)) { UI.toast(`配對成功，加入了 ${(c.members || []).length + 1} 人的隊伍！`, 'i_people', 3.5); return; }
       }
@@ -185,7 +184,7 @@ const Team = {
         t.set('teams/' + id, tm); t.set('tm/' + uid, Object.assign({}, mem || {}, { [type]: { p: tm.period, id }, at: '__now__' }));
       });
       this.mark(type, id, tm.task); await this.load(type);
-      UI.toast(match ? '還沒有可以加入的隊伍，已經幫你開了一隊並開始配對（你也可以先自己做）' : Social.dev() ? '隊伍建立了！可以邀請好友加入' : '隊伍建立了！5 分鐘內可以邀請好友，沒滿隊會自動配對', 'i_people', 4);
+      UI.toast(match ? '還沒有可以加入的隊伍，已經幫你開了一隊並開始配對（你也可以先自己做）' : '隊伍建立了！5 分鐘內可以邀請好友，沒滿隊會自動配對', 'i_people', 4);
     } catch (e) { UI.toast(e && e.code === 'already' ? '這一期你已經在別的隊伍裡了（可能是在另一台裝置加入的）' : '開始失敗：' + cloudErr(e), 'i_people', 4); }
     finally { this.busy[type] = false; UI.refresh('tasks'); }
   },
@@ -240,7 +239,6 @@ const Team = {
   // matching on / off (also ends the lobby countdown)
   async setOpen(type, open) {
     const st = this.inTeam(type); if (!st || this.busy[type]) return;
-    if (open && Social.dev()) return UI.toast('用過開發者模式的存檔不能開放陌生人配對，可以邀請好友加入', 'i_people', 3.5);
     if (open) return this.autoMatch(type, true);
     this.busy[type] = true; UI.refresh('tasks');
     try { await this.db().update('teams/' + st.id, { open: false, mAt: 0, at: '__now__' }); await this.load(type); UI.toast('已停止配對，只和好友組隊（隊伍和進度都保留）', 'i_people', 3); }
@@ -251,7 +249,6 @@ const Team = {
   // otherwise the team opens for matching so other players can join
   async autoMatch(type, manual) {
     const st = this.inTeam(type); if (!st || this.busy[type]) return;
-    if (Social.dev()) { if (manual) UI.toast('用過開發者模式的存檔不能和陌生人配對，可以邀請好友加入', 'i_people', 3.5); return; }
     this.busy[type] = true; UI.refresh('tasks');
     try {
       const tm = await this.load(type); if (!tm || tm.doneAt || (tm.members || []).length >= tm.max || !this.inTeam(type)) return;
@@ -385,7 +382,7 @@ Object.assign(UI, {
     })), h('p', { class: 'hint', text: '任何好友都能邀請，對方就算已經在別的隊伍也可以換過來。' }));
   },
   teamPhase(type, st, tm) {
-    const ph = Team.phase(tm), busy = !!Team.busy[type], dev = Social.dev(), room = tm.max - tm.members.length;
+    const ph = Team.phase(tm), busy = !!Team.busy[type], room = tm.max - tm.members.length;
     const inviteBtn = h('button', { class: 'chip', disabled: busy, onclick: () => { Team.invOpen = !Team.invOpen; this.refresh('tasks'); } }, ico('i_people', 18), '邀請好友');
     if (ph === 'lobby') {
       const left = Math.max(0, (tm.mAt - Date.now()) / 1000);
@@ -397,13 +394,13 @@ Object.assign(UI, {
         h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? '配對中…' : '立即配對'),
           h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, title: '取消倒數，只和好友組隊', onclick: () => Team.setOpen(type, false) }, '不要自動配對')));
     }
-    if (ph === 'due') return h('div', { class: 'tmphase match' }, h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, '自動配對中', h('span', { class: 'dots' })), h('p', { class: 'hint', text: dev ? '開發者存檔不能配對陌生人，請邀請好友加入。' : '5 分鐘到了，正在幫你找隊友…' })), ico('i_sparkle', 32, 'ico tmspin')), h('div', { class: 'row wrap' }, inviteBtn));
+    if (ph === 'due') return h('div', { class: 'tmphase match' }, h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, '自動配對中', h('span', { class: 'dots' })), h('p', { class: 'hint', text: '5 分鐘到了，正在幫你找隊友…' })), ico('i_sparkle', 32, 'ico tmspin')), h('div', { class: 'row wrap' }, inviteBtn));
     if (ph === 'match') return h('div', { class: 'tmphase match' },
       h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, '配對中', h('span', { class: 'dots' })), h('p', { class: 'hint', text: `其他玩家配對時會加入你的隊伍，還有 ${room} 個空位。不用等，先開始做也會算進隊伍。` })), ico('i_sparkle', 32, 'ico tmspin')),
       h('div', { class: 'row wrap' }, inviteBtn, h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, onclick: () => Team.setOpen(type, false) }, '停止配對')));
     if (ph === 'friends') return h('div', { class: 'tmphase friends' },
-      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '好友隊伍' }), h('p', { class: 'hint', text: dev ? `開發者存檔只能邀請好友，還有 ${room} 個空位。` : `只有收到邀請的好友能加入，還有 ${room} 個空位。` }))),
-      h('div', { class: 'row wrap' }, inviteBtn, dev ? null : h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? '配對中…' : '開始配對')));
+      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '好友隊伍' }), h('p', { class: 'hint', text: `只有收到邀請的好友能加入，還有 ${room} 個空位。` }))),
+      h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? '配對中…' : '開始配對')));
     if (ph === 'full') return h('div', { class: 'tmphase full' }, h('div', { class: 'tmph-row' }, ico('i_people', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '隊伍滿員！' }), h('p', { class: 'hint', text: '大家一起衝刺吧，達標後名單上每個人都能領完整獎勵。' }))));
     const can = Team.canClaim(tm, type, st.p), got = Team.T.claims[Team.key(type, st.p)];
     return h('div', { class: 'tmphase done' }, h('div', { class: 'tmph-row' }, ico('i_star', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '任務達成！' }), h('p', { class: 'hint', text: '名單已經固定，每位隊員都能領完整獎勵。' })),
@@ -442,10 +439,10 @@ Object.assign(UI, {
         st && st.left ? h('p', { class: 'hint center', text: '你離開了上一支隊伍，可以重新組隊、配對，或接受好友的邀請。' }) : null,
         h('div', { class: 'row wrap center' },
           h('button', { class: 'chip big primary', disabled: busy, onclick: () => Team.start(type, false) }, ico('i_play', 20), busy ? '處理中…' : '開始團隊任務'),
-          h('button', { class: 'chip big', disabled: busy || Social.dev(), title: Social.dev() ? '用過開發者模式的存檔不能配對' : '直接加入其他玩家開放的隊伍', onclick: () => Team.start(type, true) }, ico('i_sparkle', 20), '快速配對')),
+          h('button', { class: 'chip big', disabled: busy, title: '直接加入其他玩家開放的隊伍', onclick: () => Team.start(type, true) }, ico('i_sparkle', 20), '快速配對')),
         h('ol', { class: 'tmsteps' },
           h('li', {}, h('b', { text: '開始後 5 分鐘' }), '：邀請好友組隊，或按「立即配對」。'),
-          h('li', {}, h('b', { text: '5 分鐘到了' }), Social.dev() ? '：開發者存檔不會自動配對，只能邀請好友。' : '：還沒滿隊會自動配對其他玩家（可以取消）。'),
+          h('li', {}, h('b', { text: '5 分鐘到了' }), '：還沒滿隊會自動配對其他玩家（可以取消）。'),
           h('li', {}, h('b', { text: '一個人也能做' }), '：開始後做的事就會算進隊伍，達標全員同獎。'))));
     } else if (!tm) out.push(h('p', { class: 'hint center', text: '讀取隊伍中…' }));
     else {
