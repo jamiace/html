@@ -90,7 +90,7 @@ const ActorVisibility = {
   },
   protected(a) {
     return a.walking || a.jump || a.on || a.seat || a.bed ||
-      ['work', 'goingWork', 'deskstand', 'eat', 'trick', 'zoom'].includes(a.state);
+      ['work', 'goingWork', 'deskstand', 'eat', 'trick', 'show', 'zoom'].includes(a.state);
   },
   tick(a, dt) {
     if (this.protected(a)) { a._hiddenFor = 0; a._visibilityClock = 0; return false; }

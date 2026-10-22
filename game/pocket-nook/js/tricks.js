@@ -40,7 +40,11 @@ function petStandCanvas(kind, color, flip) {
 
 const TrickShow = {
   cur: null,
-  busy() { return !!this.cur; },
+  busy() {
+    const S = this.cur;
+    if (S && (!Game.pets.includes(S.a) || S.a.state !== 'trick')) this.cancel();
+    return !!this.cur;
+  },
   start(a, tid) {
     if (this.cur) { UI.toast('正在表演中，看完再點下一個吧', 'i_paw', 2.4); return false; }
     const def = TRICK_SHOW[tid]; if (!def || !a) return false;
@@ -64,10 +68,10 @@ const TrickShow = {
     S.ring = def.owner === 'ring' ? { x: bx + dir * ((def.move || 66) / 2), y: by - 13 } : null;
     a.state = 'trick'; a.trick = tid; a.tt = 0; a.walking = false;
     let arrived = 0; const go = () => { if (++arrived >= (owner ? 2 : 1) && this.cur === S && S.phase === 'pos') { S.phase = 'act'; S.t = 0; this.cue(S); } };
-    if (Math.abs(a.x - bx) > 1 || Math.abs(a.y - by) > 1) a.walkTo(bx, by, go); else go();
+    if (Math.abs(a.x - bx) > 1 || Math.abs(a.y - by) > 1) a.walkTo(bx, by, go, true); else go();
     if (owner) {
       if (['sleep', 'sit', 'work', 'deskstand'].includes(A.state)) A.stand();
-      A.state = 'show'; A.show = { pose: 'idle' }; S.aspeed = A.speed; A.speed = 38; A.walkTo(S.ox, S.oy, go);
+      A.state = 'show'; A.show = { pose: 'idle' }; S.aspeed = A.speed; A.speed = 38; A.walkTo(S.ox, S.oy, go, true);
     }
   },
   // the show begins: lines, facing
@@ -80,7 +84,7 @@ const TrickShow = {
     if (S.owner && S.tid === 'paw') Game.bubble(A, '握手～', 1.4);
     if (S.tid === 'firering' && !S.owner) Game.bubble(a, '看好囉！', 1.6);
   },
-  cancel() { const S = this.cur; if (!S) return; this.cur = null; if (S.a) { S.a.state = 'sit'; S.a.trick = null; S.a.timer = 2; } const A = Game.avatar; if (A && A.state === 'show') { A.state = 'idle'; A.show = null; A.timer = 1; } if (A && S.aspeed) A.speed = S.aspeed; },
+  cancel() { const S = this.cur; if (!S) return; this.cur = null; if (S.a && S.a.state === 'trick') { S.a.walking = false; S.a.onArrive = null; S.a.state = 'sit'; S.a.trick = null; S.a.timer = 2; } const A = Game.avatar; if (A && A.state === 'show') { A.walking = false; A.onArrive = null; A.state = 'idle'; A.show = null; A.timer = 1; } if (A && S.aspeed) A.speed = S.aspeed; },
   finish(S) {
     const a = S.a, A = Game.avatar; this.cur = null;
     a.state = 'sit'; a.trick = null; a.timer = 3; a.happy = 2.2; a.rot = 0;
@@ -91,7 +95,13 @@ const TrickShow = {
   update(a, dt) {
     const S = this.cur; if (!S || S.a !== a) { a.state = 'sit'; a.trick = null; return; }
     if (!Game.pets.includes(a)) return this.cancel();
-    if (S.phase === 'pos') { a.step(dt); S.wait += dt; if (S.wait > 3.5) { a.walking = false; if (S.owner) Game.avatar.walking = false; a.x = S.bx; a.y = S.by; S.phase = 'act'; S.t = 0; this.cue(S); } return; }
+    if (S.phase === 'pos') { S.wait += dt; if (S.wait > 3.5) { a.walking = false; if (S.owner) Game.avatar.walking = false; a.x = S.bx; a.y = S.by; S.phase = 'act'; S.t = 0; this.cue(S); } return; }
+    if (S.owner && (Game.focusing() || !Game.avatar || Game.avatar.state !== 'show')) {
+      const owner = Game.avatar;
+      if (owner && owner.state === 'show') { owner.walking = false; owner.onArrive = null; owner.state = 'idle'; owner.show = null; owner.timer = 0; }
+      if (owner && S.aspeed) owner.speed = S.aspeed;
+      S.aspeed = null; S.owner = false;
+    }
     S.t += dt; const t = S.t, A = S.owner ? Game.avatar : null, f = S.dir;
     const once = (key, at, fn) => { if (t >= at && !S[key]) { S[key] = 1; fn(); } };
     switch (S.tid) {
