@@ -60,6 +60,8 @@ class Walker {
     if (d < 0.8) { this.x = this.tx; this.y = this.ty; this.walking = false; const cb = this.onArrive; this.onArrive = null; if (cb) cb(); return; }
     const v = Math.min(d, this.speed * dt); this.x += dx / d * v; this.y += dy / d * v * 0.85;
     if (Math.abs(dx) > Math.abs(dy) * 1.1) { this.face = 'side'; this.flip = dx < 0; } else this.face = dy > 0 ? 'front' : 'back';
+    // pets only have a side view: they always face the way they walk, even on a mostly up/down path (no walking backwards)
+    if (this.pid != null && Math.abs(dx) > 0.5) this.flip = dx < 0;
     this.anim += dt;
   }
 }
@@ -103,7 +105,7 @@ class Avatar extends Walker {
     if (this.state === 'sleep' || this.state === 'sit') { this.stand(); this.timer = 1 + Math.random() * 2; return; }
     const h = Room.env.h, night = h >= 23 || h < 6;
     const r = Math.random();
-    const seats = itemsWith('seat'), beds = itemsWith('bed'), wins = Room.state.items.filter(i => ITEMS[i.k].window);
+    const seats = itemsWith('seat').filter(it => ActorVisibility.furnSafe(this, it, 'sit')), beds = itemsWith('bed').filter(it => ActorVisibility.furnSafe(this, it, 'sleep')), wins = Room.state.items.filter(i => ITEMS[i.k].window);
     if (night && beds.length && r < 0.5) return this.goSleep(beds[0]);
     if (r < 0.42) { const [x, y] = randFloor(); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'idle'; this.timer = 1.5 + Math.random() * 3; }); return; }
     if (r < 0.58 && seats.length) { const s = seats[Math.floor(Math.random() * seats.length)]; const [w, h2] = itemSize(s); const sp = ITEMS[s.k].seat; const sx = s.flip ? w - sp.x : sp.x; this.state = 'walk'; this.walkTo(s.x + sx, s.y + h2 + 3, () => { if (!Room.uidMap[s.uid]) { this.state = 'idle'; return; } this.state = 'sit'; this.seat = s; this.timer = 8 + Math.random() * 10; }, true); return; }
