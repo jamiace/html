@@ -22,6 +22,12 @@ const seg = (t, a, b) => clamp01((t - a) / (b - a));
 
 
 // standing on the hind legs, seen from the side (used for the 45-degree lean); built from the walk frame's head
+// first row with any pixel (the top of what is actually drawn)
+function canvasTop(cv) {
+  if (cv._top != null) return cv._top;
+  for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (cv.alpha[(y * cv.width + x) * 4 + 3]) return (cv._top = y);
+  return (cv._top = 0);
+}
 const STAND_CACHE = {};
 function petStandCanvas(kind, color, flip) {
   const key = kind + '|' + color + '|' + (flip ? 1 : 0); if (STAND_CACHE[key]) return STAND_CACHE[key];
@@ -165,7 +171,7 @@ const TrickShow = {
         if (t < .95) { P.pose = 'sit'; }
         else if (t < 1.5) { P.pose = 'sit'; P.dx = -f * Math.round(seg(t, .95, 1.05) * 2); P.rot = Math.sin((t - .95) * 26) * .18 * (1 - seg(t, .95, 1.5) * .5); }
         else if (t < 1.95) { P.pose = 'walk'; P.fr = 1; P.dx = -f * 2; P.pivot = 'feet'; P.rot = -f * ease.inOut(seg(t, 1.5, 1.95)) * Math.PI / 2; }
-        else if (t < 3.15) { P.pose = 'lie'; P.fr = 0; P.flip = !a.flip; P.rot = Math.PI; P.lift = -3; P.dead = 1; if (t > 2.6 && t < 2.75) P.dx = Math.round(Math.sin(t * 60)); }
+        else if (t < 3.15) { P.pose = 'lie'; P.fr = 0; P.flip = !a.flip; P.rot = Math.PI; P.pivot = 'body'; P.lift = 0; P.dead = 1; if (t > 2.6 && t < 2.75) P.dx = Math.round(Math.sin(t * 60)); }
         else { const k = seg(t, 3.15, 3.5); P.pose = 'sit'; P.lift = -Math.round(Math.sin(k * Math.PI) * 8); }
         break;
       }
@@ -212,10 +218,12 @@ const TrickShow = {
     // shadow shrinks while airborne
     const air = Math.min(1, -P.lift / 30); c.fillStyle = `rgba(46,34,48,${(.2 * (1 - air * .6)).toFixed(2)})`; const sw = Math.round(12 * (1 - air * .5)); c.fillRect(x - sw / 2, y - 1, sw, 2);
     c.save();
+    // 'body' turns around the middle of the drawn pet (not of the whole canvas), so a pet lying on its back stays on the floor
+    const top = canvasTop(cv), cyBody = y - (bot - top) / 2 + P.lift;
     const cx = x, cyFeet = y + P.lift, cyMid = y - bot / 2 + P.lift;
-    const py = P.pivot === 'feet' || P.pivot === 'toes' ? cyFeet : cyMid, toe = P.pivot === 'toes' ? (P.flip ? -1 : 1) * (Math.floor(cv.width / 2) - 4) : 0;
+    const py = P.pivot === 'feet' || P.pivot === 'toes' ? cyFeet : P.pivot === 'body' ? cyBody : cyMid, toe = P.pivot === 'toes' ? (P.flip ? -1 : 1) * (Math.floor(cv.width / 2) - 4) : 0;
     c.translate(cx + toe, Math.round(py)); if (P.rot) c.rotate(P.rot); if (P.skew) c.transform(1, 0, P.skew, 1, 0, 0); if (P.sx !== 1 || P.sy !== 1) c.scale(P.sx, P.sy);
-    const ox = -Math.floor(cv.width / 2) - toe, oy = P.pivot === 'feet' || P.pivot === 'toes' ? -bot : -Math.round(bot / 2);
+    const ox = -Math.floor(cv.width / 2) - toe, oy = P.pivot === 'feet' || P.pivot === 'toes' ? -bot : P.pivot === 'body' ? -Math.round((bot + top) / 2) : -Math.round(bot / 2);
     c.drawImage(cv, ox, oy);
     // extras that move with the pet
     if (P.paw) { const col = this.bodyColor(cv), fx = P.flip ? ox + 3 : ox + cv.width - 6, fy = oy + bot - 6 - Math.round(P.paw * 4) + (P.shake || 0); c.fillStyle = '#2e2230'; c.fillRect(fx - 1, fy - 1, 4, 5); c.fillStyle = col; c.fillRect(fx, fy, 2, 3); }
