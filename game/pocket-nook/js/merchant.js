@@ -284,9 +284,9 @@ Object.assign(UI, {
     const body = [];
     if (this.merchTab === 'sell') {
       body.push(h('p', { class: 'hint', text: `只有${M.n}才有的東西，每件這週最多買 ${MERCHANT_STOCK} 件。旅行商人不收折價券。` }));
-      body.push(h('div', { class: 'scroll grid' }, ...Merchant.goods(mk).map(id => {
+      body.push(h('div', { class: 'grid' }, ...Merchant.goods(mk).map(id => {
         const d = ITEMS[id], left = Merchant.stockLeft(id), locked = S.lvl < d.lvl, own = (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
-        return h('div', { class: 'card' + (locked ? ' locked' : '') }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(id), 100, 3)), h('div', { class: 'cn', text: d.n }),
+        return h('div', { class: 'card' + (locked ? ' locked' : '') }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(id), 100, 3, 80)), h('div', { class: 'cn', text: d.n }),
           h('p', { class: 'cdesc', text: left > 0 ? `這週還有 ${left} 件` + (own ? `（你有 ${own} 件）` : '') : '這週賣完了' }),
           h('div', { class: 'cfoot' }, locked ? h('span', { class: 'lock', text: `Lv ${d.lvl} 解鎖` }) : h('span', { class: 'price' }, ico('i_coin', 18), h('b', { class: 'num', text: String(d.price) })),
             h('button', { class: 'chip sm', disabled: locked || left <= 0 || S.coins < d.price, onclick: () => Merchant.buy(id) }, '購買')));

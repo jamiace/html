@@ -32,6 +32,7 @@ const Lights = {
   sound(on) {
     if (Game.S.settings.chime === false) return;
     try {
+      if (!nookTouched()) return;   // browsers only allow sound after the first tap: before that, stay silent (no console warnings)
       const A = this.ac || (this.ac = new (window.AudioContext || window.webkitAudioContext)()); if (A.state === 'suspended') A.resume();
       const o = A.createOscillator(), g = A.createGain(), t0 = A.currentTime;
       o.type = 'triangle'; o.frequency.setValueAtTime(on ? 1800 : 1300, t0); o.frequency.exponentialRampToValueAtTime(on ? 900 : 600, t0 + 0.05);

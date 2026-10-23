@@ -212,6 +212,6 @@ const THEMES = {
 const PETS = {
   'cat:ginger': { n: '橘貓', price: 0, lvl: 1 }, 'cat:grey': { n: '灰貓', price: 120, lvl: 2 }, 'cat:snow': { n: '白貓', price: 120, lvl: 3 },
   'cat:ink': { n: '黑貓', price: 150, lvl: 4 }, 'cat:cocoa': { n: '可可貓', price: 150, lvl: 5 },
-  'dog:shiba': { n: '柴犬', price: 300, lvl: 3 }, 'dog:sesame': { n: '黑芝麻柴', price: 320, lvl: 5 }, 'dog:cream': { n: '奶油柴', price: 320, lvl: 6 }, 'dog:coal': { n: '黑柴', price: 340, lvl: 7 },
+  // v0.91: cats only (dogs in older saves become the cat of the nearest colour, see Pets.migrate)
 };
 

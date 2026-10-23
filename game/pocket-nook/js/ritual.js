@@ -14,6 +14,7 @@ const Ritual = {
   chime(up) {
     if (Game.S.settings.chime === false) return;
     try {
+      if (!nookTouched()) return;   // browsers only allow sound after the first tap: before that, stay silent (no console warnings)
       const A = this.ac || (this.ac = new (window.AudioContext || window.webkitAudioContext)()); if (A.state === 'suspended') A.resume();
       const notes = up ? [659.3, 987.8] : [987.8, 784];
       notes.forEach((f, i) => {

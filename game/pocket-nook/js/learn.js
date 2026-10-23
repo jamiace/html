@@ -264,8 +264,14 @@ Object.assign(UI, {
         const key = 'q' + s.qi;
         const inp = h('input', { id: 'spell-in', type: 'text', lang: 'en', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', disabled: !!A, placeholder: hintTxt, value: !A && s.typedKey === key ? s.typed || '' : '',
           oninput: e => { s.typed = e.target.value; s.typedKey = key; },
-          oncompositionend: e => { s.typed = e.target.value; s.typedKey = key; if (s.enterAfterIme) { s.enterAfterIme = false; setTimeout(() => { if (!s.ans && s.qi + '' === key.slice(1)) Learn.answer(e.target.value); }, 0); } },
-          onkeydown: e => { if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation(); if (e.isComposing || e.keyCode === 229) { s.enterAfterIme = true; return; } if (!s.ans) Learn.answer(e.target.value); else Learn.next(); } });
+          oncompositionstart: () => { s.composing = true; },
+          oncompositionend: e => { s.composing = false; s.typed = e.target.value; s.typedKey = key; if (s.enterAfterIme) { s.enterAfterIme = false; setTimeout(() => { if (!s.ans && s.qi + '' === key.slice(1)) Learn.answer(e.target.value); }, 0); } },
+          // waits only while a composition is really open: Firefox with a Chinese input method installed can mark a plain Enter as
+          // "composing" (keyCode 229) without any composition, and then no compositionend ever comes
+          onkeydown: e => { if (e.key !== 'Enter' && e.keyCode !== 13 && !(e.keyCode === 229 && e.code === 'Enter')) return; e.preventDefault(); e.stopPropagation(); s.enterAt = Date.now();
+            if (s.composing) { s.enterAfterIme = true; return; } if (!s.ans) Learn.answer(e.target.value); else Learn.next(); },
+          // some input methods swallow the Enter keydown: the key going up still answers (never twice for one press)
+          onkeyup: e => { if ((e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') && !s.composing && Date.now() - (s.enterAt || 0) > 600 && !s.ans) { e.preventDefault(); Learn.answer(e.target.value); } } });
         parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), h('button', { class: 'chip primary', disabled: !!A, onclick: () => Learn.answer(inp.value) }, '確定')));
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus(); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
@@ -275,8 +281,11 @@ Object.assign(UI, {
           return h('button', { class: cls, disabled: !!A, onclick: () => Learn.answer(oi) }, h('em', { class: 'num', text: String(k + 1) }), h('span', { text: txt }));
         })));
       }
-      if (A && A.lucky) parts.push(h('div', { class: 'lucky' }, ico(A.lucky.icon, 22), h('b', { text: '幸運！' }), h('span', { text: A.lucky.text })));
-      if (A) parts.push(h('div', { class: 'qfb ' + (A.ok ? 'ok' : 'no') }, h('div', {}, h('b', { text: A.ok ? '答對了！' : '再記一下：' }), h('span', { text: ` ${v.w} ${v.ph}  ${v.p} ${v.z}` })), h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? '看結果' : '下一題')));
+      // the answer line always has its room: the window keeps the same height before and after answering
+      const fbTxt = `${v.w} ${v.ph}  ${v.p} ${v.z}`;
+      parts.push(h('div', { class: 'qslot' }, A ? h('div', { class: 'qfb ' + (A.ok ? 'ok' : 'no') + (A.lucky ? ' luck' : '') },
+        h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? '答對了！' : '再記一下：' }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: '幸運！' }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', title: fbTxt, text: fbTxt })),
+        h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? '看結果' : '下一題')) : null));
       return parts;
     }
     const r = s.result, n = s.qs.length;

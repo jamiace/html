@@ -79,6 +79,7 @@ const Feel = {
   ding() {
     if (Game.S.settings.chime === false) return;
     try {
+      if (!nookTouched()) return;   // browsers only allow sound after the first tap: before that, stay silent (no console warnings)
       const A = this.ac || (this.ac = new (window.AudioContext || window.webkitAudioContext)()); if (A.state === 'suspended') A.resume();
       [1318.5, 1760, 2093].forEach((f, i) => { const o = A.createOscillator(), g = A.createGain(), t0 = A.currentTime + i * 0.07; o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.05, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0006, t0 + 0.5); o.connect(g); g.connect(A.destination); o.start(t0); o.stop(t0 + 0.55); });
     } catch (e) { }

@@ -383,6 +383,8 @@ const PetPlay = {
     // while a pet is eating, taking medicine or shaking off right under the pointer, the held item steps aside so the pet stays visible
     const busyHere = !this.brushing && this.pets().some(q => q.state === 'hand' && q.hp && !q.hp.chase && Math.hypot(q.x - pt[0], (q.y - 7 - pt[1]) * 1.3) < 16);
     if (busyHere) { el.hidden = true; if (Room.cv) Room.cv.style.cursor = ''; return; }
+    // the wand: its feather is drawn in the room at the pointer, so that is the only one shown
+    if (HAND[this.held] === 'wand') { el.hidden = true; if (Room.cv) Room.cv.style.cursor = 'none'; return; }
     el.hidden = false; const s = Game.scale; el.style.transform = `translate(${Math.round(pt[0] * s)}px, ${Math.round(pt[1] * s)}px) translate(-35%, -75%)`;
     if (Room.cv) Room.cv.style.cursor = 'none';
   },

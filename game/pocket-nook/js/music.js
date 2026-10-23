@@ -214,6 +214,8 @@ const Music = {
     } else if (this.ytReady) load();
   },
   onYTState(ev) {
+    // a YouTube player stopping after you switched to another song must not mark the music as stopped
+    if (!this.cur || this.cur.type !== 'yt') return;
     const s = ev.data; this.playing = s === 1 || s === 3;
     if (s === 1 && this.cur && this.cur.type === 'yt') { try { const d = this.yt.getVideoData(); if (d && d.title && !this.cur.list && this.cur.title !== d.title) { this.cur.title = d.title.slice(0, 120); Game.save(); } } catch (e) { } }
     if (s === 0) {

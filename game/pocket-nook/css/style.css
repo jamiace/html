@@ -933,3 +933,54 @@ body.m .mzoom img { filter: var(--x-filter); }
 body.tray-side.tray-3 .handtray { width: 152px; }
 body.tray-side.tray-3 .handtray-row { grid-template-columns: repeat(3, 44px); }
 body.tray-side.tray-3 .lnote.side { width: 152px; font-size: 13px; padding: 8px 10px 6px; }
+
+/* ---------- quiz: the answer line has a fixed slot, nothing grows or shrinks when you answer ---------- */
+.qslot { height: 62px; flex: none; }
+.qslot .qfb { height: 100%; box-sizing: border-box; padding: 6px 10px; }
+.qfb-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.qfb-l1 { display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; }
+.qfb-l2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.qfb .lucky { display: inline-flex; padding: 0 6px; gap: 4px; font-size: 13px; min-width: 0; overflow: hidden; }
+.qfb .lucky b { font-size: 13px; }
+.qfb .lucky span { overflow: hidden; text-overflow: ellipsis; }
+/* the quiz window keeps one height from question to question (longer options, a spelling box...) */
+.win[data-id="study"] .win-b:has(.qslot) { min-height: 380px; }
+body.m .win[data-id="study"] .win-b:has(.qslot) { min-height: 480px; }
+.win[data-id="study"] .win-b:has(.qslot) > * { flex: none; }
+/* previews never leave their box: anything still too big is scaled down to fit */
+.pvbox { overflow: hidden; }
+.pvbox canvas.pv, .need-want canvas.pv, .gift-pv canvas.pv, .mrow canvas.pv, .medit-pv canvas.pv { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+/* scrollbars stay out of the artwork: visible while scrolling, fading out 1 s after */
+.win-b, .scroll, .dock, body.m .stage, .sbx { scrollbar-width: thin; scrollbar-color: transparent transparent; transition: scrollbar-color .45s linear; }
+.sb-on.sb-on.sb-on { scrollbar-color: rgba(46, 34, 48, .42) transparent; transition: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sb-on.sb-on.sb-on { scrollbar-color: rgba(244, 232, 216, .42) transparent; } }
+:root[data-theme="dark"] .sb-on.sb-on.sb-on { scrollbar-color: rgba(244, 232, 216, .42) transparent; }
+/* a newer version is on the server: a bar at the very top (in the page flow, it never covers the room) */
+.updbar { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; padding: 6px 8px 6px 10px; background: var(--hl); color: var(--ink); box-shadow: 0 0 0 2px #e8b54a; font-size: 14px; }
+.updbar .grow { flex: 1; min-width: 0; }
+body.has-upd #app { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+body.m.has-upd #app { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+body.m .updbar { margin: 0 0 6px; font-size: 13px; }
+.verrow { margin-top: 4px; gap: 10px; }
+.verrow .num { flex: 1; }
+/* song lists: the title gets the room; the album is a short tag, "downloaded" is a tick */
+.mlist .mb.al { max-width: 7em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.m .mlist .mb.al { max-width: 4.5em; }
+.mlist .mb.ic { display: grid; place-items: center; padding: 1px 2px; border-color: #7fb069; }
+.mlist .mn { min-width: 3em; }
+.mal-ph.radio { background: #2e2230; }
+/* YouTube player shrunk to its title bar: still playing, the video is just folded away */
+.ytpanel .yt-pp, .ytpanel .yt-min { flex: none; }
+.ytpanel.min .yt-box, body.m .stage > .ytpanel.min .yt-box { height: 1px; min-height: 0; aspect-ratio: auto; overflow: hidden; }
+.ytpanel.min { border-bottom-width: 4px; }
+body.m .stage > .lyrics { position: static; transform: none; flex: none; max-width: none; margin: 0 2px; padding: 4px 10px 5px; box-shadow: none; }
+body.m .stage > .lyrics .ly-cur { font-size: 16px; }
+body.m .stage > .lyrics .ly-next { font-size: 12px; }
+/* the camera's flash */
+.room-wrap.flash::after { content: ''; position: absolute; inset: 0; background: #fff; pointer-events: none; animation: camflash .45s steps(4) forwards; z-index: 9; }
+@keyframes camflash { from { opacity: .9; } to { opacity: 0; } }
+/* phone: messages never cover the room — just above the bottom tabs; while a window is open, at the top */
+body.m #toasts { top: auto !important; bottom: calc(max(6px, env(safe-area-inset-bottom, 0px)) + 66px) !important; flex-direction: column-reverse; }
+body.m.m-win #toasts, body.m.editing #toasts { top: calc(env(safe-area-inset-top, 0px) + 8px) !important; bottom: auto !important; flex-direction: column; }
+/* phone: the close button on the left of a window's title bar (computer: on the right, as before) */
+body.m .win-h .xbtn[aria-label="關閉"] { order: -1; margin-right: 2px; }

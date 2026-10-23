@@ -64,6 +64,7 @@ const Mobile = {
   sync() {
     if (!this.nav) return;
     const open = Object.keys(UI.wins).find(k => !UI.wins[k].el.hidden);
+    document.body.classList.toggle('m-win', !!open);   // messages go above the bottom tabs, or at the top while a window covers that
     for (const id in this.tabs) {
       const on = id === 'room' ? !open && !Room.edit : id === 'more' ? !!open && !['learn', 'tasks', 'pet'].includes(open) : open === id;
       this.tabs[id].classList.toggle('on', on);
@@ -348,4 +349,34 @@ UI.w_more = function () {
   };
   window.addEventListener('resize', place); window.addEventListener('load', () => { place(); setTimeout(place, 600); });
   setInterval(place, 3000);
+})();
+
+// scrollbars: shown while scrolling, faded out 1 s after the scrolling stops (phone and computer)
+(function () {
+  const timers = new WeakMap();
+  document.addEventListener('scroll', e => {
+    const el = e.target; if (!el || !el.classList || el === document) return;
+    el.classList.add('sbx', 'sb-on'); clearTimeout(timers.get(el));
+    timers.set(el, setTimeout(() => el.classList.remove('sb-on'), 1000));
+  }, true);
+})();
+
+// phone: the back gesture / back button closes the open window instead of leaving the game
+// (while a window is open there is one extra history step; the game never goes back by itself, so it can never leave the page)
+(function () {
+  const ours = () => !!(history.state && history.state.nookWin);
+  const anyOpen = () => Object.keys(UI.wins).find(k => !UI.wins[k].el.hidden);
+  const ow = UI.openWin.bind(UI);
+  UI.openWin = function (id) {
+    const r = ow.apply(this, arguments);
+    if (document.body.classList.contains('m') && !ours()) { try { history.pushState({ nookWin: 1 }, ''); } catch (e) { } }
+    return r;
+  };
+  window.addEventListener('popstate', () => {
+    const id = anyOpen(); if (!id) return;
+    // a window that must be answered (no close button) stays: put the step back
+    if (UI.WIN[id] && UI.WIN[id].noclose) { try { history.pushState({ nookWin: 1 }, ''); } catch (e) { } return; }
+    for (const k in UI.wins) if (!UI.wins[k].el.hidden) UI.closeWin(k);
+    if (typeof Mobile !== 'undefined') Mobile.sync();
+  });
 })();

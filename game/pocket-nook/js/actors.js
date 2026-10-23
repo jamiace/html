@@ -200,7 +200,10 @@ class Pet extends Walker {
   get data() { return Pets.get(this.pid); }
   // every walk starts on the floor: a walk begun while still on furniture would end with the pet snapped back onto it
   walkTo(x, y, cb, allowHidden) {
-    if (this.on && !this.jump) { const st = this.state; this.leaveSpot(() => { if (this.state === 'sit' && st !== 'sit') this.state = st; super.walkTo(x, y, cb, allowHidden); }); return true; }
+    // in the middle of a jump (onto the bed, say): the walk waits for the landing, then leaves the spot properly
+    // (walking off straight away left the pet "on" the bed while it walked, and it snapped back when the walk ended)
+    if (this.jump) { this.afterJump = [x, y, cb, allowHidden]; return true; }
+    if (this.on) { const st = this.state; this.leaveSpot(() => { if (this.state === 'sit' && st !== 'sit') this.state = st; super.walkTo(x, y, cb, allowHidden); }); return true; }
     return super.walkTo(x, y, cb, allowHidden);
   }
   baseSpeed() { const d = this.data; return d && Pets.stage(d) === 0 ? 28 : 24; }
@@ -319,11 +322,14 @@ class Pet extends Walker {
     if (this.jump) {
       const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
       this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
-      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb(); }
+      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb();
+        const w = this.afterJump; this.afterJump = null; if (w && !this.jump) { this.state = 'walk'; this.walkTo(w[0], w[1], w[2], w[3]); } }
       return;
     }
     PetAI.tick(this, dt);
     if (this.on && !Room.uidMap[this.on.uid]) { this.on = null; const [x, y] = randFloor(); this.x = x; this.y = y; }
+    // walking means it has left whatever it was on (never pulled back to it afterwards)
+    if (this.on && this.walking) { this.on = null; this.onOff = null; }
     if (this.on && !this.walking && this.onOff) { this.x = this.on.x + this.onOff[0]; this.y = this.on.y + this.onOff[1]; }
     if (this.on && (this.state === 'sleep' || this.state === 'sit' || this.state === 'inbox')) PetPlay.noteSpot(this, dt);
     // being cared for or played with by hand, or sitting in a box

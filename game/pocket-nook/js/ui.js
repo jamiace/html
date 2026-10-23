@@ -22,8 +22,9 @@ function h(tag, attrs, ...kids) {
 }
 const ICON = {};
 function ico(name, size = 32, cls = 'ico') { if (!ICON[name]) ICON[name] = spriteDataURL(name, 4); return h('img', { class: cls, src: ICON[name], width: size, height: size, alt: '' }); }
-function sprPreview(cv, box = 64, maxScale = 4) {
-  const s = Math.max(1, Math.min(maxScale, Math.floor(box / Math.max(cv.width, cv.height * 0.9))));
+function sprPreview(cv, box = 64, maxScale = 4, boxH = box) {
+  // whole pixels only, and the whole sprite fits the box (tall plants and big furniture included)
+  const s = Math.max(1, Math.min(maxScale, Math.floor(box / cv.width), Math.floor(boxH / cv.height)));
   const c = document.createElement('canvas'); c.width = cv.width * s; c.height = cv.height * s; c.className = 'pv';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(cv, 0, 0, c.width, c.height); return c;
 }
@@ -431,7 +432,7 @@ const UI = {
     if (tab === 'supply') {
       for (const id in SUPPLIES) {
         const d = SUPPLIES[id], have = Life.L.bag[id] || 0;
-        cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr), 60, 5)), h('div', { class: 'cn', text: d.n }), h('p', { class: 'cdesc', text: d.desc }),
+        cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr), 60, 5, 80)), h('div', { class: 'cn', text: d.n }), h('p', { class: 'cdesc', text: d.desc }),
           h('div', { class: 'cfoot' }, h('span', { class: 'price' }, ico('i_coin', 18), h('b', { class: 'num', text: String(d.price) })), h('button', { class: 'chip sm', disabled: S.coins < d.price, onclick: () => Life.buySupply(id, 1) }, '購買')),
           have ? h('span', { class: 'badge', text: '×' + have }) : null));
       }
@@ -452,7 +453,7 @@ const UI = {
     else {
       const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return d.cat === tab && !d.giftOnly && !d.merchant && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
       const list = this.filterList('shop:' + tab, all, this.shopFocus);
-      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3), d.n, d, owned(e.id), () => Game.buy('item', e.id), null, 'item'); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
+      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3, 80), d.n, d, owned(e.id), () => Game.buy('item', e.id), null, 'item'); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
       this.shopFocus = null;
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), this.couponBar(), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
     }
@@ -492,7 +493,7 @@ const UI = {
     }
     if (tab === 'bag') {
       const ids = Object.keys(SUPPLIES).filter(k => (Life.L.bag[k] || 0) > 0);
-      for (const id of ids) { const d = SUPPLIES[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr), 60, 5)), h('div', { class: 'cn', text: d.n }), h('p', { class: 'cdesc', text: d.desc }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + Life.L.bag[id] }), h('button', { class: 'chip sm', onclick: () => Life.use(id) }, '使用')))); }
+      for (const id of ids) { const d = SUPPLIES[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr), 60, 5, 80)), h('div', { class: 'cn', text: d.n }), h('p', { class: 'cdesc', text: d.desc }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + Life.L.bag[id] }), h('button', { class: 'chip sm', onclick: () => Life.use(id) }, '使用')))); }
       if (!ids.length) cards.push(h('div', { class: 'empty' }, ico('i_bag', 48), h('p', { text: '道具用完了。到「學習」複習單字就能換，商店也有賣。' }), h('button', { class: 'chip', onclick: () => this.openWin('learn') }, ico('i_learn', 20), '去學習')));
       return [h('div', { class: 'row between' }, tabs), h('div', { class: 'scroll grid' }, ...cards)];
     }
@@ -502,7 +503,7 @@ const UI = {
       const idsAll = Object.keys(S.inv).filter(k => S.inv[k] > 0 && ITEMS[k]);
       const list = this.filterList('sto:items', idsAll.map(id => ({ id, d: ITEMS[id] })), null, true); const ids = list.page.map(e => e.id);
       if (idsAll.length) cards.push(list.bar);
-      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, '擺放')))); }
+      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3, 80)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, '擺放')))); }
       if (!idsAll.length) cards.push(h('div', { class: 'empty' }, ico('i_box', 48), h('p', { text: '收納箱是空的。到商店買新家具，或在佈置模式把東西收起來。' }), h('button', { class: 'chip', onclick: () => this.openWin('shop') }, ico('i_shop', 20), '去商店')));
       if (idsAll.length) cards.push(list.nav);
     } else {
@@ -622,8 +623,8 @@ const UI = {
     out.push(h('div', { class: 'scroll mtracks' }, h('ol', { class: 'mlist' }, ...Q.map((e, i) => h('li', { class: (i === curI ? 'cur ' : '') + (e.missing ? 'missing' : '') },
       h('button', { class: 'mplay', onclick: () => Music.playLib(i, al), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }),
         e.lrc ? h('em', { class: 'mb', title: '有歌詞', text: '詞' }) : null,
-        dl && dl.id === e.id ? h('em', { class: 'mb', text: dl.total ? Math.round(dl.got / dl.total * 100) + '%' : '下載中' }) : MusicCache.has(e.id) ? h('em', { class: 'mb ok', title: '已存在這台裝置', text: '已下載' }) : null,
-        al ? null : h('em', { class: 'mb', text: e.album.split(' / ').pop() })))))));
+        dl && dl.id === e.id ? h('em', { class: 'mb', text: dl.total ? Math.round(dl.got / dl.total * 100) + '%' : '下載中' }) : MusicCache.has(e.id) ? h('em', { class: 'mb ok ic', title: '已下載到這台裝置', 'aria-label': '已下載' }, ico('i_check', 14)) : null,
+        al ? null : h('em', { class: 'mb al', title: e.album, text: e.album.split(' / ').pop() })))))));
     const used = MusicCache.total, lim = MusicCache.limitMB;
     const sz = (v) => v < 1073741824 ? Math.round(v / 1048576) + ' MB' : (v / 1073741824).toFixed(2) + ' GB';
     out.push(h('details', { class: 'mcache', open: this.mCacheOpen ? '' : null, ontoggle: e => { this.mCacheOpen = e.target.open; } },

@@ -47,6 +47,7 @@ const PET_ACCS = {
   flower: { n: '小花', slot: 'head', price: 90, lv: 4, pat: ['.f.', 'fwf', '.f.'], dy: -1 },
   crown: { n: '小王冠', slot: 'head', price: 220, lv: 10, pat: ['x.x', 'wxw'], crown: true },
 };
+const DOG_TO_CAT = { 'dog:shiba': 'cat:ginger', 'dog:sesame': 'cat:cocoa', 'dog:cream': 'cat:snow', 'dog:coal': 'cat:ink' };
 const PET_NAMES = { cat: ['麻糬', '湯圓', '布丁', '小橘', '奶茶', '芝麻', '可樂', '雪球', '團子', '豆花', '仙草', '咪咪'], dog: ['阿柴', '栗子', '黑糖', '饅頭', '小虎', '豆豆', '餅乾', '旺財', '花生', '拿鐵'] };
 const STAGE_NAMES = { cat: ['幼貓', '少年貓', '成貓'], dog: ['幼犬', '少年犬', '成犬'] };
 
@@ -56,7 +57,7 @@ const _col = (x, y0, y1) => { const o = []; for (let y = y0; y <= y1; y++) o.pus
 const ACC_ANCHOR = {
   cat: {
     sit: { neck: _row(8, 5, 12), dir: [0, 1], bell: [9, 9], head: [13, 0], crown: [9, 0] },
-    walk: { neck: _col(12, 6, 10), dir: [-1, 0], bell: [12, 11], head: [18, 1], crown: [15, 3] },
+    walk: { neck: _col(12, 6, 10), dir: [-1, 0], bell: [12, 11], head: [18, 1], crown: [15, 2] },
     sleep: { neck: _col(12, 8, 12), dir: [-1, 0], bell: [11, 12], head: [17, 4], crown: [14, 5] },
     stretch: { neck: _col(13, 8, 12), dir: [-1, 0], bell: [13, 12], head: [18, 3], crown: [15, 5] },
   },
@@ -68,7 +69,7 @@ const ACC_ANCHOR = {
   },
 };
 function applyPetAcc(g, kind, pose, acc) {
-  const ap = ['look', 'groom', 'knead', 'beg', 'shake'].includes(pose) ? 'sit' : pose === 'lie' ? 'sleep' : pose;
+  const ap = ['look', 'groom', 'knead', 'beg', 'shake', 'yawn', 'stare'].includes(pose) ? 'sit' : pose === 'lie' ? 'sleep' : pose;
   const A = ACC_ANCHOR[kind] && ACC_ANCHOR[kind][ap]; if (!A || !acc) return g;
   g = g.clone();
   const inside = (x, y) => { const c = g.get(x, y); return c && c !== '.' && c !== '0'; };
@@ -108,7 +109,9 @@ const Pets = {
       const base = this.newState(); for (const k in base) if (!(k in S.zoo)) S.zoo[k] = base[k];
       const tpl = this.make({ pets: [], nid: 0 }, 'cat:ginger');
       for (const p of S.zoo.pets) {
-        for (const k in tpl) if (!(k in p)) p[k] = JSON.parse(JSON.stringify(tpl[k])); if (!PETS[p.sp]) p.sp = 'cat:ginger';
+        for (const k in tpl) if (!(k in p)) p[k] = JSON.parse(JSON.stringify(tpl[k]));
+        // cats only now: a dog becomes the cat of the nearest colour, keeping its name, level, bond and tricks
+        if (!PETS[p.sp]) { const to = DOG_TO_CAT[p.sp] || 'cat:ginger'; if (String(p.sp).startsWith('dog:')) (S.zoo.dogsGone = S.zoo.dogsGone || []).push(p.name); p.sp = to; }
         for (const o in TRICK_RENAME) if (p.tricks[o] != null) { const n = TRICK_RENAME[o], t = TRICKS.find(x => x.id === n); p.tricks[n] = Math.min(t.need, Math.max(p.tricks[n] || 0, p.tricks[o])); delete p.tricks[o]; }
       }
       if (!S.zoo.pets.length) S.zoo.pets.push(this.make(S.zoo, 'cat:ginger', '麻糬'));

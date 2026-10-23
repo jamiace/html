@@ -227,3 +227,8 @@ rampAdd('berry', ['#5a1f3b', '#8a3459', '#b85582', '#e08fb2']);
 rampAdd('choco', ['#3d261d', '#5e3b2f', '#7d5240', '#a3735a']);
 rampAdd('sky', ['#3c6fa6', '#5c95cf', '#8bbbe8', '#c3dcf5']);
 rampAdd('rose2', ['#7a2e3f', '#a8455a', '#d36f86', '#f2a7b7']);
+
+// has the player touched the page yet? (sound may only start after that)
+let NOOK_TOUCHED = false;
+function nookTouched() { try { if (navigator.userActivation && navigator.userActivation.hasBeenActive) return true; } catch (e) { } return NOOK_TOUCHED; }
+for (const ev of ['pointerdown', 'keydown', 'touchstart']) document.addEventListener(ev, () => { NOOK_TOUCHED = true; }, { capture: true, once: true, passive: true });
