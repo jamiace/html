@@ -2,7 +2,7 @@
    - everything on this site: network first (always the newest version when online), the cached copy only when offline
    - music, Firebase, Google, YouTube and anything on other sites: never cached here
    Change VERSION to throw the old cache away. */
-const VERSION = 'nook-v0.911-android-icons';
+const VERSION = 'nook-v0.911-mobile-controls';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(VERSION).then(c => c.addAll(['./', 'index.html', 'css/style.css', 'manifest.webmanifest?icons=root-v1']).catch(() => { }))); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

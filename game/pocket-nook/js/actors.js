@@ -345,6 +345,14 @@ class Pet extends Walker {
   }
   headPos() { return [this.x + (this.flip ? -4 : 4), this.y - 16]; }
   update(dt) {
+    // A sleeping pet stays on its current floor/perch until the night is over.
+    // Keep the actor and route intact; waking uses the normal yawn/descent/walk animations.
+    if (typeof Lights !== 'undefined' && Lights.mode === 'night' && this.state === 'sleep' && !this.walking && !this.jump && !this.perchPause) {
+      PetAI.tick(this, dt);
+      if (this.on && Room.uidMap[this.on.uid] && this.onOff) { this.x = this.on.x + this.onOff[0]; this.y = this.on.y + this.onOff[1]; }
+      if (Math.random() < dt * 0.4) Room.puff('p_z', this.x + (this.flip ? -8 : 6), this.y - 14, { vx: 3, vy: -4, max: 1.8, alpha: 0.7 });
+      return;
+    }
     if (this.happy > 0) this.happy -= dt;
     if (this.perchPause) {
       this.perchPause.t -= dt;

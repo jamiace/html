@@ -5,7 +5,7 @@
    Phone layout, top to bottom:
      HUD (one row) / the room, as wide as the screen / "today" panel (what you can do right
      now: timer, today's words, the merchant's story, needs, team, paper plane, the hand
-     tray) / a bottom bar with 5 tabs (room, learn, tasks, pets, more)
+     tray) / a bottom bar with 5 tools (learn, tasks, pets, music, more)
    Windows become sheets from the bottom (half height when the room should stay visible,
    full height for quizzes and shops), closed by swiping down.
    Touch: bigger targets, long press instead of hover, things you drag float just above the
@@ -47,31 +47,58 @@ const Mobile = {
     const stage = document.querySelector('.stage');
     this.today = h('section', { class: 'mtoday', 'aria-label': '今天' }); stage.insertBefore(this.today, stage.querySelector('.ytpanel'));
     this.nav = h('nav', { class: 'mnav', 'aria-label': '分頁' }); document.getElementById('app').append(this.nav);
-    const tabs = [['room', 'i_heart', '房間'], ['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['pet', 'i_paw', '寵物'], ['more', 'i_gear', '更多']];
+    const tabs = [['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['pet', 'i_paw', '寵物'], ['music', 'i_music', '音樂'], ['more', 'i_gear', '更多']];
     this.tabs = {};
     for (const [id, ic, label] of tabs) {
-      const b = h('button', { class: 'mtab', 'data-id': id, onclick: () => this.tab(id) }, ico(ic, 28), h('span', { text: label }));
+      const b = h('button', { class: 'mtab', type: 'button', 'data-id': id, 'aria-pressed': 'false', onclick: () => this.tab(id) }, ico(ic, 28), h('span', { text: label }));
       this.tabs[id] = b; this.nav.append(b);
     }
+    if (typeof ResizeObserver !== 'undefined') { this.navObserver = new ResizeObserver(() => this.measureNav()); this.navObserver.observe(this.nav); }
+    this.measureNav();
     // zoom button: in the bar under the room, never on top of the furniture
     this.zbtn = h('button', { class: 'chip mzoom', 'aria-label': '放大房間', title: '放大房間（也可以點兩下地板）', onclick: () => this.zoomed ? this.unzoom() : this.zoomAt(RW / 2, RH * 0.62) }, ico('i_zoomin', 22));
   },
+  measureNav() {
+    if (this.nav && this.on) {
+      const height = Math.ceil(this.nav.getBoundingClientRect().height);
+      if (height > 0) document.documentElement.style.setProperty('--mobile-nav-height', height + 'px');
+    }
+  },
   tab(id) {
+    // A save-migration decision with no close button must be completed before switching tools.
+    if (Object.values(UI.wins).some(w => !w.el.hidden && w.conf.noclose)) return;
     if (id === 'room') { for (const k in UI.wins) UI.closeWin(k); if (Room.edit) UI.setEdit(false); return this.sync(); }
-    if (id === 'pet') { UI.petTab = UI.petTab || 'care'; }
-    UI.toggleWin(id); this.sync();
+    if (!this.tabs[id]) return;
+    if (id === 'pet') UI.petTab = UI.petTab || 'care';
+    const current = UI.wins[id];
+    if (current && !current.el.hidden) UI.closeWin(id);
+    else {
+      for (const k in UI.wins) if (!UI.wins[k].el.hidden) UI.closeWin(k);
+      if (Room.edit) UI.setEdit(false);
+      UI.openWin(id);
+    }
+    this.sync();
   },
   sync() {
     if (!this.nav) return;
-    const open = Object.keys(UI.wins).find(k => !UI.wins[k].el.hidden);
-    document.body.classList.toggle('m-win', !!open);   // messages go above the bottom tabs, or at the top while a window covers that
+    const visible = Object.values(UI.wins).filter(w => !w.el.hidden).sort((a, b) => (+b.el.style.zIndex || 0) - (+a.el.style.zIndex || 0));
+    const open = visible.length ? visible[0].id : null;
+    const blocking = visible.some(w => w.conf.noclose);
+    const group = !open ? null : ['learn', 'study', 'words'].includes(open) ? 'learn' : this.tabs[open] ? open : 'more';
+    document.body.classList.toggle('m-win', !!open);
+    if (this.on) document.getElementById('scrim').hidden = !visible.some(w => w.conf.modal);
+    this.nav.setAttribute('aria-disabled', String(blocking));
     for (const id in this.tabs) {
-      const on = id === 'room' ? !open && !Room.edit : id === 'more' ? !!open && !['learn', 'tasks', 'pet'].includes(open) : open === id;
+      const on = group === id;
       this.tabs[id].classList.toggle('on', on);
-      // badges follow the desktop dock's
+      this.tabs[id].setAttribute('aria-pressed', String(on));
+      this.tabs[id].disabled = blocking;
+      this.tabs[id].title = on && open === id ? '再點一次收合，回到房間' : this.tabs[id].textContent.replace(/\d+/g, '').trim();
       const src = UI.dockBtns && UI.dockBtns[id] && UI.dockBtns[id].querySelector('.badge-dot'); let el = this.tabs[id].querySelector('.badge-dot');
       if (src) { if (!el) { el = src.cloneNode(true); this.tabs[id].append(el); } else el.textContent = src.textContent; el.className = src.className; } else if (el) el.remove();
     }
+    this.measureNav();
+    if (typeof YTMiniPlace !== 'undefined') YTMiniPlace.apply();
   },
   // ---------- "today" panel: what you can do right now, one tap each ----------
   rows() {
@@ -218,7 +245,7 @@ const Mobile = {
 /* ---------------- the "more" sheet ---------------- */
 UI.WIN.more = { t: '更多', i: 'i_gear', w: 420, at: ['c', 0] };
 UI.w_more = function () {
-  const items = [['timer', 'i_tomato', '番茄鐘'], ['todo', 'i_list', '待辦'], ['memo', 'i_note', '便條'], ['music', 'i_music', '音樂'], ['shop', 'i_shop', '商店'], ['storage', 'i_box', '收納'], ['edit', 'i_brush', '佈置'], ['avatar', 'i_shirt', '造型'],
+  const items = [['timer', 'i_tomato', '番茄鐘'], ['todo', 'i_list', '待辦'], ['memo', 'i_note', '便條'], ['shop', 'i_shop', '商店'], ['storage', 'i_box', '收納'], ['edit', 'i_brush', '佈置'], ['avatar', 'i_shirt', '造型'],
     ...(typeof SOCIAL_ON !== 'undefined' && SOCIAL_ON && window.NOOK_ENV === 'web' ? [['friends', 'i_people', '好友']] : []), ...(window.NOOK_ENV !== 'web' ? [['cowork', 'i_people', '一起專注']] : []),
     ['merchant', 'i_shop', '旅行商人'], ['account', 'i_cloud', '帳號'], ['settings', 'i_gear', '設定'], ...(typeof Dev !== 'undefined' && Dev.on ? [['dev', 'i_dev', '開發者']] : [])];
   return [h('div', { class: 'mmore' }, ...items.map(([id, ic, label]) => h('button', { class: 'dock-btn', onclick: () => { this.closeWin('more'); if (id === 'edit') this.setEdit(true); else if (id === 'merchant') Merchant.open(); else this.openWin(id); } }, ico(ic, 32), h('span', { text: label }))))];
@@ -323,7 +350,7 @@ UI.w_more = function () {
   });
   // keyboard on a phone: sheets sit above it
   const vv = window.visualViewport;
-  if (vv) { const kb = () => { const k = Math.max(0, window.innerHeight - vv.height - vv.offsetTop); document.documentElement.style.setProperty('--kb', (Mobile.on ? k : 0) + 'px'); document.body.classList.toggle('kb', Mobile.on && k > 80); }; vv.addEventListener('resize', kb); vv.addEventListener('scroll', kb); }
+  if (vv) { const kb = () => { const k = Math.max(0, window.innerHeight - vv.height - vv.offsetTop); document.documentElement.style.setProperty('--kb', (Mobile.on ? k : 0) + 'px'); document.body.classList.toggle('kb', Mobile.on && k > 80); if (typeof YTMiniPlace !== 'undefined') YTMiniPlace.apply(); }; vv.addEventListener('resize', kb); vv.addEventListener('scroll', kb); }
   document.addEventListener('focusout', () => { if (Mobile.on) setTimeout(() => { if (!Mobile.typing()) UI.layout(); }, 250); });
 })();
 

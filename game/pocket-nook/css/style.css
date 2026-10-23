@@ -222,6 +222,35 @@ body.mini #app { grid-template-rows: minmax(0, 1fr); }
 .mprog { display: flex; flex-direction: column; gap: 2px; }
 .mtimes { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); }
 .mctl { gap: 6px; }
+/* Music controls: fixed touch targets and square icons on phone layouts. */
+@media (max-width: 760px), (max-width: 900px) and (orientation: portrait), (pointer: coarse) and (max-width: 1024px) {
+  .win[data-id=music] .mctl {
+    display: grid;
+    grid-template-columns: 44px 44px 52px 44px 44px;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(4px, 2vw, 8px);
+    width: 100%;
+    min-width: 0;
+  }
+  .win[data-id=music] .mctl > .chip {
+    box-sizing: border-box;
+    flex: none;
+    width: 44px; min-width: 44px; max-width: 44px;
+    height: 44px; min-height: 44px;
+    padding: 0; gap: 0;
+  }
+  .win[data-id=music] .mctl > .chip.big {
+    width: 52px; min-width: 52px; max-width: 52px;
+    height: 52px; min-height: 52px;
+  }
+  .win[data-id=music] .mctl > .chip > img.ico {
+    flex: none; width: 22px; height: 22px; max-width: none; object-fit: contain;
+  }
+  .win[data-id=music] .mctl > .chip.big > img.ico { width: 24px; height: 24px; }
+  .win[data-id=music] .mctl > .mvol { display: none; }
+}
+
 input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; background: transparent; cursor: pointer; }
 input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--line); box-shadow: inset 0 0 0 2px #2e2230; }
 input[type=range]::-moz-range-track { height: 8px; background: var(--line); box-shadow: inset 0 0 0 2px #2e2230; }
@@ -810,21 +839,24 @@ body.m .mtray-slot .handtray { position: static; max-width: none; flex-wrap: wra
 body.m .mtray-slot .handtray-row { flex: 1; }
 body.m .handbtn { width: 40px; height: 40px; }
 body.m .hand-hint { top: 4px; bottom: auto; font-size: 13px; }
+/* Bottom tools stay reachable above ordinary sheets; their height includes the safe area. */
+body.m #app { padding-bottom: calc(var(--mobile-nav-height, 60px) + var(--kb, 0px) + var(--yt-mini-height, 0px)); }
 /* bottom tabs */
-body.m .mnav { display: flex; justify-content: space-around; gap: 4px; padding: 6px 0 max(6px, env(safe-area-inset-bottom, 0px)); background: var(--bg); box-shadow: 0 -3px 0 rgba(46, 34, 48, .12); }
+body.m .mnav { position: fixed; left: 0; right: 0; bottom: var(--kb, 0px); z-index: 55; display: flex; justify-content: space-around; gap: 4px; padding: 6px 0 max(6px, env(safe-area-inset-bottom, 0px)); background: var(--bg); box-shadow: 0 -3px 0 rgba(46, 34, 48, .12); }
 body.m .mtab { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; border: 0; background: none; color: var(--ink-2); font-size: 12px; padding: 2px 0; min-height: 48px; }
+body.m .mtab:disabled { opacity: .45; cursor: default; }
 body.m .mtab.on { color: var(--ink); font-weight: 700; }
 body.m .mtab.on img { filter: drop-shadow(0 2px 0 rgba(232, 181, 74, .9)); }
 body.m .mtab .badge-dot { position: absolute; top: 0; right: calc(50% - 22px); }
 body.m .mmore { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 body.m .mmore .dock-btn { width: auto; min-height: 64px; font-size: 13px; }
 /* sheets from the bottom */
-body.m .win { left: 0 !important; right: 0; top: auto !important; bottom: var(--kb, 0px); width: auto !important; max-width: none; border-width: 10px; border-image-width: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+body.m .win { left: 0 !important; right: 0; top: auto !important; bottom: calc(var(--kb, 0px) + var(--mobile-nav-height, 60px) + var(--yt-mini-height, 0px)); width: auto !important; max-width: none; max-height: calc(100dvh - var(--kb, 0px) - var(--mobile-nav-height, 60px) - var(--yt-mini-height, 0px) - 8px); border-width: 10px; border-image-width: 10px; padding-bottom: 0; }
 body.m .win .win-h { cursor: grab; position: relative; padding-top: 10px; }
 body.m .win .win-h::before { content: ""; position: absolute; left: 50%; top: 2px; width: 40px; height: 4px; margin-left: -20px; background: var(--line); }
 body.m .win-b { max-height: calc(72dvh - 56px - var(--kb, 0px)); }
 body.m .win.half .win-b { max-height: calc(52dvh - 56px - var(--kb, 0px)); }
-body.m .win.full .win-b { max-height: calc(100dvh - 76px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--kb, 0px)); }
+body.m .win.full .win-b { max-height: calc(100dvh - 76px - var(--mobile-nav-height, 60px) - var(--yt-mini-height, 0px) - env(safe-area-inset-top, 0px) - var(--kb, 0px)); }
 body.m .win-grip { display: none; }
 /* bigger text and touch targets */
 body.m .hint { font-size: 13px; }
@@ -994,3 +1026,9 @@ body.m .win-h .xbtn[aria-label="關閉"] { order: -1; margin-right: 2px; }
 .story-review .story-say { position: relative; inset: auto; max-width: none; margin: 8px; line-height: 1.6; }
 button.sdot { border: 0; padding: 0; font: inherit; cursor: pointer; }
 button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset: 2px; }
+
+/* The compact player floats without reparenting its live iframe. */
+.ytpanel.yt-compact, body.m .stage > .ytpanel.yt-compact { position: fixed; flex: none; box-sizing: border-box; max-width: none; z-index: 56; border-width: 8px; border-bottom-width: 4px; border-image-width: 8px; }
+.ytpanel.yt-compact .yt-h { cursor: grab; user-select: none; min-height: 36px; gap: 4px; }
+.ytpanel.yt-compact .yt-h:active { cursor: grabbing; }
+.ytpanel .yt-dock { flex: none; width: auto; min-width: 38px; padding: 0 3px; font-size: 12px; }

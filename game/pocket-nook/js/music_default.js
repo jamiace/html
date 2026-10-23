@@ -98,6 +98,7 @@ const MusicDefault = {
 const YTPlace = {
   apply() {
     const yp = document.getElementById('ytpanel'), wrap = document.querySelector('.room-wrap');
+    if (YTMiniPlace.apply()) return;
     if (!yp || yp.hidden || !wrap || document.body.classList.contains('m') || yp.dataset.moved) return;
     const r = wrap.getBoundingClientRect(), gl = r.left, gr = window.innerWidth - r.right, gap = Math.max(gl, gr) - 12;
     // YouTube needs at least 200 × 200 px for its player: a slim frame fits from 204 px of free space
@@ -112,7 +113,7 @@ const YTPlace = {
 };
 (function () {
   const show = UI.ytPanel.bind(UI);
-  UI.ytPanel = function (on) { const r = show.apply(this, arguments); if (on) requestAnimationFrame(() => YTPlace.apply()); return r; };
+  UI.ytPanel = function (on) { const r = show.apply(this, arguments); requestAnimationFrame(() => YTPlace.apply()); return r; };
   window.addEventListener('resize', () => YTPlace.apply());
   window.addEventListener('load', () => { const yh = document.querySelector('#ytpanel .yt-h'); if (yh) yh.addEventListener('pointerdown', e => { if (!e.target.closest('button') && !document.body.classList.contains('m')) document.getElementById('ytpanel').dataset.moved = '1'; }); });
 })();
@@ -152,6 +153,62 @@ const YTPlace = {
   };
 })();
 
+// Keep the live iframe in place: moving it in the DOM can reload playback.
+// Only CSS coordinates change when the compact bar is dragged or docked.
+const YTMiniPlace = {
+  key: 'pocketnook.ytposition', positions: null,
+  state() {
+    if (!this.positions) { try { this.positions = JSON.parse(localStorage.getItem(this.key)) || {}; } catch (e) { this.positions = {}; } }
+    const key = document.body.classList.contains('m') ? 'mobile' : 'desktop';
+    return this.positions[key] || (this.positions[key] = { mode: 'dock' });
+  },
+  save() { try { localStorage.setItem(this.key, JSON.stringify(this.positions)); } catch (e) { } },
+  reserve(px) { const root = document.documentElement, value = px + 'px'; if (root.style.getPropertyValue('--yt-mini-height') !== value) root.style.setProperty('--yt-mini-height', value); },
+  dock() { const s = this.state(); s.mode = 'dock'; this.save(); YTMini.set(true); this.apply(); },
+  bounds(yp) {
+    const m = document.body.classList.contains('m'), css = getComputedStyle(document.documentElement);
+    const kb = m ? parseFloat(css.getPropertyValue('--kb')) || 0 : 0;
+    const nav = m ? document.querySelector('.mnav') : document.querySelector('.dock');
+    const bottom = nav && nav.getClientRects().length ? Math.max(0, window.innerHeight - nav.getBoundingClientRect().top) : kb;
+    return { m, bottom: Math.max(kb, bottom), w: Math.min(372, window.innerWidth - 16), h: yp.offsetHeight };
+  },
+  apply() {
+    const yp = document.getElementById('ytpanel');
+    if (!yp || yp.hidden || !yp.classList.contains('min')) {
+      this.reserve(0);
+      if (yp && yp.classList.contains('yt-compact')) { yp.classList.remove('yt-compact'); for (const k of ['left', 'right', 'top', 'bottom', 'width']) yp.style[k] = ''; delete yp.dataset.moved; }
+      return false;
+    }
+    yp.classList.remove('yt-side'); yp.classList.add('yt-compact');
+    const s = this.state(); yp.style.width = Math.min(372, window.innerWidth - 16) + 'px';
+    const b = this.bounds(yp); yp.style.right = 'auto';
+    if (s.mode === 'float') {
+      this.reserve(0);
+      s.x = Math.max(8, Math.min(window.innerWidth - b.w - 8, Number.isFinite(s.x) ? s.x : 8));
+      s.y = Math.max(8, Math.min(window.innerHeight - b.bottom - b.h - 8, Number.isFinite(s.y) ? s.y : 8));
+      yp.style.left = s.x + 'px'; yp.style.top = s.y + 'px'; yp.style.bottom = 'auto';
+    } else {
+      yp.style.left = Math.max(8, (window.innerWidth - b.w) / 2) + 'px'; yp.style.top = 'auto';
+      yp.style.bottom = b.m ? 'calc(var(--kb, 0px) + var(--mobile-nav-height, 60px) + 8px)' : (b.bottom + 8) + 'px';
+      this.reserve(b.m ? b.h + 16 : 0);
+    }
+    return true;
+  },
+  build() {
+    const yp = document.getElementById('ytpanel'), hd = yp && yp.querySelector('.yt-h'); if (!hd) return;
+    hd.querySelector('.yt-title').title = '拖曳標題列可移動；點「置底」收回底部';
+    hd.addEventListener('pointerdown', e => {
+      if (!yp.classList.contains('min') || e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      const r = yp.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top, s = this.state();
+      s.mode = 'float'; s.x = r.left; s.y = r.top; this.apply(); hd.setPointerCapture(e.pointerId);
+      const move = ev => { if (ev.pointerId !== e.pointerId) return; s.x = ev.clientX - ox; s.y = ev.clientY - oy; this.apply(); };
+      const end = ev => { if (ev.pointerId !== e.pointerId) return; hd.removeEventListener('pointermove', move); for (const n of ['pointerup', 'pointercancel', 'lostpointercapture']) hd.removeEventListener(n, end); this.save(); };
+      hd.addEventListener('pointermove', move); for (const n of ['pointerup', 'pointercancel', 'lostpointercapture']) hd.addEventListener(n, end);
+    }, true);
+  },
+};
+
 // the YouTube player can shrink to its title bar and keep playing (a phone has no room for the video);
 // remembered on this device, a phone starts shrunk
 const YTMini = {
@@ -169,7 +226,8 @@ const YTMini = {
     const yp = document.getElementById('ytpanel'), hd = yp && yp.querySelector('.yt-h'), x = document.getElementById('yt-close'); if (!hd || this.btn) return;
     this.pp = h('button', { class: 'xbtn yt-pp', type: 'button', 'aria-label': '播放或暫停', onclick: () => { Music.toggle(); setTimeout(() => this.apply(), 300); } });
     this.btn = h('button', { class: 'xbtn yt-min', type: 'button', onclick: () => this.set(!this.get()) });
-    hd.insertBefore(this.pp, x); hd.insertBefore(this.btn, x); this.apply();
+    this.dockBtn = h('button', { class: 'xbtn yt-dock', type: 'button', 'aria-label': 'YouTube 置底', title: '縮小並放到畫面底部', text: '置底', onclick: () => YTMiniPlace.dock() });
+    hd.insertBefore(this.pp, x); hd.insertBefore(this.btn, x); hd.insertBefore(this.dockBtn, x); YTMiniPlace.build(); this.apply();
   },
 };
 (function () {

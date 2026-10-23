@@ -91,7 +91,7 @@ const UI = {
     const yp = document.getElementById('ytpanel');
     document.getElementById('yt-close').addEventListener('click', () => Music.closeYT());
     const yh = yp.querySelector('.yt-h');
-    yh.addEventListener('pointerdown', e => { if (this.narrow() || e.target.closest('button')) return; const r = yp.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top; yh.setPointerCapture(e.pointerId);
+    yh.addEventListener('pointerdown', e => { if (yp.classList.contains('min') || this.narrow() || e.target.closest('button')) return; const r = yp.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top; yh.setPointerCapture(e.pointerId);
       const mv = ev => { yp.style.left = Math.max(0, Math.min(window.innerWidth - r.width, ev.clientX - ox)) + 'px'; yp.style.top = Math.max(0, Math.min(window.innerHeight - 60, ev.clientY - oy)) + 'px'; yp.style.bottom = 'auto'; };
       const up = () => { yh.removeEventListener('pointermove', mv); yh.removeEventListener('pointerup', up); }; yh.addEventListener('pointermove', mv); yh.addEventListener('pointerup', up); });
     const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');

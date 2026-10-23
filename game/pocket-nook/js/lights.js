@@ -73,9 +73,13 @@ const Lights = {
       await this.cloudSettled();
       if (!this.ready()) { this.setDark(0, true); this.lamp = this.lampTarget = 1; return; }
       const focusing = Game.focusing();
-      if (!focusing && !this.first && this.canMove() && (tier === 'nap' || tier === 'morning')) this.leaveTraces(away, tier);
+      // A live room waking from goodnight/idle already has real pet positions.
+      // Offline stories may reposition pets only when returning to a room that was not asleep here.
+      if (!focusing && !this.first && !dimmed && !night && kind !== 'night' && kind !== 'idle' && away >= LIGHTS.napMs && this.canMove() && (tier === 'nap' || tier === 'morning')) this.leaveTraces(away, tier);
       if (!focusing && this.canMove() && tier === 'morning') this.ownerInBed();
       if (startDark) await this.wait(kind === 'resume' ? 250 : 420);
+      // Allow the wake reaction to start before an almost-expired nap can choose a new route.
+      if (dimmed || night || kind === 'night') for (const p of this.pets()) if (p.state === 'sleep') p.timer = Math.max(p.timer || 0, 4);
       this.restoreLamps(); this.mode = 'on'; this.musicBack();
       if (startDark) this.click(true); else { this.setDark(0); this.lamp = this.lampTarget = 1; }
       if (tier === 'morning' && this.morning()) this.openCurtains();
