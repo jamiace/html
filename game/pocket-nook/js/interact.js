@@ -191,7 +191,7 @@ const FURN_RULES = [
     for (const it of this.state.items) {
       const d = ITEMS[it.k]; if (!d || !d.music) continue;
       const cv = this.itemCanvas(it), k = 0.35 + Math.max(0, Math.sin(this.t * 11.7)) * 0.25;
-      L.push({ x: it.x + cv.width / 2, y: it.y + cv.height / 2, r: 18, col: Math.floor(this.t / 2.2) % 2 ? '#ee8fa0' : '#7ea6dc', k });
+      L.push({ x: it.x + cv.width / 2, y: it.y + cv.height / 2, r: 18, col: Math.floor(this.t / 2.2) % 2 ? 'pink' : 'cool', k });
     }
     return L;
   };

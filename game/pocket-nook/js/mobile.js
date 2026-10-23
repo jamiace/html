@@ -37,7 +37,7 @@ const Mobile = {
       if (yp && st) { if (m && yp.parentNode !== st) st.insertBefore(yp, this.today && this.today.parentNode === st ? this.today.nextSibling : null); else if (!m && yp.parentNode === st) document.body.insertBefore(yp, document.getElementById('toasts')); }
       this.render();
     }
-    window.NOOK_MOBILE_REDIRECT = m || this.standalone();
+    // Layout must not force cross-site redirect authentication. Cloud uses a user-triggered popup.
     return m;
   },
   standalone() { return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; },
@@ -201,7 +201,7 @@ const Mobile = {
   // ---------- notification when a focus ends while the page is in the background ----------
   notify(text) {
     if (!Game.S.settings.notify || !('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
-    const opt = { body: text, icon: 'assets/app/icon-192.png', tag: 'pocketnook-timer' };
+    const opt = { body: text, icon: 'apple-touch-icon.png', tag: 'pocketnook-timer' };
     if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(r => r.showNotification('小窩時光', opt)).catch(() => { });
     else try { new Notification('小窩時光', opt); } catch (e) { }
   },

@@ -6,6 +6,14 @@
 
 純 HTML、CSS、JavaScript，不需要任何建置工具，放上 GitHub Pages 就能玩。所有家具、角色、寵物和圖示都是像素圖，原始檔在 `assets/sprites/`，可以直接拿去改。
 
+## Android Firefox 與主畫面圖示（0.911）
+
+Google 登入改為按鈕觸發的彈出視窗；若瀏覽器封鎖，允許本網站的彈出視窗再登入。帳號初始化會先選擇可用的登入儲存方式，登入成功後讀取原帳號雲端進度。
+
+自備的 `favicon.ico`、`icon-32x32.png`、`apple-touch-icon.png` 請放在 `index.html` 同一層。主畫面使用的 `manifest.webmanifest` 已統一指向根目錄圖示。更新部署後，移除舊主畫面捷徑，再重新新增。
+
+本次仍為 **0.911**，完整修正與驗證範圍請見 `修正說明_0.911.md`。
+
 ## 功能
 
 ### 學習

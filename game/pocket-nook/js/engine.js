@@ -379,7 +379,9 @@ const Room = {
       for (const l of lights) { const g = L.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r); g.addColorStop(0, `rgba(0,0,0,${Math.min(1, 0.95 * l.k)})`); g.addColorStop(0.55, `rgba(0,0,0,${0.55 * l.k})`); g.addColorStop(1, 'rgba(0,0,0,0)'); L.fillStyle = g; L.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2); }
       c.save(); c.globalCompositeOperation = 'source-atop'; c.drawImage(this.light, 0, 0); c.restore();
     }
-    c.save(); c.globalCompositeOperation = 'lighter';
+    c.save();
+    try {
+      c.globalCompositeOperation = 'lighter';
     const COL = { warm: '255,190,110', cool: '120,170,255', pink: '255,110,170' };
     for (const l of lights) {
       const a = (0.1 + dark * 0.32) * l.k; const g = c.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r * 0.8);
@@ -394,7 +396,7 @@ const Room = {
         c.fillStyle = `rgba(255,236,190,${strength})`; c.beginPath(); c.moveTo(gx0 + 2, 100); c.lineTo(gx1 - 2, 100); c.lineTo(gx1 + sh + 4, 132); c.lineTo(gx0 + sh - 4, 132); c.closePath(); c.fill();
       }
     }
-    c.restore();
+    } finally { c.restore(); }
   },
   // ---------------- frame ----------------
   drawList() {
@@ -497,6 +499,7 @@ if (d.music && typeof Music !== 'undefined' && Music.playing) {
   },
   render(dt) {
     this.t += dt; const c = this.ctx;
+    c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
     c.clearRect(0, 0, RW, RH);
     c.drawImage(this.bg, 0, 0);
     this.syncChildren();

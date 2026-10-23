@@ -15,17 +15,21 @@ async function loadFirebase(cfg) {
   const [A, U, F] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(base + f)));
   const app = A.initializeApp(cfg), auth = U.getAuth(app), db = F.getFirestore(app);
   auth.languageCode = 'zh-TW';
+  let persistence = '', persistenceError = null;
+  for (const [name, storage] of [['local', U.indexedDBLocalPersistence], ['local', U.browserLocalPersistence], ['session', U.browserSessionPersistence]]) {
+    try { await U.setPersistence(auth, storage); persistence = name; break; }
+    catch (e) { persistenceError = e; }
+  }
+  if (!persistence) throw Object.assign(new Error('瀏覽器無法保存登入狀態'), { code: 'auth/web-storage-unsupported', cause: persistenceError });
   const ref = uid => F.doc(db, 'saves', uid);
   const google = () => { const p = new U.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return p; };
   return {
+    persistence,
     onAuth: cb => U.onAuthStateChanged(auth, cb),
     redirectResult: () => U.getRedirectResult(auth),
-    async google() {
-      // phones and home-screen apps: popups are often blocked there, go to Google and come back instead
-      if (window.NOOK_MOBILE_REDIRECT) return U.signInWithRedirect(auth, google());
-      try { return await U.signInWithPopup(auth, google()); }
-      catch (e) { if (e && ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes(e.code)) return U.signInWithRedirect(auth, google()); throw e; }
-    },
+    // Called directly inside the login button's click; do not await initialization here.
+    // Cross-site redirects lose their auth helper state with partitioned browser storage.
+    google: () => U.signInWithPopup(auth, google()),
     signIn: (email, pw) => U.signInWithEmailAndPassword(auth, email, pw),
     signUp: (email, pw) => U.createUserWithEmailAndPassword(auth, email, pw),
     reset: email => U.sendPasswordResetEmail(auth, email),
@@ -88,6 +92,10 @@ const CLOUD_ERR = {
   'auth/network-request-failed': '網路連線失敗，請檢查網路。',
   'auth/popup-closed-by-user': '登入視窗被關掉了，再試一次吧。',
   'auth/cancelled-popup-request': '',
+  'auth/popup-blocked': 'Firefox 或瀏覽器封鎖了 Google 登入視窗。請允許此網站開啟彈出視窗，再點一次「使用 Google 帳號登入」。',
+  'auth/web-storage-unsupported': '瀏覽器目前無法保存登入狀態。請使用一般分頁，並允許此網站儲存資料後再試。',
+  'auth/operation-not-supported-in-this-environment': '目前的開啟方式不支援 Google 登入視窗。請以一般 Firefox 分頁開啟同一個遊戲網址再登入。',
+  'auth/no-current-user': 'Google 登入未完成，尚未取得遊戲帳號。請重新點選「使用 Google 帳號登入」。',
   'auth/unauthorized-domain': '這個網址還沒加進 Firebase 的授權網域（Authentication → 設定 → 授權網域）。',
   'auth/operation-not-allowed': 'Firebase 還沒啟用這種登入方式（Authentication → 登入方式）。',
   'auth/invalid-api-key': 'firebase-config.js 裡的 apiKey 不正確。',
@@ -262,9 +270,12 @@ const Cloud = {
     if (!this.configured()) return this.set('unconfigured');
     this.set('loading');
     try { this.fb = await loadFirebase(window.NOOK_FIREBASE); }
-    catch (e) { console.warn('[cloud]', e); return this.set('error', '載入 Firebase 失敗，請檢查網路或 js/firebase-config.js。'); }
-    if (this.fb.redirectResult) this.fb.redirectResult().catch(e => { const m = cloudErr(e); if (m) this.set(this.status, m); });
-    this.fb.onAuth(u => this.onUser(u));
+    catch (e) { console.warn('[cloud]', e); return this.set('error', e && e.code ? cloudErr(e) : '載入 Firebase 失敗，請檢查網路或 js/firebase-config.js。'); }
+    this.fb.onAuth(u => { this.onUser(u).catch(e => { this.authBusy = false; this.set('error', cloudErr(e)); }); });
+    // Consume an old redirect result too, without making normal popup login wait for it.
+    if (this.fb.redirectResult) this.fb.redirectResult().then(result => {
+      if (result && result.user && (!this.user || this.user.uid !== result.user.uid)) return this.onUser(result.user);
+    }).catch(e => { const m = cloudErr(e); if (m) { this.form.msg = m; UI.refresh('account'); } });
     // coming back after a while counts as opening the game again: this device takes over; a short look away only checks
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { this.hiddenAt = Date.now(); return; }
@@ -299,6 +310,7 @@ const Cloud = {
 
   // ---------- Firebase ----------
   async onUser(u) {
+    if (u && this.user && this.user.uid === u.uid && !['signedout', 'error'].includes(this.status)) return;
     this.authBusy = false;
     if (!u) { this.stopWatch(); this.paused = false; this.user = null; this.choice = null; UI.closeWin('cloudpick'); if (typeof Lights !== 'undefined') Lights.unpause(); return this.set('signedout'); }
     const prov = ((u.providerData || [])[0] || {}).providerId || 'password';
@@ -604,10 +616,16 @@ const Cloud = {
     if ((kind === 'in' || kind === 'up') && pw.length < 6) { f.msg = '密碼至少要 6 個字元。'; return UI.refresh('account'); }
     this.authBusy = true; this.err = ''; this.explicitAuth = kind !== 'reset'; UI.refresh('account');
     try {
-      if (kind === 'google') await this.fb.google();
-      else if (kind === 'in') await this.fb.signIn(f.email, pw);
-      else if (kind === 'up') await this.fb.signUp(f.email, pw);
+      let result;
+      if (kind === 'google') result = await this.fb.google();
+      else if (kind === 'in') result = await this.fb.signIn(f.email, pw);
+      else if (kind === 'up') result = await this.fb.signUp(f.email, pw);
       else if (kind === 'reset') { await this.fb.reset(f.email); f.msg = '重設密碼的信已寄出，請到信箱收信。'; this.authBusy = false; }
+      if (kind !== 'reset') {
+        if (result && result.user && (!this.user || this.user.uid !== result.user.uid)) await this.onUser(result.user);
+        if (!this.user) throw { code: 'auth/no-current-user' };
+        this.authBusy = false;
+      }
     } catch (e) { this.authBusy = false; f.msg = cloudErr(e); }
     UI.refresh('account');
   },
@@ -668,6 +686,8 @@ UI.w_account = function () {
     return out;
   }
   if (c.status === 'loading' && !c.user) { out.push(status('連線中…', 'loading')); return out; }
+  if (c.status === 'error' && !c.fb) { out.push(status('暫時無法登入', 'error'), h('p', { class: 'cl-msg', text: c.err }), h('button', { class: 'chip primary', onclick: () => c.init() }, '重新連線')); return out; }
+  if (c.fb && c.fb.persistence === 'session') out.push(h('p', { class: 'hint', text: '這個瀏覽器目前只能在分頁開啟期間保持登入；關閉分頁後可能需要重新登入，雲端進度仍會保留。' }));
   if (!c.user) {
     out.push(h('p', { class: 'hint', text: '登入之後，進度（房間、金幣、單字、任務、寵物）會自動存到雲端，換手機或電腦登入同一個帳號就能接著玩。' }));
     out.push(h('button', { class: 'chip big primary cl-google', disabled: c.authBusy, onclick: () => c.auth('google') }, ico('i_key', 22), '使用 Google 帳號登入'));
