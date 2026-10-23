@@ -750,3 +750,17 @@ body.mini .handtray, body.editing .handtray { display: none; }
 .lucky b { font-size: 15px; }
 @keyframes luckyIn { 0% { opacity: 0; transform: scale(.6); } 60% { opacity: 1; transform: scale(1.08); } }
 .plane-tag { z-index: 5; pointer-events: auto; border: 0; font: inherit; font-size: 13px; cursor: pointer; }
+/* ---------- merchant stories ---------- */
+.qctx { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+.story-say { max-width: 52%; }
+.story-say p { margin: 4px 0 0; }
+.story-dots { display: flex; justify-content: center; gap: 8px; margin: 10px 0 4px; }
+.sdot { width: 26px; height: 26px; display: grid; place-items: center; font-size: 13px; background: var(--paper-2, #efe6d8); color: var(--ink-2); box-shadow: 0 0 0 2px #2e2230; opacity: .5; }
+.sdot.open { opacity: .85; }
+.sdot.cur { opacity: 1; background: #fde7b0; color: var(--ink); }
+.sdot.done { opacity: 1; background: #cfe8c4; color: #2f5a3d; }
+.story-names { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.story-act { gap: 8px; margin: 6px 0; }
+.story-bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin: 8px 0 2px; background: var(--paper-2, #efe6d8); box-shadow: inset 0 0 0 2px rgba(46, 34, 48, .12); font-size: 14px; }
+.story-bar.new { background: #fff3c4; box-shadow: inset 0 0 0 2px #e8b54a; }
+@media (max-width: 520px) { .story-say { max-width: none; } }
