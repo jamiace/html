@@ -144,22 +144,35 @@ const Merchant = {
     Game.reward(c, 0, 'raw'); UI.toast(`把「${d.n}」賣給${M.n}，得到 ${c} 金幣`, 'i_coin', 3);
     UI.hud(true); UI.refresh('merchant'); UI.refresh('storage'); Game.save(); saveSoon();
   },
-  // ---------- the merchant sets up outside your door; a little sign in the room tells you he is here ----------
-  actor: null,
+  // ---------- the merchant sets up outside your door ----------
+  // the way to the stall is a button outside the room (the dock on a computer, the bar under the room on a phone),
+  // so nothing stands in front of your furniture
+  actor: null, shown: '',
   spawn() { try { this._spawn(); } catch (e) { console.warn('[merchant]', e); } },
   _spawn() {
-    if (!Game.S || !Room.actors) return;
-    const mk = this.id();
-    if (this.actor && this.actor.mk === mk && Room.actors.includes(this.actor)) return;
-    if (this.actor) Room.actors = Room.actors.filter(a => a !== this.actor);
-    this.actor = new MerchantSign(mk); Room.actors.push(this.actor);
-    if (!this.S.met) { this.S.met = true; Game.save(); setTimeout(() => UI.toast(`這週的旅行商人「${MERCHANTS[mk].n}」在你家門外擺攤了！點房間角落的告示牌就能去逛逛`, 'i_shop', 5.5, { label: '去看看', fn: () => Merchant.open() }), 2500); }
+    if (!Game.S) return;
+    const mk = this.id(); if (this.shown === mk) return; this.shown = mk;
+    if (Room.actors) Room.actors = Room.actors.filter(a => !(a instanceof MerchantSign));
+    if (!this.S.met) { this.S.met = true; Game.save(); setTimeout(() => UI.toast(`這週的旅行商人「${MERCHANTS[mk].n}」在你家門外擺攤了！點「旅行商人」就能去逛逛`, 'i_merchant', 5.5, { label: '去看看', fn: () => Merchant.go() }), 2500); }
+    UI.badges();
   },
-  check() { if (!this.actor || this.actor.mk !== this.id() || !Room.actors.includes(this.actor)) this.spawn(); },
-  open() { if (!this.S.seen) { this.S.seen = true; Game.save(); } UI.openWin('merchant'); },
+  check() { if (this.shown !== this.id()) this.spawn(); },
+  // what the button does: a waiting story chapter first, otherwise the stall
+  go() { if (this.S.seen && typeof Story !== 'undefined' && Story.pending()) return Story.open(); this.open(); },
+  waiting() { return !this.S.seen || (typeof Story !== 'undefined' && Story.pending()); },
+  open() { if (!this.S.seen) { this.S.seen = true; Game.save(); UI.badges(); } UI.openWin('merchant'); },
 };
 
-// the sign: a little A-frame board in the merchant's colours, standing in the front-left corner
+// a little market stall: the icon of the "travelling merchant" button
+SPR.def('i_merchant', icon(g => {
+  const R = palAdd('#e8607a'), C = palAdd('#fff3df'), W = palAdd('#9a6a44'), Wd = palAdd('#6e4a30'), Y = palAdd('#f6c75a');
+  for (let x = 1; x < 15; x++) { const c = Math.floor((x - 1) / 2) % 2 ? C : R; g.px(x, 2, c); g.px(x, 3, c); g.px(x, 4, c); }
+  for (let x = 1; x < 15; x += 2) g.px(x, 5, Math.floor((x - 1) / 2) % 2 ? C : R);
+  g.vl(2, 6, 8, W); g.vl(13, 6, 8, W);
+  g.rect(1, 10, 14, 3, W); g.hl(1, 10, 14, Y); g.hl(1, 12, 14, Wd);
+  g.rect(5, 7, 2, 3, Y); g.rect(8, 8, 3, 2, R); g.px(9, 7, R);
+}));
+// the sign: a little A-frame board in the merchant's colours (no longer stands in the room; kept for older references)
 SPR.def('m_sign', G(16, 21, g => {
   g.pts([[3, 17], [3, 18], [2, 19], [2, 20], [12, 17], [12, 18], [13, 19], [13, 20]], 'a');
   g.rect(2, 4, 12, 13, 'c'); g.hl(2, 4, 12, 'd'); g.hl(2, 16, 12, 'b'); g.vl(2, 5, 11, 'd'); g.vl(13, 5, 11, 'b');
@@ -265,7 +278,7 @@ Object.assign(UI, {
     const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     const head = h('div', { class: 'mstage' }, merchantScene(mk),
       h('div', { class: 'msay' }, h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: M.tag })), h('p', { text: `「${M.hi}」` })));
-    const when = h('p', { class: 'hint', text: `在你家門外擺攤：${fmt(ws)} 到 ${fmt(we)}，之後換下一位商人。房間角落的告示牌隨時都能打開這裡。` });
+    const when = h('p', { class: 'hint', text: `在你家門外擺攤：${fmt(ws)} 到 ${fmt(we)}，之後換下一位商人。「旅行商人」按鈕隨時都能打開這裡。` });
     const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (this.merchTab === 'sell' ? ' on' : ''), onclick: () => { this.merchTab = 'sell'; this.refresh('merchant'); } }, '他在賣'), h('button', { class: 'tab' + (this.merchTab === 'buy' ? ' on' : ''), onclick: () => { this.merchTab = 'buy'; this.refresh('merchant'); } }, '他想收購'));
     const wallet = h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }));
     const body = [];

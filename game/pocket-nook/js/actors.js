@@ -133,6 +133,8 @@ class Avatar extends Walker {
     if (this.happy > 0) this.happy -= dt;
     this.blink -= dt; if (this.blink < -0.13) this.blink = 2.5 + Math.random() * 3;
     if (this.state === 'show') { if (!TrickShow.busy()) { this.state = 'idle'; this.show = null; this.timer = 1; } return; }
+    // a short pose played by the lights (turning to you, a standing stretch): stays put until it is over
+    if (this.lp) { if (Room.t < this.lp.end && !this.walking && this.state === 'idle') return; this.lp = null; this.timer = Math.max(this.timer, 1.5); }
     // end-of-focus stretch at the desk: stays seated until it is over
     if (this.stretchT > 0) { this.stretchT -= dt; if (this.stretchT <= 0) { const f = this.afterStretch; this.afterStretch = null; if (f) f(); } return; }
     if (!this.walking) {
@@ -143,7 +145,7 @@ class Avatar extends Walker {
       if (this.state === 'sleep' && Math.random() < dt * 0.6) { const [hx, hy] = this.headPos(); Room.puff('p_z', hx + 4, hy - 4, { vx: 3, vy: -5, max: 2, alpha: 0.8 }); }
     }
   }
-  eyeState() { if (this.state === 'sleep') return 'closed'; if (this.happy > 0) return 'happy'; return this.blink < 0 ? 'closed' : null; }
+  eyeState() { if (this.state === 'sleep') return 'closed'; if (this.lp && this.lp.eyes && Room.t < this.lp.end) return this.lp.eyes; if (this.happy > 0) return 'happy'; return this.blink < 0 ? 'closed' : null; }
   draw(c) {
     const cfg = this.cfg, t = Room.t;
     if (this.state === 'sleep' && this.bed && Room.uidMap[this.bed.uid]) {
@@ -180,6 +182,7 @@ class Avatar extends Walker {
       if (sh && sh.pose !== 'cheer') sh.cheerAt = null;
       if (sh && sh.pose === 'hand') { const S = TrickShow.cur, shake = S && S.phase === 'act' && S.t > .9 && S.t < 2; frame = shake && Math.floor(t * 10) % 2 ? 'hand1' : 'hand0'; flip = this.flip; bob = 0; }
       if (sh && sh.pose === 'cheer') { if (sh.cheerAt == null) sh.cheerAt = t; this.face = 'front'; flip = false; bob = 0; frame = t - sh.cheerAt < .22 ? 'front0' : Math.floor(t * 5) % 2 ? 'cheer1' : 'cheer0'; }
+      if (this.lp && this.state === 'idle' && t < this.lp.end) { this.face = 'front'; flip = false; bob = 0; frame = this.lp.frame(t - this.lp.at); }
     }
     const cv = avatarCanvas(frame, cfg, this.eyeState(), bob, flip), top = y - canvasBottom(cv) - this.hopOff();
     c.drawImage(cv, x - (cv.width > 20 ? 12 : 10), top);

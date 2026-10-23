@@ -163,6 +163,8 @@ const UI = {
       if (id === 'friends' && (!SOCIAL_ON || window.NOOK_ENV !== 'web')) continue;
       const b = h('button', { class: 'dock-btn', 'data-id': id, onclick: () => id === 'edit' ? this.setEdit(!Room.edit) : this.toggleWin(id) }, ico(ic, 32), h('span', { text: label }));
       this.dockBtns[id] = b; dock.append(b);
+      // the travelling merchant sits next to the shop (outside the room, so nothing covers the furniture)
+      if (id === 'shop') { const m = h('button', { class: 'dock-btn', 'data-id': 'merchant', onclick: () => this.wins.merchant && !this.wins.merchant.el.hidden ? this.closeWin('merchant') : Merchant.go() }, ico('i_merchant', 32), h('span', { text: '旅行商人' })); this.dockBtns.merchant = m; dock.append(m); }
     }
   },
   syncDock() { for (const id in this.dockBtns) { const on = id === 'edit' ? Room.edit : (this.wins[id] && !this.wins[id].el.hidden); this.dockBtns[id].classList.toggle('on', !!on); this.dockBtns[id].setAttribute('aria-pressed', on ? 'true' : 'false'); } },

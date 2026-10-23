@@ -31,6 +31,7 @@ async function loadFirebase(cfg) {
     reset: email => U.sendPasswordResetEmail(auth, email),
     signOut: () => U.signOut(auth),
     async get(uid) { const s = await F.getDoc(ref(uid)); return s.exists() ? s.data() : null; },
+    watchSave: (uid, cb) => F.onSnapshot(ref(uid), s => cb(s.exists() ? s.data() : null), () => { }),
     set: (uid, data) => F.setDoc(ref(uid), Object.assign({}, data, { updated: F.serverTimestamp() })),
     backup: (uid, data) => F.addDoc(F.collection(db, 'saves', uid, 'backups'), Object.assign({}, data, { updated: F.serverTimestamp() })),
     probe: {
@@ -46,6 +47,8 @@ async function loadFirebase(cfg) {
       const rows = (r) => r.docs.map(d => Object.assign({ id: d.id }, norm(d.data())));
       return {
         async get(path) { const s = await F.getDoc(F.doc(db, path)); return s.exists() ? norm(s.data()) : null; },
+        // live updates of one small document (one read when it changes); returns a function that stops watching
+        watch: (path, cb) => F.onSnapshot(F.doc(db, path), s => cb(s.exists() ? norm(s.data()) : null), () => { }),
         set: (path, data) => F.setDoc(F.doc(db, path), stamp(data)),
         update: (path, data) => F.updateDoc(F.doc(db, path), stamp(data)),
         del: (path) => F.deleteDoc(F.doc(db, path)),
@@ -109,6 +112,8 @@ function agoText(ts) {
 const CLOUD_ROUTINE_MS = 90000, CLOUD_SOON_MS = 10000, CLOUD_PULL_MS = 120000;
 // one device per account: the session is checked before cloud writes (at most every 5 min) and when the game comes back to the front (at most every 60 s)
 const SESSION_CHECK_MS = 5 * 60e3, SESSION_FOCUS_MS = 60e3;
+// coming back after this long counts as opening the game again (this device takes over); how long a new device waits for the old one's upload
+const TAKEOVER_AWAY_MS = 10 * 60e3, HANDOFF_MS = 2500;
 const SAVE_POLICY = () => Object.assign({ devSaves: 'flag' }, window.NOOK_SAVE_POLICY || {});
 const IMPORT_MARK = 'pocketnook.imported';
 function saveHash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ':' + str.length; }
@@ -129,8 +134,9 @@ function isFreshSave(S) { return (S.lvl || 1) <= 1 && (S.xp || 0) < 30 && !Objec
 function totalXp(S) { let t = S.xp || 0; for (let l = 1; l < (S.lvl || 1); l++) t += Game.need(l); return t; }
 function progressBase(S) { return { coins: S.coins || 0, xp: totalXp(S), stats: Object.assign({}, S.stats), life: Object.assign({}, (S.life || {}).stats) }; }
 // a = cloud, b = this device; base = what both started from (known only for a simultaneous save, not for a first-time import)
-function mergeSaves(a, b, common) {
-  const base = (b.savedAt || 0) > (a.savedAt || 0) ? b : a, o = base === a ? b : a, M = JSON.parse(JSON.stringify(base));
+// cloudBase: the cloud holds the newer progress (decided by the progress stamp), so its room, tasks and needs are kept
+function mergeSaves(a, b, common, cloudBase) {
+  const base = cloudBase ? a : (b.savedAt || 0) > (a.savedAt || 0) ? b : a, o = base === a ? b : a, M = JSON.parse(JSON.stringify(base));
   const max = (x, y) => Math.max(x || 0, y || 0);
   if (common) {
     // both devices started from the same save: keep what each one earned or spent
@@ -221,6 +227,21 @@ function saveSignature(S) {
   if (c.zoo) for (const p of c.zoo.pets || []) for (const k of ['hunger', 'mood', 'clean', 'energy', 'low']) delete p[k];
   return saveHash(JSON.stringify(c));
 }
+// ---------- progress stamp (kept inside the save) ----------
+// pv.rev: the cloud version this progress grew from. The cloud version number only ever goes up (the rules accept rev + 1 only),
+// so comparing it tells which copy is newer; the clock (savedAt) is never used for that, a device opened later can hold older progress.
+// pv.fp: fingerprint of the real progress at that moment; when it still matches, this device has done nothing since.
+// pv.base: the totals at that moment, so a merge can add up what each device earned.
+function progressKey(S) {
+  const v = Object.values(S.vocab || {}), pets = (S.zoo && S.zoo.pets) || [];
+  // only things that change because you did something (no counters that move on their own, nothing reset by the 6 a.m. rollover)
+  return saveHash(JSON.stringify([totalXp(S), S.coins || 0, v.length, v.reduce((n, r) => n + (r ? (r[0] || 0) * 1000 + (r[1] || 0) : 0), 0),
+    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0]), S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
+    (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => m.text), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
+}
+function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
+// real progress made on this device since its stamp (no stamp: an older version's save, treated as unknown)
+function workSince(S) { return !S.pv || S.pv.fp !== progressKey(S); }
 function syncMeta(uid, v) { const k = 'pocketnook.sync.' + uid; try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 function importMarks() { try { return JSON.parse(localStorage.getItem(IMPORT_MARK) || '{}'); } catch (e) { return {}; } }
 function setImportMark(uid, rec) { try { const m = importMarks(); m[uid] = rec; localStorage.setItem(IMPORT_MARK, JSON.stringify(m)); } catch (e) { } }
@@ -233,7 +254,7 @@ const Cloud = {
   configured() { const c = window.NOOK_FIREBASE; return !!(c && c.apiKey && c.projectId); },
   set(st, err) { this.status = st; if (err !== undefined) this.err = err; UI.cloudChip(); UI.refresh('account'); UI.refresh('cloudpick'); if (st === 'synced' && typeof Social !== 'undefined') Social.onSynced(); },
   uid() { return this.mode === 'claude' ? (this.user && this.user.uid) : (this.user && this.user.uid); },
-  active() { return !!this.uid() && (this.mode === 'firebase' ? !!this.fb : !!this.ref) && !['choose', 'loading'].includes(this.status) && Game.S.owner === this.uid(); },
+  active() { return !!this.uid() && !this.paused && (this.mode === 'firebase' ? !!this.fb : !!this.ref) && !['choose', 'loading', 'paused'].includes(this.status) && Game.S.owner === this.uid(); },
 
   async init() {
     if (window.NOOK_ENV === 'artifact') return this.initClaude();
@@ -244,7 +265,15 @@ const Cloud = {
     catch (e) { console.warn('[cloud]', e); return this.set('error', '載入 Firebase 失敗，請檢查網路或 js/firebase-config.js。'); }
     if (this.fb.redirectResult) this.fb.redirectResult().catch(e => { const m = cloudErr(e); if (m) this.set(this.status, m); });
     this.fb.onAuth(u => this.onUser(u));
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.checkSession(SESSION_FOCUS_MS).then(ok => { if (ok) this.pull(); }); });
+    // coming back after a while counts as opening the game again: this device takes over; a short look away only checks
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { this.hiddenAt = Date.now(); return; }
+      const away = this.hiddenAt ? Date.now() - this.hiddenAt : 0; this.hiddenAt = 0;
+      if (!this.user || this.mode !== 'firebase') return;
+      if (away >= TAKEOVER_AWAY_MS) return this.resume(true);
+      if (this.paused) return;
+      this.checkSession(SESSION_FOCUS_MS).then(ok => { if (ok) this.pull(); });
+    });
     this.watchNet();
   },
 
@@ -271,51 +300,111 @@ const Cloud = {
   // ---------- Firebase ----------
   async onUser(u) {
     this.authBusy = false;
-    if (!u) { this.user = null; this.choice = null; UI.closeWin('cloudpick'); return this.set('signedout'); }
+    if (!u) { this.stopWatch(); this.paused = false; this.user = null; this.choice = null; UI.closeWin('cloudpick'); if (typeof Lights !== 'undefined') Lights.unpause(); return this.set('signedout'); }
     const prov = ((u.providerData || [])[0] || {}).providerId || 'password';
     this.user = { uid: u.uid, email: u.email || '', name: u.displayName || '', provider: prov };
-    this.set('loading', '');
+    this.set('loading', ''); this.explicitAuth = false;
+    // the device opened last takes over: the other one is paused and first uploads what it has not saved yet
+    await this.claimSession(true);
     let remote;
     try { remote = await this.fb.get(u.uid); } catch (e) { return this.set('error', cloudErr(e)); }
     this.rev = remote ? (remote.rev || 0) : 0;
     if (remote && (remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
-    // a fresh sign-in on this device takes over the account; a device that only restored an old session checks it is still the active one
-    const fresh = this.explicitAuth || !this.mySid(u.uid); this.explicitAuth = false;
-    if (fresh) await this.claimSession(); else if (!(await this.checkSession(0))) return;
     await this.reconcile(this.parse(remote));
+    this.watchSession();
   },
-  // ---------- one device per account: the newest sign-in wins, other devices are signed out ----------
+  // ---------- one device per account: the device opened last takes over, the others are paused ----------
   sessKey(uid) { return 'pocketnook.sess.' + uid; },
   mySid(uid) { try { return localStorage.getItem(this.sessKey(uid)) || ''; } catch (e) { return this.sid || ''; } },
-  async claimSession() {
+  // handoff: when another device held the session, wait (up to HANDOFF_MS) for it to upload its unsaved progress
+  async claimSession(handoff) {
     if (!this.fb || !this.fb.store || !this.user) return;
+    const uid = this.user.uid; let prev = null;
+    if (handoff) { try { prev = await this.fb.store.get('sess/' + uid); } catch (e) { } }
+    let before = null; if (prev && prev.device !== DEVICE_ID) { try { const d = await this.fb.get(uid); before = d ? (d.rev || 0) : 0; } catch (e) { } }
     const sid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
-    try { await this.fb.store.set('sess/' + this.user.uid, { sid, device: DEVICE_ID, at: '__now__' }); this.sid = sid; this.sessAt = Date.now(); try { localStorage.setItem(this.sessKey(this.user.uid), sid); } catch (e) { } }
-    catch (e) { this.sid = ''; }   // rules not deployed yet: no single-device check
+    try { await this.fb.store.set('sess/' + uid, { sid, device: DEVICE_ID, at: '__now__' }); this.sid = sid; this.sessAt = Date.now(); try { localStorage.setItem(this.sessKey(uid), sid); } catch (e) { } }
+    catch (e) { this.sid = ''; return; }   // rules not deployed yet: no single-device check
+    if (before !== null) await this.awaitUpload(uid, before);
   },
-  // false when another device has signed in since (this device is then signed out)
+  awaitUpload(uid, before) {
+    return new Promise(res => {
+      let done = false, stop = null, poll = null;
+      const end = () => { if (done) return; done = true; clearTimeout(tm); clearInterval(poll); try { stop && stop(); } catch (e) { } res(); };
+      const seen = d => { if (d && (d.rev || 0) > before) setTimeout(end, 150); };
+      const tm = setTimeout(end, HANDOFF_MS);
+      if (this.fb.watchSave) stop = this.fb.watchSave(uid, seen);
+      else poll = setInterval(() => this.fb.get(uid).then(seen).catch(() => { }), 700);
+    });
+  },
+  // live: another device taking over is noticed within a second (one small read per takeover)
+  watchSession() {
+    if (this.unwatch || this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.fb.store.watch || !this.user || !this.sid) return;
+    const uid = this.user.uid;
+    this.unwatch = this.fb.store.watch('sess/' + uid, doc => { if (doc && doc.sid && this.sid && doc.sid !== this.sid && this.user && this.user.uid === uid) this.pauseForOther(); });
+  },
+  stopWatch() { if (this.unwatch) { try { this.unwatch(); } catch (e) { } this.unwatch = null; } },
+  // false when another device has taken over since (this device is then paused)
   async checkSession(gap = SESSION_CHECK_MS) {
-    if (this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.user || this.kicking) return true;
+    if (this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.user || this.paused) return !this.paused;
     const uid = this.user.uid, mine = this.sid || this.mySid(uid); if (!mine) return true;
     if (Date.now() - (this.sessAt || 0) < gap) return true;
     this.sessAt = Date.now();
     let doc = null; try { doc = await this.fb.store.get('sess/' + uid); } catch (e) { return true; }
     if (!doc) { await this.claimSession(); return true; }
     if (doc.sid === mine) { this.sid = mine; return true; }
-    await this.kicked(); return false;
+    await this.pauseForOther(); return false;
   },
-  async kicked() {
-    this.kicking = true;
-    try { await Backups.put(Game.S, '同一個帳號在另一台裝置登入，這台裝置被登出前的進度', 'device'); } catch (e) { }
-    clearTimeout(this.timer); this.timer = null; this.dirty = false; this.pending = false;
-    const uid = this.user && this.user.uid; this.user = null; this.choice = null; this.sid = '';
-    try { if (uid) localStorage.removeItem(this.sessKey(uid)); } catch (e) { }
-    try { await this.fb.signOut(); } catch (e) { }
-    Game.replaceState(Game.newState());
-    this.set('signedout', '這個帳號已經在另一台裝置登入，這台裝置自動登出了。重新登入就會換回這台。');
-    UI.closeWin('cloudpick');
-    UI.toast('你的帳號在另一台裝置登入，這台裝置已登出（登出前的進度有備份在「帳號」視窗）', 'i_cloud', 6);
-    this.kicking = false;
+  // another device opened the game: hand over what this one has not uploaded, then turn the lights off here
+  async pauseForOther() {
+    if (this.paused) return; this.paused = true;
+    clearTimeout(this.timer); this.timer = null; this.pending = false;
+    const S = Game.S;
+    if (this.uid() && S.owner === this.uid() && !Game.outdated && (this.dirty || workSince(S) || (this.lastHash && saveHash(JSON.stringify(S)) !== this.lastHash))) {
+      try { Game.save(); await this.writeRemote(S); this.dirty = false; }
+      catch (e) {
+        try { await Backups.put(S, '另一台裝置接手時，這台還沒上傳的進度', 'device'); } catch (e2) { }
+        // the cloud moved on while this device was offline: combine both instead of dropping this device's progress
+        if (e && e.code === 'conflict') { try { await this.onConflict(e); } catch (e3) { } }
+      }
+    }
+    this.sid = ''; this.set('paused', '');
+    if (typeof Lights !== 'undefined') Lights.pause(); else UI.toast('這個帳號在另一台裝置打開了，這台先暫停', 'i_cloud', 6, { label: '在這台繼續', fn: () => this.resume() });
+  },
+  // "continue here": take the session back and start from the newest cloud progress
+  async resume(auto) {
+    if (!this.user || this.mode !== 'firebase' || this.resuming) return;
+    this.resuming = true;
+    try {
+      if (auto && !this.paused) {
+        // still the device in use: just catch up; otherwise take over quietly (this device uploaded when it was hidden)
+        let doc = null; try { doc = await this.fb.store.get('sess/' + this.user.uid); } catch (e) { return; }
+        const mine = this.sid || this.mySid(this.user.uid);
+        if (!doc || !mine || doc.sid === mine) { await this.pull(true); return; }
+        this.paused = true; clearTimeout(this.timer); this.timer = null; this.sid = '';
+      }
+      if (typeof Lights !== 'undefined') Lights.resuming();
+      await this.claimSession(true);
+      const doc = await this.fb.get(this.user.uid), rs = this.parse(doc);
+      if (doc && (doc.schema || 1) > SAVE_SCHEMA) return this.tooNew();
+      this.paused = false; this.rev = doc ? (doc.rev || 0) : 0;
+      // nothing was played here while paused: the cloud is the progress to continue from
+      if (rs) this.apply(rs, ''); else this.set('synced', '');
+      this.watchSession();
+      if (typeof Lights !== 'undefined') Lights.resumed();
+    } catch (e) { this.set(this.paused ? 'paused' : 'error', cloudErr(e)); if (typeof Lights !== 'undefined' && this.paused) Lights.resumeFailed(); }
+    finally { this.resuming = false; }
+  },
+  // which copy holds the newer progress: decided by the progress stamp, never by the clock
+  lineage(L, rs) {
+    const remoteRev = this.rev || 0, meta = syncMeta(this.uid());
+    const lr = L.pv ? L.pv.rev : meta ? meta.rev : -1;
+    const worked = L.pv ? workSince(L) : meta ? saveSignature(L) !== meta.sig : true;
+    // the cloud holds exactly this progress already (this device's own upload): nothing to combine
+    if (remoteRev >= lr && rs && rs.pv && rs.pv.fp === progressKey(L)) return remoteRev === lr ? 'same' : 'cloud';
+    if (remoteRev > lr) return worked ? 'merge' : 'cloud';
+    if (remoteRev === lr) return worked ? 'local' : 'same';
+    return 'local';
   },
   parse(doc) {
     if (!doc || typeof doc.data !== 'string') return null;
@@ -330,13 +419,13 @@ const Cloud = {
     // 1. this device already belongs to the account: normal sync, newest wins, but a blank device never replaces real cloud progress
     if (L.owner === uid) {
       if (rs && isFreshSave(L) && this.remoteHasProgress && !(L.flags && L.flags.resetAt)) return this.apply(rs, '已載入雲端進度');
-      const meta = syncMeta(uid);
-      if (rs && meta) {
-        const remoteChanged = (this.rev || 0) !== meta.rev, localChanged = saveSignature(L) !== meta.sig;
-        if (remoteChanged && !localChanged) return this.apply(rs, '已載入你在其他裝置的最新進度');
-        if (remoteChanged && localChanged) { this.common = meta.base; return this.onConflict({ remote: rs, rev: this.rev || 0 }); }
-        this.common = meta.base;
-      } else if (rs && (rs.savedAt || 0) > (L.savedAt || 0)) return this.apply(rs, '已載入雲端上較新的進度');
+      if (rs) {
+        const how = this.lineage(L, rs);
+        if (how === 'cloud') return this.apply(rs, (rs.pv && rs.pv.dev && rs.pv.dev !== DEVICE_ID) ? '已載入你在其他裝置的最新進度' : '');
+        // both sides moved on (this device played offline, or an older version): combine them, the cloud's room and tasks are kept
+        if (how === 'merge') return this.onConflict({ remote: rs, rev: this.rev || 0 });
+        if (how === 'same') { this.set('synced'); this.lastSync = Date.now(); this.lastHash = saveHash(JSON.stringify(L)); return; }
+      }
       this.set('synced'); this.lastSync = Date.now(); this.dirty = true; return this.flush();
     }
     // 2. nothing worth keeping on this device: take the cloud save, or start a new cloud save if there is none
@@ -363,7 +452,7 @@ const Cloud = {
   },
   devBlocked() { return false; },   // developer-mode saves are never blocked
   async writeRemote(S) {
-    const rev = (this.rev || 0) + 1, data = JSON.stringify(S);
+    const rev = (this.rev || 0) + 1, pv = makeStamp(S, rev), data = JSON.stringify(Object.assign({}, S, { pv }));
     if (data.length > 880000) throw { code: 'too-big' };
     if (this.mode === 'firebase') {
       try { await this.fb.set(this.user.uid, { v: 1, schema: S.schema || SAVE_SCHEMA, rev, savedAt: S.savedAt || Date.now(), device: DEVICE_ID, lvl: S.lvl, coins: S.coins, email: this.user.email || '', dev: !!(S.flags && S.flags.dev), sync: S.sync || {}, data }); }
@@ -377,7 +466,9 @@ const Cloud = {
       if (cur && (cur.rev || 0) !== (this.rev || 0) && cur.state) throw { code: 'conflict', remote: cur.state, rev: cur.rev || 0 };
       await this.ref.set({ state: JSON.parse(data), v: 1, rev, schema: S.schema || SAVE_SCHEMA });
     }
-    this.rev = rev; this.lastHash = saveHash(data); this.lastWriteAt = Date.now(); this.common = progressBase(S);
+    S.pv = pv; this.rev = rev; this.lastHash = saveHash(JSON.stringify(S)); this.lastWriteAt = Date.now(); this.common = progressBase(S);
+    // keep the stamp on this device right away (a reload must not mistake this copy for an older one)
+    if (S === Game.S) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } }
     syncMeta(this.uid(), { rev, at: Date.now(), base: this.common, sig: saveSignature(S) });
   },
   async backupRemote(S, reason) {
@@ -387,7 +478,7 @@ const Cloud = {
   },
   // write a new account save: back up first, write to the cloud, and only after that replace this device's save
   async commit(S2, meta, noMark) {
-    const uid = this.uid(); S2 = JSON.parse(JSON.stringify(S2));
+    const uid = this.uid(); S2 = JSON.parse(JSON.stringify(S2)); if (Game.S && Game.S.seenIntro) S2.seenIntro = true;
     S2.owner = uid; S2.savedAt = Date.now();
     S2.sync = Object.assign({}, meta, { at: Date.now(), device: DEVICE_ID, history: [...(((S2.sync || {}).history) || []).slice(-9), Object.assign({ at: Date.now() }, meta)] });
     if (meta.dev) S2.flags = Object.assign({}, S2.flags, { dev: true, devFrom: meta.from });
@@ -409,10 +500,12 @@ const Cloud = {
     if (!e.remote) return this.set('error', '雲端存檔讀不到，等一下會再試。');
     if ((e.remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
     const L = JSON.parse(JSON.stringify(Game.S));
+    // what both copies grew from: the stamp in this device's save (same cloud version as the base the cloud copy came from)
+    const common = L.pv && L.pv.base && L.pv.rev <= e.rev ? L.pv.base : this.common;
     try {
       await Backups.put(L, '兩台裝置同時存檔：合併前這台裝置的進度', 'device');
       await this.backupRemote(e.remote, '兩台裝置同時存檔：合併前的雲端存檔');
-      await this.commit(mergeSaves(e.remote, L, this.common), { mode: 'merge-concurrent', from: 'device+cloud', dev: !!((L.flags || {}).dev || (e.remote.flags || {}).dev) }, true);
+      await this.commit(mergeSaves(e.remote, L, common, true), { mode: 'merge-concurrent', from: 'device+cloud', dev: !!((L.flags || {}).dev || (e.remote.flags || {}).dev) }, true);
       UI.toast('另一台裝置也存了進度，已自動合併（合併前兩份都有備份）', 'i_cloud', 5);
     } catch (err) {
       if (err && err.code === 'conflict' && depth < 2) return this.onConflict(err, depth + 1);
@@ -420,7 +513,8 @@ const Cloud = {
     }
   },
   apply(rs, msg) {
-    rs = JSON.parse(JSON.stringify(rs)); rs.owner = this.uid(); this.status = 'synced';
+    rs = JSON.parse(JSON.stringify(rs)); rs.owner = this.uid(); this.status = 'synced'; if (Game.S && Game.S.seenIntro) rs.seenIntro = true;
+    rs.pv = makeStamp(rs, this.rev || 0);   // this progress is exactly the cloud version just read
     Game.replaceState(rs); this.lastSync = Date.now(); this.set('synced');
     // what we just read is what the cloud holds: no need to write it back
     this.lastWriteAt = Date.now(); this.lastHash = saveHash(JSON.stringify(Game.S)); this.dirty = false; this.common = progressBase(Game.S);
@@ -477,14 +571,16 @@ const Cloud = {
     }
     if (this.pending) { this.pending = false; this.schedule(1500); }
   },
-  async pull() {
-    if (this.mode !== 'firebase' || !this.active() || this.busy || Date.now() - this.lastPull < CLOUD_PULL_MS) return; this.lastPull = Date.now();
+  async pull(force) {
+    if (this.mode !== 'firebase' || !this.active() || this.busy || (!force && Date.now() - this.lastPull < CLOUD_PULL_MS)) return; this.lastPull = Date.now();
     try {
       const doc = await this.fb.get(this.user.uid), rs = this.parse(doc);
-      if (!doc || (doc.rev || 0) === (this.rev || 0)) return;
+      if (!doc || (doc.rev || 0) <= (this.rev || 0)) return;
       if ((doc.schema || 1) > SAVE_SCHEMA) return this.tooNew();
-      if (rs && !this.dirty) { this.rev = doc.rev || 0; this.apply(rs, '已同步你在其他裝置的最新進度'); }
-      else if (rs) this.onConflict({ remote: rs, rev: doc.rev || 0 });
+      if (!rs) return;
+      this.rev = doc.rev || 0;
+      if (this.lineage(Game.S, rs) === 'merge') this.onConflict({ remote: rs, rev: this.rev });
+      else this.apply(rs, '已同步你在其他裝置的最新進度');
     } catch (e) { }
   },
   // routine change → merged into one write at most every 90 s
@@ -521,6 +617,7 @@ const Cloud = {
     if (Game.S.owner === this.user.uid) { Game.save(); await this.push(); }
     if (this.status === 'error') { if (!confirm('最近的進度還沒成功存到雲端，確定要登出嗎？登出後這台裝置會換回空白的小窩。')) return; }
     try { localStorage.removeItem(this.sessKey(this.user.uid)); } catch (e) { }
+    this.stopWatch();
     try { await this.fb.signOut(); } catch (e) { }
     this.user = null; this.choice = null; this.sid = '';
     Game.replaceState(Game.newState());
@@ -548,6 +645,7 @@ UI.cloudChip = function () {
   else if (st === 'error') { tip = c.err || '雲端存檔發生問題'; }
   else if (st === 'offline') { tip = '離線中：進度先存在這台裝置，連上網路後會自動上傳'; }
   else if (st === 'outdated') { t = '請重新整理'; tip = c.err; }
+  else if (st === 'paused') { t = '暫停中'; tip = '這個帳號正在另一台裝置使用，這台先暫停'; }
   el.dataset.st = c.mode === 'claude' && st === 'synced' ? 'synced' : st;
   el.querySelector('.cl-t').textContent = t; el.classList.toggle('icon-only', !t);
   el.title = tip; el.setAttribute('aria-label', '帳號與雲端存檔：' + tip);
@@ -589,11 +687,14 @@ UI.w_account = function () {
     return out;
   }
   const u = c.user, provName = u.provider === 'google.com' ? 'Google 帳號' : 'Email 帳號';
-  const stText = { loading: '讀取雲端進度中…', saving: '儲存中…', synced: '已同步 · ' + agoText(c.lastSync), choose: '等你選擇要用哪一份進度', error: '同步失敗', offline: '離線中：進度先存在這台裝置，連線後自動上傳', outdated: '需要重新整理載入新版' }[c.status] || '';
+  const stText = { loading: '讀取雲端進度中…', saving: '儲存中…', synced: '已同步 · ' + agoText(c.lastSync), choose: '等你選擇要用哪一份進度', error: '同步失敗', offline: '離線中：進度先存在這台裝置，連線後自動上傳', outdated: '需要重新整理載入新版', paused: '暫停中：這個帳號正在另一台裝置使用' }[c.status] || '';
   out.push(h('div', { class: 'cl-user' }, ico('i_cloud', 32), h('div', { class: 'grow' }, h('b', { text: u.name || u.email || '已登入' }), h('div', { class: 'hint', text: provName + (u.name && u.email ? ' · ' + u.email : '') }))));
   out.push(status(stText));
+  if (c.status === 'paused') out.push(h('button', { class: 'chip primary', onclick: () => c.resume() }, ico('i_cloud', 20), '在這台繼續'));
+  // the progress number only ever goes up; the copy with the bigger number is the newer progress
+  if (Game.S.pv && c.status !== 'paused') out.push(h('p', { class: 'hint', text: `進度編號 #${Game.S.pv.rev}` }));
   if (c.err) out.push(h('p', { class: 'cl-msg', role: 'status', text: c.err }));
-  out.push(h('p', { class: 'hint', text: '遊戲會在你操作後幾秒內自動存檔，切換分頁或關閉頁面時也會存。在另一台裝置玩過後回到這裡，會自動載入較新的進度。' }));
+  out.push(h('p', { class: 'hint', text: '遊戲會在你操作後幾秒內自動存檔，切換分頁或關閉頁面時也會存。同一個帳號一次在一台裝置使用：在另一台打開時，這台會先把進度存上雲端再暫停，回來按「在這台繼續」就會接著雲端上最新的進度。' }));
   out.push(h('div', { class: 'row wrap' },
     h('button', { class: 'chip', disabled: c.status === 'saving' || c.status === 'choose', onclick: () => { Game.save(); c.flush(); } }, ico('i_reset', 20), '立即同步'),
     c.status === 'choose' ? h('button', { class: 'chip primary', onclick: () => UI.openWin('cloudpick') }, '選擇進度') : null,

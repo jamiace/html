@@ -428,6 +428,7 @@ Object.assign(UI, {
     set('tasks', Life.claimable() + Life.L.needs.length + (typeof Team !== 'undefined' && Team.ready() ? Team.claimableN() + Team.invites.length : 0));
     Learn.ensureDaily(); set('learn', 0, !Learn.L.dailyDone);
     if (Game.S.zoo) set('pet', 0, Pets.home().some(p => p.sick || p.hunger < 30 || p.clean < 25));
+    if (typeof Merchant !== 'undefined' && Merchant.S) set('merchant', 0, Merchant.waiting());
   },
 });
 Life.buySupply = function (id, n) {

@@ -219,6 +219,8 @@ const PetAI = {
     if (a.actPose === 'lie') return { pose: 'lie', f: Math.floor(t * 0.5) % 2 };
     if (a.actPose === 'stretch') return { pose: 'stretch', f: k > 1.2 ? 1 : 0 };
     if (['knead', 'beg', 'shake', 'belly', 'scratch'].includes(a.actPose)) return { pose: a.actPose, f: Math.floor(k * 3) % 2 };
+    if (a.actPose === 'yawn') return { pose: 'yawn', f: k > 0.35 && k < 1.1 ? 1 : 0 };
+    if (a.actPose === 'stare') return { pose: 'stare', f: (k % 2.4) > 2.2 ? 1 : 0 };
     return { pose: 'sit', f: 0 };
   },
 };

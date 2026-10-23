@@ -16,7 +16,7 @@ function makeCat(pose, f) {
   const g = new Grid(22, 16);
   const B = 'v', D = 'u', L = 'w', BL = 'x';
   // knead / beg / shake are variations of sitting; lie is a variation of the sleeping loaf
-  const want = pose; if (['groom', 'look', 'knead', 'beg', 'shake'].includes(pose)) pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
+  const want = pose; if (['groom', 'look', 'knead', 'beg', 'shake', 'yawn', 'stare'].includes(pose)) pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
   if (pose === 'stretch') {
     // bowing stretch: front paws reaching forward, rear up, tail high
     const t = f % 2;
@@ -113,6 +113,10 @@ function makeCat(pose, f) {
     g.pts([[9, 5], [12, 5]], B); g.pts([[9, 6], [12, 6]], D); if (f % 2) g.px(11, 8, 's');
   }
   if (want === 'lie') { g.pts([[14, 10], [18, 10]], B); g.pts([[15, 9], [15, 10], [17, 9], [17, 10]], 'Y'); if (f % 2) { g.px(2, 13, '.'); g.px(2, 12, B); } }
+  // waking up: eyes shut, mouth wide open (wider on the second frame)
+  if (want === 'yawn') { g.pts([[9, 5], [12, 5]], B); g.pts([[9, 6], [12, 6]], D); g.pts([[10, 7], [11, 7], [10, 8], [11, 8]], 'Y'); if (f % 2) { g.pts([[10, 9], [11, 9]], 'Y'); g.px(10, 8, 's'); g.px(11, 8, 's'); } }
+  // looking straight at you: a bright glint in each eye; the second frame is a blink
+  if (want === 'stare') { if (f % 2) { g.pts([[9, 5], [12, 5]], B); g.pts([[9, 6], [12, 6]], D); } else g.pts([[9, 5], [12, 5]], 'W'); }
   // kneading: eyes shut with a little blush
   if (want === 'knead') { g.pts([[9, 5], [12, 5]], B); g.px(8, 7, 's'); g.px(13, 7, 's'); }
   // shaking off water: fur sticks out all round, eyes squeezed shut
@@ -129,7 +133,7 @@ function petTufts(g, B, blobs, f) {
 function makeDog(pose, f) {
   const g = new Grid(24, 18);
   const B = 'v', D = 'u', C = 'f', N = 'Y';
-  const want = pose; if (['groom', 'look', 'knead', 'beg', 'shake'].includes(pose)) pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
+  const want = pose; if (['groom', 'look', 'knead', 'beg', 'shake', 'yawn', 'stare'].includes(pose)) pose = 'sit'; else if (pose === 'lie') pose = 'sleep';
   if (pose === 'stretch') {
     // play bow
     const t = f % 2;
@@ -208,6 +212,8 @@ function makeDog(pose, f) {
   if (want === 'groom') { g.pts([[10, 5], [15, 5]], B); g.pts([[10, 6], [11, 6], [14, 6], [15, 6]], D); g.px(12, 9, 's'); g.px(12, 10, 's'); if (f % 2) g.px(13, 10, 's'); }
   if (want === 'lie') { g.pts([[16, 11], [20, 11]], B); g.pts([[17, 10], [17, 11], [19, 10], [19, 11]], 'Y'); if (f % 2) { g.ellipse(4, 11, 2.2, 2, B); g.px(4, 11, C); } }
   if (want === 'knead') { g.pts([[10, 5], [15, 5]], B); g.px(9, 8, 's'); g.px(16, 8, 's'); }
+  if (want === 'yawn') { g.pts([[10, 5], [15, 5]], B); g.pts([[10, 6], [11, 6], [14, 6], [15, 6]], D); g.pts([[12, 9], [13, 9]], 'Y'); g.pts([[12, 10], [13, 10]], f % 2 ? 's' : 'Y'); if (f % 2) g.pts([[11, 9], [14, 9]], 'Y'); }
+  if (want === 'stare') { if (f % 2) { g.pts([[10, 5], [15, 5]], B); g.pts([[10, 6], [15, 6]], D); } else g.pts([[10, 5], [15, 5]], 'W'); }
   if (want === 'shake') { petTufts(g, B, [[10, 11, 6.1, 5.8], [12.5, 6, 5, 4.6]], f); g.pts([[10, 5], [15, 5]], B); if (f % 2) g.pts([[8, 1], [17, 1]], B); }
   return g.outline();
 }
@@ -226,7 +232,7 @@ function petCanvas(kind, color, pose, f, flip, acc) {
   return c;
 }
 
-for (const p of ['walk0', 'walk1', 'walk2', 'walk3', 'sit0', 'sit1', 'sleep0', 'sleep1', 'look0', 'groom0', 'groom1', 'lie0', 'lie1', 'stretch0', 'stretch1', 'knead0', 'knead1', 'beg0', 'beg1', 'shake0', 'shake1', 'belly0', 'belly1', 'scratch0', 'scratch1']) {
+for (const p of ['walk0', 'walk1', 'walk2', 'walk3', 'sit0', 'sit1', 'sleep0', 'sleep1', 'look0', 'groom0', 'groom1', 'lie0', 'lie1', 'stretch0', 'stretch1', 'knead0', 'knead1', 'beg0', 'beg1', 'shake0', 'shake1', 'belly0', 'belly1', 'scratch0', 'scratch1', 'yawn0', 'yawn1', 'stare0', 'stare1']) {
   SPR.def('cat_' + p, () => makeCat(p.replace(/\d/, ''), +p.slice(-1)));
   SPR.def('dog_' + p, () => makeDog(p.replace(/\d/, ''), +p.slice(-1)));
 }

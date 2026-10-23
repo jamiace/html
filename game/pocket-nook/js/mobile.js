@@ -32,6 +32,9 @@ const Mobile = {
       if (m && document.body.classList.contains('mini')) UI.setMini(false);
       for (const id in UI.wins) if (!UI.wins[id].el.hidden) UI.placeWin(UI.wins[id]);
       if (typeof PetPlay !== 'undefined' && PetPlay._tray) { PetPlay._tray.remove(); PetPlay._tray = null; PetPlay.renderTray(); }
+      // the YouTube player: under the "today" panel on a phone (never over the room), floating on a computer
+      const yp = document.getElementById('ytpanel'), st = document.querySelector('.stage');
+      if (yp && st) { if (m && yp.parentNode !== st) st.insertBefore(yp, this.today && this.today.parentNode === st ? this.today.nextSibling : null); else if (!m && yp.parentNode === st) document.body.insertBefore(yp, document.getElementById('toasts')); }
       this.render();
     }
     window.NOOK_MOBILE_REDIRECT = m || this.standalone();
@@ -42,7 +45,7 @@ const Mobile = {
   // ---------- build the phone parts once ----------
   build() {
     const stage = document.querySelector('.stage');
-    this.today = h('section', { class: 'mtoday', 'aria-label': '今天' }); stage.append(this.today);
+    this.today = h('section', { class: 'mtoday', 'aria-label': '今天' }); stage.insertBefore(this.today, stage.querySelector('.ytpanel'));
     this.nav = h('nav', { class: 'mnav', 'aria-label': '分頁' }); document.getElementById('app').append(this.nav);
     const tabs = [['room', 'i_heart', '房間'], ['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['pet', 'i_paw', '寵物'], ['more', 'i_gear', '更多']];
     this.tabs = {};
@@ -50,9 +53,8 @@ const Mobile = {
       const b = h('button', { class: 'mtab', 'data-id': id, onclick: () => this.tab(id) }, ico(ic, 28), h('span', { text: label }));
       this.tabs[id] = b; this.nav.append(b);
     }
-    // zoom button on the room
-    this.zbtn = h('button', { class: 'mzoom', 'aria-label': '放大房間', title: '放大房間（也可以點兩下地板）', onclick: () => this.zoomed ? this.unzoom() : this.zoomAt(RW / 2, RH * 0.62) }, ico('i_zoomin', 20));
-    document.querySelector('.room-wrap').append(this.zbtn);
+    // zoom button: in the bar under the room, never on top of the furniture
+    this.zbtn = h('button', { class: 'chip mzoom', 'aria-label': '放大房間', title: '放大房間（也可以點兩下地板）', onclick: () => this.zoomed ? this.unzoom() : this.zoomAt(RW / 2, RH * 0.62) }, ico('i_zoomin', 22));
   },
   tab(id) {
     if (id === 'room') { for (const k in UI.wins) UI.closeWin(k); if (Room.edit) UI.setEdit(false); return this.sync(); }
@@ -97,11 +99,15 @@ const Mobile = {
     if (!this.on) { this.today.hidden = true; return; }
     this.today.hidden = false;
     const focusing = Game.focusing();
-    const key = JSON.stringify([focusing, Game.S.timer.running, Game.S.timer.mode, !!Music.cur, Music.playing, this.rows().map(r => r.textContent)]);
+    const mw = typeof Merchant !== 'undefined' && Game.S ? [MERCHANTS[Merchant.id()].n, Merchant.waiting()] : null;
+    const key = JSON.stringify([focusing, Game.S.timer.running, Game.S.timer.mode, !!Music.cur, Music.playing, mw, this.rows().map(r => r.textContent), typeof Lights !== 'undefined' && Lights.nightRow()]);
     if (key !== this._key) {
       this._key = key;
       const tray = this.today.querySelector('.handtray');
-      this.today.replaceChildren(this.timerCard(), h('div', { class: 'mtray-slot' }), focusing ? h('p', { class: 'hint center', text: '專注中，其他的事等休息時間再說～' }) : h('div', { class: 'mrows' }, ...this.rows()));
+      // the bar under the room: the hand tray on the left; the travelling merchant and the zoom on the right
+      const mbtn = mw ? h('button', { class: 'chip mmerch', onclick: () => Merchant.go(), 'aria-label': '旅行商人' + mw[0] }, ico('i_merchant', 22), h('span', { text: mw[0] }), mw[1] ? h('span', { class: 'badge-dot' }) : null) : null;
+      const rows = this.rows(); if (!focusing && typeof Lights !== 'undefined') { const nr = Lights.nightRow(); if (nr) rows.push(h('button', { class: 'mrow', onclick: () => Lights.goodnight() }, ico('i_moon', 26), h('span', { class: 'mrow-t' }, h('b', { text: nr[0] }), h('span', { class: 'hint', text: nr[1] })), ico('i_chev', 16))); }
+      this.today.replaceChildren(h('div', { class: 'mbar' }, h('div', { class: 'mtray-slot' }), h('div', { class: 'mbar-r' }, mbtn, this.zbtn)), this.timerCard(), focusing ? h('p', { class: 'hint center', text: '專注中，其他的事等休息時間再說～' }) : h('div', { class: 'mrows' }, ...rows));
       if (tray) this.today.querySelector('.mtray-slot').append(tray);
     }
     const tm = this.today.querySelector('.mt-time'); if (tm) { const t = Game.S.timer; tm.textContent = fmt(t.running ? (t.endsAt - Date.now()) / 1000 : t.remain); }
@@ -120,9 +126,9 @@ const Mobile = {
   zoomAt(x, y) {
     const z = MOBILE.zoom; this.zoomed = true;
     this.zx = Math.max(0, Math.min(RW - RW / z, x - RW / z / 2)); this.zy = Math.max(0, Math.min(RH - RH / z, y - RH / z / 2));
-    this.applyZoom(); this.zbtn.replaceChildren(ico('i_zoomout', 20)); this.zbtn.setAttribute('aria-label', '還原大小');
+    this.applyZoom(); this.zbtn.classList.add('on'); this.zbtn.replaceChildren(ico('i_zoomout', 22)); this.zbtn.setAttribute('aria-label', '還原大小');
   },
-  unzoom() { this.zoomed = false; this.applyZoom(); if (this.zbtn) { this.zbtn.replaceChildren(ico('i_zoomin', 20)); this.zbtn.setAttribute('aria-label', '放大房間'); } },
+  unzoom() { this.zoomed = false; this.applyZoom(); if (this.zbtn) { this.zbtn.classList.remove('on'); this.zbtn.replaceChildren(ico('i_zoomin', 22)); this.zbtn.setAttribute('aria-label', '放大房間'); } },
   applyZoom() {
     const wrap = document.querySelector('.room-wrap'); if (!wrap) return;
     const s = Game.scale, z = this.zoomed ? MOBILE.zoom : 1;
@@ -330,4 +336,16 @@ UI.w_more = function () {
   window.addEventListener('load', start);
   // home screen app (works offline after the first visit); not on file:// or in previews
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.NOOK_ENV === 'web') window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
+})();
+
+// computer: the hand tray goes in the free space to the right of the room, so it never covers furniture
+// (a window too narrow for that keeps it in the room's corner, as before)
+(function () {
+  const place = () => {
+    const wrap = document.querySelector('.room-wrap'); if (!wrap) return;
+    const r = wrap.getBoundingClientRect(), g = document.body.classList.contains('m') ? 0 : window.innerWidth - r.right;
+    document.body.classList.toggle('tray-side', g >= 168); document.body.classList.toggle('tray-3', g >= 168 && g < 214);
+  };
+  window.addEventListener('resize', place); window.addEventListener('load', () => { place(); setTimeout(place, 600); });
+  setInterval(place, 3000);
 })();

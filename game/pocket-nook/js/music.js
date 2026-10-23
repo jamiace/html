@@ -208,7 +208,7 @@ const Music = {
         events: {
           onReady: () => { this.ytReady = true; if (this.cur && this.cur.type === 'yt') { const c = this.cur; e = c; load(); } },
           onStateChange: (ev) => this.onYTState(ev),
-          onError: () => { UI.toast('這部影片不允許嵌入播放，跳到下一首', 'i_video', 3.5); setTimeout(() => this.next(false), 800); },
+          onError: () => { if (this.cur && this.cur.list && this.yt) { try { const pl = this.yt.getPlaylist() || []; if (pl.length > 1) { setTimeout(() => { try { this.yt.nextVideo(); } catch (x) { } }, 400); return; } } catch (x) { } } UI.toast('這部影片不允許嵌入播放，跳到下一首', 'i_video', 3.5); setTimeout(() => this.next(false), 800); },
         },
       });
     } else if (this.ytReady) load();
