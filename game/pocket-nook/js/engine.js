@@ -399,8 +399,9 @@ const Room = {
     } finally { c.restore(); }
   },
   // ---------------- frame ----------------
-  // Entries in the same rendered pixel row share a depth; actors draw on top.
-  drawDepth(z) { return Math.round(z); },
+  // Give actors a 2px depth margin; at the exact boundary actors draw last.
+  // A single sort key keeps ordering consistent across multiple overlapping objects.
+  drawDepth(z, actor = false) { return z + (actor ? 2 : 0); },
   drawList() {
     const list = [];
     for (const it of this.state.items) {
@@ -410,7 +411,7 @@ const Room = {
     if (this.state.gifts) for (const g of this.state.gifts) list.push({ kind: 'gift', g, lay: 'floor', z: g.y });
     const order = { wall: 0, rug: 1, floor: 2 };
     list.sort((a, b) => (order[a.lay] - order[b.lay])
-      || (this.drawDepth(a.z) - this.drawDepth(b.z))
+      || (this.drawDepth(a.z, a.kind === 'actor') - this.drawDepth(b.z, b.kind === 'actor'))
       || (Number(a.kind === 'actor') - Number(b.kind === 'actor'))
       || (a.z - b.z));
     return list;

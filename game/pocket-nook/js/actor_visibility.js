@@ -40,8 +40,8 @@ const ActorVisibility = {
     const mask = this.opaquePixels(cv); if (!mask.total) return 0;
     const blockers = [];
     for (const it of Room.state.items) {
-      // Match Room.drawList(): furniture in the same rendered pixel row draws before actors.
-      if (Room.layerOf(it) !== 'floor' || Room.drawDepth(Room.base(it)) <= Room.drawDepth(z)) continue;
+      // Match Room.drawList(): furniture up to 2px in front still draws before actors.
+      if (Room.layerOf(it) !== 'floor' || Room.drawDepth(Room.base(it)) <= Room.drawDepth(z, true)) continue;
       if (own && (it === own || it.p === own.uid)) continue;
       const icv = Room.itemCanvas(it);
       if (it.x >= left + cv.width || it.x + icv.width <= left || it.y >= top + cv.height || it.y + icv.height <= top) continue;
