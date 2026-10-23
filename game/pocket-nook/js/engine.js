@@ -399,6 +399,8 @@ const Room = {
     } finally { c.restore(); }
   },
   // ---------------- frame ----------------
+  // Entries in the same rendered pixel row share a depth; actors draw on top.
+  drawDepth(z) { return Math.round(z); },
   drawList() {
     const list = [];
     for (const it of this.state.items) {
@@ -407,7 +409,10 @@ const Room = {
     for (const a of this.actors) list.push({ kind: 'actor', a, lay: 'floor', z: a.z() });
     if (this.state.gifts) for (const g of this.state.gifts) list.push({ kind: 'gift', g, lay: 'floor', z: g.y });
     const order = { wall: 0, rug: 1, floor: 2 };
-    list.sort((a, b) => (order[a.lay] - order[b.lay]) || (a.z - b.z));
+    list.sort((a, b) => (order[a.lay] - order[b.lay])
+      || (this.drawDepth(a.z) - this.drawDepth(b.z))
+      || (Number(a.kind === 'actor') - Number(b.kind === 'actor'))
+      || (a.z - b.z));
     return list;
   },
   drawItem(c, it) {
