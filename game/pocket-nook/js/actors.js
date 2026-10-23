@@ -175,9 +175,14 @@ class Avatar extends Walker {
       const v = this.state === 'deskstand' ? 'back' : this.face;
       frame = v === 'side' ? 'side0' : v + '0'; flip = v === 'side' && this.flip;
       bob = Math.floor(t * (typeof Music !== 'undefined' && Music.playing ? 2.6 : 1.3)) % 2;
+      // trick shows: holding a hand out (side view) and cheering (turned to face you first, then both arms up)
+      const sh = this.state === 'show' ? this.show : null;
+      if (sh && sh.pose !== 'cheer') sh.cheerAt = null;
+      if (sh && sh.pose === 'hand') { const S = TrickShow.cur, shake = S && S.phase === 'act' && S.t > .9 && S.t < 2; frame = shake && Math.floor(t * 10) % 2 ? 'hand1' : 'hand0'; flip = this.flip; bob = 0; }
+      if (sh && sh.pose === 'cheer') { if (sh.cheerAt == null) sh.cheerAt = t; this.face = 'front'; flip = false; bob = 0; frame = t - sh.cheerAt < .22 ? 'front0' : Math.floor(t * 5) % 2 ? 'cheer1' : 'cheer0'; }
     }
     const cv = avatarCanvas(frame, cfg, this.eyeState(), bob, flip), top = y - canvasBottom(cv) - this.hopOff();
-    c.drawImage(cv, x - 10, top);
+    c.drawImage(cv, x - (cv.width > 20 ? 12 : 10), top);
     if (this.state === 'show' && !this.walking) TrickShow.drawOwner(c, this, cv, x, top);
   }
   hit(x, y) {

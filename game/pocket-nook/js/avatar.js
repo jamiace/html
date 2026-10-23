@@ -226,8 +226,10 @@ function mannequin(view, frame) {
   }
   if (view === 'front' || view === 'back') {
     const sw = frame === 1 ? 1 : frame === 2 ? -1 : 0, L = 2 + sw, R = 2 - sw;
-    P(3, L, 'u', 3); P(3, L + 1, 'f'); P(3, L + 2, 'f'); P(3, L + 3, 'h', 3); P(3, L + 4, 'h', 3);
-    P(14, R, 'u', 1); P(14, R + 1, 'f', 1); P(14, R + 2, 'f', 1); P(14, R + 3, 'h', 3); P(14, R + 4, 'h', 1);
+    if (frame < 6) {   // 6 / 7: cheering, the raised arms are drawn in avatarGrid
+      P(3, L, 'u', 3); P(3, L + 1, 'f'); P(3, L + 2, 'f'); P(3, L + 3, 'h', 3); P(3, L + 4, 'h', 3);
+      P(14, R, 'u', 1); P(14, R + 1, 'f', 1); P(14, R + 2, 'f', 1); P(14, R + 3, 'h', 3); P(14, R + 4, 'h', 1);
+    }
     for (let y = 7; y < 9; y++) for (let x = 4; x < 14; x++) P(x, y, 'p', x === 13 ? 1 : 2); P(8, 8, 'p', 1); P(9, 8, 'p', 1);
     const lUp = frame === 1, rUp = frame === 2;
     for (let x = 5; x < 8; x++) { P(x, 9, 'g', x === 7 ? 1 : 2); if (!lUp) P(x, 10, 'g', x === 7 ? 1 : 2); P(x, lUp ? 10 : 11, 'k', x === 5 && !back ? 3 : 2); }
@@ -247,8 +249,13 @@ function mannequin(view, frame) {
   } else { // side, facing right
     for (let x = 7; x < 11; x++) P(x, 0, 't'); for (let y = 1; y < 7; y++) for (let x = 6; x < 12; x++) P(x, y, 't', x === 6 && y < 6 ? 3 : x === 11 && y >= 2 ? 1 : 2); for (let x = 6; x < 12; x++) P(x, 6, 't', 1);
     const pose = [{ dir: 0, legs: [[7, 9, 2, 2], [9, 9, 2, 2]], shoes: [[7, 11, 3], [9, 11, 3]] }, { dir: 1, legs: [[10, 9, 2, 2], [6, 9, 2, 1]], shoes: [[10, 11, 3], [5, 10, 3]] },
-      { dir: 0, legs: [[8, 9, 2, 2], [8, 9, 2, 2]], shoes: [[8, 11, 3], [8, 11, 3]] }, { dir: -1, legs: [[6, 9, 2, 2], [10, 9, 2, 1]], shoes: [[5, 11, 3], [10, 10, 3]] }][frame || 0];
-    if (pose.dir === 0) { for (let y = 2; y < 6; y++) { P(8, y, y < 4 ? 'u' : 'f', 1); P(9, y, y < 4 ? 'u' : 'f'); } P(8, 6, 'h', 3); P(9, 6, 'h', 3); }
+      { dir: 0, legs: [[8, 9, 2, 2], [8, 9, 2, 2]], shoes: [[8, 11, 3], [8, 11, 3]] }, { dir: -1, legs: [[6, 9, 2, 2], [10, 9, 2, 1]], shoes: [[5, 11, 3], [10, 10, 3]] },
+      // 4 / 5: standing, one hand held out in front (offering a hand to shake; 5 is the shake)
+      { dir: 2, legs: [[7, 9, 2, 2], [9, 9, 2, 2]], shoes: [[7, 11, 3], [9, 11, 3]] }, { dir: 3, legs: [[7, 9, 2, 2], [9, 9, 2, 2]], shoes: [[7, 11, 3], [9, 11, 3]] }][frame || 0];
+    if (pose.dir >= 2) {
+      [[8, 2, 'u'], [9, 2, 'u', 1], [9, 3, 'u', 1], [10, 3, 'f'], [10, 4, 'f', 1], [11, 4, 'f'], [12, 4, 'f', 1]].forEach(([x, y, l, s]) => P(x, y, l, s || 2));
+      const hy = pose.dir === 2 ? 4 : 5; P(13, hy, 'h', 3); P(14, hy, 'h', 3); P(13, hy + 1, 'h'); P(14, hy + 1, 'h', 1);
+    } else if (pose.dir === 0) { for (let y = 2; y < 6; y++) { P(8, y, y < 4 ? 'u' : 'f', 1); P(9, y, y < 4 ? 'u' : 'f'); } P(8, 6, 'h', 3); P(9, 6, 'h', 3); }
     else if (pose.dir > 0) { [[9, 2, 'u', 1], [9, 3, 'u', 1], [10, 4, 'f', 1], [11, 5, 'f', 1], [8, 2, 'u'], [10, 3, 'f'], [11, 4, 'f']].forEach(([x, y, l, s]) => P(x, y, l, s || 2)); P(12, 5, 'h', 3); P(12, 6, 'h', 3); }
     else { [[8, 2, 'u', 1], [8, 3, 'u', 1], [7, 4, 'f', 1], [6, 5, 'f', 1], [9, 2, 'u'], [9, 3, 'u'], [8, 4, 'f']].forEach(([x, y, l, s]) => P(x, y, l, s || 2)); P(5, 5, 'h', 3); P(5, 6, 'h', 3); }
     for (let y = 7; y < 9; y++) for (let x = 6; x < 12; x++) P(x, y, 'p', x === 11 ? 1 : 2);
@@ -556,6 +563,7 @@ const AVATAR_FRAMES = {
   back0: ['back', 'back', 0], back1: ['back', 'back', 1], back2: ['back', 'back', 2],
   side0: ['side', 'side', 0], side1: ['side', 'side', 1], side2: ['side', 'side', 2], side3: ['side', 'side', 3],
   type0: ['back', 'sitback', 0], type1: ['back', 'sitback', 1], sit0: ['front', 'sitfront', 0], stretch: ['back', 'sitback', 2],
+  hand0: ['side', 'side', 4], hand1: ['side', 'side', 5], cheer0: ['front', 'front', 6], cheer1: ['front', 'front', 7],
 };
 function colorMap(cfg) {
   const m = {};
@@ -575,7 +583,7 @@ function colorMap(cfg) {
 function avatarGrid(frame, cfg, eyes, bob) {
   const [hv, bv, bf] = AVATAR_FRAMES[frame] || AVATAR_FRAMES.front0;
   // the stretch frame is 4 px wider (arms reach out past the hair); it is drawn 2 px further left
-  const st = frame === 'stretch', X = st ? 3 : 1;
+  const cheer = frame === 'cheer0' || frame === 'cheer1', st = frame === 'stretch' || cheer, X = st ? 3 : 1;
   const g = new Grid(st ? 24 : 20, 30 + AVA_TOP);
   const body = composeBody(bv, bf, cfg); drawNeck(body, bv, cfg);
   const behind = new Grid(18, 13); drawBackItem(behind, bv, cfg, true);
@@ -587,9 +595,11 @@ function avatarGrid(frame, cfg, eyes, bob) {
   drawHeadAcc(g, hv, cfg, X, oy);
   if (st) {
     // both arms up and out in a V, beside the head, in the sleeve / skin colours of the normal sitting pose
-    const ref = composeBody('sitback', 0, cfg), T0 = 15 + AVA_TOP;
+    // (cheering: the same, seen from the front, hands waving between two heights)
+    const ref = composeBody(cheer ? 'front' : 'sitback', 0, cfg), T0 = 15 + AVA_TOP;
     const up = ref.get(3, 2), fo = ref.get(3, 3), upR = ref.get(14, 2), foR = ref.get(14, 3);
     const arm = [[3, 1, 'u'], [3, 0, 'u'], [2, 0, 'u'], [2, -1, 'u'], [1, -1, 'f'], [1, -2, 'f'], [0, -2, 'f'], [0, -3, 'f'], [-1, -3, 'h'], [-1, -4, 'h'], [-1, -5, 'h'], [-1, -6, 'h'], [0, -6, 'h']];
+    if (frame === 'cheer1') { arm.splice(-3, 3, [-1, -5, 'h'], [0, -5, 'h'], [0, -6, 'h'], [0, -7, 'h']); }
     for (const [x, y, l] of arm) {
       g.px(X + x, T0 + y, l === 'u' ? up : l === 'f' ? fo : 'C');
       g.px(X + 17 - x, T0 + y, l === 'u' ? upR : l === 'f' ? foR : 'D');

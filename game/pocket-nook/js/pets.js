@@ -331,8 +331,11 @@ const Pets = {
     Life.track('pet', 1);
     for (const n of Life.L.needs) if (n.type === 'cat_pet' && n.pet === pid) { n.prog = (n.prog || 0) + 1; if (n.prog >= 3) Life.complete(n); }
     const chance = 0.3 + (p.trait === 'curious' ? 0.2 : 0) + TRICKS.filter(t => this.knows(p, t.id)).length * 0.03;
-    if (p.blv >= 2 && p.gift !== day && Math.random() < chance) {
-      p.gift = day;
+    // three days in a row without a gift: the next day's first pat brings one
+    const lucky = p.blv >= 2 && p.gift !== day && (((p.giftDry || 0) >= 3 && p.giftDryDay !== day) || Math.random() < chance);
+    if (p.blv >= 2 && p.gift !== day && !lucky && p.giftDryDay !== day) { p.giftDryDay = day; p.giftDry = (p.giftDry || 0) + 1; }
+    if (lucky) {
+      p.gift = day; p.giftDry = 0;
       setTimeout(() => {
         if (Math.random() < 0.6) { const c = 10 + p.blv * 3 + p.lv; Game.reward(c, 0, 'raw'); UI.toast(`${p.name}叼來了 ${c} 枚金幣送你`, 'i_coin', 3.5); }
         else { const s = Life.randomSupply(); Life.give(s, 1); UI.toast(`${p.name}叼來了一個${SUPPLIES[s].n}`, 'i_paw', 3.5); }
@@ -355,6 +358,7 @@ const Pets = {
     p.energy = clamp100(p.energy - 25); p.st.train++; Life.track('train', 1);
     const ok = R >= Math.ceil(n * 0.75);
     let msg;
+    p.trainFail = ok ? 0 : (p.trainFail || 0) + 1;   // two misses in a row: the next training uses words you know well
     if (ok) {
       Life.track('trainOk', 1);
       p.tricks[tid] = Math.min(t.need, (p.tricks[tid] || 0) + 1); this.addXp(p, 8 + R * 2); this.addBond(p, 3); this.mood(p, 6);

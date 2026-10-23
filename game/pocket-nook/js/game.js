@@ -381,7 +381,7 @@ function setupInput(cv) {
     }
     if (Room.edit) { const h = Room.hit(x, y, { itemsOnly: true }); Room.hover = h ? h.it : null; cv.style.cursor = h ? 'grab' : 'default'; return; }
     if (PetPlay.held) { PetPlay.move(x, y); UI.hoverIt = null; return; }
-    const h = Life.hitBubble(x, y) || Room.hit(x, y); cv.style.cursor = h ? 'pointer' : 'default';
+    const h = Life.hitBubble(x, y) || Room.hit(x, y); cv.style.cursor = h || (typeof Feel !== 'undefined' && Feel.hitPlane(x, y)) ? 'pointer' : 'default';
     UI.hoverIt = h && h.kind === 'item' ? h.it : null;
   });
   const end = (e) => {
@@ -392,6 +392,7 @@ function setupInput(cv) {
     }
     if (!down || Room.edit) return; const [x, y] = toRoom(e); const moved = Math.hypot(x - down.x, y - down.y) > 3; down = null; if (moved) return;
     const sm = typeof Social !== 'undefined' && Social.hitMark(x, y); if (sm) { Social.readMark(sm); return; }
+    if (typeof Feel !== 'undefined' && Feel.hitPlane(x, y)) { Feel.openPlane(); return; }
     const nb = Life.hitBubble(x, y); if (nb) { UI.needCard(nb.id); return; }
     const h = Room.hit(x, y); if (!h) return;
     if (h.kind === 'actor') {

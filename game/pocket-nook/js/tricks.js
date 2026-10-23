@@ -31,6 +31,11 @@ function canvasTop(cv) {
 const STAND_CACHE = {};
 function petStandCanvas(kind, color, flip) {
   const key = kind + '|' + color + '|' + (flip ? 1 : 0); if (STAND_CACHE[key]) return STAND_CACHE[key];
+  let out = petStandGrid(kind).outline(); const map = PET_COLORS[kind][color]; if (map) out = out.recolor(map); if (flip) out = out.flip();
+  return STAND_CACHE[key] = out.toCanvas();
+}
+// the standing pose before the outline (also the source the baked lean frames were made from)
+function petStandGrid(kind) {
   const w = SPR.grid(kind + '_walk0'), W = w.w, g = new Grid(16, 24), light = kind === 'dog' ? 'f' : 'x';
   let top = 0; while (top < w.h && w.a[top].every((c, x) => x < W - 11 || c === '.')) top++;
   g.ellipse(8, 14.5, 4.2, 6, 'v');
@@ -40,8 +45,7 @@ function petStandCanvas(kind, color, flip) {
   g.rect(5, 19, 3, 4, 'v'); g.rect(9, 19, 3, 4, 'v'); g.hl(5, 22, 3, light); g.hl(9, 22, 3, light); g.vl(8, 20, 3, 'u');
   for (let y = top; y < top + 10; y++) for (let x = W - 11; x < W; x++) { const c = w.get(x, y); if (c !== '.' && c !== '0') g.px(x - (W - 11) + 3, y - top, c); }
   g.rect(11, 12, 3, 2, 'v'); g.px(13, 12, light); g.px(13, 13, light);
-  let out = g.outline(); const map = PET_COLORS[kind][color]; if (map) out = out.recolor(map); if (flip) out = out.flip();
-  return STAND_CACHE[key] = out.toCanvas();
+  return g;
 }
 
 const TrickShow = {
@@ -196,7 +200,8 @@ const TrickShow = {
       }
       case 'moonlean': {
         P.pose = t > .25 && t < 3.0 ? 'stand' : 'sit'; P.fr = 0; P.pivot = 'feet'; P.hat = clamp01((t - .2) / .3);
-        if (t > .9 && t < 2.9) { const k = t < 1.4 ? ease.inOut(seg(t, .9, 1.4)) : t > 2.4 ? 1 - ease.inOut(seg(t, 2.4, 2.9)) : 1; P.rot = f * k * Math.PI / 4; P.spot = 1; }   // up on the hind legs, the whole body tilts 45 degrees forward from the feet
+        // up on the hind legs, the whole body leans 45 degrees forward from the feet: baked frames (sprites_lean.js), no rotation while playing
+        if (t > .9 && t < 2.9) { const k = t < 1.4 ? ease.inOut(seg(t, .9, 1.4)) : t > 2.4 ? 1 - ease.inOut(seg(t, 2.4, 2.9)) : 1; P.leanN = Math.round(k * 6); P.rot = P.leanN ? (P.flip ? -1 : 1) * k * Math.PI / 4 : 0; P.spot = 1; }
         if (t > 3.0) { P.hatTip = Math.sin(seg(t, 3.0, 3.5) * Math.PI); P.lift = -Math.round(Math.sin(seg(t, 3.0, 3.4) * Math.PI) * 3); }
         break;
       }
@@ -217,6 +222,12 @@ const TrickShow = {
     if (S.ring && S.phase === 'act' && t < 3.6) this.drawRing(c, S, t, 'back');
     // shadow shrinks while airborne
     const air = Math.min(1, -P.lift / 30); c.fillStyle = `rgba(46,34,48,${(.2 * (1 - air * .6)).toFixed(2)})`; const sw = Math.round(12 * (1 - air * .5)); c.fillRect(x - sw / 2, y - 1, sw, 2);
+    const L = P.leanN ? petLeanCanvas(a.kind, a.color, P.flip, P.leanN) : null;
+    if (L) {   // the ready-made lean image (assets/sprites/*_lean*.png), hat included
+      c.drawImage(L.cv, x - L.ax, y + P.lift - L.ay);
+      if (d && d.sick && Math.floor(Room.t * 2) % 2) { c.fillStyle = '#84cbbd'; c.fillRect(x + (P.flip ? -9 : 7), y - 17, 2, 2); }
+      return true;
+    }
     c.save();
     // 'body' turns around the middle of the drawn pet (not of the whole canvas), so a pet lying on its back stays on the floor
     const top = canvasTop(cv), cyBody = y - (bot - top) / 2 + P.lift;
@@ -227,7 +238,7 @@ const TrickShow = {
     c.drawImage(cv, ox, oy);
     // extras that move with the pet
     if (P.paw) { const col = this.bodyColor(cv), fx = P.flip ? ox + 3 : ox + cv.width - 6, fy = oy + bot - 6 - Math.round(P.paw * 4) + (P.shake || 0); c.fillStyle = '#2e2230'; c.fillRect(fx - 1, fy - 1, 4, 5); c.fillStyle = col; c.fillRect(fx, fy, 2, 3); }
-    if (P.hat) { const ht = this.headTop(cv, P.flip), hx = ox + ht[0], hy = oy + ht[1] - Math.round((1 - P.hat) * 6) - Math.round((P.hatTip || 0) * 3); this.drawHat(c, hx, hy, P.flip); }
+    if (P.hat) { const ht = this.headTop(cv, P.flip), hx = ox + ht[0], hy = oy + ht[1] - 1 - Math.round((1 - P.hat) * 6) - Math.round((P.hatTip || 0) * 3); this.drawHat(c, hx, hy, P.flip); }
     if (P.dead) { const ht = this.headTop(cv, P.flip); c.fillStyle = '#ee8fa0'; c.fillRect(ox + ht[0] + (P.flip ? 2 : -3), oy + ht[1] + 3, 2, 2); }
     c.restore();
     if (P.star) Room.puff('p_spark', x + (Math.random() - .5) * 10, y + P.lift - 6, { vy: 2, max: .3 });
@@ -273,13 +284,15 @@ const TrickShow = {
   // owner's arm(s) on top of the side-view sprite
   drawOwner(c, A, cv, x, top) {
     const sh = A.show || { pose: 'idle' }, S = this.cur, t = S && S.phase === 'act' ? S.t : 0, dir = A.flip ? -1 : 1;
-    const al = cv.alpha, w = cv.width, at = (px, py) => { const o = (py * w + px) * 4; return al && al[o + 3] ? `rgb(${al[o]},${al[o + 1]},${al[o + 2]})` : null; };
-    const sleeve = at(10, 25) || at(10, 26) || '#f5909f', skin = at(10 + dir * 3, 17) || at(10, 18) || '#f6cfae';
+    if (sh.pose === 'hand' || sh.pose === 'cheer') return;   // these are real avatar frames (avatar.js)
+    // sleeve and skin colours read from the front-facing sprite's own arm (upper arm, forearm, hand)
+    const ref = avatarCanvas('front0', A.cfg, null, 0), ral = ref.alpha, rw = ref.width, at = (px, py) => { const o = (py * rw + px) * 4; return ral && ral[o + 3] ? `rgb(${ral[o]},${ral[o + 1]},${ral[o + 2]})` : null; };
+    const T0 = 15 + AVA_TOP, sleeve = at(4, T0 + 2) || '#f5909f', fore = at(4, T0 + 3) || sleeve, skin = at(4, T0 + 5) || at(4, T0 + 6) || '#f6cfae';
     const sy = top + 24;
     const line = (x0, y0, x1, y1, col, wdt) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1; for (let i = 0; i <= n; i++) { const px = Math.round(x0 + (x1 - x0) * i / n), py = Math.round(y0 + (y1 - y0) * i / n); c.fillStyle = typeof col === 'function' ? col(i / n) : col; c.fillRect(px - (wdt >> 1), py - (wdt >> 1), wdt, wdt); } };
     const arm = (ang, len, hand, d = dir) => {
       const ax = x + d * 2, ex = Math.round(ax + Math.cos(ang) * len * d), ey = Math.round(sy + Math.sin(ang) * len);
-      line(ax, sy, ex, ey, '#2e2230', 3); line(ax, sy, ex, ey, (k) => k < .55 ? sleeve : skin, 1);
+      line(ax, sy, ex, ey, '#2e2230', 3); line(ax, sy, ex, ey, (k) => k < .55 ? sleeve : fore, 1);
       if (hand === 'gun') {   // finger gun: index finger forward, thumb up
         c.fillStyle = '#2e2230'; c.fillRect(Math.min(ex, ex + d * 3) , ey - 1, 4, 3); c.fillRect(ex - 1, ey - 3, 3, 3);
         c.fillStyle = skin; c.fillRect(ex, ey, 1, 1); c.fillRect(ex + d, ey, 1, 1); c.fillRect(ex + d * 2, ey, 1, 1); c.fillRect(ex, ey - 2, 1, 2);
