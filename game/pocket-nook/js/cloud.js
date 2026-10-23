@@ -21,6 +21,8 @@ async function loadFirebase(cfg) {
     onAuth: cb => U.onAuthStateChanged(auth, cb),
     redirectResult: () => U.getRedirectResult(auth),
     async google() {
+      // phones and home-screen apps: popups are often blocked there, go to Google and come back instead
+      if (window.NOOK_MOBILE_REDIRECT) return U.signInWithRedirect(auth, google());
       try { return await U.signInWithPopup(auth, google()); }
       catch (e) { if (e && ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes(e.code)) return U.signInWithRedirect(auth, google()); throw e; }
     },

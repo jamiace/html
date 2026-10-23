@@ -187,6 +187,7 @@ const UI = {
   },
   editToolbar(hide) {
     let tb = this._tb; if (!tb) { tb = this._tb = h('div', { class: 'etool' }); this.overlay.append(tb); }
+    if (typeof Mobile !== 'undefined' && Mobile.on) { tb.hidden = true; return Mobile.renderEdit(); }   // the phone has its own edit panel
     const it = Room.sel; if (!it || !Room.edit || hide || !Room.uidMap[it.uid]) { tb.hidden = true; return; }
     const d = ITEMS[it.k]; tb.replaceChildren(...[
       h('span', { class: 'et-name', text: d.n }),

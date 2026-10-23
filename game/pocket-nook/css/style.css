@@ -764,3 +764,122 @@ body.mini .handtray, body.editing .handtray { display: none; }
 .story-bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin: 8px 0 2px; background: var(--paper-2, #efe6d8); box-shadow: inset 0 0 0 2px rgba(46, 34, 48, .12); font-size: 14px; }
 .story-bar.new { background: #fff3c4; box-shadow: inset 0 0 0 2px #e8b54a; }
 @media (max-width: 520px) { .story-say { max-width: none; } }
+
+/* ============================================================
+   Phone (portrait) layout: body.m is set by js/mobile.js on portrait screens up to 900 px wide.
+   Nothing below touches the desktop layout.
+   ============================================================ */
+.mtoday, .mnav, .mzoom { display: none; }
+body.m { touch-action: manipulation; }
+body.m #app { height: 100vh; height: 100dvh; grid-template-rows: auto minmax(0, 1fr) auto; padding: max(6px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 0 max(10px, env(safe-area-inset-left, 0px)); }
+body.m .dock, body.m .hud-right .chip[aria-label="迷你模式"], body.m .musicchip, body.m .brand-sub, body.m .brand-name { display: none !important; }
+/* HUD: one row */
+body.m .hud { display: flex; flex-wrap: nowrap; gap: 6px; }
+body.m .hud-mid { flex: 1; display: flex; gap: 6px; justify-content: flex-start; min-width: 0; grid-column: auto; grid-row: auto; }
+body.m .hud-mid .chip { padding: 1px 6px; font-size: 15px; }
+body.m .timerchip { display: none; }
+body.m .xpbar { width: 36px; }
+body.m .cloudchip .cl-t { display: none; }
+/* the room on top, the "today" panel under it */
+body.m .stage { justify-content: flex-start; align-items: stretch; gap: 8px; overflow-y: auto; overflow-x: hidden; padding: 6px 0 10px; -webkit-overflow-scrolling: touch; }
+body.m .room-wrap { align-self: center; flex: none; overflow: hidden; }
+body.m .room-wrap > #room, body.m .room-wrap > #overlay { transform-origin: 0 0; transform: var(--zt, none); transition: transform .18s steps(4); }
+body.m .mzoom { display: grid; place-items: center; position: absolute; right: 6px; top: 6px; z-index: 7; width: 34px; height: 34px; padding: 0; border: 0; background: var(--paper); box-shadow: 0 0 0 2px #2e2230, 0 3px 0 rgba(46, 34, 48, .2); opacity: .9; }
+body.m .room-wrap.zoomed .mzoom { background: #fde7b0; }
+body.m .mtoday { display: flex; flex-direction: column; gap: 8px; }
+body.m .mtoday[hidden] { display: none; }
+body.m .mtimer { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--paper); box-shadow: 0 0 0 3px #2e2230, 0 5px 0 rgba(46, 34, 48, .16); }
+body.m .mtimer.running { background: #fde3e4; }
+body.m .mtimer.running.brk { background: #d6ecc5; }
+body.m .mtimer-main { flex: 1; display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; text-align: left; color: var(--ink); }
+body.m .mt-time { font-size: 30px; line-height: 1; }
+body.m .mt-mode { font-size: 14px; color: var(--ink-2); }
+body.m .mrows { display: flex; flex-direction: column; gap: 6px; }
+body.m .mrow { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border: 0; text-align: left; color: var(--ink); background: var(--paper); box-shadow: 0 0 0 2px rgba(46, 34, 48, .55), 0 4px 0 rgba(46, 34, 48, .12); }
+body.m .mrow.need { background: #fff3c4; box-shadow: 0 0 0 2px #e8b54a, 0 4px 0 rgba(46, 34, 48, .12); }
+body.m .mrow-t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+body.m .mrow-t b { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.m .mrow-t .hint { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.m .mtray-slot .handtray { position: static; max-width: none; flex-wrap: wrap; }
+body.m .mtray-slot .handtray-row { flex: 1; }
+body.m .handbtn { width: 40px; height: 40px; }
+body.m .hand-hint { top: 4px; bottom: auto; font-size: 13px; }
+/* bottom tabs */
+body.m .mnav { display: flex; justify-content: space-around; gap: 4px; padding: 6px 0 max(6px, env(safe-area-inset-bottom, 0px)); background: var(--bg); box-shadow: 0 -3px 0 rgba(46, 34, 48, .12); }
+body.m .mtab { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; border: 0; background: none; color: var(--ink-2); font-size: 12px; padding: 2px 0; min-height: 48px; }
+body.m .mtab.on { color: var(--ink); font-weight: 700; }
+body.m .mtab.on img { filter: drop-shadow(0 2px 0 rgba(232, 181, 74, .9)); }
+body.m .mtab .badge-dot { position: absolute; top: 0; right: calc(50% - 22px); }
+body.m .mmore { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+body.m .mmore .dock-btn { width: auto; min-height: 64px; font-size: 13px; }
+/* sheets from the bottom */
+body.m .win { left: 0 !important; right: 0; top: auto !important; bottom: var(--kb, 0px); width: auto !important; max-width: none; border-width: 10px; border-image-width: 10px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+body.m .win .win-h { cursor: grab; position: relative; padding-top: 10px; }
+body.m .win .win-h::before { content: ""; position: absolute; left: 50%; top: 2px; width: 40px; height: 4px; margin-left: -20px; background: var(--line); }
+body.m .win-b { max-height: calc(72dvh - 56px - var(--kb, 0px)); }
+body.m .win.half .win-b { max-height: calc(52dvh - 56px - var(--kb, 0px)); }
+body.m .win.full .win-b { max-height: calc(100dvh - 76px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--kb, 0px)); }
+body.m .win-grip { display: none; }
+/* bigger text and touch targets */
+body.m .hint { font-size: 13px; }
+body.m .chip.sm { min-height: 30px; font-size: 14px; padding: 0 8px; }
+body.m .qopt { min-height: 50px; font-size: 16px; }
+body.m .qopts { grid-template-columns: 1fr; }
+body.m #spell-in { font-size: 18px; }
+body.m .tab { min-height: 34px; }
+body.m.editing .mtoday { visibility: hidden; }
+body.m .mtip { z-index: 8; white-space: normal; max-width: 220px; text-align: center; }
+body.m #toasts { top: calc(env(safe-area-inset-top, 0px) + 8px); bottom: auto !important; }
+body.m .pins, body.m #pins { display: none; }
+body.m .win.resizable { height: auto !important; }
+/* phone edit mode: one panel at the bottom (replaces the edit bar, the floating toolbar and the tabs) */
+body.m #editbar, body.m .etool { display: none !important; }
+.medit { display: none; }
+body.m.editing .mnav, body.m.editing .mtoday { display: none; }
+body.m.editing .medit { display: flex; flex-direction: column; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px)); background: var(--paper); box-shadow: 0 -3px 0 #2e2230, 0 -8px 0 rgba(46, 34, 48, .12); }
+.medit-h { display: flex; align-items: center; gap: 8px; min-height: 34px; }
+.medit-h .grow { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.medit-h b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.medit-pv { width: 34px; height: 34px; display: grid; place-items: center; background: var(--paper-2, #efe6d8); box-shadow: inset 0 0 0 2px rgba(46, 34, 48, .15); flex: none; }
+.medit-pv canvas { max-width: 30px; max-height: 30px; }
+.medit-b { display: flex; align-items: center; gap: 12px; }
+.medit-acts { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.medit-acts .chip { min-height: 40px; font-size: 14px; }
+.medit-pad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 44px); gap: 4px; flex: none; }
+.medit-pad button { width: 44px; height: 44px; padding: 0; min-height: 0; font-size: 18px; }
+.medit-pad .up { grid-column: 2; grid-row: 1; } .medit-pad .left { grid-column: 1; grid-row: 2; } .medit-pad .down { grid-column: 2; grid-row: 2; } .medit-pad .right { grid-column: 3; grid-row: 2; }
+.medit-tip { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+/* ---------- phone: second pass ---------- */
+body.m .mzoom { top: auto; bottom: 6px; right: 6px; width: 36px; height: 36px; }
+body.m .kbd-hint { display: none; }
+/* hand tray: a card with its toggle on top and the things in a full-width grid */
+body.m .mtray-slot .handtray { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+body.m .mtray-slot .handtray-t { align-self: flex-start; }
+body.m .mtray-slot .handtray-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 4px; margin-top: 8px; padding: 6px; }
+body.m .mtray-slot .handbtn { width: auto; height: 44px; }
+body.m .hand-hint { left: 6px; right: 6px; transform: none; max-width: none; white-space: normal; }
+body.m .hand-hint span { flex: 1; }
+/* toasts under the status bar */
+body.m #toasts { top: calc(env(safe-area-inset-top, 0px) + 52px); left: 10px; right: 10px; width: auto; transform: none; }
+body.m .toast { max-width: none; }
+/* long press: a paper note above what you pressed */
+body.m .mtip { background: var(--paper); color: var(--ink); font-size: 13px; padding: 4px 8px; box-shadow: 0 0 0 2px #2e2230, 0 3px 0 rgba(46, 34, 48, .2); line-height: 1.4; }
+/* end of focus card: wide enough for one line each */
+body.m .ritual-card { width: min(320px, calc(100% - 24px)); top: 8%; }
+body.m .ritual-card .rc-m, body.m .ritual-card .rc-pet { white-space: nowrap; }
+/* pet window: a smaller picture so the tabs fit */
+body.m .ava-stage.pet { width: 96px; padding: 6px; }
+body.m .ava-stage.pet canvas { max-width: 84px; height: auto; }
+/* outfit window: the picture on top, choices below at full width */
+body.m .win[data-id=avatar] .ava-row { flex-direction: column; }
+body.m .win[data-id=avatar] .ava-stage { width: 100%; flex-direction: row; justify-content: center; align-items: center; flex-wrap: wrap; }
+body.m .win[data-id=avatar] .ava-opts { min-width: 0; }
+/* word rows: word, part of speech and sound on one line, meaning under it */
+body.m .wrow { grid-template-columns: auto 1fr auto; row-gap: 2px; }
+body.m .wrow > b { grid-column: 1; } body.m .wrow > .hint { grid-column: 2; } body.m .wrow > .xbtn { grid-column: 3; grid-row: 1; }
+body.m .wrow > .wz, body.m .wrow > span:not(.hint):not(.dots) { grid-column: 1 / 3; }
+body.m .wrow > .dots { grid-column: 3; justify-self: end; }
+body.m .lstep { font-size: 12px; padding: 4px; gap: 4px; }
+body.m .mtray-slot .handtray-row { flex: none; grid-auto-rows: 44px; align-content: start; }
+body.m .mtray-slot .handtray { display: block; flex-wrap: nowrap; }
+body.m .mtray-slot .handtray-t { display: inline-flex; }

@@ -243,7 +243,7 @@ Object.assign(UI, {
           s.flip ? h('span', { class: 'fzh', text: v.z }) : h('span', { class: 'hint', text: '點卡片看中文' })),
         h('div', { class: 'row center' }, h('button', { class: 'chip', 'aria-label': '發音', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 20), '發音')),
         h('div', { class: 'row center sbtns' }, h('button', { class: 'chip big', id: 'rv-back', disabled: s.ri <= 0, 'aria-label': '上一個單字', title: '上一個單字（Backspace）', onclick: () => Learn.back() }, ico('i_back', 20), '上一個'), h('button', { class: 'chip big', onclick: () => Learn.review(false) }, '還不熟'), h('button', { class: 'chip big primary', onclick: () => Learn.review(true) }, '記得')),
-        h('p', { class: 'hint center', text: '空白鍵翻面 · ← 還不熟 · → 記得 · Backspace 上一個（測驗時不能回頭）' }),
+        h('p', { class: 'hint center kbd-hint', text: '空白鍵翻面 · ← 還不熟 · → 記得 · Backspace 上一個（測驗時不能回頭）' }),
         s.kind !== 'daily' ? h('button', { class: 'chip sm', onclick: () => Learn.skipReview() }, '直接測驗') : null];
     }
     if (s.step === 'quiz') {

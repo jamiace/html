@@ -1,0 +1,17 @@
+{
+  "name": "小窩時光 Pocket Nook",
+  "short_name": "小窩時光",
+  "description": "像素風 Lo-Fi 專注小遊戲：佈置小房間、番茄鐘、背單字和寵物陪伴。",
+  "lang": "zh-Hant-TW",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#d9d0e5",
+  "theme_color": "#d9d0e5",
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

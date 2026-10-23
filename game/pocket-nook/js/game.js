@@ -360,7 +360,8 @@ function setupInput(cv) {
     const [x, y] = toRoom(e);
     if (Room.edit) {
       const h = Room.hit(x, y, { itemsOnly: true });
-      if (h && h.kind === 'item') { const it = h.it; Room.sel = it; Room.drag = { it, ox: x - it.x, oy: y - it.y, sx: x, sy: y, moved: false }; cv.setPointerCapture(e.pointerId); }
+      // on a touch screen what you drag floats a little above the finger so you can see where it goes
+      if (h && h.kind === 'item') { const it = h.it, lift = e.pointerType === 'touch' ? 10 : 0; Room.sel = it; Room.drag = { it, ox: x - it.x, oy: y - it.y + lift, sx: x, sy: y, moved: false }; cv.setPointerCapture(e.pointerId); }
       else Room.sel = null;
       UI.editToolbar(); e.preventDefault(); return;
     }
@@ -390,6 +391,7 @@ function setupInput(cv) {
       const d = Room.drag; if (d.moved) { const it = d.it; if (ITEMS[it.k].layer === 'decor') Room.settleDecor(it); else Room.clampItem(it); Room.indexItems(); Life.track('move', 1); Game.save(); }
       Room.drag = null; UI.editToolbar(); return;
     }
+    if (UI.lpDone) { UI.lpDone = false; down = null; return; }   // a long press on the phone only shows what it is
     if (!down || Room.edit) return; const [x, y] = toRoom(e); const moved = Math.hypot(x - down.x, y - down.y) > 3; down = null; if (moved) return;
     const sm = typeof Social !== 'undefined' && Social.hitMark(x, y); if (sm) { Social.readMark(sm); return; }
     if (typeof Feel !== 'undefined' && Feel.hitPlane(x, y)) { Feel.openPlane(); return; }
