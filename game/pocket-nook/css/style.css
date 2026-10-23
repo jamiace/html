@@ -623,7 +623,7 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 .win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
 .win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
 /* music library: albums and songs scroll on their own; the song list always fits at least 5 songs */
-.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 486px; max-height: 486px; min-height: 70px; }
+.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 480px; max-height: 480px; min-height: 70px; }
 .win[data-id=music] .win-b > .scroll.mlib-al-scroll { flex: 0 0 auto; max-height: 76px; min-height: 0; }
 .win[data-id=music] .win-b > .scroll.mtracks { flex: 1 1 auto; min-height: calc(5 * 36px); max-height: none; }
 .win[data-id=music] .win-b > :not(.scroll) { flex-shrink: 0; }
@@ -731,3 +731,17 @@ body.mini .handtray, body.editing .handtray { display: none; }
   .hand-hint { top: auto; bottom: calc(100% + 8px); font-size: 12px; }
   .handbtn { width: 30px; height: 30px; }
 }
+
+/* ---------- daily task tiers ---------- */
+.tierpick { display: flex; flex-direction: column; gap: 4px; }
+.tierpick .hard, .tiertag.hard { background: #f6d3c4; }
+.tiertag { display: inline-block; margin-left: 6px; padding: 0 5px; font-size: 12px; background: #e6eef6; color: var(--ink-2); vertical-align: 1px; }
+/* ---------- end-of-focus card ---------- */
+.ritual-card { position: absolute; left: 50%; top: 12%; transform: translateX(-50%); z-index: 6; pointer-events: auto; display: grid; gap: 4px; justify-items: center; padding: 8px 14px 9px; border: 0; cursor: pointer; font: inherit; color: var(--ink); background: var(--paper); box-shadow: 0 0 0 3px #2e2230, 0 6px 0 rgba(46, 34, 48, .2); animation: rcIn .32s steps(4) both; max-width: calc(100% - 24px); }
+.ritual-card.out { animation: rcOut .25s steps(3) both; }
+.ritual-card .rc-t { display: flex; align-items: center; gap: 6px; font-size: 16px; }
+.ritual-card .rc-m { font-size: 14px; color: var(--ink-2); }
+.ritual-card .rc-rw { display: flex; align-items: center; gap: 8px; }
+.ritual-card .rc-pet { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink-2); }
+@keyframes rcIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+@keyframes rcOut { to { opacity: 0; transform: translate(-50%, -6px); } }

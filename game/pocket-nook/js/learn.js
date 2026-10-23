@@ -74,8 +74,10 @@ const Learn = {
     else if (kind === 'redo') { words = shuffle(this.dailyIdx()).slice(0, 10); nq = 8; kind = 'practice'; }
     else if (kind === 'need') { words = this.pick(5); nq = 5; }
     else if (kind === 'train' || kind === 'help') { words = this.pick(4); nq = 4; }
+    else if (kind === 'chal') { const t = Challenge.task(opts.k); if (!t || !t.words) return; words = Challenge.left(t).map(w => VIDX[w]); if (!words.length) return UI.openTasks('daily'); nq = words.length; }
     else { words = this.pick(10); nq = 8; }
     const s = this.sess = { kind, opts, words, nq, step: 'review', ri: kind === 'daily' ? Math.min(this.L.reviewed, words.length) : 0, flip: false, unsure: [], qs: null, qi: 0, ans: null, right: 0, wrong: [], newly: 0, mastered: 0, result: null, spoke: -1 };
+    if (kind === 'chal') { s.task = Challenge.task(opts.k); if (s.task.k !== 'c_new' || s.task.reviewed) s.ri = words.length; }
     if (s.ri >= words.length || kind === 'train' || kind === 'help') this.toQuiz();
     UI.openWin('study');
   },
@@ -84,6 +86,7 @@ const Learn = {
     const i = s.words[s.ri]; if (!knew && !s.unsure.includes(i)) s.unsure.push(i); if (knew) s.unsure = s.unsure.filter(x => x !== i);
     const r = this.recMake(i, [0, this.dayNum(), 0, 0, 0]); if (!(s.seenIdx || (s.seenIdx = new Set())).has(i)) { s.seenIdx.add(i); r[2]++; }
     s.ri++; s.flip = false; if (s.kind === 'daily') this.L.reviewed = Math.max(this.L.reviewed, s.ri);
+    if (s.kind === 'chal' && s.ri >= s.words.length) s.task.reviewed = true;
     if (s.ri >= s.words.length) this.toQuiz();
     UI.refresh('study'); Game.save();
   },
@@ -91,11 +94,12 @@ const Learn = {
     const s = this.sess; if (!s || s.step !== 'review' || s.ri <= 0) return;
     s.ri--; s.flip = false; UI.refresh('study');
   },
-  skipReview() { const s = this.sess; if (s && s.step === 'review' && s.kind !== 'daily') { this.toQuiz(); UI.refresh('study'); } },
+  skipReview() { const s = this.sess; if (s && s.step === 'review' && s.kind !== 'daily') { if (s.kind === 'chal') s.task.reviewed = true; this.toQuiz(); UI.refresh('study'); } },
   toQuiz() {
     const s = this.sess; s.step = 'quiz';
     const rest = shuffle(s.words.filter(i => !s.unsure.includes(i)));
-    s.qs = this.makeQs(shuffle([...s.unsure, ...rest].slice(0, s.nq))); s.qi = 0; s.ans = null;
+    const ids = shuffle([...s.unsure, ...rest].slice(0, s.nq));
+    s.qs = s.kind === 'chal' ? Challenge.makeQs(s.task, ids) : this.makeQs(ids); s.qi = 0; s.ans = null;
   },
   makeQs(ids) {
     const types = this.canSpeak() ? ['en2zh', 'zh2en', 'spell', 'listen'] : ['en2zh', 'zh2en', 'spell'];
@@ -117,16 +121,27 @@ const Learn = {
   answer(val) {
     const s = this.sess; if (!s || s.step !== 'quiz' || s.ans) return;
     const q = s.qs[s.qi], v = VOCAB[q.i];
-    const ok = q.type === 'spell' ? String(val || '').trim().toLowerCase() === v.w.toLowerCase() : val === q.i;
+    const typed = q.type === 'spell' || q.type === 'listenspell';
+    const ok = typed ? String(val || '').trim().toLowerCase() === v.w.toLowerCase() : val === q.i;
     s.ans = { ok, val };
     const r = this.recMake(q.i, [0, 0, 1, 0, 0]), today = this.dayNum();
-    if (ok) { const before = r[0]; r[0] = Math.min(5, r[0] + 1); r[1] = today + SRS_INT[r[0]]; r[3]++; s.right++; if (before === 0) s.newly++; if (r[0] === 5 && before < 5) s.mastered++; Life.track('quizRight', 1); }
+    if (ok) { const before = r[0]; r[0] = Math.min(5, r[0] + 1); r[1] = today + SRS_INT[r[0]]; r[3]++; s.right++; if (before === 0) s.newly++; if (r[0] === 5 && before < 5) s.mastered++; Life.track('quizRight', 1);
+      if (typed || q.type === 'listen') Life.track('engRight', 1);
+      if (s.kind === 'chal') Challenge.got(s.task, v.w); }
     else { r[0] = Math.max(1, r[0] - 1); r[1] = today + 1; r[4]++; s.wrong.push(q.i); }
     if (q.type !== 'listen' || !ok) this.speak(v.w);
     UI.refresh('study'); Game.save();
     if (ok) { const qi = s.qi; setTimeout(() => { if (this.sess === s && s.step === 'quiz' && s.qi === qi && s.ans) this.next(); }, 1000); }
   },
-  next() { const s = this.sess; if (!s || !s.ans) return; s.qi++; s.ans = null; if (s.qi >= s.qs.length) this.finish(); UI.refresh('study'); },
+  next() {
+    const s = this.sess; if (!s || !s.ans) return; s.qi++; s.ans = null;
+    if (s.qi >= s.qs.length && s.kind === 'chal' && !s.redo) {
+      // a challenge never restarts: the words you missed come back once more at the end
+      s.redo = true; const again = [...new Set(s.wrong)].filter(i => !(s.task.got || []).includes(VOCAB[i].w));
+      if (again.length) { s.redoFrom = s.qs.length; s.qs.push(...Challenge.makeQs(s.task, shuffle(again))); }
+    }
+    if (s.qi >= s.qs.length) this.finish(); UI.refresh('study');
+  },
   finish() {
     const s = this.sess, n = s.qs.length, R = s.right, L = this.L; s.step = 'result';
     const res = { coins: 0, xp: R * 3 + s.newly * 2, items: [], msg: '' };
@@ -141,9 +156,12 @@ const Learn = {
       res.coins = R; res.xp = R * 2; Object.assign(res, Pets.trainResult(s.opts.pid, s.opts.trick, R, n));
     } else if (s.kind === 'help') {
       res.coins = 0; res.xp = R * 2; Object.assign(res, Social.helpResult(s.opts, R, n));
+    } else if (s.kind === 'chal') {
+      const t = s.task, left = Challenge.left(t).length; res.coins = R;
+      res.msg = t.prog >= t.need ? '挑戰完成！到「任務」領取獎勵。' : `已答對 ${t.prog}/${t.need} 個字，剩下的 ${left} 個字隨時可以回來繼續。`;
     } else if (s.kind === 'need') {
       const it = s.opts.item, cnt = R >= n ? 2 : R >= 3 ? 1 : 0; res.coins = R;
-      if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); res.msg = cnt === 2 ? `全對！得到 2 個${SUPPLIES[it].n}。` : `得到 1 個${SUPPLIES[it].n}，全對可以拿 2 個。`; }
+      if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); Life.track('swap', 1, { perfect: R >= n }); res.msg = cnt === 2 ? `全對！得到 2 個${SUPPLIES[it].n}。` : `得到 1 個${SUPPLIES[it].n}，全對可以拿 2 個。`; }
       else res.msg = `答對 3 題才能換到${SUPPLIES[it].n}，再試一次吧！`;
       Life.track('study', 0);
     } else {
@@ -189,7 +207,7 @@ Object.assign(UI, {
   w_study() {
     const s = Learn.sess;
     if (!s) return [h('div', { class: 'empty' }, h('p', { text: '從「學習」開始一次複習。' }))];
-    const kindName = s.kind === 'daily' ? '今日單字' : s.kind === 'need' ? `換取${SUPPLIES[s.opts.item].n}` : s.kind === 'train' ? Pets.trainTitle(s.opts) : s.kind === 'help' ? Social.helpTitle(s.opts) : '自由練習';
+    const kindName = s.kind === 'chal' ? Challenge.title(s.task) : s.kind === 'daily' ? '今日單字' : s.kind === 'need' ? `換取${SUPPLIES[s.opts.item].n}` : s.kind === 'train' ? Pets.trainTitle(s.opts) : s.kind === 'help' ? Social.helpTitle(s.opts) : '自由練習';
     const bar = (a, b) => h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(a / b * 100)}%` }));
     if (s.step === 'review') {
       const v = VOCAB[s.words[s.ri]];
@@ -210,12 +228,14 @@ Object.assign(UI, {
       if (q.type === 'en2zh') { prompt = h('div', { class: 'qword' }, v.w, h('button', { class: 'xbtn', 'aria-label': '發音', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 22))); sub = `${v.ph ? v.ph + ' · ' : ''}${v.p} · 選出中文意思`; }
       else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: v.z }); sub = `${v.p} · 選出英文單字`; }
       else if (q.type === 'listen') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), '再聽一次'); sub = '聽發音，選出中文意思'; }
-      else { prompt = h('div', { class: 'qzh', text: v.z }); sub = `${v.p} · 拼出英文（${v.w.length} 個字母）`; }
-      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: `測驗 ${s.qi + 1}/${s.qs.length} · 答對 ${s.right}` })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, prompt, h('p', { class: 'hint', text: sub }))];
-      if (q.type === 'spell') {
-        const hintTxt = v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim();
+      else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), '再聽一次'); sub = '聽發音，拼出英文'; }
+      else { prompt = h('div', { class: 'qzh', text: v.z }); sub = q.noHint ? `${v.p} · 拼出英文` : `${v.p} · 拼出英文（${v.w.length} 個字母）`; }
+      const redo = s.redoFrom != null && s.qi >= s.redoFrom;
+      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? `再試一次剛剛答錯的字 ${s.qi - s.redoFrom + 1}/${s.qs.length - s.redoFrom}` : `測驗 ${s.qi + 1}/${s.redoFrom != null ? s.redoFrom : s.qs.length} · 答對 ${s.right}` })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, prompt, h('p', { class: 'hint', text: sub }))];
+      if (q.type === 'spell' || q.type === 'listenspell') {
+        const hintTxt = q.noHint || q.type === 'listenspell' ? '' : v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim();
         const inp = h('input', { id: 'spell-in', type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', disabled: !!A, placeholder: hintTxt, onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); if (!s.ans) Learn.answer(e.target.value); else Learn.next(); } } });
-        parts.push(h('div', { class: 'spellhint num', text: hintTxt }), h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), h('button', { class: 'chip primary', disabled: !!A, onclick: () => Learn.answer(inp.value) }, '確定')));
+        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), h('button', { class: 'chip primary', disabled: !!A, onclick: () => Learn.answer(inp.value) }, '確定')));
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) el.focus(); }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
@@ -236,7 +256,8 @@ Object.assign(UI, {
       h('div', { class: 'row center wrap' },
         s.kind === 'need' && r.items.length && s.opts.needId && Life.L.needs.some(x => x.id === s.opts.needId) ? h('button', { class: 'chip primary', onclick: () => { const nd = Life.L.needs.find(x => x.id === s.opts.needId); this.closeWin('study'); if (nd) Life.use(s.opts.item, nd); } }, ico(SUPPLIES[s.opts.item].spr, 20), '馬上使用') : null,
         s.kind === 'need' && !r.items.length ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), '再試一次') : null,
-        s.kind === 'daily' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '去領獎勵') : null,
+        s.kind === 'daily' || (s.kind === 'chal' && s.task.prog >= s.task.need) ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '去領獎勵') : null,
+        s.kind === 'chal' && s.task.prog < s.task.need ? h('button', { class: 'chip primary', onclick: () => Learn.start('chal', s.opts) }, ico('i_reset', 20), '繼續挑戰') : null,
         s.kind === 'train' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Pets.select(s.opts.pid, 'train'); } }, ico('i_paw', 20), '回到寵物') : null,
         s.kind === 'help' && s.right < 3 ? h('button', { class: 'chip primary', onclick: () => Learn.start('help', s.opts) }, ico('i_reset', 20), '再試一次') : null,
         s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); UI.openWin('visit'); } }, ico('i_people', 20), '回到好友房間') : null,

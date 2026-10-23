@@ -319,8 +319,9 @@ Object.assign(UI, {
     return h('span', { class: 'rw' }, h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: String(rw.c) })), h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: String(rw.x) })),
       rw.b ? h('span', { class: 'rwc' }, ico('i_heart', 16), h('b', { class: 'num', text: String(rw.b) })) : null, (rw.item || extraItem) ? h('span', { class: 'rwc', title: '隨機道具' }, ico('i_bag', 16)) : null);
   },
-  go(where) {
+  go(where, t) {
     if (where === 'learn') return this.openWin('learn');
+    if (where === 'chal') return t && Learn.start('chal', { k: t.k });
     if (where === 'timer') return this.openWin('timer');
     if (where === 'todo') return this.openWin('todo');
     if (where === 'pet') { this.petTab = 'care'; return this.openWin('pet'); }
@@ -341,15 +342,24 @@ Object.assign(UI, {
       D.tasks.forEach((t, i) => {
         const def = TASK_DEFS[t.k], rw = Life.taskReward(t), done = t.prog >= t.need;
         let goBtn = null;
-        if (!done && def.go) goBtn = h('button', { class: 'chip sm', onclick: () => { if (def.go === 'shopItem') { this.shopTab = ITEMS[t.item] ? ITEMS[t.item].cat : 'furniture'; this.shopFocus = t.item; this.openWin('shop'); } else this.go(def.go); } }, '前往');
+        const tier = def.tiers ? Challenge.tierOf(t) : null, info = def.tiers ? Challenge.info(t.k) : null;
+        if (!done && def.go) goBtn = h('button', { class: 'chip sm', onclick: () => { if (def.go === 'shopItem') { this.shopTab = ITEMS[t.item] ? ITEMS[t.item].cat : 'furniture'; this.shopFocus = t.item; this.openWin('shop'); } else this.go(def.go, t); } }, def.go === 'chal' ? (t.prog > 0 || (t.got && t.got.length) ? '繼續' : '開始') : '前往');
+        // tasks with tiers: pick normal or hard first (hard = x1.5 reward); fixed for the day once chosen
+        if (def.tiers && !tier && !t.claimed) {
+          const base = TASK_DEFS[t.k].rw || t.rw;
+          goBtn = h('div', { class: 'tierpick' },
+            h('button', { class: 'chip sm', title: info.d.n, onclick: () => Challenge.choose(t.k, 'n') }, `普通 ${def.tiers.n}`),
+            h('button', { class: 'chip sm hard', title: `${info.d.h}，獎勵 ×1.5（${Math.round(base.c * 1.5)} 金幣）`, onclick: () => Challenge.choose(t.k, 'h') }, `困難 ${def.tiers.h}`));
+        }
         body.push(h('div', { class: 'task' + (t.claimed ? ' claimed' : done ? ' ready' : '') },
-          h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: def.t(t) }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(t.prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${t.prog}/${t.need}` }), this.rewardChips(rw), t.k === 'vocab' && Learn.L.streak ? h('span', { class: 'hint', text: `連續加碼 +${Math.min(50, Learn.L.streak * 5)}` }) : null)),
+          h('div', { class: 'task-main' }, h('div', { class: 'task-t' }, def.t(t), tier ? h('span', { class: 'tiertag' + (tier === 'h' ? ' hard' : ''), text: TIER_N[tier] }) : null),
+            info ? h('div', { class: 'hint', text: tier ? info.d[tier] : `普通：${info.d.n}。困難：${info.d.h}，獎勵 ×1.5。` }) : null, h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(t.prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${t.prog}/${t.need}` }), this.rewardChips(rw), t.k === 'vocab' && Learn.L.streak ? h('span', { class: 'hint', text: `連續加碼 +${Math.min(50, Learn.L.streak * 5)}` }) : null)),
           t.claimed ? h('span', { class: 'own', text: '已領取' }) : done ? h('button', { class: 'chip sm primary', onclick: () => Life.claimTask(i) }, '領取') : goBtn));
       });
       const all = D.tasks.every(t => t.claimed);
       body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: '全部完成獎勵' }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: '＋2 個道具' }))),
         D.bonus ? h('span', { class: 'own', text: '已領取' }) : h('button', { class: 'chip sm primary', disabled: !all, onclick: () => Life.claimBonus() }, '領取')));
-      body.push(h('p', { class: 'hint', text: '每天午夜換一批新任務。' }));
+      body.push(h('p', { class: 'hint', text: '每天早上 6 點換一批新任務。英文挑戰不計時，答錯不用重來，可以中途離開，答對的字都會留著。' }));
     } else if (tab === 'team') {
       body.push(...this.w_team());
     } else if (tab === 'needs') {

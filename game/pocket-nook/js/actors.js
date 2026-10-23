@@ -133,6 +133,8 @@ class Avatar extends Walker {
     if (this.happy > 0) this.happy -= dt;
     this.blink -= dt; if (this.blink < -0.13) this.blink = 2.5 + Math.random() * 3;
     if (this.state === 'show') { if (!TrickShow.busy()) { this.state = 'idle'; this.show = null; this.timer = 1; } return; }
+    // end-of-focus stretch at the desk: stays seated until it is over
+    if (this.stretchT > 0) { this.stretchT -= dt; if (this.stretchT <= 0) { const f = this.afterStretch; this.afterStretch = null; if (f) f(); } return; }
     if (!this.walking) {
       this.timer -= dt;
       if (Game.focusing() && this.state !== 'work' && this.state !== 'goingWork' && this.state !== 'deskstand') this.think();
@@ -153,8 +155,8 @@ class Avatar extends Walker {
     if ((this.state === 'work' || this.state === 'sit') && this.seat && Room.uidMap[this.seat.uid]) {
       const [sx, sy] = this.seatPos(), it = this.seat, d = ITEMS[it.k];
       if (d.chair) {
-        const fr = Math.floor(t * 4) % 2 ? 'type1' : 'type0';
-        c.drawImage(avatarCanvas(fr, cfg, null, Math.floor(t * 1.2) % 2), Math.round(sx - 10), Math.round(sy) - AVA_TOP);
+        const str = this.stretchT > 0, fr = str ? 'stretch' : Math.floor(t * 4) % 2 ? 'type1' : 'type0';
+        c.drawImage(avatarCanvas(fr, cfg, null, str ? 0 : Math.floor(t * 1.2) % 2), Math.round(sx - (str ? 12 : 10)), Math.round(sy) - AVA_TOP - (str && this.stretchT < 1.6 && this.stretchT > 0.6 ? 1 : 0));
         c.drawImage(Room.itemCanvas(it), it.x, it.y);
         if (Math.random() < 0.01) Room.puff('p_note', sx + 6, sy + 2, { vx: 4, vy: -7, max: 1.6, alpha: 0.7 });
       } else {

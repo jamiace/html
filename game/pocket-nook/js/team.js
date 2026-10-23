@@ -34,8 +34,10 @@ const TEAM_TASKS = {
   focus: { n: '全隊專注', unit: '分鐘', ev: ['focusMin'], d: 90, w: 720, how: '番茄鐘專注的分鐘數', icon: 'i_tomato' },
   quiz: { n: '全隊答對題目', unit: '題', ev: ['quizRight'], d: 45, w: 216, how: '任何單字測驗答對的題數', icon: 'i_learn' },
   care: { n: '全隊照顧寵物', unit: '次', ev: ['feed', 'play', 'groom', 'care', 'train'], d: 15, w: 72, how: '餵食、玩耍、梳毛洗澡、吃藥、訓練的次數', icon: 'i_paw' },
+  // English challenge: spelling and listening questions answered right anywhere (daily words, practice, challenges, training)
+  eng: { n: '全隊拼字聽力', unit: '題', ev: ['engRight'], d: 30, w: 150, how: '拼字題和聽力題答對的題數（任何單字練習都算）', icon: 'i_speaker' },
 };
-const TEAM_ORDER = ['focus', 'quiz', 'care'];
+const TEAM_ORDER = ['focus', 'quiz', 'care', 'eng'];
 const TEAM_CFG = { flushMs: 5 * 60e3, pollMs: 10 * 60e3, viewMs: 30e3, lobbyMs: 5 * 60e3, lobbyPollMs: 20e3, claimDays: 7, histMax: 12, matchTry: 10 };
 // one colour per seat (join order), used for the stacked progress bar and the member cards
 const TEAM_COLORS = ['#ef7b6c', '#f2b84b', '#5fbf8f', '#5aa2e0', '#a77bd6'];
@@ -53,7 +55,15 @@ const Team = {
   // ---------- schedule: same task for everybody ----------
   period(type) { return type === 'd' ? Life.today() : weekKey(); },
   index(type) { return type === 'd' ? Learn.dayNum() : Merchant.weekIndex(); },
-  task(type) { const i = this.index(type) + (type === 'w' ? 1 : 0); return TEAM_ORDER[((i % 3) + 3) % 3]; },
+  // the same for everybody on the same day / week: a fixed shuffle by date, never the same task twice in a row
+  // every task once in each run of 4 periods, in a shuffled order
+  task(type, i = this.index(type)) {
+    const n = TEAM_ORDER.length, salt = type === 'w' ? 7 : 3;
+    const perm = (b) => TEAM_ORDER.map((_, k) => k).sort((x, y) => hsh(b, x, salt) - hsh(b, y, salt) || x - y);
+    const b = Math.floor(i / n), p = ((i % n) + n) % n, P = perm(b);
+    if (P[0] === perm(b - 1)[n - 1]) P.push(P.shift());
+    return TEAM_ORDER[P[p]];
+  },
   goal(type, task) { return TEAM_TASKS[task || this.task(type)][type]; },
   end(type) {
     if (type === 'w') return weekEnd().getTime();

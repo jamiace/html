@@ -156,7 +156,10 @@ const Game = {
   modeLen(m) { const t = this.T(); return (m === 'focus' ? t.focus : m === 'short' ? t.short : t.long) * 60; },
   setMode(m) { const t = this.T(); t.mode = m; t.running = false; t.remain = this.modeLen(m); t.credited = 0; this.afterTimer(); },
   start() {
-    const t = this.T(); if (t.running) return; if (t.remain <= 0) t.remain = this.modeLen(t.mode); t.endsAt = Date.now() + t.remain * 1000; t.running = true;
+    const t = this.T(); if (t.running) return; if (t.remain <= 0) t.remain = this.modeLen(t.mode);
+    const fresh = t.mode === 'focus' && !t.credited && t.remain >= this.modeLen('focus') - 1;
+    t.endsAt = Date.now() + t.remain * 1000; t.running = true;
+    if (fresh && typeof Ritual !== 'undefined') Ritual.start();
     const task = t.mode === 'focus' && this.S.todos.find(x => String(x.id) === String(this.S.focusTask) && !x.done);
     if (task && this.avatar) this.bubble(this.avatar, '專心做：' + task.t.slice(0, 18), 3);
     if (t.mode === 'focus' && this.S.settings.autoMusic && !Music.playing && (this.S.music.list.length || Lib.tracks.length)) Music.toggle(true);
@@ -185,9 +188,10 @@ const Game = {
         if (B.coin) { bonus += Math.round(t.focus * 2 * 0.3); delete B.coin; why.push('飯糰'); }
         if (B.xp) { bxp += Math.round(t.focus * 4 * 0.3); delete B.xp; why.push('咖啡'); }
         bonus = this.reward(bonus, bxp, 'done');
-        UI.toast(`完成一輪專注！額外 +${bonus} 金幣、+${bxp} 經驗` + (why.length ? `（${why.join('、')}加成）` : ''), 'i_tomato', 4);
+        if (typeof Ritual !== 'undefined') Ritual.end({ mins: t.focus, bonus, bxp, why });
+        else UI.toast(`完成一輪專注！額外 +${bonus} 金幣、+${bxp} 經驗` + (why.length ? `（${why.join('、')}加成）` : ''), 'i_tomato', 4);
         if (Math.random() < 0.45) setTimeout(() => Life.addNeed(Math.random() < 0.5 ? 'ava_sleepy' : 'ava_hungry'), 5000);
-        if (this.avatar) { this.avatar.happy = 3; this.avatar.hop = 0.45; Game.bubble(this.avatar, '完成了！休息一下吧', 3); }
+        if (this.avatar && typeof Ritual === 'undefined') { this.avatar.happy = 3; this.avatar.hop = 0.45; Game.bubble(this.avatar, '完成了！休息一下吧', 3); }
         UI.flashTitle('專注完成');
       }
       const next = t.round > 0 && t.round % 4 === 0 ? 'long' : 'short';

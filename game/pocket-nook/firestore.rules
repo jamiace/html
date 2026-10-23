@@ -201,7 +201,7 @@ service cloud.firestore {
     function validTeam(d) {
       return d.keys().hasOnly(['type', 'period', 'task', 'goal', 'max', 'members', 'names', 'prog', 'open', 'full', 'mAt', 'doneAt', 'roster', 'by', 'at'])
         && d.get('mAt', 0) is int
-        && d.type in ['d', 'w'] && shortText(d.period, 16) && d.task in ['focus', 'quiz', 'care']
+        && d.type in ['d', 'w'] && shortText(d.period, 16) && d.task in ['focus', 'quiz', 'care', 'eng']
         && d.goal is int && d.max is int && d.max >= 1 && d.max <= 5
         && d.members is list && d.members.size() <= d.max
         && d.names is map && d.prog is map && d.open is bool && d.full is bool

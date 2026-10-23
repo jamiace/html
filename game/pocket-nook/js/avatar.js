@@ -232,6 +232,9 @@ function mannequin(view, frame) {
     const lUp = frame === 1, rUp = frame === 2;
     for (let x = 5; x < 8; x++) { P(x, 9, 'g', x === 7 ? 1 : 2); if (!lUp) P(x, 10, 'g', x === 7 ? 1 : 2); P(x, lUp ? 10 : 11, 'k', x === 5 && !back ? 3 : 2); }
     for (let x = 10; x < 13; x++) { P(x, 9, 'g', x === 12 ? 1 : 2); if (!rUp) P(x, 10, 'g', x === 12 ? 1 : 2); P(x, rUp ? 10 : 11, 'k', x === 10 && !back ? 3 : 2); }
+  } else if (view === 'sitback' && frame === 2) {
+    // stretching at the desk: the arms are drawn raised over the head in avatarGrid
+    for (let y = 7; y < 9; y++) for (let x = 4; x < 14; x++) P(x, y, 'p');
   } else if (view === 'sitback') {
     const t = frame === 1 ? 1 : 0;
     P(3, 2, 'u', 3); P(3, 3, 'f'); P(3, 4, 'f'); P(14, 2, 'u', 1); P(14, 3, 'f', 1); P(14, 4, 'f', 1); P(4, 5 - t, 'f'); P(13, 5 - (1 - t), 'f', 1);
@@ -552,7 +555,7 @@ const AVATAR_FRAMES = {
   front0: ['front', 'front', 0], front1: ['front', 'front', 1], front2: ['front', 'front', 2],
   back0: ['back', 'back', 0], back1: ['back', 'back', 1], back2: ['back', 'back', 2],
   side0: ['side', 'side', 0], side1: ['side', 'side', 1], side2: ['side', 'side', 2], side3: ['side', 'side', 3],
-  type0: ['back', 'sitback', 0], type1: ['back', 'sitback', 1], sit0: ['front', 'sitfront', 0],
+  type0: ['back', 'sitback', 0], type1: ['back', 'sitback', 1], sit0: ['front', 'sitfront', 0], stretch: ['back', 'sitback', 2],
 };
 function colorMap(cfg) {
   const m = {};
@@ -571,15 +574,27 @@ function colorMap(cfg) {
 }
 function avatarGrid(frame, cfg, eyes, bob) {
   const [hv, bv, bf] = AVATAR_FRAMES[frame] || AVATAR_FRAMES.front0;
-  const g = new Grid(20, 30 + AVA_TOP);
+  // the stretch frame is 4 px wider (arms reach out past the hair); it is drawn 2 px further left
+  const st = frame === 'stretch', X = st ? 3 : 1;
+  const g = new Grid(st ? 24 : 20, 30 + AVA_TOP);
   const body = composeBody(bv, bf, cfg); drawNeck(body, bv, cfg);
   const behind = new Grid(18, 13); drawBackItem(behind, bv, cfg, true);
-  g.paste(behind, 1, 15 + AVA_TOP);
-  g.paste(body, 1, 15 + AVA_TOP);
-  const over = new Grid(18, 13); drawBackItem(over, bv, cfg, false); g.paste(over, 1, 15 + AVA_TOP);
+  g.paste(behind, X, 15 + AVA_TOP);
+  g.paste(body, X, 15 + AVA_TOP);
+  const over = new Grid(18, 13); drawBackItem(over, bv, cfg, false); g.paste(over, X, 15 + AVA_TOP);
   const head = composeHead(hv, hv === 'back' ? 'open' : eyes, cfg);
-  const oy = 1 + AVA_TOP + (bob || 0); g.paste(head, 1, oy);
-  drawHeadAcc(g, hv, cfg, 1, oy);
+  const oy = 1 + AVA_TOP + (bob || 0); g.paste(head, X, oy);
+  drawHeadAcc(g, hv, cfg, X, oy);
+  if (st) {
+    // both arms up and out in a V, beside the head, in the sleeve / skin colours of the normal sitting pose
+    const ref = composeBody('sitback', 0, cfg), T0 = 15 + AVA_TOP;
+    const up = ref.get(3, 2), fo = ref.get(3, 3), upR = ref.get(14, 2), foR = ref.get(14, 3);
+    const arm = [[3, 1, 'u'], [3, 0, 'u'], [2, 0, 'u'], [2, -1, 'u'], [1, -1, 'f'], [1, -2, 'f'], [0, -2, 'f'], [0, -3, 'f'], [-1, -3, 'h'], [-1, -4, 'h'], [-1, -5, 'h'], [-1, -6, 'h'], [0, -6, 'h']];
+    for (const [x, y, l] of arm) {
+      g.px(X + x, T0 + y, l === 'u' ? up : l === 'f' ? fo : 'C');
+      g.px(X + 17 - x, T0 + y, l === 'u' ? upR : l === 'f' ? foR : 'D');
+    }
+  }
   return g.outline();
 }
 const AVA_CACHE = {}; let AVA_CACHE_N = 0;

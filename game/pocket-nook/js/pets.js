@@ -356,6 +356,7 @@ const Pets = {
     const ok = R >= Math.ceil(n * 0.75);
     let msg;
     if (ok) {
+      Life.track('trainOk', 1);
       p.tricks[tid] = Math.min(t.need, (p.tricks[tid] || 0) + 1); this.addXp(p, 8 + R * 2); this.addBond(p, 3); this.mood(p, 6);
       if (p.tricks[tid] >= t.need) { msg = `${p.name}學會「${t.n}」了！在寵物視窗按「表演」看看。`; Life.track('trick', 1); this.puff(p, 'p_heart', 4); }
       else msg = `訓練成功！「${t.n}」進度 ${p.tricks[tid]}/${t.need}`;
