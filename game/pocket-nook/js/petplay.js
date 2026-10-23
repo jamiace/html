@@ -305,7 +305,7 @@ const PetPlay = {
     const boxes = items.filter(i => ITEMS[i.k].petBox && this.free(i, a));
     if (a.kind === 'cat' && boxes.length) opts.push(() => this.intoBox(a, pick(boxes)));
     const posts = items.filter(i => ITEMS[i.k].scratch || i.k === 'cat_tree');
-    if (a.kind === 'cat' && posts.length) opts.push(() => this.scratch(a, pick(posts)));
+    if (a.kind === 'cat' && posts.length) opts.push(() => { const post = pick(posts), spot = a.spots().find(s => s.it === post); if (ITEMS[post.k].petSteps && spot && this.free(post, a)) a.goSpot(spot, Math.random() < 0.7 ? 'sleep' : 'sit'); else this.scratch(a, post); });
     const rugs = items.filter(i => ITEMS[i.k].layer === 'rug');
     if (rugs.length) opts.push(() => this.rugRoll(a, pick(rugs)));
     const plants = items.filter(i => ITEMS[i.k].cat === 'plant' && ITEMS[i.k].layer === 'floor');

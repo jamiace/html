@@ -83,10 +83,10 @@ body.editing #room { touch-action: none; }
 #overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
 .bubble {
   position: absolute; left: 0; top: 0; background: var(--bubble); color: var(--bubble-ink); font-size: 14px; line-height: 1.3; padding: 3px 9px;
-  box-shadow: 0 0 0 3px #2e2230, 0 6px 0 rgba(46, 34, 48, .2); white-space: nowrap; max-width: 240px; overflow: hidden; text-overflow: ellipsis; z-index: 3;
+  border: 2px solid #e5cd83; border-radius: 8px; box-shadow: 0 3px 0 rgba(166, 137, 67, .16); white-space: normal; overflow-wrap: anywhere; width: max-content; max-width: 380px; z-index: 3;
   animation: pop .18s steps(3) both;
 }
-.bubble::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 6px; height: 6px; margin-left: -3px; background: var(--bubble); box-shadow: 0 3px 0 #2e2230, 3px 0 0 #2e2230, -3px 0 0 #2e2230; }
+.bubble::after { content: ""; position: absolute; left: var(--tail-x, 50%); bottom: -6px; width: 8px; height: 8px; margin-left: -4px; background: var(--bubble); border-right: 2px solid #e5cd83; border-bottom: 2px solid #e5cd83; border-radius: 0 0 3px 0; transform: rotate(45deg); }
 @keyframes pop { from { transform-origin: bottom; opacity: 0; } }
 .tag { position: absolute; left: 0; top: 0; background: rgba(46, 34, 48, .82); color: #fff7ea; font-size: 12px; padding: 0 6px; white-space: nowrap; z-index: 2; }
 .tag.focus { background: rgba(196, 86, 110, .92); }
@@ -289,7 +289,9 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .stats dd { margin: 0; }
 
 /* gift */
-.gift { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.gift { display: flex; flex-direction: column; align-items: stretch; gap: 10px; text-align: left; }
+.gift > .gift-pv, .gift > .tpv { align-self: center; }
+.gift > p { width: 100%; margin: 0; line-height: 1.65; overflow-wrap: anywhere; }
 .gift-pv { padding: 14px 18px; background: var(--paper-2); box-shadow: inset 0 0 0 3px var(--line); }
 .gift-t { margin: 0; font-size: 17px; }
 
@@ -624,13 +626,16 @@ ol.board li:nth-child(-n+3) .brank { background: var(--honey); color: #2e2230; }
 .win[data-id=visit] .visit-stage { width: min(100%, calc((100vh - 300px) * 4 / 3)); margin: 0 auto; }
 .win[data-id=card] .card-room { width: min(100%, calc((100vh - 420px) * 4 / 3)); margin: 0 auto; }
 /* music library: albums and songs scroll on their own; the song list always fits at least 5 songs */
-.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 1 486px; max-height: 486px; min-height: 70px; }
+.win[data-id=music] .win-b > .scroll.malbum-scroll { flex: 0 0 auto; height: 220px; max-height: none; min-height: 70px; }
 .win[data-id=music] .win-b > .scroll.mlib-al-scroll { flex: 0 0 auto; max-height: 76px; min-height: 0; }
-.win[data-id=music] .win-b > .scroll.mtracks { flex: 1 1 auto; min-height: calc(5 * 36px); max-height: none; }
+.win[data-id=music] .win-b > .scroll.mtracks { flex: 0 0 auto; height: 216px; min-height: 108px; max-height: none; }
 .win[data-id=music] .win-b > :not(.scroll) { flex-shrink: 0; }
 .win[data-id=music] .mlib-al { max-height: none; overflow: visible; }
 .malbum-scroll .malbums { padding: 2px; }
-.win[data-id=music] .win-b { gap: 8px; }
+.win[data-id=music] .win-b { gap: 8px; overflow-y: auto; }
+.music-panel-grip { flex: none; height: 22px; display: flex; align-items: center; justify-content: center; cursor: ns-resize; touch-action: none; user-select: none; color: var(--ink-2); background: var(--paper-2); border-block: 1px solid var(--line); border-radius: 4px; font-size: 12px; }
+.music-panel-grip:hover, .music-panel-grip:focus-visible { color: var(--ink); background: var(--hl); outline: 2px solid var(--honey); outline-offset: -2px; }
+@media (pointer: coarse) { .music-panel-grip { height: 30px; } }
 /* team tasks */
 .tmhead { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--line); }
 .tmhead b { font-size: 17px; }
@@ -984,3 +989,8 @@ body.m #toasts { top: auto !important; bottom: calc(max(6px, env(safe-area-inset
 body.m.m-win #toasts, body.m.editing #toasts { top: calc(env(safe-area-inset-top, 0px) + 8px) !important; bottom: auto !important; flex-direction: column; }
 /* phone: the close button on the left of a window's title bar (computer: on the right, as before) */
 body.m .win-h .xbtn[aria-label="關閉"] { order: -1; margin-right: 2px; }
+
+/* Story replay keeps every line readable rather than overlaying a tall transcript on the stall. */
+.story-review .story-say { position: relative; inset: auto; max-width: none; margin: 8px; line-height: 1.6; }
+button.sdot { border: 0; padding: 0; font: inherit; cursor: pointer; }
+button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset: 2px; }

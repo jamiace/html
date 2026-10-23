@@ -7,7 +7,7 @@ const SAVE_KEY = 'pocketnook.save.v1';
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
 //   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
 const SAVE_SCHEMA = 4;   // 4: coupons & gift pity (wallet), merchant week, pet habits & relationships, wardrobe purchases, food bowls
-const NOOK_VERSION = '2026.10.22.2';
+const NOOK_VERSION = '0.911';
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -297,18 +297,24 @@ const Game = {
   bubble(actor, text, secs = 2) { UI.bubble({ actor }, text, secs); },
   bubbleAt(x, y, text, secs = 2.2) { UI.bubble({ x, y }, text, secs); },
   // ---------- loop ----------
+  frameStep(key, fn) {
+    try { return fn(); } catch (error) {
+      const seen = this._frameErrors || (this._frameErrors = {}), now = Date.now();
+      if (!seen[key] || now - seen[key] > 10000) { seen[key] = now; console.error('[room frame: ' + key + ']', error); }
+    }
+  },
   frame(ts) {
-    const now = ts / 1000; const dt = Math.min(0.05, Math.max(0, now - (this._last || now))); this._last = now;
-    if (now - this.lastEnv > 1) { this.lastEnv = now; Room.computeEnv(this.S.settings); }
-    this.tickTimer();
-    if (!document.hidden) { this.passiveAcc += dt; if (this.passiveAcc > 300) { this.passiveAcc = 0; this.reward(1 + Math.floor(Life.comfortLv() / 2), 0, 'raw'); this.save(); } }
-    Life.tick(dt);
-    for (const a of Room.actors) a.update(dt);
-    for (const g of this.S.gifts) if (g.drop == null) g.drop = 0;
-    Room.render(dt);
-    UI.tickOverlay(dt);
-    if (now - this.lastHud > 0.25) { this.lastHud = now; UI.hud(); }
     requestAnimationFrame(t => this.frame(t));
+    const now = ts / 1000; const dt = Math.min(0.05, Math.max(0, now - (this._last || now))); this._last = now;
+    if (now - this.lastEnv > 1) { this.lastEnv = now; this.frameStep('environment', () => Room.computeEnv(this.S.settings)); }
+    this.frameStep('timer', () => this.tickTimer());
+    if (!document.hidden) { this.passiveAcc += dt; if (this.passiveAcc > 300) { this.passiveAcc = 0; this.reward(1 + Math.floor(Life.comfortLv() / 2), 0, 'raw'); this.save(); } }
+    this.frameStep('life', () => Life.tick(dt));
+    for (const a of Room.actors) this.frameStep('actor:' + (a.pid || a.kind || a.constructor.name), () => a.update(dt));
+    for (const g of this.S.gifts) if (g.drop == null) g.drop = 0;
+    this.frameStep('render', () => Room.render(dt));
+    this.frameStep('overlay', () => UI.tickOverlay(dt));
+    if (now - this.lastHud > 0.25) { this.lastHud = now; this.frameStep('hud', () => UI.hud()); }
   },
 };
 

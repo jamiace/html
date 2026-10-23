@@ -1,9 +1,9 @@
 /* ============================================================
    Built-in YouTube playlist (小窩電台)
-   - v0.91: everyone starts from it once, including players who were listening to the noa songs
-     (after that, whatever you pick yourself is kept)
+   - Only new players with no previous selection start from the radio.
+     Existing local/library/YouTube selections and positions are retained.
    - its songs are listed in the music window (內建音樂 → 小窩電台); tap one to play it
-   - the first tap after opening starts a random track of the playlist, then keeps shuffling
+   - the first tap resumes the previous source; only a new radio session starts randomly
      (browsers never let a page play sound before the first tap); pausing it yourself turns
      this off until you press play again
    ============================================================ */
@@ -13,21 +13,21 @@ const MusicDefault = {
   armed: false, shuffleNext: false, target: null, curVid: '',
   setup() {
     const M = Game.S.music; if (!M) return;
-    // once per player with this version: the playlist is in the list (first) and is what plays
-    if ((M.ytDefaultV || 0) < 1) {
-      M.ytDefaultV = 1; M.ytAdded = true;
-      let i = M.list.findIndex(e => e.type === 'yt' && e.list === NOOK_YT.list);
-      if (i < 0) { M.list.unshift(Object.assign({}, NOOK_YT)); if (M.idx >= 0) M.idx++; i = 0; }
-      else M.list[i].id = NOOK_YT.id;
-      M.ctx = 'list'; M.idx = i; M.autoOff = false;
-      Game.save();
+    const oldIndex = M.idx;
+    const selected = M.list[oldIndex];
+    const fresh = M.ctx !== 'lib' && !selected && !M.last;
+    if (!M.list.some(e => e.type === 'yt' && e.list === NOOK_YT.list)) {
+      M.list.unshift(Object.assign({}, NOOK_YT));
+      if (oldIndex >= 0) M.idx = oldIndex + 1;
     }
-    const i = M.list.findIndex(e => e.id === NOOK_YT.id);
-    if (M.ctx === 'list' && i >= 0 && M.idx === i) Music.cur = M.list[i];
-    if (M.ctx === 'list' && i >= 0 && M.idx === i && UI.mTab == null) UI.mTab = 'lib';   // the music window opens on the radio's songs
-    this.armed = M.autoOff !== true && !!Music.cur && Music.cur.id === NOOK_YT.id;
-    // get the player script ready so the first tap can start the music right away
-    if (this.armed && window.NOOK_ENV === 'web') Music.loadYTApi().catch(() => { });
+    const radio = M.list.find(e => e.type === 'yt' && e.list === NOOK_YT.list);
+    radio.id = NOOK_YT.id;
+    M.ytDefaultV = 1; M.ytAdded = true;
+    if (fresh) { M.ctx = 'list'; M.idx = M.list.indexOf(radio); M.autoOff = false; }
+    if (M.ctx === 'list') Music.cur = M.list[M.idx] || null;
+    if (UI.mTab == null) UI.mTab = M.ctx === 'lib' || (Music.cur && Music.cur.id === NOOK_YT.id) ? 'lib' : 'list';
+    this.armed = M.autoOff !== true;
+    if (this.armed && Music.cur && Music.cur.type === 'yt' && window.NOOK_ENV === 'web') Music.loadYTApi().catch(() => { });
   },
   // ---------- the playlist's songs ----------
   tracks() {
@@ -42,18 +42,21 @@ const MusicDefault = {
   // play one song of the playlist
   play(vid) {
     const M = Game.S.music, i = M.list.findIndex(e => e.id === NOOK_YT.id);
+    if (M.last && M.last.id === NOOK_YT.id) { M.last.vid = vid; M.last.position = 0; } Music._resume = 0;
     if (i < 0) { M.list.unshift(Object.assign({}, NOOK_YT)); if (M.idx >= 0) M.idx++; }
     if (this.isOn() && Music.yt && Music.ytReady) {
       try { const pl = Music.yt.getPlaylist() || [], k = pl.indexOf(vid); if (k >= 0) { Music.yt.playVideoAt(k); return; } } catch (e) { }
     }
     this.target = vid; this.shuffleNext = false; Music.playIdx(M.list.findIndex(e => e.id === NOOK_YT.id));
   },
-  // the first tap anywhere: a random track of the playlist
+  // The first gesture resumes the last source; a new radio listener starts randomly.
   first() {
     if (!this.armed) return; this.armed = false;
-    if (Music.playing || !Music.cur || Music.cur.id !== NOOK_YT.id) return;
+    if (Music.playing) return;
     if (Game.S.music.autoOff === true) return;
-    this.shuffleNext = true; Music.playAt(Game.S.music.list.indexOf(Music.cur));
+    const last = Game.S.music.last;
+    this.shuffleNext = this.isOn() && !(last && last.vid);
+    Music.toggle(true);
   },
 };
 

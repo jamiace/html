@@ -45,7 +45,7 @@ const ITEMS = {
   beanbag: { n: '懶骨頭', cat: 'furniture', spr: 'beanbag', price: 90, lvl: 2, layer: 'floor', seat: { x: 12, y: 12 }, petSpot: { x: 12, y: 8 } },
   beanbag_sun: { n: '向日葵懶骨頭', cat: 'furniture', spr: 'beanbag', map: rampMap('pink', 'sun'), price: 90, lvl: 3, layer: 'floor', seat: { x: 12, y: 12 }, petSpot: { x: 12, y: 8 } },
   cushion: { n: '圓坐墊', cat: 'furniture', spr: 'cushion', price: 40, lvl: 1, layer: 'floor', petSpot: { x: 11, y: 5 } },
-  cat_tree: { n: '貓跳台', cat: 'furniture', spr: 'cat_tree', price: 160, lvl: 3, layer: 'floor', petSpot: { x: 13, y: 9 } },
+  cat_tree: { n: '貓跳台', cat: 'furniture', spr: 'cat_tree', price: 160, lvl: 3, layer: 'floor', petSpot: { x: 13, y: 9 }, petSteps: [{ x: 19, y: 27 }, { x: 13, y: 9 }] },
   lamp_floor: { n: '立燈', cat: 'furniture', spr: 'lamp_floor', onSpr: 'lamp_floor_on', price: 100, lvl: 1, layer: 'floor', light: L(8, 8, 46), toggle: true },
   guitar: { n: '木吉他', cat: 'furniture', spr: 'guitar', price: 140, lvl: 5, layer: 'floor', react: 'notes' },
   // ---- plants

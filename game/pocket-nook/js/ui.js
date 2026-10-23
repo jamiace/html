@@ -208,9 +208,17 @@ const UI = {
   },
   // ---------------- overlay: bubbles, tags, floats ----------------
   bubble(target, text, secs) {
+    this.clearBubbles(target.actor || 'furniture');
     const el = h('div', { class: 'bubble', text }); this.overlay.append(el);
-    if (target.actor) { for (const b of this.bubbles) if (b.target.actor === target.actor) b.until = 0; }
     this.bubbles.push({ el, target, until: performance.now() + secs * 1000 });
+  },
+  clearBubbles(channel) {
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      const b = this.bubbles[i];
+      if (channel === 'furniture' ? !b.target.actor : b.target.actor === channel) {
+        b.el.remove(); this.bubbles.splice(i, 1);
+      }
+    }
   },
   floatText(txt, x, y) { const el = h('div', { class: 'floattext', text: txt }); this.overlay.append(el); this.floats.push({ el, x, y, t: 0 }); },
   dropTag(v) { const el = this.tags.get(v); if (el) { el.remove(); this.tags.delete(v); } },
@@ -220,7 +228,13 @@ const UI = {
       const b = this.bubbles[i];
       if (now > b.until || (b.target.actor && !Room.actors.includes(b.target.actor))) { b.el.remove(); this.bubbles.splice(i, 1); continue; }
       let x, y; if (b.target.actor) [x, y] = b.target.actor.headPos(); else { x = b.target.x; y = b.target.y; }
-      b.el.style.transform = `translate(${Math.round(x * s)}px, ${Math.round((y - 3) * s)}px) translate(-50%, -100%)`;
+      const width = this.overlay.clientWidth || RW * s;
+      b.el.style.maxWidth = Math.max(40, Math.min(380, width - 16)) + 'px';
+      const half = b.el.offsetWidth / 2;
+      const px = Math.max(half + 6, Math.min(width - half - 6, x * s));
+      const py = Math.max(b.el.offsetHeight + 10, (y - 3) * s);
+      b.el.style.setProperty('--tail-x', Math.max(10, Math.min(b.el.offsetWidth - 10, x * s - px + half)) + 'px');
+      b.el.style.transform = `translate(${Math.round(px)}px, ${Math.round(py)}px) translate(-50%, -100%)`;
     }
     for (let i = this.floats.length - 1; i >= 0; i--) { const f = this.floats[i]; f.t += dt; if (f.t > 1.2) { f.el.remove(); this.floats.splice(i, 1); continue; } f.el.style.transform = `translate(${Math.round(f.x * s)}px, ${Math.round((f.y - f.t * 14) * s)}px) translate(-50%,-100%)`; f.el.style.opacity = String(1 - Math.max(0, f.t - 0.7) / 0.5); }
     for (const v of Object.values(Game.visitors)) {
@@ -325,13 +339,14 @@ const UI = {
   },
   closeWin(id) { const w = this.wins[id]; if (!w) return; w.el.hidden = true; this.syncDock(); if (this.WIN[id].modal) document.getElementById('scrim').hidden = !Object.values(this.wins).some(o => !o.el.hidden && o.conf.modal); },
   toggleWin(id) { const w = this.wins[id]; if (w && !w.el.hidden) this.closeWin(id); else this.openWin(id); },
-  refresh(id) { const w = this.wins[id]; if (w && !w.el.hidden) this.render(id); if (id === 'memo') this.renderPins(); },
+  refresh(id) { if (id === 'music' && this._musicResize) { this._musicRefreshPending = true; return; } const w = this.wins[id]; if (w && !w.el.hidden) this.render(id); if (id === 'memo') this.renderPins(); },
   refreshAll() { for (const id in this.wins) this.refresh(id); this.hud(true); this.renderPins(); },
   render(id) {
     const w = this.getWin(id), b = w.body;
     const keepScroll = [...b.querySelectorAll('.scroll')].map(e => e.scrollTop);
     const active = document.activeElement && b.contains(document.activeElement) ? document.activeElement.id : null;
     b.replaceChildren(...[].concat(this['w_' + id]() || []).filter(Boolean));
+    if (id === 'music') requestAnimationFrame(() => this.layoutMusicPanels());
     b.querySelectorAll('.scroll').forEach((e, i) => { if (keepScroll[i]) e.scrollTop = keepScroll[i]; });
     if (!w.el.hidden && !this.narrow()) this.placeWin(w);
     if (active) { const el = document.getElementById(active); if (el) { el.focus(); if (el.setSelectionRange && el.value != null) try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) { } } }
@@ -587,7 +602,43 @@ const UI = {
     return [...head,
       h('div', { class: 'row wrap' }, h('label', { class: 'chip', for: 'm-file' }, ico('i_folder', 20), '加入本機音樂'), file, h('span', { class: 'hint', text: 'MP3、FLAC、M4A、OGG、WAV，也可以直接拖進來' })),
       h('div', { class: 'row' }, h('div', { class: 'inset grow' }, yt), h('button', { class: 'chip', 'aria-label': '加入 YouTube', onclick: () => { if (Music.addYT(yt.value)) yt.value = ''; } }, ico('i_video', 20), '加入')), ytNote,
-      M.list.length ? h('div', { class: 'scroll' }, list) : h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '清單是空的。加入你自己的 lo-fi 音樂，專注時一起聽。' })), auto];
+      M.list.length ? h('div', { class: 'scroll mtracks' }, list) : h('div', { class: 'empty' }, ico('i_music', 40), h('p', { text: '清單是空的。加入你自己的 lo-fi 音樂，專注時一起聽。' })), auto];
+  },
+  layoutMusicPanels() {
+    const w = this.wins.music; if (!w || w.el.hidden) return;
+    let sizes = {}; try { sizes = JSON.parse(localStorage.getItem('pocketnook.music.panels') || '{}') || {}; } catch (e) { }
+    for (const [cls, label, min, fallback] of [['malbum-scroll', '專輯', 70, 0], ['mtracks', '歌曲清單', 108, 216]]) {
+      const panel = w.body.querySelector('.' + cls); if (!panel || panel.dataset.sized) continue;
+      panel.dataset.sized = '1'; panel.id = 'music-panel-' + cls;
+      // Default to complete album cards (up to 486px), even when the whole window is shorter.
+      const natural = () => cls === 'malbum-scroll' ? Math.max(min, Math.min(486, panel.firstElementChild.scrollHeight + 8)) : fallback;
+      const initial = Number(sizes[cls]);
+      const grip = h('div', { class: 'music-panel-grip', tabindex: '0', role: 'separator', 'aria-orientation': 'horizontal', 'aria-controls': panel.id,
+        'aria-label': '調整' + label + '高度', title: '上下拖曳調整' + label + '高度；雙擊恢復預設' }, h('span', { text: label + '高度 ↕' }));
+      panel.after(grip);
+      const apply = value => { const height = Math.round(Math.max(min, Math.min(1200, value))); panel.style.height = height + 'px'; grip.setAttribute('aria-valuenow', String(height)); return height; };
+      grip.setAttribute('aria-valuemin', String(min)); grip.setAttribute('aria-valuemax', '1200');
+      apply(Number.isFinite(initial) && initial >= min ? initial : natural());
+      const save = () => { try { localStorage.setItem('pocketnook.music.panels', JSON.stringify(sizes)); } catch (e) { } };
+      grip.addEventListener('dblclick', () => { delete sizes[cls]; apply(natural()); save(); });
+      grip.addEventListener('keydown', e => {
+        if (!['ArrowUp', 'ArrowDown', 'Home'].includes(e.key)) return; e.preventDefault();
+        if (e.key === 'Home') { delete sizes[cls]; apply(natural()); }
+        else sizes[cls] = apply(panel.offsetHeight + (e.key === 'ArrowUp' ? -16 : 16)); save();
+      });
+      grip.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return; e.preventDefault(); e.stopPropagation();
+        this._musicResize = true; grip.setPointerCapture(e.pointerId);
+        const start = e.clientY, height = panel.offsetHeight;
+        const move = ev => { sizes[cls] = apply(height + ev.clientY - start); };
+        const end = () => {
+          grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', end); grip.removeEventListener('pointercancel', end); grip.removeEventListener('lostpointercapture', end);
+          this._musicResize = false; save();
+          if (this._musicRefreshPending) { this._musicRefreshPending = false; this.refresh('music'); }
+        };
+        grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end); grip.addEventListener('lostpointercapture', end);
+      });
+    }
   },
   // album covers on/off, kept per device
   mCovers(v) { try { if (v != null) localStorage.setItem('pocketnook.mcovers', v ? '1' : '0'); return localStorage.getItem('pocketnook.mcovers') !== '0'; } catch (e) { return v != null ? v : true; } },

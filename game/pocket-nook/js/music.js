@@ -9,12 +9,24 @@ const Music = {
   get M() { return Game.S.music; },
   init() {
     const a = this.audio = new Audio(); a.preload = 'auto'; a.volume = this.M.vol;
+    a.addEventListener('loadedmetadata', () => {
+      if (this.cur && this.cur.type !== 'yt' && this._loadedId === this.cur.id && this._resume > 0) {
+        try { a.currentTime = Math.min(this._resume, Number.isFinite(a.duration) ? Math.max(0, a.duration - 0.1) : this._resume); this._resume = 0; } catch (e) { }
+      }
+    });
+    a.addEventListener('timeupdate', () => this.remember());
+    clearInterval(this._rememberTimer); this._rememberTimer = setInterval(() => this.remember(), 2000);
+    if (!this._saveHook) {
+      this._saveHook = true; const save = Game.save.bind(Game);
+      Game.save = function () { Music.remember(); return save.apply(this, arguments); };
+      window.addEventListener('pagehide', () => Music.remember());
+    }
     a.addEventListener('ended', () => this.onEnded());
     a.addEventListener('play', () => { this.playing = true; this.changed(); });
     a.addEventListener('pause', () => { if (this.cur && this.cur.type !== 'yt') { this.playing = false; this.changed(); } });
     a.addEventListener('error', () => { if (!this.cur || this.cur.type === 'yt' || !a.src) return; this.playing = false; UI.toast('這首歌無法播放（格式不支援或檔案已失效）', 'i_music', 3.5); this.changed(); });
     const M = this.M; if (M.idx >= 0 && M.list[M.idx]) this.cur = M.list[M.idx];
-    if (M.ctx === 'lib') this.cur = null;
+    if (M.ctx === 'lib') this.cur = M.last && M.last.ctx === 'lib' ? Object.assign({}, M.last) : null;
     this.loadLib(false); MusicCache.init().then(() => UI.refresh('music'));
     try {
       const ms = navigator.mediaSession; if (ms) {
@@ -22,6 +34,16 @@ const Music = {
         ms.setActionHandler('nexttrack', () => this.next(true)); ms.setActionHandler('previoustrack', () => this.prev());
       }
     } catch (e) { }
+  },
+  remember() {
+    const e = this.cur, M = this.M; if (!e || !M || this._loadedId !== e.id) return;
+    const last = M.last && M.last.id === e.id ? M.last : {};
+    let position = this.progress()[0], vid = last.vid || e.vid || '';
+    if (e.type === 'yt') {
+      try { vid = this.yt.getVideoData().video_id || vid; } catch (error) { }
+      if (typeof MusicDefault !== 'undefined' && MusicDefault.target) return;
+    }
+    M.last = { id: e.id, type: e.type, fid: e.fid || '', src: e.src || '', title: e.title, album: e.album || '', ctx: M.ctx, libAlbum: M.libAlbum || '', position: Math.max(0, position || 0), vid };
   },
   // ---------- IndexedDB blob store ----------
   db() {
@@ -115,12 +137,15 @@ const Music = {
   // ---------- playback ----------
   get Q() { return this.M.ctx === 'lib' ? Lib.queue(this.M.libAlbum) : this.M.list; },
   get qi() { return this.M.ctx === 'lib' ? (this.M.lidx == null ? -1 : this.M.lidx) : this.M.idx; },
-  playIdx(i) { this.M.ctx = 'list'; return this.playAt(i); },
-  playLib(i, album) { const M = this.M; M.ctx = 'lib'; M.libAlbum = album || ''; return this.playAt(i); },
+  playIdx(i) { this.remember(); this.M.ctx = 'list'; return this.playAt(i); },
+  playLib(i, album) { this.remember(); const M = this.M; M.ctx = 'lib'; M.libAlbum = album || ''; return this.playAt(i); },
   async playAt(i) {
     const M = this.M, Q = this.Q; if (i < 0 || i >= Q.length) return;
     if (M.ctx === 'lib') M.lidx = i; else M.idx = i;
-    const e = this.cur = Q[i]; Game.save();
+    const e = this.cur = Q[i], last = M.last;
+    this._loadedId = null; this._resume = last && last.id === e.id ? last.position || 0 : 0;
+    M.last = { id: e.id, type: e.type, fid: e.fid || '', src: e.src || '', title: e.title, album: e.album || '', ctx: M.ctx, libAlbum: M.libAlbum || '', position: this._resume, vid: last && last.id === e.id ? last.vid || e.vid || '' : e.vid || '' };
+    Game.save();
     if (e.type === 'yt') { this.audio.pause(); return this.playYT(e); }
     this.stopYT();
     if (this.dl && !this.dl.bg && this.dl.id !== e.id) this.dl.ctl.abort();
@@ -129,16 +154,18 @@ const Music = {
     if (this.cur !== e || src === 'abort') return;   // another track was picked while this one downloaded
     if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast('找不到這首歌的檔案，請重新加入', 'i_music'); return; }
     e.missing = false; this.fails = 0;
-    this.audio.src = src; this.audio.volume = M.vol;
+    this._loadedId = e.id; this.audio.src = src; this.audio.volume = M.vol;
     if (M.shuffle && Q.length > 1) { let j; do { j = Math.floor(Math.random() * Q.length); } while (j === i); this.shufNext = j; }
     try { await this.audio.play(); } catch (err) { this.playing = false; this.changed(); }
     MusicCache.init().then(() => this.prefetch());
   },
   toggle(force) {
     const M = this.M;
+    if (force === false && !this.playing) return;
+    if (M.ctx === 'lib' && !this.Q.length) { if (Lib.status === 'loading') return this.loadLib(false).then(() => this.Q.length ? this.toggle(force) : UI.toast('上次播放的曲目目前無法取得，請重新讀取音樂庫', 'i_music')); UI.toast('上次播放的曲目目前無法取得，請重新讀取音樂庫', 'i_music'); return; }
     if (!this.cur) { if (M.ctx === 'lib' && Lib.tracks.length) this.playLib(Math.max(0, Math.min(M.lidx || 0, Lib.queue(M.libAlbum).length - 1)), M.libAlbum); else if (M.list.length) this.playIdx(Math.max(0, M.idx)); else if (Lib.tracks.length) this.playLib(0, ''); else UI.openWin('music'); return; }
     if (this.cur.type === 'yt') {
-      if (!this.yt || !this.ytReady) return this.playYT(this.cur);
+      if (!this.yt || !this.ytReady) return this.playAt(Math.max(0, this.qi));
       const st = this.yt.getPlayerState(); const want = force != null ? force : st !== 1;
       want ? this.yt.playVideo() : this.yt.pauseVideo(); return;
     }
@@ -199,9 +226,11 @@ const Music = {
   },
   async playYT(e) {
     UI.ytPanel(true, e, 'loading');
-    try { await this.loadYTApi(); } catch (err) { this.playing = false; UI.ytPanel(true, e, 'blocked'); this.changed(); return; }
+    try { await this.loadYTApi(); if (this.cur !== e) return; } catch (err) { this.playing = false; UI.ytPanel(true, e, 'blocked'); this.changed(); return; }
     UI.ytPanel(true, e, 'ok');
-    const load = () => { try { if (e.list) this.yt.loadPlaylist({ listType: 'playlist', list: e.list, index: 0 }); else this.yt.loadVideoById(e.vid); this.yt.setVolume(Math.round(this.M.vol * 100)); } catch (x) { } };
+    const saved = this.M.last;
+    if (saved && saved.id === e.id && saved.vid && typeof MusicDefault !== 'undefined' && e.id === NOOK_YT.id && !MusicDefault.target && !MusicDefault.shuffleNext) MusicDefault.target = saved.vid;
+    const load = () => { try { if (e.list) this.yt.loadPlaylist({ listType: 'playlist', list: e.list, index: 0 }); else this.yt.loadVideoById({ videoId: e.vid, startSeconds: this._resume || 0 }); this.yt.setVolume(Math.round(this.M.vol * 100)); } catch (x) { } };
     if (!this.yt) {
       this.yt = new YT.Player('yt-player', {
         width: '100%', height: '100%', playerVars: { playsinline: 1, rel: 0 },
@@ -217,6 +246,16 @@ const Music = {
     // a YouTube player stopping after you switched to another song must not mark the music as stopped
     if (!this.cur || this.cur.type !== 'yt') return;
     const s = ev.data; this.playing = s === 1 || s === 3;
+    if (s === 1) {
+      this._loadedId = this.cur.id;
+      const saved = this.M.last;
+      try {
+        const vid = this.yt.getVideoData().video_id;
+        if (this._resume > 0 && saved && (!saved.vid || saved.vid === vid)) { this.yt.seekTo(this._resume, true); this._resume = 0; }
+        else if (saved && saved.vid && vid !== saved.vid) this._resume = 0;
+      } catch (e) { }
+      this.remember(); Game.save();
+    }
     if (s === 1 && this.cur && this.cur.type === 'yt') { try { const d = this.yt.getVideoData(); if (d && d.title && !this.cur.list && this.cur.title !== d.title) { this.cur.title = d.title.slice(0, 120); Game.save(); } } catch (e) { } }
     if (s === 0) {
       if (this.cur && this.cur.list) { try { const pl = this.yt.getPlaylist() || []; if (this.yt.getPlaylistIndex() < pl.length - 1) return; } catch (e) { } }
@@ -231,7 +270,11 @@ const Music = {
   loadLib(force) {
     return Lib.load(force).then(() => {
       const M = this.M;
-      if (M.ctx === 'lib' && !this.cur) { const Q = Lib.queue(M.libAlbum); if (Q.length) { M.lidx = Math.max(0, Math.min(M.lidx || 0, Q.length - 1)); this.cur = Q[M.lidx]; } else { M.ctx = 'list'; this.cur = M.list[M.idx] || null; } }
+      if (M.ctx === 'lib' && (!this.cur || this._loadedId == null)) {
+        const Q = Lib.queue(M.libAlbum), last = M.last;
+        const index = last && last.ctx === 'lib' ? Q.findIndex(t => t.id === last.id || (last.fid && t.fid === last.fid) || (last.src && t.src === last.src)) : -1;
+        if (Q.length) { M.lidx = index >= 0 ? index : Math.max(0, Math.min(M.lidx || 0, Q.length - 1)); this.cur = Q[M.lidx]; }
+      }
       UI.refresh('music'); UI.hud(true);
     });
   },

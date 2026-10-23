@@ -208,11 +208,12 @@ const Story = {
   },
   // a smudged label: about half the letters left (always the first one)
   mask(w) { const keep = new Set([0]); const n = Math.max(1, Math.round(w.length * 0.45)); const idx = shuffle([...Array(w.length).keys()].slice(1)).slice(0, n - 1); idx.forEach(k => keep.add(k)); return [...w].map((ch, k) => keep.has(k) ? ch : '_').join(' '); },
-  start(i) { if (i === 4 && !this.S.name) return; this.cur = i; UI.closeWin('story'); Learn.start('story', { ch: i }); },
+  start(i) { const St = this.week(); if (!St || !St.ch[i] || i >= this.unlocked()) return; if (St.ch[i].done) return this.review(i); if (i === 4 && !this.S.name) return; this.cur = i; UI.closeWin('story'); Learn.start('story', { ch: i }); },
   title(o) { const St = this.week(); return `${MERCHANTS[St.mk].n}的故事 · 第 ${o.ch + 1} 章`; },
   finish(s, R) {
     const St = this.week(), c = St.ch[s.opts.ch], mk = St.mk, M = this.M(mk), A = M.arcs[St.arc];
-    const first = !c.done; c.done = true;
+    if (c.done) return { coins: 0, xp: 0, items: [], msg: '這一章已經完成，可以回顧故事。' };
+    const first = true; c.done = true;
     if (first) { St.used[mk] = [...new Set([...(St.used[mk] || []), ...c.words])]; }
     const res = { coins: first ? 10 + R * 2 : R, xp: R * 3, items: [], msg: '' };
     if (s.opts.ch === 4 && first) {
@@ -226,8 +227,9 @@ const Story = {
     Game.save(); saveSoon(); UI.refresh('merchant'); UI.refresh('story');
     return res;
   },
-  choose(w) { const St = this.week(); St.name = w; Game.save(); UI.refresh('story'); },
-  open() { if (this.week()) UI.openWin('story'); },
+  choose(w) { const St = this.week(); if (!St || St.ch[4].done || !St.names.includes(w)) return; St.name = w; Game.save(); UI.refresh('story'); },
+  review(i) { const St = this.week(); if (!St || !St.ch[i] || !St.ch[i].done) return; this.reviewChapter = i; UI.openWin('story'); },
+  open() { this.reviewChapter = null; if (this.week()) UI.openWin('story'); },
   // keepsake: hover shows the names you gave it
   tip(it) {
     const d = ITEMS[it.k]; if (!d || !d.keepsake) return null;
@@ -251,9 +253,24 @@ UI.WIN.story = { t: '旅行商人的故事', i: 'i_shop', w: 520, at: ['c', 0], 
 UI.w_story = function () {
   const St = Story.week(); if (!St) return [h('p', { class: 'hint', text: '這週沒有故事。' })];
   const mk = St.mk, M = MERCHANTS[mk], SM = Story.M(mk), A = SM.arcs[St.arc], i = Story.next(), all = St.ch.every(c => c.done);
-  const dots = h('div', { class: 'story-dots' }, ...St.ch.map((c, k) => h('span', { class: 'sdot' + (c.done ? ' done' : k === i ? ' cur' : k < Story.unlocked() ? ' open' : ''), title: c.done ? `第 ${k + 1} 章：完成` : k < Story.unlocked() ? `第 ${k + 1} 章` : `第 ${k + 1} 章：${['週一', '週二', '週三', '週四', '週五'][k]}開放` }, String(k + 1))));
+  const review = Number.isInteger(Story.reviewChapter) && St.ch[Story.reviewChapter] && St.ch[Story.reviewChapter].done ? Story.reviewChapter : -1;
+  const dots = h('div', { class: 'story-dots' }, ...St.ch.map((c, k) => h(c.done ? 'button' : 'span', { type: c.done ? 'button' : null, onclick: c.done ? () => Story.review(k) : null, 'aria-label': c.done ? `回顧第 ${k + 1} 章` : null, 'aria-pressed': c.done ? String(k === review) : null, class: 'sdot' + (c.done ? ' done' : k === i ? ' cur' : k < Story.unlocked() ? ' open' : ''), title: c.done ? `第 ${k + 1} 章：完成` : k < Story.unlocked() ? `第 ${k + 1} 章` : `第 ${k + 1} 章：${['週一', '週二', '週三', '週四', '週五'][k]}開放` }, String(k + 1))));
   let say, act = [];
-  if (all) {
+  if (review >= 0) {
+    const c = St.ch[review], sc = STORY_SCENES[c.sc];
+    say = review === 0 ? [...A.open] : [SM.voice.bridge[c.bridge % SM.voice.bridge.length]];
+    if (review === 4) say.push(A.ask); else say.push(...sc.lines[c.sv % sc.lines.length].map(l => Story.fill(l, mk)));
+    say.push(SM.voice.done[c.bridge % SM.voice.done.length]);
+    if (review === 4) {
+      const name = St.name || A.names[0], Name = name.charAt(0).toUpperCase() + name.slice(1);
+      say.push(...A.close.map(l => l.replace('{Name}', Name)));
+    }
+    const completed = St.ch.map((c, k) => c.done ? k : -1).filter(k => k >= 0), at = completed.indexOf(review);
+    act.push(h('span', { class: 'hint', text: `故事回顧 · 第 ${review + 1} 章` }));
+    if (at > 0) act.push(h('button', { class: 'chip sm', onclick: () => Story.review(completed[at - 1]) }, '上一章'));
+    if (at + 1 < completed.length) act.push(h('button', { class: 'chip sm', onclick: () => Story.review(completed[at + 1]) }, '下一章'));
+    act.push(h('button', { class: 'chip', onclick: () => { Story.reviewChapter = null; UI.refresh('story'); } }, '返回本週故事'));
+  } else if (all) {
     const last = (St.keep[mk] || []).slice(-1)[0];
     say = [`這週的故事結束了。${last ? `「${last.name}」，謝謝你取的名字。` : ''}`, '下次再來的時候，我再說新的故事給你聽。'];
   } else if (i < 0) {
@@ -269,9 +286,9 @@ UI.w_story = function () {
     } else say.push(...sc.lines[c.sv % sc.lines.length].map(l => Story.fill(l, mk)));
     act.push(h('button', { class: 'chip big primary', disabled: i === 4 && !St.name, onclick: () => Story.start(i) }, ico('i_learn', 22), i === 4 ? (St.name ? `就叫「${St.name}」，寫上去！` : '先選一個名字') : '幫忙（5 題）'));
   }
-  const head = h('div', { class: 'mstage' }, merchantScene(mk), h('div', { class: 'msay story-say' }, h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: A.what })), ...say.map(l => h('p', { text: l }))));
+  const head = h('div', { class: 'mstage' + (review >= 0 ? ' story-review' : '') }, merchantScene(mk), h('div', { class: 'msay story-say' }, h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: A.what })), ...say.map(l => h('p', { text: l }))));
   return [head, dots, h('div', { class: 'row center wrap story-act' }, ...act, h('button', { class: 'chip', onclick: () => { UI.closeWin('story'); Merchant.open(); } }, ico('i_shop', 18), '逛逛攤子')),
-    h('p', { class: 'hint', text: '每天早上 6 點開放一章，漏掉的可以之後補。每章 5 題，答錯沒關係，故事照樣往下走。' })];
+    h('p', { class: 'hint', text: review >= 0 ? '回顧不會重新答題、發放獎勵或變更故事進度與命名。' : '每天早上 6 點開放一章，漏掉的可以之後補。點選已完成的章節即可回顧故事。' })];
 };
 
 /* ---------------- hooks ---------------- */

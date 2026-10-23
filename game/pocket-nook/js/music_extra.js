@@ -55,7 +55,7 @@ const MusicCache = {
 
 /* ---------------- embedded cover art ---------------- */
 const Covers = {
-  mem: {}, busy: {},
+  mem: {}, busy: {}, retryAt: {},
   // returns { type, data: Uint8Array } or null; `need` tells how many bytes are needed when the buffer is too short
   parse(buf) {
     const u = new Uint8Array(buf), str = (o, n) => String.fromCharCode(...u.subarray(o, o + n));
@@ -127,7 +127,7 @@ const Covers = {
       const buf = await r.arrayBuffer(); pic = this.parse(buf); if (!pic || !pic.need) break;
       if (r.status === 200 || pic.need > 16 << 20) { pic = null; break; } need = pic.need + 1024;
     }
-    return pic && pic.data ? this.thumb(pic) : null;
+    return pic && pic.data ? this.thumb(pic) : '';
   },
   key(t) { return 'track:' + t.id; },
   // cover for a track: memory, then IndexedDB, then the cached file, then the network (start of file only)
@@ -135,28 +135,30 @@ const Covers = {
     if (!t) return null; const k = this.key(t);
     if (k in this.mem) return this.mem[k];
     if (this.busy[k]) return this.busy[k];
+    if (allowNet && this.retryAt[k] > Date.now()) return null;
     return this.busy[k] = (async () => {
       let v = await MusicCache.small('covers', k);
       if (v == null) {
         const blob = t.type === 'file' ? await Music.getBlob(t.id).catch(() => null) : await MusicCache.get(t.id);
         if (blob) v = await this.fromBlob(blob) || '';
-        else if (allowNet && t.type !== 'file') { const u = t.type === 'drive' ? Lib.mediaUrl(t.fid) : t.src; v = await this.fromUrl(u).catch(() => null); if (v == null) { delete this.busy[k]; return null; } v = v || ''; }
+        else if (allowNet && t.type !== 'file') { const u = t.type === 'drive' ? Lib.mediaUrl(t.fid) : t.src; v = await this.fromUrl(u).catch(() => null); if (v == null) { this.retryAt[k] = Date.now() + 60000; delete this.busy[k]; return null; } v = v || ''; }
         else { delete this.busy[k]; return null; }
         MusicCache.small('covers', k, v);
       }
-      this.mem[k] = v; delete this.busy[k]; return v;
+      this.mem[k] = v; delete this.retryAt[k]; delete this.busy[k]; return v;
     })();
   },
   // album covers: first track in the album that has a picture, fetched one at a time
   queue: [], running: false,
   wantAlbums() {
-    for (const a of Lib.albums) { const t = Lib.queue(a.n)[0]; if (t && !(this.key(t) in this.mem) && !this.queue.includes(t)) this.queue.push(t); }
+    for (const a of Lib.albums) { const t = Lib.queue(a.n)[0]; if (t && !(this.key(t) in this.mem) && !this.busy[this.key(t)] && !(this.retryAt[this.key(t)] > Date.now()) && !this.queue.includes(t)) this.queue.push(t); }
     this.pump();
   },
   async pump() {
     if (this.running) return; this.running = true;
-    while (this.queue.length) { const t = this.queue.shift(); try { await this.get(t, true); } catch (e) { } UI.refresh('music'); }
-    this.running = false;
+    try {
+      while (this.queue.length) { const t = this.queue.shift(); try { await this.get(t, true); } catch (e) { this.retryAt[this.key(t)] = Date.now() + 60000; delete this.busy[this.key(t)]; } UI.refresh('music'); }
+    } finally { this.running = false; }
   },
 };
 

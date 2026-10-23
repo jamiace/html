@@ -202,7 +202,7 @@ class Pet extends Walker {
   walkTo(x, y, cb, allowHidden) {
     // in the middle of a jump (onto the bed, say): the walk waits for the landing, then leaves the spot properly
     // (walking off straight away left the pet "on" the bed while it walked, and it snapped back when the walk ended)
-    if (this.jump) { this.afterJump = [x, y, cb, allowHidden]; return true; }
+    if (this.jump || this.perchPause) { this.afterJump = [x, y, cb, allowHidden]; return true; }
     if (this.on) { const st = this.state; this.leaveSpot(() => { if (this.state === 'sit' && st !== 'sit') this.state = st; super.walkTo(x, y, cb, allowHidden); }); return true; }
     return super.walkTo(x, y, cb, allowHidden);
   }
@@ -223,7 +223,7 @@ class Pet extends Walker {
     this.walkTo(pos[0], pos[1], () => { this.napAt = null; if (this.others().some(a => a.state === 'sleep' && !a.on && Math.abs(a.x - this.x) <= 18 && Math.abs(a.y - this.y) <= 10)) return this.floorNap(secs); this.state = 'sleep'; this.timer = secs || 20 + Math.random() * 20; PetAI.sleepSpin(this); }, true);
   }
   doTrick(id) { return TrickShow.start(this, id); }
-  z() { if (this.on && Room.uidMap[this.on.uid]) return Room.base(this.on) + 0.03; return this.y + 0.01; }
+  z() { const it = this.on || this.climbItem; if (it && Room.uidMap[it.uid]) return Room.base(it) + 0.03; return this.y + 0.01; }
   spots() {
     const out = [];
     for (const it of Room.state.items) {
@@ -233,9 +233,31 @@ class Pet extends Walker {
     }
     return out;
   }
+  climbRoute(it, points, done) {
+    this.walking = false; this.onArrive = null; this.climbItem = it;
+    let i = 0;
+    const next = () => {
+      if (!Room.uidMap[it.uid]) {
+        this.climbItem = null; this.on = null; this.onOff = null; this.target = null;
+        [this.x, this.y] = ActorVisibility.clamp(this.x, it.y + itemSize(it)[1] + 3);
+        this.state = 'sit'; this.timer = 2; return;
+      }
+      if (i >= points.length) { this.climbItem = null; done && done(); return; }
+      const [x, y] = points[i++];
+      this.startJump(x, y, () => {
+        this.onOff = [this.x - it.x, this.y - it.y];
+        if (i < points.length) { this.state = 'sit'; this.perchPause = { t: 0.22, next }; }
+        else next();
+      }, 7);
+    };
+    next();
+  }
   leaveSpot(cb) {
     this.target = null; this.napAt = null;
-    if (this.on) { const it = this.on, [w, h] = itemSize(it); const fy = Math.min(167, it.y + h + 3); const fx = this.x; this.on = null; this.onOff = null; if (this.y < fy - 6) this.startJump(fx, fy, () => { cb && cb(); }); else cb && cb(); }
+    if (this.on) { const it = this.on, [w, h] = itemSize(it); const fy = Math.min(167, it.y + h + 3); const fx = this.x; this.on = null; this.onOff = null; if (this.y < fy - 6) {
+      const steps = ITEMS[it.k].petSteps, route = steps ? steps.map(sp => [it.x + (it.flip ? w - sp.x : sp.x), it.y + sp.y + 1]).reverse().filter(p => p[1] > this.y + 3) : [];
+      route.push([fx, fy]); this.climbRoute(it, route, cb);
+    } else cb && cb(); }
     else cb && cb();
   }
   startJump(x, y, cb, hgt = 10) { this.jump = { x0: this.x, y0: this.y, x1: x, y1: y, t: 0, cb, hgt }; this.state = this.state === 'trick' ? 'trick' : 'jump'; if (x !== this.x) this.flip = x < this.x; }
@@ -299,11 +321,16 @@ class Pet extends Walker {
         this.state = 'sit'; this.timer = 1; return;
       }
       if (this.others().some(a => a.on === s.it)) { if (mode === 'sleep') { const sp = this.freeSpots(); if (sp.length) return this.goSpot(sp[Math.floor(Math.random() * sp.length)], mode, secs); return this.floorNap(secs); } this.state = 'sit'; this.timer = 1.5; return; }
-      const done = () => { this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4);
+      const done = () => { this.target = null; this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4);
         // on something soft it kneads it a little before curling up
         if (mode === 'sleep' && PetPlay.isSoft(s.it) && Math.random() < 0.7) { const t = this.timer; PetAI.act(this, 'knead', 1.8 + Math.random(), () => { if (this.on === s.it) { this.state = 'sleep'; this.timer = t; PetAI.sleepSpin(this); } }); return; }
         if (mode === 'sleep') PetAI.sleepSpin(this); };
-      if (s.high) this.startJump(s.x, s.y + 1, done); else { this.y = s.y + 2; done(); }
+      const steps = ITEMS[s.it.k].petSteps;
+      this.target = s.it.uid;
+      if (s.high && steps && this.kind === 'cat') {
+        const [w] = itemSize(s.it);
+        this.climbRoute(s.it, steps.map(sp => [s.it.x + (s.it.flip ? w - sp.x : sp.x), s.it.y + sp.y + 1]), done);
+      } else if (s.high) this.startJump(s.x, s.y + 1, done); else { this.y = s.y + 2; done(); }
     }, true);
   }
   poke() {
@@ -319,11 +346,16 @@ class Pet extends Walker {
   headPos() { return [this.x + (this.flip ? -4 : 4), this.y - 16]; }
   update(dt) {
     if (this.happy > 0) this.happy -= dt;
+    if (this.perchPause) {
+      this.perchPause.t -= dt;
+      if (this.perchPause.t <= 0) { const next = this.perchPause.next; this.perchPause = null; next(); }
+      return;
+    }
     if (this.jump) {
       const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
       this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
       if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb();
-        const w = this.afterJump; this.afterJump = null; if (w && !this.jump) { this.state = 'walk'; this.walkTo(w[0], w[1], w[2], w[3]); } }
+        if (!this.jump && !this.perchPause && !this.climbItem) { const w = this.afterJump; this.afterJump = null; if (w) { this.state = 'walk'; this.walkTo(w[0], w[1], w[2], w[3]); } } }
       return;
     }
     PetAI.tick(this, dt);

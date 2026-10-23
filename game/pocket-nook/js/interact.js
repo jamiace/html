@@ -17,6 +17,15 @@ const Furn = {
   puff(kind, it, cx, n, o) { for (let i = 0; i < n; i++) Room.puff(kind, cx + (Math.random() - 0.5) * 10, it.y + 2, Object.assign({ vx: (Math.random() - 0.5) * 10, vy: -7 - Math.random() * 4, wob: 6, max: 1.3 }, o || {})); },
   st() { const S = Game.S; if (!S.furn) S.furn = { loom: 0, scarves: 0, cube: 0 }; return S.furn; },
   pet() { const ps = (Game.pets || []).filter(p => p.data && !p.walking && !p.jump && !['eat', 'trick', 'hand', 'inbox', 'zoom'].includes(p.state)); return ps.find(p => p.state !== 'sleep') || ps[0] || null; },
+  climbPet(it) {
+    const p = (Game.pets || []).find(p => p.kind === 'cat' && p.data && !p.walking && !p.jump && !p.perchPause && !['eat', 'trick', 'hand', 'inbox', 'zoom'].includes(p.state) && !p.others().some(a => a.on === it || a.target === it.uid || a.climbItem === it));
+    if (!p || Game.focusing()) return false;
+    p.leaveSpot(() => {
+      const spot = p.spots().find(s => s.it === it);
+      if (spot) p.goSpot(spot, Math.random() < 0.7 ? 'sleep' : 'sit', 25 + Math.random() * 20);
+    });
+    return true;
+  },
   // a cat comes over and does something there
   callPet(it, pose, line) {
     const p = this.pet(); if (!p || Game.focusing()) return false;
@@ -94,7 +103,8 @@ const FURN_RULES = [
   [/獎狀/, (it, d, cx) => { const n = Object.keys(Game.S.vocab || {}).length; Furn.puff('p_spark', it, cx, 3); Furn.say(it, cx, `已經認識 ${n} 個單字了，了不起`, 3); }],
   [/肖像/, (it, d, cx) => { const p = Pets.home ? Pets.home()[0] : null; Furn.say(it, cx, p ? `${p.name}的肖像，畫得比本人嚴肅` : '一幅可愛的肖像'); }],
   [/雨傘/, (it, d, cx) => Furn.say(it, cx, Room.env && Room.env.rain ? '外面在下雨，出門記得帶傘' : Furn.pick('umb', ['今天應該用不到', '傘都乖乖站好了', '有一把是別人忘在這裡的']))],
-  [/貓跳台|貓抓|貓咪別墅/, (it, d, cx) => { if (!Furn.callPet(it, 'scratch', '喵！')) Furn.say(it, cx, '貓咪現在沒空'); }],
+  [/貓跳台|貓咪別墅/, (it, d, cx) => { if (!Furn.climbPet(it)) Furn.say(it, cx, '貓咪現在沒空'); }],
+  [/貓抓/, (it, d, cx) => { if (!Furn.callPet(it, 'scratch', '喵！')) Furn.say(it, cx, '貓咪現在沒空'); }],
   [/寵物窩|狗屋/, (it, d, cx) => { if (!Furn.callPet(it, 'knead', '喵～')) Furn.say(it, cx, '軟軟的窩'); }],
   [/紙箱/, (it, d, cx) => { if (Math.random() < 0.6 && Furn.callPet(it, 'stare', '…（盯）')) return; Furn.say(it, cx, Furn.pick('box', ['空的紙箱，貓咪最愛', '裡面好像有什麼在動？', '留著，總有一天會用到'])); }],
   [/毛線籃/, (it, d, cx) => { Room.puff('p_dot', cx, it.y + 4, { vx: 18, vy: -2, grav: 20, max: 1 }); if (!Furn.callPet(it, 'beg', '喵？')) Furn.say(it, cx, '一顆毛線球滾出來了'); else Furn.say(it, cx, '毛線球滾出來了！'); }],
@@ -218,3 +228,8 @@ const FURN_RULES = [
 
 // cats only: tell the player once which dogs became cats (name, level, bond and tricks are kept)
 setInterval(() => { try { const Z = Game.S && Game.S.zoo; if (!Z || !Z.dogsGone || !Z.dogsGone.length) return; const n = Z.dogsGone.slice(0, 3).join('、') + (Z.dogsGone.length > 3 ? ` 等 ${Z.dogsGone.length} 隻` : ''); delete Z.dogsGone; Game.save(); UI.toast(`小窩現在只住貓咪：${n}變成了貓咪，名字、等級和感情都還在`, 'i_paw', 6); } catch (e) { } }, 4000);
+
+(function () {
+  const interact = Game.interact.bind(Game);
+  Game.interact = function (it) { UI.clearBubbles('furniture'); return interact(it); };
+})();
