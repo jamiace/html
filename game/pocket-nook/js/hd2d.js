@@ -181,7 +181,9 @@ const HD2D = {
     let minX=W,minY=H,maxX=-1,maxY=-1;const solid=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&d[(y*W+x)*4+3]>48;
     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(solid(x,y)){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);if(!solid(x-1,y)||!solid(x+1,y)||!solid(x,y-1)||!solid(x,y+1))points.push([(x+.5)/S,(y+.5)/S]);}
     let sum=0,count=0;for(let y=Math.max(0,maxY-2);y<=maxY;y++)for(let x=0;x<W;x++)if(solid(x,y)){sum+=(x+.5)/S;count++}
-    const step=Math.max(1,Math.ceil(points.length/120)),outline=points.filter((_,i)=>i%step===0),result={points:outline,bottom:(maxY+1)/S,footX:count?sum/count:w/2,width:Math.max(1,(maxX-minX+1)/S),top:minY/S,mask:cv,alpha:d};map.set(key,result);return result;
+    const tiles=[];let active=new Map();
+    for(let y=0;y<H;y++){const next=new Map();for(let x=0;x<W;){if(!solid(x,y)){x++;continue}const start=x;while(x<W&&solid(x,y))x++;const key=start+':'+x,prior=active.get(key);if(prior&&y/S-prior[1]<2){prior[3]=(y+1)/S;next.set(key,prior)}else{const tile=[start/S,y/S,x/S,(y+1)/S];tiles.push(tile);next.set(key,tile)}}active=next;}
+    const step=Math.max(1,Math.ceil(points.length/120)),outline=points.filter((_,i)=>i%step===0),result={tiles,points:outline,bottom:(maxY+1)/S,footX:count?sum/count:w/2,width:Math.max(1,(maxX-minX+1)/S),top:minY/S,mask:cv,alpha:d};map.set(key,result);return result;
   },
   ground(it) { const root=this.root(it),cv=Room.itemCanvas(root),shape=this.shape(this.source(root),cv.width,cv.height);return {x:root.x+shape.footX,y:root.y+shape.bottom,uid:root.uid}; },
 
@@ -201,35 +203,72 @@ const HD2D = {
     }
     return list.filter(l=>l.k>.01);
   },
-  effectiveLight(caster,lights) {
-    let sum=0,gx=0,gy=0,z=0,vx=0,vy=0;
-    for(const l of lights){if(!l.casts||l.rootUid===caster.rootUid)continue;const dx=caster.x-l.gx,dy=caster.y-l.gy,dist=Math.hypot(dx,dy*1.25),reach=l.reach||l.r;
-      if(dist>=reach)continue;const weight=l.k*(1-dist/reach)**2;if(weight<.008)continue;sum+=weight;gx+=l.gx*weight;gy+=l.gy*weight;z+=l.z*weight;const len=Math.hypot(dx,dy)||1;vx+=dx/len*weight;vy+=dy/len*weight;
-    }
-    if(sum<.012)return null;return {gx:gx/sum,gy:gy/sum,z:z/sum,k:sum,coherence:Math.min(1,Math.hypot(vx,vy)/sum)};
+  shadowLights(caster,lights) {
+    // Keep each emitter's direction. Averaging positions can cancel right/back shadows.
+    return lights.filter(l=>l.casts&&l.rootUid!==caster.rootUid).map(l=>{
+      const dist=Math.hypot(caster.x-l.gx,(caster.y-l.gy)*1.25),reach=l.reach||l.r;
+      return {...l,weight:dist<reach?l.k*(1-dist/reach)**2:0};
+    }).filter(l=>l.weight>.008);
   },
-  hull(points) {
-    if(points.length<3)return[];const p=points.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]),cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]),lower=[],upper=[];
-    for(const q of p){while(lower.length>1&&cross(lower.at(-2),lower.at(-1),q)<=0)lower.pop();lower.push(q)}for(let i=p.length-1;i>=0;i--){const q=p[i];while(upper.length>1&&cross(upper.at(-2),upper.at(-1),q)<=0)upper.pop();upper.push(q)}lower.pop();upper.pop();return lower.concat(upper);
+  selfLight(caster,lights) {
+    const own=lights.filter(l=>l.type==='point'&&l.emissive&&l.rootUid===caster.rootUid);
+    return 1/(1+own.reduce((v,l)=>v+l.k,0)*4);
   },
-  projectShadow(caster,light) {
-    if(!light||light.coherence<.1)return[];const points=[],limit=26*light.coherence;
-    // Above-emitter pixels cannot hit the floor. Low lamps must not project an entire standing head.
-    for(const [x,y]of caster.points){const receiverY=Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y,height=receiverY-y,dy=receiverY-light.gy;if(height<-.8||height>=light.z*.92)continue;const factor=Math.min(Math.max(0,height)/(light.z-Math.max(0,height)),limit/Math.max(1,Math.hypot(x-light.gx,dy)));
-      const px=x+(x-light.gx)*factor,py=receiverY+dy*factor,depth=Math.max(.5,Math.min(2.2,caster.width*.055))*(1-Math.min(.7,factor*.15));points.push([px,py-depth],[px,py+depth]);}
-    return this.hull(points);
+  sourceId(src) {this.sourceIds=this.sourceIds||new WeakMap();if(!this.sourceIds.has(src))this.sourceIds.set(src,this.nextSourceId=(this.nextSourceId||0)+1);return this.sourceIds.get(src);},
+  itemSignature(it) {const cv=Room.itemCanvas(it);return [this.sourceId(this.source(it)),it.x,it.y,cv.width,cv.height].join(',');},
+  itemTiles(it) {
+    this.tileCache=this.tileCache||new WeakMap();const key=this.itemSignature(it),cached=this.tileCache.get(it);if(cached?.key===key)return cached.tiles;
+    const cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height);
+    const tiles=shape.tiles.map(([x,y,r,b])=>[[it.x+x,it.y+y],[it.x+r,it.y+y],[it.x+r,it.y+b],[it.x+x,it.y+b]]);this.tileCache.set(it,{key,tiles});return tiles;
   },
-  wallProjection(caster,light) {
-    const groups={back:[],left:[],right:[]};if(!light||light.coherence<.1)return groups;const slope=(R.wx0-R.fxf0)/(R.fy1-R.wy1);
-    for(const [x,y]of caster.points){const gy=Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y,z=gy-y;if(z<=0)continue;
-      const dx=x-light.gx,dy=gy-light.gy,dz=z-light.z,floor=dz<0?-z/dz:Infinity;
-      const planes=[['back',R.wy1-gy,dy],['left',R.wx0+slope*R.wy1-x-slope*gy,dx+slope*dy],['right',R.wx1-slope*R.wy1-x+slope*gy,dx-slope*dy]];
-      let best=null;for(const [side,n,d]of planes){if(Math.abs(d)<1e-6)continue;const t=n/d;if(t<=.001||t>=floor||(best&&t>=best.t))continue;const px=x+dx*t,py=gy+dy*t,pz=z+dz*t;
-        if(pz<0||pz>py-R.wy0||py<R.wy1-.01||py>R.fy1+.01||(side==='back'&&(px<R.wx0||px>R.wx1)))continue;
-        if(Math.hypot(px-x,(py-gy)*1.25)>140)continue;best={side,t,point:[px,py-pz]};}
-      if(best)groups[best.side].push(best.point);
-    }
-    for(const side in groups)groups[side]=this.hull(groups[side]);return groups;
+  fragmentTiles(f) {
+    const shape=this.shape(f.src,f.nw,f.nh),[sx,sy,sw,sh,dx,dy,dw,dh]=f.rect,[a,b,c,d,e,g]=f.m,tiles=[];
+    for(const [x,y,r,bottom] of shape.tiles){const l=Math.max(sx,x/f.nw*f.src.width),t=Math.max(sy,y/f.nh*f.src.height),right=Math.min(sx+sw,r/f.nw*f.src.width),bot=Math.min(sy+sh,bottom/f.nh*f.src.height);if(l>=right||t>=bot)continue;
+      tiles.push([[l,t],[right,t],[right,bot],[l,bot]].map(([px,py])=>{const u=dx+(px-sx)/sw*dw,v=dy+(py-sy)/sh*dh;return[a*u+c*v+e,b*u+d*v+g]}));
+    }return tiles;
+  },
+  clip3(poly,fn) {
+    if(!poly.length)return poly;const out=[];let a=poly.at(-1),av=fn(a);
+    for(const b of poly){const bv=fn(b);if((av>=0)!==(bv>=0)){const t=av/(av-bv);out.push(a.map((v,i)=>v+(b[i]-v)*t))}if(bv>=0)out.push(b);a=b;av=bv}return out;
+  },
+  receiverPlanes() {
+    const slope=(R.wx0-R.fxf0)/(R.fy1-R.wy1);
+    return {floor:p=>p[2],back:p=>p[1]-R.wy1,left:p=>p[0]+slope*(p[1]-R.wy1)-R.wx0,right:p=>R.wx1+slope*(p[1]-R.wy1)-p[0]};
+  },
+  projectTiles(caster,light) {
+    const result={floor:[],back:[],left:[],right:[]};if(!light)return result;
+    this.projectedMasks=this.projectedMasks||new WeakMap();let cache,key;
+    if(caster.cacheOwner){key=[caster.signature,caster.y,caster.heightLimit,light.gx,light.gy,light.z].join('|');cache=this.projectedMasks.get(caster.cacheOwner);if(cache?.has(key))return cache.get(key);if(!cache){cache=new Map();this.projectedMasks.set(caster.cacheOwner,cache)}}
+    const L=[light.gx,light.gy,light.z],planes=this.receiverPlanes(),bounds=[...Object.values(planes),p=>p[1]-p[2]-R.wy0,p=>R.fy1-p[1]];
+    for(const tile of caster.tiles||[]){
+      // A shallow receiver depth avoids a degenerate line when lamp and feet align.
+      const vertices=tile.map(([x,y])=>{const gy=Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y+(y-caster.y)*.08;return[x,gy,Math.max(0,gy-y)]});
+      for(const [side,plane] of Object.entries(planes)){
+        const fl=plane(L);let poly=vertices;
+        // t = plane(P)/(plane(L)-plane(P)); clip BEFORE division, including all
+        // room half-spaces. This gives the first valid floor/wall intersection in
+        // every direction without a positive-X/Y assumption or a convex hull.
+        poly=this.clip3(poly,p=>plane(p));poly=this.clip3(poly,p=>fl-plane(p)-.001);
+        for(const bound of bounds){const bl=bound(L);poly=this.clip3(poly,p=>bound(p)*fl-bl*plane(p));if(poly.length<3)break;}
+        if(poly.length<3)continue;
+        const projected=poly.map(p=>{const t=plane(p)/(fl-plane(p));return[p[0]+(p[0]-L[0])*t,p[1]+(p[1]-L[1])*t-(p[2]+(p[2]-L[2])*t)]});
+        if(projected.every(p=>p.every(Number.isFinite)))result[side].push(projected);
+      }
+    }if(cache){if(cache.size>=12)cache.clear();cache.set(key,result)}return result;
+  },
+  paintTiles(c,tiles,alpha) {
+    if(!tiles.length||alpha<=0)return;c.save();c.globalAlpha=alpha;c.fillStyle='#15101d';c.beginPath();
+    // One compound path per caster/light: touching alpha cells do not accumulate.
+    for(const tile of tiles){const area=tile.reduce((v,p,i)=>{const n=tile[(i+1)%tile.length];return v+p[0]*n[1]-n[0]*p[1]},0),points=area<0?tile.slice().reverse():tile;points.forEach((p,i)=>c[i?'lineTo':'moveTo'](...p));c.closePath()}c.fill();c.restore();
+  },
+  footprint(c,caster,alpha) {
+    if(alpha<=0)return;const bottom=caster.actor?caster.actor.y:caster.y,tiles=[];
+    for(const tile of caster.tiles||[]){let p=this.clip3(tile.map(([x,y])=>[x,y,0]),p=>p[1]-(bottom-2));if(p.length<3)continue;tiles.push(p.map(([x,y])=>[x,caster.y+(y-bottom)*.55]));}
+    this.paintTiles(c,tiles,alpha);
+  },
+  washShadows(c,lights,wall=false) {
+    c.save();c.globalCompositeOperation='destination-out';
+    for(const l of lights){if(l.type!=='point'||!l.emissive)continue;const r=Math.max(5,Math.min(24,l.z*.65)),x=l.gx,y=wall?l.y:l.gy,g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(0,0,0,'+Math.min(.9,l.k*.7)+')');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r)}c.restore();
   },
   wallClip(c,side) {
     c.beginPath();if(side==='left'){c.moveTo(R.fxf0,R.wy0);c.lineTo(R.wx0,R.wy0);c.lineTo(R.wx0,R.wy1);c.lineTo(R.fxf0,R.fy1)}else if(side==='right'){c.moveTo(R.wx1,R.wy0);c.lineTo(R.fxf1,R.wy0);c.lineTo(R.fxf1,R.fy1);c.lineTo(R.wx1,R.wy1)}else c.rect(R.wx0,R.wy0,R.wx1-R.wx0,R.wy1-R.wy0);c.closePath();c.clip();
@@ -256,30 +295,29 @@ const HD2D = {
     const seated=['sit','work'].includes(actor.state)&&actor.seat&&Room.uidMap[actor.seat.uid],on=actor.on?Room.uidMap[actor.on.uid]:actor.p?.on?Room.uidMap[actor.p.on]:null,target=actor.climbItem||(actor.jump&&Room.uidMap[actor.target]),support=seated||on||target;
     const j=actor.jump,t=j?Math.max(0,Math.min(1,j.t)):0,ground=support?this.ground(support):{x:actor.x,y:j?j.y0+(j.y1-j.y0)*t:actor.y};
     const points=entry.fragments.flatMap(f=>this.fragmentPoints(f));if(!points.length)return null;const minX=Math.min(...points.map(p=>p[0])),maxX=Math.max(...points.map(p=>p[0]));
-    return {id:actor.pid!=null?'pet:'+actor.pid:'actor',actor,x:seated?ground.x:actor.x,y:ground.y,width:maxX-minX,points,rootUid:support?.uid,elevation:Math.max(0,ground.y-actor.y),contact:!support,surface:!!on&&!j};
-  },
-  contact(c,x,y,rx,ry,alpha) {
-    if(alpha<=0)return;c.save();c.translate(x,y);c.scale(Math.max(.5,rx),Math.max(.4,ry));const g=c.createRadialGradient(0,0,0,0,0,1);g.addColorStop(0,'rgba(17,11,24,'+alpha+')');g.addColorStop(.55,'rgba(17,11,24,'+(alpha*.55)+')');g.addColorStop(1,'rgba(17,11,24,0)');c.fillStyle=g;c.fillRect(-1,-1,2,2);c.restore();
+    return {id:actor.pid!=null?'pet:'+actor.pid:'actor',actor,cacheOwner:actor,signature:entry.fragments.map(f=>[this.sourceId(f.src),...f.rect,...f.m].join(',')).join(';'),x:seated?ground.x:actor.x,y:ground.y,width:maxX-minX,points,tiles:entry.fragments.flatMap(f=>this.fragmentTiles(f)),rootUid:support?.uid,elevation:Math.max(0,ground.y-actor.y),contact:!support,surface:!!on&&!j};
   },
   shadows(c,list,lights) {
     if(!this.shadow){this.shadow=this.canvas(this.cv.width,this.cv.height);this.shadowCtx=this.shadow.getContext('2d')}
-    if(!this.wallShadow){this.wallShadow=this.canvas(this.cv.width,this.cv.height);this.wallShadowCtx=this.wallShadow.getContext('2d')}const wctx=this.wallShadowCtx;wctx.setTransform(this.scale,0,0,this.scale,0,0);wctx.clearRect(0,0,RW,RH);
-    const q=this.shadowCtx;q.setTransform(this.scale,0,0,this.scale,0,0);q.clearRect(0,0,RW,RH);q.save();this.floorClip(q);const casters=[],roots=new Map();
-    for(const e of list)if(e.kind==='item'&&Room.layerOf(e.it)==='floor'&&e.it.p==null){const it=e.it,cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height),foot=this.ground(it),caster={id:'item:'+it.uid,x:foot.x,y:foot.y,width:shape.width,rootUid:it.uid,contact:true,heightLimit:this.heightLimit(it,shape),points:shape.points.map(p=>[it.x+p[0],it.y+p[1]])};casters.push(caster);roots.set(it.uid,caster)}
-    for(const e of list)if(e.kind==='item'&&e.it.p!=null){const root=this.root(e.it),caster=roots.get(root.uid);if(caster){const it=e.it,cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height);caster.points.push(...shape.points.map(p=>[it.x+p[0],it.y+p[1]]))}}
+    if(!this.wallShadow){this.wallShadow=this.canvas(this.cv.width,this.cv.height);this.wallShadowCtx=this.wallShadow.getContext('2d')}
+    const q=this.shadowCtx,wctx=this.wallShadowCtx;for(const ctx of [q,wctx]){ctx.setTransform(this.scale,0,0,this.scale,0,0);ctx.clearRect(0,0,RW,RH)}
+    q.save();this.floorClip(q);const casters=[],roots=new Map();
+    for(const e of list)if(e.kind==='item'&&Room.layerOf(e.it)==='floor'&&e.it.p==null){const it=e.it,cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height),foot=this.ground(it),caster={id:'item:'+it.uid,x:foot.x,y:foot.y,width:shape.width,rootUid:it.uid,contact:true,heightLimit:this.heightLimit(it,shape),cacheOwner:it,signature:this.itemSignature(it),tiles:[...this.itemTiles(it)]};casters.push(caster);roots.set(it.uid,caster)}
+    for(const e of list)if(e.kind==='item'&&e.it.p!=null){const caster=roots.get(this.root(e.it).uid);if(caster){caster.tiles.push(...this.itemTiles(e.it));caster.signature+=';'+this.itemSignature(e.it)}}
     for(const e of list)if(e.kind==='actor'){const caster=this.actorSupport(e.a,this.frameActors.get(e.a));if(caster)casters.push(caster)}
     this.shadowPlans=[];
-    for(const caster of casters){const light=this.effectiveLight(caster,lights),polygon=this.projectShadow(caster,light),walls=this.wallProjection(caster,light);this.shadowPlans.push({walls,id:caster.id,x:caster.x,y:caster.y,contact:caster.contact,surface:!!caster.surface,elevation:caster.elevation||0,light,polygon});
-      if(light)for(const side of ['back','left','right']){const p=walls[side];if(p.length<3)continue;wctx.save();this.wallClip(wctx,side);wctx.globalAlpha=Math.min(1,light.k/.22)*light.coherence*.8;wctx.fillStyle='#15101d';wctx.beginPath();p.forEach((v,i)=>wctx[i?'lineTo':'moveTo'](...v));wctx.closePath();wctx.fill();wctx.restore();}
-      if(polygon.length>2){const cx=polygon.reduce((v,p)=>v+p[0],0)/polygon.length,cy=polygon.reduce((v,p)=>v+p[1],0)/polygon.length;
-        q.globalAlpha=Math.min(1,light.k/.22)*light.coherence;q.fillStyle='rgba(21,16,29,.22)';q.beginPath();polygon.forEach((p,i)=>q[i?'lineTo':'moveTo'](cx+(p[0]-cx)*1.035,cy+(p[1]-cy)*1.035));q.closePath();q.fill();q.fillStyle='#15101d';q.beginPath();polygon.forEach((p,i)=>q[i?'lineTo':'moveTo'](...p));q.closePath();q.fill();
+    for(const caster of casters){const sources=this.shadowLights(caster,lights),total=sources.reduce((v,l)=>v+l.weight,0),wash=this.selfLight(caster,lights);let count=0;
+      for(const light of sources){const masks=this.projectTiles(caster,light),alpha=Math.min(1,total/.35)*light.weight/Math.max(total,.001)*wash;
+        this.paintTiles(q,masks.floor,alpha);for(const side of ['back','left','right']){wctx.save();this.wallClip(wctx,side);this.paintTiles(wctx,masks[side],alpha);wctx.restore()}count+=Object.values(masks).reduce((v,a)=>v+a.length,0);
       }
+      if(caster.contact)this.footprint(q,caster,.8*wash*Math.exp(-(caster.elevation||0)/14));
+      this.shadowPlans.push({id:caster.id,sources:sources.length,tiles:count,wash,contact:caster.contact,surface:!!caster.surface,elevation:caster.elevation||0});
     }
-    q.restore();q.globalAlpha=1;c.save();c.globalAlpha=Room.env.dark>.1?.18:.14;c.drawImage(this.wallShadow,0,0,RW,RH);c.restore();c.save();this.floorClip(c);c.globalAlpha=Room.env.dark>.1?.18:.14;c.drawImage(this.shadow,0,0,RW,RH);c.globalAlpha=1;
-    for(const a of casters)if(a.contact){const height=a.elevation||0,rx=a.actor?(a.actor.pid!=null?4.2:4.6)*(1+height*.014):Math.max(2,a.width*.36),ry=a.actor?1.3+height*.014:1.5,alpha=(a.actor?.jump?.t!=null?.17*Math.exp(-height/14):.19);this.contact(c,a.x,a.y,rx,ry,alpha)}c.restore();
+    q.restore();this.washShadows(q,lights);this.washShadows(wctx,lights,true);
+    c.save();c.globalAlpha=Room.env.dark>.1?.18:.14;c.drawImage(this.wallShadow,0,0,RW,RH);c.drawImage(this.shadow,0,0,RW,RH);c.restore();
   },
   wallContact(c,it) {
-    const d=ITEMS[it.k];if(d.layer!=='wall')return;const cv=Room.itemCanvas(it),src=this.source(it),side=WallMount.side(it);c.save();c.beginPath();if(side==='left'){c.moveTo(6,12);c.lineTo(30,12);c.lineTo(30,96);c.lineTo(6,170)}else if(side==='right'){c.moveTo(210,12);c.lineTo(234,12);c.lineTo(234,170);c.lineTo(210,96)}else c.rect(30,12,180,84);c.closePath();c.clip();c.globalAlpha=.13;c.drawImage(this.mask(src),it.x+(side==='left'?-.5:.5),it.y+.65,cv.width,cv.height);c.restore();
+    const d=ITEMS[it.k];if(d.layer!=='wall')return;const cv=Room.itemCanvas(it),src=this.source(it),side=WallMount.side(it);c.save();c.beginPath();if(side==='left'){c.moveTo(6,12);c.lineTo(30,12);c.lineTo(30,96);c.lineTo(6,170)}else if(side==='right'){c.moveTo(210,12);c.lineTo(234,12);c.lineTo(234,170);c.lineTo(210,96)}else c.rect(30,12,180,84);c.closePath();c.clip();c.globalAlpha=.13*this.selfLight({rootUid:this.root(it).uid},this.frameLights||[]);c.drawImage(this.mask(src),it.x+(side==='left'?-.5:.5),it.y+.65,cv.width,cv.height);c.restore();
   },
   clearFloorMask(list) {
     for(const c of [this.shadowCtx,this.wallShadowCtx]){c.save();c.globalCompositeOperation='destination-out';
@@ -371,7 +409,7 @@ const HD2D = {
     const list = Room.drawList();
     for(const e of list)if(e.kind==='item')this.source(e.it);
     this.frameActors=new Map();for(const e of list)if(e.kind==='actor')this.frameActors.set(e.a,this.actorFrame(e.a));
-    const lights = this.lights();
+    const lights = this.frameLights = this.lights();
     for (const e of list) if (e.kind === 'item' && ITEMS[e.it.k].layer === 'rug') this.drawItem(c, e.it);
 
     this.windowLight(c,lights);
@@ -381,7 +419,7 @@ const HD2D = {
       if (e.kind === 'item') {
         if (ITEMS[e.it.k].layer !== 'rug') { this.wallContact(c,e.it); this.drawItem(c,e.it); }
       } else if (e.kind === 'actor') {
-        const support=this.actorSupport(e.a,this.frameActors.get(e.a));if(support?.surface)this.contact(c,e.a.x,e.a.y-.3,3.6,.75,.14);
+        const support=this.actorSupport(e.a,this.frameActors.get(e.a));if(support?.surface)this.footprint(c,{...support,y:e.a.y-.3},.12*this.selfLight(support,lights));
         c.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH);
       } else Room.drawGift(this.proxy(c, 'prop'), e.g);
     }
