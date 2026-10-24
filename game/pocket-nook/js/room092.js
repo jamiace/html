@@ -2,7 +2,30 @@
 const WallMount = {
  cache:new WeakMap(),raw:Room.itemCanvas.bind(Room),
  side(it){return ITEMS[it.k]&&ITEMS[it.k].layer==='wall'&&!ITEMS[it.k].surface&&['left','right'].includes(it.wall)?it.wall:null},
- project(src,side){let map=this.cache.get(src);if(!map){map={};this.cache.set(src,map)}if(map[side])return map[side];const w=Math.max(8,Math.min(20,Math.round(src.width*.48))),pad=Math.ceil((w-1)*.45),cv=document.createElement('canvas');cv.width=w;cv.height=src.height+pad;const c=cv.getContext('2d');c.imageSmoothingEnabled=false;for(let x=0;x<w;x++){const sx=Math.min(src.width-1,Math.floor(x/w*src.width)),dy=Math.round((side==='left'?w-1-x:x)*.45);c.drawImage(src,sx,0,1,src.height,x,dy,1,src.height)}cv.alpha=c.getImageData(0,0,cv.width,cv.height).data;return map[side]=cv},
+ geometry(src,side,it={x:side==='left'?7:212,y:38}){
+  // Same wall plane as Room.buildBg: the near edge is taller, all seams converge inward.
+  const scale=Math.min(1,18/(src.width*.52)),w=Math.max(3,Math.round(src.width*.52*scale)),factor=x=>1+Math.max(0,side==='left'?30-x:x-210)*74/(24*82);
+  const ref=side==='left'?it.x+w-1:it.x,base=factor(ref),top=it.y||0;
+  const ratio=x=>factor(it.x+x)/base,offset=x=>(top-14)*(ratio(x)-1);
+  const h=Math.ceil(Math.max(...[0,w-1].map(x=>offset(x)+src.height*scale*ratio(x))))+2;
+  return{w:w+2,h,inner:w,scale,ratio,offset,point:(sx,sy)=>{const x=Math.max(0,Math.min(w-1,sx/Math.max(1,src.width-1)*(w-1)));return[1+x,1+offset(x)+sy*scale*ratio(x)]}};
+ },
+ project(src,side,it={x:side==='left'?7:212,y:38},cache=true){
+  let map=this.cache.get(src);if(!map){map=new Map();this.cache.set(src,map)}const key=side+':'+Math.round(it.x)+':'+Math.round(it.y);if(cache&&map.has(key))return map.get(key);
+  const p=this.geometry(src,side,it),cv=document.createElement('canvas');cv.width=p.w;cv.height=p.h;const c=cv.getContext('2d'),read=src.getContext('2d').getImageData(0,0,src.width,src.height).data,im=c.createImageData(p.w,p.h),out=im.data;
+  // Area coverage includes every source column, including one-pixel borders and thin cords.
+  for(let x=0;x<p.inner;x++){
+   const lo=Math.floor(x*src.width/p.inner),hi=Math.min(src.width,Math.ceil((x+1)*src.width/p.inner)),r=p.ratio(x),oy=1+p.offset(x),ys=p.scale*r;
+   for(let y=0;y<src.height;y++){
+    let best=-1,score=-1;const colors=new Map();for(let sx=lo;sx<hi;sx++){const at=(y*src.width+sx)*4;if(!read[at+3])continue;const color=read[at]+','+read[at+1]+','+read[at+2],weight=(colors.get(color)||0)+1;colors.set(color,weight);if(weight>score){best=at;score=weight;}}
+    if(best<0)continue;for(let dy=Math.max(1,Math.floor(oy+y*ys));dy<Math.min(p.h-1,Math.ceil(oy+(y+1)*ys));dy++){const at=(dy*p.w+x+1)*4;out[at]=read[best];out[at+1]=read[best+1];out[at+2]=read[best+2];out[at+3]=read[best+3];}
+   }
+  }
+  // Rebuild a clean one-pixel ink contour AFTER projection; never depend on a skipped sample.
+  const mask=new Uint8Array(p.w*p.h);for(let i=0;i<mask.length;i++)mask[i]=out[i*4+3]>0?1:0;
+  for(let y=1;y<p.h-1;y++)for(let x=1;x<p.w-1;x++){const i=y*p.w+x;if(!mask[i])continue;for(const n of [i-1,i+1,i-p.w,i+p.w])if(!mask[n]){const at=n*4;out[at]=46;out[at+1]=34;out[at+2]=48;out[at+3]=255;}}
+  c.putImageData(im,0,0);cv.alpha=out;if(cache){if(map.size>64)map.clear();map.set(key,cv)}return cv;
+ },
  set(it,side){if(!it||ITEMS[it.k].layer!=='wall'||ITEMS[it.k].surface)return;it.wall=side;if(side==='left'){it.x=7;it.y=38}else if(side==='right'){it.x=212;it.y=38}else{it.x=100;it.y=25}Room.clampItem(it);Room.indexItems();Game.save();UI.editToolbar()},
  buttons(it){return h('div',{class:'wall-mount-controls'},...[['left','左牆'],['back','後牆'],['right','右牆']].map(([id,label])=>h('button',{class:'chip sm'+((it.wall||'back')===id?' on':''),'aria-pressed':String((it.wall||'back')===id),onclick:()=>this.set(it,id)},label)))},
  toolbar(){const it=Room.sel;if(!Room.edit||!it||ITEMS[it.k].layer!=='wall'||ITEMS[it.k].surface)return;const host=Mobile.on?Mobile._edit&&Mobile._edit.querySelector('.medit-acts'):UI._tb;if(!host)return;host.querySelectorAll('.wall-mount-controls').forEach(e=>e.remove());host.append(this.buttons(it));},
@@ -36,15 +59,12 @@ class VisitPerson extends Walker{
  const lights=Room.collectLights.bind(Room);Room.collectLights=function(){const out=lights(),st=Game.S&&Game.S.settings;if(st&&Room.state===Game.S){const amount=Number.isFinite(+st.ambient)?+st.ambient:60;if(amount>0){const col=['warm','cool','pink'].includes(st.ambientColor)?st.ambientColor:'warm';out.push({x:120,y:86,r:225,col,k:amount/100*.45*Lights.lamp})}}
   return out;
  };
- const src=Room.itemCanvas.bind(Room);Room.itemCanvas=function(it){const cv=src(it),side=WallMount.side(it);return side?WallMount.project(cv,side):cv};
- const clamp=Room.clampItem.bind(Room);Room.clampItem=function(it){const def=ITEMS[it.k];if(def.layer!=='wall'||def.surface)return clamp(it);if(this.drag&&this.drag.it===it){it.wall=it.x<23?'left':it.x>206?'right':'back'}const side=WallMount.side(it);if(!side)return clamp(it);const cv=this.itemCanvas(it);it.x=side==='left'?Math.max(7,Math.min(29-cv.width,it.x)):Math.max(211,Math.min(233-cv.width,it.x));const bottom=side==='left'?96+(30-it.x-cv.width)*74/24:96+(it.x-210)*74/24;it.y=Math.max(14,Math.min(bottom-cv.height-2,it.y));};
- const draw=Room.drawItem.bind(Room);let scratch=null;Room.drawItem=function(c,it){const side=WallMount.side(it);if(!side)return draw(c,it);const orig=WallMount.raw(Object.assign({},it,{wall:'back'})),w=Math.max(8,Math.min(20,Math.round(orig.width*.48)));if(!scratch)scratch=document.createElement('canvas');scratch.width=orig.width;scratch.height=orig.height;const sc=scratch.getContext('2d');sc.imageSmoothingEnabled=false;draw(sc,Object.assign({},it,{wall:'back',x:0,y:0}));
-  for(let x=0;x<w;x++){const sx=Math.min(orig.width-1,Math.floor(x/w*orig.width)),dy=Math.round((side==='left'?w-1-x:x)*.45);c.drawImage(scratch,sx,0,1,orig.height,Math.round(it.x)+x,Math.round(it.y)+dy,1,orig.height)}
+ const src=Room.itemCanvas.bind(Room);Room.itemCanvas=function(it){const cv=src(it),side=WallMount.side(it);return side?WallMount.project(cv,side,it):cv};
+ const clamp=Room.clampItem.bind(Room);Room.clampItem=function(it){const def=ITEMS[it.k];if(def.layer!=='wall'||def.surface)return clamp(it);if(this.drag&&this.drag.it===it){it.wall=it.x<23?'left':it.x>206?'right':'back'}const side=WallMount.side(it);if(!side)return clamp(it);const cv=this.itemCanvas(it);it.x=side==='left'?Math.max(7,Math.min(29-cv.width,it.x)):Math.max(211,Math.min(233-cv.width,it.x));const bottom=side==='left'?96+(30-it.x-cv.width)*74/24:96+(it.x-210)*74/24;for(let i=0;i<3;i++){const height=this.itemCanvas(it).height;it.y=Math.max(14,Math.min(bottom-height-2,it.y));}};
+ const draw=Room.drawItem.bind(Room);let scratch=null;Room.drawItem=function(c,it){const side=WallMount.side(it);if(!side)return draw(c,it);const d=ITEMS[it.k];if(!it.shake&&!it.dust&&!it.broken&&!['window','clock','calendar','anim','flicker','tv','screen','fish','spin','steam','fire','glow','music'].some(k=>d[k])){c.drawImage(this.itemCanvas(it),Math.round(it.x),Math.round(it.y));return;}const orig=WallMount.raw(Object.assign({},it,{wall:'back'}));if(!scratch)scratch=document.createElement('canvas');scratch.width=orig.width;scratch.height=orig.height;const sc=scratch.getContext('2d');sc.imageSmoothingEnabled=false;draw(sc,Object.assign({},it,{wall:'back',x:0,y:0}));const projected=WallMount.project(scratch,side,it,false);c.drawImage(projected,Math.round(it.x),Math.round(it.y));
  };
  // Move wall light sources with their projected sprites too.
- const lit=Room.collectLights.bind(Room);Room.collectLights=function(){const out=lit();for(const it of this.state.items){const d=ITEMS[it.k],side=WallMount.side(it);if(!side||!d.light)continue;const raw=WallMount.raw(it),cv=this.itemCanvas(it),oldX=it.x+(it.flip?cv.width-1-d.light.x:d.light.x);const l=out.find(l=>Math.abs(l.x-oldX)<.01&&Math.abs(l.y-(it.y+d.light.y))<.01);if(l){const x=(it.flip?raw.width-1-d.light.x:d.light.x)/raw.width*cv.width;l.x=it.x+x;l.y=it.y+d.light.y+(side==='left'?cv.width-x:x)*.45;}}
-  return out;
- };
+ const lit=Room.collectLights.bind(Room);Room.collectLights=function(){const out=lit();for(const it of this.state.items){const d=ITEMS[it.k],side=WallMount.side(it);if(!side||!d.light)continue;const raw=WallMount.raw(it),cv=this.itemCanvas(it),oldX=it.x+(it.flip?cv.width-1-d.light.x:d.light.x);const l=out.find(l=>Math.abs(l.x-oldX)<.01&&Math.abs(l.y-(it.y+d.light.y))<.01);if(l){const [x,y]=WallMount.geometry(raw,side,it).point(it.flip?raw.width-1-d.light.x:d.light.x,d.light.y);l.x=it.x+x;l.y=it.y+y;}}return out;};
  const toolbar=UI.editToolbar.bind(UI);UI.editToolbar=function(){const r=toolbar(...arguments);WallMount.toolbar();return r};const edit=Mobile.renderEdit.bind(Mobile);Mobile.renderEdit=function(){const r=edit();WallMount.toolbar();return r};
  const nav=Mobile.measureNav.bind(Mobile);Mobile.measureNav=function(){if(this.on&&Room.edit&&this._edit){document.documentElement.style.setProperty('--mobile-nav-height',Math.ceil(this._edit.getBoundingClientRect().height)+'px')}else nav()};
  const place=Game.place.bind(Game);Game.place=function(id){if(Visit.active)return UI.toast('回自己家再佈置吧','i_people',3);return place(id)};

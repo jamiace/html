@@ -197,6 +197,26 @@ const Learn = {
   },
 };
 
+// Keyboard state belongs to a physical key press and a live input, never to a stale quiz DOM.
+const SpellKeys={
+ composing:new WeakSet(),pending:null,held:false,
+ enter(e){return e.key==='Enter'||e.code==='Enter'||e.code==='NumpadEnter'||e.keyCode===13},
+ live(){const s=Learn.sess,w=UI.wins&&UI.wins.study,el=document.getElementById('spell-in');if(!s||!w||w.el.hidden||s.step!=='quiz'||!el)return null;const q=s.qs[s.qi];return q&&['spell','listenspell'].includes(q.type)?{s,el}:null},
+ submit(el){const live=this.live();if(!live||live.el!==el||live.s.ans||el.disabled)return;if(this.composing.has(el)){this.pending={s:live.s,qi:live.s.qi,el};return;}this.pending=null;Learn.answer(el.value)},
+ start(el){this.composing.add(el)},
+ end(el){this.composing.delete(el);const live=this.live();if(live&&live.el===el){live.s.typed=el.value;live.s.typedKey='q'+live.s.qi;}const p=this.pending;if(p&&p.el===el){this.pending=null;setTimeout(()=>{const now=this.live();if(now&&now.el===el&&now.s===p.s&&now.s.qi===p.qi)this.submit(el)},0)}},
+ blur(el){this.composing.delete(el);if(this.pending&&this.pending.el===el)this.pending=null},
+ keydown(e){if(!this.enter(e))return;const live=this.live();if(!live)return;const {s,el}=live,target=e.target;
+   if(target&&target.closest&&target.closest('button'))return;
+   if(target&&target!==el&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(target.tagName)))return;
+   e.stopImmediatePropagation();if(this.composing.has(el)){this.held=true;this.pending={s,qi:s.qi,el};return;}e.preventDefault();if(e.repeat||this.held)return;this.held=true;if(s.ans)Learn.next();else this.submit(el);
+ },
+ keyup(e){if(!this.enter(e))return;if(this.held){this.held=false;return;}const live=this.live();if(!live||live.s.ans||this.composing.has(live.el))return;const t=e.target;if(t&&t!==live.el&&(t.closest&&t.closest('button')||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)||t.isContentEditable))return;e.preventDefault();e.stopImmediatePropagation();this.submit(live.el)},
+};
+document.addEventListener('keydown',e=>SpellKeys.keydown(e),true);
+document.addEventListener('keyup',e=>SpellKeys.keyup(e),true);
+window.addEventListener('blur',()=>{SpellKeys.held=false;SpellKeys.pending=null;SpellKeys.composing=new WeakSet()});
+
 /* ---------------- windows ---------------- */
 Object.assign(UI.WIN, {
   learn: { t: '學習', i: 'i_learn', w: 450, at: ['l', 0] },
@@ -262,19 +282,13 @@ Object.assign(UI, {
       const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? `再試一次剛剛答錯的字 ${s.qi - s.redoFrom + 1}/${s.qs.length - s.redoFrom}` : `測驗 ${s.qi + 1}/${s.redoFrom != null ? s.redoFrom : s.qs.length} · 答對 ${s.right}` })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
       if (q.type === 'spell' || q.type === 'listenspell') {
         const hintTxt = q.hint || (q.noHint || q.type === 'listenspell' ? '' : v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim());
-        // Enter answers; while a Chinese input method is still composing, the answer goes in once it has finished
         const key = 'q' + s.qi;
-        const inp = h('input', { id: 'spell-in', type: 'text', lang: 'en', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', disabled: !!A, placeholder: hintTxt, value: !A && s.typedKey === key ? s.typed || '' : '',
+        const inp = h('input', { id: 'spell-in', type: 'text', lang: 'en', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', enterkeyhint: 'done', disabled: !!A, placeholder: hintTxt, value: !A && s.typedKey === key ? s.typed || '' : '',
           oninput: e => { s.typed = e.target.value; s.typedKey = key; },
-          oncompositionstart: () => { s.composing = true; },
-          oncompositionend: e => { s.composing = false; s.typed = e.target.value; s.typedKey = key; if (s.enterAfterIme) { s.enterAfterIme = false; setTimeout(() => { if (!s.ans && s.qi + '' === key.slice(1)) Learn.answer(e.target.value); }, 0); } },
-          // waits only while a composition is really open: Firefox with a Chinese input method installed can mark a plain Enter as
-          // "composing" (keyCode 229) without any composition, and then no compositionend ever comes
-          onkeydown: e => { if (e.key !== 'Enter' && e.keyCode !== 13 && !(e.keyCode === 229 && e.code === 'Enter')) return; e.preventDefault(); e.stopPropagation(); s.enterAt = Date.now();
-            if (s.composing) { s.enterAfterIme = true; return; } if (!s.ans) Learn.answer(e.target.value); else Learn.next(); },
-          // some input methods swallow the Enter keydown: the key going up still answers (never twice for one press)
-          onkeyup: e => { if ((e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') && !s.composing && Date.now() - (s.enterAt || 0) > 600 && !s.ans) { e.preventDefault(); Learn.answer(e.target.value); } } });
-        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), h('button', { class: 'chip primary', disabled: !!A, onclick: () => Learn.answer(inp.value) }, '確定')));
+          oncompositionstart: e => SpellKeys.start(e.target),
+          oncompositionend: e => SpellKeys.end(e.target),
+          onblur: e => SpellKeys.blur(e.target) });
+        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, '確定')));
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus(); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
