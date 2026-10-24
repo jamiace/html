@@ -210,7 +210,7 @@ const HD2D = {
           const distFactor = Math.max(0, 1 - dist / (l.r || 100));
           if (distFactor > 0.05) {
             // 提高角色影子濃度至 .45，並乘上距離係數
-            this.cast(c, src, a.x, foot, spriteW, spriteH, l, .34 * shrink * distFactor);
+            this.cast(c, src, a.x, foot, spriteW, spriteH, l, .45 * shrink * distFactor);
           }
         }
       }
