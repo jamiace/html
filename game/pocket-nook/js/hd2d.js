@@ -1,8 +1,6 @@
 /* HD-2D first playable slice. World coordinates and save rules stay with the game. */
 const HD2D = {
-  // 階段一優化：將 scale 從 5 降至 2（或 2.5），像素運算量直接減少 75% 以上
-  // 透過 CSS 的 image-rendering: pixelated 放大，既保留精緻紋理又能保證 60 FPS
-  scale: 2,
+  scale: 2, // 階段一優化：維持流暢 60 FPS
   enabled: true,
   ready: false,
   images: {},
@@ -12,7 +10,7 @@ const HD2D = {
   frames: 0,
   ms: 0,
   names: ['room-shell','bed','desk','chair','cat_tree','litter_house','rug','lantern','moon_bunny','window'],
-  
+
   canvas(w, h) {
     const cv = document.createElement('canvas');
     cv.width = w;
@@ -60,13 +58,11 @@ const HD2D = {
     if (!styles) { styles = {}; this.surfaces.set(src, styles); }
     if (styles[kind]) return styles[kind];
     if (!src.getContext) return src;
-    
-    // 紋理細節取樣維持 4 倍預烘焙，此處已自帶快取，維持不變
     const S = 4, w = src.width, h = src.height, cv = this.canvas(w * S, h * S),
           c = cv.getContext('2d'), data = src.getContext('2d').getImageData(0, 0, w, h).data,
           im = c.createImageData(w * S, h * S);
     const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 30;
-    
+
     for (let y = 0; y < h * S; y++) {
       for (let x = 0; x < w * S; x++) {
         const sx = x >> 2, sy = y >> 2, at = (sy * w + sx) * 4, o = (y * w * S + x) * 4;
@@ -132,12 +128,12 @@ const HD2D = {
     return cv;
   },
 
-floorClip(c) {
+  floorClip(c) {
     c.beginPath();
-    c.moveTo(28, 92);   // 從原本的 96 稍微上移至 92
+    c.moveTo(28, 92); // 向上微調以包容往後投射的陰影
     c.lineTo(212, 92);
-    c.lineTo(234, 170);
-    c.lineTo(6, 170);
+    c.lineTo(234, 172);
+    c.lineTo(6, 172);
     c.closePath();
     c.clip();
   },
@@ -146,24 +142,20 @@ floorClip(c) {
     return Room.collectLights().filter(l => l.k > .02);
   },
 
-cast(c, src, x, foot, w, h, light, opacity = .2) {
-    const dx = x - light.x, 
-          dy = foot - light.y, 
+  // 支援 360 度上下左右全向投射的陰影計算
+  cast(c, src, x, foot, w, h, light, opacity = .2) {
+    const dx = x - light.x,
+          dy = foot - light.y,
           dist = Math.hypot(dx, dy) || 1,
           len = Math.min(32, h * .65);
 
-    // 修正點：允許 dy 為負數（往上投射）
-    // 往上投射時（dy < 0），因為 2.5D 斜角透視關係，Y 軸長度需額外微幅壓縮（乘 0.35~0.4），避免過長穿入牆面
     const vx = (dx / dist) * len;
-    let vy = (dy / dist) * len * (dy < 0 ? .35 : .48);
-
-    // 設定最小偏移門檻（避免光源剛好在正正下方或正上方時除以零或無拉伸）
+    // 當 dy < 0（光源在物體下方）時，陰影向上伸展，透過 0.38 壓縮符合等距視角
+    let vy = (dy / dist) * len * (dy < 0 ? .38 : .48);
     if (Math.abs(vy) < 2) vy = dy < 0 ? -2 : 2;
 
     c.save();
     c.translate(x, foot);
-    
-    // 依據 vy 的方向傾斜壓平。h 為物件高度，利用 -vy/h 將直立圖案壓向地面或後上方
     c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
     c.globalAlpha = opacity * Math.min(1, light.k || 1);
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
@@ -171,17 +163,20 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
   },
 
   shadows(c, list, lights) {
-    lights = lights.filter(l => l.r < 180);
+    const shadowLights = lights.filter(l => l.r < 180);
     c.save();
     this.floorClip(c);
-    // 優化：拿掉 c.filter = 'blur(2px)'，避免在 iOS/Safari/低階裝置迫使 Canvas 走 CPU 軟體模糊
+
     for (const e of list) {
       if (e.kind === 'item') {
         const it = e.it, d = ITEMS[it.k];
         if (d.layer === 'wall' || d.layer === 'rug' || it.p != null) continue;
         const base = Room.itemCanvas(it), w = base.width, h = base.height,
               foot = it.y + h - 2, src = this.source(it);
-        const near = lights.slice().sort((a, b) => Math.hypot(a.x - it.x - w / 2, a.y - foot) - Math.hypot(b.x - it.x - w / 2, b.y - foot)).slice(0, 2);
+        const near = shadowLights.slice().sort((a, b) =>
+          Math.hypot(a.x - it.x - w / 2, a.y - foot) - Math.hypot(b.x - it.x - w / 2, b.y - foot)
+        ).slice(0, 2);
+
         for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, .22);
         c.fillStyle = 'rgba(13,8,18,.23)';
         c.beginPath();
@@ -192,19 +187,64 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
         let foot = a.y, elevation = 0;
         if (a.on) { foot = Room.base(a.on); elevation = Math.max(0, foot - a.y); }
         else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
-        if (foot < 99 || foot > 173) continue;
+        if (foot < 95 || foot > 175) continue;
+
         const shrink = Math.max(.42, 1 - elevation / 70);
-        c.fillStyle = 'rgba(14,9,25,' + (.3 * shrink) + ')';
+        c.fillStyle = 'rgba(14,9,25,' + (.35 * shrink) + ')';
         c.beginPath();
-        c.ellipse(a.x, foot, pet ? 5 * shrink : 4.5, 1.6 * shrink, 0, 0, Math.PI * 2);
+        c.ellipse(a.x, foot, pet ? 5.5 * shrink : 5 * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
         c.fill();
-        if (lights[0]) {
-          const s = ActorVisibility.sprite(a), src = this.detail(s.cv, pet ? 'pet' : 'owner');
-          this.cast(c, src, a.x, foot, src.width / 4, src.height / 4, lights[0], .16 * shrink);
+
+        // 修正重點：角色與寵物按最近光源排序，取最近的 2 盞燈投射清楚的動態影子
+        const s = ActorVisibility.sprite(a);
+        const src = this.detail(s.cv, pet ? 'pet' : 'owner');
+        const spriteW = s.cv.width;
+        const spriteH = s.cv.height;
+
+        const nearActor = shadowLights.slice().sort((l1, l2) =>
+          Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
+        ).slice(0, 2);
+
+        for (const l of nearActor) {
+          const dist = Math.hypot(l.x - a.x, l.y - foot);
+          const distFactor = Math.max(0, 1 - dist / (l.r || 100));
+          if (distFactor > 0.05) {
+            // 提高角色影子濃度至 .24，並乘上距離係數
+            this.cast(c, src, a.x, foot, spriteW, spriteH, l, .24 * shrink * distFactor);
+          }
         }
       }
     }
     c.restore();
+  },
+
+  // 為角色附加環境近距光照（受光與色溫效果）
+  drawActorLit(c, a, lights) {
+    const pet = a.pid != null;
+    const proxyCtx = this.proxy(c, pet ? 'pet' : 'owner');
+    a.draw(proxyCtx, Room);
+
+    // 計算身邊最強的燈光，為角色表面增加動態柔光
+    if (!lights.length) return;
+    const ax = a.x, ay = a.y - 10;
+    const near = lights.slice().sort((l1, l2) =>
+      Math.hypot(l1.x - ax, l1.y - ay) - Math.hypot(l2.x - ax, l2.y - ay)
+    )[0];
+
+    if (!near) return;
+    const dist = Math.hypot(near.x - ax, near.y - ay);
+    const radius = near.r || 80;
+    if (dist < radius) {
+      const power = (1 - dist / radius) * 0.22 * (near.k || 1);
+      const col = near.col === 'cool' ? '140,190,255' : near.col === 'pink' ? '255,160,190' : '255,200,120';
+      c.save();
+      c.globalCompositeOperation = 'screen';
+      c.fillStyle = `rgba(${col}, ${power})`;
+      c.beginPath();
+      c.ellipse(ax, ay, pet ? 9 : 8, pet ? 7 : 13, 0, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
   },
 
   drawItem(c, it) {
@@ -260,7 +300,6 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
     c.fillRect(0, 0, RW, RH);
     c.restore();
 
-    // 光照層使用獨立的 lightCtx
     const L = this.lightCtx;
     L.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     L.clearRect(0, 0, RW, RH);
@@ -333,8 +372,6 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
     c.globalAlpha = 1;
     c.globalCompositeOperation = 'source-over';
     c.clearRect(0, 0, RW, RH);
-    
-    // 保持像素插值平滑或關閉（此處關閉可減少插值計算開銷）
     c.imageSmoothingEnabled = false;
 
     const th = THEMES.lantern_night, isTheme = Room.state.wp === th.wp && Room.state.fl === th.fl;
@@ -353,8 +390,11 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
       if (e.kind === 'item') {
         if (ITEMS[e.it.k].layer !== 'rug') this.drawItem(c, e.it);
       } else if (e.kind === 'actor') {
-        e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
-      } else Room.drawGift(this.proxy(c, 'prop'), e.g);
+        // 使用具備受光效果的演員繪製
+        this.drawActorLit(c, e.a, lights);
+      } else {
+        Room.drawGift(this.proxy(c, 'prop'), e.g);
+      }
     }
 
     for (const p of Room.particles) {
@@ -438,7 +478,6 @@ cast(c, src, x, foot, w, h, light, opacity = .2) {
 
   attach() {
     const wrap = Room.cv.parentElement;
-    // 依據 scale: 2 初始化畫布大小（480x360）
     this.cv = this.canvas(RW * this.scale, RH * this.scale);
     this.cv.id = 'hd2d-room';
     this.cv.setAttribute('aria-hidden', 'true');
