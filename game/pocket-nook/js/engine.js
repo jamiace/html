@@ -58,7 +58,7 @@ const WindowScenery = {
   },
   draw(c,X,Y,w,h,id,room){
     if(!['city','sea','snow'].includes(id)||w<=0||h<=0)return false;const e=this.load(id);if(!e.ready)return false;
-    if(!this.frame){this.frame=document.createElement('canvas');this.frame.width=this.W;this.frame.height=this.H;this.ctx=this.frame.getContext('2d')}
+    if(!this.frame){this.frame=document.createElement('canvas');this.frame.width=this.W;this.frame.height=this.H;this.frame.nookDynamic=true;this.ctx=this.frame.getContext('2d')}
     const q=this.ctx,env=room.env,cloud=Math.max((env.cloud||0)/100,env.rain?.85:env.weather==='fog'?.8:0),weights=this.weights(env.h,cloud);q.globalAlpha=1;q.globalCompositeOperation='source-over';q.clearRect(0,0,this.W,this.H);q.imageSmoothingEnabled=false;this.sky(q,room,weights);q.drawImage(this.foreground(e,weights),0,0);
     if(weights[2]>.02)for(let i=0;i<e.windows.length;i++){const active=Math.sin(Math.floor(room.t/45)*.7+i*2)>-.75;q.globalAlpha=weights[2]*(active?.9:.38);q.fillStyle=active?'#ffd37b':'#b28b69';for(const [x,y]of e.windows[i])q.fillRect(x,y,1,1)}q.globalAlpha=1;
     if(id==='sea'){const d=e.original.data;q.fillStyle=weights[2]>.4?'#9fbad5':'#bddff0';q.globalAlpha=.55*(1-cloud*.7);for(let i=0;i<18;i++){const x=(hsh(i,51)+Math.floor(room.t*(.8+i%3*.2)))%this.W,y=28+hsh(i,29)%17,o=(y*this.W+x)*4;if(d[o+3]>200&&d[o+2]>d[o]*1.5&&d[o+1]>d[o]*1.2)q.fillRect(x,y,2,1)}q.globalAlpha=1;}

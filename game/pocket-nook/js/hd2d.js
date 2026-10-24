@@ -3,6 +3,8 @@ const HD2D = {
   // 保留效能修正版的 2 倍畫布與 CSS 硬體縮放。
   // 光影改用快取遮罩與幾何投影，不提高解析度，也不使用即時模糊。
   scale: 2,
+  shadowScale: 1/3,
+  shadowDistance: 18,
   enabled: true,
   ready: false,
   images: {},
@@ -142,7 +144,7 @@ const HD2D = {
         // Actors already receive one contact shadow from the HD support-plane pass.
         if(k==='fillRect' && (kind==='pet'||kind==='owner'))return function(x,y,w,h){if(w<=14&&h<=3&&/^rgba\(46,\s*34,\s*48,\s*0\.2/.test(t.fillStyle))return;t.fillRect(x,y,w,h)};
         if(k==='drawImage')return function(src,...a){
-          const image=self.itemSources.get(src)||self.detail(src,kind);let args;
+          const image=src.nookDynamic?src:(self.itemSources.get(src)||self.detail(src,kind));let args;
           if(a.length===2)args=[a[0],a[1],src.width,src.height];
           else if(a.length===4)args=a;
           else if(a.length===8){const x=image.width/src.width,y=image.height/src.height;args=[a[0]*x,a[1]*y,a[2]*x,a[3]*y,...a.slice(4)]}
@@ -206,8 +208,8 @@ const HD2D = {
   shadowLights(caster,lights) {
     // Keep each emitter's direction. Averaging positions can cancel right/back shadows.
     return lights.filter(l=>l.casts&&l.rootUid!==caster.rootUid).map(l=>{
-      const dist=Math.hypot(caster.x-l.gx,(caster.y-l.gy)*1.25),reach=l.reach||l.r;
-      return {...l,weight:dist<reach?l.k*(1-dist/reach)**2:0};
+      const dist=Math.hypot(caster.x-l.gx,(caster.y-l.gy)*1.25),reach=l.type==='window'?(l.reach||l.r):Math.min(64,l.r*.65);
+      const optical=l.reach||l.r,edge=l.type==='window'?.25:Math.min(1,(reach-dist)/Math.max(1,reach*.35));return {...l,weight:dist<reach?l.k*(1-dist/optical)**2*edge:0};
     }).filter(l=>l.weight>.008);
   },
   selfLight(caster,lights) {
@@ -246,17 +248,22 @@ const HD2D = {
   projectTiles(caster,light) {
     const result={floor:[],back:[],left:[],right:[]};if(!light)return result;
     this.projectedMasks=this.projectedMasks||new WeakMap();let cache,key;
-    if(caster.cacheOwner){key=[caster.signature,caster.y,caster.heightLimit,caster.wallSide,caster.wallDepth,light.gx,light.gy,light.z].join('|');cache=this.projectedMasks.get(caster.cacheOwner);if(cache?.has(key))return cache.get(key);if(!cache){cache=new Map();this.projectedMasks.set(caster.cacheOwner,cache)}}
+    if(caster.cacheOwner){key=[caster.signature,caster.y,caster.heightLimit,caster.wallSide,caster.wallDepth,this.shadowScale,this.shadowDistance,light.gx,light.gy,light.z].join('|');cache=this.projectedMasks.get(caster.cacheOwner);if(cache?.has(key))return cache.get(key);if(!cache){cache=new Map();this.projectedMasks.set(caster.cacheOwner,cache)}}
     const L=[light.gx,light.gy,light.z],planes=this.receiverPlanes(),bounds=[...Object.values(planes),p=>p[1]-p[2]-R.wy0,p=>R.fy1-p[1]];
     for(const tile of caster.tiles||[]){
       // A shallow receiver depth avoids a degenerate line when lamp and feet align.
       const vertices=tile.map(([x,y])=>{const slope=(R.wx0-R.fxf0)/(R.fy1-R.wy1),gy=caster.wallSide?this.wallFloor(x)+(caster.wallDepth||1.2)/(caster.wallSide==='back'?1:slope):Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y+(y-caster.y)*.08;return[x,gy,Math.max(0,gy-y)]});
+      // The stylized floor shadow keeps only one third of the physical ray travel.
+      // Clamp each ray to a local footprint; never turn a low lamp into a room-long shadow.
+      const floorPoly=this.clip3(vertices,p=>L[2]-p[2]-.001);
+      if(floorPoly.length>=3){const floor=floorPoly.map(p=>{const dx=p[0]-L[0],dy=p[1]-L[1],t=Math.min(p[2]/(L[2]-p[2])*this.shadowScale,this.shadowDistance/Math.max(.001,Math.hypot(dx,dy)));return[p[0]+dx*t,p[1]+dy*t]});if(floor.every(p=>p.every(Number.isFinite)))result.floor.push(floor)}
       for(const [side,plane] of Object.entries(planes)){
-        const fl=plane(L);let poly=vertices;
+        if(side==='floor')continue;const fl=plane(L);let poly=vertices;
         // t = plane(P)/(plane(L)-plane(P)); clip BEFORE division, including all
         // room half-spaces. This gives the first valid floor/wall intersection in
         // every direction without a positive-X/Y assumption or a convex hull.
         poly=this.clip3(poly,p=>plane(p));poly=this.clip3(poly,p=>fl-plane(p)-.001);
+        poly=this.clip3(poly,p=>this.shadowDistance*(fl-plane(p))-plane(p)*Math.hypot(p[0]-L[0],p[1]-L[1],p[2]-L[2]));
         for(const bound of bounds){const bl=bound(L);poly=this.clip3(poly,p=>bound(p)*fl-bl*plane(p));if(poly.length<3)break;}
         if(poly.length<3)continue;
         const projected=poly.map(p=>{const t=plane(p)/(fl-plane(p));return[p[0]+(p[0]-L[0])*t,p[1]+(p[1]-L[1])*t-(p[2]+(p[2]-L[2])*t)]});
@@ -415,31 +422,38 @@ const HD2D = {
       const values=new Float32Array(GW*GH*4),col=colors[l.col]||colors.warm;
       for(let cy=0;cy<GH;cy++)for(let cx=0;cx<GW;cx++){const u=(cx*G+G/2)/2,v=(cy*G+G/2)/2,wx=a*u+c*v+tx,wy=b*u+d*v+ty;let gy=info.ground;
         if(side)gy=this.wallFloor(wx);else if(Number.isFinite(info.heightLimit))gy=Math.min(gy,wy+info.heightLimit);else gy+=(wy-gy)*.08;
-        const z=Math.max(0,gy-wy),dx=l.gx-wx,dy=l.gy-gy,dz=l.z-z,dist=Math.hypot(dx,dy*1.25,dz),reach=l.reach||l.r,at=(cy*GW+cx)*4;if(dist>=reach)continue;const len=Math.hypot(dx,dy,dz)||1;values[at]=dx/len;values[at+1]=dy/len;values[at+2]=dz/len;values[at+3]=l.k*(1-dist/reach)**2*.68;
+        const z=Math.max(0,gy-wy),dx=l.gx-wx,dy=l.gy-gy,dz=l.z-z,dist=Math.hypot(dx,dy*1.25,dz),reach=l.reach||l.r,at=(cy*GW+cx)*4;if(dist>=reach)continue;const len=Math.hypot(dx,dy,dz)||1;values[at]=dx/len;values[at+1]=dy/len;values[at+2]=dz/len;values[at+3]=l.k*(1-dist/reach)**2*(l.type==='point'?1.9:.68);
       }return {values,col:col.map(v=>.4+.6*v)};
     });
     shape.worldNormals=shape.worldNormals||new Map();const nk=[a,b,c,d,side,info.flat].join(','),normalKey=shape.worldNormals;let worldNormals=normalKey.get(nk);
     if(!worldNormals){worldNormals=new Float32Array(W*H*3);for(let i=0;i<W*H;i++){const edgeX=normal[i*2],edgeZ=normal[i*2+1];let nx=a/scaleX*edgeX-c/scaleY*edgeZ,ny=.85,nz=-b/scaleX*edgeX+d/scaleY*edgeZ+.12;if(side==='left'){nx+=.9;ny=.4}else if(side==='right'){nx-=.9;ny=.4}else if(info.flat){nx=edgeX*.2;ny=.05;nz=1}const nl=Math.hypot(nx,ny,nz);worldNormals[i*3]=nx/nl;worldNormals[i*3+1]=ny/nl;worldNormals[i*3+2]=nz/nl}if(normalKey.size>=12)normalKey.clear();normalKey.set(nk,worldNormals)}
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,o=i*4,alpha=shape.alpha[o+3];out[o+3]=glow[o+3]=alpha;if(!alpha)continue;
       const ni=i*3,nx=worldNormals[ni],ny=worldNormals[ni+1],nz=worldNormals[ni+2],si=(Math.floor(y/G)*GW+Math.floor(x/G))*4;let red=base,green=base,blue=base;
-      for(const sample of samples){const v=sample.values,diffuse=Math.max(0,nx*v[si]+ny*v[si+1]+nz*v[si+2]),direct=Math.min(.5,v[si+3]*(.16+diffuse*.84)),col=sample.col;red+=direct*col[0];green+=direct*col[1];blue+=direct*col[2];}
+      for(const sample of samples){const v=sample.values,diffuse=Math.max(0,nx*v[si]+ny*v[si+1]+nz*v[si+2]),direct=Math.min(1.15,v[si+3]*(.3+diffuse*.7)),col=sample.col;red+=direct*col[0];green+=direct*col[1];blue+=direct*col[2];}
       // Multiply preserves material and ink; a separate low-energy screen pass
       // restores the light-facing highlight without tinting transparent pixels.
       const tone=v=>Math.max(.55,v<=.85?v:.85+(v-.85)/(1+(v-.85)/.15));out[o]=Math.round(tone(red)*255);out[o+1]=Math.round(tone(green)*255);out[o+2]=Math.round(tone(blue)*255);
-      const ink=Math.max(.12,Math.min(1,(shape.alpha[o]+shape.alpha[o+1]+shape.alpha[o+2])/300));glow[o]=Math.round(Math.min(.18,(red-base)*.4)*255*ink);glow[o+1]=Math.round(Math.min(.18,(green-base)*.4)*255*ink);glow[o+2]=Math.round(Math.min(.18,(blue-base)*.4)*255*ink);
+      const ink=Math.max(.12,Math.min(1,(shape.alpha[o]+shape.alpha[o+1]+shape.alpha[o+2])/300)),lift=[red-base,green-base,blue-base],cap=Math.min(1,.48/Math.max(.001,...lift.map(v=>v*.85)));for(let j=0;j<3;j++)glow[o+j]=Math.round(lift[j]*.85*cap*255*ink);
     }
     entry.ctx.putImageData(entry.im,0,0);entry.glow.getContext('2d').putImageData(entry.glowIm,0,0);entry.cv.highlight=entry.glow;entry.key=key;return entry.cv;
   },
-  shadeItem(c,it,lights) {
+  shadeItem(c,it,lights,highlightOnly=false) {
     const cv=Room.itemCanvas(it),src=this.materialSource(it),shape=this.shape(src,cv.width,cv.height),wall=ITEMS[it.k].layer==='wall',m=[1,0,0,1,it.x,it.y],info={ground:wall?this.wallFloor(it.x+cv.width/2):this.ground(it).y,heightLimit:wall?undefined:this.heightLimit(it,shape),side:wall?(WallMount.side(it)||'back'):'',flat:ITEMS[it.k].layer==='rug'};
-    const overlay=this.surfaceOverlay(it,src,cv.width,cv.height,m,info,lights);c.save();c.globalCompositeOperation='multiply';c.drawImage(overlay,it.x,it.y,cv.width,cv.height);c.globalCompositeOperation='screen';c.drawImage(overlay.highlight,it.x,it.y,cv.width,cv.height);c.restore();
+    const overlay=this.surfaceOverlay(it,src,cv.width,cv.height,m,info,lights);c.save();c.globalCompositeOperation=highlightOnly?'screen':'multiply';c.drawImage(highlightOnly?overlay.highlight:overlay,it.x,it.y,cv.width,cv.height);c.restore();
   },
-  shadeActor(c,actor,entry,lights) {
+  shadeActor(c,actor,entry,lights,highlightOnly=false) {
     const support=this.actorSupport(actor,entry),ground=support?.y??actor.y;
     for(let i=0;i<entry.fragments.length;i++){const f=entry.fragments[i],[sx,sy,sw,sh,dx,dy,dw,dh]=f.rect,[a,b,bx,d,x,y]=f.m,ux=f.src.width/f.nw*dw/sw,vy=f.src.height/f.nh*dh/sh,ox=dx-sx*dw/sw,oy=dy-sy*dh/sh,m=[a*ux,b*ux,bx*vy,d*vy,a*ox+bx*oy+x,b*ox+d*oy+y],overlay=this.surfaceOverlay(actor,f.src,f.nw,f.nh,m,{ground,slot:'fragment:'+i},lights);
-      c.save();c.setTransform(this.scale*a,this.scale*b,this.scale*bx,this.scale*d,this.scale*x,this.scale*y);const rect=[sx/f.src.width*overlay.width,sy/f.src.height*overlay.height,sw/f.src.width*overlay.width,sh/f.src.height*overlay.height,dx,dy,dw,dh];c.globalCompositeOperation='multiply';c.drawImage(overlay,...rect);c.globalCompositeOperation='screen';c.drawImage(overlay.highlight,...rect);c.restore();}
+      c.save();c.setTransform(this.scale*a,this.scale*b,this.scale*bx,this.scale*d,this.scale*x,this.scale*y);const rect=[sx/f.src.width*overlay.width,sy/f.src.height*overlay.height,sw/f.src.width*overlay.width,sh/f.src.height*overlay.height,dx,dy,dw,dh];c.globalCompositeOperation=highlightOnly?'screen':'multiply';c.drawImage(highlightOnly?overlay.highlight:overlay,...rect);c.restore();}
   },
 
+  materialHighlights(list,lights) {
+    if(!this.materialLight){this.materialLight=this.canvas(this.cv.width,this.cv.height);this.materialLightCtx=this.materialLight.getContext('2d')}
+    const c=this.materialLightCtx;c.setTransform(this.scale,0,0,this.scale,0,0);c.clearRect(0,0,RW,RH);
+    for(const e of list){c.globalCompositeOperation='destination-out';if(e.kind==='item'){const cv=Room.itemCanvas(e.it);c.drawImage(this.source(e.it),e.it.x,e.it.y,cv.width,cv.height)}else if(e.kind==='actor')c.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH);else continue;
+      c.globalCompositeOperation='source-over';if(e.kind==='item')this.shadeItem(c,e.it,lights,true);else this.shadeActor(c,e.a,this.frameActors.get(e.a),lights,true);
+    }c.globalCompositeOperation='destination-out';c.drawImage(this.exterior,0,0,RW,RH);c.globalCompositeOperation='source-over';
+  },
   lighting(c, lights) {
     const env=Room.env,night=env.h>19.3||env.h<6,dusk=!night&&(env.h>17||env.h<7),own=Room.state===Game.S,ambient=own?Math.max(0,Math.min(1,(Game.S.settings.ambient??60)/100)):0.6,dark=own?Math.max(0,Math.min(.95,Lights.dark||0)):0;
     const daylight=night?.66:dusk?.8:.94,gain=Math.min(1,daylight+ambient*.18*(own?Math.max(0,Lights.lamp):1))*(1-dark*.74),tint=night?[1,.94,1]:dusk?[1,.9,.86]:[1,.985,.95];
@@ -448,7 +462,7 @@ const HD2D = {
     for(const l of lights){if(l.type!=='point')continue;const r=Math.min(150,l.r),g=L.createRadialGradient(l.x,l.y,.5,l.x,l.y,r);g.addColorStop(0,'rgba('+(colors[l.col]||colors.warm)+','+Math.min(.64,(night?.5:.25)*l.k)+')');g.addColorStop(.42,'rgba('+(colors[l.col]||colors.warm)+','+(.12*l.k)+')');g.addColorStop(1,'rgba(0,0,0,0)');L.fillStyle=g;L.fillRect(l.x-r,l.y-r,r*2,r*2)}
     // The floor shadow attenuates direct light, but never darkens an object standing over it.
     L.save();L.globalCompositeOperation='destination-out';L.globalAlpha=.72;L.drawImage(this.shadow,0,0,RW,RH);L.drawImage(this.wallShadow,0,0,RW,RH);L.globalAlpha=1;L.drawImage(this.exterior,0,0,RW,RH);for(const e of this.surfaceDrawList||[]){if(e.kind==='item'){const cv=Room.itemCanvas(e.it);L.drawImage(this.source(e.it),e.it.x,e.it.y,cv.width,cv.height)}else if(e.kind==='actor')L.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH)}L.restore();
-    c.save();c.globalCompositeOperation='screen';c.drawImage(this.light,0,0,RW,RH);
+    c.save();c.globalCompositeOperation='screen';c.drawImage(this.light,0,0,RW,RH);c.drawImage(this.materialLight,0,0,RW,RH);
     for(const l of lights){if(l.type!=='point'||!l.emissive)continue;const r=l.col==='warm'?5:3,g=c.createRadialGradient(l.x,l.y,0,l.x,l.y,r);g.addColorStop(0,'rgba('+(colors[l.col]||colors.warm)+','+Math.min(.32,l.k*.25)+')');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(l.x-r,l.y-r,r*2,r*2)}c.restore();
     const vignette=c.createRadialGradient(120,92,63,120,92,147);vignette.addColorStop(0,'rgba(8,7,17,0)');vignette.addColorStop(1,'rgba(8,7,17,.24)');c.fillStyle=vignette;c.fillRect(0,0,RW,RH);
   },
@@ -498,6 +512,7 @@ const HD2D = {
 
     this.clearFloorMask(list);
     this.exteriorMask(list);
+    this.materialHighlights(list,lights);
     this.lighting(c, lights);
 
     if (lights.some(l=>l.type==='point')) {
