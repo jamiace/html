@@ -1,6 +1,5 @@
 /* HD-2D first playable slice. World coordinates and save rules stay with the game. */
 const HD2D = {
-  // 階段一優化：維持穩定 60 FPS
   scale: 2,
   enabled: true,
   ready: false,
@@ -131,10 +130,10 @@ const HD2D = {
 
   floorClip(c) {
     c.beginPath();
-    c.moveTo(28, 92); // 向上微調以包容往後方（上方）投射的陰影
-    c.lineTo(212, 92);
-    c.lineTo(234, 172);
-    c.lineTo(6, 172);
+    c.moveTo(25, 88); // 擴大地板裁切範圍，讓向後拉伸的影子不會被截斷
+    c.lineTo(215, 88);
+    c.lineTo(235, 175);
+    c.lineTo(5, 175);
     c.closePath();
     c.clip();
   },
@@ -143,22 +142,23 @@ const HD2D = {
     return Room.collectLights().filter(l => l.k > .02);
   },
 
-  // 支援 360 度上下左右全向投射的陰影計算
-  cast(c, src, x, foot, w, h, light, opacity = .22) {
+  // 正確的方向投影：光源在下(面前)，影子往上(背後)伸展
+  cast(c, src, x, foot, w, h, light, opacity = .35) {
     const dx = x - light.x,
           dy = foot - light.y,
           dist = Math.hypot(dx, dy) || 1,
-          len = Math.min(32, h * .65);
+          len = Math.min(36, Math.max(16, h * .75)); // 確保有足夠的投射長度
 
     const vx = (dx / dist) * len;
-    // 當 dy < 0（光源在物體前方）時，陰影向上伸展，乘 0.38 壓縮符合等距視角
-    let vy = (dy / dist) * len * (dy < 0 ? .38 : .48);
-    if (Math.abs(vy) < 2) vy = dy < 0 ? -2 : 2;
+    // 依據距離衰減斜角投影向量
+    let vy = (dy / dist) * len * (dy < 0 ? 0.45 : 0.45);
+    if (Math.abs(vy) < 3) vy = dy < 0 ? -3 : 3;
 
     c.save();
     c.translate(x, foot);
+    // 矩陣傾斜轉換
     c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
-    c.globalAlpha = opacity * Math.min(1, light.k || 1);
+    c.globalAlpha = opacity;
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
     c.restore();
   },
@@ -178,63 +178,48 @@ const HD2D = {
           Math.hypot(a.x - it.x - w / 2, a.y - foot) - Math.hypot(b.x - it.x - w / 2, b.y - foot)
         ).slice(0, 2);
 
-        for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, .22);
-        // 家具腳底接觸陰影
-        c.fillStyle = 'rgba(13,8,18,.23)';
+        for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.35);
+        
+        // 接觸陰影
+        c.fillStyle = 'rgba(13,8,18,0.4)';
         c.beginPath();
-        c.ellipse(it.x + w / 2, foot, w * .46, 1.6, 0, 0, Math.PI * 2);
+        c.ellipse(it.x + w / 2, foot, w * .46, 2, 0, 0, Math.PI * 2);
         c.fill();
       } else if (e.kind === 'actor' && (e.a.pid != null || e.a === Game.avatar)) {
         const a = e.a, pet = a.pid != null;
         let foot = a.y, elevation = 0;
         if (a.on) { foot = Room.base(a.on); elevation = Math.max(0, foot - a.y); }
         else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
-        if (foot < 95 || foot > 175) continue;
+        if (foot < 90 || foot > 175) continue;
 
-        const shrink = Math.max(.42, 1 - elevation / 70);
+        const shrink = Math.max(.5, 1 - elevation / 70);
 
-        // 1. 角色腳底影子濃度：完全對齊家具的 .23 參數
-        c.fillStyle = 'rgba(13,8,18,' + (.23 * shrink) + ')';
+        // 1. 接觸陰影加深
+        c.fillStyle = 'rgba(13,8,18,' + (0.45 * shrink) + ')';
         c.beginPath();
-        c.ellipse(a.x, foot, pet ? 5 * shrink : 4.5 * shrink, 1.6 * shrink, 0, 0, Math.PI * 2);
+        c.ellipse(a.x, foot, pet ? 6 * shrink : 5.5 * shrink, 2 * shrink, 0, 0, Math.PI * 2);
         c.fill();
 
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
-        // 投射長度與高度換算回未放大的原始尺寸，與家具同比例
         const baseH = s.cv.height / 4;
         const baseW = s.cv.width / 4;
 
-        // 2. 修正：以角色立體受光中心計算方位，光源在面前時堅決往後（朝上）拉伸
-        const centerOffset = pet ? 6 : 14;
+        // 2. 正確判定面前/背後：
+        // 角色的腰身大約在 foot - 8，若光源的 Y 大於此位置，代表燈在角色面前(下方)
         const nearActor = shadowLights.slice().sort((l1, l2) =>
-          Math.hypot(l1.x - a.x, l1.y - (foot - centerOffset)) - Math.hypot(l2.x - a.x, l2.y - (foot - centerOffset))
+          Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
         ).slice(0, 2);
 
         for (const l of nearActor) {
-          const dx = a.x - l.x;
-          const dy = (foot - centerOffset) - l.y;
-          const dist = Math.hypot(dx, dy) || 1;
-          const len = Math.min(32, baseH * .65);
-
-          const vx = (dx / dist) * len;
-          let vy = (dy / dist) * len * (dy < 0 ? .38 : .48);
-          if (Math.abs(vy) < 2) vy = dy < 0 ? -2 : 2;
-
-          c.save();
-          c.translate(a.x, foot);
-          c.transform(1, 0, -vx / Math.max(1, baseH), -vy / Math.max(1, baseH), 0, 0);
-          // 角色投射陰影濃度：完全對齊家具的 .22 參數
-          c.globalAlpha = .22 * Math.min(1, l.k || 1) * shrink;
-          c.drawImage(this.mask(src), -baseW / 2, -baseH, baseW, baseH);
-          c.restore();
+          // 投射長度拉長，濃度固定在 0.35 * shrink，保證清晰可見
+          this.cast(c, src, a.x, foot, baseW, baseH, l, 0.35 * shrink);
         }
       }
     }
     c.restore();
   },
 
-  // 為角色附加環境近距光照
   drawActorLit(c, a, lights) {
     const pet = a.pid != null;
     const proxyCtx = this.proxy(c, pet ? 'pet' : 'owner');
@@ -250,7 +235,7 @@ const HD2D = {
     const dist = Math.hypot(near.x - ax, near.y - ay);
     const radius = near.r || 80;
     if (dist < radius) {
-      const power = (1 - dist / radius) * 0.22 * (near.k || 1);
+      const power = (1 - dist / radius) * 0.28 * (near.k || 1);
       const col = near.col === 'cool' ? '140,190,255' : near.col === 'pink' ? '255,160,190' : '255,200,120';
       c.save();
       c.globalCompositeOperation = 'screen';
@@ -262,13 +247,11 @@ const HD2D = {
     }
   },
 
-  // 3. 正式版家具動態受光與立體照明（方向性 Diffuse & Rim Light）
   applyItemLighting(c, it, w, h, lights) {
     if (it.p != null || !lights || !lights.length) return;
     const d = ITEMS[it.k];
     const cx = it.x + w / 2, cy = it.y + h / 2;
 
-    // 排除家具自體發出的光源，只接收外來光源照射
     const validLights = lights.filter(l => !(d.light && Math.hypot(l.x - cx, l.y - cy) < 8));
     if (!validLights.length) return;
 
@@ -281,10 +264,9 @@ const HD2D = {
     const r = near.r || 90;
     if (dist >= r) return;
 
-    const intensity = (1 - dist / r) * 0.26 * Math.min(1.2, near.k || 1);
+    const intensity = (1 - dist / r) * 0.3 * Math.min(1.2, near.k || 1);
     if (intensity <= 0.02) return;
 
-    // 取得家具邊界上最靠近光源的一點（受光面起點）
     const nx = Math.max(it.x, Math.min(it.x + w, near.x));
     const ny = Math.max(it.y, Math.min(it.y + h, near.y));
 
@@ -294,7 +276,7 @@ const HD2D = {
     c.save();
     c.beginPath();
     c.rect(it.x, it.y, w, h);
-    c.clip(); // 嚴格侷限在家具邊界內，不污染地板與背景
+    c.clip();
     c.globalCompositeOperation = 'screen';
 
     const gradR = Math.max(12, Math.min(w, h) * 0.85);
@@ -358,7 +340,6 @@ const HD2D = {
       for (let n = 0; n < it.used; n++) c.fillRect(it.x + 12 + n * 2, it.y + h - 6, 1, .7);
     }
 
-    // 繪製完成後附加家具立體受光層
     this.applyItemLighting(c, it, w, h, lights);
   },
 
