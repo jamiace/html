@@ -1092,7 +1092,7 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
   height: 100%;
   pointer-events: none;
   z-index: 1;
-  /* 關鍵優化：強制啟用 GPU 獨立合成層與硬體像素縮放 */
+  /* 強制 GPU 建立獨立合成層，並使用硬體像素縮放 */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transform: translateZ(0);
