@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>小窩時光 HD-2D 試作</title>
+<script>window.NOOK_HD_DEMO=true;</script>
+<meta name="description" content="像素風 Lo-Fi 專注小遊戲：佈置小房間、番茄鐘、待辦清單、便條、音樂播放器和寵物陪伴。">
+<meta name="theme-color" content="#d9d0e5">
+<!-- Root icon files supplied by the site owner. Use the same artwork for browser and home screen. -->
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" href="icon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="apple-touch-icon.png" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?icons=root-v1" type="application/manifest+json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小窩時光">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  .loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--ink-2); font: 16px var(--font); z-index: 100; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hud"></header>
+  <main class="stage">
+    <div class="room-wrap"><canvas id="room" aria-label="你的小房間。點家具、角色或寵物可以互動"></canvas><div id="overlay"></div></div>
+    <div id="editbar" class="editbar" hidden><span>佈置模式：拖曳移動家具，小物可以放上桌面、櫃子和層架</span><button class="chip sm" id="edit-sto" type="button">收納箱</button><button class="chip sm primary" id="edit-done" type="button">完成</button></div>
+    <div id="minibar" class="minibar" hidden></div>
+  </main>
+  <nav class="dock" aria-label="工具列"><div class="dock-inner"></div></nav>
+</div>
+<div id="pins"></div>
+<div id="scrim" hidden></div>
+<div id="windows"></div>
+<div id="ytpanel" class="ytpanel" hidden>
+  <div class="yt-h"><span class="yt-title">YouTube</span><button class="xbtn" id="yt-close" type="button" aria-label="關閉 YouTube 播放器">✕</button></div>
+  <div class="yt-box"><div id="yt-player"></div><div class="yt-msg" hidden></div></div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<div id="loading" class="loading">小窩準備中…</div>
+<script src="js/config.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/sprites_items.js"></script>
+<script src="js/sprites_chars.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/sprites_ui.js"></script>
+<script src="js/sprites_themes.js"></script>
+<script src="js/sprites_life.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/vocab.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/gen_surfaces.js"></script>
+<script src="js/gen_items.js"></script>
+<script src="js/actor_visibility.js"></script>
+<script src="js/actors.js"></script>
+<script src="js/music.js"></script>
+<script src="js/music_extra.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/avatar_ui.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/life.js"></script>
+<script src="js/pets.js"></script>
+<script src="js/pet_ai.js"></script>
+<script src="js/sprites_lean.js"></script>
+<script src="js/tricks.js"></script>
+<script src="js/petplay.js"></script>
+<script src="js/merchant.js"></script>
+<script src="js/learn.js"></script>
+<script src="js/rewards.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/social.js"></script>
+<script src="js/team.js"></script>
+<script src="js/challenge.js"></script>
+<script src="js/ritual.js"></script>
+<script src="js/starjar.js"></script>
+<script src="js/feel.js"></script>
+<script src="js/story.js"></script>
+<script src="js/mobile.js"></script>
+<script src="js/lights.js"></script>
+<script src="js/interact.js"></script>
+<script src="js/owner_idle.js"></script>
+<script src="js/music_yt_tracks.js"></script>
+<script src="js/music_default.js"></script>
+<script src="js/sprites_092.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/pet_life.js"></script>
+<script src="js/room092.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/cat_behaviors.js"></script>
+<script src="js/version.js"></script>
+<script src="js/dev.js"></script>
+<script src="js/sprite-loader.js"></script>
+<script src="js/hd2d.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

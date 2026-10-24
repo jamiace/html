@@ -159,7 +159,8 @@ const Learn = {
     if (s.qi >= s.qs.length) this.finish(); UI.refresh('study');
   },
   finish() {
-    const s = this.sess, n = s.qs.length, R = s.right, L = this.L; s.step = 'result';
+    const s = this.sess; if (!s || s.step !== 'quiz' || s.result || !s.qs?.length || s.qi < s.qs.length) return;
+    const n = s.qs.length, R = s.right, L = this.L; s.step = 'result';
     const res = { coins: 0, xp: R * 3 + s.newly * 2, items: [], msg: '' };
     if (s.kind === 'levelgate') { Object.assign(res, LevelGate.finish(s, R, n)); }
     else if (s.kind === 'daily') {
@@ -184,6 +185,10 @@ const Learn = {
       const it = s.opts.item, cnt = R >= n ? 2 : R >= 3 ? 1 : 0; res.coins = R;
       if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); Life.track('swap', 1, { perfect: R >= n }); res.msg = cnt === 2 ? `全對！得到 2 個${SUPPLIES[it].n}。` : `得到 1 個${SUPPLIES[it].n}，全對可以拿 2 個。`; }
       else res.msg = `答對 3 題才能換到${SUPPLIES[it].n}，再試一次吧！`;
+      const task = Challenge.task('l_swap');
+      if (task && Challenge.tierOf(task)) {
+        res.taskNote = task.prog >= task.need ? `換道具任務已完成（${task.prog}/${task.need}），可以領獎勵了。` : Challenge.tierOf(task) === 'h' && R < n ? `本輪未全對，困難任務未增加；目前 ${task.prog}/${task.need} 次。可立即重試，已完成次數保留。` : `換道具任務：${task.prog}/${task.need} 次。`;
+      }
       Life.track('study', 0);
     } else {
       const day = Life.today(); if (L.pDay !== day) { L.pDay = day; L.pCoins = 0; }
@@ -219,12 +224,22 @@ window.addEventListener('blur',()=>{SpellKeys.held=false;SpellKeys.pending=null;
 
 /* ---------------- windows ---------------- */
 Object.assign(UI.WIN, {
+  swap: { t: '複習換道具', i: 'i_bag', w: 450, at: ['c', 0] },
   learn: { t: '學習', i: 'i_learn', w: 450, at: ['l', 0] },
   study: { t: '單字', i: 'i_learn', w: 460, at: ['c', 0], modal: true },
   words: { t: '單字本', i: 'i_book', w: 460, at: ['l', 1] },
 });
 Object.assign(UI, {
   wq: '', wf: 'all', wt: 0,
+  swapOptions() {
+    return h('div', { class: 'swap' }, ...Object.keys(SUPPLIES).map(k => h('button', { class: 'swapbtn', title: SUPPLIES[k].desc, onclick: () => { this.closeWin('swap'); Learn.start('need', { item: k }); } }, ico(SUPPLIES[k].spr, 32), h('span', { text: SUPPLIES[k].n }), h('em', { class: 'num', text: '×' + (Life.L.bag[k] || 0) }))));
+  },
+  w_swap() {
+    const t = Challenge.task('l_swap'), hard = t && Challenge.tierOf(t) === 'h';
+    return [h('p', { text: '選擇想換的道具，再複習 5 個單字。答對 3 題得 1 個，全對得 2 個。' }),
+      t ? h('p', { class: 'swap-rule', text: hard ? `困難任務 ${t.prog}/${t.need}：每輪 5 題全對算 1 次。失敗可立即重試，已完成次數保留。` : `任務 ${t.prog}/${t.need}：換到道具就算 1 次。` }) : null,
+      this.swapOptions()];
+  },
   w_learn() {
     Learn.ensureDaily(); const L = Learn.L, done = L.dailyDone, rev = Math.min(20, L.reviewed);
     const step = (n, label, on, cur) => h('div', { class: 'lstep' + (on ? ' on' : '') + (cur ? ' cur' : '') }, h('b', { class: 'num', text: String(n) }), h('span', { text: label }));
@@ -239,7 +254,7 @@ Object.assign(UI, {
     const on = new Set(Learn.levelsOn());
     const tiers = h('div', { class: 'ltiers' }, ...VLEVELS.map(t => { const all = this._lvCount[t], got = Learn.countLevel(t); return h('div', { class: 'ltier' + (on.has(t) ? '' : ' off') }, h('button', { class: 'lvtog' + (on.has(t) ? ' on' : ''), 'aria-pressed': on.has(t) ? 'true' : 'false', title: on.has(t) ? '新字會從這一級出' : '目前不出這一級的新字', onclick: () => Learn.toggleLevel(t) }, on.has(t) ? ico('i_check', 14) : null), h('span', { class: 'num', text: 'L' + t }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(got / all * 100)}%` })), h('span', { class: 'num hint', text: `${got}/${all}` })); }));
     const day = Life.today(), left = L.pDay === day ? Math.max(0, 40 - L.pCoins) : 40;
-    const swap = h('div', { class: 'swap' }, ...Object.keys(SUPPLIES).map(k => h('button', { class: 'swapbtn', title: SUPPLIES[k].desc, onclick: () => Learn.start('need', { item: k }) }, ico(SUPPLIES[k].spr, 32), h('span', { text: SUPPLIES[k].n }), h('em', { class: 'num', text: '×' + (Life.L.bag[k] || 0) }))));
+    const swap = this.swapOptions();
     return [today, stats, h('div', { class: 'sub', text: '程度 Level 1–6（打勾的程度才會出新字）' }), tiers,
       h('div', { class: 'sub', text: '複習 5 個單字換道具（答對 3 題得 1 個，全對得 2 個）' }), swap,
       h('div', { class: 'row wrap' }, h('button', { class: 'chip', onclick: () => Learn.start('practice') }, ico('i_sparkle', 20), `自由練習（今天還能賺 ${left} 金幣）`), h('button', { class: 'chip', onclick: () => this.openWin('words') }, ico('i_book', 20), `單字本（${tot}）`)),
@@ -305,7 +320,7 @@ Object.assign(UI, {
       return parts;
     }
     const r = s.result, n = s.qs.length;
-    return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }),
+    return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }), r.taskNote ? h('p', { class: 'swap-rule', text: r.taskNote }) : null,
       h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + r.coins })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + r.xp })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))),
       s.luckyN ? h('p', { class: 'hint', text: `這次遇到 ${s.luckyN} 次幸運題` }) : null,
       s.newly || s.mastered ? h('p', { class: 'hint', text: `新學會 ${s.newly} 個字` + (s.mastered ? `、精熟 ${s.mastered} 個（每個 +3 金幣）` : '') }) : null),
@@ -313,7 +328,8 @@ Object.assign(UI, {
       s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': '發音', onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
       h('div', { class: 'row center wrap' },
         s.kind === 'need' && r.items.length && s.opts.needId && Life.L.needs.some(x => x.id === s.opts.needId) ? h('button', { class: 'chip primary', onclick: () => { const nd = Life.L.needs.find(x => x.id === s.opts.needId); this.closeWin('study'); if (nd) Life.use(s.opts.item, nd); } }, ico(SUPPLIES[s.opts.item].spr, 20), '馬上使用') : null,
-        s.kind === 'need' && !r.items.length ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), '再試一次') : null,
+        s.kind === 'need' ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), r.items.length ? '再換一次' : '再試一次') : null,
+        s.kind === 'need' && r.taskNote ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '查看任務') : null,
         s.kind === 'daily' || (s.kind === 'chal' && s.task.prog >= s.task.need) ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '去領獎勵') : null,
         s.kind === 'story' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Story.open(); } }, ico('i_shop', 20), `回到${MERCHANTS[Story.week().mk].n}那裡`) : null,
         s.kind === 'chal' && s.task.prog < s.task.need ? h('button', { class: 'chip primary', onclick: () => Learn.start('chal', s.opts) }, ico('i_reset', 20), '繼續挑戰') : null,

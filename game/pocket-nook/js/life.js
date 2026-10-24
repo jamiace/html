@@ -320,6 +320,7 @@ Object.assign(UI, {
       rw.b ? h('span', { class: 'rwc' }, ico('i_heart', 16), h('b', { class: 'num', text: String(rw.b) })) : null, (rw.item || extraItem) ? h('span', { class: 'rwc', title: '隨機道具' }, ico('i_bag', 16)) : null);
   },
   go(where, t) {
+    if (where === 'swap') return this.openWin('swap');
     if (where === 'learn') return this.openWin('learn');
     if (where === 'chal') return t && Learn.start('chal', { k: t.k });
     if (where === 'timer') return this.openWin('timer');

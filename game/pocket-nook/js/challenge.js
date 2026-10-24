@@ -17,7 +17,7 @@ const CHAL = {
 };
 const LIFE_TASKS = {
   l_train: { n: '訓練寵物成功', icon: 'i_paw', tiers: { n: 1, h: 2 }, d: { n: '訓練要答單字小測驗，答對 3 題算成功', h: '訓練要答單字小測驗，答對 3 題算成功' } },
-  l_swap: { n: '複習單字換道具', icon: 'i_bag', tiers: { n: 1, h: 2 }, d: { n: '在「學習」複習 5 個單字換道具，換到就算一次', h: '在「學習」複習 5 個單字換道具，全對才算一次' } },
+  l_swap: { n: '複習單字換道具', icon: 'i_bag', tiers: { n: 1, h: 2 }, d: { n: '在「學習」複習 5 個單字換道具，換到就算一次', h: '每輪 5 題全對算 1 次，共 2 次；失敗可重試，已完成次數保留' } },
 };
 const TIER_N = { n: '普通', h: '困難' };
 for (const k in CHAL) TASK_DEFS[k] = { t: (t) => `${CHAL[k].n}：答對 ${t.need} 個字`, need: () => CHAL[k].tiers.n, rw: { c: 35, x: 30 }, go: 'chal', tiers: CHAL[k].tiers };
@@ -25,7 +25,7 @@ TASK_DEFS.l_train = { t: (t) => `訓練寵物成功 ${t.need} 次`, need: () => 
 // kept only so a task already claimed today still shows its name
 TASK_DEFS.l_ask = { t: () => '照顧寵物', need: () => 1, rw: { c: 25, x: 20 }, go: null };
 TASK_DEFS.l_todo = { t: () => '完成待辦', need: () => 1, rw: { c: 20, x: 20 }, go: null };
-TASK_DEFS.l_swap = { t: (t) => `複習單字換道具 ${t.need} 次`, need: () => 1, rw: { c: 25, x: 20 }, go: 'learn', tiers: LIFE_TASKS.l_swap.tiers };
+TASK_DEFS.l_swap = { t: (t) => `複習單字換道具 ${t.need} 次`, need: () => 1, rw: { c: 25, x: 20 }, go: 'swap', tiers: LIFE_TASKS.l_swap.tiers };
 
 const Challenge = {
   info(k) { return CHAL[k] || LIFE_TASKS[k] || null; },
