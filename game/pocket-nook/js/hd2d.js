@@ -122,7 +122,7 @@ const HD2D = {
     const c = cv.getContext('2d');
     c.drawImage(src, 0, 0);
     c.globalCompositeOperation = 'source-in';
-    c.fillStyle = '#0f0a17';
+    c.fillStyle = '#100a18';
     c.fillRect(0, 0, cv.width, cv.height);
     this.masks.set(src, cv);
     return cv;
@@ -142,24 +142,24 @@ const HD2D = {
     return Room.collectLights().filter(l => l.k > .02);
   },
 
-  // 純粹幾何射線投影：保證上下左右 360 度完全正確
-  cast(c, src, x, foot, w, h, light, opacity = 0.3) {
-    // 依物體中心算光照射線
-    const cy = foot - h * 0.4;
+  // 乾淨穩定的幾何射線投影
+  cast(c, src, x, foot, w, h, light, opacity = 0.28) {
+    // 以受光中心 (foot - h * 0.35) 計算光線入射角
+    const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y; // 光源在面前時 dy < 0，影子向後 (ty < 0)；光源在身後時 dy > 0，影子向前 (ty > 0)
+    const dy = cy - light.y; // 光源在面前 (light.y > cy) 則 dy < 0，影子向後；光源在身後 (light.y < cy) 則 dy > 0，影子向前
     const dist = Math.hypot(dx, dy) || 1;
 
-    // 長度設定在 14~28px 之間，與物件比例和諧
-    const len = Math.max(14, Math.min(28, h * 0.8));
-    const tx = (dx / dist) * len;
-    const ty = (dy / dist) * len * 0.55; // 2.5D 透視壓平
+    // 長度與高度成比例，自然適中，不拉長成竹籤
+    const len = Math.min(24, Math.max(12, h * 0.65));
+    const vx = (dx / dist) * len;
+    const vy = (dy / dist) * len * 0.48; // 2.5D 斜角視角壓平比例
 
     c.save();
     c.translate(x, foot);
-    // 矩陣變換：將 (0, -h) 的頭頂精準拉伸到 (tx, ty)
-    c.transform(1, 0, -tx / h, -ty / h, 0, 0);
-    c.globalAlpha = opacity;
+    // 矩陣變換：(0, -h) 投射到 (vx, vy)，寬度 w 保持正常比例
+    c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
+    c.globalAlpha = opacity * Math.min(1, light.k || 1);
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
     c.restore();
   },
@@ -180,14 +180,12 @@ const HD2D = {
           Math.hypot(a.x - (it.x + w / 2), a.y - foot) - Math.hypot(b.x - (it.x + w / 2), b.y - foot)
         ).slice(0, 2);
 
-        for (const l of near) {
-          this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.32);
-        }
+        for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.28);
 
-        // 接觸暗影
-        c.fillStyle = 'rgba(12, 7, 18, 0.38)';
+        // 家具接觸陰影
+        c.fillStyle = 'rgba(12, 7, 18, 0.3)';
         c.beginPath();
-        c.ellipse(it.x + w / 2, foot, w * 0.44, 2, 0, 0, Math.PI * 2);
+        c.ellipse(it.x + w / 2, foot, w * 0.45, 1.8, 0, 0, Math.PI * 2);
         c.fill();
       } else if (e.kind === 'actor' && (e.a.pid != null || e.a === Game.avatar)) {
         const a = e.a, pet = a.pid != null;
@@ -198,26 +196,25 @@ const HD2D = {
 
         const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        // 腳底接觸圓影（濃度拉高到 0.4，保證清楚）
-        c.fillStyle = 'rgba(12, 7, 18, ' + (0.4 * shrink) + ')';
+        // 角色腳底接觸陰影（與家具同參數，適度深邃）
+        c.fillStyle = 'rgba(12, 7, 18, ' + (0.3 * shrink) + ')';
         c.beginPath();
-        c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 2 * shrink, 0, 0, Math.PI * 2);
+        c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
         c.fill();
 
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
-        // 嚴格換算角色原始高度，避免除數失真
-        const baseW = s.cv.width / 4;
-        const baseH = s.cv.height / 4;
+        // 關鍵修復：直接使用 s.cv 原生寬高，不再除以 4！保持正常身形寬度！
+        const w = s.cv.width;
+        const h = s.cv.height;
 
-        // 抓身邊最近的燈光
         const nearActor = shadowLights.slice().sort((l1, l2) =>
           Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
         ).slice(0, 2);
 
         for (const l of nearActor) {
-          // 投射陰影濃度固定為 0.32 * shrink，與家具濃度長度一模一樣！
-          this.cast(c, src, a.x, foot, baseW, baseH, l, 0.32 * shrink);
+          // 角色與家具投射陰影濃度與長度完全統一為 0.28
+          this.cast(c, src, a.x, foot, w, h, l, 0.28 * shrink);
         }
       }
     }
@@ -239,7 +236,7 @@ const HD2D = {
     const dist = Math.hypot(near.x - ax, near.y - ay);
     const radius = near.r || 80;
     if (dist < radius) {
-      const power = (1 - dist / radius) * 0.28 * (near.k || 1);
+      const power = (1 - dist / radius) * 0.22 * (near.k || 1);
       const col = near.col === 'cool' ? '140,190,255' : near.col === 'pink' ? '255,160,190' : '255,200,120';
       c.save();
       c.globalCompositeOperation = 'screen';
@@ -268,7 +265,7 @@ const HD2D = {
     const r = near.r || 90;
     if (dist >= r) return;
 
-    const intensity = (1 - dist / r) * 0.3 * Math.min(1.2, near.k || 1);
+    const intensity = (1 - dist / r) * 0.25 * Math.min(1.2, near.k || 1);
     if (intensity <= 0.02) return;
 
     const nx = Math.max(it.x, Math.min(it.x + w, near.x));
@@ -286,7 +283,7 @@ const HD2D = {
     const gradR = Math.max(12, Math.min(w, h) * 0.85);
     const g = c.createRadialGradient(nx, ny, 0, nx, ny, gradR);
     g.addColorStop(0, `rgba(${col}, ${intensity})`);
-    g.addColorStop(1, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     c.fillStyle = g;
     c.fillRect(it.x, it.y, w, h);
