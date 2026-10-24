@@ -162,7 +162,7 @@ const HD2D = {
     c.restore();
   },
 
-  shadows(c, list, lights) {
+shadows(c, list, lights) {
     const shadowLights = lights.filter(l => l.r < 180);
     c.save();
     this.floorClip(c);
@@ -178,6 +178,7 @@ const HD2D = {
         ).slice(0, 2);
 
         for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, .22);
+        // 家具腳底接觸陰影
         c.fillStyle = 'rgba(13,8,18,.23)';
         c.beginPath();
         c.ellipse(it.x + w / 2, foot, w * .46, 1.6, 0, 0, Math.PI * 2);
@@ -190,28 +191,43 @@ const HD2D = {
         if (foot < 95 || foot > 175) continue;
 
         const shrink = Math.max(.42, 1 - elevation / 70);
-        c.fillStyle = 'rgba(14,9,25,' + (.70 * shrink) + ')';
+
+        // 1. 角色腳底影子濃度：完全對齊家具的 .23
+        c.fillStyle = 'rgba(13,8,18,' + (.23 * shrink) + ')';
         c.beginPath();
-        c.ellipse(a.x, foot, pet ? 5.5 * shrink : 5 * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
+        c.ellipse(a.x, foot, pet ? 5 * shrink : 4.5 * shrink, 1.6 * shrink, 0, 0, Math.PI * 2);
         c.fill();
 
-        // 修正重點：角色與寵物按最近光源排序，取最近的 2 盞燈投射清楚的動態影子
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
-        const spriteW = s.cv.width;
-        const spriteH = s.cv.height;
+        // 修正投射高度長度計算基準（換算回未放大的原始尺寸，與家具同比例）
+        const baseH = s.cv.height / 4; 
+        const baseW = s.cv.width / 4;
 
+        // 依立體中心尋找最近的 2 盞燈
+        const centerOffset = pet ? 6 : 12; // 角色立體受光中心高度
         const nearActor = shadowLights.slice().sort((l1, l2) =>
-          Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
+          Math.hypot(l1.x - a.x, l1.y - (foot - centerOffset)) - Math.hypot(l2.x - a.x, l2.y - (foot - centerOffset))
         ).slice(0, 2);
 
         for (const l of nearActor) {
-          const dist = Math.hypot(l.x - a.x, l.y - foot);
-          const distFactor = Math.max(0, 1 - dist / (l.r || 100));
-          if (distFactor > 0.05) {
-            // 提高角色影子濃度至 .45，並乘上距離係數
-            this.cast(c, src, a.x, foot, spriteW, spriteH, l, .45 * shrink * distFactor);
-          }
+          // 2. 修正核心：以立體中心 (foot - centerOffset) 計算光照向量，光源在面前時必定往後投射
+          const dx = a.x - l.x;
+          const dy = (foot - centerOffset) - l.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const len = Math.min(32, baseH * .65); // 投射長度完全對齊家具邏輯
+
+          const vx = (dx / dist) * len;
+          let vy = (dy / dist) * len * (dy < 0 ? .38 : .48);
+          if (Math.abs(vy) < 2) vy = dy < 0 ? -2 : 2;
+
+          c.save();
+          c.translate(a.x, foot);
+          c.transform(1, 0, -vx / Math.max(1, baseH), -vy / Math.max(1, baseH), 0, 0);
+          // 角色投射陰影濃度：完全對齊家具的 .22
+          c.globalAlpha = .22 * Math.min(1, l.k || 1) * shrink;
+          c.drawImage(this.mask(src), -baseW / 2, -baseH, baseW, baseH);
+          c.restore();
         }
       }
     }
