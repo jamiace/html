@@ -1101,7 +1101,27 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
 }
 .hd2d-on #overlay{z-index:2}
 .hd2d-on .room-wrap{filter:drop-shadow(0 18px 30px rgba(14,10,22,.38))}
-.hd-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:min(960px,100%);box-sizing:border-box;background:var(--paper);color:var(--ink);padding:10px 14px;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(12,7,18,.1)}
+/* 預設隱藏控制列（普通模式不顯示） */
+.hd-controls {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: min(960px, 100%);
+  box-sizing: border-box;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(12, 7, 18, .1);
+}
+
+/* 只有開啟 HD-2D 模式（body 帶有 .hd2d-on）時才顯現（桌機與手機均生效） */
+body.hd2d-on .hd-controls {
+  display: flex !important;
+}
 .hd-title{display:flex;flex-direction:column;gap:1px}.hd-title b{font-size:15px}.hd-title span{font-size:12px;color:var(--ink-2)}
 .hd-actions{display:flex;gap:5px;flex-wrap:wrap}.hd-btn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:6px 9px;cursor:pointer;font-size:13px}.hd-btn.active{background:var(--primary);color:var(--on-primary)}
 @media(max-width:700px){.hd-controls{gap:7px;padding:8px}.hd-actions{width:100%}.hd-btn{flex:1 0 auto;min-height:36px}.hd-title span{font-size:12px}}

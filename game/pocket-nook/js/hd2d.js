@@ -547,9 +547,14 @@ const HD2D = {
 
   sync() {
     if (!this.cv) return;
-    this.cv.hidden = !this.enabled || !this.ready;
-    Room.cv.style.opacity = this.enabled && this.ready ? '0' : '1';
-    document.body.classList.toggle('hd2d-on', this.enabled && this.ready);
+    const isHD = this.enabled && this.ready;
+    this.cv.hidden = !isHD;
+    Room.cv.style.opacity = isHD ? '0' : '1';
+    document.body.classList.toggle('hd2d-on', isHD);
+    if (this.bar) {
+      this.bar.hidden = !isHD;
+      this.bar.style.display = isHD ? 'flex' : 'none';
+    }
   },
 
   time(mode) {
