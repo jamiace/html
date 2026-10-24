@@ -1092,7 +1092,7 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
   height: 100%;
   pointer-events: none;
   z-index: 1;
-  /* 強制 GPU 建立獨立合成層，並使用硬體像素縮放 */
+  /* 關鍵優化：強制啟用 GPU 獨立合成層與硬體像素縮放 */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transform: translateZ(0);
@@ -1123,3 +1123,10 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
 .memo .hint,.memo .sub,.pin .hint,.pin .sub{color:var(--memo-ink)}
 .lucky .hint,.lucky .sub{color:inherit}
 .malbum.on .hint,.task.ready .hint,.pcard.cur .hint,.fcard.flip .hint,.tminvrow .hint,.tmphase.full .hint,.tmseat.me .hint{color:var(--ink)}
+
+/* Keep the HD image and the existing mobile pointer/overlay zoom on the same plane. */
+body.m .room-wrap > #hd2d-room {
+  transform-origin: 0 0;
+  transform: var(--zt, translate(0, 0)) translateZ(0);
+  transition: transform .18s steps(4);
+}
