@@ -8,6 +8,68 @@ const HEX = {};
 function rgb(h) { let c = HEX[h]; if (!c) { c = HEX[h] = [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; } return c; }
 function hsh(a, b, c = 0) { let h = (a * 374761393 + b * 668265263 + c * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0); }
 
+// These are the same view_*.png sprites used for the exported window previews.
+// Only the three redrawn views use this renderer; forest/sakura keep their original code.
+const WindowScenery = {
+  entries:{},W:60,H:52,skyKey:[123,188,228],
+  load(id){
+    if(this.entries[id])return this.entries[id];
+    const e=this.entries[id]={ready:false,failed:false,cache:new Map()},im=new Image();
+    e.promise=new Promise(resolve=>{
+      im.onload=()=>{try{
+        const cv=document.createElement('canvas');cv.width=this.W;cv.height=this.H;const c=cv.getContext('2d',{willReadFrequently:true});c.imageSmoothingEnabled=false;c.drawImage(im,0,0,this.W,this.H);const data=c.getImageData(0,0,this.W,this.H);
+        // Export marks sky/cloud/sun pixels with alpha 254 (visually opaque in
+        // the standalone preview); foreground pixels use 255. Remove only that
+        // explicit marker, preserving blue water and white snow without guessing.
+        let skyPixels=0;for(let i=0;i<data.data.length;i+=4)if(data.data[i+3]===254||this.skyKey.every((v,j)=>data.data[i+j]===v)){data.data[i+3]=0;skyPixels++}if(skyPixels<20)throw Error('Window sprite is missing its dynamic sky mask');
+        e.original=data;e.windows=this.windows(data,id);c.putImageData(data,0,0);e.base=cv;e.ready=true;
+        const redraw=()=>{if(Game.S){UI.refresh('shop');UI.refresh('storage')}};if(document.readyState==='complete')redraw();else window.addEventListener('load',redraw,{once:true});
+      }catch(err){e.failed=true}resolve(e)};
+      im.onerror=()=>{e.failed=true;resolve(e)};
+    });im.src='assets/previews/view_'+id+'.png?scenery=pixel';return e;
+  },
+  windows(image,id){
+    if(id==='sea')return [];const d=image.data,W=image.width,H=image.height,seen=new Uint8Array(W*H),groups=[];
+    const isWindow=i=>d[i*4+3]>200&&d[i*4+2]>d[i*4]*1.25&&d[i*4+2]>d[i*4+1]*1.05&&d[i*4]<100&&d[i*4+2]<155;
+    for(let i=W*Math.floor(H*.45);i<W*H;i++){if(seen[i]||!isWindow(i))continue;const stack=[i],points=[];seen[i]=1;
+      while(stack.length){const k=stack.pop(),x=k%W,y=Math.floor(k/W);points.push([x,y]);for(const n of [x? k-1:-1,x<W-1?k+1:-1,y?k-W:-1,y<H-1?k+W:-1])if(n>=0&&!seen[n]&&isWindow(n)){seen[n]=1;stack.push(n)}}
+      const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);if(points.length>=2&&points.length<=24&&Math.max(...xs)-Math.min(...xs)<=5&&Math.max(...ys)-Math.min(...ys)<=6)groups.push(points);
+    }return groups;
+  },
+  weights(hour,cloud){
+    const H=((hour%24)+24)%24,w=[0,0,0,0],blend=(a,b,t)=>{w[a]=1-t;w[b]=t};
+    if(H<5||H>=20.5)w[2]=1;else if(H<6.5)blend(2,1,(H-5)/1.5);else if(H<8)blend(1,0,(H-6.5)/1.5);else if(H<16.5)w[0]=1;else if(H<18.5)blend(0,1,(H-16.5)/2);else blend(1,2,(H-18.5)/2);
+    const k=Math.max(0,Math.min(1,cloud));w[0]*=1-k;w[1]*=1-k;w[3]=Math.max(0,1-w[0]-w[1]-w[2]);return w;
+  },
+  foreground(e,weights){
+    const key=weights.map(v=>Math.round(v*80)).join(',');if(e.cache.has(key))return e.cache.get(key);
+    const cv=document.createElement('canvas');cv.width=this.W;cv.height=this.H;const c=cv.getContext('2d'),im=c.createImageData(this.W,this.H),base=e.original.data,pal=[[1,1,1],[.88,.67,.76],[.33,.42,.65],[.78,.83,.88]],color=[0,0,0];
+    for(let i=0;i<4;i++)for(let j=0;j<3;j++)color[j]+=pal[i][j]*weights[i];
+    for(let i=0;i<base.length;i+=4){im.data[i+3]=base[i+3];for(let j=0;j<3;j++)im.data[i+j]=Math.round(base[i+j]*color[j]);}c.putImageData(im,0,0);if(e.cache.size>=24)e.cache.delete(e.cache.keys().next().value);e.cache.set(key,cv);return cv;
+  },
+  sky(c,room,weights){
+    const W=this.W,H=this.H,env=room.env,t=room.t,[top,bottom]=room.skyCols(env.h),B=[[0,2],[3,1]];
+    const skyKey=top.concat(bottom).map(Math.round).join(',');if(!this.skyRaster||this.skyRasterKey!==skyKey){if(!this.skyRaster){this.skyRaster=document.createElement('canvas');this.skyRaster.width=W;this.skyRaster.height=H}const sc=this.skyRaster.getContext('2d'),im=sc.createImageData(W,H);
+      for(let y=0;y<H;y++){const f=y/(H-1)*6;for(let x=0;x<W;x++){const k=Math.min(1,(Math.floor(f)+(f%1*4>B[y%2][x%2]?1:0))/6),o=(y*W+x)*4;for(let j=0;j<3;j++)im.data[o+j]=Math.round(top[j]+(bottom[j]-top[j])*k);im.data[o+3]=255}}sc.putImageData(im,0,0);this.skyRasterKey=skyKey;}c.drawImage(this.skyRaster,0,0);
+    const night=weights[2],day=1-night,clear=1-Math.max((env.cloud||0)/100,env.rain?.9:0),hour=((env.h%24)+24)%24;
+    if(night>.02){c.globalAlpha=night*clear;for(let i=0;i<18;i++){c.fillStyle=Math.sin(t*.7+i*1.7)>.2?'#fff3ce':'#9aadd4';c.fillRect(2+hsh(i,81)%(W-4),2+hsh(i,19)%22,1,1)}const x=40+Math.round(Math.sin((hour-21)/12*Math.PI)*5);c.fillStyle='#fff0c2';c.fillRect(x+1,5,3,1);c.fillRect(x,6,4,3);c.fillRect(x+1,9,3,1);c.fillStyle='rgb('+top.map(Math.round).join(',')+')';c.fillRect(x+3,5,2,3);}
+    if(day>.02&&hour>5&&hour<20.5){const p=Math.max(0,Math.min(1,(hour-5.5)/14)),x=Math.round(4+p*(W-12)),y=Math.round(24-Math.sin(Math.PI*p)*20);c.globalAlpha=day*clear;c.fillStyle=weights[1]>.2?'#ffd08d':'#fff6c7';c.fillRect(x+1,y,3,1);c.fillRect(x,y+1,5,3);c.fillRect(x+1,y+4,3,1)}
+    c.globalAlpha=1;const cloud=Math.max(.08,(env.cloud||0)/100);for(let i=0;i<3;i++){const x=Math.floor((t*(.18+i*.03)*(1+Math.min(3,(env.wind||0)/20))+i*24)%(W+20))-15,y=7+i*5;c.fillStyle=night>.5?'#343f63':weights[1]>.2?'#e9b3a6':cloud>.55?'#b7c6d5':'#edf6fa';c.globalAlpha=.55+cloud*.3;c.fillRect(x+3,y,7,2);c.fillRect(x,y+2,13,2);c.fillRect(x+2,y+4,10,1)}c.globalAlpha=1;
+  },
+  draw(c,X,Y,w,h,id,room){
+    if(!['city','sea','snow'].includes(id)||w<=0||h<=0)return false;const e=this.load(id);if(!e.ready)return false;
+    if(!this.frame){this.frame=document.createElement('canvas');this.frame.width=this.W;this.frame.height=this.H;this.ctx=this.frame.getContext('2d')}
+    const q=this.ctx,env=room.env,cloud=Math.max((env.cloud||0)/100,env.rain?.85:env.weather==='fog'?.8:0),weights=this.weights(env.h,cloud);q.globalAlpha=1;q.globalCompositeOperation='source-over';q.clearRect(0,0,this.W,this.H);q.imageSmoothingEnabled=false;this.sky(q,room,weights);q.drawImage(this.foreground(e,weights),0,0);
+    if(weights[2]>.02)for(let i=0;i<e.windows.length;i++){const active=Math.sin(Math.floor(room.t/45)*.7+i*2)>-.75;q.globalAlpha=weights[2]*(active?.9:.38);q.fillStyle=active?'#ffd37b':'#b28b69';for(const [x,y]of e.windows[i])q.fillRect(x,y,1,1)}q.globalAlpha=1;
+    if(id==='sea'){const d=e.original.data;q.fillStyle=weights[2]>.4?'#9fbad5':'#bddff0';q.globalAlpha=.55*(1-cloud*.7);for(let i=0;i<18;i++){const x=(hsh(i,51)+Math.floor(room.t*(.8+i%3*.2)))%this.W,y=28+hsh(i,29)%17,o=(y*this.W+x)*4;if(d[o+3]>200&&d[o+2]>d[o]*1.5&&d[o+1]>d[o]*1.2)q.fillRect(x,y,2,1)}q.globalAlpha=1;}
+
+    // Weather shares the sprite's logical pixel grid and is clipped before scaling.
+    room.rainOver(q,0,0,this.W,this.H);
+    c.save();c.beginPath();c.rect(X,Y,w,h);c.clip();c.imageSmoothingEnabled=false;c.drawImage(this.frame,X,Y,w,h);c.restore();return true;
+  }
+};
+for(const id of ['city','sea','snow'])WindowScenery.load(id);
+
 // ---------- wallpapers: (x,y) in back-wall space (0..180, 0..84) → hex ----------
 const WALL = {
   cream_stripe(x, y) { const m = ((x % 14) + 14) % 14; if (m >= 9 && m <= 11) return (y % 6 === 0 && m === 10) ? '#f6d8a0' : '#f4dcc0'; if (m === 8 || m === 12) return '#f8e6cf'; return '#fcf1df'; },
@@ -213,6 +275,7 @@ const Room = {
   },
   drawWindowScene(c, X, Y, w, h, view) {
     const env = this.env, H = env.h, t = this.t; view = view || (this.state && this.state.view) || 'city';
+    if(WindowScenery.draw(c,X,Y,w,h,view,this))return;
     const [top, bot] = this.skyCols(H);
     const B = [[0, 2], [3, 1]];
     for (let y = 0; y < h; y++) {

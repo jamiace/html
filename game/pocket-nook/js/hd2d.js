@@ -62,15 +62,15 @@ const HD2D = {
   },
 
   // The side-wall image is warped from the HD face, never from a low-res wall sprite.
-  wallSource(it) {
+  wallSource(it, frameOnly=false) {
     const side = WallMount.side(it), raw = WallMount.raw(it), back = {...it, wall:'back', x:0, y:0}, d = ITEMS[it.k];
     const dynamic = it.shake || it.broken || d.window || d.clock || d.calendar || d.anim || d.tv || d.screen || d.fish || d.flicker || d.fire || d.glow;
     this.wallFaces = this.wallFaces || new Map();
-    const id = it.uid + ':' + it.k, stamp = [dynamic ? Math.floor(Room.t * 10) : 0, !!it.on, !!it.closed, !!it.flip, !!it.broken, !!it.wilt, Math.ceil(it.dust||0), Room.state.view, Math.round(Room.env.h * 60), Room.env.weather].join('|');
+    const id = it.uid + ':' + it.k + (frameOnly?'|frame':''), stamp = [dynamic ? Math.floor(Room.t * 10) : 0, !!it.on, !!it.closed, !!it.flip, !!it.broken, !!it.wilt, Math.ceil(it.dust||0), Room.state.view, Math.round(Room.env.h * 60), Room.env.weather].join('|');
     let entry = this.wallFaces.get(id);
     if (!entry || entry.stamp !== stamp || entry.raw !== raw) {
       const front = this.canvas(raw.width * this.scale, raw.height * this.scale), c = front.getContext('2d');
-      c.setTransform(this.scale, 0, 0, this.scale, 0, 0); this.drawItem(c, back);
+      c.setTransform(this.scale, 0, 0, this.scale, 0, 0); if(frameOnly)c.drawImage(this.source(back),0,0,raw.width,raw.height);else this.drawItem(c, back);
       entry = { front, stamp, raw, projections:new Map() }; this.wallFaces.set(id, entry);
       if (this.wallFaces.size > 64) this.wallFaces.delete(this.wallFaces.keys().next().value);
     }
@@ -188,7 +188,7 @@ const HD2D = {
   ground(it) { const root=this.root(it),cv=Room.itemCanvas(root),shape=this.shape(this.source(root),cv.width,cv.height);return {x:root.x+shape.footX,y:root.y+shape.bottom,uid:root.uid}; },
 
   lights() {
-    const list=Room.collectLights().map(l=>({...l,type:l.r>=180?'ambient':'point',casts:false,emissive:l.r<180})),used=new Set();
+    const list=Room.collectLights().map(l=>({...l,gx:l.x,gy:this.wallFloor(l.x),z:Math.max(3,this.wallFloor(l.x)-l.y),type:l.r>=180?'ambient':'point',casts:false,emissive:l.r<180})),used=new Set();
     for(const it of Room.state.items){const d=ITEMS[it.k];if(!d.light||it.broken||(d.toggle&&!it.on))continue;
       const side=WallMount.side(it),raw=side?WallMount.raw(it):Room.itemCanvas(it),q=d.light;let x=it.x+(it.flip?raw.width-1-q.x:q.x),y=it.y+q.y;
       if(side){const pt=WallMount.geometry(raw,side,it).point(it.flip?raw.width-1-q.x:q.x,q.y);x=it.x+pt[0];y=it.y+pt[1]}
@@ -215,10 +215,18 @@ const HD2D = {
     return 1/(1+own.reduce((v,l)=>v+l.k,0)*4);
   },
   sourceId(src) {this.sourceIds=this.sourceIds||new WeakMap();if(!this.sourceIds.has(src))this.sourceIds.set(src,this.nextSourceId=(this.nextSourceId||0)+1);return this.sourceIds.get(src);},
-  itemSignature(it) {const cv=Room.itemCanvas(it);return [this.sourceId(this.source(it)),it.x,it.y,cv.width,cv.height].join(',');},
+  materialSource(it) {
+    const src=this.source(it),win=ITEMS[it.k].window;if(!win)return src;
+    const side=WallMount.side(it);if(!it.closed)return side?this.wallSource(it,true):src;if(side)return src;
+    // Closed blinds receive light and cast shadows; open glass stays outside the
+    // room lighting. Render the closed face so arches and mullions remain exact.
+    this.closedFaces=this.closedFaces||new WeakMap();let out=this.closedFaces.get(src);if(out)return out;
+    const cv=Room.itemCanvas(it);out=this.canvas(src.width,src.height);const c=out.getContext('2d');c.scale(src.width/cv.width,src.height/cv.height);this.drawItem(c,{...it,x:0,y:0,wall:'back'});this.closedFaces.set(src,out);return out;
+  },
+  itemSignature(it) {const cv=Room.itemCanvas(it);return [this.sourceId(this.materialSource(it)),it.x,it.y,cv.width,cv.height].join(',');},
   itemTiles(it) {
     this.tileCache=this.tileCache||new WeakMap();const key=this.itemSignature(it),cached=this.tileCache.get(it);if(cached?.key===key)return cached.tiles;
-    const cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height);
+    const cv=Room.itemCanvas(it),shape=this.shape(this.materialSource(it),cv.width,cv.height);
     const tiles=shape.tiles.map(([x,y,r,b])=>[[it.x+x,it.y+y],[it.x+r,it.y+y],[it.x+r,it.y+b],[it.x+x,it.y+b]]);this.tileCache.set(it,{key,tiles});return tiles;
   },
   fragmentTiles(f) {
@@ -238,11 +246,11 @@ const HD2D = {
   projectTiles(caster,light) {
     const result={floor:[],back:[],left:[],right:[]};if(!light)return result;
     this.projectedMasks=this.projectedMasks||new WeakMap();let cache,key;
-    if(caster.cacheOwner){key=[caster.signature,caster.y,caster.heightLimit,light.gx,light.gy,light.z].join('|');cache=this.projectedMasks.get(caster.cacheOwner);if(cache?.has(key))return cache.get(key);if(!cache){cache=new Map();this.projectedMasks.set(caster.cacheOwner,cache)}}
+    if(caster.cacheOwner){key=[caster.signature,caster.y,caster.heightLimit,caster.wallSide,caster.wallDepth,light.gx,light.gy,light.z].join('|');cache=this.projectedMasks.get(caster.cacheOwner);if(cache?.has(key))return cache.get(key);if(!cache){cache=new Map();this.projectedMasks.set(caster.cacheOwner,cache)}}
     const L=[light.gx,light.gy,light.z],planes=this.receiverPlanes(),bounds=[...Object.values(planes),p=>p[1]-p[2]-R.wy0,p=>R.fy1-p[1]];
     for(const tile of caster.tiles||[]){
       // A shallow receiver depth avoids a degenerate line when lamp and feet align.
-      const vertices=tile.map(([x,y])=>{const gy=Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y+(y-caster.y)*.08;return[x,gy,Math.max(0,gy-y)]});
+      const vertices=tile.map(([x,y])=>{const slope=(R.wx0-R.fxf0)/(R.fy1-R.wy1),gy=caster.wallSide?this.wallFloor(x)+(caster.wallDepth||1.2)/(caster.wallSide==='back'?1:slope):Number.isFinite(caster.heightLimit)?Math.min(caster.y,y+caster.heightLimit):caster.y+(y-caster.y)*.08;return[x,gy,Math.max(0,gy-y)]});
       for(const [side,plane] of Object.entries(planes)){
         const fl=plane(L);let poly=vertices;
         // t = plane(P)/(plane(L)-plane(P)); clip BEFORE division, including all
@@ -303,6 +311,7 @@ const HD2D = {
     const q=this.shadowCtx,wctx=this.wallShadowCtx;for(const ctx of [q,wctx]){ctx.setTransform(this.scale,0,0,this.scale,0,0);ctx.clearRect(0,0,RW,RH)}
     q.save();this.floorClip(q);const casters=[],roots=new Map();
     for(const e of list)if(e.kind==='item'&&Room.layerOf(e.it)==='floor'&&e.it.p==null){const it=e.it,cv=Room.itemCanvas(it),shape=this.shape(this.source(it),cv.width,cv.height),foot=this.ground(it),caster={id:'item:'+it.uid,x:foot.x,y:foot.y,width:shape.width,rootUid:it.uid,contact:true,heightLimit:this.heightLimit(it,shape),cacheOwner:it,signature:this.itemSignature(it),tiles:[...this.itemTiles(it)]};casters.push(caster);roots.set(it.uid,caster)}
+    for(const e of list)if(e.kind==='item'&&ITEMS[e.it.k].layer==='wall'&&e.it.p==null){const it=e.it,cv=Room.itemCanvas(it),side=WallMount.side(it)||'back',caster={id:'wall:'+it.uid,x:it.x+cv.width/2,y:this.wallFloor(it.x+cv.width/2),rootUid:it.uid,wallSide:side,wallDepth:ITEMS[it.k].surface?2.4:1.3,contact:false,cacheOwner:it,signature:this.itemSignature(it),tiles:[...this.itemTiles(it)]};casters.push(caster);roots.set(it.uid,caster)}
     for(const e of list)if(e.kind==='item'&&e.it.p!=null){const caster=roots.get(this.root(e.it).uid);if(caster){caster.tiles.push(...this.itemTiles(e.it));caster.signature+=';'+this.itemSignature(e.it)}}
     for(const e of list)if(e.kind==='actor'){const caster=this.actorSupport(e.a,this.frameActors.get(e.a));if(caster)casters.push(caster)}
     this.shadowPlans=[];
@@ -316,8 +325,17 @@ const HD2D = {
     q.restore();this.washShadows(q,lights);this.washShadows(wctx,lights,true);
     c.save();c.globalAlpha=Room.env.dark>.1?.18:.14;c.drawImage(this.wallShadow,0,0,RW,RH);c.drawImage(this.shadow,0,0,RW,RH);c.restore();
   },
-  wallContact(c,it) {
-    const d=ITEMS[it.k];if(d.layer!=='wall')return;const cv=Room.itemCanvas(it),src=this.source(it),side=WallMount.side(it);c.save();c.beginPath();if(side==='left'){c.moveTo(6,12);c.lineTo(30,12);c.lineTo(30,96);c.lineTo(6,170)}else if(side==='right'){c.moveTo(210,12);c.lineTo(234,12);c.lineTo(234,170);c.lineTo(210,96)}else c.rect(30,12,180,84);c.closePath();c.clip();c.globalAlpha=.13*this.selfLight({rootUid:this.root(it).uid},this.frameLights||[]);c.drawImage(this.mask(src),it.x+(side==='left'?-.5:.5),it.y+.65,cv.width,cv.height);c.restore();
+  windowPane(it) {
+    if(!ITEMS[it.k].window||it.closed)return null;const cv=Room.itemCanvas(it),src=this.source(it),frame=this.materialSource(it);this.paneMasks=this.paneMasks||new WeakMap();const owner=WallMount.side(it)?src:frame;let mask=this.paneMasks.get(owner);if(mask)return mask;
+    mask=this.canvas(cv.width*this.scale,cv.height*this.scale);const c=mask.getContext('2d');c.scale(this.scale,this.scale);
+    if(WallMount.side(it))c.drawImage(src,0,0,cv.width,cv.height);else this.drawItem(c,{...it,x:0,y:0,wall:'back'});
+    c.globalCompositeOperation='destination-out';c.drawImage(frame,0,0,cv.width,cv.height);this.paneMasks.set(owner,mask);return mask;
+  },
+  exteriorMask(list) {
+    if(!this.exterior){this.exterior=this.canvas(this.cv.width,this.cv.height);this.exteriorCtx=this.exterior.getContext('2d')}
+    const c=this.exteriorCtx;c.setTransform(this.scale,0,0,this.scale,0,0);c.clearRect(0,0,RW,RH);
+    // Use scene order, so a person/furniture in front of a window keeps room light.
+    for(const e of list){if(e.kind==='item'){const it=e.it,cv=Room.itemCanvas(it),pane=this.windowPane(it);if(pane){c.globalCompositeOperation='source-over';c.drawImage(pane,it.x,it.y,cv.width,cv.height)}c.globalCompositeOperation='destination-out';c.drawImage(this.materialSource(it),it.x,it.y,cv.width,cv.height)}else if(e.kind==='actor'){c.globalCompositeOperation='destination-out';c.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH)}}c.globalCompositeOperation='source-over';
   },
   clearFloorMask(list) {
     for(const c of [this.shadowCtx,this.wallShadowCtx]){c.save();c.globalCompositeOperation='destination-out';
@@ -375,14 +393,61 @@ const HD2D = {
     }
   },
 
+  normalData(src,w,h) {
+    const shape=this.shape(src,w,h);if(shape.normals)return shape;
+    const W=shape.mask.width,H=shape.mask.height,d=new Float32Array(W*H),n=new Float32Array(W*H*2),alpha=shape.alpha;
+    for(let i=0;i<d.length;i++)d[i]=alpha[i*4+3]>48?Math.min(W,H):0;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(!d[i])continue;d[i]=Math.min(d[i],x?d[i-1]+1:1,y?d[i-W]+1:1)}
+    for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){const i=y*W+x;if(!d[i])continue;d[i]=Math.min(d[i],x<W-1?d[i+1]+1:1,y<H-1?d[i+W]+1:1)}
+    const at=(x,y)=>x<0||y<0||x>=W||y>=H?0:d[y*W+x];
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;n[i*2]=Math.max(-.8,Math.min(.8,(at(x-2,y)-at(x+2,y))*.22));n[i*2+1]=Math.max(-.7,Math.min(.7,(at(x,y+2)-at(x,y-2))*.22));}
+    shape.normals=n;return shape;
+  },
+  surfaceOverlay(owner,src,w,h,m,info,lights) {
+    const shape=this.normalData(src,w,h),W=shape.mask.width,H=shape.mask.height,side=info.side||'',colors={warm:[1,.69,.34],cool:[.47,.7,1],pink:[1,.49,.68]};
+    this.surfaceLayers=this.surfaceLayers||new WeakMap();let slots=this.surfaceLayers.get(owner);if(!slots){slots=new Map();this.surfaceLayers.set(owner,slots)}
+    const slot=info.slot||'item',key=[this.sourceId(src),...m,info.ground,info.heightLimit,side,info.flat,Room.env.h.toFixed(3),lights.map(l=>[l.type,l.x,l.y,l.gx,l.gy,l.z,l.k.toFixed(3),l.col].join(',')).join(';')].join('|');let entry=slots.get(slot);if(entry?.key===key)return entry.cv;
+    if(!entry||entry.cv.width!==W||entry.cv.height!==H){const cv=this.canvas(W,H),ctx=cv.getContext('2d');entry={cv,ctx,im:ctx.createImageData(W,H),glow:this.canvas(W,H),glowIm:ctx.createImageData(W,H)};slots.set(slot,entry)}
+    const out=entry.im.data,glow=entry.glowIm.data,[a,b,c,d,tx,ty]=m,normal=shape.normals,scaleX=Math.hypot(a,b)||1,scaleY=Math.hypot(c,d)||1,ambient=lights.filter(l=>l.type==='ambient').reduce((v,l)=>v+l.k,0),base=Math.min(.96,.83+ambient*.15),candidates=lights.filter(l=>(l.type==='point'||l.type==='window')&&[l.gx,l.gy,l.z].every(Number.isFinite));
+    // Light vectors vary smoothly: sample them every two logical pixels, while
+    // retaining the full half-pixel alpha mask and surface normals at every pixel.
+    const G=4,GW=Math.ceil(W/G),GH=Math.ceil(H/G),samples=candidates.map(l=>{
+      const values=new Float32Array(GW*GH*4),col=colors[l.col]||colors.warm;
+      for(let cy=0;cy<GH;cy++)for(let cx=0;cx<GW;cx++){const u=(cx*G+G/2)/2,v=(cy*G+G/2)/2,wx=a*u+c*v+tx,wy=b*u+d*v+ty;let gy=info.ground;
+        if(side)gy=this.wallFloor(wx);else if(Number.isFinite(info.heightLimit))gy=Math.min(gy,wy+info.heightLimit);else gy+=(wy-gy)*.08;
+        const z=Math.max(0,gy-wy),dx=l.gx-wx,dy=l.gy-gy,dz=l.z-z,dist=Math.hypot(dx,dy*1.25,dz),reach=l.reach||l.r,at=(cy*GW+cx)*4;if(dist>=reach)continue;const len=Math.hypot(dx,dy,dz)||1;values[at]=dx/len;values[at+1]=dy/len;values[at+2]=dz/len;values[at+3]=l.k*(1-dist/reach)**2*.68;
+      }return {values,col:col.map(v=>.4+.6*v)};
+    });
+    shape.worldNormals=shape.worldNormals||new Map();const nk=[a,b,c,d,side,info.flat].join(','),normalKey=shape.worldNormals;let worldNormals=normalKey.get(nk);
+    if(!worldNormals){worldNormals=new Float32Array(W*H*3);for(let i=0;i<W*H;i++){const edgeX=normal[i*2],edgeZ=normal[i*2+1];let nx=a/scaleX*edgeX-c/scaleY*edgeZ,ny=.85,nz=-b/scaleX*edgeX+d/scaleY*edgeZ+.12;if(side==='left'){nx+=.9;ny=.4}else if(side==='right'){nx-=.9;ny=.4}else if(info.flat){nx=edgeX*.2;ny=.05;nz=1}const nl=Math.hypot(nx,ny,nz);worldNormals[i*3]=nx/nl;worldNormals[i*3+1]=ny/nl;worldNormals[i*3+2]=nz/nl}if(normalKey.size>=12)normalKey.clear();normalKey.set(nk,worldNormals)}
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,o=i*4,alpha=shape.alpha[o+3];out[o+3]=glow[o+3]=alpha;if(!alpha)continue;
+      const ni=i*3,nx=worldNormals[ni],ny=worldNormals[ni+1],nz=worldNormals[ni+2],si=(Math.floor(y/G)*GW+Math.floor(x/G))*4;let red=base,green=base,blue=base;
+      for(const sample of samples){const v=sample.values,diffuse=Math.max(0,nx*v[si]+ny*v[si+1]+nz*v[si+2]),direct=Math.min(.5,v[si+3]*(.16+diffuse*.84)),col=sample.col;red+=direct*col[0];green+=direct*col[1];blue+=direct*col[2];}
+      // Multiply preserves material and ink; a separate low-energy screen pass
+      // restores the light-facing highlight without tinting transparent pixels.
+      const tone=v=>Math.max(.55,v<=.85?v:.85+(v-.85)/(1+(v-.85)/.15));out[o]=Math.round(tone(red)*255);out[o+1]=Math.round(tone(green)*255);out[o+2]=Math.round(tone(blue)*255);
+      const ink=Math.max(.12,Math.min(1,(shape.alpha[o]+shape.alpha[o+1]+shape.alpha[o+2])/300));glow[o]=Math.round(Math.min(.18,(red-base)*.4)*255*ink);glow[o+1]=Math.round(Math.min(.18,(green-base)*.4)*255*ink);glow[o+2]=Math.round(Math.min(.18,(blue-base)*.4)*255*ink);
+    }
+    entry.ctx.putImageData(entry.im,0,0);entry.glow.getContext('2d').putImageData(entry.glowIm,0,0);entry.cv.highlight=entry.glow;entry.key=key;return entry.cv;
+  },
+  shadeItem(c,it,lights) {
+    const cv=Room.itemCanvas(it),src=this.materialSource(it),shape=this.shape(src,cv.width,cv.height),wall=ITEMS[it.k].layer==='wall',m=[1,0,0,1,it.x,it.y],info={ground:wall?this.wallFloor(it.x+cv.width/2):this.ground(it).y,heightLimit:wall?undefined:this.heightLimit(it,shape),side:wall?(WallMount.side(it)||'back'):'',flat:ITEMS[it.k].layer==='rug'};
+    const overlay=this.surfaceOverlay(it,src,cv.width,cv.height,m,info,lights);c.save();c.globalCompositeOperation='multiply';c.drawImage(overlay,it.x,it.y,cv.width,cv.height);c.globalCompositeOperation='screen';c.drawImage(overlay.highlight,it.x,it.y,cv.width,cv.height);c.restore();
+  },
+  shadeActor(c,actor,entry,lights) {
+    const support=this.actorSupport(actor,entry),ground=support?.y??actor.y;
+    for(let i=0;i<entry.fragments.length;i++){const f=entry.fragments[i],[sx,sy,sw,sh,dx,dy,dw,dh]=f.rect,[a,b,bx,d,x,y]=f.m,ux=f.src.width/f.nw*dw/sw,vy=f.src.height/f.nh*dh/sh,ox=dx-sx*dw/sw,oy=dy-sy*dh/sh,m=[a*ux,b*ux,bx*vy,d*vy,a*ox+bx*oy+x,b*ox+d*oy+y],overlay=this.surfaceOverlay(actor,f.src,f.nw,f.nh,m,{ground,slot:'fragment:'+i},lights);
+      c.save();c.setTransform(this.scale*a,this.scale*b,this.scale*bx,this.scale*d,this.scale*x,this.scale*y);const rect=[sx/f.src.width*overlay.width,sy/f.src.height*overlay.height,sw/f.src.width*overlay.width,sh/f.src.height*overlay.height,dx,dy,dw,dh];c.globalCompositeOperation='multiply';c.drawImage(overlay,...rect);c.globalCompositeOperation='screen';c.drawImage(overlay.highlight,...rect);c.restore();}
+  },
+
   lighting(c, lights) {
     const env=Room.env,night=env.h>19.3||env.h<6,dusk=!night&&(env.h>17||env.h<7),own=Room.state===Game.S,ambient=own?Math.max(0,Math.min(1,(Game.S.settings.ambient??60)/100)):0.6,dark=own?Math.max(0,Math.min(.95,Lights.dark||0)):0;
     const daylight=night?.66:dusk?.8:.94,gain=Math.min(1,daylight+ambient*.18*(own?Math.max(0,Lights.lamp):1))*(1-dark*.74),tint=night?[1,.94,1]:dusk?[1,.9,.86]:[1,.985,.95];
-    c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgb('+tint.map((v,i)=>{const tone=({warm:[1,.96,.89],cool:[.93,.97,1],pink:[1,.91,.96]})[own?Game.S.settings.ambientColor:'warm']||[1,.96,.89],mix=ambient*.35*(own?Lights.lamp:1);return Math.round(v*gain*255*(1-mix+tone[i]*mix))}).join(',')+')';c.fillRect(0,0,RW,RH);c.restore();
+    if(!this.tintLayer){this.tintLayer=this.canvas(this.cv.width,this.cv.height);this.tintCtx=this.tintLayer.getContext('2d')}const T=this.tintCtx;T.setTransform(this.scale,0,0,this.scale,0,0);T.globalCompositeOperation='source-over';T.fillStyle='rgb('+tint.map((v,i)=>{const tone=({warm:[1,.96,.89],cool:[.93,.97,1],pink:[1,.91,.96]})[own?Game.S.settings.ambientColor:'warm']||[1,.96,.89],mix=ambient*.35*(own?Lights.lamp:1);return Math.round(v*gain*255*(1-mix+tone[i]*mix))}).join(',')+')';T.fillRect(0,0,RW,RH);T.globalCompositeOperation='destination-out';T.drawImage(this.exterior,0,0,RW,RH);T.globalCompositeOperation='source-over';c.save();c.globalCompositeOperation='multiply';c.drawImage(this.tintLayer,0,0,RW,RH);c.restore();
     const L=this.lightCtx;L.setTransform(this.scale,0,0,this.scale,0,0);L.clearRect(0,0,RW,RH);const colors={warm:'255,174,80',cool:'122,170,255',pink:'255,126,165'};
     for(const l of lights){if(l.type!=='point')continue;const r=Math.min(150,l.r),g=L.createRadialGradient(l.x,l.y,.5,l.x,l.y,r);g.addColorStop(0,'rgba('+(colors[l.col]||colors.warm)+','+Math.min(.64,(night?.5:.25)*l.k)+')');g.addColorStop(.42,'rgba('+(colors[l.col]||colors.warm)+','+(.12*l.k)+')');g.addColorStop(1,'rgba(0,0,0,0)');L.fillStyle=g;L.fillRect(l.x-r,l.y-r,r*2,r*2)}
     // The floor shadow attenuates direct light, but never darkens an object standing over it.
-    L.save();L.globalCompositeOperation='destination-out';L.globalAlpha=.72;L.drawImage(this.shadow,0,0,RW,RH);L.drawImage(this.wallShadow,0,0,RW,RH);L.restore();
+    L.save();L.globalCompositeOperation='destination-out';L.globalAlpha=.72;L.drawImage(this.shadow,0,0,RW,RH);L.drawImage(this.wallShadow,0,0,RW,RH);L.globalAlpha=1;L.drawImage(this.exterior,0,0,RW,RH);for(const e of this.surfaceDrawList||[]){if(e.kind==='item'){const cv=Room.itemCanvas(e.it);L.drawImage(this.source(e.it),e.it.x,e.it.y,cv.width,cv.height)}else if(e.kind==='actor')L.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH)}L.restore();
     c.save();c.globalCompositeOperation='screen';c.drawImage(this.light,0,0,RW,RH);
     for(const l of lights){if(l.type!=='point'||!l.emissive)continue;const r=l.col==='warm'?5:3,g=c.createRadialGradient(l.x,l.y,0,l.x,l.y,r);g.addColorStop(0,'rgba('+(colors[l.col]||colors.warm)+','+Math.min(.32,l.k*.25)+')');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(l.x-r,l.y-r,r*2,r*2)}c.restore();
     const vignette=c.createRadialGradient(120,92,63,120,92,147);vignette.addColorStop(0,'rgba(8,7,17,0)');vignette.addColorStop(1,'rgba(8,7,17,.24)');c.fillStyle=vignette;c.fillRect(0,0,RW,RH);
@@ -406,21 +471,21 @@ const HD2D = {
       c.drawImage(img, 0, img.height * seam, img.width, img.height * (1 - seam), 0, 96, RW, RH - 96);
     } else c.drawImage(Room.bg, 0, 0, RW, RH);
 
-    const list = Room.drawList();
+    const list = this.surfaceDrawList = Room.drawList();
     for(const e of list)if(e.kind==='item')this.source(e.it);
     this.frameActors=new Map();for(const e of list)if(e.kind==='actor')this.frameActors.set(e.a,this.actorFrame(e.a));
     const lights = this.frameLights = this.lights();
-    for (const e of list) if (e.kind === 'item' && ITEMS[e.it.k].layer === 'rug') this.drawItem(c, e.it);
+    for (const e of list) if (e.kind === 'item' && ITEMS[e.it.k].layer === 'rug') {this.drawItem(c,e.it);this.shadeItem(c,e.it,lights);}
 
     this.windowLight(c,lights);
     this.shadows(c, list, lights);
 
     for (const e of list) {
       if (e.kind === 'item') {
-        if (ITEMS[e.it.k].layer !== 'rug') { this.wallContact(c,e.it); this.drawItem(c,e.it); }
+        if (ITEMS[e.it.k].layer !== 'rug') { this.drawItem(c,e.it); this.shadeItem(c,e.it,lights); }
       } else if (e.kind === 'actor') {
         const support=this.actorSupport(e.a,this.frameActors.get(e.a));if(support?.surface)this.footprint(c,{...support,y:e.a.y-.3},.12*this.selfLight(support,lights));
-        c.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH);
+        c.drawImage(this.frameActors.get(e.a).cv,0,0,RW,RH);this.shadeActor(c,e.a,this.frameActors.get(e.a),lights);
       } else Room.drawGift(this.proxy(c, 'prop'), e.g);
     }
 
@@ -432,6 +497,7 @@ const HD2D = {
     c.globalAlpha = 1;
 
     this.clearFloorMask(list);
+    this.exteriorMask(list);
     this.lighting(c, lights);
 
     if (lights.some(l=>l.type==='point')) {
