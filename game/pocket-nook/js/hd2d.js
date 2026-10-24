@@ -146,10 +146,10 @@ const HD2D = {
     if (opacity <= 0.01) return;
     const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y;
+    const dy = cy - light.y; // 光源在面前時 dy < 0，影子向後伸展；光源在身後時 dy > 0，影子向前伸展
     const dist = Math.hypot(dx, dy) || 1;
 
-    const len = Math.min(24, Math.max(12, h * 0.65));
+    const len = Math.min(22, Math.max(10, h * 0.6));
     const vx = (dx / dist) * len;
     const vy = (dy / dist) * len * 0.48;
 
@@ -162,18 +162,16 @@ const HD2D = {
   },
 
   shadows(c, list, lights) {
-    // 依環境暗度決定環境基礎亮度因子：全黑時 ambFactor 趨近 0，白天時 ambFactor 趨近 1
     const env = Room.env;
     const isAsleep = Lights.mode === 'night' || Lights.mode === 'paused';
     const darkVal = env ? (env.dark || 0) : 0;
-    // 當 darkVal 很高（例如夜間 0.6），環境光 factor 變小
-    const ambFactor = isAsleep ? 0.05 : Math.max(0, 1 - darkVal * 1.4);
+    const ambFactor = isAsleep ? 0 : Math.max(0, 1 - darkVal * 1.5);
 
-    // 只保留真正開啟、半徑內且有亮度的點光源
+    // 真正開啟且有亮度的點光源
     const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05);
 
-    // 如果沒有任何點光源，且環境光已經是最低（暗夜無光），場景完全不產生投影！
-    if (activeLights.length === 0 && ambFactor <= 0.08) {
+    // 環境光最低且無點光源時，徹底不產生任何影子！
+    if (activeLights.length === 0 && ambFactor <= 0.05) {
       return;
     }
 
@@ -188,8 +186,8 @@ const HD2D = {
               foot = it.y + h - 2, src = this.source(it);
         const cx = it.x + w / 2;
 
-        // 接觸暗影：強度隨環境光自動衰減，環境光極低時自然淡化
-        const contactAlpha = 0.28 * Math.max(ambFactor, activeLights.length ? 0.4 : 0);
+        // 接觸暗影隨環境光自動衰減
+        const contactAlpha = 0.25 * Math.max(ambFactor, activeLights.length ? 0.4 : 0);
         if (contactAlpha > 0.02) {
           c.fillStyle = `rgba(12, 7, 18, ${contactAlpha})`;
           c.beginPath();
@@ -197,7 +195,7 @@ const HD2D = {
           c.fill();
         }
 
-        // 投射陰影：只有在光源照射範圍內的燈才會產生拉長影子
+        // 點光源投射陰影
         if (activeLights.length > 0) {
           const near = activeLights.slice().sort((a, b) =>
             Math.hypot(a.x - cx, a.y - foot) - Math.hypot(b.x - cx, b.y - foot)
@@ -206,7 +204,6 @@ const HD2D = {
           for (const l of near) {
             const dist = Math.hypot(l.x - cx, l.y - foot);
             if (dist < (l.r || 90)) {
-              // 隨距離衰減，光源越遠或越暗，影子越淡
               const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
               if (distFactor > 0.05) {
                 this.cast(c, src, cx, foot, w, h, l, 0.28 * distFactor);
@@ -223,8 +220,8 @@ const HD2D = {
 
         const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        // 角色腳底接觸暗影：環境光為最低時不殘留黑斑
-        const actorContactAlpha = 0.28 * shrink * Math.max(ambFactor, activeLights.length ? 0.45 : 0);
+        // 接觸暗影
+        const actorContactAlpha = 0.25 * shrink * Math.max(ambFactor, activeLights.length ? 0.45 : 0);
         if (actorContactAlpha > 0.02) {
           c.fillStyle = `rgba(12, 7, 18, ${actorContactAlpha})`;
           c.beginPath();
@@ -232,12 +229,12 @@ const HD2D = {
           c.fill();
         }
 
+        // 角色影子直接取 ActorVisibility.sprite 的原始寬高，比例完全正常
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
         const w = s.cv.width;
         const h = s.cv.height;
 
-        // 投射陰影：嚴格受限於發光體是否開啟與照射距離
         if (activeLights.length > 0) {
           const nearActor = activeLights.slice().sort((l1, l2) =>
             Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
@@ -256,35 +253,6 @@ const HD2D = {
       }
     }
     c.restore();
-  },
-
-  drawActorLit(c, a, lights) {
-    const pet = a.pid != null;
-    const proxyCtx = this.proxy(c, pet ? 'pet' : 'owner');
-    a.draw(proxyCtx, Room);
-
-    const activeLights = lights.filter(l => l.k > 0.05);
-    if (!activeLights.length) return;
-
-    const ax = a.x, ay = a.y - 10;
-    const near = activeLights.slice().sort((l1, l2) =>
-      Math.hypot(l1.x - ax, l1.y - ay) - Math.hypot(l2.x - ax, l2.y - ay)
-    )[0];
-
-    if (!near) return;
-    const dist = Math.hypot(near.x - ax, near.y - ay);
-    const radius = near.r || 80;
-    if (dist < radius) {
-      const power = (1 - dist / radius) * 0.22 * (near.k || 1);
-      const col = near.col === 'cool' ? '140,190,255' : near.col === 'pink' ? '255,160,190' : '255,200,120';
-      c.save();
-      c.globalCompositeOperation = 'screen';
-      c.fillStyle = `rgba(${col}, ${power})`;
-      c.beginPath();
-      c.ellipse(ax, ay, pet ? 9 : 8, pet ? 7 : 13, 0, 0, Math.PI * 2);
-      c.fill();
-      c.restore();
-    }
   },
 
   applyItemLighting(c, it, w, h, lights) {
@@ -482,7 +450,8 @@ const HD2D = {
       if (e.kind === 'item') {
         if (ITEMS[e.it.k].layer !== 'rug') this.drawItem(c, e.it, lights);
       } else if (e.kind === 'actor') {
-        this.drawActorLit(c, e.a, lights);
+        // 恢復原版乾淨穩定的繪製，確保角色絕對不隱形！
+        e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
       } else {
         Room.drawGift(this.proxy(c, 'prop'), e.g);
       }
