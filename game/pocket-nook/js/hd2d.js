@@ -122,7 +122,7 @@ const HD2D = {
     const c = cv.getContext('2d');
     c.drawImage(src, 0, 0);
     c.globalCompositeOperation = 'source-in';
-    c.fillStyle = '#15101d';
+    c.fillStyle = '#0f0a17';
     c.fillRect(0, 0, cv.width, cv.height);
     this.masks.set(src, cv);
     return cv;
@@ -130,10 +130,10 @@ const HD2D = {
 
   floorClip(c) {
     c.beginPath();
-    c.moveTo(25, 88); // 擴大地板裁切範圍，讓向後拉伸的影子不會被截斷
-    c.lineTo(215, 88);
-    c.lineTo(235, 175);
-    c.lineTo(5, 175);
+    c.moveTo(20, 80);
+    c.lineTo(220, 80);
+    c.lineTo(238, 175);
+    c.lineTo(2, 175);
     c.closePath();
     c.clip();
   },
@@ -142,22 +142,23 @@ const HD2D = {
     return Room.collectLights().filter(l => l.k > .02);
   },
 
-  // 正確的方向投影：光源在下(面前)，影子往上(背後)伸展
-  cast(c, src, x, foot, w, h, light, opacity = .35) {
-    const dx = x - light.x,
-          dy = foot - light.y,
-          dist = Math.hypot(dx, dy) || 1,
-          len = Math.min(36, Math.max(16, h * .75)); // 確保有足夠的投射長度
+  // 純粹幾何射線投影：保證上下左右 360 度完全正確
+  cast(c, src, x, foot, w, h, light, opacity = 0.3) {
+    // 依物體中心算光照射線
+    const cy = foot - h * 0.4;
+    const dx = x - light.x;
+    const dy = cy - light.y; // 光源在面前時 dy < 0，影子向後 (ty < 0)；光源在身後時 dy > 0，影子向前 (ty > 0)
+    const dist = Math.hypot(dx, dy) || 1;
 
-    const vx = (dx / dist) * len;
-    // 依據距離衰減斜角投影向量
-    let vy = (dy / dist) * len * (dy < 0 ? 0.45 : 0.45);
-    if (Math.abs(vy) < 3) vy = dy < 0 ? -3 : 3;
+    // 長度設定在 14~28px 之間，與物件比例和諧
+    const len = Math.max(14, Math.min(28, h * 0.8));
+    const tx = (dx / dist) * len;
+    const ty = (dy / dist) * len * 0.55; // 2.5D 透視壓平
 
     c.save();
     c.translate(x, foot);
-    // 矩陣傾斜轉換
-    c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
+    // 矩陣變換：將 (0, -h) 的頭頂精準拉伸到 (tx, ty)
+    c.transform(1, 0, -tx / h, -ty / h, 0, 0);
     c.globalAlpha = opacity;
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
     c.restore();
@@ -174,16 +175,19 @@ const HD2D = {
         if (d.layer === 'wall' || d.layer === 'rug' || it.p != null) continue;
         const base = Room.itemCanvas(it), w = base.width, h = base.height,
               foot = it.y + h - 2, src = this.source(it);
+
         const near = shadowLights.slice().sort((a, b) =>
-          Math.hypot(a.x - it.x - w / 2, a.y - foot) - Math.hypot(b.x - it.x - w / 2, b.y - foot)
+          Math.hypot(a.x - (it.x + w / 2), a.y - foot) - Math.hypot(b.x - (it.x + w / 2), b.y - foot)
         ).slice(0, 2);
 
-        for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.35);
-        
-        // 接觸陰影
-        c.fillStyle = 'rgba(13,8,18,0.4)';
+        for (const l of near) {
+          this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.32);
+        }
+
+        // 接觸暗影
+        c.fillStyle = 'rgba(12, 7, 18, 0.38)';
         c.beginPath();
-        c.ellipse(it.x + w / 2, foot, w * .46, 2, 0, 0, Math.PI * 2);
+        c.ellipse(it.x + w / 2, foot, w * 0.44, 2, 0, 0, Math.PI * 2);
         c.fill();
       } else if (e.kind === 'actor' && (e.a.pid != null || e.a === Game.avatar)) {
         const a = e.a, pet = a.pid != null;
@@ -192,28 +196,28 @@ const HD2D = {
         else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
         if (foot < 90 || foot > 175) continue;
 
-        const shrink = Math.max(.5, 1 - elevation / 70);
+        const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        // 1. 接觸陰影加深
-        c.fillStyle = 'rgba(13,8,18,' + (0.45 * shrink) + ')';
+        // 腳底接觸圓影（濃度拉高到 0.4，保證清楚）
+        c.fillStyle = 'rgba(12, 7, 18, ' + (0.4 * shrink) + ')';
         c.beginPath();
-        c.ellipse(a.x, foot, pet ? 6 * shrink : 5.5 * shrink, 2 * shrink, 0, 0, Math.PI * 2);
+        c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 2 * shrink, 0, 0, Math.PI * 2);
         c.fill();
 
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
-        const baseH = s.cv.height / 4;
+        // 嚴格換算角色原始高度，避免除數失真
         const baseW = s.cv.width / 4;
+        const baseH = s.cv.height / 4;
 
-        // 2. 正確判定面前/背後：
-        // 角色的腰身大約在 foot - 8，若光源的 Y 大於此位置，代表燈在角色面前(下方)
+        // 抓身邊最近的燈光
         const nearActor = shadowLights.slice().sort((l1, l2) =>
           Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
         ).slice(0, 2);
 
         for (const l of nearActor) {
-          // 投射長度拉長，濃度固定在 0.35 * shrink，保證清晰可見
-          this.cast(c, src, a.x, foot, baseW, baseH, l, 0.35 * shrink);
+          // 投射陰影濃度固定為 0.32 * shrink，與家具濃度長度一模一樣！
+          this.cast(c, src, a.x, foot, baseW, baseH, l, 0.32 * shrink);
         }
       }
     }
