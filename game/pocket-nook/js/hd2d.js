@@ -139,33 +139,44 @@ const HD2D = {
   },
 
   lights() {
-    return Room.collectLights().filter(l => l.k > .02);
+    return Room.collectLights().filter(l => l.k > .05);
   },
 
-  // 乾淨穩定的幾何射線投影
   cast(c, src, x, foot, w, h, light, opacity = 0.28) {
-    // 以受光中心 (foot - h * 0.35) 計算光線入射角
+    if (opacity <= 0.01) return;
     const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y; // 光源在面前 (light.y > cy) 則 dy < 0，影子向後；光源在身後 (light.y < cy) 則 dy > 0，影子向前
+    const dy = cy - light.y;
     const dist = Math.hypot(dx, dy) || 1;
 
-    // 長度與高度成比例，自然適中，不拉長成竹籤
     const len = Math.min(24, Math.max(12, h * 0.65));
     const vx = (dx / dist) * len;
-    const vy = (dy / dist) * len * 0.48; // 2.5D 斜角視角壓平比例
+    const vy = (dy / dist) * len * 0.48;
 
     c.save();
     c.translate(x, foot);
-    // 矩陣變換：(0, -h) 投射到 (vx, vy)，寬度 w 保持正常比例
     c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
-    c.globalAlpha = opacity * Math.min(1, light.k || 1);
+    c.globalAlpha = opacity;
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
     c.restore();
   },
 
   shadows(c, list, lights) {
-    const shadowLights = lights.filter(l => l.r < 180);
+    // 依環境暗度決定環境基礎亮度因子：全黑時 ambFactor 趨近 0，白天時 ambFactor 趨近 1
+    const env = Room.env;
+    const isAsleep = Lights.mode === 'night' || Lights.mode === 'paused';
+    const darkVal = env ? (env.dark || 0) : 0;
+    // 當 darkVal 很高（例如夜間 0.6），環境光 factor 變小
+    const ambFactor = isAsleep ? 0.05 : Math.max(0, 1 - darkVal * 1.4);
+
+    // 只保留真正開啟、半徑內且有亮度的點光源
+    const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05);
+
+    // 如果沒有任何點光源，且環境光已經是最低（暗夜無光），場景完全不產生投影！
+    if (activeLights.length === 0 && ambFactor <= 0.08) {
+      return;
+    }
+
     c.save();
     this.floorClip(c);
 
@@ -175,18 +186,34 @@ const HD2D = {
         if (d.layer === 'wall' || d.layer === 'rug' || it.p != null) continue;
         const base = Room.itemCanvas(it), w = base.width, h = base.height,
               foot = it.y + h - 2, src = this.source(it);
+        const cx = it.x + w / 2;
 
-        const near = shadowLights.slice().sort((a, b) =>
-          Math.hypot(a.x - (it.x + w / 2), a.y - foot) - Math.hypot(b.x - (it.x + w / 2), b.y - foot)
-        ).slice(0, 2);
+        // 接觸暗影：強度隨環境光自動衰減，環境光極低時自然淡化
+        const contactAlpha = 0.28 * Math.max(ambFactor, activeLights.length ? 0.4 : 0);
+        if (contactAlpha > 0.02) {
+          c.fillStyle = `rgba(12, 7, 18, ${contactAlpha})`;
+          c.beginPath();
+          c.ellipse(cx, foot, w * 0.44, 1.8, 0, 0, Math.PI * 2);
+          c.fill();
+        }
 
-        for (const l of near) this.cast(c, src, it.x + w / 2, foot, w, h, l, 0.28);
+        // 投射陰影：只有在光源照射範圍內的燈才會產生拉長影子
+        if (activeLights.length > 0) {
+          const near = activeLights.slice().sort((a, b) =>
+            Math.hypot(a.x - cx, a.y - foot) - Math.hypot(b.x - cx, b.y - foot)
+          ).slice(0, 2);
 
-        // 家具接觸陰影
-        c.fillStyle = 'rgba(12, 7, 18, 0.3)';
-        c.beginPath();
-        c.ellipse(it.x + w / 2, foot, w * 0.45, 1.8, 0, 0, Math.PI * 2);
-        c.fill();
+          for (const l of near) {
+            const dist = Math.hypot(l.x - cx, l.y - foot);
+            if (dist < (l.r || 90)) {
+              // 隨距離衰減，光源越遠或越暗，影子越淡
+              const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
+              if (distFactor > 0.05) {
+                this.cast(c, src, cx, foot, w, h, l, 0.28 * distFactor);
+              }
+            }
+          }
+        }
       } else if (e.kind === 'actor' && (e.a.pid != null || e.a === Game.avatar)) {
         const a = e.a, pet = a.pid != null;
         let foot = a.y, elevation = 0;
@@ -196,25 +223,35 @@ const HD2D = {
 
         const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        // 角色腳底接觸陰影（與家具同參數，適度深邃）
-        c.fillStyle = 'rgba(12, 7, 18, ' + (0.3 * shrink) + ')';
-        c.beginPath();
-        c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
-        c.fill();
+        // 角色腳底接觸暗影：環境光為最低時不殘留黑斑
+        const actorContactAlpha = 0.28 * shrink * Math.max(ambFactor, activeLights.length ? 0.45 : 0);
+        if (actorContactAlpha > 0.02) {
+          c.fillStyle = `rgba(12, 7, 18, ${actorContactAlpha})`;
+          c.beginPath();
+          c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
+          c.fill();
+        }
 
         const s = ActorVisibility.sprite(a);
         const src = this.detail(s.cv, pet ? 'pet' : 'owner');
-        // 關鍵修復：直接使用 s.cv 原生寬高，不再除以 4！保持正常身形寬度！
         const w = s.cv.width;
         const h = s.cv.height;
 
-        const nearActor = shadowLights.slice().sort((l1, l2) =>
-          Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
-        ).slice(0, 2);
+        // 投射陰影：嚴格受限於發光體是否開啟與照射距離
+        if (activeLights.length > 0) {
+          const nearActor = activeLights.slice().sort((l1, l2) =>
+            Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
+          ).slice(0, 2);
 
-        for (const l of nearActor) {
-          // 角色與家具投射陰影濃度與長度完全統一為 0.28
-          this.cast(c, src, a.x, foot, w, h, l, 0.28 * shrink);
+          for (const l of nearActor) {
+            const dist = Math.hypot(l.x - a.x, l.y - foot);
+            if (dist < (l.r || 90)) {
+              const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
+              if (distFactor > 0.05) {
+                this.cast(c, src, a.x, foot, w, h, l, 0.28 * shrink * distFactor);
+              }
+            }
+          }
         }
       }
     }
@@ -226,9 +263,11 @@ const HD2D = {
     const proxyCtx = this.proxy(c, pet ? 'pet' : 'owner');
     a.draw(proxyCtx, Room);
 
-    if (!lights.length) return;
+    const activeLights = lights.filter(l => l.k > 0.05);
+    if (!activeLights.length) return;
+
     const ax = a.x, ay = a.y - 10;
-    const near = lights.slice().sort((l1, l2) =>
+    const near = activeLights.slice().sort((l1, l2) =>
       Math.hypot(l1.x - ax, l1.y - ay) - Math.hypot(l2.x - ax, l2.y - ay)
     )[0];
 
@@ -253,7 +292,7 @@ const HD2D = {
     const d = ITEMS[it.k];
     const cx = it.x + w / 2, cy = it.y + h / 2;
 
-    const validLights = lights.filter(l => !(d.light && Math.hypot(l.x - cx, l.y - cy) < 8));
+    const validLights = lights.filter(l => l.k > 0.05 && !(d.light && Math.hypot(l.x - cx, l.y - cy) < 8));
     if (!validLights.length) return;
 
     const near = validLights.slice().sort((a, b) =>
@@ -321,7 +360,7 @@ const HD2D = {
         c.lineWidth = .5;
         for (let y = it.y + 4; y < it.y + h; y += 3) {
           c.beginPath();
-          c.moveTo(it.x, y);
+          c.moveTo(it.x);
           c.lineTo(it.x + w, y);
           c.stroke();
         }
