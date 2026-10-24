@@ -53,6 +53,72 @@ const HD2D = {
     return base;
   },
 
+  detail(src, kind = 'prop') {
+    let styles = this.surfaces.get(src);
+    if (!styles) { styles = {}; this.surfaces.set(src, styles); }
+    if (styles[kind]) return styles[kind];
+    if (!src.getContext) return src;
+    const S = 4, w = src.width, h = src.height, cv = this.canvas(w * S, h * S),
+          c = cv.getContext('2d'), data = src.getContext('2d').getImageData(0, 0, w, h).data,
+          im = c.createImageData(w * S, h * S);
+    const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 30;
+
+    for (let y = 0; y < h * S; y++) {
+      for (let x = 0; x < w * S; x++) {
+        const sx = x >> 2, sy = y >> 2, at = (sy * w + sx) * 4, o = (y * w * S + x) * 4;
+        if (!data[at + 3]) continue;
+        let mul = 1, red = data[at], green = data[at + 1], blue = data[at + 2];
+        const ink = red < 70 && green < 62 && blue < 75;
+        if (!ink) {
+          const nx = (solid(sx - 1, sy) ? 0 : -1) + (solid(sx + 1, sy) ? 0 : 1),
+                ny = (solid(sx, sy - 1) ? 0 : -1) + (solid(sx, sy + 1) ? 0 : 1),
+                dx = x % 4, dy = y % 4;
+          mul = 1 - nx * .11 - ny * .075 + (hsh(x, y, 17) % 13 - 6) * .002;
+          if (kind === 'pet' && red > green * 1.1) {
+            if ((x + Math.floor(y / 7)) % 7 === 0 && y % 5 < 2) mul += .11;
+            if (dx === 3 && solid(sx + 1, sy)) mul -= .025;
+          }
+          if (kind === 'owner') {
+            const hair = red < 150 && red > green * 1.1;
+            if (hair && (x + Math.floor(y * .22)) % 6 === 0) mul -= .12;
+            else if (!hair && green < 150 && y > h * S * .48 && ((x + y) % 7 === 0)) mul += .07;
+          }
+        }
+        im.data[o] = Math.max(0, Math.min(255, red * mul));
+        im.data[o + 1] = Math.max(0, Math.min(255, green * mul));
+        im.data[o + 2] = Math.max(0, Math.min(255, blue * mul));
+        im.data[o + 3] = data[at + 3];
+      }
+    }
+    c.putImageData(im, 0, 0);
+    styles[kind] = cv;
+    return cv;
+  },
+
+  // 100% 穩固的原版 Proxy，確保所有精靈圖完全無損繪製
+  proxy(ctx, kind) {
+    const self = this;
+    return new Proxy(ctx, {
+      get(t, k) {
+        if (k === 'drawImage') return function(src, ...a) {
+          if (!src) return;
+          const im = self.itemSources.get(src) || (src.getContext ? self.detail(src, kind) : src);
+          if (a.length === 2) {
+            t.drawImage(im, a[0], a[1], src.width, src.height);
+          } else if (a.length === 4) {
+            t.drawImage(im, ...a);
+          } else if (a.length === 8) {
+            const rx = im.width / (src.width || 1), ry = im.height / (src.height || 1);
+            t.drawImage(im, a[0] * rx, a[1] * ry, a[2] * rx, a[3] * ry, a[4], a[5], a[6], a[7]);
+          }
+        };
+        const v = t[k];
+        return typeof v === 'function' ? v.bind(t) : v;
+      },
+      set(t, k, v) { t[k] = v; return true; }
+    });
+  },
+
   mask(src) {
     if (!src) return null;
     let cv = this.masks.get(src);
@@ -69,10 +135,10 @@ const HD2D = {
 
   floorClip(c) {
     c.beginPath();
-    c.moveTo(20, 80);
-    c.lineTo(220, 80);
-    c.lineTo(238, 175);
-    c.lineTo(2, 175);
+    c.moveTo(25, 96);
+    c.lineTo(215, 96);
+    c.lineTo(235, 172);
+    c.lineTo(5, 172);
     c.closePath();
     c.clip();
   },
@@ -81,11 +147,12 @@ const HD2D = {
     return Room.collectLights().filter(l => l.k > .05);
   },
 
-  cast(c, src, x, foot, w, h, light, opacity = 0.28) {
+  // 正常投影拉伸：長度自然、比例正常
+  cast(c, src, x, foot, w, h, light, opacity = 0.25) {
     if (!src || opacity <= 0.01) return;
     const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y; // 光源在面前時 dy < 0，影子向後伸展；光源在身後時 dy > 0，影子向前伸展
+    const dy = cy - light.y; // 光源在身前(light.y > cy)時 dy < 0，影子向後伸展；在身後時 dy > 0，向前伸展
     const dist = Math.hypot(dx, dy) || 1;
 
     const len = Math.min(22, Math.max(10, h * 0.6));
@@ -109,10 +176,10 @@ const HD2D = {
     const darkVal = env ? (env.dark || 0) : 0;
     const ambFactor = isAsleep ? 0 : Math.max(0, 1 - darkVal * 1.5);
 
-    // 真正開啟且有亮度的點光源
+    // 真正有開啟且有亮度的點光源
     const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05);
 
-    // 環境光最低且無點光源時，徹底不產生任何影子
+    // 【核心邏輯】：環境光最低且無開啟的點光源時，徹底不產生任何影子！
     if (activeLights.length === 0 && ambFactor <= 0.05) {
       return;
     }
@@ -123,12 +190,15 @@ const HD2D = {
     for (const e of list) {
       if (e.kind === 'item') {
         const it = e.it, d = ITEMS[it.k];
-        if (d.layer === 'wall' || d.layer === 'rug' || it.p != null) continue;
+        // 牆面物件、掛飾、地毯不產生地面拉伸投影
+        if (d.layer === 'wall' || d.layer === 'rug' || WallMount.side(it) || it.p != null) continue;
+        if (it.y < 85) continue;
+
         const base = Room.itemCanvas(it), w = base.width, h = base.height,
               foot = it.y + h - 2, src = this.source(it);
         const cx = it.x + w / 2;
 
-        const contactAlpha = 0.25 * Math.max(ambFactor, activeLights.length ? 0.4 : 0);
+        const contactAlpha = 0.25 * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
         if (contactAlpha > 0.02) {
           c.fillStyle = `rgba(12, 7, 18, ${contactAlpha})`;
           c.beginPath();
@@ -146,7 +216,7 @@ const HD2D = {
             if (dist < (l.r || 90)) {
               const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
               if (distFactor > 0.05) {
-                this.cast(c, src, cx, foot, w, h, l, 0.28 * distFactor);
+                this.cast(c, src, cx, foot, w, h, l, 0.26 * distFactor);
               }
             }
           }
@@ -156,11 +226,11 @@ const HD2D = {
         let foot = a.y, elevation = 0;
         if (a.on) { foot = Room.base(a.on); elevation = Math.max(0, foot - a.y); }
         else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
-        if (foot < 90 || foot > 175) continue;
+        if (foot < 95 || foot > 175) continue;
 
         const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        const actorContactAlpha = 0.25 * shrink * Math.max(ambFactor, activeLights.length ? 0.45 : 0);
+        const actorContactAlpha = 0.25 * shrink * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
         if (actorContactAlpha > 0.02) {
           c.fillStyle = `rgba(12, 7, 18, ${actorContactAlpha})`;
           c.beginPath();
@@ -168,7 +238,6 @@ const HD2D = {
           c.fill();
         }
 
-        // 安全取得角色精靈圖
         try {
           const s = ActorVisibility.sprite(a);
           if (s && s.cv) {
@@ -185,7 +254,7 @@ const HD2D = {
                 if (dist < (l.r || 90)) {
                   const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
                   if (distFactor > 0.05) {
-                    this.cast(c, s.cv, a.x, foot, w, h, l, 0.28 * shrink * distFactor);
+                    this.cast(c, s.cv, a.x, foot, w, h, l, 0.26 * shrink * distFactor);
                   }
                 }
               }
@@ -202,7 +271,7 @@ const HD2D = {
     const w = base.width, h = base.height;
 
     if (!key) {
-      Room.drawItem(c, it);
+      Room.drawItem(this.proxy(c, 'prop'), it);
       return;
     }
 
@@ -349,10 +418,12 @@ const HD2D = {
       if (e.kind === 'item') {
         if (ITEMS[e.it.k].layer !== 'rug') this.drawItem(c, e.it);
       } else if (e.kind === 'actor') {
-        // 直接呼叫原生繪圖管線，不再透過 Proxy 攔截，保證主角與寵物絕對正常繪製出來！
-        if (e.a && e.a.draw) e.a.draw(c, Room);
+        // 原生通道繪製，參數完整傳入，保證主角與寵物絕對不會隱形！
+        if (e.a && e.a.draw) {
+          e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
+        }
       } else {
-        Room.drawGift(c, e.g);
+        Room.drawGift(this.proxy(c, 'prop'), e.g);
       }
     }
 
@@ -375,12 +446,12 @@ const HD2D = {
     }
 
     if (!Room.edit && Room.state === Game.S) {
-      Life.drawBubbles(c);
-      Social.drawMarks(c);
+      Life.drawBubbles(this.proxy(c, 'prop'));
+      Social.drawMarks(this.proxy(c, 'prop'));
     }
     if (Room.edit) {
       const it = Room.sel || Room.hover;
-      if (it) Room.outline(c, it, Room.sel ? '#ffe3a3' : 'rgba(255,227,163,.6)');
+      if (it) Room.outline(this.proxy(c, 'prop'), it, Room.sel ? '#ffe3a3' : 'rgba(255,227,163,.6)');
     }
 
     this.frames++;
