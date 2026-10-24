@@ -6,8 +6,8 @@ const SAVE_KEY = 'pocketnook.save.v1';
 //   1  original release
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
 //   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
-const SAVE_SCHEMA = 4;   // 4: coupons & gift pity (wallet), merchant week, pet habits & relationships, wardrobe purchases, food bowls
-const NOOK_VERSION = '0.911';
+const SAVE_SCHEMA = 5;   // 5: persistent cat care and relationships, level-up quiz gates, ambient light and weather settings
+const NOOK_VERSION = '0.92';
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -36,7 +36,7 @@ const Game = {
     const items = [];
     for (const [key, x, y, o = {}] of layout) {
       const k = pick(key); if (!k || !ITEMS[k]) continue;
-      const it = { uid: nextUid(), k, x, y }; if (ITEMS[k].toggle) it.on = o.on !== false; if (o.flip) it.flip = true; if (o.closed) it.closed = true;
+      const it = { uid: nextUid(), k, x, y }; if (ITEMS[k].toggle) it.on = o.on !== false; if (o.flip) it.flip = true; if (o.closed) it.closed = true; if (o.wall && ITEMS[k].layer === 'wall') it.wall = o.wall;
       items.push(it);
       const surf = ITEMS[k].surface; if (!surf) continue;
       for (const [ck, dx] of (o.kids || [])) {
@@ -130,7 +130,8 @@ const Game = {
     if (coins > 0 && from && from !== 'raw') coins = Math.round(coins * Life.coinMult());
     S.coins += coins; S.xp += xp; if (coins > 0 && S.life) S.life.stats.coins += coins;
     if (coins > 0 && from) this.popCoins(coins, from);
-    while (S.xp >= this.need(S.lvl)) { S.xp -= this.need(S.lvl); S.lvl++; this.levelUp(); }
+    while (S.xp >= this.need(S.lvl)) { if (typeof LevelGate !== 'undefined' && !LevelGate.allowed('owner', null, S.lvl + 1)) break; S.xp -= this.need(S.lvl); S.lvl++; this.levelUp(); }
+    if (typeof LevelGate !== 'undefined') LevelGate.notifyOwner();
     UI.hud(true);
     return coins;
   },

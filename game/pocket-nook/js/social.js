@@ -229,7 +229,7 @@ const Social = {
   // called by the quiz: a pass is good for this one need, for 10 minutes
   helpResult(o, R) {
     if (R >= 3) { o.pass = Date.now(); this.doHelp(o); return { msg: `答對 ${R} 題，正在幫${o.fname || '好友'}${HELP_KINDS[NEED_HELP[o.need.type]].v}…` }; }
-    return { msg: '要答對 3 題才能幫忙，再試一次吧（沒有用掉次數）' };
+    return { msg: '答對 3 題就能幫忙；這次沒扣次數。' };
   },
   targetName(need) {
     const d = this.visitSt && this.visitSt.d; if (!d) return '';
@@ -239,7 +239,7 @@ const Social = {
   async doHelp(o) {
     const kind = NEED_HELP[o.need.type]; if (!kind) return;
     const why = this.canHelp(o.fid, o.need); if (why) return UI.toast(why, 'i_people', 3);
-    if (!this.freeLeft() && !(o.pass && Date.now() - o.pass < SOCIAL.quizMs)) return UI.toast('要先複習 4 個單字（答對 3 題）', 'i_people', 3);
+    if (!this.freeLeft() && !(o.pass && Date.now() - o.pass < SOCIAL.quizMs)) return UI.toast('先複習 4 字，答對 3 題', 'i_people', 3);
     const free = this.freeLeft();
     try {
       // the note's id is the need itself: if a friend got there first, this write is refused
@@ -474,7 +474,7 @@ Object.assign(UI, {
     const left = SOCIAL.helpsPerDay - Social.helpsToday();
     return [head, h('div', { class: 'visit-stage' }, big, ...marks, ...hearts),
       known.length ? h('p', { class: 'hint', text: `${known.join('、')}認得你，跑過來蹭蹭你！` }) : null,
-      h('p', { class: 'hint', text: marks.length ? (left > 0 ? `點泡泡幫忙。今天還能幫 ${left} 次` + (Social.freeLeft() ? '，這次免費。' : '，要先複習 4 個單字（答對 3 題）。') : '今天的 5 次幫忙用完了。') + ' 不會用到你的金幣和道具，好友下次打開遊戲時才會生效。' : `${V.name}的房間現在一切都好，沒有需要幫忙的地方。` }),
+      h('p', { class: 'hint', text: marks.length ? (left > 0 ? `點泡泡幫忙。今天還能幫 ${left} 次` + (Social.freeLeft() ? '，這次免費。' : '，先複習 4 字，答對 3 題。') : '今天的 5 次幫忙用完了。') + ' 不會用到你的金幣和道具，好友下次打開遊戲時才會生效。' : `${V.name}的房間現在一切都好，沒有需要幫忙的地方。` }),
       h('div', { class: 'row center' }, h('button', { class: 'chip', onclick: () => Social.visit(V.fid) }, ico('i_reset', 16), '重新整理'), h('button', { class: 'chip primary', onclick: () => this.closeWin('visit') }, '回家'))];
   },
 });

@@ -6,8 +6,8 @@
    - when the game saves, it checks version.json at most every 10 minutes (and when it comes back
      to the front); a newer one shows a bar at the top with a "reload" button
    ============================================================ */
-window.NOOK_VERSION = '0.911';
-window.NOOK_VERSION_DATE = '2026/10/23';
+window.NOOK_VERSION = '0.92';
+window.NOOK_VERSION_DATE = '2026/10/24';
 
 const Update = {
   lastCheck: 0, newer: null, bar: null,

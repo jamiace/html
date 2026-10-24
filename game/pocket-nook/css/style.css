@@ -1032,3 +1032,54 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
 .ytpanel.yt-compact .yt-h { cursor: grab; user-select: none; min-height: 36px; gap: 4px; }
 .ytpanel.yt-compact .yt-h:active { cursor: grabbing; }
 .ytpanel .yt-dock { flex: none; width: auto; min-width: 38px; padding: 0 3px; font-size: 12px; }
+
+/* 0.92: room care, weather and readable phone controls. */
+.settings-card { display:flex; flex-direction:column; gap:10px; padding:12px; border:2px solid var(--line); border-radius:8px; background:var(--paper-2); min-width:0; }
+.settings-card p { margin:0; line-height:1.65; }
+.weather-choices { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.weather-local { display:flex; flex-direction:column; gap:9px; min-width:0; }
+.weather-search { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+.weather-search input { min-width:0; width:100%; box-sizing:border-box; }
+.region-choice { text-align:left; justify-content:flex-start; }
+.ambient-range { display:grid; grid-template-columns:auto minmax(0,1fr) 3.2em; align-items:center; gap:8px; }
+.ambient-range input { width:100%; min-width:0; }
+.care-line { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.care-line > span:first-child { flex:1; min-width:90px; }
+.pet-life details p { padding:5px 0; }
+.wall-mount-controls { display:flex; gap:4px; flex-wrap:wrap; }
+.visit-banner { display:flex; justify-content:center; align-items:center; gap:12px; padding:7px 12px; border:2px solid #e5cd83; border-radius:7px; background:var(--paper); color:var(--ink); }
+.visit-room-marks { position:absolute; inset:0; pointer-events:none; }
+.visit-room-marks .vmark { pointer-events:auto; }
+.theme-includes { font-size:13px; color:var(--ink-2); }
+.theme-includes summary { cursor:pointer; padding:4px 0; }
+@media (max-width:760px), (max-width:900px) and (orientation:portrait) {
+ .win-b, .win-b > *, .row > *, .ava-opts, .tinfo, .tt { min-width:0; }
+ .win-b p, .hint, .cn, .tn, .tt, .field { word-break:normal; line-break:strict; overflow-wrap:break-word; }
+ .chip > img, .tab > img, .swapbtn > img { flex-shrink:0; }
+ .win-b > .row { flex-wrap:wrap; }
+ .win-b .chip { max-width:100%; min-height:36px; }
+ .win-b .chip.sm, .tab, .ptag { white-space:nowrap; }
+ .win-b .row .chip { flex-shrink:0; }
+ .pstats2 { grid-template-columns:minmax(0,1fr); gap:7px; }
+ .pstats2 .pstat > span { width:3em; white-space:nowrap; }
+ .pstat b { white-space:nowrap; }
+ .ava-row { gap:10px; }
+ .ava-row .ava-opts { flex-basis:100%; min-width:0; }
+ .ava-row .ava-stage { margin-inline:auto; }
+ .ptraits { display:flex; flex-wrap:wrap; gap:5px; }
+ .weather-choices .chip { padding-inline:4px; justify-content:center; white-space:nowrap; }
+ .care-line .chip { white-space:nowrap; }
+ .medit-acts .wall-mount-controls { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .medit-acts .wall-mount-controls .chip { padding-inline:4px; }
+ .settings-card { padding:10px; }
+ .visit-banner { flex:none; justify-content:space-between; font-size:14px; }
+ .win[data-id=pet] .swapbtn span { line-height:1.5; }
+ .tinc { line-height:1.65; }
+}
+
+.etool { flex-wrap:wrap; max-width:calc(100% - 12px); width:max-content; box-sizing:border-box; }
+.etool .wall-mount-controls { flex-basis:100%; justify-content:center; }
+
+.xpbar i, .pbar i { max-width:100%; }
+.gate-ready { box-shadow:0 0 0 2px #dfb94f; }
+.levelgate-card { border-color:#ddbb6c; background:#fff4d9; }

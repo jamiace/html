@@ -173,7 +173,7 @@ const Mobile = {
     const done = h('button', { class: 'chip primary', onclick: () => UI.setEdit(false) }, '完成'), box = h('button', { class: 'chip', onclick: () => UI.openWin('storage') }, ico('i_box', 18), '收納箱');
     if (!it) {
       el.replaceChildren(h('div', { class: 'medit-h' }, h('div', { class: 'grow' }, ico('i_brush', 22), h('b', { text: '佈置模式' })), box, done),
-        h('p', { class: 'medit-tip', text: '點一下家具選取，按住拖曳移動。小物放到桌面、櫃子或層架上會自動放好。' }));
+        h('p', { class: 'medit-tip', text: '點選家具後拖曳；小物靠近桌面會自動放好。' }));
       return;
     }
     const pv = h('span', { class: 'medit-pv' }, sprPreview(Room.itemCanvas(it), 30, 1));
@@ -303,7 +303,7 @@ UI.w_more = function () {
   const ws = UI.w_settings;
   if (ws) UI.w_settings = function () {
     const out = ws.call(this), st = Game.S.settings;
-    if (Array.isArray(out)) out.push(h('div', { class: 'row' }, h('button', { class: 'chip' + (st.notify ? ' on' : ''), 'aria-pressed': st.notify ? 'true' : 'false', onclick: () => Mobile.askNotify(!st.notify) }, st.notify ? '專注結束時通知我：開' : '專注結束時通知我：關'), h('span', { class: 'hint', text: '遊戲在背景時才會跳通知；iPhone 要先「加入主畫面」。' })));
+    if (Array.isArray(out)) out.push(h('div', { class: 'row' }, h('button', { class: 'chip' + (st.notify ? ' on' : ''), 'aria-pressed': st.notify ? 'true' : 'false', onclick: () => Mobile.askNotify(!st.notify) }, st.notify ? '休息通知：開' : '休息通知：關'), h('span', { class: 'hint', text: '遊戲在背景時提醒；iPhone 請先加入主畫面。' })));
     return out;
   };
   // drawing: when nothing is happening on a phone, draw every other frame (half the battery)

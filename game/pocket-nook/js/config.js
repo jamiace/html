@@ -35,3 +35,11 @@ window.NOOK_AUDIO_BASE = '';
  */
 window.NOOK_DRIVE_FOLDER = '';   // 內建音樂改放在網站的 music/ 資料夾，不再從雲端硬碟播放（原本的資料夾 ID：11uJHdrWUOjZBRGfyqc763bUeT6qTfD6w）
 window.NOOK_DRIVE_API_KEY = 'AIzaSyCDmAUMuPI1dYgENKhxMQ9hDnOcop6-WSQ';
+
+/* 附近天氣：留空使用 Open-Meteo 免費非商業端點。
+ * 商業部署請使用供應商授權方案；可填入自己的代理網址，回傳相容的 forecast JSON。
+ * 代理接收 latitude、longitude、current、timezone 參數；商業金鑰保留在後端。
+ * 設定範例：window.NOOK_WEATHER_ENDPOINT = '/api/weather';
+ * 城市搜尋另使用 Open-Meteo Geocoding API。詳細說明見 更新說明_0.92.md。
+ */
+window.NOOK_WEATHER_ENDPOINT = '';

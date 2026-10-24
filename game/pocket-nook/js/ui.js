@@ -558,16 +558,16 @@ const UI = {
     return [h('div', { class: 'sub', text: '窗外時間' }), seg('timeMode', [['auto', '跟著現在'], ['day', '白天', 'i_sun'], ['dusk', '黃昏'], ['night', '夜晚', 'i_moon']]),
       h('div', { class: 'row' }, h('button', { class: 'chip' + (st.rain ? ' on' : ''), 'aria-pressed': st.rain ? 'true' : 'false', onclick: () => { st.rain = !st.rain; Room.computeEnv(st); Game.save(); this.refresh('settings'); } }, ico('i_rain', 20), st.rain ? '下雨中' : '下點雨')),
       h('div', { class: 'sub', text: '番茄鐘長度' }), stepper('專注', 'focus', 10, 60), stepper('短休息', 'short', 1, 15), stepper('長休息', 'long', 5, 30),
-      h('div', { class: 'row' }, h('button', { class: 'chip' + (st.autoBreak ? ' on' : ''), 'aria-pressed': st.autoBreak ? 'true' : 'false', onclick: () => { st.autoBreak = !st.autoBreak; Game.save(); this.refresh('settings'); } }, st.autoBreak ? '專注結束自動開始休息：開' : '專注結束自動開始休息：關')),
-      h('div', { class: 'row' }, h('button', { class: 'chip' + (st.chime !== false ? ' on' : ''), 'aria-pressed': st.chime !== false ? 'true' : 'false', onclick: () => { st.chime = st.chime === false; Game.save(); this.refresh('settings'); } }, st.chime !== false ? '專注開始和結束的提示音：開' : '專注開始和結束的提示音：關')),
+      h('div', { class: 'row' }, h('button', { class: 'chip' + (st.autoBreak ? ' on' : ''), 'aria-pressed': st.autoBreak ? 'true' : 'false', onclick: () => { st.autoBreak = !st.autoBreak; Game.save(); this.refresh('settings'); } }, st.autoBreak ? '自動休息：開' : '自動休息：關')),
+      h('div', { class: 'row' }, h('button', { class: 'chip' + (st.chime !== false ? ' on' : ''), 'aria-pressed': st.chime !== false ? 'true' : 'false', onclick: () => { st.chime = st.chime === false; Game.save(); this.refresh('settings'); } }, st.chime !== false ? '提示音：開' : '提示音：關')),
       h('div', { class: 'sub', text: '紀錄' }), stats,
       h('div', { class: 'row' }, this.resetArm ? h('button', { class: 'chip danger', onclick: () => { this.resetArm = false; try { localStorage.removeItem(SAVE_KEY); } catch (e) { } Game.replaceState(Game.newState()); Game.S.seenIntro = true; this.toast('已重新開始', 'i_sparkle'); } }, '確定清除所有進度') : h('button', { class: 'chip', onclick: () => { this.resetArm = true; this.refresh('settings'); setTimeout(() => { this.resetArm = false; this.refresh('settings'); }, 5000); } }, '重新開始…')),
-      h('p', { class: 'hint', text: '房間裡的每一件家具、角色和圖示都是用程式一格一格畫出來的像素圖。' })];
+      h('p', { class: 'hint', text: '小窩裡的一切，都是一格格畫出的像素。' })];
   },
   // ---------- music ----------
   w_music() {
     const M = Game.S.music, cur = Music.cur, playing = Music.playing;
-    const src = cur ? (cur.type === 'yt' ? (cur.list ? 'YouTube 播放清單' : 'YouTube') : cur.type === 'drive' ? '內建音樂 · ' + cur.album : cur.type === 'url' ? '內建曲目' + (cur.album ? ' · ' + cur.album : '') : '本機檔案') : '聽內建音樂、加入本機音樂檔，或貼上 YouTube 連結';
+    const src = cur ? (cur.type === 'yt' ? (cur.list ? 'YouTube 播放清單' : 'YouTube') : cur.type === 'drive' ? '內建音樂 · ' + cur.album : cur.type === 'url' ? '內建曲目' + (cur.album ? ' · ' + cur.album : '') : '本機檔案') : '選音樂，或加入檔案／YouTube 連結';
     const cover = cur && cur.type !== 'yt' ? Covers.mem[Covers.key(cur)] : null;
     const dl = Music.dl, dlTxt = dl && cur && dl.id === cur.id ? `下載到這台裝置 ${dl.total ? Math.round(dl.got / dl.total * 100) + '%' : Math.round(dl.got / 1048576) + ' MB'}（之後就不用再下載）` : cur && Music.isLib(cur) && MusicCache.has(cur.id) ? '已存在這台裝置' : '';
     const now = h('div', { class: 'now' }, cover ? h('img', { class: 'mcover', src: cover, alt: '專輯封面' }) : h('div', { class: 'disc' + (playing ? ' spin' : '') }, ico('i_music', 36)),
@@ -707,8 +707,8 @@ const UI = {
   w_themeask() {
     const id = this.themeAsk, th = THEMES[id]; if (!th) return [];
     return [h('div', { class: 'gift' }, h('div', { class: 'tpv big' }, themePreview(id)), h('p', { class: 'gift-t', text: th.n })),
-      h('button', { class: 'chip primary', onclick: () => { this.closeWin('themeask'); Game.applyTheme(id, 'full'); } }, ico('i_theme', 20), '整套佈置（目前家具收進收納箱）'),
-      h('button', { class: 'chip', onclick: () => { this.closeWin('themeask'); Game.applyTheme(id, 'look'); } }, ico('i_wall', 20), '只換牆面、地板和窗景'),
+      h('button', { class: 'chip primary', onclick: () => { this.closeWin('themeask'); Game.applyTheme(id, 'full'); } }, ico('i_theme', 20), '整套佈置，原家具收進收納箱'),
+      h('button', { class: 'chip', onclick: () => { this.closeWin('themeask'); Game.applyTheme(id, 'look'); } }, ico('i_wall', 20), '只換牆地與窗景'),
       h('button', { class: 'chip', onclick: () => this.closeWin('themeask') }, '先不要')];
   },
   // ---------- gift ----------

@@ -234,7 +234,7 @@ class Pet extends Walker {
     return out;
   }
   climbRoute(it, points, done) {
-    this.walking = false; this.onArrive = null; this.climbItem = it;
+    this.walking = false; this.onArrive = null; this.afterJump = null; this.climbItem = it;
     let i = 0;
     const next = () => {
       if (!Room.uidMap[it.uid]) {
@@ -253,6 +253,7 @@ class Pet extends Walker {
     next();
   }
   leaveSpot(cb) {
+    this.perchUntil = 0;
     this.target = null; this.napAt = null;
     if (this.on) { const it = this.on, [w, h] = itemSize(it); const fy = Math.min(167, it.y + h + 3); const fx = this.x; this.on = null; this.onOff = null; if (this.y < fy - 6) {
       const steps = ITEMS[it.k].petSteps, route = steps ? steps.map(sp => [it.x + (it.flip ? w - sp.x : sp.x), it.y + sp.y + 1]).reverse().filter(p => p[1] > this.y + 3) : [];
@@ -321,7 +322,8 @@ class Pet extends Walker {
         this.state = 'sit'; this.timer = 1; return;
       }
       if (this.others().some(a => a.on === s.it)) { if (mode === 'sleep') { const sp = this.freeSpots(); if (sp.length) return this.goSpot(sp[Math.floor(Math.random() * sp.length)], mode, secs); return this.floorNap(secs); } this.state = 'sit'; this.timer = 1.5; return; }
-      const done = () => { this.target = null; this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4);
+      const done = () => { this.target = null; this.on = s.it; this.onOff = [this.x - s.it.x, this.y - s.it.y]; this.state = mode; this.afterJump = null; this.timer = secs || (mode === 'sleep' ? 14 + Math.random() * 20 : 4 + Math.random() * 4);
+        if (ITEMS[s.it.k].petSteps) { this.timer = Math.max(this.timer, mode === 'sleep' ? 75 : 35); this.perchUntil = Room.t + this.timer; }
         // on something soft it kneads it a little before curling up
         if (mode === 'sleep' && PetPlay.isSoft(s.it) && Math.random() < 0.7) { const t = this.timer; PetAI.act(this, 'knead', 1.8 + Math.random(), () => { if (this.on === s.it) { this.state = 'sleep'; this.timer = t; PetAI.sleepSpin(this); } }); return; }
         if (mode === 'sleep') PetAI.sleepSpin(this); };
@@ -345,6 +347,13 @@ class Pet extends Walker {
   }
   headPos() { return [this.x + (this.flip ? -4 : 4), this.y - 16]; }
   update(dt) {
+    if (this.landSquash > 0) this.landSquash -= dt;
+    if (this.on && ITEMS[this.on.k].petSteps && Room.uidMap[this.on.uid] && this.perchUntil > Room.t && !this.walking && !this.jump && ['sleep', 'sit'].includes(this.state)) {
+      PetAI.tick(this, dt); if (this.onOff) { this.x = this.on.x + this.onOff[0]; this.y = this.on.y + this.onOff[1]; }
+      this.timer = Math.max(this.timer, this.perchUntil - Room.t);
+      if (this.state === 'sleep' && Math.random() < dt * .3) Room.puff('p_z', this.x + 5, this.y - 15, { vy: -4, max: 1.5 });
+      return;
+    }
     // A sleeping pet stays on its current floor/perch until the night is over.
     // Keep the actor and route intact; waking uses the normal yawn/descent/walk animations.
     if (typeof Lights !== 'undefined' && Lights.mode === 'night' && this.state === 'sleep' && !this.walking && !this.jump && !this.perchPause) {
@@ -362,7 +371,7 @@ class Pet extends Walker {
     if (this.jump) {
       const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
       this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
-      if (k >= 1) { this.jump = null; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb();
+      if (k >= 1) { this.jump = null; this.landSquash = .14; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb();
         if (!this.jump && !this.perchPause && !this.climbItem) { const w = this.afterJump; this.afterJump = null; if (w) { this.state = 'walk'; this.walkTo(w[0], w[1], w[2], w[3]); } } }
       return;
     }
@@ -407,7 +416,10 @@ class Pet extends Walker {
     const cv = petCanvas(this.kind, this.color, pose, f, flip, d && d.acc);
     const x = Math.round(this.x), y = Math.round(this.y);
     if (!this.on && !this.jump) { c.fillStyle = 'rgba(46,34,48,0.2)'; c.fillRect(x - 6, y - 1, 12, 2); }
-    c.drawImage(cv, x - Math.floor(cv.width / 2), y - canvasBottom(cv) - hop);
+    const j = this.jump, rise = j && j.y1 < j.y0 - 4 && j.t < .72 ? Math.sin(Math.PI * j.t / .72) * .25 : 0;
+    const land = this.landSquash > 0 ? Math.sin(Math.PI * this.landSquash / .14) * .12 : 0;
+    c.save(); c.translate(x, y - hop); c.scale(1 / (1 + rise) + land, 1 + rise - land);
+    c.drawImage(cv, -Math.floor(cv.width / 2), -canvasBottom(cv)); c.restore();
     if (d && d.sick && Math.floor(t * 2) % 2) { c.fillStyle = '#84cbbd'; c.fillRect(x + (flip ? -9 : 7), y - 17, 2, 2); c.fillRect(x + (flip ? -11 : 9), y - 20, 1, 1); }
   }
   hit(x, y) { return Math.abs(x - this.x) < 10 && y > this.y - 16 && y < this.y + 1; }

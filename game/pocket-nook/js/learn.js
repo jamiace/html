@@ -77,14 +77,15 @@ const Learn = {
     else if (kind === 'redo') { words = shuffle(this.dailyIdx()).slice(0, 10); nq = 8; kind = 'practice'; }
     else if (kind === 'need') { words = this.pick(5); nq = 5; }
     else if (kind === 'train' || kind === 'help') { words = kind === 'train' && Feel.trainEasy(opts.pid) ? Feel.easyWords(4) : this.pick(4); nq = 4; }
-    else if (kind === 'story') { const pk = Story.pack(opts.ch); if (!pk) return; words = pk.ids; nq = pk.qs.length; opts.preset = pk.qs; }
+    else if (kind === 'levelgate') { words = opts.questions.map(q => q.i); nq = words.length; opts.preset = opts.questions; }
+    else if (kind === 'story') { const pk = Story.pack(opts.ch); if (!pk) return; words = pk.ids; nq = pk.qs.length; opts.preset = pk.qs; opts.strict = true; }
     else if (kind === 'team') { words = Feel.teamWords(opts); nq = words.length; if (!nq) return UI.openTasks('team'); }
     else if (kind === 'chal') { const t = Challenge.task(opts.k); if (!t || !t.words) return; words = Challenge.left(t).map(w => VIDX[w]); if (!words.length) return UI.openTasks('daily'); nq = words.length; }
     else { words = this.pick(10); nq = 8; }
     const s = this.sess = { kind, opts, words, nq, step: 'review', ri: kind === 'daily' ? Math.min(this.L.reviewed, words.length) : 0, flip: false, unsure: [], qs: null, qi: 0, ans: null, right: 0, wrong: [], newly: 0, mastered: 0, result: null, spoke: -1 };
     if (kind === 'chal') { s.task = Challenge.task(opts.k); if (s.task.k !== 'c_new' || s.task.reviewed) s.ri = words.length; }
     if (kind === 'train' && Feel.trainEasy(opts.pid)) s.easy = true;
-    if (s.ri >= words.length || kind === 'train' || kind === 'help' || kind === 'team' || kind === 'story') this.toQuiz();
+    if (s.ri >= words.length || kind === 'train' || kind === 'help' || kind === 'team' || kind === 'story' || kind === 'levelgate') this.toQuiz();
     UI.openWin('study');
   },
   review(knew) {
@@ -146,7 +147,7 @@ const Learn = {
   },
   next() {
     const s = this.sess; if (!s || !s.ans) return; s.qi++; s.ans = null;
-    if (s.qi >= s.qs.length && s.kind === 'story' && !s.redo) {
+    if (s.qi >= s.qs.length && s.kind === 'story' && !s.redo && !s.opts.strict) {
       s.redo = true; const seen = new Set(), again = s.qs.filter((q, k) => s.wrong.includes(q.i) && !seen.has(q.i) && seen.add(q.i));
       if (again.length) { s.redoFrom = s.qs.length; s.qs.push(...again.map(q => Object.assign({}, q))); }
     }
@@ -160,7 +161,8 @@ const Learn = {
   finish() {
     const s = this.sess, n = s.qs.length, R = s.right, L = this.L; s.step = 'result';
     const res = { coins: 0, xp: R * 3 + s.newly * 2, items: [], msg: '' };
-    if (s.kind === 'daily') {
+    if (s.kind === 'levelgate') { Object.assign(res, LevelGate.finish(s, R, n)); }
+    else if (s.kind === 'daily') {
       res.coins = R * 2 + (R === n ? 15 : 0); L.dailyScore = `${R}/${n}`;
       if (!L.dailyDone) {
         L.dailyDone = true; const day = Life.today();
@@ -189,7 +191,7 @@ const Learn = {
       res.msg = c < R * 2 ? '今天練習的金幣已達上限，經驗照拿。' : '練習完成！';
       Life.track('study', 1);
     }
-    res.coins += s.mastered * 3;
+    if (s.kind !== 'levelgate') res.coins += s.mastered * 3;
     res.coins = Game.reward(res.coins, res.xp, 'quiz');
     s.result = res; UI.badges(); UI.refresh('learn'); Game.save(); saveSoon();
   },
@@ -303,7 +305,7 @@ Object.assign(UI, {
         s.kind === 'chal' && s.task.prog < s.task.need ? h('button', { class: 'chip primary', onclick: () => Learn.start('chal', s.opts) }, ico('i_reset', 20), '繼續挑戰') : null,
         s.kind === 'train' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Pets.select(s.opts.pid, 'train'); } }, ico('i_paw', 20), '回到寵物') : null,
         s.kind === 'help' && s.right < 3 ? h('button', { class: 'chip primary', onclick: () => Learn.start('help', s.opts) }, ico('i_reset', 20), '再試一次') : null,
-        s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); UI.openWin('visit'); } }, ico('i_people', 20), '回到好友房間') : null,
+        s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); if (Visit.active) Visit.refreshMarks(); else UI.openWin('visit'); } }, ico('i_people', 20), '回到好友房間') : null,
         h('button', { class: 'chip', onclick: () => this.closeWin('study') }, '完成'))];
   },
   w_words() {

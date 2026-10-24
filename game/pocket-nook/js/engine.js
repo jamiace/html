@@ -303,7 +303,7 @@ const Room = {
     const tree = (cx, base, ht) => { for (let i = 0; i < ht; i++) { const hw = Math.floor((i / ht) * (ht * 0.36)); c.fillStyle = (i % 3 === 0) ? snow : pine; c.fillRect(X + cx - hw, Y + base - ht + i, hw * 2 + 1, 1); } };
     tree(4, h - 4, 11); tree(9, h - 6, 8); tree(w - 6, h - 3, 12); tree(w - 11, h - 6, 7);
     if (night) { c.fillStyle = '#ffd77a'; c.fillRect(X + 15, Y + h - 7, 4, 3); c.fillStyle = '#4a3a3a'; c.fillRect(X + 14, Y + h - 9, 6, 2); c.fillRect(X + 16, Y + h - 6, 1, 2); }
-    for (let i = 0; i < 18; i++) { const sx = ((hsh(i, 5) % w) + Math.sin(t * 1.3 + i) * 2) , sy = ((hsh(i, 1) % h) + t * (4 + (i % 3) * 2)) % h; c.fillStyle = '#ffffff'; c.fillRect(X + Math.round(sx), Y + Math.round(sy), 1, 1); }
+    if (!this.env.weather || this.env.weather === 'snow') for (let i = 0; i < 18; i++) { const sx = ((hsh(i, 5) % w) + Math.sin(t * 1.3 + i) * 2) , sy = ((hsh(i, 1) % h) + t * (4 + (i % 3) * 2)) % h; c.fillStyle = '#ffffff'; c.fillRect(X + Math.round(sx), Y + Math.round(sy), 1, 1); }
     this.rainOver(c, X, Y, w, h);
   },
   // ---------------- items ----------------
@@ -399,8 +399,6 @@ const Room = {
     } finally { c.restore(); }
   },
   // ---------------- frame ----------------
-  // Give actors a 2px depth margin; at the exact boundary actors draw last.
-  // A single sort key keeps ordering consistent across multiple overlapping objects.
   drawDepth(z, actor = false) { return z + (actor ? 2 : 0); },
   drawList() {
     const list = [];
@@ -410,16 +408,19 @@ const Room = {
     for (const a of this.actors) list.push({ kind: 'actor', a, lay: 'floor', z: a.z() });
     if (this.state.gifts) for (const g of this.state.gifts) list.push({ kind: 'gift', g, lay: 'floor', z: g.y });
     const order = { wall: 0, rug: 1, floor: 2 };
-    list.sort((a, b) => (order[a.lay] - order[b.lay])
-      || (this.drawDepth(a.z, a.kind === 'actor') - this.drawDepth(b.z, b.kind === 'actor'))
-      || (Number(a.kind === 'actor') - Number(b.kind === 'actor'))
-      || (a.z - b.z));
+    list.sort((a, b) => (order[a.lay] - order[b.lay]) || (this.drawDepth(a.z, a.kind === 'actor') - this.drawDepth(b.z, b.kind === 'actor')) || (Number(a.kind === 'actor') - Number(b.kind === 'actor')) || (a.z - b.z));
     return list;
   },
   drawItem(c, it) {
     const d = ITEMS[it.k], cv = this.itemCanvas(it);
     let ox = 0, oy = 0; if (it.shake > 0) { ox = Math.round(Math.sin(it.shake * 40) * 1); it.shake -= 1 / 60; }
     const x = it.x + ox, y = it.y + oy;
+    if (d.window && d.window.custom) {
+      const win = d.window; c.save(); c.beginPath(); if (win.arch) { const xx=x+win.x, yy=y+win.y, mid=xx+win.w/2; c.moveTo(xx,yy+win.w/2); c.quadraticCurveTo(xx,yy,mid,yy); c.quadraticCurveTo(xx+win.w,yy,xx+win.w,yy+win.w/2); c.lineTo(xx+win.w,yy+win.h); c.lineTo(xx,yy+win.h); c.closePath(); } else c.rect(x + win.x, y + win.y, win.w, win.h); c.clip();
+      this.drawWindowScene(c, x + win.x, y + win.y, win.w, win.h);
+      if (it.closed) { c.fillStyle = '#d7c7b7'; c.fillRect(x + win.x, y + win.y, win.w, win.h); for (let yy = 2; yy < win.h; yy += 4) { c.fillStyle = '#b59c88'; c.fillRect(x + win.x, y + win.y + yy, win.w, 1); } }
+      c.restore(); c.drawImage(cv, x, y); return;
+    }
     if (d.window && d.window.round) {
       c.save(); c.beginPath(); c.arc(x + 20, y + 20, 15.2, 0, Math.PI * 2); c.clip();
       this.drawWindowScene(c, x + d.window.x, y + d.window.y, d.window.w, d.window.h);

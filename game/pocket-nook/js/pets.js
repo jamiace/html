@@ -152,8 +152,9 @@ const Pets = {
 
   // ---------- growth ----------
   addXp(p, n) {
-    if (p.lv >= PET_LV_MAX || n <= 0) return; p.xp += n;
+    if (p.lv >= PET_LV_MAX || n < 0) return; p.xp += n;
     while (p.lv < PET_LV_MAX && p.xp >= this.xpNeed(p.lv)) {
+      if (typeof LevelGate !== 'undefined' && !LevelGate.allowed('pet', p.id, p.lv + 1)) break;
       const st0 = this.stage(p); p.xp -= this.xpNeed(p.lv); p.lv++;
       const c = 8 * p.lv; Game.reward(c, 10, 'raw');
       const st1 = this.stage(p);
@@ -162,6 +163,7 @@ const Pets = {
       this.puff(p, 'p_spark', 4);
       Life.track('petLv', 1);
     }
+    if (typeof LevelGate !== 'undefined') LevelGate.notifyPet(p);
     if (p.lv >= PET_LV_MAX) p.xp = 0;
   },
   addBond(p, n) {
@@ -446,7 +448,7 @@ Object.assign(UI, {
     const Z = Pets.Z, p = Pets.sel(); if (!p) return [];
     Z.sel = p.id; const [k, c] = p.sp.split(':');
     const roster = h('div', { class: 'proster' }, ...Z.pets.map(q => {
-      const [kk, cc] = q.sp.split(':'), warn = q.sick || q.hunger < 30 || q.clean < 30 || q.mood < 30;
+      const [kk, cc] = q.sp.split(':'), warn = q.injury || q.sick || q.hunger < 30 || q.clean < 30 || q.mood < 30;
       return h('button', { class: 'pcard' + (q.id === p.id ? ' cur' : '') + (q.home ? '' : ' away'), title: q.name + (q.home ? '' : '（寵物旅館）'), onclick: () => { Z.sel = q.id; this.refresh('pet'); } },
         sprPreview(petCanvas(kk, cc, 'sit', 0, false, q.acc), 40, 2), h('span', { text: q.name }), petNeedBadge(q) || (warn ? h('i', { class: 'pwarn' }) : null));
     }), Z.pets.length < PET_MAX ? h('button', { class: 'pcard add', title: '領養新寵物', onclick: () => { this.shopTab = 'pet'; this.openWin('shop'); } }, ico('i_plus', 22), h('span', { text: '領養' })) : null);

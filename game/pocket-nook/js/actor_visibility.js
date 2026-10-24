@@ -40,7 +40,7 @@ const ActorVisibility = {
     const mask = this.opaquePixels(cv); if (!mask.total) return 0;
     const blockers = [];
     for (const it of Room.state.items) {
-      // Match Room.drawList(): furniture up to 2px in front still draws before actors.
+      // walls/rugs render before actors; equal-z items also render first; its own furniture and what stands on it don't count
       if (Room.layerOf(it) !== 'floor' || Room.drawDepth(Room.base(it)) <= Room.drawDepth(z, true)) continue;
       if (own && (it === own || it.p === own.uid)) continue;
       const icv = Room.itemCanvas(it);
