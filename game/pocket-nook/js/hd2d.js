@@ -95,7 +95,6 @@ const HD2D = {
     return cv;
   },
 
-  // 100% 穩固的原版 Proxy，確保所有精靈圖完全無損繪製
   proxy(ctx, kind) {
     const self = this;
     return new Proxy(ctx, {
@@ -106,7 +105,7 @@ const HD2D = {
           if (a.length === 2) {
             t.drawImage(im, a[0], a[1], src.width, src.height);
           } else if (a.length === 4) {
-            t.drawImage(im, ...a);
+            t.drawImage(im, a[0], a[1], a[2], a[3]);
           } else if (a.length === 8) {
             const rx = im.width / (src.width || 1), ry = im.height / (src.height || 1);
             t.drawImage(im, a[0] * rx, a[1] * ry, a[2] * rx, a[3] * ry, a[4], a[5], a[6], a[7]);
@@ -143,16 +142,16 @@ const HD2D = {
     c.clip();
   },
 
+  // 嚴格過濾真正有亮起、未被關閉的燈光
   lights() {
     return Room.collectLights().filter(l => l.k > .05);
   },
 
-  // 正常投影拉伸：長度自然、比例正常
   cast(c, src, x, foot, w, h, light, opacity = 0.25) {
     if (!src || opacity <= 0.01) return;
     const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y; // 光源在身前(light.y > cy)時 dy < 0，影子向後伸展；在身後時 dy > 0，向前伸展
+    const dy = cy - light.y; // 光源在身前時 dy < 0，影子向後伸展；身後時 dy > 0，向前伸展
     const dist = Math.hypot(dx, dy) || 1;
 
     const len = Math.min(22, Math.max(10, h * 0.6));
@@ -176,10 +175,10 @@ const HD2D = {
     const darkVal = env ? (env.dark || 0) : 0;
     const ambFactor = isAsleep ? 0 : Math.max(0, 1 - darkVal * 1.5);
 
-    // 真正有開啟且有亮度的點光源
+    // 只保留已開啟且在有效照射範圍內的燈
     const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05);
 
-    // 【核心邏輯】：環境光最低且無開啟的點光源時，徹底不產生任何影子！
+    // 環境光最低且無開啟的燈具時，徹底不產生任何影子
     if (activeLights.length === 0 && ambFactor <= 0.05) {
       return;
     }
@@ -190,7 +189,7 @@ const HD2D = {
     for (const e of list) {
       if (e.kind === 'item') {
         const it = e.it, d = ITEMS[it.k];
-        // 牆面物件、掛飾、地毯不產生地面拉伸投影
+        // 排除壁掛與地毯，避免產生不合理的長條斜影
         if (d.layer === 'wall' || d.layer === 'rug' || WallMount.side(it) || it.p != null) continue;
         if (it.y < 85) continue;
 
@@ -403,11 +402,13 @@ const HD2D = {
     c.imageSmoothingEnabled = false;
 
     const th = THEMES.lantern_night, isTheme = Room.state.wp === th.wp && Room.state.fl === th.fl;
-    if (isTheme) {
+    if (isTheme && this.images['room-shell']) {
       const img = this.images['room-shell'], seam = .474;
       c.drawImage(img, 0, 0, img.width, img.height * seam, 0, 0, RW, 96);
       c.drawImage(img, 0, img.height * seam, img.width, img.height * (1 - seam), 0, 96, RW, RH - 96);
-    } else c.drawImage(Room.bg, 0, 0, RW, RH);
+    } else {
+      c.drawImage(Room.bg, 0, 0, RW, RH);
+    }
 
     const list = Room.drawList(), lights = this.lights();
     for (const e of list) if (e.kind === 'item' && ITEMS[e.it.k].layer === 'rug') this.drawItem(c, e.it);
@@ -418,7 +419,6 @@ const HD2D = {
       if (e.kind === 'item') {
         if (ITEMS[e.it.k].layer !== 'rug') this.drawItem(c, e.it);
       } else if (e.kind === 'actor') {
-        // 原生通道繪製，參數完整傳入，保證主角與寵物絕對不會隱形！
         if (e.a && e.a.draw) {
           e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
         }
