@@ -190,7 +190,7 @@ const HD2D = {
         if (foot < 95 || foot > 175) continue;
 
         const shrink = Math.max(.42, 1 - elevation / 70);
-        c.fillStyle = 'rgba(14,9,25,' + (.60 * shrink) + ')';
+        c.fillStyle = 'rgba(14,9,25,' + (.70 * shrink) + ')';
         c.beginPath();
         c.ellipse(a.x, foot, pet ? 5.5 * shrink : 5 * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
         c.fill();
@@ -209,7 +209,7 @@ const HD2D = {
           const dist = Math.hypot(l.x - a.x, l.y - foot);
           const distFactor = Math.max(0, 1 - dist / (l.r || 100));
           if (distFactor > 0.05) {
-            // 提高角色影子濃度至 .34，並乘上距離係數
+            // 提高角色影子濃度至 .45，並乘上距離係數
             this.cast(c, src, a.x, foot, spriteW, spriteH, l, .34 * shrink * distFactor);
           }
         }
