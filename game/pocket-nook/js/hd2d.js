@@ -187,7 +187,7 @@ const HD2D = {
     for(let y=0;y<H;y++){const next=new Map();for(let x=0;x<W;){if(!solid(x,y)){x++;continue}const start=x;while(x<W&&solid(x,y))x++;const key=start+':'+x,prior=active.get(key);if(prior&&y/S-prior[1]<2){prior[3]=(y+1)/S;next.set(key,prior)}else{const tile=[start/S,y/S,x/S,(y+1)/S];tiles.push(tile);next.set(key,tile)}}active=next;}
     const step=Math.max(1,Math.ceil(points.length/120)),outline=points.filter((_,i)=>i%step===0),result={tiles,points:outline,bottom:(maxY+1)/S,footX:count?sum/count:w/2,width:Math.max(1,(maxX-minX+1)/S),top:minY/S,mask:cv,alpha:d};map.set(key,result);return result;
   },
-  ground(it) { const root=this.root(it),cv=Room.itemCanvas(root),shape=this.shape(this.source(root),cv.width,cv.height);return {x:root.x+shape.footX,y:root.y+shape.bottom,uid:root.uid}; },
+  ground(it) { const root=this.root(it),cv=Room.itemCanvas(root),shape=this.shape(this.source(root),cv.width,cv.height),x=root.x+shape.footX;return {x,y:ITEMS[root.k].layer==='wall'?this.wallFloor(x):root.y+shape.bottom,uid:root.uid}; },
 
   lights() {
     const list=Room.collectLights().map(l=>({...l,gx:l.x,gy:this.wallFloor(l.x),z:Math.max(3,this.wallFloor(l.x)-l.y),type:l.r>=180?'ambient':'point',casts:false,emissive:l.r<180})),used=new Set();
@@ -421,7 +421,9 @@ const HD2D = {
     const G=4,GW=Math.ceil(W/G),GH=Math.ceil(H/G),samples=candidates.map(l=>{
       const values=new Float32Array(GW*GH*4),col=colors[l.col]||colors.warm;
       for(let cy=0;cy<GH;cy++)for(let cx=0;cx<GW;cx++){const u=(cx*G+G/2)/2,v=(cy*G+G/2)/2,wx=a*u+c*v+tx,wy=b*u+d*v+ty;let gy=info.ground;
-        if(side)gy=this.wallFloor(wx);else if(Number.isFinite(info.heightLimit))gy=Math.min(gy,wy+info.heightLimit);else gy+=(wy-gy)*.08;
+        // Receiver height must use the same support plane as the emitter. A
+        // small prop's own sprite height is not its height above the room floor.
+        if(side)gy=this.wallFloor(wx);else gy+=(wy-gy)*(Number.isFinite(info.heightLimit)?.04:.08);
         const z=Math.max(0,gy-wy),dx=l.gx-wx,dy=l.gy-gy,dz=l.z-z,dist=Math.hypot(dx,dy*1.25,dz),reach=l.reach||l.r,at=(cy*GW+cx)*4;if(dist>=reach)continue;const len=Math.hypot(dx,dy,dz)||1;values[at]=dx/len;values[at+1]=dy/len;values[at+2]=dz/len;values[at+3]=l.k*(1-dist/reach)**2*(l.type==='point'?1.9:.68);
       }return {values,col:col.map(v=>.4+.6*v)};
     });

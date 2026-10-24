@@ -2,6 +2,11 @@
 const Weather = {
   key:'pocketnook.weather.v1', data:null, local:null, status:'尚未選擇地區', busy:false, query:0,
   types:{clear:'晴天',cloud:'多雲',overcast:'陰天',drizzle:'細雨',rain:'下雨',storm:'雷雨',fog:'霧',snow:'下雪',wind:'有風'},
+  cloudCover(type,reported){
+    const manual={clear:0,cloud:38,overcast:100,drizzle:0,rain:100,storm:100,fog:80,snow:65,wind:0},value=Number.isFinite(reported)?Math.max(0,Math.min(100,reported)):(manual[type]||0);
+    if(type==='cloud')return Math.max(25,Math.min(65,value));if(['overcast','rain','storm'].includes(type))return Math.max(95,value);if(type==='snow')return Math.max(55,value);return value;
+  },
+  veil(type){return type==='snow'?.055:type==='fog'?.12:['overcast','rain','storm'].includes(type)?.10:0;},
   load(){if(this.local)return this.local;try{this.local=JSON.parse(localStorage.getItem(this.key))||{}}catch(e){this.local={}}if(this.local.cache&&Date.now()-this.local.cache.at<3600e3)this.data=this.local.cache;return this.local},
   save(){try{localStorage.setItem(this.key,JSON.stringify(this.local))}catch(e){}},
   type(code,wind=0){if(code>=95)return 'storm';if([71,73,75,77,85,86].includes(code))return 'snow';if(code>=51&&code<=57)return 'drizzle';if(code>=61&&code<=82)return 'rain';if([45,48].includes(code))return 'fog';if(wind>=30)return 'wind';return code===3?'overcast':code===1||code===2?'cloud':'clear'},
@@ -29,15 +34,15 @@ const Weather = {
    let type=st.weather||(st.rain?'rain':'clear'),d=null;
    if(st.weatherMode==='local'&&Weather.valid())d=Weather.data;
    if(d&&st.timeMode==='auto'&&window.NOOK_DEV_HOUR==null){const n=new Date(Date.now()+d.offset*1000),keep=window.NOOK_DEV_HOUR;window.NOOK_DEV_HOUR=n.getUTCHours()+n.getUTCMinutes()/60;try{env(st)}finally{window.NOOK_DEV_HOUR=keep}}else env(st);
-   if(d)type=d.type;this.env.weather=type;this.env.rain=['drizzle','rain','storm'].includes(type);this.env.wind=d?d.wind:0;this.env.cloud=d?d.cloud:(['cloud','overcast','fog','storm'].includes(type)?80:0);
+   if(d)type=d.type;this.env.weather=type;this.env.rain=['drizzle','rain','storm'].includes(type);this.env.wind=d?d.wind:0;this.env.cloud=Weather.cloudCover(type,d?d.cloud:undefined);
    if(['overcast','fog','storm','rain'].includes(type))this.env.dark=Math.max(this.env.dark,.16);
  };
- const sky=Room.skyCols.bind(Room);Room.skyCols=function(hour){const cs=sky(hour),k=(this.env.cloud||0)/100*.55;return cs.map(a=>a.map((v,i)=>v*(1-k)+[125,137,157][i]*k))};
+ const sky=Room.skyCols.bind(Room);Room.skyCols=function(hour){const cs=sky(hour),cover=(this.env.cloud||0)/100;if(!cover)return cs;if(this.env.weather==='drizzle'){const k=cover*.55;return cs.map(a=>a.map((v,i)=>v*(1-k)+[125,137,157][i]*k))}const night=hour<6||hour>19.3,dusk=!night&&(hour<7.5||hour>17),target=night?[25,31,47]:dusk?[101,98,119]:[112,126,141],k=cover*.78;return cs.map(a=>a.map((v,i)=>v*(1-k)+target[i]*k))};
  Room.rainOver=function(c,X,Y,w,h){const e=this.env,t=this.t,type=e.weather||(e.rain?'rain':'clear');c.save();c.beginPath();c.rect(X,Y,w,h);c.clip();
   if(['drizzle','rain','storm'].includes(type)){const n=type==='storm'?38:type==='rain'?23:9;c.fillStyle=type==='drizzle'?'rgba(210,225,255,.45)':'rgba(210,225,255,.8)';for(let i=0;i<n;i++){const ry=(t*(type==='storm'?65:40)+hsh(i,2)%100)%(h+6)-3,rx=(hsh(i,1)+t*(type==='storm'?9:2))%w;c.fillRect(X+rx,Y+ry,1,type==='drizzle'?2:4);}if(type==='storm'&&Math.sin(t*.47)> .9995){c.fillStyle='rgba(235,240,255,.5)';c.fillRect(X,Y,w,h)}}
-  if(type==='snow'){c.fillStyle='#f5f9ff';for(let i=0;i<22;i++){const x=(hsh(i,7)%w+Math.sin(t+i)*3+w)%w,y=(hsh(i,3)%h+t*(4+i%4))%h;c.fillRect(X+Math.round(x),Y+Math.round(y),i%6===0?2:1,1)}}
-  if(type==='fog'){for(let i=0;i<4;i++){c.fillStyle='rgba(222,230,235,.18)';c.fillRect(X,Y+((i*9+t)%h),w,4)}}
-  if(['cloud','overcast','storm'].includes(type)){c.fillStyle='rgba(110,120,145,.38)';for(let i=0;i<3;i++){const x=X+(t*1.6+i*17)%(w+18)-18;c.fillRect(x,Y+3+i*3,17,3);c.fillRect(x+3,Y+1+i*3,9,2)}}
+  if(type==='snow'){c.fillStyle='rgba(245,249,255,'+Weather.veil(type)+')';c.fillRect(X,Y,w,h);c.fillStyle='#f5f9ff';for(let i=0;i<22;i++){const x=(hsh(i,7)%w+Math.sin(t+i)*3+w)%w,y=(hsh(i,3)%h+t*(4+i%4))%h;c.fillRect(X+Math.round(x),Y+Math.round(y),i%6===0?2:1,1)}}
+  if(type==='fog'){c.fillStyle='rgba(222,230,235,'+Weather.veil(type)+')';c.fillRect(X,Y,w,h);for(let i=0;i<4;i++){c.fillStyle='rgba(222,230,235,.18)';c.fillRect(X,Y+((i*9+t)%h),w,4)}}
+  if(['cloud','overcast','rain','storm'].includes(type)){const overcast=type!=='cloud';if(overcast){c.fillStyle='rgba(132,142,156,'+Weather.veil(type)+')';c.fillRect(X,Y,w,h)}c.fillStyle=overcast?'rgba(103,115,137,.42)':'rgba(161,179,199,.20)';for(let i=0;i<(overcast?5:2);i++){const x=X+(t*(overcast?.85:1.6)+i*17)%(w+24)-24;c.fillRect(x,Y+3+i*3,overcast?24:14,overcast?4:2);c.fillRect(x+3,Y+1+i*3,overcast?15:8,2)}}
   if(type==='wind'){c.fillStyle='rgba(230,240,245,.6)';for(let i=0;i<7;i++){const x=X+(t*18+i*13)%(w+10)-10,y=Y+4+(i*7)%(h-5);c.fillRect(x,y,6,1);c.fillRect(x+3,y+2,2,1)}}c.restore();
  };
  // Every scenery is clipped once, so new large windows and weather cannot spill onto walls.
