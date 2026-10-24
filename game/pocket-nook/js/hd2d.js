@@ -57,42 +57,47 @@ const HD2D = {
     let styles = this.surfaces.get(src);
     if (!styles) { styles = {}; this.surfaces.set(src, styles); }
     if (styles[kind]) return styles[kind];
-    if (!src.getContext) return src;
+    if (!src || !src.getContext) return src;
     const S = 4, w = src.width, h = src.height, cv = this.canvas(w * S, h * S),
-          c = cv.getContext('2d'), data = src.getContext('2d').getImageData(0, 0, w, h).data,
-          im = c.createImageData(w * S, h * S);
-    const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 30;
+          c = cv.getContext('2d');
+    try {
+      const data = src.getContext('2d').getImageData(0, 0, w, h).data,
+            im = c.createImageData(w * S, h * S);
+      const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 30;
 
-    for (let y = 0; y < h * S; y++) {
-      for (let x = 0; x < w * S; x++) {
-        const sx = x >> 2, sy = y >> 2, at = (sy * w + sx) * 4, o = (y * w * S + x) * 4;
-        if (!data[at + 3]) continue;
-        let mul = 1, red = data[at], green = data[at + 1], blue = data[at + 2];
-        const ink = red < 70 && green < 62 && blue < 75;
-        if (!ink) {
-          const nx = (solid(sx - 1, sy) ? 0 : -1) + (solid(sx + 1, sy) ? 0 : 1),
-                ny = (solid(sx, sy - 1) ? 0 : -1) + (solid(sx, sy + 1) ? 0 : 1),
-                dx = x % 4, dy = y % 4;
-          mul = 1 - nx * .11 - ny * .075 + (hsh(x, y, 17) % 13 - 6) * .002;
-          if (kind === 'pet' && red > green * 1.1) {
-            if ((x + Math.floor(y / 7)) % 7 === 0 && y % 5 < 2) mul += .11;
-            if (dx === 3 && solid(sx + 1, sy)) mul -= .025;
+      for (let y = 0; y < h * S; y++) {
+        for (let x = 0; x < w * S; x++) {
+          const sx = x >> 2, sy = y >> 2, at = (sy * w + sx) * 4, o = (y * w * S + x) * 4;
+          if (!data[at + 3]) continue;
+          let mul = 1, red = data[at], green = data[at + 1], blue = data[at + 2];
+          const ink = red < 70 && green < 62 && blue < 75;
+          if (!ink) {
+            const nx = (solid(sx - 1, sy) ? 0 : -1) + (solid(sx + 1, sy) ? 0 : 1),
+                  ny = (solid(sx, sy - 1) ? 0 : -1) + (solid(sx, sy + 1) ? 0 : 1),
+                  dx = x % 4, dy = y % 4;
+            mul = 1 - nx * .11 - ny * .075 + (hsh(x, y, 17) % 13 - 6) * .002;
+            if (kind === 'pet' && red > green * 1.1) {
+              if ((x + Math.floor(y / 7)) % 7 === 0 && y % 5 < 2) mul += .11;
+              if (dx === 3 && solid(sx + 1, sy)) mul -= .025;
+            }
+            if (kind === 'owner') {
+              const hair = red < 150 && red > green * 1.1;
+              if (hair && (x + Math.floor(y * .22)) % 6 === 0) mul -= .12;
+              else if (!hair && green < 150 && y > h * S * .48 && ((x + y) % 7 === 0)) mul += .07;
+            }
           }
-          if (kind === 'owner') {
-            const hair = red < 150 && red > green * 1.1;
-            if (hair && (x + Math.floor(y * .22)) % 6 === 0) mul -= .12;
-            else if (!hair && green < 150 && y > h * S * .48 && ((x + y) % 7 === 0)) mul += .07;
-          }
+          im.data[o] = Math.max(0, Math.min(255, red * mul));
+          im.data[o + 1] = Math.max(0, Math.min(255, green * mul));
+          im.data[o + 2] = Math.max(0, Math.min(255, blue * mul));
+          im.data[o + 3] = data[at + 3];
         }
-        im.data[o] = Math.max(0, Math.min(255, red * mul));
-        im.data[o + 1] = Math.max(0, Math.min(255, green * mul));
-        im.data[o + 2] = Math.max(0, Math.min(255, blue * mul));
-        im.data[o + 3] = data[at + 3];
       }
+      c.putImageData(im, 0, 0);
+      styles[kind] = cv;
+      return cv;
+    } catch (e) {
+      return src;
     }
-    c.putImageData(im, 0, 0);
-    styles[kind] = cv;
-    return cv;
   },
 
   proxy(ctx, kind) {
@@ -107,7 +112,7 @@ const HD2D = {
           } else if (a.length === 4) {
             t.drawImage(im, a[0], a[1], a[2], a[3]);
           } else if (a.length === 8) {
-            const rx = im.width / (src.width || 1), ry = im.height / (src.height || 1);
+            const rx = (im.width || 1) / (src.width || 1), ry = (im.height || 1) / (src.height || 1);
             t.drawImage(im, a[0] * rx, a[1] * ry, a[2] * rx, a[3] * ry, a[4], a[5], a[6], a[7]);
           }
         };
@@ -142,7 +147,6 @@ const HD2D = {
     c.clip();
   },
 
-  // 嚴格過濾真正有亮起、未被關閉的燈光
   lights() {
     return Room.collectLights().filter(l => l.k > .05);
   },
@@ -151,12 +155,13 @@ const HD2D = {
     if (!src || opacity <= 0.01) return;
     const cy = foot - h * 0.35;
     const dx = x - light.x;
-    const dy = cy - light.y; // 光源在身前時 dy < 0，影子向後伸展；身後時 dy > 0，向前伸展
+    const dy = cy - light.y;
     const dist = Math.hypot(dx, dy) || 1;
 
-    const len = Math.min(22, Math.max(10, h * 0.6));
+    // 長度適中，避免怪異的長條黑影
+    const len = Math.min(20, Math.max(8, h * 0.55));
     const vx = (dx / dist) * len;
-    const vy = (dy / dist) * len * 0.48;
+    const vy = (dy / dist) * len * 0.45;
 
     const m = this.mask(src);
     if (!m) return;
@@ -175,10 +180,10 @@ const HD2D = {
     const darkVal = env ? (env.dark || 0) : 0;
     const ambFactor = isAsleep ? 0 : Math.max(0, 1 - darkVal * 1.5);
 
-    // 只保留已開啟且在有效照射範圍內的燈
-    const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05);
+    // 只保留真正開啟、有亮度、且屬於房間中下部地面光源（Y >= 70）的燈光，排除天花板高處壁燈對地面造成怪異投射
+    const activeLights = lights.filter(l => l.r < 180 && l.k > 0.05 && l.y >= 70);
 
-    // 環境光最低且無開啟的燈具時，徹底不產生任何影子
+    // 當處於暗夜且沒有任何開啟的地面點光源時，徹底不繪製任何影子！
     if (activeLights.length === 0 && ambFactor <= 0.05) {
       return;
     }
@@ -187,57 +192,60 @@ const HD2D = {
     this.floorClip(c);
 
     for (const e of list) {
-      if (e.kind === 'item') {
-        const it = e.it, d = ITEMS[it.k];
-        // 排除壁掛與地毯，避免產生不合理的長條斜影
-        if (d.layer === 'wall' || d.layer === 'rug' || WallMount.side(it) || it.p != null) continue;
-        if (it.y < 85) continue;
+      try {
+        if (e.kind === 'item') {
+          const it = e.it, d = ITEMS[it.k];
+          if (!d || d.layer === 'wall' || d.layer === 'rug' || WallMount.side(it) || it.p != null) continue;
+          if (it.y < 85) continue;
 
-        const base = Room.itemCanvas(it), w = base.width, h = base.height,
-              foot = it.y + h - 2, src = this.source(it);
-        const cx = it.x + w / 2;
+          const base = Room.itemCanvas(it);
+          if (!base) continue;
+          const w = base.width, h = base.height, foot = it.y + h - 2, src = this.source(it);
+          const cx = it.x + w / 2;
 
-        const contactAlpha = 0.25 * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
-        if (contactAlpha > 0.02) {
-          c.fillStyle = `rgba(12, 7, 18, ${contactAlpha})`;
-          c.beginPath();
-          c.ellipse(cx, foot, w * 0.44, 1.8, 0, 0, Math.PI * 2);
-          c.fill();
-        }
+          // 接觸暗影
+          const contactAlpha = 0.22 * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
+          if (contactAlpha > 0.02) {
+            c.fillStyle = `rgba(12, 7, 18, ${contactAlpha})`;
+            c.beginPath();
+            c.ellipse(cx, foot, w * 0.44, 1.8, 0, 0, Math.PI * 2);
+            c.fill();
+          }
 
-        if (activeLights.length > 0) {
-          const near = activeLights.slice().sort((a, b) =>
-            Math.hypot(a.x - cx, a.y - foot) - Math.hypot(b.x - cx, b.y - foot)
-          ).slice(0, 2);
+          // 點光源投射陰影
+          if (activeLights.length > 0) {
+            const near = activeLights.slice().sort((a, b) =>
+              Math.hypot(a.x - cx, a.y - foot) - Math.hypot(b.x - cx, b.y - foot)
+            ).slice(0, 1); // 每個家具只取最近的一盞燈，避免多光源交錯怪異
 
-          for (const l of near) {
-            const dist = Math.hypot(l.x - cx, l.y - foot);
-            if (dist < (l.r || 90)) {
-              const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
-              if (distFactor > 0.05) {
-                this.cast(c, src, cx, foot, w, h, l, 0.26 * distFactor);
+            for (const l of near) {
+              const dist = Math.hypot(l.x - cx, l.y - foot);
+              const radius = l.r || 80;
+              if (dist < radius) {
+                const distFactor = (1 - dist / radius) * Math.min(1, l.k || 1);
+                if (distFactor > 0.08) {
+                  this.cast(c, src, cx, foot, w, h, l, 0.24 * distFactor);
+                }
               }
             }
           }
-        }
-      } else if (e.kind === 'actor' && e.a) {
-        const a = e.a, pet = a.pid != null;
-        let foot = a.y, elevation = 0;
-        if (a.on) { foot = Room.base(a.on); elevation = Math.max(0, foot - a.y); }
-        else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
-        if (foot < 95 || foot > 175) continue;
+        } else if (e.kind === 'actor' && e.a) {
+          const a = e.a, pet = a.pid != null;
+          let foot = a.y, elevation = 0;
+          if (a.on) { foot = Room.base(a.on); elevation = Math.max(0, foot - a.y); }
+          else if (a.jump) { foot = a.jump.y1; elevation = Math.max(0, foot - a.y); }
+          if (foot < 95 || foot > 175) continue;
 
-        const shrink = Math.max(0.5, 1 - elevation / 70);
+          const shrink = Math.max(0.5, 1 - elevation / 70);
 
-        const actorContactAlpha = 0.25 * shrink * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
-        if (actorContactAlpha > 0.02) {
-          c.fillStyle = `rgba(12, 7, 18, ${actorContactAlpha})`;
-          c.beginPath();
-          c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
-          c.fill();
-        }
+          const actorContactAlpha = 0.22 * shrink * Math.max(ambFactor, activeLights.length ? 0.35 : 0);
+          if (actorContactAlpha > 0.02) {
+            c.fillStyle = `rgba(12, 7, 18, ${actorContactAlpha})`;
+            c.beginPath();
+            c.ellipse(a.x, foot, (pet ? 5.5 : 5) * shrink, 1.8 * shrink, 0, 0, Math.PI * 2);
+            c.fill();
+          }
 
-        try {
           const s = ActorVisibility.sprite(a);
           if (s && s.cv) {
             const w = s.cv.width;
@@ -246,20 +254,23 @@ const HD2D = {
             if (activeLights.length > 0) {
               const nearActor = activeLights.slice().sort((l1, l2) =>
                 Math.hypot(l1.x - a.x, l1.y - foot) - Math.hypot(l2.x - a.x, l2.y - foot)
-              ).slice(0, 2);
+              ).slice(0, 1);
 
               for (const l of nearActor) {
                 const dist = Math.hypot(l.x - a.x, l.y - foot);
-                if (dist < (l.r || 90)) {
-                  const distFactor = (1 - dist / (l.r || 90)) * Math.min(1, l.k || 1);
-                  if (distFactor > 0.05) {
-                    this.cast(c, s.cv, a.x, foot, w, h, l, 0.26 * shrink * distFactor);
+                const radius = l.r || 80;
+                if (dist < radius) {
+                  const distFactor = (1 - dist / radius) * Math.min(1, l.k || 1);
+                  if (distFactor > 0.08) {
+                    this.cast(c, s.cv, a.x, foot, w, h, l, 0.24 * shrink * distFactor);
                   }
                 }
               }
             }
           }
-        } catch (err) {}
+        }
+      } catch (err) {
+        // 萬一單一物件計算異常，絕不中斷整個迴圈
       }
     }
     c.restore();
@@ -267,6 +278,7 @@ const HD2D = {
 
   drawItem(c, it) {
     const key = this.key(it), d = ITEMS[it.k], base = Room.itemCanvas(it);
+    if (!base) return;
     const w = base.width, h = base.height;
 
     if (!key) {
@@ -411,20 +423,34 @@ const HD2D = {
     }
 
     const list = Room.drawList(), lights = this.lights();
-    for (const e of list) if (e.kind === 'item' && ITEMS[e.it.k].layer === 'rug') this.drawItem(c, e.it);
-
-    this.shadows(c, list, lights);
-
+    
+    // 1. 繪製地毯
     for (const e of list) {
-      if (e.kind === 'item') {
-        if (ITEMS[e.it.k].layer !== 'rug') this.drawItem(c, e.it);
-      } else if (e.kind === 'actor') {
-        if (e.a && e.a.draw) {
-          e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
-        }
-      } else {
-        Room.drawGift(this.proxy(c, 'prop'), e.g);
+      if (e.kind === 'item' && ITEMS[e.it.k] && ITEMS[e.it.k].layer === 'rug') {
+        this.drawItem(c, e.it);
       }
+    }
+
+    // 2. 繪製陰影（含保護，保證絕不中斷）
+    try {
+      this.shadows(c, list, lights);
+    } catch (e) {}
+
+    // 3. 繪製家具、角色、寵物
+    for (const e of list) {
+      try {
+        if (e.kind === 'item') {
+          if (ITEMS[e.it.k] && ITEMS[e.it.k].layer !== 'rug') {
+            this.drawItem(c, e.it);
+          }
+        } else if (e.kind === 'actor') {
+          if (e.a && e.a.draw) {
+            e.a.draw(this.proxy(c, e.a.pid != null ? 'pet' : 'owner'), Room);
+          }
+        } else {
+          Room.drawGift(this.proxy(c, 'prop'), e.g);
+        }
+      } catch (err) {}
     }
 
     for (const p of Room.particles) {
