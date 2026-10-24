@@ -132,10 +132,10 @@ const HD2D = {
     return cv;
   },
 
-  floorClip(c) {
+floorClip(c) {
     c.beginPath();
-    c.moveTo(30, 96);
-    c.lineTo(210, 96);
+    c.moveTo(28, 92);   // 從原本的 96 稍微上移至 92
+    c.lineTo(212, 92);
     c.lineTo(234, 170);
     c.lineTo(6, 170);
     c.closePath();
@@ -146,11 +146,24 @@ const HD2D = {
     return Room.collectLights().filter(l => l.k > .02);
   },
 
-  cast(c, src, x, foot, w, h, light, opacity = .2) {
-    const dx = x - light.x, dy = foot - light.y, dist = Math.hypot(dx, dy) || 1,
-          len = Math.min(32, h * .65), vx = dx / dist * len, vy = Math.max(4, dy / dist * len * .48);
+cast(c, src, x, foot, w, h, light, opacity = .2) {
+    const dx = x - light.x, 
+          dy = foot - light.y, 
+          dist = Math.hypot(dx, dy) || 1,
+          len = Math.min(32, h * .65);
+
+    // 修正點：允許 dy 為負數（往上投射）
+    // 往上投射時（dy < 0），因為 2.5D 斜角透視關係，Y 軸長度需額外微幅壓縮（乘 0.35~0.4），避免過長穿入牆面
+    const vx = (dx / dist) * len;
+    let vy = (dy / dist) * len * (dy < 0 ? .35 : .48);
+
+    // 設定最小偏移門檻（避免光源剛好在正正下方或正上方時除以零或無拉伸）
+    if (Math.abs(vy) < 2) vy = dy < 0 ? -2 : 2;
+
     c.save();
     c.translate(x, foot);
+    
+    // 依據 vy 的方向傾斜壓平。h 為物件高度，利用 -vy/h 將直立圖案壓向地面或後上方
     c.transform(1, 0, -vx / Math.max(1, h), -vy / Math.max(1, h), 0, 0);
     c.globalAlpha = opacity * Math.min(1, light.k || 1);
     c.drawImage(this.mask(src), -w / 2, -h, w, h);
