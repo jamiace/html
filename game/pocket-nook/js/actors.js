@@ -151,7 +151,7 @@ class Avatar extends Walker {
     if (this.state === 'sleep' && this.bed && Room.uidMap[this.bed.uid]) {
       const bed = this.bed, bc = Room.itemCanvas(bed), b = ITEMS[bed.k].bed, px = bed.flip ? bc.width - b.x : b.x;
       const head = sleepHeadCanvas(cfg); c.drawImage(head, Math.round(bed.x + px - 10), bed.y + b.y - 8 - AVA_TOP + (Math.sin(t * 1.5) > 0.6 ? 1 : 0));
-      const by = b.blanketY || 18; c.drawImage(bc, 0, by, bc.width, bc.height - by, bed.x, bed.y + by, bc.width, bc.height - by);
+      const by = b.blanketY ?? Math.max(18, b.y + 7); c.drawImage(bc, 0, by, bc.width, bc.height - by, bed.x, bed.y + by, bc.width, bc.height - by);
       return;
     }
     if ((this.state === 'work' || this.state === 'sit') && this.seat && Room.uidMap[this.seat.uid]) {

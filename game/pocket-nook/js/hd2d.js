@@ -1,3 +1,38 @@
+/* Chair direction is shared by pixel and HD modes; saved furniture IDs stay unchanged. */
+const ChairViews = {
+  ready: null,
+  back(it) {
+    if (!ITEMS[it.k]?.chair) return false;
+    if (Room.actors?.some(a=>a.seat?.uid===it.uid && ['work','sit'].includes(a.state))) return true;
+    const raw=WallMount.raw(it), x=it.x+raw.width/2;
+    return (Room.state?.items||[]).some(desk=>{
+      if(!ITEMS[desk.k]?.desk || desk.p!=null)return false;
+      const cv=WallMount.raw(desk);
+      return Math.abs(x-desk.x-cv.width/2)<=Math.max(6,cv.width*.38) && it.y>=desk.y-2 && it.y<=desk.y+cv.height+14;
+    });
+  },
+  async load() {
+    try {
+      const response=await fetch('assets/sprites/chair-backs.json');
+      if(!response.ok)return;
+      const pack=await response.json();
+      for(const [name,entry] of Object.entries(pack.sprites))SPR.def(name,Grid.rows(entry.rows));
+    } catch { /* A missing optional pack leaves the original chair available. */ }
+  }
+};
+ChairViews.ready=ChairViews.load();
+(function(){
+  const original=Room.itemCanvas.bind(Room);
+  Room.itemCanvas=function(it){
+    const d=ITEMS[it.k], name=d?.spr+'_back';
+    if(ChairViews.back(it) && SPR.defs[name]) {
+      const map=it.wilt?Object.assign({},d.map,WILT_MAP):d.map;
+      return SPR.get(name,map,it.flip,d.id+':back'+(it.wilt?':wilt':''));
+    }
+    return original(it);
+  };
+})();
+
 /* HD-2D first playable slice. World coordinates and save rules stay with the game. */
 const HD2D = {
   // 保留效能修正版的 2 倍畫布與 CSS 硬體縮放。
@@ -8,6 +43,8 @@ const HD2D = {
   enabled: true,
   ready: false,
   images: {},
+  objectImages: {},
+  objectVariants: new WeakMap(),
   surfaces: new WeakMap(),
   itemSources: new WeakMap(),
   masks: new WeakMap(),
@@ -29,9 +66,72 @@ const HD2D = {
       im.onerror = () => no(Error('無法載入 ' + name));
       im.src = 'assets/hd2d/' + name + '.png';
     })));
+    await ChairViews.ready;
+    await this.loadObjects();
     this.failed = results.filter(r => r.status === 'rejected').length;
     this.ready = !this.failed;
     return this.ready;
+  },
+
+  // Optional HD art packs never replace SPR: pixel mode and save coordinates stay intact.
+  async loadObjects() {
+    this.objectFailures = [];
+    try {
+      const response = await fetch('assets/hd2d/objects.json');
+      if (!response.ok) return;
+      const manifest = await response.json();
+      await Promise.allSettled(Object.entries(manifest.sprites).map(([name, entry]) => new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => { this.objectImages[name] = image; resolve(); };
+        image.onerror = () => { this.objectFailures.push(name); resolve(); };
+        image.src = entry.file;
+      })));
+    } catch { this.objectFailures.push('manifest'); }
+  },
+
+  objectSource(it, base) {
+    const d = ITEMS[it.k], food = d.bowl ? Pets.bowlLevel(it) : '',
+          normal = food ? 'pet_bowl_'+food : d.onSpr && it.on && !it.broken ? d.onSpr : d.spr,
+          name = ChairViews.back(it) && SPR.defs[normal+'_back'] ? normal+'_back' : normal,
+          image = this.objectImages[name];
+    if (!image) return null;
+    let result = this.objectVariants.get(base);
+    if (result) return result;
+    let cv = this.canvas(image.width,image.height);
+    const c = cv.getContext('2d');
+    c.drawImage(image,0,0);
+    const map = it.wilt ? Object.assign({},d.map,WILT_MAP) : d.map;
+    if (map && Object.keys(map).length) {
+      const grid = SPR.grid(name), pixels = c.getImageData(0,0,cv.width,cv.height), data = pixels.data;
+      // Recolour the original palette regions while retaining generated texture and alpha.
+      for (let y=0;y<cv.height;y++) for(let x=0;x<cv.width;x++) {
+        const at=(y*cv.width+x)*4;
+        if(!data[at+3] || Math.max(data[at],data[at+1],data[at+2])<65)continue;
+        let gx=Math.min(grid.w-1,Math.floor(x/cv.width*grid.w)), gy=Math.min(grid.h-1,Math.floor(y/cv.height*grid.h));
+        let token=grid.a[gy][gx];
+        if(token==='.') {
+          let distance=Infinity;
+          for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++) {
+            const key=grid.a[gy+dy]?.[gx+dx], dist=dx*dx+dy*dy;
+            if(key && key!=='.' && dist<distance){distance=dist;token=key;}
+          }
+        }
+        const from=PAL_RGBA[token], to=PAL_RGBA[map[token]];
+        if(!from || !to || token==='0' || token==='1')continue;
+        const light=(data[at]*.2126+data[at+1]*.7152+data[at+2]*.0722)/Math.max(1,from[0]*.2126+from[1]*.7152+from[2]*.0722);
+        for(let channel=0;channel<3;channel++) {
+          const detail=data[at+channel]-from[channel]*light;
+          data[at+channel]=Math.max(0,Math.min(255,to[channel]*light+detail*.4));
+        }
+      }
+      c.putImageData(pixels,0,0);
+    }
+    if(it.flip) {
+      const mirrored=this.canvas(cv.width,cv.height), m=mirrored.getContext('2d');
+      m.translate(cv.width,0);m.scale(-1,1);m.drawImage(cv,0,0);cv=mirrored;
+    }
+    this.objectVariants.set(base,cv);
+    return cv;
   },
 
   key(it) {
@@ -52,9 +152,10 @@ const HD2D = {
 
   source(it) {
     if (WallMount.side(it)) return this.wallSource(it);
-    const base = Room.itemCanvas(it), key = this.key(it), image = key && this.images[key];
-    let src = image || this.detail(base, 'prop');
-    if (image && it.flip) {
+    const base = Room.itemCanvas(it), key = this.key(it), image = !ChairViews.back(it) && !ITEMS[it.k].window && key && this.images[key];
+    const object = this.objectSource(it,base);
+    let src = object || image || this.detail(base, 'prop');
+    if (!object && image && it.flip) {
       this.flips = this.flips || new WeakMap();
       if (!this.flips.has(image)) { const cv = this.canvas(image.width, image.height), c = cv.getContext('2d'); c.translate(cv.width, 0); c.scale(-1, 1); c.drawImage(image, 0, 0); this.flips.set(image, cv); }
       src = this.flips.get(image);
@@ -362,7 +463,7 @@ const HD2D = {
   drawItem(c, it) {
     const key = this.key(it), d = ITEMS[it.k], base = Room.itemCanvas(it);
     if (WallMount.side(it)) { c.drawImage(this.source(it),it.x,it.y,base.width,base.height); return; }
-    if (!key) { this.source(it); Room.drawItem(this.proxy(c, 'prop'), it); return; }
+    if (!key || d.window) { this.source(it); Room.drawItem(this.proxy(c, 'prop'), it); return; }
     const src = this.source(it), w = base.width, h = base.height;
     c.save();
     if (d.window) {
@@ -391,7 +492,7 @@ const HD2D = {
       }
       c.restore();
     }
-    if (d.toggle && (!it.on || it.broken)) c.filter = 'brightness(.44) saturate(.55)';
+    if (d.toggle && (!it.on || it.broken) && !this.objectImages[d.spr]) c.filter = 'brightness(.44) saturate(.55)';
     c.drawImage(src, it.x, it.y, w, h);
     c.restore();
     if (it.used && d.litter) {
@@ -667,7 +768,7 @@ const HD2D = {
     const out = settings();
     out.unshift(h('section', { class: 'settings-card' },
       h('b', { text: 'HD-2D 美術試作' }),
-      h('p', { class: 'hint', text: '團圓夜套組支援新的家具與房間材質；所有造型與寵物動作可使用新的材質光照。' }),
+      h('p', { class: 'hint', text: '家具、座椅與牆面層架陸續換上精緻素材；角色與寵物也會受到房間光照影響。' }),
       h('button', {
         class: 'chip',
         onclick: () => {

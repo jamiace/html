@@ -1,0 +1,2447 @@
+{
+  "batch": 1,
+  "gameVersion": "0.92",
+  "sprites": {
+    "desk": {
+      "file": "assets/hd2d/objects/desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "desk_white": {
+      "file": "assets/hd2d/objects/desk_white.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "chair": {
+      "file": "assets/hd2d/objects/chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "bookshelf": {
+      "file": "assets/hd2d/objects/bookshelf.png",
+      "w": 28,
+      "h": 47,
+      "batch": 1
+    },
+    "wardrobe": {
+      "file": "assets/hd2d/objects/wardrobe.png",
+      "w": 36,
+      "h": 54,
+      "batch": 1
+    },
+    "nightstand": {
+      "file": "assets/hd2d/objects/nightstand.png",
+      "w": 20,
+      "h": 22,
+      "batch": 1
+    },
+    "cabinet_low": {
+      "file": "assets/hd2d/objects/cabinet_low.png",
+      "w": 42,
+      "h": 20,
+      "batch": 1
+    },
+    "sofa": {
+      "file": "assets/hd2d/objects/sofa.png",
+      "w": 54,
+      "h": 30,
+      "batch": 1
+    },
+    "beanbag": {
+      "file": "assets/hd2d/objects/beanbag.png",
+      "w": 26,
+      "h": 19,
+      "batch": 1
+    },
+    "rattan_chair": {
+      "file": "assets/hd2d/objects/rattan_chair.png",
+      "w": 26,
+      "h": 31,
+      "batch": 1
+    },
+    "fireplace": {
+      "file": "assets/hd2d/objects/fireplace.png",
+      "w": 46,
+      "h": 43,
+      "batch": 1
+    },
+    "chabudai": {
+      "file": "assets/hd2d/objects/chabudai.png",
+      "w": 42,
+      "h": 15,
+      "batch": 1
+    },
+    "gaming_chair": {
+      "file": "assets/hd2d/objects/gaming_chair.png",
+      "w": 22,
+      "h": 33,
+      "batch": 1
+    },
+    "ch_side": {
+      "file": "assets/hd2d/objects/ch_side.png",
+      "w": 16,
+      "h": 26,
+      "batch": 1
+    },
+    "ch_cafe": {
+      "file": "assets/hd2d/objects/ch_cafe.png",
+      "w": 16,
+      "h": 26,
+      "batch": 1
+    },
+    "ch_shell": {
+      "file": "assets/hd2d/objects/ch_shell.png",
+      "w": 18,
+      "h": 26,
+      "batch": 1
+    },
+    "ch_stool": {
+      "file": "assets/hd2d/objects/ch_stool.png",
+      "w": 14,
+      "h": 18,
+      "batch": 1
+    },
+    "ch_bar": {
+      "file": "assets/hd2d/objects/ch_bar.png",
+      "w": 14,
+      "h": 30,
+      "batch": 1
+    },
+    "ch_rocking": {
+      "file": "assets/hd2d/objects/ch_rocking.png",
+      "w": 22,
+      "h": 26,
+      "batch": 1
+    },
+    "ch_folding": {
+      "file": "assets/hd2d/objects/ch_folding.png",
+      "w": 16,
+      "h": 26,
+      "batch": 1
+    },
+    "ac_club": {
+      "file": "assets/hd2d/objects/ac_club.png",
+      "w": 26,
+      "h": 24,
+      "batch": 1
+    },
+    "ac_wing": {
+      "file": "assets/hd2d/objects/ac_wing.png",
+      "w": 24,
+      "h": 30,
+      "batch": 1
+    },
+    "ac_pouf": {
+      "file": "assets/hd2d/objects/ac_pouf.png",
+      "w": 18,
+      "h": 13,
+      "batch": 1
+    },
+    "sf_love": {
+      "file": "assets/hd2d/objects/sf_love.png",
+      "w": 44,
+      "h": 22,
+      "batch": 1
+    },
+    "sf_chester": {
+      "file": "assets/hd2d/objects/sf_chester.png",
+      "w": 52,
+      "h": 22,
+      "batch": 1
+    },
+    "st_dresser": {
+      "file": "assets/hd2d/objects/st_dresser.png",
+      "w": 30,
+      "h": 26,
+      "batch": 1
+    },
+    "st_tall": {
+      "file": "assets/hd2d/objects/st_tall.png",
+      "w": 22,
+      "h": 44,
+      "batch": 1
+    },
+    "st_tv_stand": {
+      "file": "assets/hd2d/objects/st_tv_stand.png",
+      "w": 46,
+      "h": 16,
+      "batch": 1
+    },
+    "st_cube": {
+      "file": "assets/hd2d/objects/st_cube.png",
+      "w": 30,
+      "h": 30,
+      "batch": 1
+    },
+    "st_ladder": {
+      "file": "assets/hd2d/objects/st_ladder.png",
+      "w": 26,
+      "h": 42,
+      "batch": 1
+    },
+    "st_sideboard": {
+      "file": "assets/hd2d/objects/st_sideboard.png",
+      "w": 42,
+      "h": 22,
+      "batch": 1
+    },
+    "ws_plank": {
+      "file": "assets/hd2d/objects/ws_plank.png",
+      "w": 30,
+      "h": 6,
+      "batch": 1
+    },
+    "ws_bracket": {
+      "file": "assets/hd2d/objects/ws_bracket.png",
+      "w": 30,
+      "h": 12,
+      "batch": 1
+    },
+    "ws_double": {
+      "file": "assets/hd2d/objects/ws_double.png",
+      "w": 30,
+      "h": 17,
+      "batch": 1
+    },
+    "sm_basket_laundry": {
+      "file": "assets/hd2d/objects/sm_basket_laundry.png",
+      "w": 18,
+      "h": 16,
+      "batch": 1
+    },
+    "sm_coat_rack": {
+      "file": "assets/hd2d/objects/sm_coat_rack.png",
+      "w": 16,
+      "h": 44,
+      "batch": 1
+    },
+    "sm_umbrella": {
+      "file": "assets/hd2d/objects/sm_umbrella.png",
+      "w": 12,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_lantern_night_desk": {
+      "file": "assets/hd2d/objects/a92_lantern_night_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_lantern_night_chair": {
+      "file": "assets/hd2d/objects/a92_lantern_night_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "a92_pumpkin_night_desk": {
+      "file": "assets/hd2d/objects/a92_pumpkin_night_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_pumpkin_night_chair": {
+      "file": "assets/hd2d/objects/a92_pumpkin_night_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "a92_birthday_room_desk": {
+      "file": "assets/hd2d/objects/a92_birthday_room_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_birthday_room_chair": {
+      "file": "assets/hd2d/objects/a92_birthday_room_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "a92_aurora_study_desk": {
+      "file": "assets/hd2d/objects/a92_aurora_study_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_aurora_study_chair": {
+      "file": "assets/hd2d/objects/a92_aurora_study_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "a92_greenhouse_desk": {
+      "file": "assets/hd2d/objects/a92_greenhouse_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_greenhouse_chair": {
+      "file": "assets/hd2d/objects/a92_greenhouse_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "a92_winter_party_desk": {
+      "file": "assets/hd2d/objects/a92_winter_party_desk.png",
+      "w": 42,
+      "h": 26,
+      "batch": 1
+    },
+    "a92_winter_party_chair": {
+      "file": "assets/hd2d/objects/a92_winter_party_chair.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1
+    },
+    "chair_back": {
+      "file": "assets/hd2d/objects/chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "gaming_chair_back": {
+      "file": "assets/hd2d/objects/gaming_chair_back.png",
+      "w": 22,
+      "h": 33,
+      "batch": 1,
+      "view": "back"
+    },
+    "ch_side_back": {
+      "file": "assets/hd2d/objects/ch_side_back.png",
+      "w": 16,
+      "h": 26,
+      "batch": 1,
+      "view": "back"
+    },
+    "ch_cafe_back": {
+      "file": "assets/hd2d/objects/ch_cafe_back.png",
+      "w": 16,
+      "h": 26,
+      "batch": 1,
+      "view": "back"
+    },
+    "ch_shell_back": {
+      "file": "assets/hd2d/objects/ch_shell_back.png",
+      "w": 18,
+      "h": 26,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_lantern_night_chair_back": {
+      "file": "assets/hd2d/objects/a92_lantern_night_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_pumpkin_night_chair_back": {
+      "file": "assets/hd2d/objects/a92_pumpkin_night_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_birthday_room_chair_back": {
+      "file": "assets/hd2d/objects/a92_birthday_room_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_aurora_study_chair_back": {
+      "file": "assets/hd2d/objects/a92_aurora_study_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_greenhouse_chair_back": {
+      "file": "assets/hd2d/objects/a92_greenhouse_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "a92_winter_party_chair_back": {
+      "file": "assets/hd2d/objects/a92_winter_party_chair_back.png",
+      "w": 16,
+      "h": 25,
+      "batch": 1,
+      "view": "back"
+    },
+    "bed": {
+      "file": "assets/hd2d/objects/bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "plant_monstera": {
+      "file": "assets/hd2d/objects/plant_monstera.png",
+      "w": 30,
+      "h": 40,
+      "batch": 2
+    },
+    "plant_snake": {
+      "file": "assets/hd2d/objects/plant_snake.png",
+      "w": 16,
+      "h": 32,
+      "batch": 2
+    },
+    "plant_fern": {
+      "file": "assets/hd2d/objects/plant_fern.png",
+      "w": 22,
+      "h": 22,
+      "batch": 2
+    },
+    "plant_succulent": {
+      "file": "assets/hd2d/objects/plant_succulent.png",
+      "w": 12,
+      "h": 13,
+      "batch": 2
+    },
+    "cactus": {
+      "file": "assets/hd2d/objects/cactus.png",
+      "w": 12,
+      "h": 17,
+      "batch": 2
+    },
+    "plant_hanging": {
+      "file": "assets/hd2d/objects/plant_hanging.png",
+      "w": 22,
+      "h": 32,
+      "batch": 2
+    },
+    "mug": {
+      "file": "assets/hd2d/objects/mug.png",
+      "w": 11,
+      "h": 9,
+      "batch": 2
+    },
+    "teapot": {
+      "file": "assets/hd2d/objects/teapot.png",
+      "w": 14,
+      "h": 10,
+      "batch": 2
+    },
+    "books_stack": {
+      "file": "assets/hd2d/objects/books_stack.png",
+      "w": 15,
+      "h": 10,
+      "batch": 2
+    },
+    "record_player": {
+      "file": "assets/hd2d/objects/record_player.png",
+      "w": 22,
+      "h": 13,
+      "batch": 2
+    },
+    "fishbowl": {
+      "file": "assets/hd2d/objects/fishbowl.png",
+      "w": 16,
+      "h": 15,
+      "batch": 2
+    },
+    "photo_frame": {
+      "file": "assets/hd2d/objects/photo_frame.png",
+      "w": 11,
+      "h": 12,
+      "batch": 2
+    },
+    "globe": {
+      "file": "assets/hd2d/objects/globe.png",
+      "w": 13,
+      "h": 17,
+      "batch": 2
+    },
+    "alarm_clock": {
+      "file": "assets/hd2d/objects/alarm_clock.png",
+      "w": 12,
+      "h": 12,
+      "batch": 2
+    },
+    "plush_bear": {
+      "file": "assets/hd2d/objects/plush_bear.png",
+      "w": 12,
+      "h": 13,
+      "batch": 2
+    },
+    "headphones": {
+      "file": "assets/hd2d/objects/headphones.png",
+      "w": 13,
+      "h": 10,
+      "batch": 2
+    },
+    "rubber_duck": {
+      "file": "assets/hd2d/objects/rubber_duck.png",
+      "w": 10,
+      "h": 10,
+      "batch": 2
+    },
+    "shell": {
+      "file": "assets/hd2d/objects/shell.png",
+      "w": 12,
+      "h": 10,
+      "batch": 2
+    },
+    "bonsai": {
+      "file": "assets/hd2d/objects/bonsai.png",
+      "w": 20,
+      "h": 17,
+      "batch": 2
+    },
+    "futon": {
+      "file": "assets/hd2d/objects/futon.png",
+      "w": 50,
+      "h": 24,
+      "batch": 2
+    },
+    "snowman": {
+      "file": "assets/hd2d/objects/snowman.png",
+      "w": 13,
+      "h": 17,
+      "batch": 2
+    },
+    "pl_pothos_terra": {
+      "file": "assets/hd2d/objects/pl_pothos_terra.png",
+      "w": 20,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_pothos_white": {
+      "file": "assets/hd2d/objects/pl_pothos_white.png",
+      "w": 20,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_pothos_basket": {
+      "file": "assets/hd2d/objects/pl_pothos_basket.png",
+      "w": 20,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_pothos_pink": {
+      "file": "assets/hd2d/objects/pl_pothos_pink.png",
+      "w": 20,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_heartleaf_white": {
+      "file": "assets/hd2d/objects/pl_heartleaf_white.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "pl_heartleaf_blue": {
+      "file": "assets/hd2d/objects/pl_heartleaf_blue.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "pl_heartleaf_mustard": {
+      "file": "assets/hd2d/objects/pl_heartleaf_mustard.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "pl_heartleaf_terra": {
+      "file": "assets/hd2d/objects/pl_heartleaf_terra.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "pl_aloe_terra": {
+      "file": "assets/hd2d/objects/pl_aloe_terra.png",
+      "w": 16,
+      "h": 18,
+      "batch": 2
+    },
+    "pl_aloe_white": {
+      "file": "assets/hd2d/objects/pl_aloe_white.png",
+      "w": 16,
+      "h": 18,
+      "batch": 2
+    },
+    "pl_aloe_black": {
+      "file": "assets/hd2d/objects/pl_aloe_black.png",
+      "w": 16,
+      "h": 18,
+      "batch": 2
+    },
+    "pl_basil_terra": {
+      "file": "assets/hd2d/objects/pl_basil_terra.png",
+      "w": 16,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_basil_white": {
+      "file": "assets/hd2d/objects/pl_basil_white.png",
+      "w": 16,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_basil_mustard": {
+      "file": "assets/hd2d/objects/pl_basil_mustard.png",
+      "w": 16,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_roundcactus_terra": {
+      "file": "assets/hd2d/objects/pl_roundcactus_terra.png",
+      "w": 14,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_roundcactus_pink": {
+      "file": "assets/hd2d/objects/pl_roundcactus_pink.png",
+      "w": 14,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_roundcactus_blue": {
+      "file": "assets/hd2d/objects/pl_roundcactus_blue.png",
+      "w": 14,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_roundcactus_white": {
+      "file": "assets/hd2d/objects/pl_roundcactus_white.png",
+      "w": 14,
+      "h": 16,
+      "batch": 2
+    },
+    "pl_tulip_white": {
+      "file": "assets/hd2d/objects/pl_tulip_white.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_tulip_blue": {
+      "file": "assets/hd2d/objects/pl_tulip_blue.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_tulip_basket": {
+      "file": "assets/hd2d/objects/pl_tulip_basket.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_lavender_white": {
+      "file": "assets/hd2d/objects/pl_lavender_white.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_lavender_terra": {
+      "file": "assets/hd2d/objects/pl_lavender_terra.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_lavender_basket": {
+      "file": "assets/hd2d/objects/pl_lavender_basket.png",
+      "w": 16,
+      "h": 22,
+      "batch": 2
+    },
+    "pl_orchid_white": {
+      "file": "assets/hd2d/objects/pl_orchid_white.png",
+      "w": 18,
+      "h": 24,
+      "batch": 2
+    },
+    "pl_orchid_black": {
+      "file": "assets/hd2d/objects/pl_orchid_black.png",
+      "w": 18,
+      "h": 24,
+      "batch": 2
+    },
+    "pl_orchid_blue": {
+      "file": "assets/hd2d/objects/pl_orchid_blue.png",
+      "w": 18,
+      "h": 24,
+      "batch": 2
+    },
+    "pl_fiddle_white": {
+      "file": "assets/hd2d/objects/pl_fiddle_white.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_fiddle_basket": {
+      "file": "assets/hd2d/objects/pl_fiddle_basket.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_fiddle_black": {
+      "file": "assets/hd2d/objects/pl_fiddle_black.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_fiddle_terra": {
+      "file": "assets/hd2d/objects/pl_fiddle_terra.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_palm_basket": {
+      "file": "assets/hd2d/objects/pl_palm_basket.png",
+      "w": 28,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_palm_white": {
+      "file": "assets/hd2d/objects/pl_palm_white.png",
+      "w": 28,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_palm_terra": {
+      "file": "assets/hd2d/objects/pl_palm_terra.png",
+      "w": 28,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_palm_black": {
+      "file": "assets/hd2d/objects/pl_palm_black.png",
+      "w": 28,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_olive_terra": {
+      "file": "assets/hd2d/objects/pl_olive_terra.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_olive_white": {
+      "file": "assets/hd2d/objects/pl_olive_white.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_olive_black": {
+      "file": "assets/hd2d/objects/pl_olive_black.png",
+      "w": 22,
+      "h": 42,
+      "batch": 2
+    },
+    "pl_bamboo_white": {
+      "file": "assets/hd2d/objects/pl_bamboo_white.png",
+      "w": 18,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_bamboo_blue": {
+      "file": "assets/hd2d/objects/pl_bamboo_blue.png",
+      "w": 18,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_bamboo_black": {
+      "file": "assets/hd2d/objects/pl_bamboo_black.png",
+      "w": 18,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_sunflower_terra": {
+      "file": "assets/hd2d/objects/pl_sunflower_terra.png",
+      "w": 20,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_sunflower_basket": {
+      "file": "assets/hd2d/objects/pl_sunflower_basket.png",
+      "w": 20,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_sunflower_mustard": {
+      "file": "assets/hd2d/objects/pl_sunflower_mustard.png",
+      "w": 20,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_saguaro_terra": {
+      "file": "assets/hd2d/objects/pl_saguaro_terra.png",
+      "w": 18,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_saguaro_white": {
+      "file": "assets/hd2d/objects/pl_saguaro_white.png",
+      "w": 18,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_saguaro_pink": {
+      "file": "assets/hd2d/objects/pl_saguaro_pink.png",
+      "w": 18,
+      "h": 36,
+      "batch": 2
+    },
+    "pl_birdparadise_white": {
+      "file": "assets/hd2d/objects/pl_birdparadise_white.png",
+      "w": 26,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_birdparadise_black": {
+      "file": "assets/hd2d/objects/pl_birdparadise_black.png",
+      "w": 26,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_birdparadise_basket": {
+      "file": "assets/hd2d/objects/pl_birdparadise_basket.png",
+      "w": 26,
+      "h": 40,
+      "batch": 2
+    },
+    "pl_moneytree_white": {
+      "file": "assets/hd2d/objects/pl_moneytree_white.png",
+      "w": 22,
+      "h": 38,
+      "batch": 2
+    },
+    "pl_moneytree_terra": {
+      "file": "assets/hd2d/objects/pl_moneytree_terra.png",
+      "w": 22,
+      "h": 38,
+      "batch": 2
+    },
+    "pl_moneytree_blue": {
+      "file": "assets/hd2d/objects/pl_moneytree_blue.png",
+      "w": 22,
+      "h": 38,
+      "batch": 2
+    },
+    "fv_rose_bud": {
+      "file": "assets/hd2d/objects/fv_rose_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_rose_jar": {
+      "file": "assets/hd2d/objects/fv_rose_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_rose_bottle": {
+      "file": "assets/hd2d/objects/fv_rose_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_daisy_bud": {
+      "file": "assets/hd2d/objects/fv_daisy_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_daisy_jar": {
+      "file": "assets/hd2d/objects/fv_daisy_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_daisy_bottle": {
+      "file": "assets/hd2d/objects/fv_daisy_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_tulipY_bud": {
+      "file": "assets/hd2d/objects/fv_tulipY_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_tulipY_jar": {
+      "file": "assets/hd2d/objects/fv_tulipY_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_tulipY_bottle": {
+      "file": "assets/hd2d/objects/fv_tulipY_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_lav_bud": {
+      "file": "assets/hd2d/objects/fv_lav_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_lav_jar": {
+      "file": "assets/hd2d/objects/fv_lav_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_lav_bottle": {
+      "file": "assets/hd2d/objects/fv_lav_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sun_bud": {
+      "file": "assets/hd2d/objects/fv_sun_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sun_jar": {
+      "file": "assets/hd2d/objects/fv_sun_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sun_bottle": {
+      "file": "assets/hd2d/objects/fv_sun_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_gyp_bud": {
+      "file": "assets/hd2d/objects/fv_gyp_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_gyp_jar": {
+      "file": "assets/hd2d/objects/fv_gyp_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_gyp_bottle": {
+      "file": "assets/hd2d/objects/fv_gyp_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sakura_bud": {
+      "file": "assets/hd2d/objects/fv_sakura_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sakura_jar": {
+      "file": "assets/hd2d/objects/fv_sakura_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_sakura_bottle": {
+      "file": "assets/hd2d/objects/fv_sakura_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_euca_bud": {
+      "file": "assets/hd2d/objects/fv_euca_bud.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_euca_jar": {
+      "file": "assets/hd2d/objects/fv_euca_jar.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "fv_euca_bottle": {
+      "file": "assets/hd2d/objects/fv_euca_bottle.png",
+      "w": 13,
+      "h": 22,
+      "batch": 2
+    },
+    "tb_round_side": {
+      "file": "assets/hd2d/objects/tb_round_side.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "tb_square_side": {
+      "file": "assets/hd2d/objects/tb_square_side.png",
+      "w": 18,
+      "h": 20,
+      "batch": 2
+    },
+    "tb_pedestal": {
+      "file": "assets/hd2d/objects/tb_pedestal.png",
+      "w": 14,
+      "h": 26,
+      "batch": 2
+    },
+    "tb_coffee": {
+      "file": "assets/hd2d/objects/tb_coffee.png",
+      "w": 38,
+      "h": 16,
+      "batch": 2
+    },
+    "tb_oval": {
+      "file": "assets/hd2d/objects/tb_oval.png",
+      "w": 34,
+      "h": 15,
+      "batch": 2
+    },
+    "tb_writing": {
+      "file": "assets/hd2d/objects/tb_writing.png",
+      "w": 40,
+      "h": 26,
+      "batch": 2
+    },
+    "tb_standing": {
+      "file": "assets/hd2d/objects/tb_standing.png",
+      "w": 40,
+      "h": 28,
+      "batch": 2
+    },
+    "bd_single": {
+      "file": "assets/hd2d/objects/bd_single.png",
+      "w": 50,
+      "h": 26,
+      "batch": 2
+    },
+    "bd_canopy": {
+      "file": "assets/hd2d/objects/bd_canopy.png",
+      "w": 52,
+      "h": 44,
+      "batch": 2
+    },
+    "bd_bunk": {
+      "file": "assets/hd2d/objects/bd_bunk.png",
+      "w": 50,
+      "h": 46,
+      "batch": 2
+    },
+    "sm_pencil_cup": {
+      "file": "assets/hd2d/objects/sm_pencil_cup.png",
+      "w": 8,
+      "h": 14,
+      "batch": 2
+    },
+    "sm_notebook": {
+      "file": "assets/hd2d/objects/sm_notebook.png",
+      "w": 14,
+      "h": 8,
+      "batch": 2
+    },
+    "sm_camera": {
+      "file": "assets/hd2d/objects/sm_camera.png",
+      "w": 14,
+      "h": 10,
+      "batch": 2
+    },
+    "sm_radio": {
+      "file": "assets/hd2d/objects/sm_radio.png",
+      "w": 18,
+      "h": 12,
+      "batch": 2
+    },
+    "sm_typewriter": {
+      "file": "assets/hd2d/objects/sm_typewriter.png",
+      "w": 20,
+      "h": 12,
+      "batch": 2
+    },
+    "sm_terrarium": {
+      "file": "assets/hd2d/objects/sm_terrarium.png",
+      "w": 14,
+      "h": 14,
+      "batch": 2
+    },
+    "sm_books_tall": {
+      "file": "assets/hd2d/objects/sm_books_tall.png",
+      "w": 14,
+      "h": 14,
+      "batch": 2
+    },
+    "a92_lantern_night_bed": {
+      "file": "assets/hd2d/objects/a92_lantern_night_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "a92_pumpkin_night_bed": {
+      "file": "assets/hd2d/objects/a92_pumpkin_night_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "a92_birthday_room_bed": {
+      "file": "assets/hd2d/objects/a92_birthday_room_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "a92_aurora_study_bed": {
+      "file": "assets/hd2d/objects/a92_aurora_study_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "a92_greenhouse_bed": {
+      "file": "assets/hd2d/objects/a92_greenhouse_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "a92_winter_party_bed": {
+      "file": "assets/hd2d/objects/a92_winter_party_bed.png",
+      "w": 48,
+      "h": 35,
+      "batch": 2
+    },
+    "lamp_floor": {
+      "file": "assets/hd2d/objects/lamp_floor.png",
+      "w": 16,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "lamp_floor_on": {
+      "file": "assets/hd2d/objects/lamp_floor_on.png",
+      "w": 16,
+      "h": 44,
+      "batch": 3,
+      "state": "on"
+    },
+    "window": {
+      "file": "assets/hd2d/objects/window.png",
+      "w": 40,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "laptop": {
+      "file": "assets/hd2d/objects/laptop.png",
+      "w": 18,
+      "h": 13,
+      "batch": 3,
+      "state": "base"
+    },
+    "monitor": {
+      "file": "assets/hd2d/objects/monitor.png",
+      "w": 24,
+      "h": 19,
+      "batch": 3,
+      "state": "base"
+    },
+    "desk_lamp": {
+      "file": "assets/hd2d/objects/desk_lamp.png",
+      "w": 14,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "candle": {
+      "file": "assets/hd2d/objects/candle.png",
+      "w": 7,
+      "h": 11,
+      "batch": 3,
+      "state": "base"
+    },
+    "tv_retro": {
+      "file": "assets/hd2d/objects/tv_retro.png",
+      "w": 24,
+      "h": 22,
+      "batch": 3,
+      "state": "base"
+    },
+    "pet_bowl": {
+      "file": "assets/hd2d/objects/pet_bowl.png",
+      "w": 18,
+      "h": 10,
+      "batch": 3,
+      "state": "base"
+    },
+    "diploma": {
+      "file": "assets/hd2d/objects/diploma.png",
+      "w": 26,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "mushroom_lamp": {
+      "file": "assets/hd2d/objects/mushroom_lamp.png",
+      "w": 14,
+      "h": 16,
+      "batch": 3,
+      "state": "base"
+    },
+    "mushroom_lamp_on": {
+      "file": "assets/hd2d/objects/mushroom_lamp_on.png",
+      "w": 14,
+      "h": 16,
+      "batch": 3,
+      "state": "on"
+    },
+    "window_round": {
+      "file": "assets/hd2d/objects/window_round.png",
+      "w": 40,
+      "h": 40,
+      "batch": 3,
+      "state": "base"
+    },
+    "paper_lantern": {
+      "file": "assets/hd2d/objects/paper_lantern.png",
+      "w": 16,
+      "h": 28,
+      "batch": 3,
+      "state": "base"
+    },
+    "paper_lantern_on": {
+      "file": "assets/hd2d/objects/paper_lantern_on.png",
+      "w": 16,
+      "h": 28,
+      "batch": 3,
+      "state": "on"
+    },
+    "xmas_tree": {
+      "file": "assets/hd2d/objects/xmas_tree.png",
+      "w": 30,
+      "h": 46,
+      "batch": 3,
+      "state": "base"
+    },
+    "xmas_tree_on": {
+      "file": "assets/hd2d/objects/xmas_tree_on.png",
+      "w": 30,
+      "h": 46,
+      "batch": 3,
+      "state": "on"
+    },
+    "heater": {
+      "file": "assets/hd2d/objects/heater.png",
+      "w": 22,
+      "h": 26,
+      "batch": 3,
+      "state": "base"
+    },
+    "dual_monitor": {
+      "file": "assets/hd2d/objects/dual_monitor.png",
+      "w": 40,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "lf_drum": {
+      "file": "assets/hd2d/objects/lf_drum.png",
+      "w": 16,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "lf_drum_on": {
+      "file": "assets/hd2d/objects/lf_drum_on.png",
+      "w": 16,
+      "h": 44,
+      "batch": 3,
+      "state": "on"
+    },
+    "lf_globe": {
+      "file": "assets/hd2d/objects/lf_globe.png",
+      "w": 14,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "lf_globe_on": {
+      "file": "assets/hd2d/objects/lf_globe_on.png",
+      "w": 14,
+      "h": 44,
+      "batch": 3,
+      "state": "on"
+    },
+    "lf_arc": {
+      "file": "assets/hd2d/objects/lf_arc.png",
+      "w": 28,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "lf_arc_on": {
+      "file": "assets/hd2d/objects/lf_arc_on.png",
+      "w": 28,
+      "h": 44,
+      "batch": 3,
+      "state": "on"
+    },
+    "lf_tripod": {
+      "file": "assets/hd2d/objects/lf_tripod.png",
+      "w": 18,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "lf_tripod_on": {
+      "file": "assets/hd2d/objects/lf_tripod_on.png",
+      "w": 18,
+      "h": 44,
+      "batch": 3,
+      "state": "on"
+    },
+    "lt_dome": {
+      "file": "assets/hd2d/objects/lt_dome.png",
+      "w": 14,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "lt_dome_on": {
+      "file": "assets/hd2d/objects/lt_dome_on.png",
+      "w": 14,
+      "h": 18,
+      "batch": 3,
+      "state": "on"
+    },
+    "lt_cyl": {
+      "file": "assets/hd2d/objects/lt_cyl.png",
+      "w": 12,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "lt_cyl_on": {
+      "file": "assets/hd2d/objects/lt_cyl_on.png",
+      "w": 12,
+      "h": 18,
+      "batch": 3,
+      "state": "on"
+    },
+    "lt_bell": {
+      "file": "assets/hd2d/objects/lt_bell.png",
+      "w": 14,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "lt_bell_on": {
+      "file": "assets/hd2d/objects/lt_bell_on.png",
+      "w": 14,
+      "h": 18,
+      "batch": 3,
+      "state": "on"
+    },
+    "lt_ball": {
+      "file": "assets/hd2d/objects/lt_ball.png",
+      "w": 12,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "lt_ball_on": {
+      "file": "assets/hd2d/objects/lt_ball_on.png",
+      "w": 12,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "lt_tiffany": {
+      "file": "assets/hd2d/objects/lt_tiffany.png",
+      "w": 16,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "ls_brass": {
+      "file": "assets/hd2d/objects/ls_brass.png",
+      "w": 10,
+      "h": 16,
+      "batch": 3,
+      "state": "base"
+    },
+    "ls_brass_on": {
+      "file": "assets/hd2d/objects/ls_brass_on.png",
+      "w": 10,
+      "h": 16,
+      "batch": 3,
+      "state": "on"
+    },
+    "ls_candle": {
+      "file": "assets/hd2d/objects/ls_candle.png",
+      "w": 12,
+      "h": 16,
+      "batch": 3,
+      "state": "base"
+    },
+    "ls_candle_on": {
+      "file": "assets/hd2d/objects/ls_candle_on.png",
+      "w": 12,
+      "h": 16,
+      "batch": 3,
+      "state": "on"
+    },
+    "ls_flower": {
+      "file": "assets/hd2d/objects/ls_flower.png",
+      "w": 14,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "ls_flower_on": {
+      "file": "assets/hd2d/objects/ls_flower_on.png",
+      "w": 14,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "ls_shell": {
+      "file": "assets/hd2d/objects/ls_shell.png",
+      "w": 14,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "ls_shell_on": {
+      "file": "assets/hd2d/objects/ls_shell_on.png",
+      "w": 14,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_star_pink": {
+      "file": "assets/hd2d/objects/neon_star_pink.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_star_pink_on": {
+      "file": "assets/hd2d/objects/neon_star_pink_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_star_cyan": {
+      "file": "assets/hd2d/objects/neon_star_cyan.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_star_cyan_on": {
+      "file": "assets/hd2d/objects/neon_star_cyan_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_star_yellow": {
+      "file": "assets/hd2d/objects/neon_star_yellow.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_star_yellow_on": {
+      "file": "assets/hd2d/objects/neon_star_yellow_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_star_violet": {
+      "file": "assets/hd2d/objects/neon_star_violet.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_star_violet_on": {
+      "file": "assets/hd2d/objects/neon_star_violet_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_moon_pink": {
+      "file": "assets/hd2d/objects/neon_moon_pink.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_moon_pink_on": {
+      "file": "assets/hd2d/objects/neon_moon_pink_on.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_moon_cyan": {
+      "file": "assets/hd2d/objects/neon_moon_cyan.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_moon_cyan_on": {
+      "file": "assets/hd2d/objects/neon_moon_cyan_on.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_moon_yellow": {
+      "file": "assets/hd2d/objects/neon_moon_yellow.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_moon_yellow_on": {
+      "file": "assets/hd2d/objects/neon_moon_yellow_on.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_moon_violet": {
+      "file": "assets/hd2d/objects/neon_moon_violet.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_moon_violet_on": {
+      "file": "assets/hd2d/objects/neon_moon_violet_on.png",
+      "w": 13,
+      "h": 15,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cloud_pink": {
+      "file": "assets/hd2d/objects/neon_cloud_pink.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cloud_pink_on": {
+      "file": "assets/hd2d/objects/neon_cloud_pink_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cloud_cyan": {
+      "file": "assets/hd2d/objects/neon_cloud_cyan.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cloud_cyan_on": {
+      "file": "assets/hd2d/objects/neon_cloud_cyan_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cloud_yellow": {
+      "file": "assets/hd2d/objects/neon_cloud_yellow.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cloud_yellow_on": {
+      "file": "assets/hd2d/objects/neon_cloud_yellow_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cloud_violet": {
+      "file": "assets/hd2d/objects/neon_cloud_violet.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cloud_violet_on": {
+      "file": "assets/hd2d/objects/neon_cloud_violet_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_bolt_pink": {
+      "file": "assets/hd2d/objects/neon_bolt_pink.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_bolt_pink_on": {
+      "file": "assets/hd2d/objects/neon_bolt_pink_on.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_bolt_cyan": {
+      "file": "assets/hd2d/objects/neon_bolt_cyan.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_bolt_cyan_on": {
+      "file": "assets/hd2d/objects/neon_bolt_cyan_on.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_bolt_yellow": {
+      "file": "assets/hd2d/objects/neon_bolt_yellow.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_bolt_yellow_on": {
+      "file": "assets/hd2d/objects/neon_bolt_yellow_on.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_bolt_violet": {
+      "file": "assets/hd2d/objects/neon_bolt_violet.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_bolt_violet_on": {
+      "file": "assets/hd2d/objects/neon_bolt_violet_on.png",
+      "w": 13,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_smile_pink": {
+      "file": "assets/hd2d/objects/neon_smile_pink.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_smile_pink_on": {
+      "file": "assets/hd2d/objects/neon_smile_pink_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_smile_cyan": {
+      "file": "assets/hd2d/objects/neon_smile_cyan.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_smile_cyan_on": {
+      "file": "assets/hd2d/objects/neon_smile_cyan_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_smile_yellow": {
+      "file": "assets/hd2d/objects/neon_smile_yellow.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_smile_yellow_on": {
+      "file": "assets/hd2d/objects/neon_smile_yellow_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_smile_violet": {
+      "file": "assets/hd2d/objects/neon_smile_violet.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_smile_violet_on": {
+      "file": "assets/hd2d/objects/neon_smile_violet_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cat_pink": {
+      "file": "assets/hd2d/objects/neon_cat_pink.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cat_pink_on": {
+      "file": "assets/hd2d/objects/neon_cat_pink_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cat_cyan": {
+      "file": "assets/hd2d/objects/neon_cat_cyan.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cat_cyan_on": {
+      "file": "assets/hd2d/objects/neon_cat_cyan_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cat_yellow": {
+      "file": "assets/hd2d/objects/neon_cat_yellow.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cat_yellow_on": {
+      "file": "assets/hd2d/objects/neon_cat_yellow_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cat_violet": {
+      "file": "assets/hd2d/objects/neon_cat_violet.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cat_violet_on": {
+      "file": "assets/hd2d/objects/neon_cat_violet_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_flower_pink": {
+      "file": "assets/hd2d/objects/neon_flower_pink.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_flower_pink_on": {
+      "file": "assets/hd2d/objects/neon_flower_pink_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_flower_cyan": {
+      "file": "assets/hd2d/objects/neon_flower_cyan.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_flower_cyan_on": {
+      "file": "assets/hd2d/objects/neon_flower_cyan_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_flower_yellow": {
+      "file": "assets/hd2d/objects/neon_flower_yellow.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_flower_yellow_on": {
+      "file": "assets/hd2d/objects/neon_flower_yellow_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_flower_violet": {
+      "file": "assets/hd2d/objects/neon_flower_violet.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_flower_violet_on": {
+      "file": "assets/hd2d/objects/neon_flower_violet_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_planet_pink": {
+      "file": "assets/hd2d/objects/neon_planet_pink.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_planet_pink_on": {
+      "file": "assets/hd2d/objects/neon_planet_pink_on.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_planet_cyan": {
+      "file": "assets/hd2d/objects/neon_planet_cyan.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_planet_cyan_on": {
+      "file": "assets/hd2d/objects/neon_planet_cyan_on.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_planet_yellow": {
+      "file": "assets/hd2d/objects/neon_planet_yellow.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_planet_yellow_on": {
+      "file": "assets/hd2d/objects/neon_planet_yellow_on.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_planet_violet": {
+      "file": "assets/hd2d/objects/neon_planet_violet.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_planet_violet_on": {
+      "file": "assets/hd2d/objects/neon_planet_violet_on.png",
+      "w": 17,
+      "h": 13,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_rainbow_pink": {
+      "file": "assets/hd2d/objects/neon_rainbow_pink.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_rainbow_pink_on": {
+      "file": "assets/hd2d/objects/neon_rainbow_pink_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_rainbow_cyan": {
+      "file": "assets/hd2d/objects/neon_rainbow_cyan.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_rainbow_cyan_on": {
+      "file": "assets/hd2d/objects/neon_rainbow_cyan_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_rainbow_yellow": {
+      "file": "assets/hd2d/objects/neon_rainbow_yellow.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_rainbow_yellow_on": {
+      "file": "assets/hd2d/objects/neon_rainbow_yellow_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_rainbow_violet": {
+      "file": "assets/hd2d/objects/neon_rainbow_violet.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_rainbow_violet_on": {
+      "file": "assets/hd2d/objects/neon_rainbow_violet_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cup_pink": {
+      "file": "assets/hd2d/objects/neon_cup_pink.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cup_pink_on": {
+      "file": "assets/hd2d/objects/neon_cup_pink_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cup_cyan": {
+      "file": "assets/hd2d/objects/neon_cup_cyan.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cup_cyan_on": {
+      "file": "assets/hd2d/objects/neon_cup_cyan_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cup_yellow": {
+      "file": "assets/hd2d/objects/neon_cup_yellow.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cup_yellow_on": {
+      "file": "assets/hd2d/objects/neon_cup_yellow_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cup_violet": {
+      "file": "assets/hd2d/objects/neon_cup_violet.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cup_violet_on": {
+      "file": "assets/hd2d/objects/neon_cup_violet_on.png",
+      "w": 15,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_heart2_pink": {
+      "file": "assets/hd2d/objects/neon_heart2_pink.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_heart2_pink_on": {
+      "file": "assets/hd2d/objects/neon_heart2_pink_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_heart2_cyan": {
+      "file": "assets/hd2d/objects/neon_heart2_cyan.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_heart2_cyan_on": {
+      "file": "assets/hd2d/objects/neon_heart2_cyan_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_heart2_yellow": {
+      "file": "assets/hd2d/objects/neon_heart2_yellow.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_heart2_yellow_on": {
+      "file": "assets/hd2d/objects/neon_heart2_yellow_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_heart2_violet": {
+      "file": "assets/hd2d/objects/neon_heart2_violet.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_heart2_violet_on": {
+      "file": "assets/hd2d/objects/neon_heart2_violet_on.png",
+      "w": 17,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_wave_pink": {
+      "file": "assets/hd2d/objects/neon_wave_pink.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_wave_pink_on": {
+      "file": "assets/hd2d/objects/neon_wave_pink_on.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_wave_cyan": {
+      "file": "assets/hd2d/objects/neon_wave_cyan.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_wave_cyan_on": {
+      "file": "assets/hd2d/objects/neon_wave_cyan_on.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_wave_yellow": {
+      "file": "assets/hd2d/objects/neon_wave_yellow.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_wave_yellow_on": {
+      "file": "assets/hd2d/objects/neon_wave_yellow_on.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_wave_violet": {
+      "file": "assets/hd2d/objects/neon_wave_violet.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_wave_violet_on": {
+      "file": "assets/hd2d/objects/neon_wave_violet_on.png",
+      "w": 16,
+      "h": 12,
+      "batch": 3,
+      "state": "on"
+    },
+    "string_lights": {
+      "file": "assets/hd2d/objects/string_lights.png",
+      "w": 64,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "string_lights_on": {
+      "file": "assets/hd2d/objects/string_lights_on.png",
+      "w": 64,
+      "h": 14,
+      "batch": 3,
+      "state": "on"
+    },
+    "lava_lamp": {
+      "file": "assets/hd2d/objects/lava_lamp.png",
+      "w": 8,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_round_wood": {
+      "file": "assets/hd2d/objects/mr_round_wood.png",
+      "w": 16,
+      "h": 16,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_round_gold": {
+      "file": "assets/hd2d/objects/mr_round_gold.png",
+      "w": 16,
+      "h": 16,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_arch_wood": {
+      "file": "assets/hd2d/objects/mr_arch_wood.png",
+      "w": 14,
+      "h": 22,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_arch_gold": {
+      "file": "assets/hd2d/objects/mr_arch_gold.png",
+      "w": 14,
+      "h": 22,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_rect_wood": {
+      "file": "assets/hd2d/objects/mr_rect_wood.png",
+      "w": 12,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_rect_gold": {
+      "file": "assets/hd2d/objects/mr_rect_gold.png",
+      "w": 12,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_sun_wood": {
+      "file": "assets/hd2d/objects/mr_sun_wood.png",
+      "w": 20,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "mr_sun_gold": {
+      "file": "assets/hd2d/objects/mr_sun_gold.png",
+      "w": 20,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "clk_wood": {
+      "file": "assets/hd2d/objects/clk_wood.png",
+      "w": 17,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "clk_white": {
+      "file": "assets/hd2d/objects/clk_white.png",
+      "w": 17,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "clk_black": {
+      "file": "assets/hd2d/objects/clk_black.png",
+      "w": 17,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "clk_pink": {
+      "file": "assets/hd2d/objects/clk_pink.png",
+      "w": 17,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "clk_mint": {
+      "file": "assets/hd2d/objects/clk_mint.png",
+      "w": 17,
+      "h": 17,
+      "batch": 3,
+      "state": "base"
+    },
+    "sm_globe_lamp": {
+      "file": "assets/hd2d/objects/sm_globe_lamp.png",
+      "w": 12,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "sm_floor_mirror": {
+      "file": "assets/hd2d/objects/sm_floor_mirror.png",
+      "w": 16,
+      "h": 44,
+      "batch": 3,
+      "state": "base"
+    },
+    "pet_box": {
+      "file": "assets/hd2d/objects/pet_box.png",
+      "w": 26,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "scratch_post": {
+      "file": "assets/hd2d/objects/scratch_post.png",
+      "w": 16,
+      "h": 36,
+      "batch": 3,
+      "state": "base"
+    },
+    "pet_bed": {
+      "file": "assets/hd2d/objects/pet_bed.png",
+      "w": 28,
+      "h": 14,
+      "batch": 3,
+      "state": "base"
+    },
+    "guestbook": {
+      "file": "assets/hd2d/objects/guestbook.png",
+      "w": 16,
+      "h": 22,
+      "batch": 3,
+      "state": "base"
+    },
+    "litter_tray": {
+      "file": "assets/hd2d/objects/litter_tray.png",
+      "w": 34,
+      "h": 18,
+      "batch": 3,
+      "state": "base"
+    },
+    "litter_house": {
+      "file": "assets/hd2d/objects/litter_house.png",
+      "w": 34,
+      "h": 29,
+      "batch": 3,
+      "state": "base"
+    },
+    "litter_capsule": {
+      "file": "assets/hd2d/objects/litter_capsule.png",
+      "w": 34,
+      "h": 29,
+      "batch": 3,
+      "state": "base"
+    },
+    "festival_lantern": {
+      "file": "assets/hd2d/objects/festival_lantern.png",
+      "w": 18,
+      "h": 32,
+      "batch": 3,
+      "state": "base"
+    },
+    "festival_lantern_on": {
+      "file": "assets/hd2d/objects/festival_lantern_on.png",
+      "w": 18,
+      "h": 32,
+      "batch": 3,
+      "state": "on"
+    },
+    "star_curtain": {
+      "file": "assets/hd2d/objects/star_curtain.png",
+      "w": 64,
+      "h": 22,
+      "batch": 3,
+      "state": "base"
+    },
+    "star_curtain_on": {
+      "file": "assets/hd2d/objects/star_curtain_on.png",
+      "w": 64,
+      "h": 22,
+      "batch": 3,
+      "state": "on"
+    },
+    "aurora_panel": {
+      "file": "assets/hd2d/objects/aurora_panel.png",
+      "w": 48,
+      "h": 27,
+      "batch": 3,
+      "state": "base"
+    },
+    "aurora_panel_on": {
+      "file": "assets/hd2d/objects/aurora_panel_on.png",
+      "w": 48,
+      "h": 27,
+      "batch": 3,
+      "state": "on"
+    },
+    "neon_cat": {
+      "file": "assets/hd2d/objects/neon_cat.png",
+      "w": 30,
+      "h": 27,
+      "batch": 3,
+      "state": "base"
+    },
+    "neon_cat_on": {
+      "file": "assets/hd2d/objects/neon_cat_on.png",
+      "w": 30,
+      "h": 27,
+      "batch": 3,
+      "state": "on"
+    },
+    "jelly_lamp": {
+      "file": "assets/hd2d/objects/jelly_lamp.png",
+      "w": 22,
+      "h": 33,
+      "batch": 3,
+      "state": "base"
+    },
+    "jelly_lamp_on": {
+      "file": "assets/hd2d/objects/jelly_lamp_on.png",
+      "w": 22,
+      "h": 33,
+      "batch": 3,
+      "state": "on"
+    },
+    "disco_globe": {
+      "file": "assets/hd2d/objects/disco_globe.png",
+      "w": 26,
+      "h": 32,
+      "batch": 3,
+      "state": "base"
+    },
+    "disco_globe_on": {
+      "file": "assets/hd2d/objects/disco_globe_on.png",
+      "w": 26,
+      "h": 32,
+      "batch": 3,
+      "state": "on"
+    },
+    "wall_sconce": {
+      "file": "assets/hd2d/objects/wall_sconce.png",
+      "w": 16,
+      "h": 23,
+      "batch": 3,
+      "state": "base"
+    },
+    "wall_sconce_on": {
+      "file": "assets/hd2d/objects/wall_sconce_on.png",
+      "w": 16,
+      "h": 23,
+      "batch": 3,
+      "state": "on"
+    },
+    "balloon_bouquet": {
+      "file": "assets/hd2d/objects/balloon_bouquet.png",
+      "w": 30,
+      "h": 46,
+      "batch": 3,
+      "state": "base"
+    },
+    "gift_tower": {
+      "file": "assets/hd2d/objects/gift_tower.png",
+      "w": 31,
+      "h": 29,
+      "batch": 3,
+      "state": "base"
+    },
+    "celebration_banner": {
+      "file": "assets/hd2d/objects/celebration_banner.png",
+      "w": 70,
+      "h": 20,
+      "batch": 3,
+      "state": "base"
+    },
+    "wall_planter": {
+      "file": "assets/hd2d/objects/wall_planter.png",
+      "w": 23,
+      "h": 31,
+      "batch": 3,
+      "state": "base"
+    },
+    "constellation_clock": {
+      "file": "assets/hd2d/objects/constellation_clock.png",
+      "w": 26,
+      "h": 26,
+      "batch": 3,
+      "state": "base"
+    },
+    "window_small": {
+      "file": "assets/hd2d/objects/window_small.png",
+      "w": 24,
+      "h": 28,
+      "batch": 3,
+      "state": "base"
+    },
+    "window_wide": {
+      "file": "assets/hd2d/objects/window_wide.png",
+      "w": 72,
+      "h": 42,
+      "batch": 3,
+      "state": "base"
+    },
+    "window_arch": {
+      "file": "assets/hd2d/objects/window_arch.png",
+      "w": 54,
+      "h": 63,
+      "batch": 3,
+      "state": "base"
+    },
+    "window_tall": {
+      "file": "assets/hd2d/objects/window_tall.png",
+      "w": 30,
+      "h": 66,
+      "batch": 3,
+      "state": "base"
+    },
+    "pet_bowl_full": {
+      "file": "assets/hd2d/objects/pet_bowl_full.png",
+      "w": 18,
+      "h": 10,
+      "batch": 3,
+      "state": "food"
+    },
+    "pet_bowl_half": {
+      "file": "assets/hd2d/objects/pet_bowl_half.png",
+      "w": 18,
+      "h": 10,
+      "batch": 3,
+      "state": "food"
+    },
+    "pet_bowl_low": {
+      "file": "assets/hd2d/objects/pet_bowl_low.png",
+      "w": 18,
+      "h": 10,
+      "batch": 3,
+      "state": "food"
+    }
+  },
+  "latestBatch": 3
+}
