@@ -1012,7 +1012,7 @@
     {
       "batch": 4,
       "label": "第四批",
-      "status": "pending",
+      "status": "complete",
       "families": [
         "rug",
         "figure",
@@ -1383,7 +1383,13 @@
         "a92_aurora_study_rug_round",
         "a92_greenhouse_rug_round",
         "a92_winter_party_rug_round"
-      ]
+      ],
+      "targetNewImages": 140,
+      "completedImages": 140,
+      "remainingImages": 0,
+      "completedOn": "2026-10-25",
+      "newImages": 140,
+      "onStateImages": 2
     },
     {
       "batch": 5,

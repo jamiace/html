@@ -1,0 +1,216 @@
+{
+  "checks": 30,
+  "allPassed": true,
+  "rugs": [
+    {
+      "sprite": "rg_round_border",
+      "referenceHue": 0.6046,
+      "paintedHue": 0.6013,
+      "hueDistance": 0.0033,
+      "passed": true
+    },
+    {
+      "sprite": "rg_round_stripe",
+      "referenceHue": 0.6081,
+      "paintedHue": 0.6028,
+      "hueDistance": 0.0053,
+      "passed": true
+    },
+    {
+      "sprite": "rg_round_diamond",
+      "referenceHue": 0.6035,
+      "paintedHue": 0.6035,
+      "hueDistance": 0.0001,
+      "passed": true
+    },
+    {
+      "sprite": "rg_round_checker",
+      "referenceHue": 0.6082,
+      "paintedHue": 0.604,
+      "hueDistance": 0.0043,
+      "passed": true
+    },
+    {
+      "sprite": "rg_round_rings",
+      "referenceHue": 0.6044,
+      "paintedHue": 0.6008,
+      "hueDistance": 0.0036,
+      "passed": true
+    },
+    {
+      "sprite": "rg_rect_border",
+      "referenceHue": 0.6044,
+      "paintedHue": 0.6011,
+      "hueDistance": 0.0033,
+      "passed": true
+    },
+    {
+      "sprite": "rg_rect_stripe",
+      "referenceHue": 0.6081,
+      "paintedHue": 0.6062,
+      "hueDistance": 0.0019,
+      "passed": true
+    },
+    {
+      "sprite": "rg_rect_diamond",
+      "referenceHue": 0.6033,
+      "paintedHue": 0.5969,
+      "hueDistance": 0.0064,
+      "passed": true
+    },
+    {
+      "sprite": "rg_rect_checker",
+      "referenceHue": 0.6081,
+      "paintedHue": 0.6032,
+      "hueDistance": 0.0048,
+      "passed": true
+    },
+    {
+      "sprite": "rg_rect_fringe",
+      "referenceHue": 0.6038,
+      "paintedHue": 0.5986,
+      "hueDistance": 0.0052,
+      "passed": true
+    },
+    {
+      "sprite": "rg_runner_border",
+      "referenceHue": 0.6115,
+      "paintedHue": 0.5941,
+      "hueDistance": 0.0174,
+      "passed": true
+    },
+    {
+      "sprite": "rg_runner_stripe",
+      "referenceHue": 0.6141,
+      "paintedHue": 0.6111,
+      "hueDistance": 0.003,
+      "passed": true
+    },
+    {
+      "sprite": "rg_runner_diamond",
+      "referenceHue": 0.6115,
+      "paintedHue": 0.5964,
+      "hueDistance": 0.0151,
+      "passed": true
+    },
+    {
+      "sprite": "rg_runner_checker",
+      "referenceHue": 0.6141,
+      "paintedHue": 0.6034,
+      "hueDistance": 0.0107,
+      "passed": true
+    },
+    {
+      "sprite": "rg_runner_fringe",
+      "referenceHue": 0.6109,
+      "paintedHue": 0.5994,
+      "hueDistance": 0.0115,
+      "passed": true
+    },
+    {
+      "sprite": "rg_half_border",
+      "referenceHue": 0.6055,
+      "paintedHue": 0.5993,
+      "hueDistance": 0.0061,
+      "passed": true
+    },
+    {
+      "sprite": "rg_half_stripe",
+      "referenceHue": 0.6095,
+      "paintedHue": 0.6106,
+      "hueDistance": 0.001,
+      "passed": true
+    },
+    {
+      "sprite": "rg_half_diamond",
+      "referenceHue": 0.6044,
+      "paintedHue": 0.6016,
+      "hueDistance": 0.0028,
+      "passed": true
+    },
+    {
+      "sprite": "rg_half_checker",
+      "referenceHue": 0.6095,
+      "paintedHue": 0.6105,
+      "hueDistance": 0.0009,
+      "passed": true
+    },
+    {
+      "sprite": "rg_half_rings",
+      "referenceHue": 0.6056,
+      "paintedHue": 0.6005,
+      "hueDistance": 0.005,
+      "passed": true
+    },
+    {
+      "sprite": "rg_cloud_border",
+      "referenceHue": 0.6037,
+      "paintedHue": 0.6023,
+      "hueDistance": 0.0014,
+      "passed": true
+    },
+    {
+      "sprite": "rg_cloud_stripe",
+      "referenceHue": 0.6074,
+      "paintedHue": 0.6013,
+      "hueDistance": 0.0061,
+      "passed": true
+    },
+    {
+      "sprite": "rg_cloud_diamond",
+      "referenceHue": 0.6024,
+      "paintedHue": 0.5994,
+      "hueDistance": 0.003,
+      "passed": true
+    },
+    {
+      "sprite": "rg_cloud_checker",
+      "referenceHue": 0.6074,
+      "paintedHue": 0.6065,
+      "hueDistance": 0.0009,
+      "passed": true
+    },
+    {
+      "sprite": "rg_cloud_rings",
+      "referenceHue": 0.6034,
+      "paintedHue": 0.6013,
+      "hueDistance": 0.0021,
+      "passed": true
+    },
+    {
+      "sprite": "rg_oval_border",
+      "referenceHue": 0.6052,
+      "paintedHue": 0.5964,
+      "hueDistance": 0.0088,
+      "passed": true
+    },
+    {
+      "sprite": "rg_oval_stripe",
+      "referenceHue": 0.6088,
+      "paintedHue": 0.6025,
+      "hueDistance": 0.0063,
+      "passed": true
+    },
+    {
+      "sprite": "rg_oval_diamond",
+      "referenceHue": 0.6041,
+      "paintedHue": 0.5995,
+      "hueDistance": 0.0046,
+      "passed": true
+    },
+    {
+      "sprite": "rg_oval_checker",
+      "referenceHue": 0.6088,
+      "paintedHue": 0.6042,
+      "hueDistance": 0.0046,
+      "passed": true
+    },
+    {
+      "sprite": "rg_oval_rings",
+      "referenceHue": 0.6051,
+      "paintedHue": 0.605,
+      "hueDistance": 0.0001,
+      "passed": true
+    }
+  ]
+}

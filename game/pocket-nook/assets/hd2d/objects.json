@@ -2441,7 +2441,987 @@
       "h": 10,
       "batch": 3,
       "state": "food"
+    },
+    "rug_round": {
+      "file": "assets/hd2d/objects/rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "rug_rect": {
+      "file": "assets/hd2d/objects/rug_rect.png",
+      "w": 62,
+      "h": 24,
+      "batch": 4,
+      "state": "base"
+    },
+    "rug_runner": {
+      "file": "assets/hd2d/objects/rug_runner.png",
+      "w": 30,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "trophy": {
+      "file": "assets/hd2d/objects/trophy.png",
+      "w": 16,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "cake": {
+      "file": "assets/hd2d/objects/cake.png",
+      "w": 12,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_round_border": {
+      "file": "assets/hd2d/objects/rg_round_border.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_round_stripe": {
+      "file": "assets/hd2d/objects/rg_round_stripe.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_round_diamond": {
+      "file": "assets/hd2d/objects/rg_round_diamond.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_round_checker": {
+      "file": "assets/hd2d/objects/rg_round_checker.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_round_rings": {
+      "file": "assets/hd2d/objects/rg_round_rings.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_rect_border": {
+      "file": "assets/hd2d/objects/rg_rect_border.png",
+      "w": 54,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_rect_stripe": {
+      "file": "assets/hd2d/objects/rg_rect_stripe.png",
+      "w": 54,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_rect_diamond": {
+      "file": "assets/hd2d/objects/rg_rect_diamond.png",
+      "w": 54,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_rect_checker": {
+      "file": "assets/hd2d/objects/rg_rect_checker.png",
+      "w": 54,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_rect_fringe": {
+      "file": "assets/hd2d/objects/rg_rect_fringe.png",
+      "w": 54,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_runner_border": {
+      "file": "assets/hd2d/objects/rg_runner_border.png",
+      "w": 40,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_runner_stripe": {
+      "file": "assets/hd2d/objects/rg_runner_stripe.png",
+      "w": 40,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_runner_diamond": {
+      "file": "assets/hd2d/objects/rg_runner_diamond.png",
+      "w": 40,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_runner_checker": {
+      "file": "assets/hd2d/objects/rg_runner_checker.png",
+      "w": 40,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_runner_fringe": {
+      "file": "assets/hd2d/objects/rg_runner_fringe.png",
+      "w": 40,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_half_border": {
+      "file": "assets/hd2d/objects/rg_half_border.png",
+      "w": 40,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_half_stripe": {
+      "file": "assets/hd2d/objects/rg_half_stripe.png",
+      "w": 40,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_half_diamond": {
+      "file": "assets/hd2d/objects/rg_half_diamond.png",
+      "w": 40,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_half_checker": {
+      "file": "assets/hd2d/objects/rg_half_checker.png",
+      "w": 40,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_half_rings": {
+      "file": "assets/hd2d/objects/rg_half_rings.png",
+      "w": 40,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_cloud_border": {
+      "file": "assets/hd2d/objects/rg_cloud_border.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_cloud_stripe": {
+      "file": "assets/hd2d/objects/rg_cloud_stripe.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_cloud_diamond": {
+      "file": "assets/hd2d/objects/rg_cloud_diamond.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_cloud_checker": {
+      "file": "assets/hd2d/objects/rg_cloud_checker.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_cloud_rings": {
+      "file": "assets/hd2d/objects/rg_cloud_rings.png",
+      "w": 46,
+      "h": 18,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_oval_border": {
+      "file": "assets/hd2d/objects/rg_oval_border.png",
+      "w": 56,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_oval_stripe": {
+      "file": "assets/hd2d/objects/rg_oval_stripe.png",
+      "w": 56,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_oval_diamond": {
+      "file": "assets/hd2d/objects/rg_oval_diamond.png",
+      "w": 56,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_oval_checker": {
+      "file": "assets/hd2d/objects/rg_oval_checker.png",
+      "w": 56,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "rg_oval_rings": {
+      "file": "assets/hd2d/objects/rg_oval_rings.png",
+      "w": 56,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_cat_snow": {
+      "file": "assets/hd2d/objects/fig_cat_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_cat_sky": {
+      "file": "assets/hd2d/objects/fig_cat_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_cat_rose2": {
+      "file": "assets/hd2d/objects/fig_cat_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_cat_peach": {
+      "file": "assets/hd2d/objects/plush_cat_peach.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_cat_grey": {
+      "file": "assets/hd2d/objects/plush_cat_grey.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_cat_snow": {
+      "file": "assets/hd2d/objects/plush_cat_snow.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bunny_snow": {
+      "file": "assets/hd2d/objects/fig_bunny_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bunny_sky": {
+      "file": "assets/hd2d/objects/fig_bunny_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bunny_rose2": {
+      "file": "assets/hd2d/objects/fig_bunny_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bunny_snow": {
+      "file": "assets/hd2d/objects/plush_bunny_snow.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bunny_rose2": {
+      "file": "assets/hd2d/objects/plush_bunny_rose2.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bunny_choco": {
+      "file": "assets/hd2d/objects/plush_bunny_choco.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bear_snow": {
+      "file": "assets/hd2d/objects/fig_bear_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bear_sky": {
+      "file": "assets/hd2d/objects/fig_bear_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_bear_rose2": {
+      "file": "assets/hd2d/objects/fig_bear_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bear_choco": {
+      "file": "assets/hd2d/objects/plush_bear_choco.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bear_peach": {
+      "file": "assets/hd2d/objects/plush_bear_peach.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_bear_snow": {
+      "file": "assets/hd2d/objects/plush_bear_snow.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_duck_snow": {
+      "file": "assets/hd2d/objects/fig_duck_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_duck_sky": {
+      "file": "assets/hd2d/objects/fig_duck_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_duck_rose2": {
+      "file": "assets/hd2d/objects/fig_duck_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_duck_sun": {
+      "file": "assets/hd2d/objects/plush_duck_sun.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_frog_snow": {
+      "file": "assets/hd2d/objects/fig_frog_snow.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_frog_sky": {
+      "file": "assets/hd2d/objects/fig_frog_sky.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_frog_rose2": {
+      "file": "assets/hd2d/objects/fig_frog_rose2.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_frog_green": {
+      "file": "assets/hd2d/objects/plush_frog_green.png",
+      "w": 9,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_owl_snow": {
+      "file": "assets/hd2d/objects/fig_owl_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_owl_sky": {
+      "file": "assets/hd2d/objects/fig_owl_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_owl_rose2": {
+      "file": "assets/hd2d/objects/fig_owl_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_owl_clay": {
+      "file": "assets/hd2d/objects/plush_owl_clay.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_penguin_snow": {
+      "file": "assets/hd2d/objects/fig_penguin_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_penguin_sky": {
+      "file": "assets/hd2d/objects/fig_penguin_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_penguin_rose2": {
+      "file": "assets/hd2d/objects/fig_penguin_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_penguin_ink": {
+      "file": "assets/hd2d/objects/plush_penguin_ink.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_whale_snow": {
+      "file": "assets/hd2d/objects/fig_whale_snow.png",
+      "w": 11,
+      "h": 9,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_whale_sky": {
+      "file": "assets/hd2d/objects/fig_whale_sky.png",
+      "w": 11,
+      "h": 9,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_whale_rose2": {
+      "file": "assets/hd2d/objects/fig_whale_rose2.png",
+      "w": 11,
+      "h": 9,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_whale_sky": {
+      "file": "assets/hd2d/objects/plush_whale_sky.png",
+      "w": 11,
+      "h": 8,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_whale_aqua": {
+      "file": "assets/hd2d/objects/plush_whale_aqua.png",
+      "w": 11,
+      "h": 8,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_dino_snow": {
+      "file": "assets/hd2d/objects/fig_dino_snow.png",
+      "w": 10,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_dino_sky": {
+      "file": "assets/hd2d/objects/fig_dino_sky.png",
+      "w": 10,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_dino_rose2": {
+      "file": "assets/hd2d/objects/fig_dino_rose2.png",
+      "w": 10,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_dino_green": {
+      "file": "assets/hd2d/objects/plush_dino_green.png",
+      "w": 10,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_dino_lilac": {
+      "file": "assets/hd2d/objects/plush_dino_lilac.png",
+      "w": 10,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_dino_rose2": {
+      "file": "assets/hd2d/objects/plush_dino_rose2.png",
+      "w": 10,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_fox_snow": {
+      "file": "assets/hd2d/objects/fig_fox_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_fox_sky": {
+      "file": "assets/hd2d/objects/fig_fox_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_fox_rose2": {
+      "file": "assets/hd2d/objects/fig_fox_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_fox_peach": {
+      "file": "assets/hd2d/objects/plush_fox_peach.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_panda_snow": {
+      "file": "assets/hd2d/objects/fig_panda_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_panda_snow": {
+      "file": "assets/hd2d/objects/plush_panda_snow.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_chick_snow": {
+      "file": "assets/hd2d/objects/fig_chick_snow.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_chick_sky": {
+      "file": "assets/hd2d/objects/fig_chick_sky.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "fig_chick_rose2": {
+      "file": "assets/hd2d/objects/fig_chick_rose2.png",
+      "w": 9,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "plush_chick_sun": {
+      "file": "assets/hd2d/objects/plush_chick_sun.png",
+      "w": 9,
+      "h": 11,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_boba": {
+      "file": "assets/hd2d/objects/sm_boba.png",
+      "w": 8,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_latte": {
+      "file": "assets/hd2d/objects/sm_latte.png",
+      "w": 8,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_teacups": {
+      "file": "assets/hd2d/objects/sm_teacups.png",
+      "w": 18,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_cake_slice": {
+      "file": "assets/hd2d/objects/sm_cake_slice.png",
+      "w": 12,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_donut": {
+      "file": "assets/hd2d/objects/sm_donut.png",
+      "w": 12,
+      "h": 8,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_fruit_bowl": {
+      "file": "assets/hd2d/objects/sm_fruit_bowl.png",
+      "w": 16,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_cookie_jar": {
+      "file": "assets/hd2d/objects/sm_cookie_jar.png",
+      "w": 10,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_console": {
+      "file": "assets/hd2d/objects/sm_console.png",
+      "w": 10,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_rubik": {
+      "file": "assets/hd2d/objects/sm_rubik.png",
+      "w": 8,
+      "h": 8,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_blocks": {
+      "file": "assets/hd2d/objects/sm_blocks.png",
+      "w": 14,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_robot": {
+      "file": "assets/hd2d/objects/sm_robot.png",
+      "w": 10,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_rocket": {
+      "file": "assets/hd2d/objects/sm_rocket.png",
+      "w": 8,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_snowglobe": {
+      "file": "assets/hd2d/objects/sm_snowglobe.png",
+      "w": 12,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_hourglass": {
+      "file": "assets/hd2d/objects/sm_hourglass.png",
+      "w": 10,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_crystal": {
+      "file": "assets/hd2d/objects/sm_crystal.png",
+      "w": 12,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_perfume": {
+      "file": "assets/hd2d/objects/sm_perfume.png",
+      "w": 8,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_musicbox": {
+      "file": "assets/hd2d/objects/sm_musicbox.png",
+      "w": 14,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_candle_jar": {
+      "file": "assets/hd2d/objects/sm_candle_jar.png",
+      "w": 8,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_diffuser": {
+      "file": "assets/hd2d/objects/sm_diffuser.png",
+      "w": 10,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_cushion_heart": {
+      "file": "assets/hd2d/objects/sm_cushion_heart.png",
+      "w": 14,
+      "h": 12,
+      "batch": 4,
+      "state": "base"
+    },
+    "sm_floor_pillow": {
+      "file": "assets/hd2d/objects/sm_floor_pillow.png",
+      "w": 24,
+      "h": 10,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_gacha": {
+      "file": "assets/hd2d/objects/fun_gacha.png",
+      "w": 18,
+      "h": 32,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_aquarium": {
+      "file": "assets/hd2d/objects/fun_aquarium.png",
+      "w": 40,
+      "h": 34,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_coffee_machine": {
+      "file": "assets/hd2d/objects/fun_coffee_machine.png",
+      "w": 14,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_fridge": {
+      "file": "assets/hd2d/objects/fun_fridge.png",
+      "w": 22,
+      "h": 32,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_piano": {
+      "file": "assets/hd2d/objects/fun_piano.png",
+      "w": 40,
+      "h": 34,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_arcade": {
+      "file": "assets/hd2d/objects/fun_arcade.png",
+      "w": 22,
+      "h": 44,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_disco": {
+      "file": "assets/hd2d/objects/fun_disco.png",
+      "w": 14,
+      "h": 20,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_chime": {
+      "file": "assets/hd2d/objects/fun_chime.png",
+      "w": 12,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_cuckoo": {
+      "file": "assets/hd2d/objects/fun_cuckoo.png",
+      "w": 20,
+      "h": 30,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_fountain": {
+      "file": "assets/hd2d/objects/fun_fountain.png",
+      "w": 16,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "fun_word_shelf": {
+      "file": "assets/hd2d/objects/fun_word_shelf.png",
+      "w": 34,
+      "h": 44,
+      "batch": 4,
+      "state": "base"
+    },
+    "star_jar_d": {
+      "file": "assets/hd2d/objects/star_jar_d.png",
+      "w": 9,
+      "h": 13,
+      "batch": 4,
+      "state": "base"
+    },
+    "star_jar_w": {
+      "file": "assets/hd2d/objects/star_jar_w.png",
+      "w": 13,
+      "h": 19,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_cocoa": {
+      "file": "assets/hd2d/objects/keep_cocoa.png",
+      "w": 16,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_moss": {
+      "file": "assets/hd2d/objects/keep_moss.png",
+      "w": 14,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_clock": {
+      "file": "assets/hd2d/objects/keep_clock.png",
+      "w": 14,
+      "h": 16,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_fluff": {
+      "file": "assets/hd2d/objects/keep_fluff.png",
+      "w": 14,
+      "h": 14,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_star": {
+      "file": "assets/hd2d/objects/keep_star.png",
+      "w": 14,
+      "h": 15,
+      "batch": 4,
+      "state": "base"
+    },
+    "keep_yarn": {
+      "file": "assets/hd2d/objects/keep_yarn.png",
+      "w": 16,
+      "h": 15,
+      "batch": 4,
+      "state": "base"
+    },
+    "pumpkin_glow": {
+      "file": "assets/hd2d/objects/pumpkin_glow.png",
+      "w": 24,
+      "h": 23,
+      "batch": 4,
+      "state": "base"
+    },
+    "pumpkin_glow_on": {
+      "file": "assets/hd2d/objects/pumpkin_glow_on.png",
+      "w": 24,
+      "h": 23,
+      "batch": 4,
+      "state": "on"
+    },
+    "moon_bunny": {
+      "file": "assets/hd2d/objects/moon_bunny.png",
+      "w": 24,
+      "h": 27,
+      "batch": 4,
+      "state": "base"
+    },
+    "moon_bunny_on": {
+      "file": "assets/hd2d/objects/moon_bunny_on.png",
+      "w": 24,
+      "h": 27,
+      "batch": 4,
+      "state": "on"
+    },
+    "a92_lantern_night_rug_round": {
+      "file": "assets/hd2d/objects/a92_lantern_night_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "a92_pumpkin_night_rug_round": {
+      "file": "assets/hd2d/objects/a92_pumpkin_night_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "a92_birthday_room_rug_round": {
+      "file": "assets/hd2d/objects/a92_birthday_room_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "a92_aurora_study_rug_round": {
+      "file": "assets/hd2d/objects/a92_aurora_study_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "a92_greenhouse_rug_round": {
+      "file": "assets/hd2d/objects/a92_greenhouse_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
+    },
+    "a92_winter_party_rug_round": {
+      "file": "assets/hd2d/objects/a92_winter_party_rug_round.png",
+      "w": 58,
+      "h": 22,
+      "batch": 4,
+      "state": "base"
     }
   },
-  "latestBatch": 3
+  "latestBatch": 4
 }

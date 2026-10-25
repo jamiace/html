@@ -1,0 +1,33 @@
+{
+  "checks": 7,
+  "objects": [
+    {
+      "k": "fun_aquarium",
+      "frames": 4
+    },
+    {
+      "k": "fun_disco",
+      "frames": 4
+    },
+    {
+      "k": "fun_chime",
+      "frames": 3
+    },
+    {
+      "k": "fun_fountain",
+      "frames": 2
+    },
+    {
+      "k": "star_jar_d",
+      "progressStates": 3
+    },
+    {
+      "k": "star_jar_w",
+      "progressStates": 3
+    },
+    {
+      "k": "fun_coffee_machine",
+      "steam": true
+    }
+  ]
+}
