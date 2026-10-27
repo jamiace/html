@@ -2,7 +2,7 @@
 <html lang="zh-Hant-TW">
 <head>
 <meta charset="utf-8">
-<script>window.PURR_BUILD=Object.freeze({version:"0.92.2",date:"2026/10/27"});</script>
+<script>window.PURR_BUILD=Object.freeze({version:"0.92.3",date:"2026/10/28"});</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Purr Cozy / 呼嚕小窩</title>
 <meta name="description" content="像素風 Lo-Fi 專注小遊戲：佈置小房間、番茄鐘、待辦清單、便條、音樂播放器和寵物陪伴。">
@@ -10,15 +10,15 @@
 <!-- Root icon files supplied by the site owner. Use the same artwork for browser and home screen. -->
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="icon" href="icon-32x32.png" type="image/png" sizes="32x32">
-<link rel="icon" href="apple-touch-icon.png?v=0.92.2" type="image/png">
-<link rel="manifest" href="manifest.webmanifest?v=0.92.2" type="application/manifest+json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.92.2">
+<link rel="icon" href="apple-touch-icon.png?v=0.92.3" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=0.92.3" type="application/manifest+json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.92.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="呼嚕小窩">
-<link rel="stylesheet" href="assets/fonts/fonts.css?v=0.92.2">
-<link rel="stylesheet" href="css/style.css?v=0.92.2">
+<link rel="stylesheet" href="assets/fonts/fonts.css?v=0.92.3">
+<link rel="stylesheet" href="css/style.css?v=0.92.3">
 <style>
   :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   img { max-width: 100%; }
@@ -44,65 +44,65 @@
   <div class="yt-box"><div id="yt-player"></div><div class="yt-msg" hidden></div></div>
 </div>
 <div id="toasts" aria-live="polite"></div>
-<div id="loading" class="loading" role="status" aria-live="polite"><div class="purr-splash"><img src="apple-touch-icon.png?v=0.92.2" width="132" height="132" alt="呼嚕小窩遊戲圖示"><h1>Purr Cozy</h1><p class="purr-subtitle">呼嚕小窩</p><progress id="load-progress" max="100" value="0" aria-label="載入進度"></progress><div class="purr-load-info"><span id="load-status">正在準備房間與 HD-2D 素材…</span><span id="load-percent">0%</span></div><button id="load-retry" type="button" hidden>重新載入</button></div></div>
-<script src="js/purr-boot.js?v=0.92.2"></script>
-<script src="js/config.js?v=0.92.2"></script>
-<script src="js/firebase-config.js?v=0.92.2"></script>
-<script src="js/core.js?v=0.92.2"></script>
-<script src="js/sprites_items.js?v=0.92.2"></script>
-<script src="js/sprites_chars.js?v=0.92.2"></script>
-<script src="js/avatar.js?v=0.92.2"></script>
-<script src="js/sprites_ui.js?v=0.92.2"></script>
-<script src="js/sprites_themes.js?v=0.92.2"></script>
-<script src="js/sprites_life.js?v=0.92.2"></script>
-<script src="js/catalog.js?v=0.92.2"></script>
-<script src="js/vocab.js?v=0.92.2"></script>
-<script src="js/engine.js?v=0.92.2"></script>
-<script src="js/gen_surfaces.js?v=0.92.2"></script>
-<script src="js/gen_items.js?v=0.92.2"></script>
-<script src="js/actor_visibility.js?v=0.92.2"></script>
-<script src="js/actors.js?v=0.92.2"></script>
-<script src="js/music.js?v=0.92.2"></script>
-<script src="js/music_extra.js?v=0.92.2"></script>
-<script src="js/game.js?v=0.92.2"></script>
-<script src="js/ui.js?v=0.92.2"></script>
-<script src="js/avatar_ui.js?v=0.92.2"></script>
-<script src="js/profile.js?v=0.92.2"></script>
-<script src="js/life.js?v=0.92.2"></script>
-<script src="js/pets.js?v=0.92.2"></script>
-<script src="js/pet_ai.js?v=0.92.2"></script>
-<script src="js/sprites_lean.js?v=0.92.2"></script>
-<script src="js/tricks.js?v=0.92.2"></script>
-<script src="js/petplay.js?v=0.92.2"></script>
-<script src="js/merchant.js?v=0.92.2"></script>
-<script src="js/learn.js?v=0.92.2"></script>
-<script src="js/rewards.js?v=0.92.2"></script>
-<script src="js/cloud.js?v=0.92.2"></script>
-<script src="js/social.js?v=0.92.2"></script>
-<script src="js/team.js?v=0.92.2"></script>
-<script src="js/challenge.js?v=0.92.2"></script>
-<script src="js/ritual.js?v=0.92.2"></script>
-<script src="js/starjar.js?v=0.92.2"></script>
-<script src="js/feel.js?v=0.92.2"></script>
-<script src="js/story.js?v=0.92.2"></script>
-<script src="js/mobile.js?v=0.92.2"></script>
-<script src="js/lights.js?v=0.92.2"></script>
-<script src="js/interact.js?v=0.92.2"></script>
-<script src="js/owner_idle.js?v=0.92.2"></script>
-<script src="js/music_yt_tracks.js?v=0.92.2"></script>
-<script src="js/music_default.js?v=0.92.2"></script>
-<script src="js/sprites_092.js?v=0.92.2"></script>
-<script src="js/weather.js?v=0.92.2"></script>
-<script src="js/pet_life.js?v=0.92.2"></script>
-<script src="js/room092.js?v=0.92.2"></script>
-<script src="js/progression.js?v=0.92.2"></script>
-<script src="js/cat_behaviors.js?v=0.92.2"></script>
-<script src="js/version.js?v=0.92.2"></script>
-<script src="js/dev.js?v=0.92.2"></script>
-<script src="js/sprite-loader.js?v=0.92.2"></script>
-<script src="js/hd2d.js?v=0.92.2"></script>
-<script src="js/purr-ui.js?v=0.92.2"></script>
-<script src="js/purr-hands.js?v=0.92.2"></script>
-<script src="js/main.js?v=0.92.2"></script>
+<div id="loading" class="loading" role="status" aria-live="polite"><div class="purr-splash"><img src="apple-touch-icon.png?v=0.92.3" width="132" height="132" alt="呼嚕小窩遊戲圖示"><h1>Purr Cozy</h1><p class="purr-subtitle">呼嚕小窩</p><progress id="load-progress" max="100" value="0" aria-label="載入進度"></progress><div class="purr-load-info"><span id="load-status">正在準備房間與 HD-2D 素材…</span><span id="load-percent">0%</span></div><button id="load-retry" type="button" hidden>重新載入</button></div></div>
+<script src="js/purr-boot.js?v=0.92.3"></script>
+<script src="js/config.js?v=0.92.3"></script>
+<script src="js/firebase-config.js?v=0.92.3"></script>
+<script src="js/core.js?v=0.92.3"></script>
+<script src="js/sprites_items.js?v=0.92.3"></script>
+<script src="js/sprites_chars.js?v=0.92.3"></script>
+<script src="js/avatar.js?v=0.92.3"></script>
+<script src="js/sprites_ui.js?v=0.92.3"></script>
+<script src="js/sprites_themes.js?v=0.92.3"></script>
+<script src="js/sprites_life.js?v=0.92.3"></script>
+<script src="js/catalog.js?v=0.92.3"></script>
+<script src="js/vocab.js?v=0.92.3"></script>
+<script src="js/engine.js?v=0.92.3"></script>
+<script src="js/gen_surfaces.js?v=0.92.3"></script>
+<script src="js/gen_items.js?v=0.92.3"></script>
+<script src="js/actor_visibility.js?v=0.92.3"></script>
+<script src="js/actors.js?v=0.92.3"></script>
+<script src="js/music.js?v=0.92.3"></script>
+<script src="js/music_extra.js?v=0.92.3"></script>
+<script src="js/game.js?v=0.92.3"></script>
+<script src="js/ui.js?v=0.92.3"></script>
+<script src="js/avatar_ui.js?v=0.92.3"></script>
+<script src="js/profile.js?v=0.92.3"></script>
+<script src="js/life.js?v=0.92.3"></script>
+<script src="js/pets.js?v=0.92.3"></script>
+<script src="js/pet_ai.js?v=0.92.3"></script>
+<script src="js/sprites_lean.js?v=0.92.3"></script>
+<script src="js/tricks.js?v=0.92.3"></script>
+<script src="js/petplay.js?v=0.92.3"></script>
+<script src="js/merchant.js?v=0.92.3"></script>
+<script src="js/learn.js?v=0.92.3"></script>
+<script src="js/rewards.js?v=0.92.3"></script>
+<script src="js/cloud.js?v=0.92.3"></script>
+<script src="js/social.js?v=0.92.3"></script>
+<script src="js/team.js?v=0.92.3"></script>
+<script src="js/challenge.js?v=0.92.3"></script>
+<script src="js/ritual.js?v=0.92.3"></script>
+<script src="js/starjar.js?v=0.92.3"></script>
+<script src="js/feel.js?v=0.92.3"></script>
+<script src="js/story.js?v=0.92.3"></script>
+<script src="js/mobile.js?v=0.92.3"></script>
+<script src="js/lights.js?v=0.92.3"></script>
+<script src="js/interact.js?v=0.92.3"></script>
+<script src="js/owner_idle.js?v=0.92.3"></script>
+<script src="js/music_yt_tracks.js?v=0.92.3"></script>
+<script src="js/music_default.js?v=0.92.3"></script>
+<script src="js/sprites_092.js?v=0.92.3"></script>
+<script src="js/weather.js?v=0.92.3"></script>
+<script src="js/pet_life.js?v=0.92.3"></script>
+<script src="js/room092.js?v=0.92.3"></script>
+<script src="js/progression.js?v=0.92.3"></script>
+<script src="js/cat_behaviors.js?v=0.92.3"></script>
+<script src="js/version.js?v=0.92.3"></script>
+<script src="js/dev.js?v=0.92.3"></script>
+<script src="js/sprite-loader.js?v=0.92.3"></script>
+<script src="js/hd2d.js?v=0.92.3"></script>
+<script src="js/purr-ui.js?v=0.92.3"></script>
+<script src="js/purr-hands.js?v=0.92.3"></script>
+<script src="js/main.js?v=0.92.3"></script>
 </body>
 </html>

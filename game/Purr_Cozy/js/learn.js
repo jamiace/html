@@ -133,6 +133,7 @@ const Learn = {
     const q = s.qs[s.qi], v = VOCAB[q.i];
     const typed = q.type === 'spell' || q.type === 'listenspell';
     const ok = typed ? String(val || '').trim().toLowerCase() === v.w.toLowerCase() : val === q.i;
+    if(typed && document.activeElement?.id==='spell-in')document.activeElement.blur();
     s.ans = { ok, val };
     const r = this.recMake(q.i, [0, 0, 1, 0, 0]), today = this.dayNum();
     Feel.note(s, ok);
@@ -304,7 +305,7 @@ Object.assign(UI, {
           oncompositionend: e => SpellKeys.end(e.target),
           onblur: e => SpellKeys.blur(e.target) });
         parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, '確定')));
-        if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus(); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
+        if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus({preventScroll:true}); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
           const o = VOCAB[oi], txt = q.type === 'zh2en' ? o.w : o.z;
@@ -317,7 +318,15 @@ Object.assign(UI, {
       parts.push(h('div', { class: 'qslot' }, A ? h('div', { class: 'qfb ' + (A.ok ? 'ok' : 'no') + (A.lucky ? ' luck' : '') },
         h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? '答對了！' : '再記一下：' }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: '幸運！' }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', title: fbTxt, text: fbTxt })),
         h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? '看結果' : '下一題')) : null));
-      return parts;
+      const meta=parts.splice(0,2), feedback=parts.pop();
+      const entry=parts.find(node=>node&&node.tagName==='FORM');
+      const question=parts.filter(node=>node&&node!==entry);
+      if(entry)entry.classList.add('quiz-entry');
+      return [h('div',{class:'quiz-shell'+(A?' answered':'')},
+        h('div',{class:'quiz-meta'},...meta),
+        h('div',{class:'quiz-content scroll'},...question),
+        entry?h('div',{class:'quiz-input'},entry):null,
+        feedback)];
     }
     const r = s.result, n = s.qs.length;
     return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }), r.taskNote ? h('p', { class: 'swap-rule', text: r.taskNote }) : null,
@@ -382,3 +391,35 @@ document.addEventListener('keydown', e => {
 });
 
 const OLD_WORDS_500 = ["ability", "absent", "active", "actually", "admire", "advice", "afford", "agree", "allow", "ancient", "anger", "annoy", "anxious", "apartment", "appear", "argue", "arrange", "arrive", "attack", "attend", "attention", "award", "balance", "battle", "belief", "belong", "benefit", "blank", "bother", "brave", "brief", "budget", "burden", "career", "celebrate", "challenge", "citizen", "clever", "climate", "collect", "common", "compare", "complain", "confident", "consider", "contain", "control", "convenient", "correct", "create", "crowd", "culture", "customer", "damage", "danger", "decorate", "degree", "deliver", "describe", "desert", "deserve", "destroy", "develop", "difference", "direction", "discuss", "disease", "distance", "doubt", "education", "effort", "energy", "enemy", "enter", "especially", "event", "exact", "excellent", "exercise", "expect", "explain", "express", "fail", "famous", "favorite", "fever", "figure", "final", "foreign", "forgive", "freedom", "friendly", "future", "gentle", "goal", "government", "greet", "guess", "guest", "handle", "harm", "health", "honest", "huge", "human", "hurry", "imagine", "important", "include", "increase", "influence", "invite", "island", "journey", "judge", "language", "lazy", "lesson", "limit", "local", "lonely", "manage", "market", "material", "medicine", "member", "memory", "message", "method", "mistake", "moment", "nature", "nervous", "notice", "offer", "opinion", "peace", "perfect", "period", "personal", "polite", "popular", "possible", "praise", "prepare", "pretend", "pride", "private", "prize", "progress", "promise", "protect", "provide", "purpose", "quality", "reason", "receive", "record", "refuse", "regular", "relax", "repeat", "reply", "respect", "result", "safety", "satisfy", "schedule", "secret", "select", "serious", "share", "silent", "similar", "society", "solve", "spirit", "strange", "strength", "stress", "suggest", "support", "surprise", "talent", "task", "teenager", "terrible", "thirsty", "threaten", "tradition", "treasure", "trust", "truth", "valuable", "victory", "volunteer", "weigh", "wisdom", "wonder", "youth", "absorb", "academic", "accurate", "achieve", "adapt", "adequate", "adjust", "adventure", "advertisement", "affect", "ambition", "analyze", "annual", "apologize", "appetite", "approach", "appropriate", "approve", "assist", "assume", "attitude", "attract", "audience", "aware", "awkward", "background", "behave", "biology", "brilliant", "broadcast", "calculate", "capable", "capture", "category", "certificate", "chemistry", "classical", "colleague", "combine", "committee", "communicate", "community", "competition", "concentrate", "concern", "conclusion", "condition", "confirm", "conflict", "connect", "consequence", "constant", "consume", "contact", "content", "contribute", "convince", "cope", "creative", "creature", "criticize", "crucial", "curiosity", "current", "debate", "declare", "decline", "defeat", "delicate", "delight", "demand", "demonstrate", "deny", "desire", "despite", "detail", "device", "devote", "dialogue", "digital", "diligent", "disaster", "discipline", "distinguish", "diverse", "domestic", "donate", "eager", "economic", "elderly", "element", "eliminate", "emergency", "emotion", "employ", "encounter", "encourage", "ensure", "entertain", "enthusiasm", "establish", "estimate", "eventually", "evidence", "exaggerate", "exchange", "exhausted", "exhibition", "expand", "expense", "explore", "export", "extend", "facility", "factor", "faith", "fascinate", "feature", "fluent", "focus", "formal", "fortunate", "foundation", "fragile", "frustrate", "fundamental", "generation", "generous", "genius", "global", "graduate", "grateful", "guidance", "harmony", "highlight", "horizon", "identify", "ignore", "illustrate", "immediate", "impact", "impress", "incident", "income", "independent", "individual", "industry", "inform", "initial", "injure", "insist", "inspire", "install", "instant", "instruct", "intelligent", "intend", "intense", "interpret", "interrupt", "interview", "investigate", "involve", "journal", "justice", "labor", "launch", "legend", "leisure", "logical", "luxury", "majority", "mature", "meaningful", "merchant", "miracle", "mission", "monitor", "moral", "mysterious", "narrow", "negative", "negotiate", "neutral", "nutrition", "objective", "obstacle", "obvious", "occasion", "occur", "operate", "opportunity", "oppose", "optimistic", "original", "outstanding", "particular", "passion", "perform", "permanent", "permit", "perspective", "persuade", "philosophy", "physical", "pleasant", "pollution", "positive", "poverty", "precious", "precise", "preference", "pressure", "primary", "principle", "procedure", "profession", "profit", "prominent", "promote", "property", "proportion", "prospect", "psychology", "publish", "qualify", "quantity", "rational", "react", "recall", "recommend", "recover", "refer", "reflect", "reform", "regret", "reject", "relevant", "reliable", "reluctant", "rely", "remain", "remote", "represent", "request", "require", "research", "resident", "resist", "resource", "respond", "restore", "restrict", "reveal", "revolution", "routine", "satellite", "scholar", "section", "sensitive", "sequence", "signal", "significant", "situation", "solution", "sophisticated", "spectacular", "stable", "strategy", "structure", "stubborn", "submit", "substance", "subtle", "sufficient", "superior", "survey", "survive", "sustain", "symbol", "technique", "temporary", "tendency", "theory", "thorough", "tragedy", "transfer", "transport", "tremendous", "trend", "ultimate", "undergo", "urban", "urgent", "valid", "vehicle", "venture", "vital", "vivid", "witness"];
+
+/* Compact phone quiz surface: the input and explanation never sit below the question scroller. */
+const StudyMobile = {
+  key:null, frame:null,
+  compact(){return window.innerWidth<760||(typeof Mobile!=='undefined'&&Mobile.on);},
+  sync(){
+    const w=UI.wins.study, active=!!(w&&!w.el.hidden&&this.compact());
+    document.body.classList.toggle('purr-study-open',active);
+    document.body.classList.toggle('purr-quiz-open',active&&Learn.sess?.step==='quiz');
+    if(!active)return;
+    const vv=window.visualViewport,height=vv?vv.height:window.innerHeight,top=vv?vv.offsetTop:0;
+    w.el.style.setProperty('--study-height',Math.round(height)+'px');
+    w.el.style.setProperty('--study-top',Math.round(top)+'px');
+    w.el.classList.toggle('study-short',height<430);
+    const s=Learn.sess,key=s?s.kind+':'+s.step+':'+s.qi+':'+s.ri:'';
+    const scroller=w.body.querySelector('.quiz-content');
+    if(this.key!==key&&scroller)scroller.scrollTop=0;
+    this.key=key;
+  },
+  schedule(){cancelAnimationFrame(this.frame);this.frame=requestAnimationFrame(()=>this.sync());}
+};
+(function(){
+  const render=UI.render.bind(UI);
+  UI.render=function(id){const result=render(id);if(id==='study')StudyMobile.sync();return result;};
+  for(const name of ['openWin','closeWin']){
+    const original=UI[name].bind(UI);
+    UI[name]=function(...args){const result=original(...args);StudyMobile.sync();return result;};
+  }
+  window.addEventListener('resize',()=>StudyMobile.schedule());
+  window.visualViewport?.addEventListener('resize',()=>StudyMobile.schedule());
+  window.visualViewport?.addEventListener('scroll',()=>StudyMobile.schedule());
+})();

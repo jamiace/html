@@ -197,7 +197,57 @@ const Lyrics = {
   mount() {
     if (this.el) return this.el;
     this.el = h('div', { id: 'lyrics', class: 'lyrics', 'aria-live': 'off', hidden: true }, h('div', { class: 'ly-cur' }), h('div', { class: 'ly-next' }));
-    document.body.append(this.el); return this.el;
+    document.body.append(this.el);
+    if(typeof ResizeObserver!=='undefined') {
+      let width=0;
+      this.fitObserver=new ResizeObserver(entries=>{const next=entries[0].contentRect.width;if(Math.abs(next-width)>.5){width=next;this.scheduleFit();}});
+      this.fitObserver.observe(this.el);
+    }
+    window.addEventListener('resize',()=>this.scheduleFit());
+    window.visualViewport?.addEventListener('resize',()=>this.scheduleFit());
+    document.fonts.ready.then(()=>this.scheduleFit());
+    for(const event of ['seeked','ratechange'])Music.audio?.addEventListener(event,()=>this.scheduleFit());
+    return this.el;
+  },
+  scheduleFit() {
+    cancelAnimationFrame(this.fitFrame);
+    this.fitFrame=requestAnimationFrame(()=>this.fit());
+  },
+  fit() {
+    if(!this.el||this.el.hidden)return;
+    const now=(Music.audio?.currentTime||0)+this.off, index=this.last;
+    const start=index>=0?this.lines[index].t:Math.min(0,now);
+    const next=this.lines?.[index+1]?.t;
+    const end=Number.isFinite(next)?next:Number.isFinite(Music.audio?.duration)?Music.audio.duration+this.off:now+8;
+    const duration=Math.max(.15,end-start),rate=Math.max(.1,Music.audio?.playbackRate||1);
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    [...this.el.children].forEach((line,i)=>{
+      line.getAnimations().forEach(a=>a.cancel());
+      line.querySelector('.ly-text')?.getAnimations().forEach(a=>a.cancel());
+      line.style.fontSize='';line.style.whiteSpace='nowrap';
+      const span=line.firstElementChild;
+      if(!span)return;
+      span.style.whiteSpace='nowrap';span.style.overflowWrap='normal';
+      const available=line.clientWidth,base=parseFloat(getComputedStyle(line).fontSize),min=i===0?12:11;
+      if(available<=0)return;
+      let natural=span.getBoundingClientRect().width;
+      if(natural>available) {
+        line.style.fontSize=Math.max(min,Math.floor(base*available/natural*10-2)/10)+'px';
+        natural=span.getBoundingClientRect().width;
+      }
+      const overflow=Math.max(0,natural-available);
+      line.dataset.fit=overflow>.5?'scroll':'shrink';
+      if(overflow<=.5)return;
+      if(reduced){line.style.whiteSpace='normal';span.style.whiteSpace='normal';span.style.overflowWrap='anywhere';line.dataset.fit='wrap';return;}
+      const head=Math.min(.6,duration*.15),tail=Math.min(.4,duration*.1);
+      const animation=span.animate([
+        {transform:'translateX(0)',offset:0},
+        {transform:'translateX(0)',offset:head/duration},
+        {transform:'translateX(-'+overflow+'px)',offset:1-tail/duration},
+        {transform:'translateX(-'+overflow+'px)',offset:1}
+      ],{duration:duration/rate*1000,fill:'both',easing:'linear'});
+      animation.currentTime=Math.max(0,Math.min(duration,now-start))/rate*1000;
+    });
   },
   index(t) { const L = this.lines; if (!L) return -1; let lo = 0, hi = L.length - 1, ans = -1; t += this.off; while (lo <= hi) { const m = (lo + hi) >> 1; if (L[m].t <= t) { ans = m; lo = m + 1; } else hi = m - 1; } return ans; },
   tick() {
@@ -206,7 +256,9 @@ const Lyrics = {
     const i = this.index(Music.audio.currentTime || 0); if (el.hidden) { el.hidden = false; this.last = -2; }
     if (i === this.last) return; this.last = i;
     const L = this.lines, cur = i >= 0 ? L[i].text : '', next = L[i + 1] ? L[i + 1].text : '';
-    el.children[0].textContent = cur || '♪'; el.children[1].textContent = next;
+    el.children[0].replaceChildren(h('span',{class:'ly-text',text:cur||'♪'}));
+    el.children[1].replaceChildren(h('span',{class:'ly-text',text:next}));
+    this.scheduleFit();
     el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip');
   },
   render() { this.last = -2; this.tick(); },

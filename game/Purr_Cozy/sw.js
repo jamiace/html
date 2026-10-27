@@ -1,5 +1,5 @@
 /* Purr Cozy: fresh code online; exact build files remain available offline. */
-const BUILD='0.92.2';
+const BUILD='0.92.3';
 const VERSION='purr-cozy-web-'+BUILD;
 const codeRequest=url=>/\.(?:html|js|css|webmanifest)$/.test(url.pathname)||url.pathname.endsWith('/')||url.pathname.endsWith('/version.json');
 self.addEventListener('install',e=>{self.skipWaiting();});
