@@ -7,7 +7,7 @@ const SAVE_KEY = window.NOOK_HD_DEMO ? 'pocketnook.hd2d-preview.v1' : 'pocketnoo
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
 //   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
 const SAVE_SCHEMA = 5;   // 5: persistent cat care and relationships, level-up quiz gates, ambient light and weather settings
-const NOOK_VERSION = '0.92.1';
+const NOOK_VERSION = window.PURR_BUILD.version;
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -361,7 +361,7 @@ const Cowork = {
 
 // ---------- input on the room canvas ----------
 function setupInput(cv) {
-  const toRoom = (e) => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * RW, (e.clientY - r.top) / r.height * RH]; };
+  const toRoom = (e) => { const r = cv.getBoundingClientRect(), pt=[(e.clientX-r.left)/r.width*RW,(e.clientY-r.top)/r.height*RH]; return typeof PurrHands !== 'undefined' ? PurrHands.roomPoint(e,pt) : pt; };
   let down = null;
   cv.addEventListener('pointerdown', e => {
     const [x, y] = toRoom(e);
@@ -373,7 +373,7 @@ function setupInput(cv) {
       UI.editToolbar(); e.preventDefault(); return;
     }
     // holding food, a brush or a toy: the click is used on the pet / the floor
-    if (PetPlay.held) { PetPlay.down(x, y); if (PetPlay.brushing) cv.setPointerCapture(e.pointerId); down = null; e.preventDefault(); return; }
+    if (PetPlay.held) { cv.setPointerCapture(e.pointerId); PetPlay.move(x,y); PetPlay.down(x, y); down = null; e.preventDefault(); return; }
     down = { x, y, t: performance.now() };
   });
   cv.addEventListener('pointermove', e => {
@@ -410,7 +410,7 @@ function setupInput(cv) {
       h.a.poke();
     } else if (h.kind === 'gift') Game.openGift(h.g); else Game.interact(h.it);
   };
-  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', () => { Room.drag = null; down = null; });
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', () => { Room.drag = null; down = null; PetPlay.up(); });
   cv.addEventListener('pointerleave', () => { Room.hover = null; UI.hoverIt = null; PetPlay.leave(); });
   // right click puts down what you are holding
   cv.addEventListener('contextmenu', e => { if (PetPlay.held) { e.preventDefault(); PetPlay.drop(); } });

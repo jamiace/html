@@ -441,7 +441,7 @@ class PetToy {
   Room.render = function (dt) {
     render(dt);
     if (PetPlay.held && PetPlay.ptrIn) PetPlay.cursor(PetPlay.ptr);
-    if (HAND[PetPlay.held] === 'wand' && PetPlay.ptr && PetPlay.ptrIn && !Room.edit) { const f = SPR.get('toy_feather'), [x, y] = PetPlay.ptr, sw = Math.round(Math.sin(Room.t * 9) * 1.5); this.ctx.drawImage(f, Math.round(x - 2 + sw), Math.round(y - 7)); }
+    if (HAND[PetPlay.held] === 'wand' && PetPlay.ptr && PetPlay.ptrIn && !Room.edit && !(Mobile.on || Mobile.touch)) { const f = SPR.get('toy_feather'), [x, y] = PetPlay.ptr, sw = Math.round(Math.sin(Room.t * 9) * 1.5); this.ctx.drawImage(f, Math.round(x - 2 + sw), Math.round(y - 7)); }
   };
 })();
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && PetPlay.held) PetPlay.drop(); });

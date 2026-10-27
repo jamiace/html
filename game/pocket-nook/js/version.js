@@ -6,8 +6,8 @@
    - when the game saves, it checks version.json at most every 10 minutes (and when it comes back
      to the front); a newer one shows a bar at the top with a "reload" button
    ============================================================ */
-window.NOOK_VERSION = '0.92.1';
-window.NOOK_VERSION_DATE = '2026/10/27';
+window.NOOK_VERSION = window.PURR_BUILD.version;
+window.NOOK_VERSION_DATE = window.PURR_BUILD.date;
 
 const Update = {
   lastCheck: 0, newer: null, bar: null,
@@ -19,7 +19,8 @@ const Update = {
     try {
       const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return;
       const j = await r.json(); if (!j || !j.version) return;
-      if (this.cmp(j.version, window.NOOK_VERSION) > 0) { this.newer = j; this.show(); }
+      if (this.cmp(j.version, NOOK_VERSION) > 0) { this.newer = j; this.show(); }
+      else { this.newer = null; if (this.bar) this.hide(); }
     } catch (e) { }
   },
   show() {
@@ -35,9 +36,33 @@ const Update = {
   hide() { if (this.bar) { this.bar.remove(); this.bar = null; document.body.classList.remove('has-upd'); } this.lastCheck = Date.now(); },
   // save first, then get the newest files (the service worker always asks the network first)
   async reload() {
-    try { Game.save(); if (typeof Cloud !== 'undefined' && Cloud.flush) await Promise.race([Cloud.flush(), new Promise(r => setTimeout(r, 2500))]); } catch (e) { }
-    try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) { }
-    location.reload();
+    if (this.reloading) return;
+    this.reloading = true;
+    try {
+      Game.save();
+      if (typeof Cloud !== 'undefined' && Cloud.flush) await Promise.race([Cloud.flush(), new Promise(r => setTimeout(r,2500))]);
+      const scopeURL = new URL('./', location.href);
+      if ('caches' in window) {
+        for (const name of await caches.keys()) {
+          if (!/^(nook-|purr-cozy-)/.test(name)) continue;
+          const cache = await caches.open(name), requests = await cache.keys();
+          if (requests.some(r => r.url.startsWith(scopeURL.href))) await caches.delete(name);
+        }
+      }
+      const target = this.newer?.version || NOOK_VERSION;
+      if (navigator.serviceWorker) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) { await Promise.race([reg.update(),new Promise(r=>setTimeout(r,4000))]); reg.waiting?.postMessage({type:'SKIP_WAITING'}); }
+      }
+      const url = new URL('index.html',scopeURL);
+      url.searchParams.set('build',target);
+      url.searchParams.set('refresh',String(Date.now()));
+      location.replace(url.href);
+    } catch(e) {
+      this.reloading=false;
+      UI.toast('更新未完成，請檢查連線後再試一次。','i_cloud',5);
+    }
+
   },
 };
 

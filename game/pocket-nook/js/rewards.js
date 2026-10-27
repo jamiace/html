@@ -19,7 +19,7 @@ const Rewards = {
   rollCoupon() { let r = Math.random() * COUPONS.reduce((a, c) => a + c.w, 0); for (const c of COUPONS) { if ((r -= c.w) < 0) return c.off; } return 10; },
   usedToday() { return this.W.usedDay === this.today(); },
   // the coupon picked for the next purchase in an allowed category
-  active(cat) { this.prune(); const W = this.W; if (!COUPON_CATS[cat] || this.usedToday() || !W.sel) return null; const selected = W.coupons.find(c => c.id === W.sel); return selected ? W.coupons.filter(c => c.off === selected.off).sort((a,b) => a.exp-b.exp || a.id-b.id)[0] : null; },
+  active(cat) { this.prune(); const W = this.W; if (!COUPON_CATS[cat] || this.usedToday() || !W.sel) return null; const selected = W.coupons.find(c => c.id === W.sel); return selected ? W.coupons.filter(c => Number(c.off) === Number(selected.off)).sort((a,b) => a.exp-b.exp || a.id-b.id)[0] : null; },
   pay(base, c) { return c ? Math.max(1, Math.floor(base * (100 - c.off) / 100)) : base; },
   price(base, cat) { return this.pay(base, this.active(cat)); },
   // call right after a purchase that charged price(base, cat) succeeded
@@ -34,8 +34,9 @@ const Rewards = {
     this.prune();
     const groups = new Map();
     for (const c of this.W.coupons) {
-      let g = groups.get(c.off);
-      if (!g) groups.set(c.off, g = { off: c.off, count: 0, first: c });
+      const off = Number(c.off);
+      let g = groups.get(off);
+      if (!g) groups.set(off, g = { off, count: 0, first: c });
       g.count++; if (c.exp < g.first.exp || (c.exp === g.first.exp && c.id < g.first.id)) g.first = c;
     }
     return [...groups.values()].sort((a,b) => b.off - a.off);
@@ -136,12 +137,11 @@ Object.assign(UI, {
     return h('div', { class: 'cpbar', 'aria-label': '折價券' },
       h('span', { class: 'cp-hint hint', text: used ? '今日已用券' : '選券後購買時使用；每天一張' }),
       ...groups.map(g => {
-        const selected = W.coupons.some(c => c.id === W.sel && c.off === g.off);
+        const selected = W.coupons.some(c => c.id === W.sel && Number(c.off) === g.off);
         return h('button', { class: 'chip sm coupon-group' + (selected ? ' on' : ''), disabled: used,
           'aria-pressed': String(selected), title: '優先使用最早到期的一張；' + Rewards.timeLeft(g.first) + '後過期',
           onclick: () => Rewards.select(selected ? W.sel : g.first.id) },
-          h('span', { class: 'coupon-kind', text: ((100-g.off)/10) + '折券 x' + g.count }),
-          h('span', { class: 'coupon-expiry', text: '剩' + Rewards.daysLeft(g.first) + '天' }));
+          h('span', { class: 'coupon-stack-label', text: ((100-g.off)/10) + '折券 x' + g.count + ' 剩' + Rewards.daysLeft(g.first) + '天' }));
       }));
   },
 

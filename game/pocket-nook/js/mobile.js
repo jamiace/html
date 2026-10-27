@@ -295,7 +295,7 @@ UI.w_more = function () {
   };
   // the wand's feather and dragged furniture float just above the finger
   const move = PetPlay.move.bind(PetPlay);
-  PetPlay.move = function (x, y) { if (Mobile.on && Mobile.touch && HAND[this.held] === 'wand') y -= 9; return move(x, y); };
+  PetPlay.move = function (x, y) { return move(x, y); };
   // the sound of a finished focus, and a notification when the page is hidden
   const complete = Game.complete.bind(Game);
   Game.complete = function (skipped) { const was = this.T().mode; const r = complete(skipped); if (!skipped) Mobile.notify(was === 'focus' ? '專注完成！休息一下吧' : '休息結束，準備好就再開始吧'); return r; };
@@ -363,7 +363,7 @@ UI.w_more = function () {
   };
   window.addEventListener('load', start);
   // home screen app (works offline after the first visit); not on file:// or in previews
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.NOOK_ENV === 'web') window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.NOOK_ENV === 'web') window.addEventListener('load', () => navigator.serviceWorker.register('sw.js?v=' + encodeURIComponent(window.PURR_BUILD.version), { updateViaCache: 'none' }).catch(() => { }));
 })();
 
 // computer: the hand tray goes in the free space to the right of the room, so it never covers furniture

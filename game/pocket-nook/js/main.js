@@ -39,6 +39,7 @@
     Room.indexItems(); Room.buildBg(Game.S.wp, Game.S.fl); Room.computeEnv(Game.S.settings);
     UI.refreshAll(); Mobile.render(); UI.layout(); Room.render(0);
     B.message(outcome === 'timeout' ? '雲端讀取逾時，先載入這台裝置的房間。' : '小窩準備好了');
+    await B.minimumDisplay();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     document.body.classList.remove('purr-loading', 'purr-save-choice');
     document.getElementById('loading').remove();
