@@ -1,8 +1,8 @@
-/* Pocket Nook service worker: lets the game open without a network after the first visit.
+/* Purr Cozy service worker: lets the game open without a network after the first visit.
    - everything on this site: network first (always the newest version when online), the cached copy only when offline
    - music, Firebase, Google, YouTube and anything on other sites: never cached here
    Change VERSION to throw the old cache away. */
-const VERSION = 'nook-v0.92-ui-retry-hd2d-20261024';
+const VERSION = 'purr-cozy-web-20261027-r1';
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(VERSION).then(c => c.addAll(['./', 'index.html', 'css/style.css', 'manifest.webmanifest?icons=root-v1']).catch(() => { }))); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {

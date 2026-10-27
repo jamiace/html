@@ -280,7 +280,7 @@ const Music = {
   },
   changed() {
     UI.refresh('music'); UI.hud(true);
-    try { if (navigator.mediaSession && this.cur && window.MediaMetadata) { navigator.mediaSession.metadata = new MediaMetadata({ title: this.cur.title, artist: '小窩時光' }); navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused'; } } catch (e) { }
+    try { if (navigator.mediaSession && this.cur && window.MediaMetadata) { navigator.mediaSession.metadata = new MediaMetadata({ title: this.cur.title, artist: '呼嚕小窩' }); navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused'; } } catch (e) { }
   },
 };
 

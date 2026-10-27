@@ -11,11 +11,12 @@ const SpriteFiles = {
     try { const res = await fetch(this.base + 'assets/sprites/overrides.json', { cache: 'no-cache' }); if (!res.ok) return { loaded: 0 }; idx = await res.json(); }
     catch (e) { return { loaded: 0 }; }
     const names = (Array.isArray(idx) ? idx : Array.isArray(idx.sprites) ? idx.sprites : []).filter(n => typeof n === 'string' && SPR.defs[n]);
-    let loaded = 0;
+    let loaded = 0, settled = 0;
+    const report = () => { settled++; window.PurrBoot?.set('pixel', settled / Math.max(1,names.length)); };
     const one = (name) => new Promise(ok => {
       const img = new Image();
-      img.onload = () => { try { SPR.override(name, Grid.fromImage(img)); loaded++; } catch (e) { console.warn('[sprites] 無法讀取', name, e); } ok(); };
-      img.onerror = () => { console.warn('[sprites] 找不到', name + '.png，改用內建圖'); ok(); };
+      img.onload = () => { try { SPR.override(name, Grid.fromImage(img)); loaded++; } catch (e) { console.warn('[sprites] 無法讀取', name, e); } report(); ok(); };
+      img.onerror = () => { console.warn('[sprites] 找不到', name + '.png，改用內建圖'); report(); ok(); };
       img.src = this.base + 'assets/sprites/' + encodeURIComponent(name) + '.png?v=' + (idx.version || 1);
     });
     await Promise.race([Promise.all(names.map(one)), new Promise(ok => setTimeout(ok, timeoutMs))]);

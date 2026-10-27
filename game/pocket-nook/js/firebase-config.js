@@ -1,4 +1,4 @@
-/* 小窩時光 — Firebase 設定（Google / Email 登入 + 雲端存檔）
+/* 呼嚕小窩 — Firebase 設定（Google / Email 登入 + 雲端存檔）
  *
  * 留空 → 遊戲照常運作，進度只存在玩家自己的瀏覽器。
  * 填好 → 右上角出現「登入」，玩家登入後進度自動存到你的 Cloud Firestore。

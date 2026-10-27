@@ -49,7 +49,7 @@ const Furn = {
     const wrap = document.querySelector('.room-wrap'); if (wrap) { wrap.classList.remove('flash'); void wrap.offsetWidth; wrap.classList.add('flash'); }
     try {
       const k = 4, c = document.createElement('canvas'); c.width = RW * k; c.height = RH * k; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(room, 0, 0, c.width, c.height);
-      const n = new Date(), p2 = v => String(v).padStart(2, '0'), name = `小窩時光-${n.getFullYear()}${p2(n.getMonth() + 1)}${p2(n.getDate())}-${p2(n.getHours())}${p2(n.getMinutes())}.png`;
+      const n = new Date(), p2 = v => String(v).padStart(2, '0'), name = `呼嚕小窩-${n.getFullYear()}${p2(n.getMonth() + 1)}${p2(n.getDate())}-${p2(n.getHours())}${p2(n.getMinutes())}.png`;
       c.toBlob(b => { if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); }, 'image/png');
       setTimeout(() => this.say(it, cx, this.pick('cam', ['喀嚓！照片存好了', '喀嚓！這張很好看', '喀嚓！大家都有入鏡嗎？']), 2.4), 250);
       const p = this.pet(); if (p && p.state !== 'sleep') setTimeout(() => PetAI.act(p, 'stare', 1.4), 100);

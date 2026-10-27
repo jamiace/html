@@ -97,7 +97,7 @@ const Dev = {
   },
   importSave(file) {
     if (!file) return; const r = new FileReader();
-    r.onload = () => { try { const S = JSON.parse(r.result); if (!S || S.v !== 1) throw new Error('不是小窩時光的存檔'); if (Game.S.owner) S.owner = Game.S.owner; this.act('匯入存檔', () => Game.replaceState(S)); UI.toast('已匯入存檔', 'i_dev'); } catch (e) { UI.toast('匯入失敗：' + e.message, 'i_dev', 3.5); } };
+    r.onload = () => { try { const S = JSON.parse(r.result); if (!S || S.v !== 1) throw new Error('不是呼嚕小窩的存檔'); if (Game.S.owner) S.owner = Game.S.owner; this.act('匯入存檔', () => Game.replaceState(S)); UI.toast('已匯入存檔', 'i_dev'); } catch (e) { UI.toast('匯入失敗：' + e.message, 'i_dev', 3.5); } };
     r.readAsText(file);
   },
 };

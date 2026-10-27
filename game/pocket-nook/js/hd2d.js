@@ -59,17 +59,25 @@ const HD2D = {
     return cv;
   },
 
-  async load() {
+  load() {
+    return this.loadingPromise || (this.loadingPromise = this.preload());
+  },
+
+  async preload() {
     const results = await Promise.allSettled(this.names.map(name => new Promise((ok, no) => {
       const im = new Image();
       im.onload = () => { this.images[name] = im; ok(); };
       im.onerror = () => no(Error('無法載入 ' + name));
+      const timeout = setTimeout(() => { im.onerror(); }, 20000);
+      const done = im.onload, failed = im.onerror;
+      im.onload = () => { clearTimeout(timeout); done(); window.PurrBoot?.hdStep(); };
+      im.onerror = () => { clearTimeout(timeout); failed(); window.PurrBoot?.hdStep(); };
       im.src = 'assets/hd2d/' + name + '.png';
     })));
     await ChairViews.ready;
     await this.loadObjects();
     this.failed = results.filter(r => r.status === 'rejected').length;
-    this.ready = !this.failed;
+    this.ready = !this.failed && !this.objectFailures.length;
     return this.ready;
   },
 
@@ -78,12 +86,17 @@ const HD2D = {
     this.objectFailures = [];
     try {
       const response = await fetch('assets/hd2d/objects.json');
-      if (!response.ok) return;
+      if (!response.ok) throw Error('HD 素材清單讀取失敗');
       const manifest = await response.json();
+      window.PurrBoot?.hdManifest(Object.keys(manifest.sprites).length);
       await Promise.allSettled(Object.entries(manifest.sprites).map(([name, entry]) => new Promise(resolve => {
         const image = new Image();
         image.onload = () => { this.objectImages[name] = image; resolve(); };
         image.onerror = () => { this.objectFailures.push(name); resolve(); };
+        const timeout = setTimeout(() => image.onerror(), 20000);
+        const done = image.onload, failed = image.onerror;
+        image.onload = () => { clearTimeout(timeout); done(); window.PurrBoot?.objectStep(); };
+        image.onerror = () => { clearTimeout(timeout); failed(); window.PurrBoot?.objectStep(); };
         image.src = entry.file;
       })));
     } catch { this.objectFailures.push('manifest'); }
@@ -665,33 +678,7 @@ const HD2D = {
     this.controls();
   },
 
-  controls() {
-    if (!this.bar) return;
-    this.bar.replaceChildren(
-      h('div', { class: 'hd-title' },
-        h('b', { text: 'HD-2D · 團圓夜' }),
-        h('span', { text: window.NOOK_HD_DEMO ? '體驗進度獨立保存在本機' : '第一階段美術試作' })
-      ),
-      h('div', { class: 'hd-actions' },
-        ...[["day", "日光"], ["dusk", "黃昏"], ["night", "月夜"]].map(([mode, n]) =>
-          h('button', {
-            class: 'hd-btn' + (Game.S.settings.timeMode === mode ? ' active' : ''),
-            onclick: () => this.time(mode)
-          }, n)
-        ),
-        h('button', {
-          class: 'hd-btn',
-          onclick: () => {
-            for (const it of Game.S.items) if (ITEMS[it.k].light && ITEMS[it.k].toggle) it.on = !it.on;
-            Game.save();
-          }
-        }, '切換燈光'),
-        h('button', { class: 'hd-btn', onclick: () => UI.openWin('avatar') }, '換裝'),
-        h('button', { class: 'hd-btn', onclick: () => UI.setEdit(!Room.edit) }, '佈置'),
-        h('button', { class: 'hd-btn', onclick: () => this.toggle() }, this.enabled ? '比較原版' : '返回 HD-2D')
-      )
-    );
-  },
+  controls() {},
 
   attach() {
     if(this.cv)return;
@@ -704,8 +691,6 @@ const HD2D = {
     this.ctx = this.cv.getContext('2d');
     this.light = this.canvas(this.cv.width, this.cv.height);
     this.lightCtx = this.light.getContext('2d');
-    this.bar = h('section', { class: 'hd-controls' });
-    document.querySelector('.stage').append(this.bar);
     this.controls();
     this.sync();
     this.load().then(() => {
@@ -767,7 +752,7 @@ const HD2D = {
   UI.w_settings = function() {
     const out = settings();
     out.unshift(h('section', { class: 'settings-card' },
-      h('b', { text: 'HD-2D 美術試作' }),
+      h('b', { text: 'HD-2D 畫面' }),
       h('p', { class: 'hint', text: '家具、座椅與牆面層架陸續換上精緻素材；角色與寵物也會受到房間光照影響。' }),
       h('button', {
         class: 'chip',

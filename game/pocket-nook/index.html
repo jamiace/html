@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>小窩時光 Pocket Nook</title>
+<title>Purr Cozy / 呼嚕小窩</title>
 <meta name="description" content="像素風 Lo-Fi 專注小遊戲：佈置小房間、番茄鐘、待辦清單、便條、音樂播放器和寵物陪伴。">
 <meta name="theme-color" content="#d9d0e5">
 <!-- Root icon files supplied by the site owner. Use the same artwork for browser and home screen. -->
@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="小窩時光">
+<meta name="apple-mobile-web-app-title" content="呼嚕小窩">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -25,7 +25,7 @@
   .loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--ink-2); font: 16px var(--font); z-index: 100; }
 </style>
 </head>
-<body>
+<body class="purr-loading">
 <div id="app">
   <header class="hud"></header>
   <main class="stage">
@@ -43,7 +43,8 @@
   <div class="yt-box"><div id="yt-player"></div><div class="yt-msg" hidden></div></div>
 </div>
 <div id="toasts" aria-live="polite"></div>
-<div id="loading" class="loading">小窩準備中…</div>
+<div id="loading" class="loading" role="status" aria-live="polite"><div class="purr-splash"><img src="apple-touch-icon.png" width="132" height="132" alt="呼嚕小窩遊戲圖示"><h1>Purr Cozy</h1><p class="purr-subtitle">呼嚕小窩</p><progress id="load-progress" max="100" value="0" aria-label="載入進度"></progress><div class="purr-load-info"><span id="load-status">正在準備房間與 HD-2D 素材…</span><span id="load-percent">0%</span></div><button id="load-retry" type="button" hidden>重新載入</button></div></div>
+<script src="js/purr-boot.js"></script>
 <script src="js/config.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/core.js"></script>
@@ -99,6 +100,7 @@
 <script src="js/dev.js"></script>
 <script src="js/sprite-loader.js"></script>
 <script src="js/hd2d.js"></script>
+<script src="js/purr-ui.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

@@ -121,7 +121,7 @@ const UI = {
     const hud = document.querySelector('.hud');
     this.el = {};
     hud.append(
-      h('div', { class: 'brand' }, ico('i_heart', 22), h('span', { class: 'brand-name', text: '小窩時光' }), h('span', { class: 'brand-sub', text: 'Pocket Nook' })),
+      h('div', { class: 'brand' }, ico('i_heart', 22), h('span', { class: 'brand-name', text: '呼嚕小窩' }), h('span', { class: 'brand-sub', text: 'Purr Cozy' })),
       h('div', { class: 'hud-mid' },
         this.el.lvl = h('button', { class: 'chip lvlchip', 'aria-label': '等級與統計', onclick: () => this.openWin('settings') }, ico('i_star', 22), h('span', { class: 'lv' }), h('span', { class: 'xpbar' }, h('i'))),
         this.el.coins = h('button', { class: 'chip coinchip', 'aria-label': '金幣，打開商店', onclick: () => this.openWin('shop') }, ico('i_coin', 22), h('b', { class: 'num' })),
@@ -142,10 +142,10 @@ const UI = {
     this.el.coins.querySelector('.num').textContent = S.coins;
     const rem = t.running ? (t.endsAt - Date.now()) / 1000 : t.remain;
     this.el.timer.querySelector('.num').textContent = fmt(rem);
-    this.el.timer.querySelector('.tm-mode').textContent = t.running ? (t.mode === 'focus' ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : (t.mode === 'focus' ? '準備專注' : '準備休息'));
+    this.el.timer.querySelector('.tm-mode').replaceChildren(...this.timerWords(t.running ? (t.mode === 'focus' ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : (t.mode === 'focus' ? '準備專注' : '準備休息'))));
     this.el.timer.classList.toggle('running', t.running); this.el.timer.classList.toggle('brk', t.mode !== 'focus');
     const mini = this.el.miniTime; if (mini) { mini.textContent = fmt(rem); this.el.miniMode.textContent = t.mode === 'focus' ? '專注' : '休息'; this.el.miniPlay.replaceChildren(ico(t.running ? 'i_pause' : 'i_play', 24)); }
-    if (!this.titleFlash) document.title = t.running ? `${fmt(rem)} ${t.mode === 'focus' ? '專注中' : '休息中'} · 小窩時光` : '小窩時光';
+    if (!this.titleFlash) document.title = t.running ? `${fmt(rem)} ${t.mode === 'focus' ? '專注中' : '休息中'} · 呼嚕小窩` : 'Purr Cozy / 呼嚕小窩';
     if (this.wins.timer && !this.wins.timer.el.hidden) this.tickTimerWin();
     const mc = this.el.music; if (mc) { const cur = Music.cur; mc.hidden = !cur; if (cur) { const tt = (Music.playing ? '' : '暫停 · ') + cur.title; if (mc.lastTitle !== tt) { mc.lastTitle = tt; mc.querySelector('.mt').textContent = tt; mc.title = cur.title; } mc.classList.toggle('playing', Music.playing); } }
     if (this.wins.music && !this.wins.music.el.hidden) this.tickMusic();
@@ -153,7 +153,7 @@ const UI = {
     if (this.el.miniMusic) this.el.miniMusic.classList.toggle('on', Music.playing);
     if (this.wins.cowork && !this.wins.cowork.el.hidden && Cowork.peers.length) this.tickCowork();
   },
-  flashTitle(txt) { this.titleFlash = true; document.title = txt + ' · 小窩時光'; clearTimeout(this._tf); this._tf = setTimeout(() => { this.titleFlash = false; }, 6000); },
+  flashTitle(txt) { this.titleFlash = true; document.title = txt + ' · 呼嚕小窩'; clearTimeout(this._tf); this._tf = setTimeout(() => { this.titleFlash = false; }, 6000); },
   // ---------------- dock ----------------
   buildDock() {
     const dock = document.querySelector('.dock-inner');
@@ -283,7 +283,7 @@ const UI = {
   // ---------------- windows ----------------
   WIN: {
     timer: { t: '番茄鐘', i: 'i_tomato', w: 320, at: ['r', 0] }, todo: { t: '待辦清單', i: 'i_list', w: 330, at: ['l', 0] }, memo: { t: '便條紙', i: 'i_note', w: 380, at: ['l', 1] },
-    shop: { t: '商店', i: 'i_shop', w: 600, at: ['c', 0] }, storage: { t: '收納箱', i: 'i_box', w: 560, at: ['c', 0] }, avatar: { t: '造型', i: 'i_shirt', w: 400, at: ['l', 0] },
+    shop: { t: '商店', i: 'i_shop', w: 840, at: ['c', 0] }, storage: { t: '收納箱', i: 'i_box', w: 560, at: ['c', 0] }, avatar: { t: '造型', i: 'i_shirt', w: 400, at: ['l', 0] },
     pet: { t: '寵物', i: 'i_paw', w: 360, at: ['l', 0] }, cowork: { t: '一起專注', i: 'i_people', w: 360, at: ['r', 1] }, settings: { t: '設定與紀錄', i: 'i_gear', w: 400, at: ['c', 0] },
     gift: { t: '禮物', i: 'i_star', w: 320, at: ['c', 0], modal: true },
     themeask: { t: '套用主題', i: 'i_theme', w: 380, at: ['c', 0], modal: true },
@@ -423,7 +423,7 @@ const UI = {
   shopTab: 'furniture',
   w_shop() {
     const S = Game.S, tab = this.shopTab;
-    const tabs = h('div', { class: 'tabs wrap' }, ...CATS.map(c => h('button', { class: 'tab' + (tab === c.id ? ' on' : ''), onclick: () => { this.shopTab = c.id; this.refresh('shop'); } }, c.n)));
+    const tabs = h('select', { class: 'shop-category', 'aria-label': '商品種類', onchange: e => { this.shopTab = e.target.value; this.shopOptionsOpen = false; this.refresh('shop'); } }, ...CATS.map(c => h('option', { value: c.id, selected: tab === c.id }, c.n)));
     const cards = [];
     const owned = (id) => (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
     const card = (pv, name, d, has, onBuy, extra, cat) => {

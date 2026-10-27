@@ -118,7 +118,7 @@ const Mobile = {
   timerCard() {
     const S = Game.S, t = S.timer, rem = t.running ? (t.endsAt - Date.now()) / 1000 : t.remain, focus = t.mode === 'focus';
     return h('div', { class: 'mtimer' + (t.running ? ' running' : '') + (focus ? '' : ' brk') },
-      h('button', { class: 'mtimer-main', onclick: () => UI.openWin('timer') }, ico('i_tomato', 28), h('b', { class: 'num mt-time', text: fmt(rem) }), h('span', { class: 'mt-mode', text: t.running ? (focus ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : focus ? '準備專注' : '準備休息') })),
+      h('button', { class: 'mtimer-main', onclick: () => UI.openWin('timer') }, ico('i_tomato', 28), h('b', { class: 'num mt-time', text: fmt(rem) }), h('span', { class: 'mt-mode' }, ...UI.timerWords(t.running ? (focus ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : focus ? '準備專注' : '準備休息')))),
       h('button', { class: 'chip big ' + (t.running ? '' : 'primary'), onclick: () => t.running ? Game.pause() : Game.start() }, ico(t.running ? 'i_pause' : 'i_play', 22), t.running ? '暫停' : '開始'),
       Music.cur ? h('button', { class: 'chip icon-only' + (Music.playing ? ' on' : ''), 'aria-label': '音樂', onclick: () => Music.toggle() }, ico('i_music', 22)) : null);
   },
@@ -229,8 +229,8 @@ const Mobile = {
   notify(text) {
     if (!Game.S.settings.notify || !('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
     const opt = { body: text, icon: 'apple-touch-icon.png', tag: 'pocketnook-timer' };
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(r => r.showNotification('小窩時光', opt)).catch(() => { });
-    else try { new Notification('小窩時光', opt); } catch (e) { }
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(r => r.showNotification('呼嚕小窩', opt)).catch(() => { });
+    else try { new Notification('呼嚕小窩', opt); } catch (e) { }
   },
   async askNotify(on) {
     const st = Game.S.settings;

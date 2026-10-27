@@ -7,7 +7,7 @@ const SAVE_KEY = window.NOOK_HD_DEMO ? 'pocketnook.hd2d-preview.v1' : 'pocketnoo
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)
 //   3  several pets (S.zoo), flags (legacy / dev), sync records, rev-checked cloud writes
 const SAVE_SCHEMA = 5;   // 5: persistent cat care and relationships, level-up quiz gates, ambient light and weather settings
-const NOOK_VERSION = '0.92';
+const NOOK_VERSION = '0.92.1';
 const Game = {
   S: null, avatar: null, pet: null, visitors: {}, bubbles: [], scale: 4, lastHud: 0, lastEnv: 0, passiveAcc: 0,
   need(l) { return 100 + 50 * (l - 1); },
@@ -428,8 +428,8 @@ function boot(data) {
   Music.init();
   Dev.init(); Life.ensureDaily(); Learn.ensureDaily(); UI.badges();
   setupInput(document.getElementById('room')); PetPlay.renderTray();
-  requestAnimationFrame(t => Game.frame(t));
-  setInterval(() => { if (document.hidden) { Game.tickTimer(); UI.hud(); } }, 1000);
+  Game.startRendering = () => { if (Game.renderingStarted) return; Game.renderingStarted = true; requestAnimationFrame(t => Game.frame(t)); };
+  setInterval(() => { if (document.hidden && Game.renderingStarted) { Game.tickTimer(); UI.hud(); } }, 1000);
   Cloud.init(); Cowork.init();
   window.claude?.hot?.snapshot?.(() => ({ S: Game.S }));
   document.addEventListener('visibilitychange', () => { if (document.hidden) { Game.save(); Cloud.flush(); } });

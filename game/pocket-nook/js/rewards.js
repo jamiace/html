@@ -19,7 +19,7 @@ const Rewards = {
   rollCoupon() { let r = Math.random() * COUPONS.reduce((a, c) => a + c.w, 0); for (const c of COUPONS) { if ((r -= c.w) < 0) return c.off; } return 10; },
   usedToday() { return this.W.usedDay === this.today(); },
   // the coupon picked for the next purchase in an allowed category
-  active(cat) { this.prune(); const W = this.W; if (!COUPON_CATS[cat] || this.usedToday() || !W.sel) return null; return W.coupons.find(c => c.id === W.sel) || null; },
+  active(cat) { this.prune(); const W = this.W; if (!COUPON_CATS[cat] || this.usedToday() || !W.sel) return null; const selected = W.coupons.find(c => c.id === W.sel); return selected ? W.coupons.filter(c => c.off === selected.off).sort((a,b) => a.exp-b.exp || a.id-b.id)[0] : null; },
   pay(base, c) { return c ? Math.max(1, Math.floor(base * (100 - c.off) / 100)) : base; },
   price(base, cat) { return this.pay(base, this.active(cat)); },
   // call right after a purchase that charged price(base, cat) succeeded
@@ -30,6 +30,17 @@ const Rewards = {
     UI.toast(`${name ? `「${name}」` : ''}原價 ${base}，用${this.couponName(c)}券折 ${base - pay}，實付 ${pay} 金幣（今天的折價券用完了）`, 'i_coupon', 4.5);
     return base - pay;
   },
+  groups() {
+    this.prune();
+    const groups = new Map();
+    for (const c of this.W.coupons) {
+      let g = groups.get(c.off);
+      if (!g) groups.set(c.off, g = { off: c.off, count: 0, first: c });
+      g.count++; if (c.exp < g.first.exp || (c.exp === g.first.exp && c.id < g.first.id)) g.first = c;
+    }
+    return [...groups.values()].sort((a,b) => b.off - a.off);
+  },
+  daysLeft(c) { return Math.max(1, Math.ceil((c.exp - Date.now()) / 86400000)); },
   select(id) { const W = this.W; W.sel = W.sel === id ? null : id; Game.save(); for (const w of ['shop', 'avatar', 'pet']) UI.refresh(w); },
   coinPrize(lvl) { return 50 + (lvl || Game.S.lvl) * 20; },
   itemPrize() {
@@ -119,12 +130,21 @@ Object.assign(UI, {
   },
   // coupon picker used by the shop, the wardrobe and the pet window
   couponBar() {
-    Rewards.prune(); const W = Rewards.W; if (!W.coupons.length) return null;
-    if (Rewards.usedToday()) return h('div', { class: 'cpbar' }, ico('i_coupon', 20), h('span', { class: 'hint', text: `今天已經用過折價券了，早上 6 點後才能再用（還有 ${W.coupons.length} 張）` }));
-    return h('div', { class: 'cpbar' }, ico('i_coupon', 20), h('span', { class: 'hint', text: '今天還可以用一張：' }),
-      ...W.coupons.map(c => h('button', { class: 'chip sm' + (W.sel === c.id ? ' on' : ''), 'aria-pressed': W.sel === c.id ? 'true' : 'false', title: `${Rewards.timeLeft(c)}後過期`, onclick: () => Rewards.select(c.id) }, Rewards.couponName(c), h('em', { class: 'num', text: ` 剩${Rewards.timeLeft(c).replace(/ \d+ (小時|分)$/, '')}` }))),
-      h('span', { class: 'hint', text: W.sel ? '已選好，買可以用券的東西時就會打折' : '選一張，下一次買可以用券的東西就會打折' }));
+    const groups = Rewards.groups(), W = Rewards.W;
+    if (!groups.length) return null;
+    const used = Rewards.usedToday();
+    return h('div', { class: 'cpbar', 'aria-label': '折價券' },
+      h('span', { class: 'cp-hint hint', text: used ? '今日已用券' : '選券後購買時使用；每天一張' }),
+      ...groups.map(g => {
+        const selected = W.coupons.some(c => c.id === W.sel && c.off === g.off);
+        return h('button', { class: 'chip sm coupon-group' + (selected ? ' on' : ''), disabled: used,
+          'aria-pressed': String(selected), title: '優先使用最早到期的一張；' + Rewards.timeLeft(g.first) + '後過期',
+          onclick: () => Rewards.select(selected ? W.sel : g.first.id) },
+          h('span', { class: 'coupon-kind', text: ((100-g.off)/10) + '折券 x' + g.count }),
+          h('span', { class: 'coupon-expiry', text: '剩' + Rewards.daysLeft(g.first) + '天' }));
+      }));
   },
+
   priceTag(base, cat) {
     const p = Rewards.price(base, cat);
     return p === base ? h('b', { class: 'num', text: String(base) }) : h('b', { class: 'num' }, h('s', { class: 'was', text: String(base) }), ' ' + p);
