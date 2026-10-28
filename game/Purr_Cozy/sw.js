@@ -12,7 +12,7 @@ self.addEventListener('fetch',e=>{
     if(response.ok){const cache=await caches.open(await buildReady);cache.put(req,response.clone()).catch(()=>{});}
     return response;
   }).catch(async()=>{
-    const cache=await caches.open(VERSION);
+    const cache=await caches.open(await buildReady);
     const exact=await cache.match(req);
     if(exact)return exact;
     if(req.mode==='navigate')return await cache.match(new URL('index.html',self.registration.scope).href)||Response.error();

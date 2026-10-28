@@ -59,3 +59,24 @@ html:lang(ja) .ct-notice{max-height:3em;overflow:auto}
  .win[data-id="timer"] .win-b{max-height:calc(var(--purr-vh,100dvh) - var(--mobile-nav-height,60px) - 82px)!important;gap:6px}
  .win[data-id="timer"] .big-time{font-size:48px;min-height:54px}.win[data-id="timer"] .rounds{min-height:16px}
 }
+
+/* Fixed letter slots remain visible after typing on desktop and mobile. */
+.spell-slots{display:flex;flex:0 0 auto;flex-wrap:wrap;justify-content:center;align-items:end;gap:4px 5px;padding:7px 0 9px;min-width:0;max-width:100%}
+.spell-letter{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;height:29px;box-sizing:border-box;border-bottom:2px solid var(--ink);font:20px/1.2 var(--font);color:var(--ink);text-transform:lowercase}
+.spell-letter.hinted{color:var(--ink-2)}
+body.purr-quiz-open .quiz-input{display:flex;flex-direction:column;gap:4px}
+body.purr-quiz-open .quiz-input .spell-slots{padding:3px 0 7px;gap:3px 4px}
+body.purr-quiz-open .spell-letter{flex-basis:18px;height:25px;font-size:18px}
+body.purr-quiz-open .quiz-shell.answered .quiz-input{display:none}
+
+/* Keep all Meow Typo entry text readable, including the timer entry. */
+.ct-banner,.win[data-id="timer"] .ct-banner{display:flex!important;flex-wrap:wrap;gap:10px;min-height:116px;max-height:none;padding:12px!important}
+.ct-banner img,.win[data-id="timer"] .ct-banner img{width:66px;height:64px}
+.ct-banner-copy{flex:1;min-width:140px;width:auto;gap:4px}
+.ct-banner-copy strong,.win[data-id="timer"] .ct-banner-copy strong{font-size:26px;line-height:1.15;white-space:normal}
+.ct-banner-copy>span{font-size:15px;line-height:1.4}
+.ct-banner-copy small,.win[data-id="timer"] .ct-banner-copy small{display:block;font-size:14px;line-height:1.45;max-width:none}
+.ct-banner-go{position:static!important;margin-left:auto;font-size:14px;min-height:36px;padding:8px 12px}
+@media(max-width:350px){.ct-banner img,.win[data-id="timer"] .ct-banner img{width:52px;height:56px}.ct-banner-copy small{display:block}.ct-banner-copy strong,.win[data-id="timer"] .ct-banner-copy strong{font-size:24px}}
+
+.spell-separator{align-self:center;font-size:18px;color:var(--ink)}

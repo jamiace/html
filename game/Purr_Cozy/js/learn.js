@@ -57,7 +57,7 @@ const Learn = {
     L.dailyDay = day; L.dailyWords = this.pick(20).map(i => VOCAB[i].w); L.dailyDone = false; L.reviewed = 0; L.dailyScore = '';
   },
   tts() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; },
-  canSpeak() { return this.tts() || !!window.NOOK_AUDIO_BASE; },
+  canSpeak() { return this.tts(); },
   say(w) {
     if(!this.tts())return false;
     const engine=window.speechSynthesis,word=String(w||'').trim();if(!word)return false;
@@ -73,18 +73,10 @@ const Learn = {
       return true;
     }catch(e){console.warn('[speech]',e);return false}
   },
-  speak(w) {
-    const word=String(w||'').trim(),base=window.NOOK_AUDIO_BASE,i=VIDX[word];if(!word)return;
-    if(this.audio){this.audio.pause();this.audio=null}
-    if(!base||i==null||this.noAudio?.[word])return this.say(word);
-    try{
-      const a=this.audio=new Audio(base+encodeURIComponent(VOCAB[i].au));let fallen=false;
-      const fallback=()=>{if(fallen)return;fallen=true;(this.noAudio||(this.noAudio={}))[word]=1;this.say(word)};
-      a.onerror=fallback;a.play().catch(fallback);
-    }catch(e){this.say(word)}
-  },
+  speak(w) { return this.say(w); },
   // ---------- sessions ----------
   start(kind, opts = {}) {
+    if(kind==='chal'&&opts.k==='c_spell')return CatsTypo.openDaily();
     this.ensureDaily();
     let words, nq;
     if (kind === 'daily') { words = this.dailyIdx(); nq = 10; }
@@ -310,15 +302,21 @@ Object.assign(UI, {
       const redo = s.redoFrom != null && s.qi >= s.redoFrom;
       const ctx = q.ctx ? h('p', { class: 'qctx', text: q.ctx }) : null;
       const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? I18n.s("u_ac75ea2713f3", [s.qi - s.redoFrom + 1, s.qs.length - s.redoFrom]) : I18n.s("u_a8ce1fb26c0f", [s.qi + 1, s.redoFrom != null ? s.redoFrom : s.qs.length, s.right]) })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
+      let spellingSlots = null;
       if (q.type === 'spell' || q.type === 'listenspell') {
         const hintTxt = q.hint || (q.noHint || q.type === 'listenspell' ? '' : v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim());
         const key = 'q' + s.qi;
+        const hinted=q.hint?Array.from(q.hint.replace(/\s/g,'')):q.noHint||q.type==='listenspell'?[]:[v.w[0]];
+        const cells=Array.from(v.w).map(ch=>h('span',{class:/[a-z]/i.test(ch)?'spell-letter':'spell-separator','aria-hidden':'true'}));
+        const paint=value=>{const typed=Array.from(value);cells.forEach((cell,i)=>{cell.textContent=(!/[a-z]/i.test(v.w[i])?v.w[i]:typed[i])||((hinted[i]&&hinted[i]!=='_')?hinted[i]:'\u00a0');cell.classList.toggle('hinted',!typed[i]&&!!hinted[i]&&hinted[i]!=='_')});};
+        spellingSlots=h('div',{class:'spell-slots',role:'img','aria-label':I18n.t('spell.letterCount',[(v.w.match(/[a-z]/ig)||[]).length]),'data-length':v.w.length},...cells);
+        paint(!A&&s.typedKey===key?s.typed||'':'');
         const inp = h('input', { id: 'spell-in', type: 'text', lang: 'en', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', enterkeyhint: 'done', disabled: !!A, placeholder: hintTxt, value: !A && s.typedKey === key ? s.typed || '' : '',
-          oninput: e => { s.typed = e.target.value; s.typedKey = key; },
+          oninput: e => { s.typed = e.target.value; s.typedKey = key; paint(e.target.value); },
           oncompositionstart: e => SpellKeys.start(e.target),
           oncompositionend: e => SpellKeys.end(e.target),
           onblur: e => SpellKeys.blur(e.target) });
-        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, I18n.s("u_20db9f87b860"))));
+        parts.push(h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, I18n.s("u_20db9f87b860"))));
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus({preventScroll:true}); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
@@ -330,7 +328,7 @@ Object.assign(UI, {
       // the answer line always has its room: the window keeps the same height before and after answering
       const fbTxt = `${v.w} ${v.ph}  ${v.p} ${v.z}`;
       parts.push(h('div', { class: 'qslot' }, A ? h('div', { class: 'qfb ' + (A.ok ? 'ok' : 'no') + (A.lucky ? ' luck' : '') },
-        h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? I18n.s("u_97c6bbf85445") : I18n.s("u_be3854998308") }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: I18n.s("u_786a5b4a0cf2") }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', title: fbTxt, text: fbTxt })),
+        h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? I18n.s("u_97c6bbf85445") : I18n.s("u_be3854998308") }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: I18n.s("u_786a5b4a0cf2") }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', 'data-i18n-skip':true, title: fbTxt, text: fbTxt })),
         h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? I18n.s("u_3f188107191e") : I18n.s("u_c52524b00455"))) : null));
       const meta=parts.splice(0,2), feedback=parts.pop();
       const entry=parts.find(node=>node&&node.tagName==='FORM');
@@ -339,7 +337,7 @@ Object.assign(UI, {
       return [h('div',{class:'quiz-shell'+(A?' answered':'')},
         h('div',{class:'quiz-meta'},...meta),
         h('div',{class:'quiz-content scroll'},...question),
-        entry?h('div',{class:'quiz-input'},entry):null,
+        entry?h('div',{class:'quiz-input'},spellingSlots,entry):null,
         feedback)];
     }
     const r = s.result, n = s.qs.length;

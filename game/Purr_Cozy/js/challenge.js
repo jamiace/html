@@ -10,7 +10,7 @@
      once chosen (or once it has any progress) it stays for the day
    ============================================================ */
 const CHAL = {
-  c_spell: { n: I18n.s("u_00356771de4c"), icon: 'i_learn', tiers: { n: 8, h: 10 }, d: { n: I18n.s("u_ea64e2fa5d7a"), h: I18n.s("u_fb331407c698") } },
+  c_spell: { n: 'Meow Typo', icon: 'i_learn', tiers: { n: 8, h: 10 }, d: { n: I18n.s("u_ea64e2fa5d7a"), h: I18n.s("u_fb331407c698") } },
   c_listen: { n: I18n.s("u_4e87cc689a38"), icon: 'i_speaker', tiers: { n: 10, h: 10 }, d: { n: I18n.s("u_2895e8416b32"), h: I18n.s("u_1b61e66ab35b") }, speak: true },
   c_review: { n: I18n.s("u_2bbf3832b89d"), icon: 'i_reset', tiers: { n: 8, h: 12 }, d: { n: I18n.s("u_02aeb4d9d51b"), h: I18n.s("u_05cff8777cf9") } },
   c_new: { n: I18n.s("u_8e6501f3684a"), icon: 'i_star', tiers: { n: 6, h: 10 }, d: { n: I18n.s("u_bc78854915f3"), h: I18n.s("u_b0634d4840ba") } },
@@ -101,8 +101,9 @@ Object.assign(Life, {
     if (cands.length) { const d = cands[Math.floor(Math.random() * cands.length)]; tasks.push(mk('buy', { item: d.id, rw: { c: Math.round(d.price * 0.35) + 10, x: 20 } })); }
     else tasks.push(mk('buyany'));
     // two English challenges (listening only where the device can speak) and one life task
-    const chal = Object.keys(CHAL).filter(k => (!CHAL[k].speak || Learn.canSpeak()) && (k !== 'c_review' || Challenge.wrongCount() >= 6));
-    for (const k of shuffle(chal).slice(0, 2)) tasks.push(mk(k, { tier: null }));
+    const chal = Object.keys(CHAL).filter(k => k !== 'c_spell' && (!CHAL[k].speak || Learn.canSpeak()) && (k !== 'c_review' || Challenge.wrongCount() >= 6));
+    tasks.push(mk('c_spell', { tier: null }));
+    for (const k of shuffle(chal).slice(0, 1)) tasks.push(mk(k, { tier: null }));
     const home = Pets.home().length > 0, canTrain = home && Pets.home().some(p => TRICKS.some(tr => tr.lv <= p.lv && !Pets.knows(p, tr.id)));
     const life = ['l_swap', ...(canTrain ? ['l_train'] : [])];
     tasks.push(mk(life[Math.floor(Math.random() * life.length)], { tier: null }));
@@ -135,6 +136,8 @@ Object.assign(Life, {
   const ensure = Life.ensureDaily.bind(Life);
   Life.ensureDaily = function () {
     ensure(); const D = this.L.daily; if (!D) return;
+    // Add today's missing Meow Typo task without replacing existing progress or claimed rewards.
+    if(!D.tasks.some(t=>t.k==='c_spell')){D.tasks.push({k:'c_spell',need:CHAL.c_spell.tiers.n,prog:0,claimed:false,tier:null});}
     D.tasks.forEach((t, i) => { if ((t.k === 'l_ask' || t.k === 'l_todo') && !t.claimed) D.tasks[i] = { k: 'l_swap', need: 1, prog: 0, claimed: false, tier: null }; });
   };
 })();

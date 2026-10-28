@@ -5,7 +5,7 @@ window.I18n={
  s(id,args=[]){const source=this.ui.messages[id]?.source;if(source==null)throw Error('Missing localization key: '+id);const text=this.format(source,args);if(args.length){this.origins.set(text,{id,args});this.cache.delete(text);this.register(text,{id,args})}return text},
  t(id,args=[]){const entry=this.ui.messages[id];return this.format(entry?.[this.lang]??entry?.['zh-TW']??id,args.map(x=>typeof x==='string'?this.render(x):x))},
  named(source,args={}){const id=this.sourceIndex.get(source),entry=id?this.ui.messages[id]:null;const template=entry?.[this.lang]??source;const text=template.replace(/\{(\w+)\}/g,(m,k)=>args[k]!=null?this.render(String(args[k])):m);if(text!==source)this.localizedOutputs.add(text);return text},
- meaning(word){const key=this.vocab.runtime[word],e=this.vocab.meanings[key];return e?.[this.lang]??e?.['zh-TW']??''},
+ meaning(word){const key=this.vocab.runtime[word],e=this.vocab.meanings[key];const value=e?.[this.lang]??e?.['zh-TW']??'';this.localizedOutputs?.add(value);for(const part of value.split(/[；;]/))this.localizedOutputs?.add(part.trim());return value},
 
  register(text,descriptor){if(!text||!/[\p{Script=Han}]/u.test(text))return;let node=this.trie;for(const ch of text){if(!node.next)node.next=new Map();if(!node.next.has(ch))node.next.set(ch,{});node=node.next.get(ch)}node.entry=descriptor;},
  resolve(descriptor,depth){const e=this.ui.messages[descriptor.id];if(!e)return '';return this.format(e[this.lang]??e['zh-TW']??e.source,(descriptor.args||[]).map(v=>typeof v==='string'?this.render(v,depth+1):v))},

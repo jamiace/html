@@ -269,12 +269,6 @@ const Duck = {
     }
     return say(w);
   };
-  const sp = Learn.speak.bind(Learn);
-  Learn.speak = function (w) {
-    const r = sp(w);
-    try { const a = this.audio; if (a && window.NOOK_AUDIO_BASE && Music.playing) { Duck.start(4000); a.volume = 1; a.addEventListener('ended', () => setTimeout(() => Duck.end(), 200), { once: true }); a.addEventListener('error', () => Duck.end(), { once: true }); } } catch (e) { }
-    return r;
-  };
   // the volume slider while ducked: keep the duck
   const sv = Music.setVol.bind(Music); Music.setVol = function (v) { const r = sv(v); if (Duck.k !== 1) Duck.vol(Duck.k); return r; };
 })();
