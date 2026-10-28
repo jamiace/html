@@ -121,7 +121,7 @@ const UI = {
     const hud = document.querySelector('.hud');
     this.el = {};
     hud.append(
-      h('div', { class: 'brand' }, ico('i_heart', 22), h('span', { class: 'brand-name', text: '呼嚕小窩' }), h('span', { class: 'brand-sub', text: 'Purr Cozy' })),
+      h('div', { class: 'brand' }, h('span', { class: 'brand-name', text: '呼嚕小窩' }), h('span', { class: 'brand-sub', text: 'Purr Cozy' })),
       h('div', { class: 'hud-mid' },
         this.el.lvl = h('button', { class: 'chip lvlchip', 'aria-label': '等級與統計', onclick: () => this.openWin('settings') }, ico('i_star', 22), h('span', { class: 'lv' }), h('span', { class: 'xpbar' }, h('i'))),
         this.el.coins = h('button', { class: 'chip coinchip', 'aria-label': '金幣，打開商店', onclick: () => this.openWin('shop') }, ico('i_coin', 22), h('b', { class: 'num' })),
@@ -130,7 +130,7 @@ const UI = {
       h('div', { class: 'hud-right' },
         this.el.cloud = h('button', { class: 'chip cloudchip', 'data-st': 'off', onclick: () => this.toggleWin('account') }, ico('i_cloud', 24), h('span', { class: 'cl-t' })),
         h('button', { class: 'chip icon-only', title: '迷你模式', 'aria-label': '迷你模式', onclick: () => this.setMini(true) }, ico('i_mini', 24)),
-        h('button', { class: 'chip icon-only', title: '設定', 'aria-label': '設定', onclick: () => this.toggleWin('settings') }, ico('i_gear', 24))),
+        h('button', { class: 'chip icon-only hud-settings', title: '設定', 'aria-label': '設定', onclick: () => this.toggleWin('settings') }, ico('i_gear', 24))),
     );
     this.hud(true);
   },
@@ -139,7 +139,8 @@ const UI = {
     this.el.lvl.querySelector('.lv').textContent = 'Lv ' + S.lvl;
     this.el.lvl.querySelector('.xpbar i').style.width = Math.round(S.xp / Game.need(S.lvl) * 100) + '%';
     this.el.lvl.title = `經驗 ${S.xp} / ${Game.need(S.lvl)}`;
-    this.el.coins.querySelector('.num').textContent = S.coins;
+    this.el.coins.querySelector('.num').textContent = String(S.coins);
+    this.el.coins.title=String(S.coins)+' 金幣';this.el.coins.setAttribute('aria-label',String(S.coins)+' 金幣，打開商店');
     const rem = t.running ? (t.endsAt - Date.now()) / 1000 : t.remain;
     this.el.timer.querySelector('.num').textContent = fmt(rem);
     this.el.timer.querySelector('.tm-mode').replaceChildren(...this.timerWords(t.running ? (t.mode === 'focus' ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : (t.mode === 'focus' ? '準備專注' : '準備休息'))));

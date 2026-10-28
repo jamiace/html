@@ -1371,3 +1371,47 @@ body.purr-quiz-open .study-short .qslot .qfb { min-height:44px; padding:4px; }
 body.m .stage > .lyrics { width:auto; align-self:stretch; min-width:0; }
 
 body.purr-quiz-open .quiz-shell.answered .quiz-input { display:none; }
+
+/* 0.92.4: stable study bars, complete coin counts, and low-cost lyric updates. */
+.win[data-id="study"] .pbar { flex:0 0 3px; height:3px; min-height:3px; max-height:3px; box-shadow:none; }
+.win[data-id="study"] .pbar i { left:0; top:0; bottom:0; }
+.lyrics .ly-cur { --ly-base-size:20px; --ly-min-size:12px; }
+.lyrics .ly-next { --ly-base-size:13px; --ly-min-size:11px; }
+.lyrics .ly-cur,.lyrics .ly-next { contain:layout paint; }
+.lyrics [data-fit="scroll"] .ly-text { will-change:transform; }
+.lyrics.flip .ly-cur { animation:none; }
+body.m .stage > .lyrics { position:sticky; top:4px; z-index:8; }
+body.m .stage > .lyrics .ly-cur { --ly-base-size:16px; }
+body.m .stage > .lyrics .ly-next { --ly-base-size:12px; }
+body.m .brand,body.m .hud-right .hud-settings { display:none !important; }
+body.m .hud { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px; padding:0; }
+body.m .hud-mid { display:flex; flex-wrap:nowrap; gap:4px; align-items:center; min-width:0; }
+body.m .hud-mid .lvlchip { flex:none; padding:1px 4px; gap:3px; font-size:13px; }
+body.m .lvlchip > .ico { width:18px; height:18px; }
+body.m .xpbar { width:26px; }
+body.m .hud-mid .coinchip { flex:none; padding:1px 4px; gap:4px; }
+body.m .coinchip > .ico { width:18px; height:18px; }
+body.m .hud-mid .coinchip b { flex:none; min-width:0; font-size:14px; white-space:nowrap; overflow:visible; text-overflow:clip; }
+body.m .hud-right { flex-wrap:nowrap; align-self:start; gap:0; }
+body.m .hud-right .cloudchip { padding:1px 4px; }
+@media(max-width:340px){body.m .lvlchip .xpbar { display:none; }}
+
+.lyrics .ly-cur { height:30px; line-height:30px; }
+.lyrics .ly-next { height:18px; line-height:18px; }
+.lyrics .ly-text { vertical-align:top; }
+body.m .stage > .lyrics .ly-cur { height:24px; line-height:24px; }
+.lyrics .ly-cur[data-fit=wrap],.lyrics .ly-next[data-fit=wrap],body.m .stage > .lyrics .ly-cur[data-fit=wrap] { height:auto; }
+/* 單字學習視窗：所有階段的進度條固定為 3px */
+.win[data-id="study"] .pbar {
+  flex: 0 0 3px;
+  height: 3px;
+  min-height: 3px;
+  max-height: 3px;
+  box-shadow: none;
+}
+
+.win[data-id="study"] .pbar i {
+  left: 0;
+  top: 0;
+  bottom: 0;
+}

@@ -164,7 +164,7 @@ const Covers = {
 
 /* ---------------- synced lyrics (.lrc) ---------------- */
 const Lyrics = {
-  lines: null, key: null, off: 0, el: null, last: -2,
+  lines: null, key: null, off: 0, el: null, last: -2, cache:new Map(),loadGeneration:0,metricsDirty:true,fitFrame:null,
   parse(text) {
     const out = []; let off = 0;
     for (const raw of String(text || '').split(/\r?\n/)) {
@@ -188,78 +188,104 @@ const Lyrics = {
   // LRC files are usually UTF-8; fall back to Big5 for older Traditional Chinese files
   decode(buf) { try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (e) { try { return new TextDecoder('big5').decode(buf); } catch (e2) { return new TextDecoder().decode(buf); } } },
   async load(t) {
-    const key = t && t.id; this.key = key; this.lines = null; this.last = -2; this.render();
-    const text = await this.textFor(t); if (this.key !== key) return;
-    if (text) { const p = this.parse(text); this.lines = p.lines.length ? p.lines : null; this.off = p.off; }
+    const key=t&&t.id,generation=++this.loadGeneration;
+    const kept=this.key===key&&this.lines?.length?{lines:this.lines,off:this.off}:this.cache.get(key);
+    this.key=key;this.lines=kept?.lines||null;this.off=kept?.off||0;this.last=-2;this.render();
+    const text=await this.textFor(t);
+    if(this.key!==key||generation!==this.loadGeneration)return;
+    if(text){const parsed=this.parse(text);if(parsed.lines.length){this.lines=parsed.lines;this.off=parsed.off;this.cache.set(key,parsed);if(this.cache.size>30)this.cache.delete(this.cache.keys().next().value);}}
     this.render();
   },
-  on() { return Game.S.settings.lyrics !== false; },
-  mount() {
-    if (this.el) return this.el;
-    this.el = h('div', { id: 'lyrics', class: 'lyrics', 'aria-live': 'off', hidden: true }, h('div', { class: 'ly-cur' }), h('div', { class: 'ly-next' }));
+  on(){return Game.S.settings.lyrics!==false;},
+  mount(){
+    if(this.el){if(!this.el.isConnected)document.body.append(this.el);return this.el;}
+    this.el=h('div',{id:'lyrics',class:'lyrics','aria-live':'off',hidden:true},
+      h('div',{class:'ly-cur'},h('span',{class:'ly-text'})),
+      h('div',{class:'ly-next'},h('span',{class:'ly-text'})));
+    this.rows=[...this.el.children].map(line=>({line,span:line.firstElementChild,animation:null,metrics:null}));
+    this.measure=document.createElement('canvas').getContext('2d');
     document.body.append(this.el);
-    if(typeof ResizeObserver!=='undefined') {
-      let width=0;
-      this.fitObserver=new ResizeObserver(entries=>{const next=entries[0].contentRect.width;if(Math.abs(next-width)>.5){width=next;this.scheduleFit();}});
+    if(typeof ResizeObserver!=='undefined'){
+      let width=-1;
+      this.fitObserver=new ResizeObserver(entries=>{const next=entries[0].contentRect.width;if(Math.abs(next-width)>.5){width=next;this.metricsDirty=true;this.scheduleFit();}});
       this.fitObserver.observe(this.el);
     }
-    window.addEventListener('resize',()=>this.scheduleFit());
-    window.visualViewport?.addEventListener('resize',()=>this.scheduleFit());
-    document.fonts.ready.then(()=>this.scheduleFit());
-    for(const event of ['seeked','ratechange'])Music.audio?.addEventListener(event,()=>this.scheduleFit());
+    const resized=()=>{this.metricsDirty=true;this.scheduleFit();};
+    window.addEventListener('resize',resized);
+    window.visualViewport?.addEventListener('resize',resized);
+    document.fonts.ready.then(resized);
+    this.bindAudio();
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden){this.metricsDirty=true;this.render();}});
     return this.el;
   },
-  scheduleFit() {
-    cancelAnimationFrame(this.fitFrame);
-    this.fitFrame=requestAnimationFrame(()=>this.fit());
+  bindAudio(){
+    const audio=Music.audio;
+    if(!audio||audio===this.boundAudio)return;
+    if(this.boundAudio&&this.audioHandlers)for(const [event,handler]of this.audioHandlers)this.boundAudio.removeEventListener(event,handler);
+    this.boundAudio=audio;
+    this.audioHandlers=[...['timeupdate','playing','pause','ended'].map(event=>[event,()=>this.tick()]),
+      ...['seeked','ratechange'].map(event=>[event,()=>this.render()]),
+      ...['loadedmetadata','durationchange'].map(event=>[event,()=>this.scheduleFit()])];
+    for(const [event,handler]of this.audioHandlers)audio.addEventListener(event,handler);
   },
-  fit() {
-    if(!this.el||this.el.hidden)return;
-    const now=(Music.audio?.currentTime||0)+this.off, index=this.last;
-    const start=index>=0?this.lines[index].t:Math.min(0,now);
-    const next=this.lines?.[index+1]?.t;
+  scheduleFit(){
+    if(this.fitFrame)return;
+    this.fitFrame=requestAnimationFrame(()=>{this.fitFrame=null;this.fit();});
+  },
+  refreshMetrics(){
+    for(const row of this.rows){
+      const style=getComputedStyle(row.line),size=parseFloat(style.fontSize)||16;
+      row.metrics={width:row.line.clientWidth,base:parseFloat(style.getPropertyValue('--ly-base-size'))||size,
+        min:parseFloat(style.getPropertyValue('--ly-min-size'))||12,family:style.fontFamily,
+        weight:style.fontWeight,fontStyle:style.fontStyle,spacing:(parseFloat(style.letterSpacing)||0)/size};
+    }
+    this.metricsDirty=false;
+  },
+  fit(){
+    if(!this.el||this.el.hidden||!this.lines)return;
+    if(this.metricsDirty||this.rows.some(row=>!row.metrics))this.refreshMetrics();
+    const now=(Music.audio?.currentTime||0)+this.off,index=this.last;
+    const start=index>=0?this.lines[index]?.t||0:Math.min(0,now),next=this.lines[index+1]?.t;
     const end=Number.isFinite(next)?next:Number.isFinite(Music.audio?.duration)?Music.audio.duration+this.off:now+8;
     const duration=Math.max(.15,end-start),rate=Math.max(.1,Music.audio?.playbackRate||1);
     const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    [...this.el.children].forEach((line,i)=>{
-      line.getAnimations().forEach(a=>a.cancel());
-      line.querySelector('.ly-text')?.getAnimations().forEach(a=>a.cancel());
-      line.style.fontSize='';line.style.whiteSpace='nowrap';
-      const span=line.firstElementChild;
-      if(!span)return;
-      span.style.whiteSpace='nowrap';span.style.overflowWrap='normal';
-      const available=line.clientWidth,base=parseFloat(getComputedStyle(line).fontSize),min=i===0?12:11;
-      if(available<=0)return;
-      let natural=span.getBoundingClientRect().width;
-      if(natural>available) {
-        line.style.fontSize=Math.max(min,Math.floor(base*available/natural*10-2)/10)+'px';
-        natural=span.getBoundingClientRect().width;
-      }
-      const overflow=Math.max(0,natural-available);
+    for(const row of this.rows){
+      row.animation?.cancel();row.animation=null;
+      const {line,span,metrics:m}=row;
+      if(!m||m.width<=0)continue;
+      const text=span.textContent||'',chars=[...text].length,available=Math.max(1,m.width-2);
+      const widthAt=size=>{this.measure.font=m.fontStyle+' '+m.weight+' '+size+'px '+m.family;return this.measure.measureText(text).width+chars*m.spacing*size;};
+      const natural=widthAt(m.base),size=natural>available?Math.max(m.min,Math.floor(m.base*available/natural*10)/10):m.base;
+      const width=widthAt(size),overflow=Math.max(0,width-available);
+      line.style.fontSize=size+'px';line.style.whiteSpace='nowrap';span.style.whiteSpace='nowrap';span.style.overflowWrap='normal';
+      line.style.textAlign=overflow>.5?'left':'center';
       line.dataset.fit=overflow>.5?'scroll':'shrink';
-      if(overflow<=.5)return;
-      if(reduced){line.style.whiteSpace='normal';span.style.whiteSpace='normal';span.style.overflowWrap='anywhere';line.dataset.fit='wrap';return;}
+      if(overflow<=.5)continue;
+      if(reduced){line.style.whiteSpace='normal';span.style.whiteSpace='normal';span.style.overflowWrap='anywhere';line.dataset.fit='wrap';continue;}
       const head=Math.min(.6,duration*.15),tail=Math.min(.4,duration*.1);
-      const animation=span.animate([
+      row.animation=span.animate([
         {transform:'translateX(0)',offset:0},
         {transform:'translateX(0)',offset:head/duration},
         {transform:'translateX(-'+overflow+'px)',offset:1-tail/duration},
         {transform:'translateX(-'+overflow+'px)',offset:1}
       ],{duration:duration/rate*1000,fill:'both',easing:'linear'});
-      animation.currentTime=Math.max(0,Math.min(duration,now-start))/rate*1000;
-    });
+      row.animation.currentTime=Math.max(0,Math.min(duration,now-start))/rate*1000;
+    }
   },
-  index(t) { const L = this.lines; if (!L) return -1; let lo = 0, hi = L.length - 1, ans = -1; t += this.off; while (lo <= hi) { const m = (lo + hi) >> 1; if (L[m].t <= t) { ans = m; lo = m + 1; } else hi = m - 1; } return ans; },
-  tick() {
-    const el = this.mount(), show = this.on() && this.lines && Music.playing && Music.cur && Music.cur.id === this.key && !document.body.classList.contains('mini');
-    if (!show) { if (!el.hidden) el.hidden = true; return; }
-    const i = this.index(Music.audio.currentTime || 0); if (el.hidden) { el.hidden = false; this.last = -2; }
-    if (i === this.last) return; this.last = i;
-    const L = this.lines, cur = i >= 0 ? L[i].text : '', next = L[i + 1] ? L[i + 1].text : '';
-    el.children[0].replaceChildren(h('span',{class:'ly-text',text:cur||'♪'}));
-    el.children[1].replaceChildren(h('span',{class:'ly-text',text:next}));
+  index(t){const L=this.lines;if(!L)return -1;let lo=0,hi=L.length-1,ans=-1;t+=this.off;while(lo<=hi){const m=(lo+hi)>>1;if(L[m].t<=t){ans=m;lo=m+1;}else hi=m-1;}return ans;},
+  tick(){
+    const el=this.mount(),a=Music.audio;this.bindAudio();
+    const sameTrack=Music._loadedId===this.key||(!Music._loadedId&&Music.cur?.id===this.key);
+    const playing=a&&!a.paused&&!a.ended;
+    const show=this.on()&&this.lines?.length&&playing&&sameTrack&&Music.cur?.type!=='yt'&&!document.body.classList.contains('mini');
+    if(!show){if(!el.hidden)el.hidden=true;return;}
+    const i=this.index(a.currentTime||0);
+    if(el.hidden){el.hidden=false;this.last=-2;this.metricsDirty=true;}
+    if(i===this.last)return;
+    this.last=i;
+    const texts=[i>=0?this.lines[i].text||'♪':'♪',this.lines[i+1]?.text||''];
+    this.rows.forEach((row,n)=>{if(row.span.textContent!==texts[n])row.span.textContent=texts[n];});
     this.scheduleFit();
-    el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip');
   },
-  render() { this.last = -2; this.tick(); },
+  render(){this.last=-2;this.tick();},
 };
