@@ -98,3 +98,35 @@ body.ct-open #toasts{display:none!important}.ct-slot{border-bottom:2px solid #88
 .ct-answer .ct-at-end{border-right:2px solid #315d36}
 
 @media(max-width:759px){body.ct-open #ytpanel{visibility:hidden!important;pointer-events:none!important}}
+
+/* Intro and results: a quiet wood surface keeps rules clear of the copy. */
+.ct-shell.ct-intro{
+ box-sizing:border-box;width:100%;flex:1 0 auto;min-height:100%;
+ background:#e3b883;padding:24px 28px 28px;gap:16px;
+}
+.ct-intro .ct-top{text-align:left;align-items:center;gap:16px}
+.ct-intro .ct-top h3{font-size:20px;line-height:1.4;margin-top:4px}
+.ct-intro .ct-top small{display:block;font-size:12px;line-height:1.5}
+.ct-intro .ct-counter{font-size:13px;line-height:1.5}
+.ct-intro .ct-intro-cat{display:block;flex:none;width:220px;height:160px;max-width:100%;margin:4px 0;image-rendering:pixelated}
+.ct-intro h2{max-width:100%;font-size:24px;line-height:1.5;text-wrap:balance;overflow-wrap:anywhere}
+.ct-intro p{box-sizing:border-box;width:100%;max-width:620px;font-size:16px;line-height:1.85;text-wrap:pretty;overflow-wrap:anywhere}
+.ct-intro .ct-help{max-width:560px;font-size:14px;line-height:1.8;color:#6b5239}
+.ct-intro .ct-primary{flex:none;min-height:44px;margin-top:2px;padding:10px 20px;font-size:16px;line-height:1.5}
+@media(max-width:759px){
+ .ct-shell.ct-intro{padding:20px 18px max(24px,env(safe-area-inset-bottom));gap:18px}
+ .ct-intro .ct-top{flex-wrap:wrap;gap:8px 16px}
+ .ct-intro .ct-top h3{font-size:18px}
+ .ct-intro .ct-top small{display:block;font-size:12px}
+ .ct-intro .ct-counter{font-size:12px;margin-left:auto}
+ .ct-intro .ct-intro-cat{width:190px;height:140px;margin:8px 0}
+ .ct-intro h2{font-size:22px}
+ .ct-intro p{max-width:36em;font-size:16px;line-height:1.8}
+ .ct-intro .ct-help{font-size:14px;line-height:1.8;text-align:left}
+ .ct-intro .ct-primary{min-height:46px;max-width:100%}
+}
+@media(max-height:550px){
+ .ct-shell.ct-intro{padding:16px 20px;gap:12px}
+ .ct-intro .ct-intro-cat{width:140px;height:96px;margin:0}
+ .ct-intro h2{font-size:21px}
+}
