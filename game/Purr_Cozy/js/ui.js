@@ -10,14 +10,15 @@ const WinLayout = {
    ============================================================ */
 function h(tag, attrs, ...kids) {
   const el = document.createElement(tag);
+  const skipI18n=Object.prototype.hasOwnProperty.call(attrs||{},'data-i18n-skip')||/^(input|textarea|script|style)$/i.test(tag)||/(^|\s)(lyrics|ly-text|ly-cur|ly-next|yt-title)(\s|$)/.test(attrs?.class||'');
   if (attrs) for (const k in attrs) {
     const v = attrs[k]; if (v == null || v === false) continue;
     if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else if (k === 'class') el.className = v; else if (k === 'style') el.style.cssText = v;
-    else if (k === 'text') el.textContent = v; else if (k === 'html') el.innerHTML = v;
-    else el.setAttribute(k, v === true ? '' : v);
+    else if (k === 'text') el.textContent = skipI18n ? v : I18n.render(v); else if (k === 'html') el.innerHTML = v;
+    else el.setAttribute(k, v === true ? '' : ['title','placeholder','aria-label','alt'].includes(k) ? I18n.render(v) : v);
   }
-  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(skipI18n ? String(c) : I18n.render(String(c))));
   return el;
 }
 const ICON = {};
@@ -92,7 +93,7 @@ const UI = {
     document.getElementById('yt-close').addEventListener('click', () => Music.closeYT());
     const yh = yp.querySelector('.yt-h');
     yh.addEventListener('pointerdown', e => { if (yp.classList.contains('min') || this.narrow() || e.target.closest('button')) return; const r = yp.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top; yh.setPointerCapture(e.pointerId);
-      const mv = ev => { yp.style.left = Math.max(0, Math.min(window.innerWidth - r.width, ev.clientX - ox)) + 'px'; yp.style.top = Math.max(0, Math.min(window.innerHeight - 60, ev.clientY - oy)) + 'px'; yp.style.bottom = 'auto'; };
+      const mv = ev => { yp.style.left = Math.max(0, Math.min(window.innerWidth - r.width, ev.clientX - ox)) + 'px'; yp.style.top = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, ev.clientY - oy)) + 'px'; yp.style.bottom = 'auto'; };
       const up = () => { yh.removeEventListener('pointermove', mv); yh.removeEventListener('pointerup', up); }; yh.addEventListener('pointermove', mv); yh.addEventListener('pointerup', up); });
     const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
     document.addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); document.body.classList.add('dropping'); } });
@@ -163,7 +164,7 @@ const UI = {
     for (const [id, ic, label] of items) {
       if (id === 'cowork' && window.NOOK_ENV === 'web') continue;
       if (id === 'friends' && (!SOCIAL_ON || window.NOOK_ENV !== 'web')) continue;
-      const b = h('button', { class: 'dock-btn', 'data-id': id, onclick: () => id === 'edit' ? this.setEdit(!Room.edit) : this.toggleWin(id) }, ico(ic, 32), h('span', { text: label }));
+      const b = h('button', { class: 'dock-btn', 'data-id': id, onclick: () => id === 'edit' ? this.setEdit(!Room.edit) : this.toggleWin(id) }, ico(ic, 32), h('span', { text: id==='timer'?I18n.t('nav.timer'):id==='tasks'?I18n.t('nav.tasks'):label }));
       this.dockBtns[id] = b; dock.append(b);
       // the travelling merchant sits next to the shop (outside the room, so nothing covers the furniture)
       if (id === 'shop') { const m = h('button', { class: 'dock-btn', 'data-id': 'merchant', onclick: () => this.wins.merchant && !this.wins.merchant.el.hidden ? this.closeWin('merchant') : Merchant.go() }, ico('i_merchant', 32), h('span', { text: I18n.s("u_a924b4e38bc8") })); this.dockBtns.merchant = m; dock.append(m); }
@@ -412,7 +413,7 @@ const UI = {
         const grip = h('div', { class: 'pin-grip' }, h('span', { text: I18n.s("u_42820b4e9544") }), h('button', { class: 'del', 'aria-label': I18n.s("u_73953f2ef932"), onclick: () => { m.pin = false; Game.save(); this.renderPins(); this.refresh('memo'); } }, ico('i_close', 16)));
         el = h('div', { class: 'pin c-' + m.color, 'data-id': String(m.id) }, grip, ta); layer.append(el);
         grip.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; const r = el.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top; grip.setPointerCapture(e.pointerId);
-          const mv = ev => { m.x = Math.max(0, Math.min(window.innerWidth - 180, ev.clientX - ox)); m.y = Math.max(0, Math.min(window.innerHeight - 60, ev.clientY - oy)); el.style.left = m.x + 'px'; el.style.top = m.y + 'px'; };
+          const mv = ev => { m.x = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, ev.clientX - ox)); m.y = Math.max(0, Math.min(window.innerHeight - 60, ev.clientY - oy)); el.style.left = m.x + 'px'; el.style.top = m.y + 'px'; };
           const up = () => { grip.removeEventListener('pointermove', mv); grip.removeEventListener('pointerup', up); Game.save(); }; grip.addEventListener('pointermove', mv); grip.addEventListener('pointerup', up); });
       }
       el.className = 'pin c-' + m.color; el.style.left = Math.min(window.innerWidth - 190, m.x) + 'px'; el.style.top = Math.min(window.innerHeight - 80, m.y) + 'px'; have.delete(String(m.id));

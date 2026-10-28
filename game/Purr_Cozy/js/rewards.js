@@ -141,7 +141,7 @@ Object.assign(UI, {
         return h('button', { class: 'chip sm coupon-group' + (selected ? ' on' : ''), disabled: used,
           'aria-pressed': String(selected), title: I18n.s("u_e6c2e39fe6fc") + Rewards.timeLeft(g.first) + I18n.s("u_0757dfb8926b"),
           onclick: () => Rewards.select(selected ? W.sel : g.first.id) },
-          h('span', { class: 'coupon-stack-label', text: ((100-g.off)/10) + I18n.s("u_3501b8c58bc9") + g.count + I18n.s("u_292b5991046e") + Rewards.daysLeft(g.first) + I18n.s("u_49da61ceeea2") }));
+          h('span', { class: 'coupon-stack-label', text: I18n.t('coupon.stack',[I18n.t('coupon.discount',[I18n.lang==='ja'?g.off:(100-g.off)/10]),g.count,Rewards.daysLeft(g.first)]) }));
       }));
   },
 

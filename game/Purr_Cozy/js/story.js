@@ -157,7 +157,7 @@ const Story = {
   get S() { const S = Game.S; if (!S.story) S.story = { used: {}, keep: {} }; if (!S.story.used) S.story.used = {}; if (!S.story.keep) S.story.keep = {}; return S.story; },
   M(mk) { return STORY_M[mk || Merchant.id()]; },
   pick(a) { return a[Math.floor(Math.random() * a.length)]; },
-  fill(s, mk, extra = {}) { const n = this.M(mk).nouns; return s.replace(/\{(\w+)\}/g, (m, k) => extra[k] != null ? extra[k] : n[k] != null ? n[k] : m); },
+  fill(s, mk, extra = {}) { const n = this.M(mk).nouns; return I18n.named(s,Object.assign({},n,extra)); },
   zh(v) { return v.z.split(/[；;，,]/)[0].replace(/（.*?）|\(.*?\)/g, '').trim(); },
   // this week's story, put together the first time it is opened this week
   week() {
@@ -218,7 +218,7 @@ const Story = {
     const res = { coins: first ? 10 + R * 2 : R, xp: R * 3, items: [], msg: '' };
     if (s.opts.ch === 4 && first) {
       const name = St.name || A.names[0], Name = name.charAt(0).toUpperCase() + name.slice(1);
-      res.msg = A.close.map(l => l.replace('{Name}', Name)).join(' ');
+      res.msg = A.close.map(l => I18n.named(l,{Name})).join(' ');
       const k = 'keep_' + mk, list = St.keep[mk] = St.keep[mk] || []; list.push({ name: Name, wk: St.wk, what: A.what });
       const S = Game.S, have = (S.inv[k] || 0) + S.items.filter(it => it.k === k).length;
       if (!have) { S.inv[k] = 1; res.keep = k; }
@@ -263,7 +263,7 @@ UI.w_story = function () {
     say.push(SM.voice.done[c.bridge % SM.voice.done.length]);
     if (review === 4) {
       const name = St.name || A.names[0], Name = name.charAt(0).toUpperCase() + name.slice(1);
-      say.push(...A.close.map(l => l.replace('{Name}', Name)));
+      say.push(...A.close.map(l => I18n.named(l,{Name})));
     }
     const completed = St.ch.map((c, k) => c.done ? k : -1).filter(k => k >= 0), at = completed.indexOf(review);
     act.push(h('span', { class: 'hint', text: I18n.s("u_3e52002896d6", [review + 1]) }));

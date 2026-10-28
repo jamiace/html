@@ -287,7 +287,7 @@ Object.assign(UI, {
       body.push(h('div', { class: 'grid' }, ...Merchant.goods(mk).map(id => {
         const d = ITEMS[id], left = Merchant.stockLeft(id), locked = S.lvl < d.lvl, own = (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
         return h('div', { class: 'card' + (locked ? ' locked' : '') }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(id), 100, 3, 80)), h('div', { class: 'cn', text: d.n }),
-          h('p', { class: 'cdesc', text: left > 0 ? I18n.s("u_ee3fa37d68e5", [left]) + (own ? I18n.s("u_50a1adcac3e6", [own]) : '') : I18n.s("u_801173176707") }),
+          h('p', { class: 'cdesc', text: left > 0 ? I18n.t('merchant.stock',[left,own]) : I18n.s("u_801173176707") }),
           h('div', { class: 'cfoot' }, locked ? h('span', { class: 'lock', text: I18n.s("u_5aa48649ffcf", [d.lvl]) }) : h('span', { class: 'price' }, ico('i_coin', 18), h('b', { class: 'num', text: String(d.price) })),
             h('button', { class: 'chip sm', disabled: locked || left <= 0 || S.coins < d.price, onclick: () => Merchant.buy(id) }, I18n.s("u_d781b1f88f12"))));
       })));

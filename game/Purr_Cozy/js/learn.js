@@ -58,16 +58,30 @@ const Learn = {
   },
   tts() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; },
   canSpeak() { return this.tts() || !!window.NOOK_AUDIO_BASE; },
-  say(w) { if (!this.tts()) return; try { const u = new SpeechSynthesisUtterance(w); u.lang = 'en-US'; u.rate = 0.88; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { } },
+  say(w) {
+    if(!this.tts())return false;
+    const engine=window.speechSynthesis,word=String(w||'').trim();if(!word)return false;
+    clearTimeout(this._speechTimer);const request=this._speechRequest=(this._speechRequest||0)+1;
+    try{
+      engine.cancel();engine.resume();
+      const voices=engine.getVoices(),english=voices.filter(v=>/^en[-_]/i.test(v.lang));
+      const voice=english.find(v=>/^en[-_]US$/i.test(v.lang)&&/Google|Natural|Microsoft/i.test(v.name))||english.find(v=>/^en[-_]US$/i.test(v.lang))||english[0];
+      const u=this.utterance=new SpeechSynthesisUtterance(word);u.lang=voice?.lang||'en-US';u.rate=.88;u.volume=1;if(voice)u.voice=voice;
+      u.onend=()=>{if(this.utterance===u)this.utterance=null};
+      u.onerror=e=>{if(!['interrupted','canceled'].includes(e.error))console.warn('[speech]',e.error)};
+      this._speechTimer=setTimeout(()=>{if(this._speechRequest!==request)return;engine.resume();engine.speak(u)},60);
+      return true;
+    }catch(e){console.warn('[speech]',e);return false}
+  },
   speak(w) {
-    const base = window.NOOK_AUDIO_BASE, i = VIDX[w];
-    if (!base || i == null || this.noAudio?.[w]) return this.say(w);
-    try {
-      if (this.audio) this.audio.pause();
-      const a = this.audio = new Audio(base + encodeURIComponent(VOCAB[i].au));
-      a.onerror = () => { (this.noAudio || (this.noAudio = {}))[w] = 1; this.say(w); };
-      a.play().catch(() => { });
-    } catch (e) { this.say(w); }
+    const word=String(w||'').trim(),base=window.NOOK_AUDIO_BASE,i=VIDX[word];if(!word)return;
+    if(this.audio){this.audio.pause();this.audio=null}
+    if(!base||i==null||this.noAudio?.[word])return this.say(word);
+    try{
+      const a=this.audio=new Audio(base+encodeURIComponent(VOCAB[i].au));let fallen=false;
+      const fallback=()=>{if(fallen)return;fallen=true;(this.noAudio||(this.noAudio={}))[word]=1;this.say(word)};
+      a.onerror=fallback;a.play().catch(fallback);
+    }catch(e){this.say(word)}
   },
   // ---------- sessions ----------
   start(kind, opts = {}) {
