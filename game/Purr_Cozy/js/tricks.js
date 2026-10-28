@@ -7,12 +7,12 @@
      rotated / squashed with nearest-neighbour sampling so it stays pixel art
    ============================================================ */
 const TRICK_SHOW = {
-  sit: { dur: 2.0, owner: 'near', line: (p) => p.kind === 'dog' ? '汪！坐好了' : '喵，坐好了' },
-  paw: { dur: 2.8, owner: 'paw', line: () => '握手！' },
-  spin: { dur: 2.4, owner: 'near', line: () => '轉圈圈～' },
-  backflip: { dur: 2.3, owner: 'near', line: () => '看我的！' },
+  sit: { dur: 2.0, owner: 'near', line: (p) => p.kind === 'dog' ? I18n.s("u_b84b8e3d139b") : I18n.s("u_afba387f3ab8") },
+  paw: { dur: 2.8, owner: 'paw', line: () => I18n.s("u_7239d7b8580c") },
+  spin: { dur: 2.4, owner: 'near', line: () => I18n.s("u_699ab388d408") },
+  backflip: { dur: 2.3, owner: 'near', line: () => I18n.s("u_0758d15d2b2b") },
   bang: { dur: 4.0, owner: 'gun', line: null },
-  jordan: { dur: 3.2, owner: 'behind', move: 66, line: () => '起跳！' },
+  jordan: { dur: 3.2, owner: 'behind', move: 66, line: () => I18n.s("u_5def8d6139a4") },
   firering: { dur: 4.0, owner: 'ring', move: 66, line: null },
   moonlean: { dur: 3.8, owner: 'far', line: () => '♪～' },
 };
@@ -56,7 +56,7 @@ const TrickShow = {
     return !!this.cur;
   },
   start(a, tid) {
-    if (this.cur) { UI.toast('正在表演中，看完再點下一個吧', 'i_paw', 2.4); return false; }
+    if (this.cur) { UI.toast(I18n.s("u_fad899398a3b"), 'i_paw', 2.4); return false; }
     const def = TRICK_SHOW[tid]; if (!def || !a) return false;
     a.leaveSpot(() => this.setup(a, tid, def));
     return true;
@@ -90,9 +90,9 @@ const TrickShow = {
     if (S.def.move) a.flip = S.dir < 0; else a.flip = S.owner ? A.x < a.x : S.dir < 0;
     if (S.owner) { A.face = 'side'; A.flip = def.owner === 'behind' ? S.dir < 0 : a.x < A.x; }
     if (def.line) Game.bubble(a, def.line(a), 1.6);
-    if (S.owner && S.tid === 'firering') Game.bubble(A, '跳過來！', 1.6);
-    if (S.owner && S.tid === 'paw') Game.bubble(A, '握手～', 1.4);
-    if (S.tid === 'firering' && !S.owner) Game.bubble(a, '看好囉！', 1.6);
+    if (S.owner && S.tid === 'firering') Game.bubble(A, I18n.s("u_67b2a9881cc6"), 1.6);
+    if (S.owner && S.tid === 'paw') Game.bubble(A, I18n.s("u_00516c52d4b4"), 1.4);
+    if (S.tid === 'firering' && !S.owner) Game.bubble(a, I18n.s("u_4939100f6fdb"), 1.6);
   },
   cancel() { const S = this.cur; if (!S) return; this.cur = null; if (S.a && S.a.state === 'trick') { S.a.walking = false; S.a.onArrive = null; S.a.state = 'sit'; S.a.trick = null; S.a.timer = 2; } const A = Game.avatar; if (A && A.state === 'show') { A.walking = false; A.onArrive = null; A.state = 'idle'; A.show = null; A.timer = 1; } if (A && S.aspeed) A.speed = S.aspeed; },
   finish(S) {
@@ -121,11 +121,11 @@ const TrickShow = {
       case 'backflip': once('h1', .4, () => Room.puff('p_dot', a.x, a.y - 1, { vy: -4, max: .4 })); once('h2', 1.25, () => { for (let i = 0; i < 4; i++) Room.puff('p_dot', a.x - 6 + i * 4, a.y - 1, { vy: -3, vx: (i - 1.5) * 8, grav: 12, max: .5 }); Room.puff('p_spark', a.x, a.y - 22, { vy: -6 }); }); break;
       case 'bang':
         once('b1', .2, () => { if (A) A.show.pose = 'gun'; });
-        once('b2', .85, () => { if (A) { Game.bubble(A, '砰！', 1.3); S.flash = .14; } else Game.bubble(a, '砰？', 1.2); });
-        once('b3', 1.0, () => Game.bubble(a, '嗚啊…', 1.2));
+        once('b2', .85, () => { if (A) { Game.bubble(A, I18n.s("u_f20bb67b0ed5"), 1.3); S.flash = .14; } else Game.bubble(a, I18n.s("u_b772167dd7de"), 1.2); });
+        once('b3', 1.0, () => Game.bubble(a, I18n.s("u_b8c4bf9db7b6"), 1.2));
         once('b4', 1.95, () => { for (let i = 0; i < 3; i++) Room.puff('p_dot', a.x - 4 + i * 4, a.y - 1, { vy: -3, vx: (i - 1) * 6, grav: 10, max: .4 }); });
         once('b5', 2.0, () => { if (A) A.show.pose = 'idle'; });
-        once('b6', 3.15, () => { Game.bubble(a, a.kind === 'dog' ? '汪！騙你的～' : '喵！騙你的～', 1.4); if (A) A.show.pose = 'clap'; });
+        once('b6', 3.15, () => { Game.bubble(a, a.kind === 'dog' ? I18n.s("u_c34f2531d400") : I18n.s("u_5d3bb2795d88"), 1.4); if (A) A.show.pose = 'clap'; });
         if (S.flash > 0) S.flash -= dt;
         break;
       case 'jordan': {
@@ -138,7 +138,7 @@ const TrickShow = {
       case 'firering':
         if (A) A.show.pose = t < 3.3 ? 'hold' : 'idle';
         if (S.ring && t < 3.4 && Math.random() < dt * 6) Room.puff('p_spark', S.ring.x - 3 + Math.random() * 6, S.ring.y - 12, { vy: -8, max: .5 });
-        once('f1', 1.75, () => { for (let i = 0; i < 4; i++) Room.puff('p_dot', a.x - 6 + i * 4, a.y - 1, { vy: -3, vx: (i - 1.5) * 8, grav: 12, max: .5 }); if (A) Game.bubble(A, '好棒！', 1.4); });
+        once('f1', 1.75, () => { for (let i = 0; i < 4; i++) Room.puff('p_dot', a.x - 6 + i * 4, a.y - 1, { vy: -3, vx: (i - 1.5) * 8, grav: 12, max: .5 }); if (A) Game.bubble(A, I18n.s("u_106d9fb0b654"), 1.4); });
         break;
       case 'moonlean':
         if (t > 1.0 && t < 2.8 && Math.random() < dt * 3) Room.puff('p_note', a.x - 6 + Math.random() * 12, a.y - 24, { vy: -8, max: 1.2 });

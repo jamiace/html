@@ -120,11 +120,11 @@ class Avatar extends Walker {
   }
   poke() {
     if (this.state === 'show') { this.happy = 1; return; }
-    if (this.state === 'sleep') { this.stand(); Game.bubble(this, '嗯…早安！', 2.2); this.happy = 1.4; this.timer = 3; return; }
-    if (this.state === 'work') { Game.bubble(this, ['專心中！', '再一下下～', '加油加油', '快完成了！'][Math.floor(Math.random() * 4)], 2); this.happy = 1.2; Room.puff('p_spark', this.headPos()[0], this.headPos()[1], { vy: -6 }); return; }
+    if (this.state === 'sleep') { this.stand(); Game.bubble(this, I18n.s("u_d7d84b280302"), 2.2); this.happy = 1.4; this.timer = 3; return; }
+    if (this.state === 'work') { Game.bubble(this, [I18n.s("u_a38f86cefc68"), I18n.s("u_cd32ca0c857b"), I18n.s("u_92152a930351"), I18n.s("u_890fae7b19b6")][Math.floor(Math.random() * 4)], 2); this.happy = 1.2; Room.puff('p_spark', this.headPos()[0], this.headPos()[1], { vy: -6 }); return; }
     this.hop = 0.45; this.happy = 1.6; this.face = 'front';
     Room.puff('p_heart', this.x - 2, this.y - 34, { vy: -10 });
-    Game.bubble(this, ['嗨！', '今天也要好好的', '喝口水吧', '來點音樂？', '心情不錯～', '要不要專注一下？'][Math.floor(Math.random() * 6)], 2.2);
+    Game.bubble(this, [I18n.s("u_c18bda9b964f"), I18n.s("u_3bf8f1f8a706"), I18n.s("u_b1a3d4856f89"), I18n.s("u_4d218d945410"), I18n.s("u_0fc990c71d69"), I18n.s("u_8ba2d2a19c95")][Math.floor(Math.random() * 6)], 2.2);
   }
   update(dt) {
     this.step(dt);
@@ -280,7 +280,7 @@ class Pet extends Walker {
     this.walkTo(b.x + w / 2 + side * 11, b.y + h - 1, () => {
       if (!Room.uidMap[b.uid]) { this.eatBowl = null; this.state = 'sit'; this.timer = 2; return; }
       this.state = 'eat'; this.flip = side > 0; this.timer = 4; const ate = Pets.eatFromBowl(this.data, b, 40);
-      if (ate > 0 && Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? '汪！好吃' : '喵～好吃', 1.6);
+      if (ate > 0 && Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? I18n.s("u_70f9871cf03d") : I18n.s("u_1052da390b08"), 1.6);
     }, true);
   }
   zoom(n = 6) { this.leaveSpot(() => { this.zoomN = n; this.speed = 70; this.state = 'zoom'; this.timer = 0; }); }
@@ -290,7 +290,7 @@ class Pet extends Walker {
     const L = Game.S.life;
     if (d && d.hunger < 50 && !d.sick) { const b = Pets.bowlFor(d); if (b && !this.others().some(a => a.eatBowl === b && a.state === 'eat')) return go(() => this.eatAt(b)); }
     if (L && L.needs.some(n => n.type === 'cat_hungry' && n.pet === this.pid) && r < 0.5) {
-      const b = this.bowl(); if (b) { const [w, h] = itemSize(b); return go(() => { this.state = 'walk'; this.walkTo(b.x + w / 2 + 12, b.y + h - 1, () => { this.state = 'sit'; this.flip = true; this.timer = 4 + Math.random() * 3; Game.bubble(this, this.kind === 'dog' ? '汪…餓餓' : '喵…肚子餓', 2); }); }); }
+      const b = this.bowl(); if (b) { const [w, h] = itemSize(b); return go(() => { this.state = 'walk'; this.walkTo(b.x + w / 2 + 12, b.y + h - 1, () => { this.state = 'sit'; this.flip = true; this.timer = 4 + Math.random() * 3; Game.bubble(this, this.kind === 'dog' ? I18n.s("u_082d4f267bbf") : I18n.s("u_78755e68bf60"), 2); }); }); }
     }
     if (d && (d.energy < 22 || (d.trait === 'sleepy' && r < 0.25) || d.sick) && Math.random() < 0.8) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, 'sleep', 30 + Math.random() * 30)); } return go(() => this.floorNap(30 + Math.random() * 30)); }
     // furniture used in its own way: boxes, soft spots, posts, rugs, plants; dogs at your feet while you focus
@@ -302,7 +302,7 @@ class Pet extends Walker {
     // free time: relationships with the other pets, then this pet's own habits
     { const rr = Math.random(); if (rr < REL_CHANCE && PetAI.relate(this, go)) return; if (rr < REL_CHANCE + HABIT_CHANCE && PetAI.habit(this, go)) return; }
     const os = this.others();
-    if (os.length && r < 0.14) { const o = os[Math.floor(Math.random() * os.length)]; if (!o.on && o.state !== 'sleep') return go(() => { this.state = 'walk'; this.walkTo(o.x + (o.x > this.x ? -13 : 13), o.y + 1, () => { this.state = 'sit'; this.flip = o.x < this.x; this.timer = 2.5 + Math.random() * 2; if (PetAI.snub(o, this)) return; Room.puff('p_heart', (this.x + o.x) / 2 - 2, this.y - 16, { vy: -8 }); if (Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? '汪？' : '喵？', 1.4); }); }); }
+    if (os.length && r < 0.14) { const o = os[Math.floor(Math.random() * os.length)]; if (!o.on && o.state !== 'sleep') return go(() => { this.state = 'walk'; this.walkTo(o.x + (o.x > this.x ? -13 : 13), o.y + 1, () => { this.state = 'sit'; this.flip = o.x < this.x; this.timer = 2.5 + Math.random() * 2; if (PetAI.snub(o, this)) return; Room.puff('p_heart', (this.x + o.x) / 2 - 2, this.y - 16, { vy: -8 }); if (Math.random() < 0.5) Game.bubble(this, this.kind === 'dog' ? I18n.s("u_f8b30a7f815b") : I18n.s("u_9672d1022225"), 1.4); }); }); }
     const roam = d && (d.trait === 'curious' || d.trait === 'playful') ? 0.45 : 0.35;
     if (r < roam) return go(() => { const [x, y] = randFloor(10); this.state = 'walk'; this.walkTo(x, y, () => { this.state = 'sit'; this.timer = 2 + Math.random() * 4; }); });
     if (r < roam + 0.25) { const sp = this.freeSpots(); if (sp.length) { const s = sp[Math.floor(Math.random() * sp.length)]; return go(() => this.goSpot(s, Math.random() < 0.6 ? 'sleep' : 'sit')); } }
@@ -343,7 +343,7 @@ class Pet extends Walker {
     if (this.state !== 'jump') { this.state = 'sit'; this.timer = 3; }
     for (let i = 0; i < 2; i++) Room.puff('p_heart', this.x - 4 + i * 5, this.y - 18, { vy: -9 - i * 3, vx: (i - 0.5) * 6 });
     const d = this.data, nm = d ? d.name : '';
-    Game.bubble(this, this.kind === 'dog' ? ['汪！', '汪汪～', '摸摸頭！', nm + '在這裡！'][Math.floor(Math.random() * 4)] : ['喵～', '喵嗚', '呼嚕呼嚕…', nm + '喵～'][Math.floor(Math.random() * 4)], 1.8);
+    Game.bubble(this, this.kind === 'dog' ? [I18n.s("u_28452697f131"), I18n.s("u_9741ab608634"), I18n.s("u_f62b85c42667"), nm + I18n.s("u_8c4ef0177672")][Math.floor(Math.random() * 4)] : [I18n.s("u_b5d7570da46d"), I18n.s("u_43fdd6d30f94"), I18n.s("u_e00184f317c3"), nm + I18n.s("u_b5d7570da46d")][Math.floor(Math.random() * 4)], 1.8);
   }
   headPos() { return [this.x + (this.flip ? -4 : 4), this.y - 16]; }
   update(dt) {
@@ -389,7 +389,7 @@ class Pet extends Walker {
     if (ActorVisibility.tick(this, dt)) return;
     if (this.state === 'eat' && !this.walking) {
       this.timer -= dt; if (Math.random() < dt * 5) Room.puff('p_dot', this.x + (this.flip ? -8 : 8), this.y - 6, { vy: -4, vx: (Math.random() - 0.5) * 6, grav: 20, max: 0.5 });
-      if (this.timer <= 0) { this.eatBowl = null; this.state = 'sit'; this.happy = 2; this.timer = 3; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); Game.bubble(this, this.kind === 'dog' ? '汪！好吃！' : '喵～吃飽了', 2); PetAI.afterEat(this); }
+      if (this.timer <= 0) { this.eatBowl = null; this.state = 'sit'; this.happy = 2; this.timer = 3; Room.puff('p_heart', this.x - 2, this.y - 18, { vy: -9 }); Game.bubble(this, this.kind === 'dog' ? I18n.s("u_e2fe8140cfed") : I18n.s("u_120e5ad2b789"), 2); PetAI.afterEat(this); }
       return;
     }
     if (this.state === 'act') { if (!this.walking) PetAI.update(this, dt); PetAI.react(this, dt); return; }

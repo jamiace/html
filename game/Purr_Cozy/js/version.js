@@ -22,9 +22,9 @@ const Update = {
       this.bar = h('div', { class: 'updbar', role: 'status' });
       const app = document.getElementById('app'); app.prepend(this.bar); document.body.classList.add('has-upd');
     }
-    this.bar.replaceChildren(ico('i_sparkle', 20), h('span', { class: 'grow', text: `有新版本 ${this.label(j.version, j.date)}（目前 ${this.label(window.NOOK_VERSION)}）` }),
-      h('button', { class: 'chip sm primary', onclick: () => this.reload() }, ico('i_reset', 16), '更新'),
-      h('button', { class: 'xbtn', 'aria-label': '先不要', title: '先不要（下次存檔時會再提醒）', onclick: () => this.hide() }, ico('i_close', 16)));
+    this.bar.replaceChildren(ico('i_sparkle', 20), h('span', { class: 'grow', text: I18n.s("u_8360666ac92a", [this.label(j.version, j.date), this.label(window.NOOK_VERSION)]) }),
+      h('button', { class: 'chip sm primary', onclick: () => this.reload() }, ico('i_reset', 16), I18n.s("u_3055a035f0eb")),
+      h('button', { class: 'xbtn', 'aria-label': I18n.s("u_ecddc6cb858d"), title: I18n.s("u_900ec60cd051"), onclick: () => this.hide() }, ico('i_close', 16)));
   },
   hide() { if (this.bar) { this.bar.remove(); this.bar = null; document.body.classList.remove('has-upd'); } this.lastCheck = Date.now(); },
   // save first, then get the newest files (the service worker always asks the network first)
@@ -53,7 +53,7 @@ const Update = {
       location.replace(url.href);
     } catch(e) {
       this.reloading=false;
-      UI.toast('更新未完成，請檢查連線後再試一次。','i_cloud',5);
+      UI.toast(I18n.s("u_2e9cf79261ef"),'i_cloud',5);
     }
 
   },
@@ -69,8 +69,8 @@ const Update = {
   const ws = UI.w_settings;
   UI.w_settings = function () {
     const out = ws.apply(this, arguments);
-    out.push(h('div', { class: 'row between verrow' }, h('span', { class: 'hint', text: '版本' }), h('span', { class: 'num', text: Update.label(window.NOOK_VERSION, window.NOOK_VERSION_DATE) }),
-      window.NOOK_ENV === 'web' ? h('button', { class: 'chip sm', onclick: async () => { await Update.check(true); if (!Update.newer) UI.toast('已經是最新版本', 'i_check', 2.2); } }, '檢查更新') : null));
+    out.push(h('div', { class: 'row between verrow' }, h('span', { class: 'hint', text: I18n.s("u_5f76b2bf82dd") }), h('span', { class: 'num', text: Update.label(window.NOOK_VERSION, window.NOOK_VERSION_DATE) }),
+      window.NOOK_ENV === 'web' ? h('button', { class: 'chip sm', onclick: async () => { await Update.check(true); if (!Update.newer) UI.toast(I18n.s("u_73f81bb2cf82"), 'i_check', 2.2); } }, I18n.s("u_46393cd017ed")) : null));
     return out;
   };
 })();

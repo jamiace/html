@@ -55,8 +55,8 @@ const PurrHands = {
       this.panel.replaceChildren(ico(PetPlay.spr(id),34),
         h('div',{class:'purr-hand-text'},
           h('b',{text:PetPlay.name(id)}),
-          h('span',{text:HAND[id]==='wand'?'在房間拖曳，羽毛會浮在手指上方':HAND[id]==='brush'?'按住寵物來回刷；圖示浮在手指上方':'點寵物或食盆使用；圖示浮在手指上方'})),
-        h('button',{class:'chip sm',onclick:()=>PetPlay.drop()},'放下'));
+          h('span',{text:HAND[id]==='wand'?I18n.s("u_4a03bd6d53eb"):HAND[id]==='brush'?I18n.s("u_6aa9061285cf"):I18n.s("u_9abf407bab1c")})),
+        h('button',{class:'chip sm',onclick:()=>PetPlay.drop()},I18n.s("u_e0f2d3ead59c")));
     }
     if(Mobile.today&&this.panel.parentNode!==Mobile.today)Mobile.today.prepend(this.panel);
     if(PetPlay._hint)PetPlay._hint.hidden=true;

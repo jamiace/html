@@ -26,8 +26,8 @@
 // inner area that fills with stars, in sprite pixels: x0..x1, y0 (top) .. y1 (bottom)
 const JARS = { d: { k: 'star_jar_d', x0: 2, x1: 6, y0: 4, y1: 10 }, w: { k: 'star_jar_w', x0: 2, x1: 10, y0: 4, y1: 16 } };
 Object.assign(ITEMS, {
-  star_jar_d: { n: '每日星星罐', cat: 'decor', spr: 'star_jar_d', price: 0, lvl: 1, layer: 'decor', giftOnly: true, jar: 'd', act: 'starJar', desc: '每日團隊任務的進度會變成罐子裡的星星。' },
-  star_jar_w: { n: '每週星星罐', cat: 'decor', spr: 'star_jar_w', price: 0, lvl: 1, layer: 'decor', giftOnly: true, jar: 'w', act: 'starJar', desc: '每週團隊任務的進度會變成罐子裡的星星。' },
+  star_jar_d: { n: I18n.s("u_a0422fbf91cb"), cat: 'decor', spr: 'star_jar_d', price: 0, lvl: 1, layer: 'decor', giftOnly: true, jar: 'd', act: 'starJar', desc: I18n.s("u_50258ad37ea0") },
+  star_jar_w: { n: I18n.s("u_dd8c84a00f0d"), cat: 'decor', spr: 'star_jar_w', price: 0, lvl: 1, layer: 'decor', giftOnly: true, jar: 'w', act: 'starJar', desc: I18n.s("u_a96245ed136a") },
 });
 for (const k of ['star_jar_d', 'star_jar_w']) ITEMS[k].id = k;
 
@@ -71,15 +71,15 @@ const StarJar = {
   give(type) {
     const k = JARS[type].k, S = Game.S; if (!S.jarGiven) S.jarGiven = {};
     if (S.jarGiven[type]) return; S.jarGiven[type] = true;
-    if (!this.placed(type).length && !(S.inv[k] > 0)) { S.inv[k] = (S.inv[k] || 0) + 1; UI.toast(`收到「${ITEMS[k].n}」！到收納箱把它擺出來（桌上、架子上或地上都可以），團隊進度會變成星星`, 'i_star', 5, { label: '收納箱', fn: () => { UI.stoTab = 'items'; UI.openWin('storage'); } }); UI.refresh('storage'); }
+    if (!this.placed(type).length && !(S.inv[k] > 0)) { S.inv[k] = (S.inv[k] || 0) + 1; UI.toast(I18n.s("u_9d8515690170", [ITEMS[k].n]), 'i_star', 5, { label: I18n.s("u_888f1eb65671"), fn: () => { UI.stoTab = 'items'; UI.openWin('storage'); } }); UI.refresh('storage'); }
     Game.save();
   },
   tip(it) {
     const d = ITEMS[it.k]; if (!d || !d.jar) return null;
     const s = this.state(d.jar), n = TEAM_TYPES[d.jar].n;
-    if (!s) return `${d.n}：還沒有加入${n}團隊`;
+    if (!s) return I18n.s("u_7917d4fd0ed3", [d.n, n]);
     const def = TEAM_TASKS[s.task];
-    return `${n}團隊「${def ? def.n : ''}」${s.total}/${s.goal}${def ? ' ' + def.unit : ''}` + (s.done ? (s.claim ? '・完成！可以領獎勵' : '・完成') : '');
+    return I18n.s("u_f3e4c6544fb0", [n, def ? def.n : '', s.total, s.goal, def ? ' ' + def.unit : '']) + (s.done ? (s.claim ? I18n.s("u_f81df4588f8f") : I18n.s("u_7bc73c5f0bd3")) : '');
   },
 };
 ITEMS.star_jar_d.anim = ITEMS.star_jar_w.anim = (c, x, y, it, t, cv) => StarJar.draw(c, x, y, it, t, cv);

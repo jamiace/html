@@ -6,15 +6,15 @@
    - coupon: one per purchase, one per game day (06:00), expires 30 x 24 h after you get it,
      only for COUPON_CATS (not themes, gacha, adoption, consumables, the merchant)
    ============================================================ */
-const COUPONS = [{ off: 10, w: 60, n: '9 折' }, { off: 20, w: 30, n: '8 折' }, { off: 30, w: 10, n: '7 折' }];
+const COUPONS = [{ off: 10, w: 60, n: I18n.s("u_0c686931a381") }, { off: 20, w: 30, n: I18n.s("u_89489413051e") }, { off: 30, w: 10, n: I18n.s("u_83d2bf758086") }];
 const COUPON_DAYS = 30, GIFT_ITEM_RATE = 0.25, GIFT_PITY = 4, PRIZE_COIN_SHARE = 0.6, GACHA_COST = 80, GACHA_SELL = 0.3;
-const COUPON_CATS = { item: '家具擺飾', wp: '壁紙', fl: '地板', view: '窗景', closet: '角色造型', pettool: '寵物玩具', petacc: '寵物配件' };
+const COUPON_CATS = { item: I18n.s("u_ea23ec0dffea"), wp: I18n.s("u_524746976904"), fl: I18n.s("u_59a6a585ba18"), view: I18n.s("u_5f0d94f3ff27"), closet: I18n.s("u_b77f3fd8ff7e"), pettool: I18n.s("u_ed07fe1f1d03"), petacc: I18n.s("u_2963e1ddbf48") };
 const Rewards = {
   get W() { const S = Game.S; if (!S.wallet) S.wallet = { coupons: [], usedDay: '', sel: null, giftMiss: 0, tickets: 0, nid: 1, pend: null }; return S.wallet; },
   today() { return Life.today(); },
   prune() { const W = this.W, now = Date.now(), n = W.coupons.length; W.coupons = W.coupons.filter(c => c.exp > now); if (W.sel && !W.coupons.some(c => c.id === W.sel)) W.sel = null; return n - W.coupons.length; },
-  couponName(c) { const t = COUPONS.find(x => x.off === c.off); return t ? t.n : `${(100 - c.off) / 10} 折`; },
-  timeLeft(c) { const ms = c.exp - Date.now(); if (ms <= 0) return '已過期'; const d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600e3); return d ? `${d} 天 ${h} 小時` : `${h} 小時 ${Math.max(1, Math.floor(ms % 3600e3 / 60000))} 分`; },
+  couponName(c) { const t = COUPONS.find(x => x.off === c.off); return t ? t.n : I18n.s("u_44547dec965c", [(100 - c.off) / 10]); },
+  timeLeft(c) { const ms = c.exp - Date.now(); if (ms <= 0) return I18n.s("u_9b42a6cda2e5"); const d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600e3); return d ? I18n.s("u_afb68209967c", [d, h]) : I18n.s("u_60dddd8c2d43", [h, Math.max(1, Math.floor(ms % 3600e3 / 60000))]); },
   addCoupon(off) { const W = this.W, now = Date.now(), c = { id: W.nid++, off, got: now, exp: now + COUPON_DAYS * 86400000 }; W.coupons.push(c); W.coupons.sort((a, b) => a.exp - b.exp); return c; },
   rollCoupon() { let r = Math.random() * COUPONS.reduce((a, c) => a + c.w, 0); for (const c of COUPONS) { if ((r -= c.w) < 0) return c.off; } return 10; },
   usedToday() { return this.W.usedDay === this.today(); },
@@ -27,7 +27,7 @@ const Rewards = {
     const c = this.active(cat); if (!c) return 0;
     const W = this.W, pay = this.pay(base, c);
     W.coupons = W.coupons.filter(x => x.id !== c.id); W.sel = null; W.usedDay = this.today(); (W.spent = W.spent || []).push(c.got + ':' + c.off); if (W.spent.length > 200) W.spent.splice(0, W.spent.length - 200);
-    UI.toast(`${name ? `「${name}」` : ''}原價 ${base}，用${this.couponName(c)}券折 ${base - pay}，實付 ${pay} 金幣（今天的折價券用完了）`, 'i_coupon', 4.5);
+    UI.toast(I18n.s("u_7d5c7a42a46c", [name ? `「${name}」` : '', base, this.couponName(c), base - pay, pay]), 'i_coupon', 4.5);
     return base - pay;
   },
   groups() {
@@ -62,7 +62,7 @@ const Rewards = {
     if (!p) p = Math.random() < PRIZE_COIN_SHARE ? { type: 'coins', n: this.coinPrize(opts.lvl) } : { type: 'coupon', off: this.rollCoupon() };
     return p;
   },
-  pityText() { const m = this.W.giftMiss || 0; return m >= GIFT_PITY ? '下一個禮物盒必出家具' : m ? `禮物盒已連續 ${m} 次沒開到家具，再開 ${GIFT_PITY + 1 - m} 次內必出` : `禮物盒有 25% 開出家具，連續 ${GIFT_PITY} 次沒開到，第 ${GIFT_PITY + 1} 次必出`; },
+  pityText() { const m = this.W.giftMiss || 0; return m >= GIFT_PITY ? I18n.s("u_942924d45975") : m ? I18n.s("u_d12ba9467e54", [m, GIFT_PITY + 1 - m]) : I18n.s("u_e430fa7f02f3", [GIFT_PITY, GIFT_PITY + 1]); },
   grant(p) {
     const S = Game.S;
     if (p.type === 'item') S.inv[p.id] = (S.inv[p.id] || 0) + 1;
@@ -71,8 +71,8 @@ const Rewards = {
     UI.hud(true); UI.refresh('storage'); Game.save(); saveSoon();
   },
   openTicket() {
-    const W = this.W; if (!(W.tickets > 0)) return UI.toast('沒有抽獎券', 'i_ticket');
-    W.tickets--; const p = this.roll({}); this.grant(p); UI.prizeModal(p, '抽獎券'); UI.refresh('friends');
+    const W = this.W; if (!(W.tickets > 0)) return UI.toast(I18n.s("u_de67d613afe2"), 'i_ticket');
+    W.tickets--; const p = this.roll({}); this.grant(p); UI.prizeModal(p, I18n.s("u_1cec9a55bdea")); UI.refresh('friends');
   },
   // ---------- gacha ----------
   owned(id) { const S = Game.S; return { room: S.items.filter(i => i.k === id).length, box: S.inv[id] || 0 }; },
@@ -80,21 +80,21 @@ const Rewards = {
   gacha(it, cx) {
     const S = Game.S, W = this.W;
     if (W.pend) return UI.openWin('gacha');   // an earlier result is still waiting for keep / sell
-    if (S.coins < GACHA_COST) return Game.bubbleAt(cx, it.y, `扭一次要 ${GACHA_COST} 金幣`);
+    if (S.coins < GACHA_COST) return Game.bubbleAt(cx, it.y, I18n.s("u_c691b22e9bc2", [GACHA_COST]));
     const pool = this.gachaPool(), got = pool[Math.floor(Math.random() * pool.length)]; if (!got) return;
     const o = this.owned(got.id);
     S.coins -= GACHA_COST; Life.track('buy', 1, { kind: 'gacha', id: got.id });
     for (let i = 0; i < 4; i++) Room.puff('p_spark', cx - 4 + i * 3, it.y + 18, { vy: -8 - i, max: 0.9 });
     if (o.room + o.box > 0) { W.pend = { id: got.id, at: Date.now() }; UI.openWin('gacha'); }
-    else { S.inv[got.id] = (S.inv[got.id] || 0) + 1; UI.toast(`扭到了「${got.n}」！放在收納箱`, 'i_box', 3.5, { label: '馬上擺放', fn: () => Game.place(got.id) }); }
+    else { S.inv[got.id] = (S.inv[got.id] || 0) + 1; UI.toast(I18n.s("u_dd380b91373f", [got.n]), 'i_box', 3.5, { label: I18n.s("u_6a1f209d5ec4"), fn: () => Game.place(got.id) }); }
     UI.hud(true); UI.refresh('storage'); Game.save(); saveSoon();
   },
   sellPrice(id) { return Math.floor((ITEMS[id] ? ITEMS[id].price : 0) * GACHA_SELL); },
   gachaKeep(sell) {
     const W = this.W, id = W.pend && W.pend.id, d = ITEMS[id]; W.pend = null; const S = Game.S;
     if (!d) return UI.closeWin('gacha');
-    if (sell) { const c = this.sellPrice(id); Game.reward(c, 0, 'raw'); UI.toast(`賣掉「${d.n}」，得到 ${c} 金幣`, 'i_coin', 3); }
-    else { S.inv[id] = (S.inv[id] || 0) + 1; UI.toast(`「${d.n}」放進收納箱了`, 'i_box', 2.5); }
+    if (sell) { const c = this.sellPrice(id); Game.reward(c, 0, 'raw'); UI.toast(I18n.s("u_e8132088319f", [d.n, c]), 'i_coin', 3); }
+    else { S.inv[id] = (S.inv[id] || 0) + 1; UI.toast(I18n.s("u_6f3742c0252d", [d.n]), 'i_box', 2.5); }
     UI.closeWin('gacha'); UI.hud(true); UI.refresh('storage'); Game.save(); saveSoon();
   },
 };
@@ -105,7 +105,7 @@ SPR.def('i_ticket', icon(g => { g.rect(1, 3, 14, 10, 'K'); g.cut(1, 3, 14, 10, 1
 SPR.def('i_gift', icon(g => { g.rect(2, 6, 12, 8, 'r'); g.rect(1, 4, 14, 3, 's'); g.vl(7, 4, 10, 'w'); g.vl(8, 4, 10, 'w'); g.pts([[5, 2], [6, 3], [10, 2], [9, 3], [4, 3], [11, 3]], 'w'); }));
 
 /* ---------------- windows ---------------- */
-Object.assign(UI.WIN, { prize: { t: '打開了！', i: 'i_gift', w: 320, at: ['c', 0], modal: true }, gacha: { t: '扭到重複的了', i: 'i_box', w: 340, at: ['c', 0], modal: true } });
+Object.assign(UI.WIN, { prize: { t: I18n.s("u_e748fedb5951"), i: 'i_gift', w: 320, at: ['c', 0], modal: true }, gacha: { t: I18n.s("u_849ecc894e2a"), i: 'i_box', w: 340, at: ['c', 0], modal: true } });
 Object.assign(UI, {
   prizeModal(p, from) { this.prizeP = { p, from }; this.openWin('prize'); },
   prizePreview(p) {
@@ -114,34 +114,34 @@ Object.assign(UI, {
   },
   w_prize() {
     const P = this.prizeP; if (!P) return []; const p = P.p;
-    const t = p.type === 'item' ? ['收到了「', h('b', { text: ITEMS[p.id].n }), '」'] : p.type === 'coins' ? ['得到 ', h('b', { class: 'num', text: String(p.n) }), ' 金幣'] : ['得到一張', h('b', { text: Rewards.couponName(p) }), '折價券'];
-    const hint = (p.type === 'item' ? (p.pity ? '連續 4 次沒開到家具，這次保底送你一件。' : '') + '東西放在收納箱裡。' : p.type === 'coupon' ? `可以用在${Object.values(COUPON_CATS).join('、')}（主題房間、扭蛋、領養、消耗道具、旅行商人不行）。一次購買用一張、一天只能用一張，${COUPON_DAYS} 天後過期。` : '') ;
-    const pity = P.from === '禮物盒' ? h('p', { class: 'hint', text: Rewards.pityText() }) : null;
+    const t = p.type === 'item' ? [I18n.s("u_9bf524ce3a19"), h('b', { text: ITEMS[p.id].n }), '」'] : p.type === 'coins' ? [I18n.s("u_8ccfd0fc233e"), h('b', { class: 'num', text: String(p.n) }), I18n.s("u_35074813fa04")] : [I18n.s("u_965ec721f455"), h('b', { text: Rewards.couponName(p) }), I18n.s("u_495d7531d276")];
+    const hint = (p.type === 'item' ? (p.pity ? I18n.s("u_202b6f6b45b0") : '') + I18n.s("u_14df92276fa7") : p.type === 'coupon' ? I18n.s("u_4781f8ecf5b9", [Object.values(COUPON_CATS).join('、'), COUPON_DAYS]) : '') ;
+    const pity = P.from === I18n.s("u_aa3f01d20cb5") ? h('p', { class: 'hint', text: Rewards.pityText() }) : null;
     return [h('div', { class: 'gift' }, h('div', { class: 'gift-pv' }, this.prizePreview(p)), h('p', { class: 'gift-t' }, ...t), hint ? h('p', { class: 'hint', text: hint }) : null, pity),
-      h('div', { class: 'row center' }, p.type === 'item' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('prize'); Game.place(p.id); } }, ico('i_brush', 20), '馬上擺放') : null,
-        p.type === 'coupon' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('prize'); this.openWin('shop'); } }, ico('i_shop', 20), '去商店') : null,
-        h('button', { class: 'chip', onclick: () => this.closeWin('prize') }, '收下'))];
+      h('div', { class: 'row center' }, p.type === 'item' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('prize'); Game.place(p.id); } }, ico('i_brush', 20), I18n.s("u_6a1f209d5ec4")) : null,
+        p.type === 'coupon' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('prize'); this.openWin('shop'); } }, ico('i_shop', 20), I18n.s("u_0ae148c4b35d")) : null,
+        h('button', { class: 'chip', onclick: () => this.closeWin('prize') }, I18n.s("u_52251aeea31a")))];
   },
   w_gacha() {
     const W = Rewards.W, id = W.pend && W.pend.id, d = ITEMS[id]; if (!d) return [];
     const c = Rewards.sellPrice(id), o = Rewards.owned(id);
-    return [h('div', { class: 'gift' }, h('div', { class: 'gift-pv' }, sprPreview(Room.itemCanvas({ k: id }), 120, 5)), h('p', { class: 'gift-t' }, '扭到了「', h('b', { text: d.n }), '」'),
-      h('p', { class: 'hint', text: `你已經有這件了（房間裡 ${o.room} 件、收納箱 ${o.box} 件）。原價 ${d.price} 金幣。重複的也能拿來佈置，或是用原價 3 折賣掉。` })),
-      h('div', { class: 'row center' }, h('button', { class: 'chip primary', onclick: () => Rewards.gachaKeep(false) }, ico('i_box', 20), '收進收納箱'), h('button', { class: 'chip', onclick: () => Rewards.gachaKeep(true) }, ico('i_coin', 20), `賣掉 +${c}`))];
+    return [h('div', { class: 'gift' }, h('div', { class: 'gift-pv' }, sprPreview(Room.itemCanvas({ k: id }), 120, 5)), h('p', { class: 'gift-t' }, I18n.s("u_0bc5d46e088b"), h('b', { text: d.n }), '」'),
+      h('p', { class: 'hint', text: I18n.s("u_66075e1e5b56", [o.room, o.box, d.price]) })),
+      h('div', { class: 'row center' }, h('button', { class: 'chip primary', onclick: () => Rewards.gachaKeep(false) }, ico('i_box', 20), I18n.s("u_9f13c4fa2af5")), h('button', { class: 'chip', onclick: () => Rewards.gachaKeep(true) }, ico('i_coin', 20), I18n.s("u_0800fa30dfd5", [c])))];
   },
   // coupon picker used by the shop, the wardrobe and the pet window
   couponBar() {
     const groups = Rewards.groups(), W = Rewards.W;
     if (!groups.length) return null;
     const used = Rewards.usedToday();
-    return h('div', { class: 'cpbar', 'aria-label': '折價券' },
-      h('span', { class: 'cp-hint hint', text: used ? '今日已用券' : '選券後購買時使用；每天一張' }),
+    return h('div', { class: 'cpbar', 'aria-label': I18n.s("u_495d7531d276") },
+      h('span', { class: 'cp-hint hint', text: used ? I18n.s("u_9795f6150d5f") : I18n.s("u_4afe41d0c93d") }),
       ...groups.map(g => {
         const selected = W.coupons.some(c => c.id === W.sel && Number(c.off) === g.off);
         return h('button', { class: 'chip sm coupon-group' + (selected ? ' on' : ''), disabled: used,
-          'aria-pressed': String(selected), title: '優先使用最早到期的一張；' + Rewards.timeLeft(g.first) + '後過期',
+          'aria-pressed': String(selected), title: I18n.s("u_e6c2e39fe6fc") + Rewards.timeLeft(g.first) + I18n.s("u_0757dfb8926b"),
           onclick: () => Rewards.select(selected ? W.sel : g.first.id) },
-          h('span', { class: 'coupon-stack-label', text: ((100-g.off)/10) + '折券 x' + g.count + ' 剩' + Rewards.daysLeft(g.first) + '天' }));
+          h('span', { class: 'coupon-stack-label', text: ((100-g.off)/10) + I18n.s("u_3501b8c58bc9") + g.count + I18n.s("u_292b5991046e") + Rewards.daysLeft(g.first) + I18n.s("u_49da61ceeea2") }));
       }));
   },
 

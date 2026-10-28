@@ -24,7 +24,7 @@ const Music = {
     a.addEventListener('ended', () => this.onEnded());
     a.addEventListener('play', () => { this.playing = true; this.changed(); });
     a.addEventListener('pause', () => { if (this.cur && this.cur.type !== 'yt') { this.playing = false; this.changed(); } });
-    a.addEventListener('error', () => { if (!this.cur || this.cur.type === 'yt' || !a.src) return; this.playing = false; UI.toast('這首歌無法播放（格式不支援或檔案已失效）', 'i_music', 3.5); this.changed(); });
+    a.addEventListener('error', () => { if (!this.cur || this.cur.type === 'yt' || !a.src) return; this.playing = false; UI.toast(I18n.s("u_7e10d0afe55e"), 'i_music', 3.5); this.changed(); });
     const M = this.M; if (M.idx >= 0 && M.list[M.idx]) this.cur = M.list[M.idx];
     if (M.ctx === 'lib') this.cur = M.last && M.last.ctx === 'lib' ? Object.assign({}, M.last) : null;
     this.loadLib(false); MusicCache.init().then(() => UI.refresh('music'));
@@ -60,7 +60,7 @@ const Music = {
     const lrcs = {}; for (const f of files) if (/\.lrc$/i.test(f.name)) lrcs[f.name.replace(/\.lrc$/i, '').toLowerCase()] = f;
     for (const f of files) {
       if (!(f.type && f.type.startsWith('audio/')) && !AUDIO_EXT.test(f.name)) continue;
-      if (M.list.length >= 300) { UI.toast('播放清單最多 300 首', 'i_music'); break; }
+      if (M.list.length >= 300) { UI.toast(I18n.s("u_9e7e990ff681"), 'i_music'); break; }
       const id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
       let stored = true; try { await this.putBlob(id, f); } catch (e) { stored = false; unsaved++; }
       this.urls[id] = URL.createObjectURL(f);
@@ -68,9 +68,9 @@ const Music = {
       const lf = lrcs[f.name.replace(AUDIO_EXT, '').toLowerCase()]; if (lf) { try { MusicCache.small('lrc', 'file:' + id, Lyrics.decode(await lf.arrayBuffer())); } catch (e) { } }
       if (first < 0) first = M.list.length - 1; n++;
     }
-    if (!n) { UI.toast(Object.keys(lrcs).length ? '只找到歌詞檔，請和同名的音樂檔一起拖進來' : '沒有找到可以播放的音樂檔（支援 MP3、FLAC、M4A、OGG、WAV）', 'i_music', 4); return; }
+    if (!n) { UI.toast(Object.keys(lrcs).length ? I18n.s("u_14744a5b3fd9") : I18n.s("u_2c7b38ad1df7"), 'i_music', 4); return; }
     Game.save(); UI.refresh('music');
-    UI.toast(`加入了 ${n} 首歌` + (unsaved ? `，其中 ${unsaved} 首太大無法記住，重新整理後要再加一次` : ''), 'i_music', 3.5);
+    UI.toast(I18n.s("u_f2905c3284c4", [n]) + (unsaved ? I18n.s("u_ff260e301a29", [unsaved]) : ''), 'i_music', 3.5);
     if (!this.playing) this.playIdx(first);
   },
   parseYT(s) {
@@ -88,8 +88,8 @@ const Music = {
     return { vid, list: list && /^[\w-]+$/.test(list) ? list : null };
   },
   addYT(text) {
-    const p = this.parseYT(text); if (!p) { UI.toast('看不懂這個連結，請貼上 YouTube 影片或播放清單網址', 'i_video', 3.5); return false; }
-    const M = this.M; M.list.push({ id: 'y' + Date.now().toString(36), type: 'yt', vid: p.vid, list: p.list, title: p.list && !p.vid ? 'YouTube 播放清單' : 'YouTube 影片 ' + (p.vid || '') });
+    const p = this.parseYT(text); if (!p) { UI.toast(I18n.s("u_f3e4e22d67cd"), 'i_video', 3.5); return false; }
+    const M = this.M; M.list.push({ id: 'y' + Date.now().toString(36), type: 'yt', vid: p.vid, list: p.list, title: p.list && !p.vid ? I18n.s("u_740bb06c2eee") : I18n.s("u_d75fa4fef9e8") + (p.vid || '') });
     Game.save(); UI.refresh('music'); if (!this.playing) this.playIdx(M.list.length - 1); return true;
   },
   isLib(e) { return e && (e.type === 'drive' || (e.type === 'url' && String(e.id).startsWith('u:'))); },
@@ -152,7 +152,7 @@ const Music = {
     this.audio.pause(); Lyrics.load(e); Covers.get(e, true).then(() => UI.refresh('music'));
     const src = await this.srcFor(e);
     if (this.cur !== e || src === 'abort') return;   // another track was picked while this one downloaded
-    if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast('找不到這首歌的檔案，請重新加入', 'i_music'); return; }
+    if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast(I18n.s("u_4b1dbb5bb0bc"), 'i_music'); return; }
     e.missing = false; this.fails = 0;
     this._loadedId = e.id; this.audio.src = src; this.audio.volume = M.vol;
     if (M.shuffle && Q.length > 1) { let j; do { j = Math.floor(Math.random() * Q.length); } while (j === i); this.shufNext = j; }
@@ -162,7 +162,7 @@ const Music = {
   toggle(force) {
     const M = this.M;
     if (force === false && !this.playing) return;
-    if (M.ctx === 'lib' && !this.Q.length) { if (Lib.status === 'loading') return this.loadLib(false).then(() => this.Q.length ? this.toggle(force) : UI.toast('上次播放的曲目目前無法取得，請重新讀取音樂庫', 'i_music')); UI.toast('上次播放的曲目目前無法取得，請重新讀取音樂庫', 'i_music'); return; }
+    if (M.ctx === 'lib' && !this.Q.length) { if (Lib.status === 'loading') return this.loadLib(false).then(() => this.Q.length ? this.toggle(force) : UI.toast(I18n.s("u_70d234d09a2b"), 'i_music')); UI.toast(I18n.s("u_70d234d09a2b"), 'i_music'); return; }
     if (!this.cur) { if (M.ctx === 'lib' && Lib.tracks.length) this.playLib(Math.max(0, Math.min(M.lidx || 0, Lib.queue(M.libAlbum).length - 1)), M.libAlbum); else if (M.list.length) this.playIdx(Math.max(0, M.idx)); else if (Lib.tracks.length) this.playLib(0, ''); else UI.openWin('music'); return; }
     if (this.cur.type === 'yt') {
       if (!this.yt || !this.ytReady) return this.playAt(Math.max(0, this.qi));
@@ -237,7 +237,7 @@ const Music = {
         events: {
           onReady: () => { this.ytReady = true; if (this.cur && this.cur.type === 'yt') { const c = this.cur; e = c; load(); } },
           onStateChange: (ev) => this.onYTState(ev),
-          onError: () => { if (this.cur && this.cur.list && this.yt) { try { const pl = this.yt.getPlaylist() || []; if (pl.length > 1) { setTimeout(() => { try { this.yt.nextVideo(); } catch (x) { } }, 400); return; } } catch (x) { } } UI.toast('這部影片不允許嵌入播放，跳到下一首', 'i_video', 3.5); setTimeout(() => this.next(false), 800); },
+          onError: () => { if (this.cur && this.cur.list && this.yt) { try { const pl = this.yt.getPlaylist() || []; if (pl.length > 1) { setTimeout(() => { try { this.yt.nextVideo(); } catch (x) { } }, 400); return; } } catch (x) { } } UI.toast(I18n.s("u_0765ca299cfd"), 'i_video', 3.5); setTimeout(() => this.next(false), 800); },
         },
       });
     } else if (this.ytReady) load();
@@ -280,7 +280,7 @@ const Music = {
   },
   changed() {
     UI.refresh('music'); UI.hud(true);
-    try { if (navigator.mediaSession && this.cur && window.MediaMetadata) { navigator.mediaSession.metadata = new MediaMetadata({ title: this.cur.title, artist: '呼嚕小窩' }); navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused'; } } catch (e) { }
+    try { if (navigator.mediaSession && this.cur && window.MediaMetadata) { navigator.mediaSession.metadata = new MediaMetadata({ title: this.cur.title, artist: I18n.s("u_e41ac510c97e") }); navigator.mediaSession.playbackState = this.playing ? 'playing' : 'paused'; } } catch (e) { }
   },
 };
 
@@ -328,20 +328,20 @@ const Lib = {
       const r = await fetch('music/playlist.json', { cache: 'no-cache' }); if (!r.ok) return [];
       const list = await r.json(); if (!Array.isArray(list)) return [];
       return list.map((t, i) => { const src = typeof t === 'string' ? t : t && t.src; if (!src) return null;
-        return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', lrc: (t && t.lrc) || '', album: (t && t.album) || '內建', title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
+        return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', lrc: (t && t.lrc) || '', album: (t && t.album) || I18n.s("u_b3cf484b0ad2"), title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
     } catch (e) { return []; }
   },
   async api(path, params) {
     const u = new URL('https://www.googleapis.com/drive/v3/' + path); for (const k in params) u.searchParams.set(k, params[k]); u.searchParams.set('key', this.key);
     const r = await fetch(u.toString()); const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const m = (j.error && j.error.message) || ('HTTP ' + r.status); throw new Error(r.status === 403 ? '金鑰沒有權限或 Drive API 沒有啟用：' + m : r.status === 404 ? '找不到資料夾，請確認已設成「知道連結的人都能檢視」' : m); }
+    if (!r.ok) { const m = (j.error && j.error.message) || ('HTTP ' + r.status); throw new Error(r.status === 403 ? I18n.s("u_d5c7ab76b291") + m : r.status === 404 ? I18n.s("u_05cb5058bcd2") : m); }
     return j;
   },
   async loadDrive(force) {
     const root = this.folder;
     if (!force) try { const c = JSON.parse(localStorage.getItem(this.CACHE) || 'null'); if (c && c.folder === root && Date.now() - c.at < this.TTL && Array.isArray(c.tracks)) { this.root = c.root || ''; this.at = c.at; return c.tracks; } } catch (e) { }
     const meta = await this.api('files/' + encodeURIComponent(root), { fields: 'name', supportsAllDrives: 'true' }).catch(() => ({}));
-    this.root = meta.name || '雲端資料夾';
+    this.root = meta.name || I18n.s("u_f3e1a241d500");
     const out = [], todo = [{ id: root, path: '' }], done = new Set();
     while (todo.length && done.size < this.MAX_FOLDERS && out.length < this.MAX_TRACKS) {
       const f = todo.shift(); if (done.has(f.id)) continue; done.add(f.id);

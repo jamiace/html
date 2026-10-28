@@ -1,7 +1,7 @@
 /* Purr Cozy: compact shop, semantic timer wrapping and visible viewport sizing. */
 (function () {
   UI.timerWords = function (text) {
-    const words = text.startsWith('準備') ? ['準備', text.slice(2)] : [text];
+    const words = text.startsWith(I18n.s("u_04f46f8ed7b7")) ? [I18n.s("u_04f46f8ed7b7"), text.slice(2)] : [text];
     return words.flatMap((word, i) => [i ? h('wbr') : null, h('span', { class: 'status-word', text: word })]).filter(Boolean);
   };
   const shop = UI.w_shop.bind(UI);
@@ -17,7 +17,7 @@
       const families = filter.querySelector('.ffams');
       if (families) {
         const buttons = [...families.querySelectorAll('button')];
-        const select = h('select', { class: 'shop-family', 'aria-label': '商品系列',
+        const select = h('select', { class: 'shop-family', 'aria-label': I18n.s("u_0a49f5421d8d"),
           onchange: e => buttons[Number(e.target.value)].click() },
           ...buttons.map((b,i) => h('option', { value: String(i), selected: b.classList.contains('on') }, b.textContent)));
         families.replaceWith(select);
@@ -28,9 +28,9 @@
     const active = F && (F.q || F.fam || F.avail);
     const detail = h('details', { class: 'shop-options', open: window.innerWidth >= 760 || !!UI.shopOptionsOpen,
       ontoggle: e => { if (window.innerWidth < 760) UI.shopOptionsOpen = e.target.open; } },
-      h('summary', { class: 'chip sm', text: selected ? ((100-selected.off)/10) + '折券・篩選' : active ? '篩選中・券' : '篩選・券' }),
-      h('div', { class: 'shop-options-panel' }, ...options.length ? options : [h('p', { class: 'hint', text: '此分類沒有額外篩選。' })]));
-    const sidebar = h('aside', { class: 'shop-sidebar', 'aria-label': '商店工具' }, header, detail);
+      h('summary', { class: 'chip sm', text: selected ? ((100-selected.off)/10) + I18n.s("u_7cd2c70e1e74") : active ? I18n.s("u_8bb9022e1bca") : I18n.s("u_f683e24888a2") }),
+      h('div', { class: 'shop-options-panel' }, ...options.length ? options : [h('p', { class: 'hint', text: I18n.s("u_a2eeb890aea6") })]));
+    const sidebar = h('aside', { class: 'shop-sidebar', 'aria-label': I18n.s("u_444f8c7b18c0") }, header, detail);
     return [h('div', { class: 'shop-shell' }, sidebar,
       h('div', { class: 'shop-content' }, grid, foot ? h('div', { class: 'shop-pagination' }, foot) : null))];
   };

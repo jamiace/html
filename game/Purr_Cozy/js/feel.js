@@ -47,11 +47,11 @@ const Feel = {
     const pool = ['coin', 'xp', 'treat']; if (team) pool.push('star'); if (pet) pool.push('bond');
     const k = pool[Math.floor(Math.random() * pool.length)];
     let r;
-    if (k === 'coin') { const c = Game.reward(5 + Math.floor(Math.random() * 8), 0, 'raw'); r = { icon: 'i_coin', text: `+${c} 金幣` }; }
-    else if (k === 'xp') { const x = 8 + Math.floor(Math.random() * 8); Game.reward(0, x, 'raw'); r = { icon: 'i_star', text: `+${x} 經驗` }; }
-    else if (k === 'treat') { Life.give('cat_treat', 1); r = { icon: SUPPLIES.cat_treat.spr, text: '寵物零食 +1' }; }
-    else if (k === 'star') { Team.onTrack(team.ev, 1); r = { icon: 'i_people', text: `${TEAM_TYPES[team.type].n}團隊多一顆星` }; }
-    else { Pets.addBond(pet, 2); Pets.say(pet, pet.sp.startsWith('dog') ? '汪！' : '喵～'); r = { icon: 'i_heart', text: `和${pet.name}的羈絆 +2` }; }
+    if (k === 'coin') { const c = Game.reward(5 + Math.floor(Math.random() * 8), 0, 'raw'); r = { icon: 'i_coin', text: I18n.s("u_9b583063d081", [c]) }; }
+    else if (k === 'xp') { const x = 8 + Math.floor(Math.random() * 8); Game.reward(0, x, 'raw'); r = { icon: 'i_star', text: I18n.s("u_f37fd1346438", [x]) }; }
+    else if (k === 'treat') { Life.give('cat_treat', 1); r = { icon: SUPPLIES.cat_treat.spr, text: I18n.s("u_359bff718aef") }; }
+    else if (k === 'star') { Team.onTrack(team.ev, 1); r = { icon: 'i_people', text: I18n.s("u_d797909c9336", [TEAM_TYPES[team.type].n]) }; }
+    else { Pets.addBond(pet, 2); Pets.say(pet, pet.sp.startsWith('dog') ? I18n.s("u_28452697f131") : I18n.s("u_b5d7570da46d")); r = { icon: 'i_heart', text: I18n.s("u_ea83e69f4518", [pet.name]) }; }
     this.ding(); UI.hud(true); Game.save();
     return r;
   },
@@ -99,8 +99,8 @@ const Feel = {
       if (S.nearSeen[type] === key || Game.focusing()) continue;
       S.nearSeen[type] = key; Game.save();
       const tn = TEAM_TYPES[type].n;
-      if (n.quiz) UI.toast(`${tn}團隊只差 ${n.left} ${n.unit}了！`, 'i_people', 6, { label: '一起完成', fn: () => this.finishTeam(type) });
-      else UI.toast(`${tn}團隊只差 ${n.left} ${n.unit}了`, 'i_people', 5, { label: '看看', fn: () => UI.openTasks('team') });
+      if (n.quiz) UI.toast(I18n.s("u_19c27076aa44", [tn, n.left, n.unit]), 'i_people', 6, { label: I18n.s("u_3c5fbb63c843"), fn: () => this.finishTeam(type) });
+      else UI.toast(I18n.s("u_99574b761251", [tn, n.left, n.unit]), 'i_people', 5, { label: I18n.s("u_d87059e4c8ca"), fn: () => UI.openTasks('team') });
     }
   },
   finishTeam(type) { const n = this.nearLeft(type); if (n && n.quiz) Learn.start('team', { type, n: Math.min(n.left, 12), task: n.task }); else UI.openTasks('team'); },
@@ -129,10 +129,10 @@ const Feel = {
       const d = JSON.parse(r.data), needs = (d.needs || []).filter(n => NEED_HELP[n.type] && !Social.canHelp(f.id, n)); if (!needs.length) return;
       const need = needs[Math.floor(Math.random() * needs.length)], kind = HELP_KINDS[NEED_HELP[need.type]];
       let target = '';
-      if (need.pet != null) { const p = (d.pets || []).find(x => x.id === need.pet); target = p ? p.name : '寵物'; }
-      else { const it = (d.items || []).find(i => i.uid === need.target); target = it && ITEMS[it.k] ? ITEMS[it.k].n : '家具'; }
+      if (need.pet != null) { const p = (d.pets || []).find(x => x.id === need.pet); target = p ? p.name : I18n.s("u_5b825353b534"); }
+      else { const it = (d.items || []).find(i => i.uid === need.target); target = it && ITEMS[it.k] ? ITEMS[it.k].n : I18n.s("u_62bd927cebc0"); }
       const fname = clipName(r.name) || Social.friendName(f.id);
-      const text = need.type === 'cat_hungry' ? `${fname}家的${target}肚子餓了` : need.type === 'plant_wilt' ? `${fname}家的${target}需要澆水` : `${fname}家的${target}積灰塵了`;
+      const text = need.type === 'cat_hungry' ? I18n.s("u_f37aadc1e5a5", [fname, target]) : need.type === 'plant_wilt' ? I18n.s("u_ae8da1c2d33f", [fname, target]) : I18n.s("u_1f9a6c097d4b", [fname, target]);
       this.launch({ fid: f.id, need, fname, target, text, kind, until: now + FEEL.planeLifeMs });
     } catch (e) { } finally { this.busyPlane = false; }
   },
@@ -166,7 +166,7 @@ const Feel = {
   posTag() {
     const P = this.plane; let el = this._tag;
     if (!P || P.t < 1 || Room.edit) return this.hideTag();
-    if (!el) { el = this._tag = h('button', { class: 'pet-ask plane-tag', title: '去幫忙', onclick: () => this.openPlane() }); UI.overlay.append(el); }
+    if (!el) { el = this._tag = h('button', { class: 'pet-ask plane-tag', title: I18n.s("u_d9a065993836"), onclick: () => this.openPlane() }); UI.overlay.append(el); }
     if (el.dataset.t !== P.text) { el.dataset.t = P.text; el.replaceChildren(ico(P.kind.icon, 20), h('span', { text: P.text })); }
     el.hidden = false; const s = Game.scale, bob = Math.round(Math.sin(performance.now() / 260) * 2);
     el.style.transform = `translate(${Math.round(P.x * s)}px, ${Math.round((P.y - 9) * s) + bob}px) translate(-50%, -100%)`;
@@ -196,7 +196,7 @@ SPR.def('paper_plane', () => {
     }
   };
   const tip = StarJar.tip.bind(StarJar);
-  StarJar.tip = function (it) { const d = ITEMS[it.k], n = d && d.jar && Feel.near[d.jar]; const base = tip(it); return n ? `${base}・只差 ${n.left} ${n.unit}${n.quiz ? '，點一下一起完成' : ''}` : base; };
+  StarJar.tip = function (it) { const d = ITEMS[it.k], n = d && d.jar && Feel.near[d.jar]; const base = tip(it); return n ? I18n.s("u_a3cf9c7438bb", [base, n.left, n.unit, n.quiz ? I18n.s("u_24b37baf29a9") : '']) : base; };
   Fun.starJar = (it) => { const n = Feel.near[ITEMS[it.k].jar]; if (n && n.quiz) Feel.finishTeam(n.type); else UI.openTasks('team'); };
   // paper plane drawn over the room, its note follows it
   const render = Room.render.bind(Room); let last = performance.now();

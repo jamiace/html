@@ -1,19 +1,19 @@
 /* ============================================================
    Wardrobe window for the paper-doll avatar
    ============================================================ */
-UI.WIN.avatar = { t: '造型', i: 'i_shirt', w: 560, at: ['l', 0] };
+UI.WIN.avatar = { t: I18n.s("u_345897933b2d"), i: 'i_shirt', w: 560, at: ['l', 0] };
 const AVA_TABS = [
-  ['face', '臉', [['skin', '膚色', 'sw'], ['cheeks', '臉頰', 'grid', 'head']]],
-  ['eyes', '眼睛', [['eyes', '眼睛', 'grid', 'face'], ['eyeColor', '眼睛顏色', 'sw']]],
-  ['brow', '眉毛嘴巴', [['brows', '眉毛', 'grid', 'face'], ['mouth', '嘴巴', 'grid', 'face']]],
-  ['hair', '髮型', [['hairFront', '瀏海', 'grid', 'head'], ['hairBack', '後髮', 'grid', 'headback'], ['hairColor', '髮色', 'sw']]],
-  ['top', '上衣', [['top', '上衣', 'grid', 'torso'], ['topColor', '主色', 'sw'], ['top2', '配色', 'sw']]],
-  ['bottom', '下身', [['bottom', '褲子裙子', 'grid', 'legs'], ['bottomColor', '顏色', 'sw']]],
-  ['shoes', '鞋子', [['shoes', '鞋子', 'grid', 'feet'], ['shoesColor', '顏色', 'sw']]],
-  ['hat', '帽子', [['hat', '帽子頭飾', 'grid', 'hat'], ['hatColor', '顏色', 'sw']]],
-  ['glasses', '眼鏡耳飾', [['glasses', '眼鏡', 'grid', 'face'], ['glassesColor', '鏡框顏色', 'sw'], ['ear', '耳飾', 'grid', 'head'], ['earColor', '耳飾顏色', 'sw']]],
-  ['acc', '頸部背部', [['neck', '頸部', 'grid', 'torso'], ['neckColor', '顏色', 'sw'], ['back', '背部', 'grid', 'full'], ['backColor', '顏色', 'sw']]],
-  ['sets', '套裝', null],
+  ['face', I18n.s("u_a0860db58e88"), [['skin', I18n.s("u_de04efb8e03c"), 'sw'], ['cheeks', I18n.s("u_25c73ff62777"), 'grid', 'head']]],
+  ['eyes', I18n.s("u_9069cc8f2c62"), [['eyes', I18n.s("u_9069cc8f2c62"), 'grid', 'face'], ['eyeColor', I18n.s("u_a372d451eb99"), 'sw']]],
+  ['brow', I18n.s("u_5d55c28331af"), [['brows', I18n.s("u_a25ee7adaa11"), 'grid', 'face'], ['mouth', I18n.s("u_cbb4c198e88c"), 'grid', 'face']]],
+  ['hair', I18n.s("u_0c0684148c17"), [['hairFront', I18n.s("u_730efd6f134b"), 'grid', 'head'], ['hairBack', I18n.s("u_f1a5738b5b26"), 'grid', 'headback'], ['hairColor', I18n.s("u_17b1a7da8cc4"), 'sw']]],
+  ['top', I18n.s("u_f0ed5fbca379"), [['top', I18n.s("u_f0ed5fbca379"), 'grid', 'torso'], ['topColor', I18n.s("u_11979c5c7acc"), 'sw'], ['top2', I18n.s("u_2ae75e168123"), 'sw']]],
+  ['bottom', I18n.s("u_d6af14e8852b"), [['bottom', I18n.s("u_73dd1a03019f"), 'grid', 'legs'], ['bottomColor', I18n.s("u_394ed4a8db28"), 'sw']]],
+  ['shoes', I18n.s("u_a00b97bbc47f"), [['shoes', I18n.s("u_a00b97bbc47f"), 'grid', 'feet'], ['shoesColor', I18n.s("u_394ed4a8db28"), 'sw']]],
+  ['hat', I18n.s("u_f045b9ca8f63"), [['hat', I18n.s("u_87fd8ca8df78"), 'grid', 'hat'], ['hatColor', I18n.s("u_394ed4a8db28"), 'sw']]],
+  ['glasses', I18n.s("u_ed04dc3e7441"), [['glasses', I18n.s("u_48aa98edfe45"), 'grid', 'face'], ['glassesColor', I18n.s("u_147320dd5160"), 'sw'], ['ear', I18n.s("u_699f297f523a"), 'grid', 'head'], ['earColor', I18n.s("u_bf695780df12"), 'sw']]],
+  ['acc', I18n.s("u_687820a2cba9"), [['neck', I18n.s("u_7536bd8e6524"), 'grid', 'torso'], ['neckColor', I18n.s("u_394ed4a8db28"), 'sw'], ['back', I18n.s("u_1ffb4b1f3d2c"), 'grid', 'full'], ['backColor', I18n.s("u_394ed4a8db28"), 'sw']]],
+  ['sets', I18n.s("u_a4a69b0339d0"), null],
 ];
 // 'full' shows the back (for back items such as wings); saved outfits are shown from the front
 const AVA_CROP = { outfit: [0, 0, 20, 36, 'front0'], face: [3, 13, 16, 9, 'front0'], head: [1, 7, 20, 16, 'front0'], headback: [1, 7, 20, 22, 'back0'], torso: [1, 18, 20, 14, 'front0'], legs: [1, 21, 20, 13, 'front0'],
@@ -35,14 +35,14 @@ Object.assign(UI, {
   avaBuy() {
     const S = Game.S, t = this.avaTry; if (!t) return;
     const base = partPrice(t.cat, t.id), price = Rewards.price(base, 'closet'), lvl = partLvl(t.cat, t.id);
-    if (S.lvl < lvl) return UI.toast(`升到 Lv ${lvl} 才能買`, 'i_star');
-    if (S.coins < price) return UI.toast(`這個要 ${price} 金幣，還差 ${price - S.coins}`, 'i_coin');
+    if (S.lvl < lvl) return UI.toast(I18n.s("u_5a2fe1146a15", [lvl]), 'i_star');
+    if (S.coins < price) return UI.toast(I18n.s("u_b83938a441b6", [price, price - S.coins]), 'i_coin');
     S.coins -= price; Rewards.consume(base, 'closet', this.avaName(t.cat, t.id)); S.closet[closetKey(t.cat, t.id)] = 1;
-    UI.toast(`買下了「${this.avaName(t.cat, t.id)}」${AVA_DYE[t.cat] ? '（所有衣服都能用這個顏色）' : ''}`, 'i_shirt');
+    UI.toast(I18n.s("u_ef0927d7ec69", [this.avaName(t.cat, t.id), AVA_DYE[t.cat] ? I18n.s("u_786239391b7f") : '']), 'i_shirt');
     Life.track('buy', 1, { kind: 'closet', id: t.cat + ':' + t.id }); UI.hud(true); saveSoon();
     this.avaWear(t.cat, t.id);
   },
-  avaName(cat, id) { const v = AVA_PARTS[cat][id]; return cat === 'eyeColor' ? EYEC_N[id] + '色眼睛' : Array.isArray(v) ? (v[3] || id) + (AVA_DYE[cat] ? '染料' : cat === 'hairColor' ? '髮色' : '') : v.n; },
+  avaName(cat, id) { const v = AVA_PARTS[cat][id]; return cat === 'eyeColor' ? EYEC_N[id] + I18n.s("u_4fac18f6209b") : Array.isArray(v) ? (v[3] || id) + (AVA_DYE[cat] ? I18n.s("u_45f21de3b2ac") : cat === 'hairColor' ? I18n.s("u_17b1a7da8cc4") : '') : v.n; },
   avaRandom() {
     const a = Game.S.avatar;
     for (const cat in AVA_PARTS) {
@@ -69,38 +69,38 @@ Object.assign(UI, {
     if (tab[2]) {
       for (const [cat, label, kind, crop] of tab[2]) {
         const P = AVA_PARTS[cat], ids = order(cat, Object.keys(P)), own = ids.filter(id => this.avaOwned(cat, id)).length;
-        body.push(h('div', { class: 'sub', text: `${label}（已擁有 ${own} / ${ids.length}）` }));
+        body.push(h('div', { class: 'sub', text: I18n.s("u_e5bd73c0d774", [label, own, ids.length]) }));
         if (kind === 'sw') {
           const hexOf = (id) => { const v = P[id]; return Array.isArray(v) ? v[1] : '#ccc'; };
           body.push(h('div', { class: 'sws avasw' }, ...ids.map(id => { const owned = this.avaOwned(cat, id), nm = this.avaName(cat, id), lv = partLvl(cat, id);
-            return h('button', { class: 'sw' + (view[cat] === id ? ' on' : '') + (owned ? '' : ' paid') + (t && t.cat === cat && t.id === id ? ' try' : ''), style: `--c:${hexOf(id)}`, title: nm + (owned ? '' : S.lvl < lv ? `（Lv ${lv}、${partPrice(cat, id)} 金幣）` : `（${partPrice(cat, id)} 金幣）`), 'aria-label': `${label} ${nm}${owned ? '' : '，未擁有'}`, onclick: () => this.avaSet(cat, id) }); })));
+            return h('button', { class: 'sw' + (view[cat] === id ? ' on' : '') + (owned ? '' : ' paid') + (t && t.cat === cat && t.id === id ? ' try' : ''), style: `--c:${hexOf(id)}`, title: nm + (owned ? '' : S.lvl < lv ? I18n.s("u_57a8bfd6b862", [lv, partPrice(cat, id)]) : I18n.s("u_3424e190351f", [partPrice(cat, id)])), 'aria-label': `${label} ${nm}${owned ? '' : I18n.s("u_70b6d36b4054")}`, onclick: () => this.avaSet(cat, id) }); })));
         } else {
           body.push(h('div', { class: 'avagrid' }, ...ids.map(id => {
             const v = Object.assign({}, a, { [cat]: id }), owned = this.avaOwned(cat, id), lv = partLvl(cat, id);
-            return h('button', { class: 'avaopt' + (a[cat] === id ? ' on' : '') + (owned ? '' : ' paid') + (owned || S.lvl >= lv ? '' : ' locked') + (t && t.cat === cat && t.id === id ? ' try' : ''), title: P[id].n + (owned ? '' : `（Lv ${lv}、${partPrice(cat, id)} 金幣）`), onclick: () => this.avaSet(cat, id) }, avaThumb(v, crop), h('span', { text: P[id].n }), this.avaBadge(cat, id));
+            return h('button', { class: 'avaopt' + (a[cat] === id ? ' on' : '') + (owned ? '' : ' paid') + (owned || S.lvl >= lv ? '' : ' locked') + (t && t.cat === cat && t.id === id ? ' try' : ''), title: P[id].n + (owned ? '' : I18n.s("u_57a8bfd6b862", [lv, partPrice(cat, id)])), onclick: () => this.avaSet(cat, id) }, avaThumb(v, crop), h('span', { text: P[id].n }), this.avaBadge(cat, id));
           })));
         }
       }
     } else {
-      body.push(h('p', { class: 'hint', text: '把現在的造型存起來，之後一鍵換回來（最多 8 套）。' }));
-      body.push(h('div', { class: 'row' }, h('button', { class: 'chip primary', disabled: S.outfits.length >= 8, onclick: () => { S.outfits.push({ n: `套裝 ${S.outfits.length + 1}`, a: sanitizeAvatar(a) }); Game.save(); this.refresh('avatar'); } }, ico('i_plus', 18), '存成新套裝')));
+      body.push(h('p', { class: 'hint', text: I18n.s("u_a3880d699ec2") }));
+      body.push(h('div', { class: 'row' }, h('button', { class: 'chip primary', disabled: S.outfits.length >= 8, onclick: () => { S.outfits.push({ n: I18n.s("u_b23189acdb79", [S.outfits.length + 1]), a: sanitizeAvatar(a) }); Game.save(); this.refresh('avatar'); } }, ico('i_plus', 18), I18n.s("u_1326e6d460ea"))));
       body.push(h('div', { class: 'avagrid sets' }, ...S.outfits.map((o, i) => h('div', { class: 'avaopt set' }, avaThumb(Object.assign({}, a, o.a), 'outfit'), h('span', { text: o.n }),
-        h('div', { class: 'row center' }, h('button', { class: 'chip sm primary', onclick: () => { for (const c in o.a) if (c in AVA_PARTS && this.avaOwned(c, o.a[c])) a[c] = o.a[c]; this.avaTry = null; Game.save(); Cowork.push(); this.refresh('avatar'); } }, '換上'), h('button', { class: 'chip sm', 'aria-label': '刪除', onclick: () => { S.outfits.splice(i, 1); Game.save(); this.refresh('avatar'); } }, ico('i_trash', 14)))))));
+        h('div', { class: 'row center' }, h('button', { class: 'chip sm primary', onclick: () => { for (const c in o.a) if (c in AVA_PARTS && this.avaOwned(c, o.a[c])) a[c] = o.a[c]; this.avaTry = null; Game.save(); Cowork.push(); this.refresh('avatar'); } }, I18n.s("u_2a56668cb258")), h('button', { class: 'chip sm', 'aria-label': I18n.s("u_3c8f5b363ab3"), onclick: () => { S.outfits.splice(i, 1); Game.save(); this.refresh('avatar'); } }, ico('i_trash', 14)))))));
     }
     let tryBar = null;
     if (t) {
       const base = partPrice(t.cat, t.id), price = Rewards.price(base, 'closet'), lv = partLvl(t.cat, t.id), short = Math.max(0, price - S.coins), lowLv = S.lvl < lv;
-      tryBar = h('div', { class: 'avatry' }, h('div', { class: 'hint', text: `試穿中：${this.avaName(t.cat, t.id)}` }),
+      tryBar = h('div', { class: 'avatry' }, h('div', { class: 'hint', text: I18n.s("u_96787af907b6", [this.avaName(t.cat, t.id)]) }),
         h('div', { class: 'row center' },
-          h('button', { class: 'chip sm primary', disabled: lowLv || short > 0, onclick: () => this.avaBuy() }, ico('i_coin', 16), lowLv ? `Lv ${lv} 解鎖` : short ? `還差 ${short}` : price < base ? `${price}（原 ${base}）買下` : `${price} 買下`),
-          h('button', { class: 'chip sm', onclick: () => { this.avaTry = null; this.refresh('avatar'); } }, '脫掉')));
+          h('button', { class: 'chip sm primary', disabled: lowLv || short > 0, onclick: () => this.avaBuy() }, ico('i_coin', 16), lowLv ? I18n.s("u_5aa48649ffcf", [lv]) : short ? I18n.s("u_f5ad3db2e3a4", [short]) : price < base ? I18n.s("u_2a76f2433f80", [price, base]) : I18n.s("u_75fb1333bc41", [price])),
+          h('button', { class: 'chip sm', onclick: () => { this.avaTry = null; this.refresh('avatar'); } }, I18n.s("u_99b9ee94fea2"))));
     }
     const paidN = Object.keys(S.closet).length;
     return [h('div', { class: 'ava-row' },
-      h('div', { class: 'ava-stage' }, pv, tryBar, h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => { this.avaView = (this.avaView + 1) % 3; this.refresh('avatar'); } }, ico('i_flip', 18), '轉一圈'), h('button', { class: 'chip sm', title: '用已經擁有的款式隨機搭配', onclick: () => this.avaRandom() }, ico('i_sparkle', 18), '隨機'))),
+      h('div', { class: 'ava-stage' }, pv, tryBar, h('div', { class: 'row center' }, h('button', { class: 'chip sm', onclick: () => { this.avaView = (this.avaView + 1) % 3; this.refresh('avatar'); } }, ico('i_flip', 18), I18n.s("u_f9513258c18d")), h('button', { class: 'chip sm', title: I18n.s("u_cd7202fd2731"), onclick: () => this.avaRandom() }, ico('i_sparkle', 18), I18n.s("u_3941bb44df5c")))),
       h('div', { class: 'ava-opts' },
-        h('div', { class: 'row' }, h('span', { text: '名字：' }), h('b', { class: 'grow', text: a.name || '（還沒設定）' }), h('button', { class: 'chip sm', onclick: () => this.openWin('account') }, '到帳號設定')),
-        h('p', { class: 'hint', text: `每一項都有幾款免費的基本款，其他款式用金幣購買，等級越高能買的越多。點沒有的款式可以先試穿，衣服顏色買一次所有衣服都能用（已收藏 ${paidN} 件）。` }), tabs)),
+        h('div', { class: 'row' }, h('span', { text: I18n.s("u_8f4c47bf1b49") }), h('b', { class: 'grow', text: a.name || I18n.s("u_3c581b6a26b4") }), h('button', { class: 'chip sm', onclick: () => this.openWin('account') }, I18n.s("u_339999c3a9eb"))),
+        h('p', { class: 'hint', text: I18n.s("u_a039b191f159", [paidN]) }), tabs)),
       h('div', { class: 'scroll avabody' }, this.couponBar(), ...body)];
   },
 });

@@ -15,7 +15,7 @@ const LEAN_HAT = ['#3b3346', '#fff4e0', '#5a5070'];
 const LEAN_GRID = { cat: [], dog: [] }, LEAN_CACHE = {};
 (function load() {
   for (const c of LEAN_HAT) palAdd(c);   // the hat colours map back to palette letters too
-  for (const kind of ['cat', 'dog']) for (let n = 1; n <= 6; n++) {
+  for (const kind of ['cat']) for (let n = 1; n <= 6; n++) {
     const img = new Image();
     img.onload = () => { try { LEAN_GRID[kind][n] = Grid.fromImage(img); for (const k in LEAN_CACHE) delete LEAN_CACHE[k]; } catch (e) { /* file:// cannot read pixels */ } };
     img.src = 'assets/sprites/' + kind + '_lean' + n + '.png';

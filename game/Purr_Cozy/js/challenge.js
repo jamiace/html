@@ -10,22 +10,22 @@
      once chosen (or once it has any progress) it stays for the day
    ============================================================ */
 const CHAL = {
-  c_spell: { n: '拼字挑戰', icon: 'i_learn', tiers: { n: 8, h: 10 }, d: { n: '看中文拼出英文，有字首和字數提示', h: '看中文拼出英文，沒有提示' } },
-  c_listen: { n: '聽力挑戰', icon: 'i_speaker', tiers: { n: 10, h: 10 }, d: { n: '聽發音，選出中文意思', h: '聽發音，直接拼出英文' }, speak: true },
-  c_review: { n: '錯字複習', icon: 'i_reset', tiers: { n: 8, h: 12 }, d: { n: '之前答錯過的字，選擇題', h: '之前答錯過的字，選擇題和拼字混合' } },
-  c_new: { n: '新程度單字', icon: 'i_star', tiers: { n: 6, h: 10 }, d: { n: '比目前程度高一級的字，先看卡片再測驗', h: '比目前程度高一級的字，先看卡片再測驗（含拼字）' } },
+  c_spell: { n: I18n.s("u_00356771de4c"), icon: 'i_learn', tiers: { n: 8, h: 10 }, d: { n: I18n.s("u_ea64e2fa5d7a"), h: I18n.s("u_fb331407c698") } },
+  c_listen: { n: I18n.s("u_4e87cc689a38"), icon: 'i_speaker', tiers: { n: 10, h: 10 }, d: { n: I18n.s("u_2895e8416b32"), h: I18n.s("u_1b61e66ab35b") }, speak: true },
+  c_review: { n: I18n.s("u_2bbf3832b89d"), icon: 'i_reset', tiers: { n: 8, h: 12 }, d: { n: I18n.s("u_02aeb4d9d51b"), h: I18n.s("u_05cff8777cf9") } },
+  c_new: { n: I18n.s("u_8e6501f3684a"), icon: 'i_star', tiers: { n: 6, h: 10 }, d: { n: I18n.s("u_bc78854915f3"), h: I18n.s("u_b0634d4840ba") } },
 };
 const LIFE_TASKS = {
-  l_train: { n: '訓練寵物成功', icon: 'i_paw', tiers: { n: 1, h: 2 }, d: { n: '訓練要答單字小測驗，答對 3 題算成功', h: '訓練要答單字小測驗，答對 3 題算成功' } },
-  l_swap: { n: '複習單字換道具', icon: 'i_bag', tiers: { n: 1, h: 2 }, d: { n: '在「學習」複習 5 個單字換道具，換到就算一次', h: '每輪 5 題全對算 1 次，共 2 次；失敗可重試，已完成次數保留' } },
+  l_train: { n: I18n.s("u_1d707d82c1f8"), icon: 'i_paw', tiers: { n: 1, h: 2 }, d: { n: I18n.s("u_1b438b426b1e"), h: I18n.s("u_1b438b426b1e") } },
+  l_swap: { n: I18n.s("u_a363b5bc5f0c"), icon: 'i_bag', tiers: { n: 1, h: 2 }, d: { n: I18n.s("u_0893fd5f25a1"), h: I18n.s("u_efcd51760f7d") } },
 };
-const TIER_N = { n: '普通', h: '困難' };
-for (const k in CHAL) TASK_DEFS[k] = { t: (t) => `${CHAL[k].n}：答對 ${t.need} 個字`, need: () => CHAL[k].tiers.n, rw: { c: 35, x: 30 }, go: 'chal', tiers: CHAL[k].tiers };
-TASK_DEFS.l_train = { t: (t) => `訓練寵物成功 ${t.need} 次`, need: () => 1, rw: { c: 25, x: 25 }, go: 'petTrain', tiers: LIFE_TASKS.l_train.tiers };
+const TIER_N = { n: I18n.s("u_de907d10df98"), h: I18n.s("u_60e83e465d28") };
+for (const k in CHAL) TASK_DEFS[k] = { t: (t) => I18n.s("u_0d7b7af46522", [CHAL[k].n, t.need]), need: () => CHAL[k].tiers.n, rw: { c: 35, x: 30 }, go: 'chal', tiers: CHAL[k].tiers };
+TASK_DEFS.l_train = { t: (t) => I18n.s("u_2ee3c99e7ea0", [t.need]), need: () => 1, rw: { c: 25, x: 25 }, go: 'petTrain', tiers: LIFE_TASKS.l_train.tiers };
 // kept only so a task already claimed today still shows its name
-TASK_DEFS.l_ask = { t: () => '照顧寵物', need: () => 1, rw: { c: 25, x: 20 }, go: null };
-TASK_DEFS.l_todo = { t: () => '完成待辦', need: () => 1, rw: { c: 20, x: 20 }, go: null };
-TASK_DEFS.l_swap = { t: (t) => `複習單字換道具 ${t.need} 次`, need: () => 1, rw: { c: 25, x: 20 }, go: 'swap', tiers: LIFE_TASKS.l_swap.tiers };
+TASK_DEFS.l_ask = { t: () => I18n.s("u_b3c8e7af698b"), need: () => 1, rw: { c: 25, x: 20 }, go: null };
+TASK_DEFS.l_todo = { t: () => I18n.s("u_2b35ceedbe8f"), need: () => 1, rw: { c: 20, x: 20 }, go: null };
+TASK_DEFS.l_swap = { t: (t) => I18n.s("u_e722de697c1a", [t.need]), need: () => 1, rw: { c: 25, x: 20 }, go: 'swap', tiers: LIFE_TASKS.l_swap.tiers };
 
 const Challenge = {
   info(k) { return CHAL[k] || LIFE_TASKS[k] || null; },
@@ -82,10 +82,10 @@ const Challenge = {
   got(t, w) {
     t.got = t.got || []; if (t.got.includes(w)) return;
     t.got.push(w); const was = t.prog; t.prog = Math.min(t.need, t.got.length);
-    if (t.prog >= t.need && was < t.need) UI.toast(`任務完成：${TASK_DEFS[t.k].t(t)}，到「任務」領獎勵`, 'i_task', 3.5, { label: '領取', fn: () => { UI.closeWin('study'); UI.openTasks('daily'); } });
+    if (t.prog >= t.need && was < t.need) UI.toast(I18n.s("u_202ec2a6caff", [TASK_DEFS[t.k].t(t)]), 'i_task', 3.5, { label: I18n.s("u_92edf81e0715"), fn: () => { UI.closeWin('study'); UI.openTasks('daily'); } });
     UI.refresh('tasks'); UI.badges();
   },
-  title(t) { return `${CHAL[t.k].n}（${TIER_N[t.tier] || '普通'}）`; },
+  title(t) { return `${CHAL[t.k].n}（${TIER_N[t.tier] || I18n.s("u_de907d10df98")}）`; },
 };
 
 /* ---------------- daily tasks: new mix, tiers, rewards ---------------- */
@@ -124,7 +124,7 @@ Object.assign(Life, {
       if (!add) continue;
       if (!t.tier) t.tier = 'n';
       t.prog = Math.min(t.need, t.prog + add);
-      if (t.prog >= t.need) UI.toast(`任務完成：${TASK_DEFS[t.k].t(t)}，到「任務」領獎勵`, 'i_task', 3.5, { label: '領取', fn: () => UI.openTasks('daily') });
+      if (t.prog >= t.need) UI.toast(I18n.s("u_202ec2a6caff", [TASK_DEFS[t.k].t(t)]), 'i_task', 3.5, { label: I18n.s("u_92edf81e0715"), fn: () => UI.openTasks('daily') });
     }
     return track(ev, n, data);
   };

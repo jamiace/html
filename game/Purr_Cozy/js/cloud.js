@@ -14,13 +14,13 @@ async function loadFirebase(cfg) {
   const base = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK}/`;
   const [A, U, F] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(base + f)));
   const app = A.initializeApp(cfg), auth = U.getAuth(app), db = F.getFirestore(app);
-  auth.languageCode = 'zh-TW';
+  auth.languageCode = I18n.lang;
   let persistence = '', persistenceError = null;
   for (const [name, storage] of [['local', U.indexedDBLocalPersistence], ['local', U.browserLocalPersistence], ['session', U.browserSessionPersistence]]) {
     try { await U.setPersistence(auth, storage); persistence = name; break; }
     catch (e) { persistenceError = e; }
   }
-  if (!persistence) throw Object.assign(new Error('瀏覽器無法保存登入狀態'), { code: 'auth/web-storage-unsupported', cause: persistenceError });
+  if (!persistence) throw Object.assign(new Error(I18n.s("u_c31aef0255ae")), { code: 'auth/web-storage-unsupported', cause: persistenceError });
   const ref = uid => F.doc(db, 'saves', uid);
   const google = () => { const p = new U.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' }); return p; };
   return {
@@ -76,43 +76,43 @@ async function loadFirebase(cfg) {
 }
 
 const CLOUD_ERR = {
-  'too-big': '存檔太大（超過 880 KB），沒有上傳。',
-  'conflict': '另一台裝置也存了進度。',
-  'auth/invalid-email': 'Email 格式不正確。',
-  'auth/missing-email': '請輸入 Email。',
-  'auth/missing-password': '請輸入密碼。',
-  'auth/weak-password': '密碼至少要 6 個字元。',
-  'auth/email-already-in-use': '這個 Email 已經註冊過了，請直接登入。',
-  'auth/invalid-credential': 'Email 或密碼不正確。',
-  'auth/invalid-login-credentials': 'Email 或密碼不正確。',
-  'auth/wrong-password': 'Email 或密碼不正確。',
-  'auth/user-not-found': '找不到這個帳號，要不要先註冊？',
-  'auth/user-disabled': '這個帳號已被停用。',
-  'auth/too-many-requests': '嘗試太多次了，請過幾分鐘再試。',
-  'auth/network-request-failed': '網路連線失敗，請檢查網路。',
-  'auth/popup-closed-by-user': '登入視窗被關掉了，再試一次吧。',
+  'too-big': I18n.s("u_e69ac0eda952"),
+  'conflict': I18n.s("u_e4a6649defaf"),
+  'auth/invalid-email': I18n.s("u_74ebf71845be"),
+  'auth/missing-email': I18n.s("u_a3c575d5c84b"),
+  'auth/missing-password': I18n.s("u_d92e160178ba"),
+  'auth/weak-password': I18n.s("u_acd3482a8732"),
+  'auth/email-already-in-use': I18n.s("u_c9475318de78"),
+  'auth/invalid-credential': I18n.s("u_bbff6d095fb5"),
+  'auth/invalid-login-credentials': I18n.s("u_bbff6d095fb5"),
+  'auth/wrong-password': I18n.s("u_bbff6d095fb5"),
+  'auth/user-not-found': I18n.s("u_7ba60f506251"),
+  'auth/user-disabled': I18n.s("u_6dc04cbb7b4e"),
+  'auth/too-many-requests': I18n.s("u_db7e81ac023e"),
+  'auth/network-request-failed': I18n.s("u_6eb95afe3620"),
+  'auth/popup-closed-by-user': I18n.s("u_9e86a0e6b800"),
   'auth/cancelled-popup-request': '',
-  'auth/popup-blocked': 'Firefox 或瀏覽器封鎖了 Google 登入視窗。請允許此網站開啟彈出視窗，再點一次「使用 Google 帳號登入」。',
-  'auth/web-storage-unsupported': '瀏覽器目前無法保存登入狀態。請使用一般分頁，並允許此網站儲存資料後再試。',
-  'auth/operation-not-supported-in-this-environment': '目前的開啟方式不支援 Google 登入視窗。請以一般 Firefox 分頁開啟同一個遊戲網址再登入。',
-  'auth/no-current-user': 'Google 登入未完成，尚未取得遊戲帳號。請重新點選「使用 Google 帳號登入」。',
-  'auth/unauthorized-domain': '這個網址還沒加進 Firebase 的授權網域（Authentication → 設定 → 授權網域）。',
-  'auth/operation-not-allowed': 'Firebase 還沒啟用這種登入方式（Authentication → 登入方式）。',
-  'auth/invalid-api-key': 'firebase-config.js 裡的 apiKey 不正確。',
-  'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'firebase-config.js 裡的 apiKey 不正確。',
-  'permission-denied': 'Firestore 安全規則拒絕存取，請貼上 README 裡的 firestore.rules。',
-  'unavailable': '暫時連不上雲端，等一下會自動重試。',
-  'failed-precondition': 'Firestore 資料庫還沒建立（Firebase 主控台 → Firestore Database → 建立資料庫）。',
-  'not-found': 'Firestore 資料庫還沒建立（Firebase 主控台 → Firestore Database → 建立資料庫）。',
+  'auth/popup-blocked': I18n.s("u_50490c32ad18"),
+  'auth/web-storage-unsupported': I18n.s("u_da6e9aaf8d65"),
+  'auth/operation-not-supported-in-this-environment': I18n.s("u_d912ff61b0e8"),
+  'auth/no-current-user': I18n.s("u_dc015a9c8846"),
+  'auth/unauthorized-domain': I18n.s("u_2903e0fc2aab"),
+  'auth/operation-not-allowed': I18n.s("u_41a9cf17239f"),
+  'auth/invalid-api-key': I18n.s("u_062c7ac363b8"),
+  'auth/api-key-not-valid.-please-pass-a-valid-api-key.': I18n.s("u_062c7ac363b8"),
+  'permission-denied': I18n.s("u_2bdd7dc97384"),
+  'unavailable': I18n.s("u_a84ea4811c89"),
+  'failed-precondition': I18n.s("u_f5ebf5d166f4"),
+  'not-found': I18n.s("u_f5ebf5d166f4"),
 };
 function cloudErr(e) {
   const code = (e && e.code) || ''; if (code in CLOUD_ERR) return CLOUD_ERR[code];
-  return '發生錯誤：' + (code || (e && e.message) || e);
+  return I18n.s("u_4df011106d4a") + (code || (e && e.message) || e);
 }
 function agoText(ts) {
-  if (!ts) return '還沒同步'; const s = Math.max(0, (Date.now() - ts) / 1000);
-  if (s < 45) return '剛剛'; if (s < 3600) return Math.round(s / 60) + ' 分鐘前'; if (s < 86400) return Math.round(s / 3600) + ' 小時前';
-  return new Date(ts).toLocaleDateString('zh-TW');
+  if (!ts) return I18n.s("u_d93370d8c387"); const s = Math.max(0, (Date.now() - ts) / 1000);
+  if (s < 45) return I18n.s("u_dc48e8cd94cd"); if (s < 3600) return Math.round(s / 60) + I18n.s("u_b7493888054b"); if (s < 86400) return Math.round(s / 3600) + I18n.s("u_8939ff498ce7");
+  return new Date(ts).toLocaleDateString(I18n.lang);
 }
 
 // ---------- save helpers shared by both cloud modes ----------
@@ -125,7 +125,7 @@ const TAKEOVER_AWAY_MS = 10 * 60e3, HANDOFF_MS = 2500;
 const SAVE_POLICY = () => Object.assign({ devSaves: 'flag' }, window.NOOK_SAVE_POLICY || {});
 const IMPORT_MARK = 'pocketnook.imported';
 function saveHash(str) { let h = 5381; for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + ':' + str.length; }
-function saveDate(ts) { return ts ? new Date(ts).toLocaleString('zh-TW', { hour12: false }) : '不明'; }
+function saveDate(ts) { return ts ? new Date(ts).toLocaleString(I18n.lang, { hour12: false }) : I18n.s("u_bd5a8814a363"); }
 function deviceUsedDev() { try { return localStorage.getItem('pocketnook.dev') === '1' || !!localStorage.getItem('pocketnook.dev.hist'); } catch (e) { return false; } }
 function saveSummary(S, local) {
   const vocab = Object.values(S.vocab || {});
@@ -270,7 +270,7 @@ const Cloud = {
     if (!this.configured()) return this.set('unconfigured');
     this.set('loading');
     try { this.fb = await loadFirebase(window.NOOK_FIREBASE); }
-    catch (e) { console.warn('[cloud]', e); return this.set('error', e && e.code ? cloudErr(e) : '載入 Firebase 失敗，請檢查網路或 js/firebase-config.js。'); }
+    catch (e) { console.warn('[cloud]', e); return this.set('error', e && e.code ? cloudErr(e) : I18n.s("u_c90b464209b9")); }
     this.fb.onAuth(u => { this.onUser(u).catch(e => { this.authBusy = false; this.set('error', cloudErr(e)); }); });
     // Consume an old redirect result too, without making normal popup login wait for it.
     if (this.fb.redirectResult) this.fb.redirectResult().then(result => {
@@ -299,7 +299,7 @@ const Cloud = {
       const cl = window.claude; if (!cl || !cl.use) return this.set('off');
       const [user, db] = await Promise.all([cl.use('user'), cl.use('db')]); if (!user || !db) return this.set('off');
       const id = await user.id(); if (!id) return this.set('off');
-      this.user = { uid: 'claude:' + id, email: '', name: 'Claude 帳號', provider: 'claude' };
+      this.user = { uid: 'claude:' + id, email: '', name: I18n.s("u_41a7c8f01af3"), provider: 'claude' };
       this.ref = db.doc('data/users/' + id + '/save'); this.bref = db.doc('data/users/' + id + '/backup');
       const snap = await this.ref.get();
       const raw = snap.exists ? (snap.data() || {}) : null, remote = raw ? raw.state : null; this.rev = raw ? (raw.rev || 0) : 0;
@@ -375,13 +375,13 @@ const Cloud = {
     if (this.uid() && S.owner === this.uid() && !Game.outdated && (this.dirty || workSince(S) || (this.lastHash && saveHash(JSON.stringify(S)) !== this.lastHash))) {
       try { Game.save(); await this.writeRemote(S); this.dirty = false; }
       catch (e) {
-        try { await Backups.put(S, '另一台裝置接手時，這台還沒上傳的進度', 'device'); } catch (e2) { }
+        try { await Backups.put(S, I18n.s("u_d58cd6e37d3e"), 'device'); } catch (e2) { }
         // the cloud moved on while this device was offline: combine both instead of dropping this device's progress
         if (e && e.code === 'conflict') { try { await this.onConflict(e); } catch (e3) { } }
       }
     }
     this.sid = ''; this.set('paused', '');
-    if (typeof Lights !== 'undefined') Lights.pause(); else UI.toast('這個帳號在另一台裝置打開了，這台先暫停', 'i_cloud', 6, { label: '在這台繼續', fn: () => this.resume() });
+    if (typeof Lights !== 'undefined') Lights.pause(); else UI.toast(I18n.s("u_e53de39cedb5"), 'i_cloud', 6, { label: I18n.s("u_63ace269c7ba"), fn: () => this.resume() });
   },
   // "continue here": take the session back and start from the newest cloud progress
   async resume(auto) {
@@ -430,10 +430,10 @@ const Cloud = {
     this.remoteHasProgress = !!rs && !isFreshSave(rs);
     // 1. this device already belongs to the account: normal sync, newest wins, but a blank device never replaces real cloud progress
     if (L.owner === uid) {
-      if (rs && isFreshSave(L) && this.remoteHasProgress && !(L.flags && L.flags.resetAt)) return this.apply(rs, '已載入雲端進度');
+      if (rs && isFreshSave(L) && this.remoteHasProgress && !(L.flags && L.flags.resetAt)) return this.apply(rs, I18n.s("u_982d7f8bf88f"));
       if (rs) {
         const how = this.lineage(L, rs);
-        if (how === 'cloud') return this.apply(rs, (rs.pv && rs.pv.dev && rs.pv.dev !== DEVICE_ID) ? '已載入你在其他裝置的最新進度' : '');
+        if (how === 'cloud') return this.apply(rs, (rs.pv && rs.pv.dev && rs.pv.dev !== DEVICE_ID) ? I18n.s("u_fdb4fca83832") : '');
         // both sides moved on (this device played offline, or an older version): combine them, the cloud's room and tasks are kept
         if (how === 'merge') return this.onConflict({ remote: rs, rev: this.rev || 0 });
         if (how === 'same') { this.set('synced'); this.lastSync = Date.now(); this.lastHash = saveHash(JSON.stringify(L)); return; }
@@ -442,23 +442,23 @@ const Cloud = {
     }
     // 2. nothing worth keeping on this device: take the cloud save, or start a new cloud save if there is none
     if (isFreshSave(L)) {
-      if (rs) return this.apply(rs, '歡迎回來！已載入你的雲端進度');
-      try { await this.commit(Game.newState(), { mode: 'new', from: 'none' }); UI.toast('已建立你的雲端存檔', 'i_cloud'); } catch (e) { this.set('error', cloudErr(e)); }
+      if (rs) return this.apply(rs, I18n.s("u_47b967cba2df"));
+      try { await this.commit(Game.newState(), { mode: 'new', from: 'none' }); UI.toast(I18n.s("u_df41bc198524"), 'i_cloud'); } catch (e) { this.set('error', cloudErr(e)); }
       return;
     }
     // 3. this device holds another account's progress (session ended without signing out): keep it as a backup, never mix accounts
     if (L.owner && L.owner !== uid) {
-      await Backups.put(L, '另一個帳號留在這台裝置的進度', 'device');
-      if (rs) return this.apply(rs, '這台裝置上的是另一個帳號的進度，已備份起來；現在載入你的雲端存檔');
-      try { await this.commit(Game.newState(), { mode: 'new', from: 'none' }); UI.toast('這台裝置上的是另一個帳號的進度，已備份起來；已幫你建立新的雲端存檔', 'i_cloud', 5); } catch (e) { this.set('error', cloudErr(e)); }
+      await Backups.put(L, I18n.s("u_96360ed9dad1"), 'device');
+      if (rs) return this.apply(rs, I18n.s("u_0d7033eaeaf7"));
+      try { await this.commit(Game.newState(), { mode: 'new', from: 'none' }); UI.toast(I18n.s("u_17d6566a78ab"), 'i_cloud', 5); } catch (e) { this.set('error', cloudErr(e)); }
       return;
     }
     // 4. saves from before accounts existed (older version kept device and cloud in sync): identical progress means it is the same save
     if (rs && !rs.owner) { const x = saveSummary(L), y = saveSummary(rs), same = ['lvl', 'xp', 'coins', 'words', 'seen', 'items', 'focus', 'pets'].every(k => x[k] === y[k]);
-      if (same) { const newer = (L.savedAt || 0) >= (rs.savedAt || 0) ? L : rs; setImportMark(uid, { at: Date.now(), fp: Game.loadedFp || '', mode: 'linked' }); const st = JSON.parse(JSON.stringify(newer)); st.sync = Object.assign({}, st.sync, { mode: 'kept-cloud', at: Date.now(), device: DEVICE_ID }); return this.apply(st, '這台裝置和雲端是同一份進度，已連結到你的帳號'); } }
+      if (same) { const newer = (L.savedAt || 0) >= (rs.savedAt || 0) ? L : rs; setImportMark(uid, { at: Date.now(), fp: Game.loadedFp || '', mode: 'linked' }); const st = JSON.parse(JSON.stringify(newer)); st.sync = Object.assign({}, st.sync, { mode: 'kept-cloud', at: Date.now(), device: DEVICE_ID }); return this.apply(st, I18n.s("u_5f5c01df6dae")); } }
     // 5. guest / older-version progress on this device: ask once
     const mark = importMarks()[uid];
-    if (mark && mark.fp === Game.loadedFp && rs) return this.apply(rs, '已載入雲端進度（這台裝置的舊存檔之前處理過了）');
+    if (mark && mark.fp === Game.loadedFp && rs) return this.apply(rs, I18n.s("u_d3a1cd77c06a"));
     this.choice = { mode: rs ? 'conflict' : 'import', remote: rs, local: L, localSum: saveSummary(L, true), remoteSum: rs ? saveSummary(rs) : null, localSavedAt: Game.loadedSavedAt || L.savedAt, sel: rs ? 'cloud' : 'import' };
     this.set('choose'); UI.openWin('cloudpick');
   },
@@ -503,22 +503,22 @@ const Cloud = {
     if (!noMark) setImportMark(uid, { at: Date.now(), fp: Game.loadedFp || '', mode: meta.mode });
   },
   tooNew() {
-    Game.outdated = true; this.set('outdated', '雲端存檔來自比較新的遊戲版本。請重新整理頁面（必要時清除快取）載入新版；為了保護存檔，這個舊版本不會儲存任何進度。');
-    UI.toast('雲端存檔來自較新版本，請重新整理頁面', 'i_cloud', 8, { label: '重新整理', fn: () => location.reload() });
+    Game.outdated = true; this.set('outdated', I18n.s("u_b8a7a6f41bd6"));
+    UI.toast(I18n.s("u_285364f25b58"), 'i_cloud', 8, { label: I18n.s("u_5f451c71b46a"), fn: () => location.reload() });
   },
   // another device saved this account in the meantime (rev moved on): merge by the fixed rules, back up both sides first
   async onConflict(e, depth = 0) {
     this.rev = e.rev;
-    if (!e.remote) return this.set('error', '雲端存檔讀不到，等一下會再試。');
+    if (!e.remote) return this.set('error', I18n.s("u_84016a252383"));
     if ((e.remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
     const L = JSON.parse(JSON.stringify(Game.S));
     // what both copies grew from: the stamp in this device's save (same cloud version as the base the cloud copy came from)
     const common = L.pv && L.pv.base && L.pv.rev <= e.rev ? L.pv.base : this.common;
     try {
-      await Backups.put(L, '兩台裝置同時存檔：合併前這台裝置的進度', 'device');
-      await this.backupRemote(e.remote, '兩台裝置同時存檔：合併前的雲端存檔');
+      await Backups.put(L, I18n.s("u_93e730d3eb26"), 'device');
+      await this.backupRemote(e.remote, I18n.s("u_7ee1740add75"));
       await this.commit(mergeSaves(e.remote, L, common, true), { mode: 'merge-concurrent', from: 'device+cloud', dev: !!((L.flags || {}).dev || (e.remote.flags || {}).dev) }, true);
-      UI.toast('另一台裝置也存了進度，已自動合併（合併前兩份都有備份）', 'i_cloud', 5);
+      UI.toast(I18n.s("u_c68fd2a05b72"), 'i_cloud', 5);
     } catch (err) {
       if (err && err.code === 'conflict' && depth < 2) return this.onConflict(err, depth + 1);
       this.set('error', cloudErr(err));
@@ -539,29 +539,29 @@ const Cloud = {
     this.working = true; this.err = ''; UI.refresh('cloudpick');
     try {
       // the device's original save is always kept as a backup on this device
-      if (!c.backedUp) await Backups.put(c.local, which === 'cloud' ? '登入時改用雲端存檔，保留這台裝置原本的進度' : which === 'fresh' ? '選擇不匯入，保留這台裝置原本的進度' : '匯入雲端前的這台裝置原始存檔', 'device');
+      if (!c.backedUp) await Backups.put(c.local, which === 'cloud' ? I18n.s("u_a3058f390536") : which === 'fresh' ? I18n.s("u_89b1294baee3") : I18n.s("u_b15730e57d6e"), 'device');
       c.backedUp = true;
-      if (which === 'cloud') { setImportMark(uid, { at: Date.now(), fp: Game.loadedFp || '', mode: 'kept-cloud' }); this.apply(c.remote, '已載入雲端進度，這台裝置原本的進度備份在「帳號」視窗'); }
-      else if (which === 'fresh') { await this.commit(Game.newState(), { mode: 'declined', from: 'device' }); UI.toast('已建立新的雲端存檔，這台裝置原本的進度備份在「帳號」視窗', 'i_cloud', 4.5); }
-      else if (which === 'import') { await this.commit(c.local, { mode: 'import', from: 'device', srcSavedAt: c.localSavedAt, dev: devSrc }); UI.toast('匯入完成！這台裝置的進度已經存到雲端', 'i_cloud', 4); }
+      if (which === 'cloud') { setImportMark(uid, { at: Date.now(), fp: Game.loadedFp || '', mode: 'kept-cloud' }); this.apply(c.remote, I18n.s("u_02644727cb93")); }
+      else if (which === 'fresh') { await this.commit(Game.newState(), { mode: 'declined', from: 'device' }); UI.toast(I18n.s("u_e56ed3faa805"), 'i_cloud', 4.5); }
+      else if (which === 'import') { await this.commit(c.local, { mode: 'import', from: 'device', srcSavedAt: c.localSavedAt, dev: devSrc }); UI.toast(I18n.s("u_306ea7cc6859"), 'i_cloud', 4); }
       else {
-        if (c.remote) await this.backupRemote(c.remote, which === 'local' ? '被這台裝置的進度取代前的雲端存檔' : '合併前的雲端存檔');
-        if (which === 'local') { await this.commit(c.local, { mode: 'replace-cloud', from: 'device', srcSavedAt: c.localSavedAt, dev: devSrc }); UI.toast('已用這台裝置的進度取代雲端，原本的雲端存檔有備份', 'i_cloud', 4.5); }
-        else { await this.commit(mergeSaves(c.remote, c.local), { mode: 'merge', from: 'device+cloud', srcSavedAt: c.localSavedAt, dev: devSrc || !!(c.remote.flags && c.remote.flags.dev) }); UI.toast('合併完成！兩邊的進度都留下來了，合併前的兩份存檔都有備份', 'i_cloud', 4.5); }
+        if (c.remote) await this.backupRemote(c.remote, which === 'local' ? I18n.s("u_446febc8f3b0") : I18n.s("u_a05d72c79ea4"));
+        if (which === 'local') { await this.commit(c.local, { mode: 'replace-cloud', from: 'device', srcSavedAt: c.localSavedAt, dev: devSrc }); UI.toast(I18n.s("u_de397784421a"), 'i_cloud', 4.5); }
+        else { await this.commit(mergeSaves(c.remote, c.local), { mode: 'merge', from: 'device+cloud', srcSavedAt: c.localSavedAt, dev: devSrc || !!(c.remote.flags && c.remote.flags.dev) }); UI.toast(I18n.s("u_e7694336e009"), 'i_cloud', 4.5); }
       }
       this.choice = null; this.working = false; UI.closeWin('cloudpick');
     } catch (e) {
       console.warn('[cloud] migrate', e); this.working = false; this.status = 'choose';
-      this.err = '移轉沒有完成，這台裝置的進度沒有被改動：' + cloudErr(e); UI.refresh('cloudpick'); UI.cloudChip();
+      this.err = I18n.s("u_32e721709377") + cloudErr(e); UI.refresh('cloudpick'); UI.cloudChip();
     }
   },
   async restoreBackup(S, label) {
-    if (!this.uid()) { Dev && Dev.on ? Dev.act('還原備份', () => Game.replaceState(S)) : Game.replaceState(S); return UI.toast('已還原備份', 'i_reset'); }
-    if (!confirm(`用「${label}」取代目前的進度？目前的進度會先備份。`)) return;
+    if (!this.uid()) { Dev && Dev.on ? Dev.act(I18n.s("u_9df01cd68b95"), () => Game.replaceState(S)) : Game.replaceState(S); return UI.toast(I18n.s("u_8144cb99ff00"), 'i_reset'); }
+    if (!confirm(I18n.s("u_a8a6b334efac", [label]))) return;
     try {
-      await Backups.put(Game.S, '還原備份前的進度', 'device'); await this.backupRemote(Game.S, '還原備份前的雲端存檔');
+      await Backups.put(Game.S, I18n.s("u_c10a0c1fe750"), 'device'); await this.backupRemote(Game.S, I18n.s("u_9f371de9e4ed"));
       await this.commit(S, { mode: 'restore', from: 'backup', srcSavedAt: S.savedAt, dev: !!(S.flags && S.flags.dev) });
-      UI.toast('已還原備份並同步到雲端', 'i_reset', 3);
+      UI.toast(I18n.s("u_9d15033c0e86"), 'i_reset', 3);
     } catch (e) { this.set('error', cloudErr(e)); }
   },
   async push() {
@@ -571,7 +571,7 @@ const Cloud = {
     if (typeof navigator !== 'undefined' && navigator.onLine === false) { this.set('offline', ''); return; }
     if (this.lastHash && saveHash(JSON.stringify(S)) === this.lastHash) { if (this.status !== 'synced') this.set('synced', ''); return; }
     // safety net: never let a blank save replace real progress in the cloud unless the player reset on purpose
-    if (isFreshSave(S) && this.remoteHasProgress && !(S.flags && S.flags.resetAt)) { this.set('error', '這台裝置的進度是空白的，沒有上傳，避免蓋掉雲端存檔。請重新登入。'); return; }
+    if (isFreshSave(S) && this.remoteHasProgress && !(S.flags && S.flags.resetAt)) { this.set('error', I18n.s("u_31037521f9df")); return; }
     if (!(await this.checkSession())) return;
     this.busy = true; this.set('saving');
     try { await this.writeRemote(S); this.dirty = false; this.lastSync = Date.now(); this.busy = false; this.remoteHasProgress = !isFreshSave(S); this.set('synced', ''); }
@@ -592,7 +592,7 @@ const Cloud = {
       if (!rs) return;
       this.rev = doc.rev || 0;
       if (this.lineage(Game.S, rs) === 'merge') this.onConflict({ remote: rs, rev: this.rev });
-      else this.apply(rs, '已同步你在其他裝置的最新進度');
+      else this.apply(rs, I18n.s("u_81cb1a0f23a7"));
     } catch (e) { }
   },
   // routine change → merged into one write at most every 90 s
@@ -612,15 +612,15 @@ const Cloud = {
     if (this.authBusy) return; const f = this.form;
     const email = (document.getElementById('cl-email') || {}).value || f.email, pw = (document.getElementById('cl-pw') || {}).value || '';
     f.email = email.trim(); f.msg = '';
-    if (kind !== 'google' && !f.email) { f.msg = '請輸入 Email。'; return UI.refresh('account'); }
-    if ((kind === 'in' || kind === 'up') && pw.length < 6) { f.msg = '密碼至少要 6 個字元。'; return UI.refresh('account'); }
+    if (kind !== 'google' && !f.email) { f.msg = I18n.s("u_a3c575d5c84b"); return UI.refresh('account'); }
+    if ((kind === 'in' || kind === 'up') && pw.length < 6) { f.msg = I18n.s("u_acd3482a8732"); return UI.refresh('account'); }
     this.authBusy = true; this.err = ''; this.explicitAuth = kind !== 'reset'; UI.refresh('account');
     try {
       let result;
       if (kind === 'google') result = await this.fb.google();
       else if (kind === 'in') result = await this.fb.signIn(f.email, pw);
       else if (kind === 'up') result = await this.fb.signUp(f.email, pw);
-      else if (kind === 'reset') { await this.fb.reset(f.email); f.msg = '重設密碼的信已寄出，請到信箱收信。'; this.authBusy = false; }
+      else if (kind === 'reset') { await this.fb.reset(f.email); f.msg = I18n.s("u_718be77f4134"); this.authBusy = false; }
       if (kind !== 'reset') {
         if (result && result.user && (!this.user || this.user.uid !== result.user.uid)) await this.onUser(result.user);
         if (!this.user) throw { code: 'auth/no-current-user' };
@@ -633,120 +633,120 @@ const Cloud = {
     if (!this.user) return;
     if (this.mode === 'claude') return;
     if (Game.S.owner === this.user.uid) { Game.save(); await this.push(); }
-    if (this.status === 'error') { if (!confirm('最近的進度還沒成功存到雲端，確定要登出嗎？登出後這台裝置會換回空白的小窩。')) return; }
+    if (this.status === 'error') { if (!confirm(I18n.s("u_76c423c6c991"))) return; }
     try { localStorage.removeItem(this.sessKey(this.user.uid)); } catch (e) { }
     this.stopWatch();
     try { await this.fb.signOut(); } catch (e) { }
     this.user = null; this.choice = null; this.sid = '';
     Game.replaceState(Game.newState());
     this.set('signedout', '');
-    UI.toast('已登出。你的小窩安全存在雲端，下次登入就會回來', 'i_cloud');
+    UI.toast(I18n.s("u_d17e88e9e120"), 'i_cloud');
   },
 };
 
 // ---------------- UI ----------------
 Object.assign(UI.WIN, {
-  account: { t: '帳號與雲端存檔', i: 'i_cloud', w: 420, at: ['r', 0] },
-  cloudpick: { t: '存檔移轉', i: 'i_cloud', w: 560, at: ['c', 0], modal: true, noclose: true },
+  account: { t: I18n.s("u_6eaf4d04daf1"), i: 'i_cloud', w: 420, at: ['r', 0] },
+  cloudpick: { t: I18n.s("u_d09a287ac706"), i: 'i_cloud', w: 560, at: ['c', 0], modal: true, noclose: true },
 });
 UI.cloudChip = function () {
   const el = this.el && this.el.cloud; if (!el) return;
   const c = Cloud, st = c.status; let t = '', tip = '';
-  if (c.mode === 'claude' && st === 'choose') { t = '選擇進度'; tip = '請選擇要使用哪一份進度'; }
-  else if (c.mode === 'claude') { tip = st === 'synced' ? '進度自動存在你的 Claude 帳號' : '雲端存檔'; }
-  else if (st === 'unconfigured') { tip = '雲端存檔尚未設定，進度只存在這台裝置'; }
-  else if (st === 'signedout') { t = '登入'; tip = '登入後進度會存到雲端'; }
-  else if (st === 'loading') { tip = '連線中…'; }
-  else if (st === 'saving') { tip = '儲存到雲端中…'; }
-  else if (st === 'synced') { tip = '已同步到雲端（' + (c.user ? c.user.email || c.user.name : '') + '）'; }
-  else if (st === 'choose') { t = '選擇進度'; tip = '請選擇要使用哪一份進度'; }
-  else if (st === 'error') { tip = c.err || '雲端存檔發生問題'; }
-  else if (st === 'offline') { tip = '離線中：進度先存在這台裝置，連上網路後會自動上傳'; }
-  else if (st === 'outdated') { t = '請重新整理'; tip = c.err; }
-  else if (st === 'paused') { t = '暫停中'; tip = '這個帳號正在另一台裝置使用，這台先暫停'; }
+  if (c.mode === 'claude' && st === 'choose') { t = I18n.s("u_c836543ad625"); tip = I18n.s("u_856c08959ddf"); }
+  else if (c.mode === 'claude') { tip = st === 'synced' ? I18n.s("u_14237b4957b6") : I18n.s("u_19fb673bb74e"); }
+  else if (st === 'unconfigured') { tip = I18n.s("u_fce4fd133e6f"); }
+  else if (st === 'signedout') { t = I18n.s("u_92fc480bee59"); tip = I18n.s("u_2a859e7e04fb"); }
+  else if (st === 'loading') { tip = I18n.s("u_429d44d10399"); }
+  else if (st === 'saving') { tip = I18n.s("u_50fb57f603e3"); }
+  else if (st === 'synced') { tip = I18n.s("u_eaa7dbba116c") + (c.user ? c.user.email || c.user.name : '') + '）'; }
+  else if (st === 'choose') { t = I18n.s("u_c836543ad625"); tip = I18n.s("u_856c08959ddf"); }
+  else if (st === 'error') { tip = c.err || I18n.s("u_b11b528a7214"); }
+  else if (st === 'offline') { tip = I18n.s("u_b8734dc53f53"); }
+  else if (st === 'outdated') { t = I18n.s("u_f6df668fd43a"); tip = c.err; }
+  else if (st === 'paused') { t = I18n.s("u_cb3d772c4a36"); tip = I18n.s("u_7b7075f3f090"); }
   el.dataset.st = c.mode === 'claude' && st === 'synced' ? 'synced' : st;
   el.querySelector('.cl-t').textContent = t; el.classList.toggle('icon-only', !t);
-  el.title = tip; el.setAttribute('aria-label', '帳號與雲端存檔：' + tip);
+  el.title = tip; el.setAttribute('aria-label', I18n.s("u_a92e2e3e77bd") + tip);
 };
 UI.w_account = function () {
   const c = Cloud, f = c.form, out = [];
   const status = (txt, cls) => h('p', { class: 'cl-status ' + (cls || '') }, h('i', { class: 'cl-dot', 'data-st': cls || c.status }), h('span', { text: txt }));
   out.push(UI.nameField()); if (typeof Social !== 'undefined' && Social.enabled()) out.push(UI.statusField());
   if (c.mode === 'claude' || window.NOOK_ENV === 'artifact') {
-    out.push(status(c.status === 'synced' ? '已自動存到你的 Claude 帳號' : c.status === 'loading' ? '連線中…' : '這個環境沒有雲端儲存，進度只存在這台裝置', c.status === 'synced' ? 'synced' : c.status));
-    out.push(h('p', { class: 'hint', text: '在 Claude 上玩時不用另外登入：進度跟著你的 Claude 帳號走，換一台裝置打開同一個頁面就能接著玩。想用 Google 或 Email 帳號登入，請用 GitHub 版本（README 有 Firebase 設定教學）。' }));
-    if (c.lastSync) out.push(h('p', { class: 'hint', text: '上次同步：' + agoText(c.lastSync) }));
-    if (c.status === 'choose') out.push(h('button', { class: 'chip primary', onclick: () => UI.openWin('cloudpick') }, '選擇要用哪一份進度'));
+    out.push(status(c.status === 'synced' ? I18n.s("u_949af61ceb85") : c.status === 'loading' ? I18n.s("u_429d44d10399") : I18n.s("u_fd8fd2f71bc9"), c.status === 'synced' ? 'synced' : c.status));
+    out.push(h('p', { class: 'hint', text: I18n.s("u_3764f023e98d") }));
+    if (c.lastSync) out.push(h('p', { class: 'hint', text: I18n.s("u_d3642789ee37") + agoText(c.lastSync) }));
+    if (c.status === 'choose') out.push(h('button', { class: 'chip primary', onclick: () => UI.openWin('cloudpick') }, I18n.s("u_ec91c0388651")));
     out.push(...UI.backupSection());
     return out;
   }
   if (c.status === 'unconfigured') {
-    out.push(status('雲端存檔尚未設定', 'off'));
-    out.push(h('p', { class: 'hint', text: '目前進度只存在這台裝置的瀏覽器。網站主人在 js/firebase-config.js 填入 Firebase 設定後，大家就能用 Google 或 Email 登入，把進度存到雲端。步驟請看 README 的「雲端存檔」。' }));
+    out.push(status(I18n.s("u_da7c3b93e5aa"), 'off'));
+    out.push(h('p', { class: 'hint', text: I18n.s("u_4068ed0bb3af") }));
     return out;
   }
-  if (c.status === 'loading' && !c.user) { out.push(status('連線中…', 'loading')); return out; }
-  if (c.status === 'error' && !c.fb) { out.push(status('暫時無法登入', 'error'), h('p', { class: 'cl-msg', text: c.err }), h('button', { class: 'chip primary', onclick: () => c.init() }, '重新連線')); return out; }
-  if (c.fb && c.fb.persistence === 'session') out.push(h('p', { class: 'hint', text: '這個瀏覽器目前只能在分頁開啟期間保持登入；關閉分頁後可能需要重新登入，雲端進度仍會保留。' }));
+  if (c.status === 'loading' && !c.user) { out.push(status(I18n.s("u_429d44d10399"), 'loading')); return out; }
+  if (c.status === 'error' && !c.fb) { out.push(status(I18n.s("u_042887d69946"), 'error'), h('p', { class: 'cl-msg', text: c.err }), h('button', { class: 'chip primary', onclick: () => c.init() }, I18n.s("u_4d71f06e3db3"))); return out; }
+  if (c.fb && c.fb.persistence === 'session') out.push(h('p', { class: 'hint', text: I18n.s("u_7154b12b06fb") }));
   if (!c.user) {
-    out.push(h('p', { class: 'hint', text: '登入之後，進度（房間、金幣、單字、任務、寵物）會自動存到雲端，換手機或電腦登入同一個帳號就能接著玩。' }));
-    out.push(h('button', { class: 'chip big primary cl-google', disabled: c.authBusy, onclick: () => c.auth('google') }, ico('i_key', 22), '使用 Google 帳號登入'));
-    out.push(h('div', { class: 'cl-or' }, h('span', { text: '或使用 Email' })));
-    out.push(h('div', { class: 'tabs' }, ...[['in', '登入'], ['up', '註冊新帳號'], ['reset', '忘記密碼']].map(([k, l]) => h('button', { class: 'tab' + (f.tab === k ? ' on' : ''), onclick: () => { f.email = (document.getElementById('cl-email') || {}).value || f.email; f.tab = k; f.msg = ''; UI.refresh('account'); } }, l))));
+    out.push(h('p', { class: 'hint', text: I18n.s("u_d792bbca3cce") }));
+    out.push(h('button', { class: 'chip big primary cl-google', disabled: c.authBusy, onclick: () => c.auth('google') }, ico('i_key', 22), I18n.s("u_f2a23af75b5a")));
+    out.push(h('div', { class: 'cl-or' }, h('span', { text: I18n.s("u_6bb07915b6aa") })));
+    out.push(h('div', { class: 'tabs' }, ...[['in', I18n.s("u_92fc480bee59")], ['up', I18n.s("u_932431bff183")], ['reset', I18n.s("u_cdef206d6e89")]].map(([k, l]) => h('button', { class: 'tab' + (f.tab === k ? ' on' : ''), onclick: () => { f.email = (document.getElementById('cl-email') || {}).value || f.email; f.tab = k; f.msg = ''; UI.refresh('account'); } }, l))));
     const submit = () => c.auth(f.tab);
     const em = h('input', { id: 'cl-email', type: 'email', autocomplete: 'email', placeholder: 'you@example.com', value: f.email, 'aria-label': 'Email', onkeydown: e => { if (e.key === 'Enter') submit(); } });
     out.push(h('label', { class: 'field' }, h('span', { text: 'Email' }), h('div', { class: 'inset grow' }, em)));
     if (f.tab !== 'reset') {
-      const pw = h('input', { id: 'cl-pw', type: 'password', autocomplete: f.tab === 'up' ? 'new-password' : 'current-password', placeholder: f.tab === 'up' ? '至少 6 個字元' : '密碼', 'aria-label': '密碼', onkeydown: e => { if (e.key === 'Enter') submit(); } });
-      out.push(h('label', { class: 'field' }, h('span', { text: '密碼' }), h('div', { class: 'inset grow' }, pw)));
+      const pw = h('input', { id: 'cl-pw', type: 'password', autocomplete: f.tab === 'up' ? 'new-password' : 'current-password', placeholder: f.tab === 'up' ? I18n.s("u_922ad57febef") : I18n.s("u_ef8b49458c14"), 'aria-label': I18n.s("u_ef8b49458c14"), onkeydown: e => { if (e.key === 'Enter') submit(); } });
+      out.push(h('label', { class: 'field' }, h('span', { text: I18n.s("u_ef8b49458c14") }), h('div', { class: 'inset grow' }, pw)));
     }
-    out.push(h('button', { class: 'chip primary', disabled: c.authBusy, onclick: submit }, ico('i_mail', 20), c.authBusy ? '處理中…' : f.tab === 'in' ? '登入' : f.tab === 'up' ? '註冊並登入' : '寄送重設密碼信'));
+    out.push(h('button', { class: 'chip primary', disabled: c.authBusy, onclick: submit }, ico('i_mail', 20), c.authBusy ? I18n.s("u_d166e71ff3ae") : f.tab === 'in' ? I18n.s("u_92fc480bee59") : f.tab === 'up' ? I18n.s("u_ce88047c8109") : I18n.s("u_397bd4ecbf3d")));
     if (f.msg) out.push(h('p', { class: 'cl-msg', role: 'status', text: f.msg }));
     if (c.err) out.push(h('p', { class: 'cl-msg', role: 'status', text: c.err }));
-    out.push(h('p', { class: 'hint', text: '你現在在這台裝置上的進度，登入後可以選擇要不要帶上雲端。' }));
+    out.push(h('p', { class: 'hint', text: I18n.s("u_4854fe90575b") }));
     return out;
   }
-  const u = c.user, provName = u.provider === 'google.com' ? 'Google 帳號' : 'Email 帳號';
-  const stText = { loading: '讀取雲端進度中…', saving: '儲存中…', synced: '已同步 · ' + agoText(c.lastSync), choose: '等你選擇要用哪一份進度', error: '同步失敗', offline: '離線中：進度先存在這台裝置，連線後自動上傳', outdated: '需要重新整理載入新版', paused: '暫停中：這個帳號正在另一台裝置使用' }[c.status] || '';
-  out.push(h('div', { class: 'cl-user' }, ico('i_cloud', 32), h('div', { class: 'grow' }, h('b', { text: u.name || u.email || '已登入' }), h('div', { class: 'hint', text: provName + (u.name && u.email ? ' · ' + u.email : '') }))));
+  const u = c.user, provName = u.provider === 'google.com' ? I18n.s("u_d1ab5d5544a2") : I18n.s("u_1f1a88281a97");
+  const stText = { loading: I18n.s("u_957c550bdc53"), saving: I18n.s("u_00190ad393a3"), synced: I18n.s("u_aa7e8f4a2b8d") + agoText(c.lastSync), choose: I18n.s("u_01a4a674ad4f"), error: I18n.s("u_449405c514b7"), offline: I18n.s("u_cc2c5f9e26d0"), outdated: I18n.s("u_52c77df3b77a"), paused: I18n.s("u_c80a566801a4") }[c.status] || '';
+  out.push(h('div', { class: 'cl-user' }, ico('i_cloud', 32), h('div', { class: 'grow' }, h('b', { text: u.name || u.email || I18n.s("u_c42a66e27201") }), h('div', { class: 'hint', text: provName + (u.name && u.email ? ' · ' + u.email : '') }))));
   out.push(status(stText));
-  if (c.status === 'paused') out.push(h('button', { class: 'chip primary', onclick: () => c.resume() }, ico('i_cloud', 20), '在這台繼續'));
+  if (c.status === 'paused') out.push(h('button', { class: 'chip primary', onclick: () => c.resume() }, ico('i_cloud', 20), I18n.s("u_63ace269c7ba")));
   // the progress number only ever goes up; the copy with the bigger number is the newer progress
-  if (Game.S.pv && c.status !== 'paused') out.push(h('p', { class: 'hint', text: `進度編號 #${Game.S.pv.rev}` }));
+  if (Game.S.pv && c.status !== 'paused') out.push(h('p', { class: 'hint', text: I18n.s("u_bcda2ad97dcc", [Game.S.pv.rev]) }));
   if (c.err) out.push(h('p', { class: 'cl-msg', role: 'status', text: c.err }));
-  out.push(h('p', { class: 'hint', text: '遊戲會在你操作後幾秒內自動存檔，切換分頁或關閉頁面時也會存。同一個帳號一次在一台裝置使用：在另一台打開時，這台會先把進度存上雲端再暫停，回來按「在這台繼續」就會接著雲端上最新的進度。' }));
+  out.push(h('p', { class: 'hint', text: I18n.s("u_fb1e52d0730f") }));
   out.push(h('div', { class: 'row wrap' },
-    h('button', { class: 'chip', disabled: c.status === 'saving' || c.status === 'choose', onclick: () => { Game.save(); c.flush(); } }, ico('i_reset', 20), '立即同步'),
-    c.status === 'choose' ? h('button', { class: 'chip primary', onclick: () => UI.openWin('cloudpick') }, '選擇進度') : null,
-    h('button', { class: 'chip', onclick: () => c.signOut() }, '登出')));
+    h('button', { class: 'chip', disabled: c.status === 'saving' || c.status === 'choose', onclick: () => { Game.save(); c.flush(); } }, ico('i_reset', 20), I18n.s("u_36e7a43a1c67")),
+    c.status === 'choose' ? h('button', { class: 'chip primary', onclick: () => UI.openWin('cloudpick') }, I18n.s("u_c836543ad625")) : null,
+    h('button', { class: 'chip', onclick: () => c.signOut() }, I18n.s("u_057f31bc16c8"))));
   out.push(...UI.backupSection());
   return out;
 };
 Cloud.selfTest = async function () {
   if (this.testing) return; this.testing = true; UI.refresh('account'); const res = [], add = (name, ok, detail, warn) => res.push({ name, ok, detail, warn });
   const cfg = window.NOOK_FIREBASE || {}, uid = this.user && this.user.uid;
-  add('firebase-config.js 已填寫', !!(cfg.apiKey && cfg.appId && cfg.projectId && cfg.messagingSenderId), `projectId：${cfg.projectId || '（空白）'}`);
+  add(I18n.s("u_caedbf2763ef"), !!(cfg.apiKey && cfg.appId && cfg.projectId && cfg.messagingSenderId), `projectId：${cfg.projectId || I18n.s("u_cda3ac17e609")}`);
   const secure = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
-  add('網址使用 HTTPS（或 localhost）', secure, `${location.protocol}//${location.host}；這個網域要在 Authentication → 授權網域裡`);
-  add('Firebase SDK 已載入', !!this.fb, `firebasejs ${FIREBASE_SDK}`);
-  add('已登入並取得 UID', !!uid, uid ? `UID：${uid.slice(0, 6)}…（${this.user.email || this.user.provider}）` : '');
-  const expectDenied = async (name, fn) => { try { await fn(); add(name, false, '沒有被拒絕！安全規則可能沒有部署，請重新貼上 firestore.rules。'); return false; } catch (e) { const ok = e && e.code === 'permission-denied'; add(name, ok, ok ? '正確被拒絕（permission-denied）' : '錯誤：' + cloudErr(e)); return ok; } };
+  add(I18n.s("u_5654a6d76c62"), secure, I18n.s("u_a2f97d85f07c", [location.protocol, location.host]));
+  add(I18n.s("u_8eebeeabe35a"), !!this.fb, `firebasejs ${FIREBASE_SDK}`);
+  add(I18n.s("u_164e4951221f"), !!uid, uid ? `UID：${uid.slice(0, 6)}…（${this.user.email || this.user.provider}）` : '');
+  const expectDenied = async (name, fn) => { try { await fn(); add(name, false, I18n.s("u_3d9bff0c4645")); return false; } catch (e) { const ok = e && e.code === 'permission-denied'; add(name, ok, ok ? I18n.s("u_0571ba4b0fa0") : I18n.s("u_f78e031368d5") + cloudErr(e)); return ok; } };
   if (uid && this.fb) {
-    try { const d = await this.fb.get(uid); add(`讀取自己的存檔 saves/${uid.slice(0, 6)}…`, true, d ? `有存檔：schema ${d.schema || 1}、rev ${d.rev || 0}、${Math.round((d.data || '').length / 1024)} KB` : '還沒有存檔'); }
-    catch (e) { add('讀取自己的存檔', false, cloudErr(e)); }
+    try { const d = await this.fb.get(uid); add(I18n.s("u_b8eb8eb708d3", [uid.slice(0, 6)]), true, d ? I18n.s("u_be92ab3fa1e1", [d.schema || 1, d.rev || 0, Math.round((d.data || '').length / 1024)]) : I18n.s("u_b4f74d8df740")); }
+    catch (e) { add(I18n.s("u_5190fa6625b0"), false, cloudErr(e)); }
     if (this.fb.probe) {
-      await expectDenied('讀取別人的存檔', () => this.fb.probe.getOther());
-      await expectDenied('列出所有玩家的存檔', () => this.fb.probe.listAll());
-      const okBad = await expectDenied('寫入格式錯誤的資料', async () => { const id = await this.fb.probe.badWrite(uid); try { await this.fb.probe.delBackup(uid, id); } catch (e) { } });
-      try { await this.fb.backups(uid); add('讀取自己的雲端備份', true, ''); } catch (e) { add('讀取自己的雲端備份', false, cloudErr(e)); }
+      await expectDenied(I18n.s("u_8e5af561bbfc"), () => this.fb.probe.getOther());
+      await expectDenied(I18n.s("u_c5a46ba66c29"), () => this.fb.probe.listAll());
+      const okBad = await expectDenied(I18n.s("u_b54327f92aa3"), async () => { const id = await this.fb.probe.badWrite(uid); try { await this.fb.probe.delBackup(uid, id); } catch (e) { } });
+      try { await this.fb.backups(uid); add(I18n.s("u_2b44ed37b8c0"), true, ''); } catch (e) { add(I18n.s("u_2b44ed37b8c0"), false, cloudErr(e)); }
     }
   }
-  const size = JSON.stringify(Game.S).length; add('存檔大小在上限內', size < 880000, `${Math.round(size / 1024)} KB（上限約 880 KB）`);
-  add('存檔版本', !Game.outdated, `schema ${Game.S.schema}（這個版本支援到 ${SAVE_SCHEMA}）、rev ${this.rev || 0}`);
-  add('未登入時無法存取', true, '請另外用無痕視窗、不登入打開網址，確認右上角只顯示「登入」、不會讀到任何存檔。', true);
+  const size = JSON.stringify(Game.S).length; add(I18n.s("u_c9820b1c808b"), size < 880000, I18n.s("u_3500d1edaa5a", [Math.round(size / 1024)]));
+  add(I18n.s("u_17378e9a477b"), !Game.outdated, I18n.s("u_68745d9681f7", [Game.S.schema, SAVE_SCHEMA, this.rev || 0]));
+  add(I18n.s("u_845074de34c9"), true, I18n.s("u_ca0e7f894375"), true);
   this.testRes = res; this.testing = false; UI.refresh('account');
 };
-const SYNC_MODES = { 'merge-concurrent': '兩台裝置同時存檔，自動合併', new: '新建立的雲端存檔', import: '從這台裝置匯入', declined: '選擇不匯入，重新開始', 'replace-cloud': '用裝置進度取代雲端', merge: '裝置與雲端合併', restore: '從備份還原', 'kept-cloud': '使用雲端存檔' };
+const SYNC_MODES = { 'merge-concurrent': I18n.s("u_3c2907336f33"), new: I18n.s("u_26e16a71020d"), import: I18n.s("u_cfb1c4d0a751"), declined: I18n.s("u_14fc53ed8fd2"), 'replace-cloud': I18n.s("u_977da1e59c5b"), merge: I18n.s("u_575bb29f9c86"), restore: I18n.s("u_1956fe6d42b2"), 'kept-cloud': I18n.s("u_58812ffd742d") };
 Cloud.bk = { local: [], cloud: [], at: 0 };
 Cloud.loadBackups = async function (withCloud) {
   this.bk.local = await Backups.list().catch(() => []);
@@ -759,18 +759,18 @@ UI.backupSection = function () {
   const c = Cloud, S = Game.S, out = [];
   if (Date.now() - c.bk.at > 15000) { c.bk.at = Date.now(); setTimeout(() => c.loadBackups(false), 0); }
   const sy = S.sync;
-  out.push(h('div', { class: 'sub', text: '存檔來源與備份' }));
-  out.push(h('p', { class: 'hint', text: sy && sy.mode ? `目前存檔：${SYNC_MODES[sy.mode] || sy.mode} · ${saveDate(sy.at)}` + (sy.srcSavedAt ? `（來源存檔修改於 ${saveDate(sy.srcSavedAt)}）` : '') : '這份存檔還沒有移轉紀錄。' }));
-  const row = (b, label, fn) => h('div', { class: 'devh' }, h('div', { class: 'grow' }, h('div', { text: b.reason || '備份' }), h('div', { class: 'hint num', text: `${saveDate(b.at)} · Lv ${b.lvl || (b.sum || {}).lvl || 1} · ${(b.coins != null ? b.coins : (b.sum || {}).coins) || 0} 金幣` + (b.sum ? ` · 學會 ${b.sum.words} 字` : '') })), h('button', { class: 'chip sm', onclick: fn }, label));
+  out.push(h('div', { class: 'sub', text: I18n.s("u_c908bb5a6754") }));
+  out.push(h('p', { class: 'hint', text: sy && sy.mode ? I18n.s("u_6898c6f3c762", [SYNC_MODES[sy.mode] || sy.mode, saveDate(sy.at)]) + (sy.srcSavedAt ? I18n.s("u_548fd51c43be", [saveDate(sy.srcSavedAt)]) : '') : I18n.s("u_2a63d48f7a2e") }));
+  const row = (b, label, fn) => h('div', { class: 'devh' }, h('div', { class: 'grow' }, h('div', { text: b.reason || I18n.s("u_7811b9a40d7c") }), h('div', { class: 'hint num', text: I18n.s("u_48ec332cf4fb", [saveDate(b.at), b.lvl || (b.sum || {}).lvl || 1, (b.coins != null ? b.coins : (b.sum || {}).coins) || 0]) + (b.sum ? I18n.s("u_43d5229678b0", [b.sum.words]) : '') })), h('button', { class: 'chip sm', onclick: fn }, label));
   const loc = c.bk.local.slice(0, 6), cl = c.bk.cloud.slice(0, 6);
-  if (loc.length) out.push(h('div', { class: 'hint', text: '這台裝置上的備份' }), h('div', { class: 'devhist' }, ...loc.map(b => row(b, '還原', () => c.restoreBackup(JSON.parse(b.json), b.reason)))));
-  if (cl.length) out.push(h('div', { class: 'hint', text: '雲端上的備份' }), h('div', { class: 'devhist' }, ...cl.map(b => row(b, '還原', () => { const st = b.state || JSON.parse(b.data); c.restoreBackup(st, b.reason); }))));
-  if (!c.bk.cloudLoaded && c.uid()) out.push(h('button', { class: 'chip sm', onclick: () => c.loadBackups(true) }, '讀取雲端上的備份'));
-  if (!loc.length && !cl.length) out.push(h('p', { class: 'hint', text: '還沒有備份。移轉、合併或取代存檔之前，都會自動先備份。' }));
+  if (loc.length) out.push(h('div', { class: 'hint', text: I18n.s("u_707fa2f50010") }), h('div', { class: 'devhist' }, ...loc.map(b => row(b, I18n.s("u_c07fb8c4d3e4"), () => c.restoreBackup(JSON.parse(b.json), b.reason)))));
+  if (cl.length) out.push(h('div', { class: 'hint', text: I18n.s("u_36832926e803") }), h('div', { class: 'devhist' }, ...cl.map(b => row(b, I18n.s("u_c07fb8c4d3e4"), () => { const st = b.state || JSON.parse(b.data); c.restoreBackup(st, b.reason); }))));
+  if (!c.bk.cloudLoaded && c.uid()) out.push(h('button', { class: 'chip sm', onclick: () => c.loadBackups(true) }, I18n.s("u_bc868c22f1c3")));
+  if (!loc.length && !cl.length) out.push(h('p', { class: 'hint', text: I18n.s("u_16f2a0272d9c") }));
   if (c.mode === 'firebase' && c.uid()) {
-    out.push(h('div', { class: 'sub', text: '雲端自我檢查' }), h('p', { class: 'hint', text: '在正式網址上按一次，確認設定、登入、安全規則都正確（會做 6 次讀取、1 次被拒絕的寫入）。' }),
-      h('button', { class: 'chip sm', disabled: c.testing, onclick: () => c.selfTest() }, c.testing ? '檢查中…' : '開始檢查'));
-    if (c.testRes) out.push(h('div', { class: 'devhist' }, ...c.testRes.map(r => h('div', { class: 'devh' }, h('b', { class: r.ok ? 'ok' : 'bad', text: r.ok ? '通過' : r.warn ? '注意' : '失敗' }), h('div', { class: 'grow' }, h('div', { text: r.name }), h('div', { class: 'hint', text: r.detail || '' }))))));
+    out.push(h('div', { class: 'sub', text: I18n.s("u_6a7ad373067e") }), h('p', { class: 'hint', text: I18n.s("u_187767a96e71") }),
+      h('button', { class: 'chip sm', disabled: c.testing, onclick: () => c.selfTest() }, c.testing ? I18n.s("u_4e592d9d3638") : I18n.s("u_6b41b6dafe4a")));
+    if (c.testRes) out.push(h('div', { class: 'devhist' }, ...c.testRes.map(r => h('div', { class: 'devh' }, h('b', { class: r.ok ? 'ok' : 'bad', text: r.ok ? I18n.s("u_dd55c6c25912") : r.warn ? I18n.s("u_4ffef8f3113a") : I18n.s("u_37d266e0ab12") }), h('div', { class: 'grow' }, h('div', { text: r.name }), h('div', { class: 'hint', text: r.detail || '' }))))));
   }
   return out;
 };
@@ -778,31 +778,31 @@ UI.w_cloudpick = function () {
   const ch = Cloud.choice; if (!ch) return [];
   const pol = SAVE_POLICY(), blocked = Cloud.devBlocked(ch.localSum), busy = Cloud.working;
   const card = (sum, title, src, when, extra, on) => h('div', { class: 'cl-card' + (on ? ' on' : '') }, h('b', { text: title }),
-    h('dl', { class: 'stats' }, h('dt', { text: '來源' }), h('dd', { text: src }), h('dt', { text: '修改日期' }), h('dd', { class: 'num', text: saveDate(when) }),
-      h('dt', { text: '等級' }), h('dd', { class: 'num', text: `Lv ${sum.lvl}` }), h('dt', { text: '金幣' }), h('dd', { class: 'num', text: String(sum.coins) }),
-      h('dt', { text: '單字' }), h('dd', { class: 'num', text: `學會 ${sum.words}／看過 ${sum.seen}` }), h('dt', { text: '寵物、家具' }), h('dd', { class: 'num', text: `${sum.pets} 隻、${sum.items} 件` }),
-      h('dt', { text: '累積專注' }), h('dd', { class: 'num', text: `${sum.focus} 分鐘` })),
+    h('dl', { class: 'stats' }, h('dt', { text: I18n.s("u_c21db84c0653") }), h('dd', { text: src }), h('dt', { text: I18n.s("u_2cbced881b2d") }), h('dd', { class: 'num', text: saveDate(when) }),
+      h('dt', { text: I18n.s("u_31b0f533e8db") }), h('dd', { class: 'num', text: `Lv ${sum.lvl}` }), h('dt', { text: I18n.s("u_ca5f4cb3273e") }), h('dd', { class: 'num', text: String(sum.coins) }),
+      h('dt', { text: I18n.s("u_53a60ddde56e") }), h('dd', { class: 'num', text: I18n.s("u_2c8bb33a4b96", [sum.words, sum.seen]) }), h('dt', { text: I18n.s("u_5923e40773ec") }), h('dd', { class: 'num', text: I18n.s("u_1b502698618d", [sum.pets, sum.items]) }),
+      h('dt', { text: I18n.s("u_2829735daebd") }), h('dd', { class: 'num', text: I18n.s("u_40a8f80e5512", [sum.focus]) })),
     extra);
-  const tags = (sum) => h('div', { class: 'ptraits' }, sum.legacy ? h('span', { class: 'ptag', text: '舊版存檔（已轉成新格式）' }) : null);
+  const tags = (sum) => h('div', { class: 'ptraits' }, sum.legacy ? h('span', { class: 'ptag', text: I18n.s("u_826bc359f396") }) : null);
   const out = [];
-  const localCard = card(ch.localSum, '這台裝置', '這台裝置的瀏覽器（localStorage）', ch.localSavedAt, tags(ch.localSum), ch.mode === 'import');
+  const localCard = card(ch.localSum, I18n.s("u_893f68afda0b"), I18n.s("u_8a9af09df210"), ch.localSavedAt, tags(ch.localSum), ch.mode === 'import');
   if (ch.mode === 'import') {
-    out.push(h('p', {}, `你已經登入（${Cloud.user.email || Cloud.user.name}），這個帳號在雲端還沒有存檔。這台裝置上有一份還沒連到任何帳號的進度，要把它匯入雲端嗎？`));
+    out.push(h('p', {}, I18n.s("u_b85e5aa65df8", [Cloud.user.email || Cloud.user.name])));
     out.push(h('div', { class: 'cl-cards one' }, localCard));
   } else {
-    out.push(h('p', {}, `這個帳號在雲端已經有存檔，這台裝置上也有一份還沒連到帳號的進度。請選擇要怎麼處理：`));
-    out.push(h('div', { class: 'cl-cards' }, card(ch.remoteSum, '雲端存檔', Cloud.mode === 'claude' ? '你的 Claude 帳號' : '雲端（Firebase）', ch.remote.savedAt, tags(ch.remoteSum), false), localCard));
+    out.push(h('p', {}, I18n.s("u_8c26c2fab942")));
+    out.push(h('div', { class: 'cl-cards' }, card(ch.remoteSum, I18n.s("u_19fb673bb74e"), Cloud.mode === 'claude' ? I18n.s("u_e5a320deabac") : I18n.s("u_bd1af157629c"), ch.remote.savedAt, tags(ch.remoteSum), false), localCard));
     const opt = (k, label, desc, dis) => h('label', { class: 'cl-opt' + (ch.sel === k ? ' on' : '') + (dis ? ' dis' : '') }, h('input', { type: 'radio', name: 'clpick', checked: ch.sel === k, disabled: dis, onchange: () => { ch.sel = k; UI.refresh('cloudpick'); } }), h('div', {}, h('b', { text: label }), h('div', { class: 'hint', text: desc })));
     out.push(h('div', { class: 'cl-opts' },
-      opt('cloud', '使用雲端存檔', '這台裝置的進度會備份在這台裝置上，之後可以在「帳號」視窗還原。'),
-      opt('merge', '合併兩份', '以修改日期較新的那份為主（房間擺設、今天的任務）；等級、金幣取較高的；每個單字取熟練度較高的；家具、外觀、道具、寵物用品、成就、待辦合在一起；寵物兩邊都留下（最多 10 隻）。合併前兩份都會備份。', blocked),
-      opt('local', '用這台裝置的進度取代雲端', '雲端存檔會先備份到雲端，之後可以還原。', blocked)));
+      opt('cloud', I18n.s("u_58812ffd742d"), I18n.s("u_370468efb5b2")),
+      opt('merge', I18n.s("u_703e82ff8f7c"), I18n.s("u_adf5aba3dd6d"), blocked),
+      opt('local', I18n.s("u_c7a279cba516"), I18n.s("u_de249216f750"), blocked)));
   }
   if (Cloud.err) out.push(h('p', { class: 'cl-msg', role: 'status', text: Cloud.err }));
-  out.push(h('p', { class: 'hint', text: '不論選哪一種，這台裝置原本的存檔都會先備份，完成後會記下匯入紀錄，下次登入不會再問。' }));
+  out.push(h('p', { class: 'hint', text: I18n.s("u_97baa33be915") }));
   if (ch.mode === 'import') out.push(h('div', { class: 'row wrap center' },
-    h('button', { class: 'chip primary', disabled: busy || blocked, onclick: () => Cloud.pick('import') }, ico('i_cloud', 18), busy ? '處理中…' : '匯入到雲端'),
-    h('button', { class: 'chip', disabled: busy, onclick: () => { if (confirm('不匯入的話，雲端會建立一個新的小窩，這台裝置原本的進度只留在備份裡。確定嗎？')) Cloud.pick('fresh'); } }, '不要匯入，從新的小窩開始')));
-  else out.push(h('div', { class: 'row wrap center' }, h('button', { class: 'chip primary', disabled: busy, onclick: () => { if (ch.sel === 'local' && !confirm('確定要用這台裝置的進度取代雲端存檔嗎？（雲端存檔會先備份）')) return; Cloud.pick(ch.sel); } }, busy ? '處理中…' : '確定')));
+    h('button', { class: 'chip primary', disabled: busy || blocked, onclick: () => Cloud.pick('import') }, ico('i_cloud', 18), busy ? I18n.s("u_d166e71ff3ae") : I18n.s("u_bc6d637eb494")),
+    h('button', { class: 'chip', disabled: busy, onclick: () => { if (confirm(I18n.s("u_aa8a6a6f7b6d"))) Cloud.pick('fresh'); } }, I18n.s("u_574322b386a6"))));
+  else out.push(h('div', { class: 'row wrap center' }, h('button', { class: 'chip primary', disabled: busy, onclick: () => { if (ch.sel === 'local' && !confirm(I18n.s("u_bc693e1bb777"))) return; Cloud.pick(ch.sel); } }, busy ? I18n.s("u_d166e71ff3ae") : I18n.s("u_20db9f87b860"))));
   return out;
 };

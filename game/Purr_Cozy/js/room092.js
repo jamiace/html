@@ -27,14 +27,14 @@ const WallMount = {
   c.putImageData(im,0,0);cv.alpha=out;if(cache){if(map.size>64)map.clear();map.set(key,cv)}return cv;
  },
  set(it,side){if(!it||ITEMS[it.k].layer!=='wall'||ITEMS[it.k].surface)return;it.wall=side;if(side==='left'){it.x=7;it.y=38}else if(side==='right'){it.x=212;it.y=38}else{it.x=100;it.y=25}Room.clampItem(it);Room.indexItems();Game.save();UI.editToolbar()},
- buttons(it){return h('div',{class:'wall-mount-controls'},...[['left','左牆'],['back','後牆'],['right','右牆']].map(([id,label])=>h('button',{class:'chip sm'+((it.wall||'back')===id?' on':''),'aria-pressed':String((it.wall||'back')===id),onclick:()=>this.set(it,id)},label)))},
+ buttons(it){return h('div',{class:'wall-mount-controls'},...[['left',I18n.s("u_8fdd73da2a8b")],['back',I18n.s("u_7238a5d54e60")],['right',I18n.s("u_9ffd8e4ed87d")]].map(([id,label])=>h('button',{class:'chip sm'+((it.wall||'back')===id?' on':''),'aria-pressed':String((it.wall||'back')===id),onclick:()=>this.set(it,id)},label)))},
  toolbar(){const it=Room.sel;if(!Room.edit||!it||ITEMS[it.k].layer!=='wall'||ITEMS[it.k].surface)return;const host=Mobile.on?Mobile._edit&&Mobile._edit.querySelector('.medit-acts'):UI._tb;if(!host)return;host.querySelectorAll('.wall-mount-controls').forEach(e=>e.remove());host.append(this.buttons(it));},
 };
 const Visit = {
  active:null,returnState:null,marks:null,banner:null,helper:null,epoch:0,
  enter(V){if(!V||!V.d||V.loading||V.err)return;this.exit();if(Room.edit)UI.setEdit(false);if(PetPlay.held)PetPlay.drop();const own=Game.S;this.returnState={actors:Room.actors,sel:Room.sel,hover:Room.hover};this.active=V;this.epoch++;
    const d=V.d;Room.state=Object.assign({gifts:[],items:[]},d,{items:d.items.map(it=>Object.assign({},it))});Room.indexItems();Room.actors=(d.pets||[]).map(p=>new VisitCat(p));Room.actors.push(new VisitPerson(d.ava||defaultAvatar(),124,142,false));this.helper=new VisitPerson(own.avatar,115,164,true);Room.actors.push(this.helper);Room.sel=Room.hover=null;Room.buildBg(Room.state.wp,Room.state.fl);UI.closeWin('visit');UI.closeWin('friends');UI.bubbles.forEach(b=>b.el.remove());UI.bubbles=[];
-   this.banner=h('div',{class:'visit-banner'},h('span',{text:V.name+'的小屋'}),h('button',{class:'chip sm',onclick:()=>this.exit()},'回自己家'));document.querySelector('.stage').prepend(this.banner);this.refreshMarks();UI.toast('點好友房間裡的泡泡幫忙','i_people',3);
+   this.banner=h('div',{class:'visit-banner'},h('span',{text:V.name+I18n.s("u_474004ce4f1c")}),h('button',{class:'chip sm',onclick:()=>this.exit()},I18n.s("u_624fbfccd8f1")));document.querySelector('.stage').prepend(this.banner);this.refreshMarks();UI.toast(I18n.s("u_1a86fe63746b"),'i_people',3);
  },
  exit(){if(!this.active)return;this.epoch++;this.active=null;if(this.banner)this.banner.remove();if(this.marks)this.marks.remove();this.banner=this.marks=null;Room.state=Game.S;Room.indexItems();Room.actors=this.returnState?this.returnState.actors:[];Room.sel=Room.hover=null;Room.buildBg(Game.S.wp,Game.S.fl);this.returnState=null;this.helper=null;UI.bubbles.forEach(b=>b.el.remove());UI.bubbles=[];},
  refreshMarks(){if(this.marks)this.marks.remove();if(!this.active)return;const V=this.active,d=V.d;this.marks=h('div',{class:'visit-room-marks'});
@@ -42,15 +42,15 @@ const Visit = {
   UI.overlay.append(this.marks);
  },
  feedback(need){if(!this.active||!this.helper)return;const V=this.active,d=V.d,epoch=this.epoch;let x=120,y=150;if(need.pet!=null){const p=d.pets.find(p=>p.id===need.pet);if(p){x=p.x;y=p.y}}else{const it=d.items.find(it=>it.uid===need.target);if(it){x=it.x+Room.itemCanvas(it).width/2;y=it.y+Room.itemCanvas(it).height}}
-  this.helper.walkTo(x+12,Math.min(166,Math.max(104,y+4)),()=>{if(epoch!==this.epoch)return;this.helper.careUntil=Room.t+2.2;for(let i=0;i<5;i++)Room.puff(need.pet!=null?'p_heart':'p_bubble',x+i*2-4,y-9,{vy:-8,max:1.4});Game.bubble(this.helper,need.pet!=null?'吃飽飽～':'照顧好了',2)});this.refreshMarks();
+  this.helper.walkTo(x+12,Math.min(166,Math.max(104,y+4)),()=>{if(epoch!==this.epoch)return;this.helper.careUntil=Room.t+2.2;for(let i=0;i<5;i++)Room.puff(need.pet!=null?'p_heart':'p_bubble',x+i*2-4,y-9,{vy:-8,max:1.4});Game.bubble(this.helper,need.pet!=null?I18n.s("u_61c7c6c1d143"):I18n.s("u_cf2cb27ea304"),2)});this.refreshMarks();
  },
 };
 class VisitCat {
- constructor(p){this.p=p;this.x=p.x;this.y=p.y;this.flip=!!p.flip}z(){return this.p.on&&Room.uidMap[this.p.on]?Room.base(Room.uidMap[this.p.on])+.03:this.y+.01}update(){}headPos(){return[this.x,this.y-16]}hit(x,y){return Math.abs(x-this.x)<10&&y<this.y&&y>this.y-20}poke(){Game.bubble(this,this.p.name+'：喵～',2)}
+ constructor(p){this.p=p;this.x=p.x;this.y=p.y;this.flip=!!p.flip}z(){return this.p.on&&Room.uidMap[this.p.on]?Room.base(Room.uidMap[this.p.on])+.03:this.y+.01}update(){}headPos(){return[this.x,this.y-16]}hit(x,y){return Math.abs(x-this.x)<10&&y<this.y&&y>this.y-20}poke(){Game.bubble(this,this.p.name+I18n.s("u_6dddf00f2393"),2)}
  draw(c){const [kind,color]=this.p.sp.split(':'),cv=petCanvas(kind,color,this.p.sleep?'sleep':'sit',Math.floor(Room.t*.9)%2,this.flip,this.p.acc);c.drawImage(cv,Math.round(this.x)-Math.floor(cv.width/2),Math.round(this.y)-canvasBottom(cv))}
 }
 class VisitPerson extends Walker{
- constructor(cfg,x,y,helper){super();this.cfg=cfg;this.x=x;this.y=y;this.helper=helper;this.speed=30;this.careUntil=0}z(){return this.y}update(dt){this.step(dt)}headPos(){return[this.x,this.y-30]}hit(x,y){return Math.abs(x-this.x)<9&&y<this.y&&y>this.y-30}poke(){Game.bubble(this,this.helper?'來幫忙了':'歡迎來坐坐',2)}
+ constructor(cfg,x,y,helper){super();this.cfg=cfg;this.x=x;this.y=y;this.helper=helper;this.speed=30;this.careUntil=0}z(){return this.y}update(dt){this.step(dt)}headPos(){return[this.x,this.y-30]}hit(x,y){return Math.abs(x-this.x)<9&&y<this.y&&y>this.y-30}poke(){Game.bubble(this,this.helper?I18n.s("u_8da31eedfea1"):I18n.s("u_f794e8adeb45"),2)}
  draw(c){const frame=this.walking?'side'+(Math.floor(this.anim*8)%4):Room.t<this.careUntil?'type0':'front0',cv=avatarCanvas(frame,this.cfg,null,0,this.walking&&this.flip);c.drawImage(cv,Math.round(this.x)-10,Math.round(this.y)-canvasBottom(cv))}
 }
 (function(){
@@ -67,21 +67,21 @@ class VisitPerson extends Walker{
  const lit=Room.collectLights.bind(Room);Room.collectLights=function(){const out=lit();for(const it of this.state.items){const d=ITEMS[it.k],side=WallMount.side(it);if(!side||!d.light)continue;const raw=WallMount.raw(it),cv=this.itemCanvas(it),oldX=it.x+(it.flip?cv.width-1-d.light.x:d.light.x);const l=out.find(l=>Math.abs(l.x-oldX)<.01&&Math.abs(l.y-(it.y+d.light.y))<.01);if(l){const [x,y]=WallMount.geometry(raw,side,it).point(it.flip?raw.width-1-d.light.x:d.light.x,d.light.y);l.x=it.x+x;l.y=it.y+y;}}return out;};
  const toolbar=UI.editToolbar.bind(UI);UI.editToolbar=function(){const r=toolbar(...arguments);WallMount.toolbar();return r};const edit=Mobile.renderEdit.bind(Mobile);Mobile.renderEdit=function(){const r=edit();WallMount.toolbar();return r};
  const nav=Mobile.measureNav.bind(Mobile);Mobile.measureNav=function(){if(this.on&&Room.edit&&this._edit){document.documentElement.style.setProperty('--mobile-nav-height',Math.ceil(this._edit.getBoundingClientRect().height)+'px')}else nav()};
- const place=Game.place.bind(Game);Game.place=function(id){if(Visit.active)return UI.toast('回自己家再佈置吧','i_people',3);return place(id)};
+ const place=Game.place.bind(Game);Game.place=function(id){if(Visit.active)return UI.toast(I18n.s("u_75a9087b03fe"),'i_people',3);return place(id)};
  const replace=Game.replaceState.bind(Game);Game.replaceState=function(S){Visit.exit();PetCare.ownerBusy=false;return replace(S)};
- const setEdit=UI.setEdit.bind(UI);UI.setEdit=function(on){if(on&&Visit.active)return UI.toast('這是好友的小屋，回家再佈置吧','i_people',3);return setEdit(on)};
- const oldSettings=UI.w_settings.bind(UI);UI.w_settings=function(){const out=oldSettings(),st=Game.S.settings;const range=h('input',{type:'range',min:'0',max:'100',step:'5',value:String(st.ambient??60),'aria-label':'室內環境燈亮度',oninput:e=>{st.ambient=+e.target.value;Room.computeEnv(st);const n=e.target.parentNode.querySelector('output');if(n)n.textContent=e.target.value+'%';},onchange:()=>Game.save()});out.unshift(h('section',{class:'settings-card ambient-card'},h('b',{text:'室內環境燈'}),h('p',{class:'hint',text:'黃昏與夜晚留點亮度，說晚安時會一起關掉。'}),h('label',{class:'ambient-range'},h('span',{text:'亮度'}),range,h('output',{text:(st.ambient??60)+'%'})),h('div',{class:'row wrap'},...[["warm","暖黃"],["cool","月白"],["pink","玫瑰"]].map(([id,label])=>h('button',{class:'chip'+((st.ambientColor||'warm')===id?' on':''),onclick:()=>{st.ambientColor=id;Game.save();UI.refresh('settings')}},label)))));return out};
+ const setEdit=UI.setEdit.bind(UI);UI.setEdit=function(on){if(on&&Visit.active)return UI.toast(I18n.s("u_25837b52f158"),'i_people',3);return setEdit(on)};
+ const oldSettings=UI.w_settings.bind(UI);UI.w_settings=function(){const out=oldSettings(),st=Game.S.settings;const range=h('input',{type:'range',min:'0',max:'100',step:'5',value:String(st.ambient??60),'aria-label':I18n.s("u_321dcc2f31ac"),oninput:e=>{st.ambient=+e.target.value;Room.computeEnv(st);const n=e.target.parentNode.querySelector('output');if(n)n.textContent=e.target.value+'%';},onchange:()=>Game.save()});out.unshift(h('section',{class:'settings-card ambient-card'},h('b',{text:I18n.s("u_29ac15df5d43")}),h('p',{class:'hint',text:I18n.s("u_6ef93678e01a")}),h('label',{class:'ambient-range'},h('span',{text:I18n.s("u_8e2f643ad160")}),range,h('output',{text:(st.ambient??60)+'%'})),h('div',{class:'row wrap'},...[["warm",I18n.s("u_23b05aeaa2d9")],["cool",I18n.s("u_726b9af50bdb")],["pink",I18n.s("u_a6664df1efc8")]].map(([id,label])=>h('button',{class:'chip'+((st.ambientColor||'warm')===id?' on':''),onclick:()=>{st.ambientColor=id;Game.save();UI.refresh('settings')}},label)))));return out};
  // Snapshots preserve wall mounting and perch positions for visitors.
  const preview=Social.roomPreview.bind(Social);Social.roomPreview=function(){const r=preview();for(const it of r.items){const original=Game.S.items.find(x=>x.uid===it.uid);if(original&&original.wall)it.wall=original.wall}return r};
  const snap=Social.snapData.bind(Social);Social.snapData=function(){const r=snap();for(const p of r.pets){const a=Game.pets.find(a=>a.pid===p.id);if(a&&a.on)p.on=a.on.uid}return r};
  Social.visit=async function(fid){
-   if(!this.ready())return UI.toast('登入後就能拜訪好友','i_people',3);
-   if(this.rel(fid)!=='ok')return UI.toast('先加為好友吧','i_people',3);
+   if(!this.ready())return UI.toast(I18n.s("u_af7d54c6bde7"),'i_people',3);
+   if(this.rel(fid)!=='ok')return UI.toast(I18n.s("u_59fe2afd477b"),'i_people',3);
    Visit.exit();const epoch=++Visit.epoch;Visit.loading=true;
    this.visitSt={fid,name:this.friendName(fid),loading:true};UI.openWin('visit');
    try{const r=await this.db().get('rooms/'+fid);if(epoch!==Visit.epoch)return;
      if(!r){Visit.loading=false;this.visitSt={fid,name:this.friendName(fid),empty:true};UI.refresh('visit');return;}
-     const d=JSON.parse(r.data);if(!Array.isArray(d.items))throw Error('房間資料不完整');d.items=d.items.filter(it=>ITEMS[it.k]);d.pets=d.pets||[];d.needs=d.needs||[];
+     const d=JSON.parse(r.data);if(!Array.isArray(d.items))throw Error(I18n.s("u_b9dcb2de023d"));d.items=d.items.filter(it=>ITEMS[it.k]);d.pets=d.pets||[];d.needs=d.needs||[];
      this.visitSt={fid,name:r.name||this.friendName(fid),d,at:r.at};Visit.loading=false;
      for(const g of this.Z.guest||[])if(g.uid===fid)g.back=true;
      Game.save();Visit.enter(this.visitSt);
@@ -89,13 +89,13 @@ class VisitPerson extends Walker{
  };
  const close=UI.closeWin.bind(UI);UI.closeWin=function(id){if(id==='visit'&&Visit.loading){Visit.loading=false;Visit.epoch++;}return close(id)};
  const snapshot=Social.snapshot.bind(Social);Social.snapshot=function(force){if(Visit.active)return Promise.resolve();return snapshot(force)};
- const can=Social.canHelp.bind(Social);Social.canHelp=function(fid,need){if(!Visit.active||Visit.active.fid!==fid)return '先拜訪好友的小屋，再點房間裡的泡泡';if(!(Visit.active.d.needs||[]).some(n=>n.k===need.k&&n.type===need.type))return '這件事已經處理好了';return can(fid,need)};
+ const can=Social.canHelp.bind(Social);Social.canHelp=function(fid,need){if(!Visit.active||Visit.active.fid!==fid)return I18n.s("u_31841ecfd9de");if(!(Visit.active.d.needs||[]).some(n=>n.k===need.k&&n.type===need.type))return I18n.s("u_f53d7be91b0c");return can(fid,need)};
  const help=Social.doHelp.bind(Social);Social.doHelp=async function(o){if(this._helpBusy)return;this._helpBusy=true;const count=this.helpsToday();try{await help(o);if(this.helpsToday()>count&&Visit.active&&Visit.active.fid===o.fid)Visit.feedback(o.need)}finally{this._helpBusy=false}};
  // Interactions on the main canvas belong to the visited room while away.
  window.addEventListener('load',()=>{const cv=document.getElementById('room');let down=null;cv.addEventListener('pointerdown',e=>{if(!Visit.active)return;const r=cv.getBoundingClientRect();down=[(e.clientX-r.left)/r.width*RW,(e.clientY-r.top)/r.height*RH];e.stopImmediatePropagation()},true);cv.addEventListener('pointerup',e=>{if(!Visit.active)return;e.stopImmediatePropagation();const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*RW,y=(e.clientY-r.top)/r.height*RH;if(down&&Math.hypot(x-down[0],y-down[1])<4){const hit=Room.hit(x,y);if(hit&&hit.kind==='actor')hit.a.poke();}down=null},true)});
 })();
 
 // Theme lists stay available on demand rather than taking over each card.
-(function(){const render=UI.render.bind(UI);UI.render=function(id){const r=render(id),w=this.wins[id];if(w)for(const text of w.body.querySelectorAll('.tinc')){if(text.parentNode.classList.contains('theme-includes'))continue;const n=text.textContent.replace(/^含 /,'').split('、').length,details=h('details',{class:'theme-includes'},h('summary',{text:'包含 '+n+' 款家具'}));text.replaceWith(details);details.append(text);}return r};})();
+(function(){const render=UI.render.bind(UI);UI.render=function(id){const r=render(id),w=this.wins[id];if(w)for(const text of w.body.querySelectorAll('.tinc')){if(text.parentNode.classList.contains('theme-includes'))continue;const n=text.textContent.replace(/^含 /,'').split('、').length,details=h('details',{class:'theme-includes'},h('summary',{text:I18n.s("u_d027cac94e86")+n+I18n.s("u_c5f0265f64d0")}));text.replaceWith(details);details.append(text);}return r};})();
 
 Feel.openPlane = function () { const p=this.plane; if(!p)return; this.plane=null; this.hideTag(); return Social.visit(p.fid); };

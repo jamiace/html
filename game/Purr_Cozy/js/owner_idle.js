@@ -64,47 +64,47 @@ const OwnerIdle = {
   pt(A, cv, dx, top, x, y) { const flip = A.idle && A.idle.flip; return [dx + (flip ? cv.width - 1 - (1 + x) : 1 + x), top + 15 + AVA_TOP + y]; },
   // ---------- the activities ----------
   acts: {
-    sweep: { w: 3, can: () => true, start(A) { const [x, y] = randFloor(16); return { at: [x, y], dur: 5 + Math.random() * 2.5, face: 'side', flip: Math.random() < 0.5, pose: t => Math.floor(t * 3) % 2 ? 'reach1' : 'reach0', prop: 'broom', say: ['掃一掃～', '地板亮晶晶', '貓毛好多…'], tick: (A, I, t, dt) => { if (Math.random() < dt * 2.5) { const p = I.tip; if (p) Room.puff('p_dot', p[0], p[1], { vx: (I.flip ? -1 : 1) * 8, vy: -3, grav: 12, max: 0.6 }); } } }; } },
+    sweep: { w: 3, can: () => true, start(A) { const [x, y] = randFloor(16); return { at: [x, y], dur: 5 + Math.random() * 2.5, face: 'side', flip: Math.random() < 0.5, pose: t => Math.floor(t * 3) % 2 ? 'reach1' : 'reach0', prop: 'broom', say: [I18n.s("u_a874397661f1"), I18n.s("u_d494a6bfcb13"), I18n.s("u_fddebca84e60")], tick: (A, I, t, dt) => { if (Math.random() < dt * 2.5) { const p = I.tip; if (p) Room.puff('p_dot', p[0], p[1], { vx: (I.flip ? -1 : 1) * 8, vy: -3, grav: 12, max: 0.6 }); } } }; } },
     tidy: { w: 2, can: () => OwnerIdle.items(d => d.layer === 'floor' && !d.bed).length > 0, start(A) {
       const it = OwnerIdle.pick(OwnerIdle.items(d => d.layer === 'floor' && !d.bed)), [w, h] = itemSize(it), left = Math.random() < 0.5, x = left ? it.x - 9 : it.x + w + 9;
-      return { at: [x, Math.min(166, it.y + h + 2)], dur: 2.6 + Math.random(), face: 'side', flip: !left, pose: t => t < 1.3 ? 'reach0' : 'reach1', say: ['擺正一點', '這個放這裡比較好', '嗯，整齊多了'],
+      return { at: [x, Math.min(166, it.y + h + 2)], dur: 2.6 + Math.random(), face: 'side', flip: !left, pose: t => t < 1.3 ? 'reach0' : 'reach1', say: [I18n.s("u_4fd55c81ffce"), I18n.s("u_2e6af4b11468"), I18n.s("u_e789d0e5f992")],
         begin: () => { it.shake = 0.4; }, end: () => { const cv = Room.itemCanvas(it); Room.puff('p_spark', it.x + cv.width / 2, it.y + 2, { vy: -6 }); } }; } },
     makebed: { w: 2, can: () => itemsWith('bed').length > 0, start(A) {
       const bed = OwnerIdle.pick(itemsWith('bed')), [w, h] = itemSize(bed), left = Math.random() < 0.5;
-      return { at: [left ? bed.x - 6 : bed.x + w + 6, Math.min(166, bed.y + h - 2)], dur: 4.2, face: 'side', flip: !left, pose: t => Math.floor(t * 1.6) % 2 ? 'reach1' : 'reach0', say: ['床鋪好了', '棉被拍一拍', '今晚會睡得很好'],
+      return { at: [left ? bed.x - 6 : bed.x + w + 6, Math.min(166, bed.y + h - 2)], dur: 4.2, face: 'side', flip: !left, pose: t => Math.floor(t * 1.6) % 2 ? 'reach1' : 'reach0', say: [I18n.s("u_a419fbd1ed63"), I18n.s("u_0ebb89880cf3"), I18n.s("u_13bf09b9adbd")],
         tick: (A, I, t, dt) => { if (Math.random() < dt * 3) Room.puff('p_spark', bed.x + 4 + Math.random() * (w - 8), bed.y + 6 + Math.random() * 6, { vy: -4, max: 0.5 }); } }; } },
     petcat: { w: 3, can: () => (Game.pets || []).some(p => !p.on && !p.walking && ['sit', 'sleep', 'act'].includes(p.state) && p.x > 26 && p.x < 214), start(A) {
       const p = OwnerIdle.pick((Game.pets || []).filter(p => !p.on && !p.walking && ['sit', 'sleep', 'act'].includes(p.state) && p.x > 26 && p.x < 214)); if (!p) return null; const left = p.x > 120;
-      return { at: [p.x + (left ? -13 : 13), Math.min(166, p.y + 1)], dur: 4, face: 'side', flip: left ? false : true, pose: t => Math.floor(t * 2.2) % 2 ? 'reach1' : 'reach0', say: [`${(p.data && p.data.name) || '貓咪'}乖～`, '摸摸頭', '軟綿綿的'],
+      return { at: [p.x + (left ? -13 : 13), Math.min(166, p.y + 1)], dur: 4, face: 'side', flip: left ? false : true, pose: t => Math.floor(t * 2.2) % 2 ? 'reach1' : 'reach0', say: [I18n.s("u_dfc7d9ea9e1a", [(p.data && p.data.name) || I18n.s("u_796926dfb9ba")]), I18n.s("u_86dbfa2943c4"), I18n.s("u_8724807c325a")],
         begin: () => { if (p.walking || p.on) return; if (p.state === 'sleep') p.state = 'sit'; p.flip = !left; PetAI.act(p, Math.random() < 0.35 ? 'belly' : 'knead', 3.6); },
         tick: (A, I, t, dt) => { if (Math.random() < dt * 1.2) Room.puff('p_heart', p.x - 2, p.y - 16, { vy: -8, max: 1 }); } }; } },
-    computer: { w: 2, can: () => itemsWith('desk').length > 0 && itemsWith('chair').length > 0, start(A) { return { seat: true, dur: 9 + Math.random() * 7, say: ['看一下天氣', '回個訊息', '查一個單字', '看看新聞'] }; } },
+    computer: { w: 2, can: () => itemsWith('desk').length > 0 && itemsWith('chair').length > 0, start(A) { return { seat: true, dur: 9 + Math.random() * 7, say: [I18n.s("u_0a858fd52311"), I18n.s("u_3b262f41d58d"), I18n.s("u_728eb311521b"), I18n.s("u_81935e9cd369")] }; } },
     read: { w: 3, can: () => OwnerIdle.items(d => /書櫃|書架/.test(d.n || '')).length > 0 || OwnerIdle.items(d => d.seat).length > 0, start(A) {
       const shelf = OwnerIdle.items(d => /書櫃|書架/.test(d.n || ''))[0], seats = itemsWith('seat').filter(it => ActorVisibility.furnSafe(A, it, 'sit'));
-      const I = { dur: 10 + Math.random() * 5, say: ['這本好看', '再一頁就好', '（翻頁）'], prop: 'book', eyes: null };
+      const I = { dur: 10 + Math.random() * 5, say: [I18n.s("u_3069677a0e47"), I18n.s("u_1dc27a72b3cd"), I18n.s("u_4ce9bc0f4da8")], prop: 'book', eyes: null };
       if (shelf) { const [w, h] = itemSize(shelf); I.pre = { at: [shelf.x + w / 2, Math.min(166, shelf.y + h + 3)], dur: 1.4, face: 'back' }; }
       if (seats.length && Math.random() < 0.7) I.sitOn = OwnerIdle.pick(seats); else { I.at = randFloor(20); I.face = 'front'; I.pose = () => 'hold0'; }
       return I; } },
     music: { w: 2, can: () => typeof Music !== 'undefined' && Music.playing, start(A) {
       const dance = Math.random() < 0.5;
-      return dance ? { dur: 4.5, face: 'front', pose: t => Math.floor(t * 4) % 2 ? 'cheer1' : 'cheer0', wide: true, say: ['♪～', '跳起來！'], tick: (A, I, t, dt) => { if (Math.random() < dt * 2) Room.puff('p_note', A.x + (Math.random() - 0.5) * 16, A.y - 30, { vy: -8, wob: 8, max: 1.4 }); } }
-        : { dur: 6, face: 'front', pose: () => 'front0', eyes: 'closed', sway: true, say: ['這首好好聽', '♪'], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.3) Room.puff('p_note', A.x + 6, A.y - 30, { vx: 4, vy: -7, wob: 6, max: 1.6 }); } };
+      return dance ? { dur: 4.5, face: 'front', pose: t => Math.floor(t * 4) % 2 ? 'cheer1' : 'cheer0', wide: true, say: ['♪～', I18n.s("u_ef1d1e9572e6")], tick: (A, I, t, dt) => { if (Math.random() < dt * 2) Room.puff('p_note', A.x + (Math.random() - 0.5) * 16, A.y - 30, { vy: -8, wob: 8, max: 1.4 }); } }
+        : { dur: 6, face: 'front', pose: () => 'front0', eyes: 'closed', sway: true, say: [I18n.s("u_1768e4c06a76"), '♪'], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.3) Room.puff('p_note', A.x + 6, A.y - 30, { vx: 4, vy: -7, wob: 6, max: 1.6 }); } };
     } },
     window: { w: 2, can: () => OwnerIdle.items(d => d.window).length > 0 || Room.state.items.some(it => ITEMS[it.k] && ITEMS[it.k].window), start(A) {
       const w = OwnerIdle.pick(Room.state.items.filter(it => ITEMS[it.k] && ITEMS[it.k].window)), env = Room.env || {}, hr = env.h || 12;
-      const line = env.rain ? ['下雨了…', '雨聲好好聽'] : env.dark > 0.55 ? ['星星好亮', '月亮出來了'] : hr >= 17 && hr < 19.5 ? ['夕陽好美', '天空變成橘色了'] : ['天氣真好', '那朵雲像一隻貓', '有小鳥飛過去'];
+      const line = env.rain ? [I18n.s("u_fe5b4586ec08"), I18n.s("u_1dfce680cb8c")] : env.dark > 0.55 ? [I18n.s("u_7257f0c3b3a5"), I18n.s("u_4aec702985a9")] : hr >= 17 && hr < 19.5 ? [I18n.s("u_d72cf706d12f"), I18n.s("u_81207012f102")] : [I18n.s("u_9ec283cc20c5"), I18n.s("u_796859ce3e27"), I18n.s("u_53a9b76f6133")];
       return { at: [w.x + itemSize(w)[0] / 2, 106], dur: 5 + Math.random() * 2, face: 'back', pose: () => 'back0', say: line }; } },
-    sing: { w: 2, can: () => true, start(A) { return { dur: 4, face: 'front', pose: () => 'front0', eyes: 'happy', sway: true, say: ['♪ 啦啦啦～', '♪ 嗯嗯～嗯～', '♪～'], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.8) Room.puff('p_note', A.x + (Math.random() < 0.5 ? -6 : 6), A.y - 30, { vy: -8, wob: 8, max: 1.5 }); } }; } },
-    tea: { w: 2, can: () => true, start(A) { return { at: randFloor(20), dur: 5, face: 'front', pose: () => 'hold0', prop: 'mug', say: ['呼～好喝', '暖暖的', '休息一下'], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.6 && I.cup) Room.puff('p_steam', I.cup[0], I.cup[1] - 2, { vy: -5, vx: (Math.random() - 0.5) * 2, max: 1.2, alpha: 0.7 }); } }; } },
+    sing: { w: 2, can: () => true, start(A) { return { dur: 4, face: 'front', pose: () => 'front0', eyes: 'happy', sway: true, say: [I18n.s("u_9cefcd3b8f09"), I18n.s("u_3af90de3ce62"), '♪～'], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.8) Room.puff('p_note', A.x + (Math.random() < 0.5 ? -6 : 6), A.y - 30, { vy: -8, wob: 8, max: 1.5 }); } }; } },
+    tea: { w: 2, can: () => true, start(A) { return { at: randFloor(20), dur: 5, face: 'front', pose: () => 'hold0', prop: 'mug', say: [I18n.s("u_4ab77c02387f"), I18n.s("u_67e3623ac6c8"), I18n.s("u_adf092bb4f10")], tick: (A, I, t, dt) => { if (Math.random() < dt * 1.6 && I.cup) Room.puff('p_steam', I.cup[0], I.cup[1] - 2, { vy: -5, vx: (Math.random() - 0.5) * 2, max: 1.2, alpha: 0.7 }); } }; } },
     water: { w: 2, can: () => OwnerIdle.items(d => d.react === 'water' || d.react === 'rustle').length > 0, start(A) {
       const pl = OwnerIdle.pick(OwnerIdle.items(d => d.react === 'water' || d.react === 'rustle')), [w, h] = itemSize(pl), left = Math.random() < 0.5;
-      return { at: [left ? pl.x - 10 : pl.x + w + 10, Math.min(166, pl.y + h + 2)], dur: 3.6, face: 'side', flip: !left, pose: () => 'reach0', prop: 'can', say: ['喝水囉', '快快長大', '葉子好綠'],
+      return { at: [left ? pl.x - 10 : pl.x + w + 10, Math.min(166, pl.y + h + 2)], dur: 3.6, face: 'side', flip: !left, pose: () => 'reach0', prop: 'can', say: [I18n.s("u_9fcfeef719ff"), I18n.s("u_0e034deb9682"), I18n.s("u_b0861e749a24")],
         tick: (A, I, t, dt) => { if (I.spout && Math.random() < dt * 8) Room.puff('p_dot', I.spout[0], I.spout[1], { vx: (I.flip ? -1 : 1) * 6, vy: 2, grav: 40, max: 0.5 }); if (Math.random() < dt) Room.puff('p_leaf', pl.x + w / 2, pl.y + 4, { vy: -5, max: 0.8 }); } }; } },
     dust: { w: 2, can: () => OwnerIdle.items(d => /櫃|架/.test(d.n || '') && d.layer === 'floor').length > 0, start(A) {
       const it = OwnerIdle.pick(OwnerIdle.items(d => /櫃|架/.test(d.n || '') && d.layer === 'floor')), [w, h] = itemSize(it), left = Math.random() < 0.5;
-      return { at: [left ? it.x - 8 : it.x + w + 8, Math.min(166, it.y + h + 2)], dur: 4, face: 'side', flip: !left, pose: t => Math.floor(t * 4) % 2 ? 'hand1' : 'hand0', prop: 'duster', say: ['灰塵掰掰', '擦一擦', '哈啾！'],
+      return { at: [left ? it.x - 8 : it.x + w + 8, Math.min(166, it.y + h + 2)], dur: 4, face: 'side', flip: !left, pose: t => Math.floor(t * 4) % 2 ? 'hand1' : 'hand0', prop: 'duster', say: [I18n.s("u_65834b5eb8d2"), I18n.s("u_1e22eac0c34a"), I18n.s("u_9dae53e56128")],
         tick: (A, I, t, dt) => { if (I.fluff && Math.random() < dt * 4) Room.puff('p_dot', I.fluff[0], I.fluff[1], { vx: (Math.random() - 0.5) * 10, vy: -4, grav: 6, max: 0.8 }); } }; } },
-    stretch: { w: 1, can: () => typeof Lights !== 'undefined', start(A) { return { dur: 2.6, custom: () => Lights.stretch(A, Math.random() < 0.5 ? '嗯～伸個懶腰' : null) }; } },
+    stretch: { w: 1, can: () => typeof Lights !== 'undefined', start(A) { return { dur: 2.6, custom: () => Lights.stretch(A, Math.random() < 0.5 ? I18n.s("u_754d12299fae") : null) }; } },
   },
   choose(A) {
     const list = Object.entries(this.acts).filter(([k, a]) => k !== this.last && a.can(A)); if (!list.length) return null;
@@ -200,7 +200,7 @@ const OwnerIdle = {
     return r;
   };
   const poke = Avatar.prototype.poke;
-  Avatar.prototype.poke = function () { if (this.idle && this.idle.stage === 'on' && this.state === 'idle') { this.happy = 1.4; Game.bubble(this, '嗯？', 1.2); return; } return poke.call(this); };
+  Avatar.prototype.poke = function () { if (this.idle && this.idle.stage === 'on' && this.state === 'idle') { this.happy = 1.4; Game.bubble(this, I18n.s("u_8af85ce981d9"), 1.2); return; } return poke.call(this); };
   const draw = Avatar.prototype.draw;
   Avatar.prototype.draw = function (c) {
     const I = this.idle, t = Room.t;

@@ -18,5 +18,5 @@ PurrBoot.appearanceReady = document.querySelector('.purr-splash img').decode().c
 document.getElementById('load-retry').addEventListener('click', () => { const url=new URL(location.href);url.searchParams.set('refresh',String(Date.now()));location.replace(url.href); });
 window.addEventListener('error', e => {
   if (!document.body.classList.contains('purr-loading')) return;
-  if (e.target?.tagName === 'SCRIPT' || e.error) PurrBoot.fail('遊戲啟動未完成，請重新載入；若持續發生，請檢查網路連線。');
+  if (e.target?.tagName === 'SCRIPT' || e.error) PurrBoot.fail(I18n.s("u_76f7be4fb086"));
 }, true);

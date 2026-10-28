@@ -108,7 +108,7 @@ const Lights = {
     if (A && !A.walking) {
       if (A.state === 'sleep') {
         // wakes up, sits up for a moment, then a big standing stretch
-        setTimeout(() => { if (A.state !== 'sleep') return; A.stand(); A.timer = 4; Game.bubble(A, tier === 'morning' && this.morning() ? '嗯…早安！' : '嗯…你回來啦', 2.2); setTimeout(() => this.stretch(A), 900); }, 500);
+        setTimeout(() => { if (A.state !== 'sleep') return; A.stand(); A.timer = 4; Game.bubble(A, tier === 'morning' && this.morning() ? I18n.s("u_d7d84b280302") : I18n.s("u_fc0282834dbf"), 2.2); setTimeout(() => this.stretch(A), 900); }, 500);
       } else if (A.state === 'idle') {
         if (tier === 'peek') { A.lp = { at: t, end: t + 1.6, frame: () => 'front0' }; A.happy = 1.4; setTimeout(() => Game.bubble(A, hi, 2.2), 250); }
         else { A.face = 'front'; setTimeout(() => this.stretch(A, hi), 300); }
@@ -126,7 +126,7 @@ const Lights = {
           PetAI.act(p, 'stare', 1.8 + Math.random() * 0.6); Room.puff('p_spark', p.x + (p.flip ? -4 : 4), p.y - 20, { vy: -6, max: 0.6 });
           return;
         }
-        const come = () => { if (p.walking || p.state !== 'sit') return; const A2 = Game.avatar, tx = A2 ? A2.x + (p.x > A2.x ? 14 : -14) : p.x, ty = Math.min(166, (A2 ? A2.y : p.y) + 4); p.walkTo(tx, ty, () => { p.state = 'sit'; PetAI.act(p, 'stare', 2.2); Room.puff('p_heart', p.x - 2, p.y - 18, { vy: -8 }); if (Math.random() < 0.6) Game.bubble(p, p.kind === 'dog' ? '汪！' : '喵～', 1.6); }); };
+        const come = () => { if (p.walking || p.state !== 'sit') return; const A2 = Game.avatar, tx = A2 ? A2.x + (p.x > A2.x ? 14 : -14) : p.x, ty = Math.min(166, (A2 ? A2.y : p.y) + 4); p.walkTo(tx, ty, () => { p.state = 'sit'; PetAI.act(p, 'stare', 2.2); Room.puff('p_heart', p.x - 2, p.y - 18, { vy: -8 }); if (Math.random() < 0.6) Game.bubble(p, p.kind === 'dog' ? I18n.s("u_28452697f131") : I18n.s("u_b5d7570da46d"), 1.6); }); };
         const up = () => PetAI.act(p, 'yawn', 1.4, () => PetAI.act(p, 'stretch', 1.6, () => { if (p.on) p.leaveSpot(come); else come(); }));
         if (sleeping) up(); else PetAI.act(p, 'stare', 1.4, up);
       }, d);
@@ -140,11 +140,11 @@ const Lights = {
   greet(tier) {
     const h = new Date().getHours(), part = h < 5 ? 'late' : h < 11 ? 'morning' : h < 14 ? 'noon' : h < 18 ? 'after' : h < 22 ? 'eve' : 'late';
     const L = {
-      peek: ['你回來啦', '嗨～', '等你好久了', '剛好想到你'],
-      nap: ['你回來啦！', '睡了一個好覺', '剛剛好安靜喔', '歡迎回來～'],
-      morning: { morning: ['早安！', '今天也慢慢來', '睡飽了嗎？'], noon: ['午安～', '吃飯了嗎？'], after: ['午安，你來了', '下午好'], eve: ['晚上好', '今天辛苦了'], late: ['這麼晚還來看我們', '夜深了，別太累喔'] },
-      idle: ['嗯…睡著了', '你還在呀', '剛剛打了個盹'],
-    }[tier] || ['你回來啦'];
+      peek: [I18n.s("u_11eb587012a5"), I18n.s("u_d523d570eb0c"), I18n.s("u_a01ecb6df815"), I18n.s("u_19257cf1f7c0")],
+      nap: [I18n.s("u_4b014dc54f1a"), I18n.s("u_9e2d01c17562"), I18n.s("u_949d8915f39c"), I18n.s("u_805fb543fcb4")],
+      morning: { morning: [I18n.s("u_6a115409a63d"), I18n.s("u_52fc91d6256f"), I18n.s("u_082ee89f4b24")], noon: [I18n.s("u_713b2cb4be79"), I18n.s("u_92825c550896")], after: [I18n.s("u_93d2fee63cc6"), I18n.s("u_552594ef8057")], eve: [I18n.s("u_d8e9a7fa2086"), I18n.s("u_5f4b92929718")], late: [I18n.s("u_5bf153bcd7a0"), I18n.s("u_0c679df50b2c")] },
+      idle: [I18n.s("u_36f7ddbacbba"), I18n.s("u_18fc82d4c15d"), I18n.s("u_10336ae46575")],
+    }[tier] || [I18n.s("u_11eb587012a5")];
     const list = Array.isArray(L) ? L : (L[part] || L.morning);
     return list[Math.floor(Math.random() * list.length)];
   },
@@ -183,38 +183,38 @@ const Lights = {
   },
   noteText(away, tier, used) {
     const pets = Pets.home ? Pets.home() : [], P = pets[Math.floor(Math.random() * pets.length)], P2 = pets.find(x => x !== P);
-    const nm = P ? P.name : '', dog = P && P.sp && P.sp.startsWith('dog'), cry = dog ? '汪' : '喵';
+    const nm = P ? P.name : '', dog = P && P.sp && P.sp.startsWith('dog'), cry = dog ? I18n.s("u_c4fb192141bf") : I18n.s("u_be65e0d3685d");
     const items = Room.state.items, has = f => items.find(it => ITEMS[it.k] && f(ITEMS[it.k], it)), name = it => it ? ITEMS[it.k].n : '';
     const bed = has(d => d.bed), win = has(d => d.window), plant = has(d => d.react === 'rustle'), rug = has(d => d.layer === 'rug'), bowl = has(d => d.bowl), chair = has(d => d.chair), lamp = has(d => d.toggle && d.light), desk = has(d => d.desk);
     const h = new Date().getHours(), rain = Room.env && Room.env.rain, hrs = away / 3600e3;
-    const dur = hrs < 1 ? `${Math.max(10, Math.round(away / 60e3 / 5) * 5)} 分鐘` : hrs < 24 ? `${Math.round(hrs)} 個小時` : `${Math.round(hrs / 24)} 天`;
+    const dur = hrs < 1 ? I18n.s("u_40a8f80e5512", [Math.max(10, Math.round(away / 60e3 / 5) * 5)]) : hrs < 24 ? I18n.s("u_09885c3093f0", [Math.round(hrs)]) : I18n.s("u_84b058156452", [Math.round(hrs / 24)]);
     const naps = Math.max(1, Math.min(9, Math.round(hrs * 1.5)));
     const T = [
-      ['bed1', P && bed, `你不在的時候，${nm}在${name(bed)}上睡了好久，起來還伸了一個大懶腰。`],
-      ['win1', P && win, `${nm}在窗邊坐了好一陣子，好像在數經過的雲。`],
-      ['win2', P && win && h >= 17, `天色暗下來的時候，${nm}一直望著窗外，大概在等你。`],
-      ['rug1', P && rug, `${nm}把${name(rug)}的角踩得皺皺的，然後若無其事地走開了。`],
-      ['door1', P, `門外有腳步聲經過，${nm}豎起耳朵聽了好久，發現不是你。`],
-      ['bug1', P, `${nm}追著一隻小飛蟲繞了房間好幾圈，最後放棄了。`],
-      ['two1', P && P2, `${nm}和${P2 && P2.name}擠在一起睡午覺，誰也不讓誰。`],
-      ['two2', P && P2, `${P2 && P2.name}偷偷玩了${nm}的玩具，被發現後假裝在睡覺。`],
-      ['chair1', P && chair, `${nm}在你的${name(chair)}上留下了一撮毛，那是牠的位子了。`],
-      ['step1', P, `${nm}好像聽得出你的腳步聲，剛剛比你先跑到門口。`],
-      ['sun1', P && h >= 6 && h < 12, `早上的陽光照到${nm}的鼻子，牠打了一個小噴嚏。`],
-      ['night1', P && (h >= 22 || h < 5), `晚上很安靜，${nm}守著小窩，等你回來。`],
-      ['bowl1', P && bowl, `${nm}把${name(bowl)}推到房間中間，好像在提醒什麼。`],
-      ['plant1', plant, `${name(plant)}的葉子好像又長大了一點點。`],
-      ['plant2', P && plant, `${nm}聞了聞${name(plant)}，打了個噴嚏，就不理它了。`],
-      ['rain1', rain, `下了一場小雨，窗上的水珠一顆一顆滑下來。${P ? nm + '看得好專心。' : ''}`],
-      ['naps', P && hrs >= 2, `你出門 ${dur}，${nm}大概睡了 ${naps} 覺。`],
-      ['desk1', P && desk, `桌上的筆被${nm}撥到地上了，已經偷偷撿回去放好。`],
-      ['lamp1', lamp && (h >= 18 || h < 6), `${name(lamp)}一直亮著，房間暖暖的，像在等人回家。`],
-      ['dream1', P, `${nm}睡覺的時候腳一直動，好像夢到在追什麼。`],
-      ['cry1', P, `剛剛${nm}對著空氣「${cry}」了一聲，然後又若無其事地躺下。`],
-      ['clock1', has(d => d.react === 'time'), `時鐘滴答滴答地走，小窩裡的時間過得很慢。`],
-      ['quiet1', true, `你不在的這段時間，小窩很安靜。歡迎回來。`],
-      ['long1', hrs >= 24, `好久不見！房間裡的東西都還在原來的地方，等你。`],
-      ['mail1', P && hrs >= 3, `${nm}把一片葉子叼到門口，好像是要送你的。`],
+      ['bed1', P && bed, I18n.s("u_6831eebdea1d", [nm, name(bed)])],
+      ['win1', P && win, I18n.s("u_eb9e56b5c72d", [nm])],
+      ['win2', P && win && h >= 17, I18n.s("u_e4df2946a34b", [nm])],
+      ['rug1', P && rug, I18n.s("u_791bdb3e27a4", [nm, name(rug)])],
+      ['door1', P, I18n.s("u_d356d1e9789d", [nm])],
+      ['bug1', P, I18n.s("u_7391bdb8cfbe", [nm])],
+      ['two1', P && P2, I18n.s("u_6c8516aebd64", [nm, P2 && P2.name])],
+      ['two2', P && P2, I18n.s("u_b6c46118266e", [P2 && P2.name, nm])],
+      ['chair1', P && chair, I18n.s("u_d34c325630a7", [nm, name(chair)])],
+      ['step1', P, I18n.s("u_45dc457c6748", [nm])],
+      ['sun1', P && h >= 6 && h < 12, I18n.s("u_164c6fbb9058", [nm])],
+      ['night1', P && (h >= 22 || h < 5), I18n.s("u_7b369bb26b56", [nm])],
+      ['bowl1', P && bowl, I18n.s("u_3eb1d58e3f8b", [nm, name(bowl)])],
+      ['plant1', plant, I18n.s("u_bdfe66ed4db2", [name(plant)])],
+      ['plant2', P && plant, I18n.s("u_8ee8d91a0443", [nm, name(plant)])],
+      ['rain1', rain, I18n.s("u_53baa4e2c8db", [P ? nm + I18n.s("u_7b0e7b13329d") : ''])],
+      ['naps', P && hrs >= 2, I18n.s("u_4fede0b243be", [dur, nm, naps])],
+      ['desk1', P && desk, I18n.s("u_63e06c65ce97", [nm])],
+      ['lamp1', lamp && (h >= 18 || h < 6), I18n.s("u_41efe5686945", [name(lamp)])],
+      ['dream1', P, I18n.s("u_891083a4cb64", [nm])],
+      ['cry1', P, I18n.s("u_466c893a4130", [nm, cry])],
+      ['clock1', has(d => d.react === 'time'), I18n.s("u_60214d1b5c9c")],
+      ['quiet1', true, I18n.s("u_ca278e080d93")],
+      ['long1', hrs >= 24, I18n.s("u_69df364e4c83")],
+      ['mail1', P && hrs >= 3, I18n.s("u_12f64c3cdb23", [nm])],
     ].filter(x => x[1]);
     const fresh = T.filter(x => !used.includes(x[0])), pool = fresh.length ? fresh : T;
     const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -228,8 +228,8 @@ const Lights = {
     const side = !mob && document.body.classList.contains('tray-side');
     const wrap = mob ? st : side ? document.querySelector('.room-wrap') : document.getElementById('toasts'); if (!wrap) return;
     if (this.noteEl) this.noteEl.remove();
-    const now = new Date(), stamp = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} 的小窩`;
-    const el = this.noteEl = h('button', { class: 'lnote' + (side ? ' side' : ''), title: '點一下收起', onclick: () => this.hideNote() }, h('span', { class: 'lnote-t', text: text }), h('span', { class: 'lnote-s', text: '— ' + stamp }));
+    const now = new Date(), stamp = I18n.s("u_78c5e562723b", [String(now.getHours()).padStart(2, '0'), String(now.getMinutes()).padStart(2, '0')]);
+    const el = this.noteEl = h('button', { class: 'lnote' + (side ? ' side' : ''), title: I18n.s("u_bbf62cb76174"), onclick: () => this.hideNote() }, h('span', { class: 'lnote-t', text: text }), h('span', { class: 'lnote-s', text: '— ' + stamp }));
     if (mob) st.insertBefore(el, Mobile.today); else if (side) wrap.append(el); else wrap.prepend(el); clearTimeout(this._noteT); this._noteT = setTimeout(() => this.hideNote(), 12000);
   },
   hideNote() { const el = this.noteEl; if (!el) return; this.noteEl = null; el.classList.add('out'); setTimeout(() => el.remove(), 300); },
@@ -245,10 +245,10 @@ const Lights = {
     for (const p of this.pets()) if (p.state !== 'sleep' && !p.walking && !['eat', 'trick', 'hand', 'inbox'].includes(p.state)) p.goNap();
   },
   // ---------- good night ----------
-  nightRow() { return this.isNight() && this.mode === 'on' ? ['晚安，關燈休息', '大家一起睡覺，明天見'] : null; },
+  nightRow() { return this.isNight() && this.mode === 'on' ? [I18n.s("u_2877d8242edb"), I18n.s("u_fae6dc167c5d")] : null; },
   async goodnight(bedIt) {
     if (!this.ready() || this.busy || this.mode !== 'on') return;
-    if (Game.focusing()) return UI.toast('專注結束再說晚安吧', 'i_moon', 2.4);
+    if (Game.focusing()) return UI.toast(I18n.s("u_2512863e7887"), 'i_moon', 2.4);
     this.busy = true; this.mode = 'night'; this.lastInput = Date.now();
     try {
       for (const id in UI.wins) UI.closeWin(id);
@@ -257,7 +257,7 @@ const Lights = {
       for (const p of this.pets()) if (p.state !== 'sleep' && !['eat', 'trick', 'hand', 'inbox'].includes(p.state)) p.goNap();
       const t0 = Date.now(); while (A && bed && A.state !== 'sleep' && Date.now() - t0 < 7000) await this.wait(150);
       if (A && A.timer) A.timer = 1e6;
-      if (A) Game.bubble(A, '晚安', 2);
+      if (A) Game.bubble(A, I18n.s("u_7196ef2fbde2"), 2);
       await this.wait(700);
       // the lamps go off one by one
       const lit = Room.state.items.filter(it => ITEMS[it.k] && ITEMS[it.k].toggle && ITEMS[it.k].light && it.on);
@@ -265,7 +265,7 @@ const Lights = {
       this.store(LIGHTS.nightKey, { at: Date.now(), lamps: lit.map(it => it.uid) });
       this.click(false);
       if (typeof Music !== 'undefined' && Music.playing) { this.music(1); for (let k = 1; k > 0.05; k -= 0.1) { this.music(k); await this.wait(120); } Music.toggle(false); this.musicK = null; try { Music.audio.volume = Game.S.music.vol; } catch (e) { } }
-      const pet = this.pets()[0]; if (pet) setTimeout(() => Game.bubble(pet, pet.kind === 'dog' ? '汪…' : '喵…', 1.6), 400);
+      const pet = this.pets()[0]; if (pet) setTimeout(() => Game.bubble(pet, pet.kind === 'dog' ? I18n.s("u_60d35572941d") : I18n.s("u_6bb82ad758d2"), 1.6), 400);
       Game.save();
     } finally { this.busy = false; this.lastInput = Date.now(); }
   },
@@ -281,15 +281,15 @@ const Lights = {
     this.mode = 'paused'; this.busy = false; this.click(false); this.musicBack();
     if (typeof Music !== 'undefined' && Music.playing) try { Music.toggle(false); } catch (e) { }
     for (const id in UI.wins) if (!(UI.WIN[id] && UI.WIN[id].modal)) UI.closeWin(id);
-    let el = this.pel; if (!el) { el = this.pel = h('div', { class: 'lpause', role: 'dialog', 'aria-modal': 'true', 'aria-label': '這台裝置暫停中' }); document.body.append(el); }
-    const btn = h('button', { class: 'chip primary big', onclick: () => Cloud.resume() }, ico('i_lamp', 22), '在這台繼續');
-    el.replaceChildren(h('div', { class: 'lpause-card' }, ico('i_moon', 40), h('b', { text: '小窩的燈正在另一台裝置亮著' }),
-      h('p', { text: '這台先熄燈休息。剛剛的進度已經存到雲端，在這裡繼續會接著最新的進度。' }), btn, h('p', { class: 'lpause-msg hint', text: '' })));
+    let el = this.pel; if (!el) { el = this.pel = h('div', { class: 'lpause', role: 'dialog', 'aria-modal': 'true', 'aria-label': I18n.s("u_79e4702f12c7") }); document.body.append(el); }
+    const btn = h('button', { class: 'chip primary big', onclick: () => Cloud.resume() }, ico('i_lamp', 22), I18n.s("u_63ace269c7ba"));
+    el.replaceChildren(h('div', { class: 'lpause-card' }, ico('i_moon', 40), h('b', { text: I18n.s("u_fa91097c859f") }),
+      h('p', { text: I18n.s("u_0fb221c4de3e") }), btn, h('p', { class: 'lpause-msg hint', text: '' })));
     el.hidden = false; this.pbtn = btn;
   },
-  resuming() { if (this.pbtn) { this.pbtn.disabled = true; this.pbtn.replaceChildren(ico('i_lamp', 22), '開燈中…'); } },
+  resuming() { if (this.pbtn) { this.pbtn.disabled = true; this.pbtn.replaceChildren(ico('i_lamp', 22), I18n.s("u_315bec7bc0a2")); } },
   resumed() { if (this.pel) this.pel.hidden = true; this.mode = 'on'; this.wake('resume', 0); },
-  resumeFailed() { if (this.pbtn) { this.pbtn.disabled = false; this.pbtn.replaceChildren(ico('i_lamp', 22), '再試一次'); } const m = this.pel && this.pel.querySelector('.lpause-msg'); if (m) m.textContent = '連不上雲端，檢查一下網路再試一次。'; },
+  resumeFailed() { if (this.pbtn) { this.pbtn.disabled = false; this.pbtn.replaceChildren(ico('i_lamp', 22), I18n.s("u_2f5a858ab28f")); } const m = this.pel && this.pel.querySelector('.lpause-msg'); if (m) m.textContent = I18n.s("u_f204f0667d86"); },
   unpause() { if (this.pel) this.pel.hidden = true; if (this.mode === 'paused') { this.mode = 'on'; this.click(true); } },
   // ---------- input and time ----------
   input() {
@@ -349,12 +349,12 @@ class Fur extends Trace {
   const inter = Game.interact.bind(Game);
   Game.interact = function (it) {
     const d = ITEMS[it.k], r = inter(it);
-    if (d && d.bed && !this.focusing() && Lights.isNight() && Lights.mode === 'on' && !Lights.busy) UI.toast('要說晚安、關燈休息了嗎？', 'i_moon', 5, { label: '晚安', fn: () => Lights.goodnight(it) });
+    if (d && d.bed && !this.focusing() && Lights.isNight() && Lights.mode === 'on' && !Lights.busy) UI.toast(I18n.s("u_38e667838834"), 'i_moon', 5, { label: I18n.s("u_7196ef2fbde2"), fn: () => Lights.goodnight(it) });
     return r;
   };
   // bed tip on a long press mentions it
   const tag = Pets.ownerTag.bind(Pets);
-  Pets.ownerTag = function (it) { const t = tag(it); if (t) return t; const d = ITEMS[it.k]; return d && d.bed && Lights.isNight() ? `${d.n}・晚上點一下可以說晚安` : t; };
+  Pets.ownerTag = function (it) { const t = tag(it); if (t) return t; const d = ITEMS[it.k]; return d && d.bed && Lights.isNight() ? I18n.s("u_57886582c80e", [d.n]) : t; };
   // focusing never winds the room down; the end of a focus counts as being here
   const start = Game.start.bind(Game); Game.start = function () { Lights.input(); return start.apply(this, arguments); };
   // input

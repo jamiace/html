@@ -45,9 +45,9 @@ const Mobile = {
   // ---------- build the phone parts once ----------
   build() {
     const stage = document.querySelector('.stage');
-    this.today = h('section', { class: 'mtoday', 'aria-label': '今天' }); stage.insertBefore(this.today, stage.querySelector('.ytpanel'));
-    this.nav = h('nav', { class: 'mnav', 'aria-label': '分頁' }); document.getElementById('app').append(this.nav);
-    const tabs = [['learn', 'i_learn', '學習'], ['tasks', 'i_task', '任務'], ['pet', 'i_paw', '寵物'], ['music', 'i_music', '音樂'], ['more', 'i_gear', '更多']];
+    this.today = h('section', { class: 'mtoday', 'aria-label': I18n.s("u_d5f5a7a01073") }); stage.insertBefore(this.today, stage.querySelector('.ytpanel'));
+    this.nav = h('nav', { class: 'mnav', 'aria-label': I18n.s("u_842433f0a425") }); document.getElementById('app').append(this.nav);
+    const tabs = [['learn', 'i_learn', I18n.s("u_dcb9874582c0")], ['tasks', 'i_task', I18n.s("u_c72c7750015b")], ['pet', 'i_paw', I18n.s("u_5b825353b534")], ['music', 'i_music', I18n.s("u_78998a594b50")], ['more', 'i_gear', I18n.s("u_38844b135cf7")]];
     this.tabs = {};
     for (const [id, ic, label] of tabs) {
       const b = h('button', { class: 'mtab', type: 'button', 'data-id': id, 'aria-pressed': 'false', onclick: () => this.tab(id) }, ico(ic, 28), h('span', { text: label }));
@@ -56,7 +56,7 @@ const Mobile = {
     if (typeof ResizeObserver !== 'undefined') { this.navObserver = new ResizeObserver(() => this.measureNav()); this.navObserver.observe(this.nav); }
     this.measureNav();
     // zoom button: in the bar under the room, never on top of the furniture
-    this.zbtn = h('button', { class: 'chip mzoom', 'aria-label': '放大房間', title: '放大房間（也可以點兩下地板）', onclick: () => this.zoomed ? this.unzoom() : this.zoomAt(RW / 2, RH * 0.62) }, ico('i_zoomin', 22));
+    this.zbtn = h('button', { class: 'chip mzoom', 'aria-label': I18n.s("u_b05b79c53d55"), title: I18n.s("u_222787a2aa78"), onclick: () => this.zoomed ? this.unzoom() : this.zoomAt(RW / 2, RH * 0.62) }, ico('i_zoomin', 22));
   },
   measureNav() {
     if (this.nav && this.on) {
@@ -93,7 +93,7 @@ const Mobile = {
       this.tabs[id].classList.toggle('on', on);
       this.tabs[id].setAttribute('aria-pressed', String(on));
       this.tabs[id].disabled = blocking;
-      this.tabs[id].title = on && open === id ? '再點一次收合，回到房間' : this.tabs[id].textContent.replace(/\d+/g, '').trim();
+      this.tabs[id].title = on && open === id ? I18n.s("u_38387863922d") : this.tabs[id].textContent.replace(/\d+/g, '').trim();
       const src = UI.dockBtns && UI.dockBtns[id] && UI.dockBtns[id].querySelector('.badge-dot'); let el = this.tabs[id].querySelector('.badge-dot');
       if (src) { if (!el) { el = src.cloneNode(true); this.tabs[id].append(el); } else el.textContent = src.textContent; el.className = src.className; } else if (el) el.remove();
     }
@@ -105,22 +105,22 @@ const Mobile = {
     const out = [], S = Game.S, t = S.timer, L = Learn.L;
     const row = (icon, title, sub, fn, cls) => out.push(h('button', { class: 'mrow' + (cls ? ' ' + cls : ''), onclick: fn }, ico(icon, 26), h('span', { class: 'mrow-t' }, h('b', { text: title }), sub ? h('span', { class: 'hint', text: sub }) : null), ico('i_chev', 16)));
     // plane, team, story: someone needs you
-    if (typeof Feel !== 'undefined' && Feel.plane && Feel.plane.t >= 1) row(Feel.plane.kind.icon, Feel.plane.text, '去幫忙', () => Feel.openPlane(), 'need');
-    if (typeof Feel !== 'undefined') for (const type of ['d', 'w']) { const n = Feel.near[type]; if (n) row('i_people', `${TEAM_TYPES[type].n}團隊只差 ${n.left} ${n.unit}`, n.quiz ? '一起完成' : '看看團隊', () => Feel.finishTeam(type), 'need'); }
-    if (typeof Story !== 'undefined' && Story.pending()) { const St = Story.week(), i = Story.next(); row('i_shop', `${MERCHANTS[St.mk].n}的故事 · 第 ${i + 1} 章`, i === 0 ? Story.M().arcs[St.arc].open[0] : '有一章新的故事在等你', () => Story.open(), 'need'); }
-    for (const n of Life.L.needs.slice(0, 2)) { const def = NEED_DEFS[n.type], sup = def.item && SUPPLIES[def.item]; row(sup ? sup.spr : def.icon, def.t(n), '處理', () => UI.needCard(n.id)); }
+    if (typeof Feel !== 'undefined' && Feel.plane && Feel.plane.t >= 1) row(Feel.plane.kind.icon, Feel.plane.text, I18n.s("u_d9a065993836"), () => Feel.openPlane(), 'need');
+    if (typeof Feel !== 'undefined') for (const type of ['d', 'w']) { const n = Feel.near[type]; if (n) row('i_people', I18n.s("u_33877088024c", [TEAM_TYPES[type].n, n.left, n.unit]), n.quiz ? I18n.s("u_3c5fbb63c843") : I18n.s("u_ed99b1ce9b4d"), () => Feel.finishTeam(type), 'need'); }
+    if (typeof Story !== 'undefined' && Story.pending()) { const St = Story.week(), i = Story.next(); row('i_shop', I18n.s("u_b53c31653c1b", [MERCHANTS[St.mk].n, i + 1]), i === 0 ? Story.M().arcs[St.arc].open[0] : I18n.s("u_bebc98812dcc"), () => Story.open(), 'need'); }
+    for (const n of Life.L.needs.slice(0, 2)) { const def = NEED_DEFS[n.type], sup = def.item && SUPPLIES[def.item]; row(sup ? sup.spr : def.icon, def.t(n), I18n.s("u_cece58780d3c"), () => UI.needCard(n.id)); }
     // today's words
     Learn.ensureDaily(); const rev = Math.min(20, L.reviewed);
-    if (!L.dailyDone) row('i_learn', rev >= 20 ? '今日單字：小測驗' : rev ? `今日單字：再 5 個（${rev}/20）` : '今日單字：先做 5 個', `連續 ${Learn.streakNow()} 天`, () => Learn.start('daily'));
-    const claim = Life.claimable(); if (claim) row('i_task', `${claim} 個任務可以領獎勵`, '領取', () => UI.openTasks('daily'));
+    if (!L.dailyDone) row('i_learn', rev >= 20 ? I18n.s("u_6fa78fe31fa2") : rev ? I18n.s("u_d3aede83b2c3", [rev]) : I18n.s("u_94ca2126688a"), I18n.s("u_eae047483b84", [Learn.streakNow()]), () => Learn.start('daily'));
+    const claim = Life.claimable(); if (claim) row('i_task', I18n.s("u_4bcf70c0a38a", [claim]), I18n.s("u_92edf81e0715"), () => UI.openTasks('daily'));
     return out;
   },
   timerCard() {
     const S = Game.S, t = S.timer, rem = t.running ? (t.endsAt - Date.now()) / 1000 : t.remain, focus = t.mode === 'focus';
     return h('div', { class: 'mtimer' + (t.running ? ' running' : '') + (focus ? '' : ' brk') },
-      h('button', { class: 'mtimer-main', onclick: () => UI.openWin('timer') }, ico('i_tomato', 28), h('b', { class: 'num mt-time', text: fmt(rem) }), h('span', { class: 'mt-mode' }, ...UI.timerWords(t.running ? (focus ? '專注中' : '休息中') : (t.remain < Game.modeLen(t.mode) ? '暫停' : focus ? '準備專注' : '準備休息')))),
-      h('button', { class: 'chip big ' + (t.running ? '' : 'primary'), onclick: () => t.running ? Game.pause() : Game.start() }, ico(t.running ? 'i_pause' : 'i_play', 22), t.running ? '暫停' : '開始'),
-      Music.cur ? h('button', { class: 'chip icon-only' + (Music.playing ? ' on' : ''), 'aria-label': '音樂', onclick: () => Music.toggle() }, ico('i_music', 22)) : null);
+      h('button', { class: 'mtimer-main', onclick: () => UI.openWin('timer') }, ico('i_tomato', 28), h('b', { class: 'num mt-time', text: fmt(rem) }), h('span', { class: 'mt-mode' }, ...UI.timerWords(t.running ? (focus ? I18n.s("u_cfafd28e1920") : I18n.s("u_d7c2959469de")) : (t.remain < Game.modeLen(t.mode) ? I18n.s("u_2c35e9a3a4ed") : focus ? I18n.s("u_f317ef8836e8") : I18n.s("u_6118c5dfcab9"))))),
+      h('button', { class: 'chip big ' + (t.running ? '' : 'primary'), onclick: () => t.running ? Game.pause() : Game.start() }, ico(t.running ? 'i_pause' : 'i_play', 22), t.running ? I18n.s("u_2c35e9a3a4ed") : I18n.s("u_cc147e162c82")),
+      Music.cur ? h('button', { class: 'chip icon-only' + (Music.playing ? ' on' : ''), 'aria-label': I18n.s("u_78998a594b50"), onclick: () => Music.toggle() }, ico('i_music', 22)) : null);
   },
   render() {
     if (!this.today) return;
@@ -133,9 +133,9 @@ const Mobile = {
       this._key = key;
       const tray = this.today.querySelector('.handtray');
       // the bar under the room: the hand tray on the left; the travelling merchant and the zoom on the right
-      const mbtn = mw ? h('button', { class: 'chip mmerch', onclick: () => Merchant.go(), 'aria-label': '旅行商人' + mw[0] }, ico('i_merchant', 22), h('span', { text: mw[0] }), mw[1] ? h('span', { class: 'badge-dot' }) : null) : null;
+      const mbtn = mw ? h('button', { class: 'chip mmerch', onclick: () => Merchant.go(), 'aria-label': I18n.s("u_a924b4e38bc8") + mw[0] }, ico('i_merchant', 22), h('span', { text: mw[0] }), mw[1] ? h('span', { class: 'badge-dot' }) : null) : null;
       const rows = this.rows(); if (!focusing && typeof Lights !== 'undefined') { const nr = Lights.nightRow(); if (nr) rows.push(h('button', { class: 'mrow', onclick: () => Lights.goodnight() }, ico('i_moon', 26), h('span', { class: 'mrow-t' }, h('b', { text: nr[0] }), h('span', { class: 'hint', text: nr[1] })), ico('i_chev', 16))); }
-      this.today.replaceChildren(h('div', { class: 'mbar' }, h('div', { class: 'mtray-slot' }), h('div', { class: 'mbar-r' }, mbtn, this.zbtn)), this.timerCard(), focusing ? h('p', { class: 'hint center', text: '專注中，其他的事等休息時間再說～' }) : h('div', { class: 'mrows' }, ...rows));
+      this.today.replaceChildren(h('div', { class: 'mbar' }, h('div', { class: 'mtray-slot' }), h('div', { class: 'mbar-r' }, mbtn, this.zbtn)), this.timerCard(), focusing ? h('p', { class: 'hint center', text: I18n.s("u_20f08b0a9fc1") }) : h('div', { class: 'mrows' }, ...rows));
       if (tray) this.today.querySelector('.mtray-slot').append(tray);
     }
     const tm = this.today.querySelector('.mt-time'); if (tm) { const t = Game.S.timer; tm.textContent = fmt(t.running ? (t.endsAt - Date.now()) / 1000 : t.remain); }
@@ -154,9 +154,9 @@ const Mobile = {
   zoomAt(x, y) {
     const z = MOBILE.zoom; this.zoomed = true;
     this.zx = Math.max(0, Math.min(RW - RW / z, x - RW / z / 2)); this.zy = Math.max(0, Math.min(RH - RH / z, y - RH / z / 2));
-    this.applyZoom(); this.zbtn.classList.add('on'); this.zbtn.replaceChildren(ico('i_zoomout', 22)); this.zbtn.setAttribute('aria-label', '還原大小');
+    this.applyZoom(); this.zbtn.classList.add('on'); this.zbtn.replaceChildren(ico('i_zoomout', 22)); this.zbtn.setAttribute('aria-label', I18n.s("u_95f6ddeb3bf2"));
   },
-  unzoom() { this.zoomed = false; this.applyZoom(); if (this.zbtn) { this.zbtn.classList.remove('on'); this.zbtn.replaceChildren(ico('i_zoomin', 22)); this.zbtn.setAttribute('aria-label', '放大房間'); } },
+  unzoom() { this.zoomed = false; this.applyZoom(); if (this.zbtn) { this.zbtn.classList.remove('on'); this.zbtn.replaceChildren(ico('i_zoomin', 22)); this.zbtn.setAttribute('aria-label', I18n.s("u_b05b79c53d55")); } },
   applyZoom() {
     const wrap = document.querySelector('.room-wrap'); if (!wrap) return;
     const s = Game.scale, z = this.zoomed ? MOBILE.zoom : 1;
@@ -167,23 +167,23 @@ const Mobile = {
   // header: what is selected (or a short how-to), storage box, done
   // body:   the actions on the left in a 2x2 grid, a cross of arrows on the right (hold to keep moving)
   renderEdit() {
-    let el = this._edit; if (!el) { el = this._edit = h('div', { class: 'medit', role: 'toolbar', 'aria-label': '佈置' }); document.body.append(el); }
+    let el = this._edit; if (!el) { el = this._edit = h('div', { class: 'medit', role: 'toolbar', 'aria-label': I18n.s("u_f65a9c821145") }); document.body.append(el); }
     if (!Room.edit) { el.replaceChildren(); return; }
     const it = Room.sel && Room.uidMap[Room.sel.uid] ? Room.sel : null, d = it && ITEMS[it.k];
-    const done = h('button', { class: 'chip primary', onclick: () => UI.setEdit(false) }, '完成'), box = h('button', { class: 'chip', onclick: () => UI.openWin('storage') }, ico('i_box', 18), '收納箱');
+    const done = h('button', { class: 'chip primary', onclick: () => UI.setEdit(false) }, I18n.s("u_c0b3fbff51cc")), box = h('button', { class: 'chip', onclick: () => UI.openWin('storage') }, ico('i_box', 18), I18n.s("u_888f1eb65671"));
     if (!it) {
-      el.replaceChildren(h('div', { class: 'medit-h' }, h('div', { class: 'grow' }, ico('i_brush', 22), h('b', { text: '佈置模式' })), box, done),
-        h('p', { class: 'medit-tip', text: '點選家具後拖曳；小物靠近桌面會自動放好。' }));
+      el.replaceChildren(h('div', { class: 'medit-h' }, h('div', { class: 'grow' }, ico('i_brush', 22), h('b', { text: I18n.s("u_a4f324ea00a1") })), box, done),
+        h('p', { class: 'medit-tip', text: I18n.s("u_2380e5a73ab6") }));
       return;
     }
     const pv = h('span', { class: 'medit-pv' }, sprPreview(Room.itemCanvas(it), 30, 1));
     const act = (icon, label, fn) => h('button', { class: 'chip', onclick: fn }, icon ? ico(icon, 18) : null, label);
     const acts = [
-      act('i_flip', '翻轉', () => { it.flip = !it.flip; if (it.p != null) Room.settleDecor(it); for (const c of Game.S.items) if (c.p === it.uid) { const cv = Room.itemCanvas(it), ccv = Room.itemCanvas(c); c.dx = cv.width - c.dx - ccv.width; } Room.clampItem(it); Game.save(); this.renderEdit(); }),
-      d.toggle ? act('i_lamp', it.on ? '關燈' : '開燈', () => { it.on = !it.on; Game.save(); this.renderEdit(); }) : null,
-      d.window ? act(null, it.closed ? '拉開窗簾' : '拉上窗簾', () => { it.closed = !it.closed; Game.save(); this.renderEdit(); }) : null,
-      act('i_box', '收起', () => Game.storeItem(it)),
-      act(null, '取消選取', () => { Room.sel = null; UI.editToolbar(); }),
+      act('i_flip', I18n.s("u_67488d73d4f6"), () => { it.flip = !it.flip; if (it.p != null) Room.settleDecor(it); for (const c of Game.S.items) if (c.p === it.uid) { const cv = Room.itemCanvas(it), ccv = Room.itemCanvas(c); c.dx = cv.width - c.dx - ccv.width; } Room.clampItem(it); Game.save(); this.renderEdit(); }),
+      d.toggle ? act('i_lamp', it.on ? I18n.s("u_596d3994d952") : I18n.s("u_7eaff4e24f04"), () => { it.on = !it.on; Game.save(); this.renderEdit(); }) : null,
+      d.window ? act(null, it.closed ? I18n.s("u_ae2d5d076740") : I18n.s("u_62f456307067"), () => { it.closed = !it.closed; Game.save(); this.renderEdit(); }) : null,
+      act('i_box', I18n.s("u_afd4b783536b"), () => Game.storeItem(it)),
+      act(null, I18n.s("u_fa3e643cbefe"), () => { Room.sel = null; UI.editToolbar(); }),
     ].filter(Boolean);
     const nudge = (dx, dy) => { if (it.p != null && dx) { delete it.p; delete it.dx; delete it.dy; } it.x += dx; it.y += dy; if (d.layer === 'decor') Room.settleDecor(it); else Room.clampItem(it); Room.indexItems(); };
     const arrow = (cls, label, txt, dx, dy) => {
@@ -196,14 +196,14 @@ const Mobile = {
     el.replaceChildren(
       h('div', { class: 'medit-h' }, h('div', { class: 'grow' }, pv, h('b', { text: d.n })), box, done),
       h('div', { class: 'medit-b' }, h('div', { class: 'medit-acts' }, ...acts),
-        h('div', { class: 'medit-pad' }, arrow('up', '往上', '↑', 0, -1), arrow('left', '往左', '←', -1, 0), arrow('down', '往下', '↓', 0, 1), arrow('right', '往右', '→', 1, 0))));
+        h('div', { class: 'medit-pad' }, arrow('up', I18n.s("u_cbde578346bf"), '↑', 0, -1), arrow('left', I18n.s("u_3c9c2588a7f2"), '←', -1, 0), arrow('down', I18n.s("u_75e78162fc2d"), '↓', 0, 1), arrow('right', I18n.s("u_3a74327ad1f5"), '→', 1, 0))));
   },
   // ---------- long press: what is this? ----------
   tip(x, y) {
     const hh = Room.hit(x, y); if (!hh) return false;
     let text = '', ax = x, ay = y;
-    if (hh.kind === 'actor' && hh.a instanceof Pet) { const p = hh.a.data; if (!p) return false; text = `${p.name}・飽足 ${Math.round(p.hunger)}・心情 ${Math.round(p.mood)}・清潔 ${Math.round(p.clean)}・精力 ${Math.round(p.energy)}`; const hp = hh.a.headPos ? hh.a.headPos() : [hh.a.x, hh.a.y - 16]; ax = hp[0]; ay = hp[1] - 8; }
-    else if (hh.kind === 'actor' && hh.a === Game.avatar) { text = Game.S.avatar.name || '我'; ax = hh.a.x; ay = hh.a.y - 34; }
+    if (hh.kind === 'actor' && hh.a instanceof Pet) { const p = hh.a.data; if (!p) return false; text = I18n.s("u_81ddb8940e93", [p.name, Math.round(p.hunger), Math.round(p.mood), Math.round(p.clean), Math.round(p.energy)]); const hp = hh.a.headPos ? hh.a.headPos() : [hh.a.x, hh.a.y - 16]; ax = hp[0]; ay = hp[1] - 8; }
+    else if (hh.kind === 'actor' && hh.a === Game.avatar) { text = Game.S.avatar.name || I18n.s("u_b70bb4acc048"); ax = hh.a.x; ay = hh.a.y - 34; }
     else if (hh.kind === 'item') { const it = hh.it, d = ITEMS[it.k]; text = Pets.ownerTag(it) || d.n; const cv = Room.itemCanvas(it); ax = it.x + cv.width / 2; ay = it.y - 2; }
     else return false;
     let el = this._tip; if (!el) { el = this._tip = h('div', { class: 'tag owner-tip mtip' }); UI.overlay.append(el); }
@@ -229,25 +229,25 @@ const Mobile = {
   notify(text) {
     if (!Game.S.settings.notify || !('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
     const opt = { body: text, icon: 'apple-touch-icon.png', tag: 'pocketnook-timer' };
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(r => r.showNotification('呼嚕小窩', opt)).catch(() => { });
-    else try { new Notification('呼嚕小窩', opt); } catch (e) { }
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(r => r.showNotification(I18n.s("u_e41ac510c97e"), opt)).catch(() => { });
+    else try { new Notification(I18n.s("u_e41ac510c97e"), opt); } catch (e) { }
   },
   async askNotify(on) {
     const st = Game.S.settings;
     if (!on) { st.notify = false; Game.save(); UI.refresh('settings'); return; }
-    if (!('Notification' in window)) { UI.toast('這個瀏覽器不支援通知（iPhone 要先「加入主畫面」）', 'i_bell', 4); return; }
+    if (!('Notification' in window)) { UI.toast(I18n.s("u_0315d19e2b04"), 'i_bell', 4); return; }
     const p = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
     st.notify = p === 'granted'; Game.save(); UI.refresh('settings');
-    if (p !== 'granted') UI.toast('沒有拿到通知權限，可以到瀏覽器設定裡打開', 'i_bell', 4);
+    if (p !== 'granted') UI.toast(I18n.s("u_1f40ead38f5d"), 'i_bell', 4);
   },
 };
 
 /* ---------------- the "more" sheet ---------------- */
-UI.WIN.more = { t: '更多', i: 'i_gear', w: 420, at: ['c', 0] };
+UI.WIN.more = { t: I18n.s("u_38844b135cf7"), i: 'i_gear', w: 420, at: ['c', 0] };
 UI.w_more = function () {
-  const items = [['timer', 'i_tomato', '番茄鐘'], ['todo', 'i_list', '待辦'], ['memo', 'i_note', '便條'], ['shop', 'i_shop', '商店'], ['storage', 'i_box', '收納'], ['edit', 'i_brush', '佈置'], ['avatar', 'i_shirt', '造型'],
-    ...(typeof SOCIAL_ON !== 'undefined' && SOCIAL_ON && window.NOOK_ENV === 'web' ? [['friends', 'i_people', '好友']] : []), ...(window.NOOK_ENV !== 'web' ? [['cowork', 'i_people', '一起專注']] : []),
-    ['merchant', 'i_shop', '旅行商人'], ['account', 'i_cloud', '帳號'], ['settings', 'i_gear', '設定'], ...(typeof Dev !== 'undefined' && Dev.on ? [['dev', 'i_dev', '開發者']] : [])];
+  const items = [['timer', 'i_tomato', I18n.s("u_ff68508417bc")], ['todo', 'i_list', I18n.s("u_76b6a42fded9")], ['memo', 'i_note', I18n.s("u_42820b4e9544")], ['shop', 'i_shop', I18n.s("u_61f96c6aac6a")], ['storage', 'i_box', I18n.s("u_f1306b0c5a26")], ['edit', 'i_brush', I18n.s("u_f65a9c821145")], ['avatar', 'i_shirt', I18n.s("u_345897933b2d")],
+    ...(typeof SOCIAL_ON !== 'undefined' && SOCIAL_ON && window.NOOK_ENV === 'web' ? [['friends', 'i_people', I18n.s("u_b9b1480dd6ec")]] : []), ...(window.NOOK_ENV !== 'web' ? [['cowork', 'i_people', I18n.s("u_2aaccdc7d56d")]] : []),
+    ['merchant', 'i_shop', I18n.s("u_a924b4e38bc8")], ['account', 'i_cloud', I18n.s("u_969396f78f3b")], ['settings', 'i_gear', I18n.s("u_0d8619aae051")], ...(typeof Dev !== 'undefined' && Dev.on ? [['dev', 'i_dev', I18n.s("u_7f4b958db72f")]] : [])];
   return [h('div', { class: 'mmore' }, ...items.map(([id, ic, label]) => h('button', { class: 'dock-btn', onclick: () => { this.closeWin('more'); if (id === 'edit') this.setEdit(true); else if (id === 'merchant') Merchant.open(); else this.openWin(id); } }, ico(ic, 32), h('span', { text: label }))))];
 };
 
@@ -298,12 +298,12 @@ UI.w_more = function () {
   PetPlay.move = function (x, y) { return move(x, y); };
   // the sound of a finished focus, and a notification when the page is hidden
   const complete = Game.complete.bind(Game);
-  Game.complete = function (skipped) { const was = this.T().mode; const r = complete(skipped); if (!skipped) Mobile.notify(was === 'focus' ? '專注完成！休息一下吧' : '休息結束，準備好就再開始吧'); return r; };
+  Game.complete = function (skipped) { const was = this.T().mode; const r = complete(skipped); if (!skipped) Mobile.notify(was === 'focus' ? I18n.s("u_ecc26adcfe19") : I18n.s("u_f63798269722")); return r; };
   // settings: notification switch
   const ws = UI.w_settings;
   if (ws) UI.w_settings = function () {
     const out = ws.call(this), st = Game.S.settings;
-    if (Array.isArray(out)) out.push(h('div', { class: 'row' }, h('button', { class: 'chip' + (st.notify ? ' on' : ''), 'aria-pressed': st.notify ? 'true' : 'false', onclick: () => Mobile.askNotify(!st.notify) }, st.notify ? '休息通知：開' : '休息通知：關'), h('span', { class: 'hint', text: '遊戲在背景時提醒；iPhone 請先加入主畫面。' })));
+    if (Array.isArray(out)) out.push(h('div', { class: 'row' }, h('button', { class: 'chip' + (st.notify ? ' on' : ''), 'aria-pressed': st.notify ? 'true' : 'false', onclick: () => Mobile.askNotify(!st.notify) }, st.notify ? I18n.s("u_58493a753fc6") : I18n.s("u_8c2ba4a4e943")), h('span', { class: 'hint', text: I18n.s("u_85f6a7f9ce97") })));
     return out;
   };
   // drawing: when nothing is happening on a phone, draw every other frame (half the battery)

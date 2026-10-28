@@ -7,7 +7,7 @@
      (browsers never let a page play sound before the first tap); pausing it yourself turns
      this off until you press play again
    ============================================================ */
-const NOOK_YT = { id: 'yt_nook', type: 'yt', list: 'PL_77ETNrRb7Ep0Zv3tQNLNxQgwTsTHNrV', title: '小窩電台（YouTube 播放清單）', builtin: true };
+const NOOK_YT = { id: 'yt_nook', type: 'yt', list: 'PL_77ETNrRb7Ep0Zv3tQNLNxQgwTsTHNrV', title: I18n.s("u_b98b2b8dc092"), builtin: true };
 
 const MusicDefault = {
   armed: false, shuffleNext: false, target: null, curVid: '',
@@ -76,7 +76,7 @@ const MusicDefault = {
   Music.onYTState = function (ev) {
     const e = this.cur;
     // which song is on: highlighted in the list
-    if (e && e.id === NOOK_YT.id && ev.data === 1) { try { const v = (this.yt.getVideoData() || {}).video_id || ''; if (v !== MusicDefault.curVid) { MusicDefault.curVid = v; UI.refresh('music'); const r = NOOK_YT_TRACKS.find(x => x[0] === v), tt = document.querySelector('#ytpanel .yt-title'), nm = r ? r[1] : ((this.yt.getVideoData() || {}).title || ''); if (tt && nm) tt.textContent = '小窩電台 · ' + nm; } } catch (x) { } }
+    if (e && e.id === NOOK_YT.id && ev.data === 1) { try { const v = (this.yt.getVideoData() || {}).video_id || ''; if (v !== MusicDefault.curVid) { MusicDefault.curVid = v; UI.refresh('music'); const r = NOOK_YT_TRACKS.find(x => x[0] === v), tt = document.querySelector('#ytpanel .yt-title'), nm = r ? r[1] : ((this.yt.getVideoData() || {}).title || ''); if (tt && nm) tt.textContent = I18n.s("u_06eceed05d03") + nm; } } catch (x) { } }
     if (e && e.id === NOOK_YT.id && this.yt && (ev.data === 1 || ev.data === 5 || ev.data === -1)) {
       try {
         const pl = this.yt.getPlaylist() || [];
@@ -90,7 +90,7 @@ const MusicDefault = {
     return st(ev);
   };
   // (a first tap on a play button is left to that button)
-  for (const ev of ['pointerdown', 'keydown']) document.addEventListener(ev, e => { try { if (e.target && e.target.closest && e.target.closest('.musicchip, #ytpanel, [aria-label*="音樂"], [aria-label="播放"], [aria-label="暫停"]')) { MusicDefault.armed = false; return; } MusicDefault.first(); } catch (x) { } }, true);
+  for (const ev of ['pointerdown', 'keydown']) document.addEventListener(ev, e => { try { if (e.target && e.target.closest && e.target.closest(I18n.s("u_e3817258409a"))) { MusicDefault.armed = false; return; } MusicDefault.first(); } catch (x) { } }, true);
 })();
 
 // computer: the YouTube player goes in the free space beside the room, never over the furniture
@@ -122,9 +122,9 @@ const YTPlace = {
 (function () {
   const RADIO = '__yt';
   const lib = UI.musicLib.bind(UI);
-  const card = (on) => h('button', { class: 'malbum radio' + (on ? ' on' : ''), title: '小窩電台（YouTube 播放清單）', onclick: () => { UI.mAlbum = RADIO; UI.refresh('music'); } },
-    h('div', { class: 'mal-ph radio' }, ico('i_video', 36)), h('b', { text: '小窩電台' }), h('span', { class: 'hint', text: `YouTube · ${MusicDefault.tracks().length} 首` }));
-  const tab = (on) => h('button', { class: 'tab sm' + (on ? ' on' : ''), onclick: () => { UI.mAlbum = RADIO; UI.refresh('music'); } }, `小窩電台 ${MusicDefault.tracks().length}`);
+  const card = (on) => h('button', { class: 'malbum radio' + (on ? ' on' : ''), title: I18n.s("u_b98b2b8dc092"), onclick: () => { UI.mAlbum = RADIO; UI.refresh('music'); } },
+    h('div', { class: 'mal-ph radio' }, ico('i_video', 36)), h('b', { text: I18n.s("u_5aa44450caac") }), h('span', { class: 'hint', text: I18n.s("u_f97af1b28608", [MusicDefault.tracks().length]) }));
+  const tab = (on) => h('button', { class: 'tab sm' + (on ? ' on' : ''), onclick: () => { UI.mAlbum = RADIO; UI.refresh('music'); } }, I18n.s("u_304a979aff76", [MusicDefault.tracks().length]));
   UI.musicLib = function () {
     // the radio is what plays and nothing else was picked here yet: open on its songs
     if (this.mAlbum == null && MusicDefault.isOn()) this.mAlbum = RADIO;
@@ -140,11 +140,11 @@ const YTPlace = {
     if (!radio) return items;
     // the radio's own songs instead of the library's play row and track list
     const T = MusicDefault.tracks(), on = MusicDefault.isOn(), cur = on ? MusicDefault.curVid : '';
-    const head = h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => MusicDefault.play(T[Math.floor(Math.random() * T.length)].id) }, ico('i_shuffle', 16), '隨機播放'),
-      h('span', { class: 'hint grow', text: 'YouTube 播放清單 · 點一首就從那首開始，之後隨機播放' }));
+    const head = h('div', { class: 'row' }, h('button', { class: 'chip primary sm', onclick: () => MusicDefault.play(T[Math.floor(Math.random() * T.length)].id) }, ico('i_shuffle', 16), I18n.s("u_184289218952")),
+      h('span', { class: 'hint grow', text: I18n.s("u_0f34a601535d") }));
     const list = h('div', { class: 'scroll mtracks' }, h('ol', { class: 'mlist' }, ...T.map((r, i) => h('li', { class: r.id === cur ? 'cur' : '' },
-      h('button', { class: 'mplay', title: r.t ? `${r.t}${r.by ? ' · ' + r.by : ''}` : `第 ${i + 1} 首`, onclick: () => MusicDefault.play(r.id) },
-        h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: r.t || `第 ${i + 1} 首` }), r.len ? h('em', { class: 'mb num', text: r.len }) : null)))));
+      h('button', { class: 'mplay', title: r.t ? `${r.t}${r.by ? ' · ' + r.by : ''}` : I18n.s("u_53bd1b6739f4", [i + 1]), onclick: () => MusicDefault.play(r.id) },
+        h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: r.t || I18n.s("u_53bd1b6739f4", [i + 1]) }), r.len ? h('em', { class: 'mb num', text: r.len }) : null)))));
     const playRow = items.findIndex(el => el.matches && el.matches('.row') && el.querySelector('.chip.primary'));
     const trk = items.findIndex(el => el.matches && el.matches('.mtracks'));
     items = items.filter((el, k) => k !== playRow && k !== trk && !(el.matches && el.matches('.mcache, .empty, .hint.center')));
@@ -196,7 +196,7 @@ const YTMiniPlace = {
   },
   build() {
     const yp = document.getElementById('ytpanel'), hd = yp && yp.querySelector('.yt-h'); if (!hd) return;
-    hd.querySelector('.yt-title').title = '拖曳標題列可移動；點「置底」收回底部';
+    hd.querySelector('.yt-title').title = I18n.s("u_70ead01caba8");
     hd.addEventListener('pointerdown', e => {
       if (!yp.classList.contains('min') || e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
       e.preventDefault(); e.stopImmediatePropagation();
@@ -218,15 +218,15 @@ const YTMini = {
   apply() {
     const yp = document.getElementById('ytpanel'); if (!yp) return;
     const on = this.get(); yp.classList.toggle('min', on);
-    if (this.btn) { this.btn.replaceChildren(ico(on ? 'i_zoomin' : 'i_zoomout', 16)); this.btn.setAttribute('aria-label', on ? '展開影片' : '縮小（繼續播放）'); this.btn.title = on ? '展開影片' : '縮小成一條（繼續播放）'; }
+    if (this.btn) { this.btn.replaceChildren(ico(on ? 'i_zoomin' : 'i_zoomout', 16)); this.btn.setAttribute('aria-label', on ? I18n.s("u_63b75bdbd3ef") : I18n.s("u_fb1a2d03b3eb")); this.btn.title = on ? I18n.s("u_63b75bdbd3ef") : I18n.s("u_1031a9d3dd40"); }
     if (this.pp) this.pp.replaceChildren(ico(Music.playing ? 'i_pause' : 'i_play', 16));
     requestAnimationFrame(() => YTPlace.apply());
   },
   build() {
     const yp = document.getElementById('ytpanel'), hd = yp && yp.querySelector('.yt-h'), x = document.getElementById('yt-close'); if (!hd || this.btn) return;
-    this.pp = h('button', { class: 'xbtn yt-pp', type: 'button', 'aria-label': '播放或暫停', onclick: () => { Music.toggle(); setTimeout(() => this.apply(), 300); } });
+    this.pp = h('button', { class: 'xbtn yt-pp', type: 'button', 'aria-label': I18n.s("u_bdb3feb8e0a3"), onclick: () => { Music.toggle(); setTimeout(() => this.apply(), 300); } });
     this.btn = h('button', { class: 'xbtn yt-min', type: 'button', onclick: () => this.set(!this.get()) });
-    this.dockBtn = h('button', { class: 'xbtn yt-dock', type: 'button', 'aria-label': 'YouTube 置底', title: '縮小並放到畫面底部', text: '置底', onclick: () => YTMiniPlace.dock() });
+    this.dockBtn = h('button', { class: 'xbtn yt-dock', type: 'button', 'aria-label': I18n.s("u_b2fd0792912d"), title: I18n.s("u_31c0ba1897d5"), text: I18n.s("u_aa03cd91ca77"), onclick: () => YTMiniPlace.dock() });
     hd.insertBefore(this.pp, x); hd.insertBefore(this.btn, x); hd.insertBefore(this.dockBtn, x); YTMiniPlace.build(); this.apply();
   },
 };

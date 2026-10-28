@@ -169,8 +169,8 @@ const Learn = {
       if (!L.dailyDone) {
         L.dailyDone = true; const day = Life.today();
         L.streak = L.lastDone === this.yesterday() ? (L.streak || 0) + 1 : (L.lastDone >= day ? L.streak : 1); L.lastDone = day; L.best = Math.max(L.best || 0, L.streak);
-        Life.track('vocab', 1); res.msg = `今日單字完成！連續 ${L.streak} 天。到「任務」領取每日獎勵。`;
-      } else res.msg = '今天的單字已經完成過了。';
+        Life.track('vocab', 1); res.msg = I18n.s("u_46815ac416f8", [L.streak]);
+      } else res.msg = I18n.s("u_35e0389748ca");
     } else if (s.kind === 'train') {
       res.coins = R; res.xp = R * 2; Object.assign(res, Pets.trainResult(s.opts.pid, s.opts.trick, R, n));
     } else if (s.kind === 'help') {
@@ -178,23 +178,23 @@ const Learn = {
     } else if (s.kind === 'story') {
       Object.assign(res, Story.finish(s, R));
     } else if (s.kind === 'team') {
-      res.coins = R; res.msg = R ? `全隊又往前 ${R} 題！` : '這次沒有答對，隊伍還在等你，再試一次吧';
+      res.coins = R; res.msg = R ? I18n.s("u_67e08c8a3a18", [R]) : I18n.s("u_7884007316e9");
     } else if (s.kind === 'chal') {
       const t = s.task, left = Challenge.left(t).length; res.coins = R;
-      res.msg = t.prog >= t.need ? '挑戰完成！到「任務」領取獎勵。' : `已答對 ${t.prog}/${t.need} 個字，剩下的 ${left} 個字隨時可以回來繼續。`;
+      res.msg = t.prog >= t.need ? I18n.s("u_1af5b15ce928") : I18n.s("u_ab786b0c095c", [t.prog, t.need, left]);
     } else if (s.kind === 'need') {
       const it = s.opts.item, cnt = R >= n ? 2 : R >= 3 ? 1 : 0; res.coins = R;
-      if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); Life.track('swap', 1, { perfect: R >= n }); res.msg = cnt === 2 ? `全對！得到 2 個${SUPPLIES[it].n}。` : `得到 1 個${SUPPLIES[it].n}，全對可以拿 2 個。`; }
-      else res.msg = `答對 3 題才能換到${SUPPLIES[it].n}，再試一次吧！`;
+      if (cnt) { Life.give(it, cnt); res.items.push([it, cnt]); Life.track('swap', 1, { perfect: R >= n }); res.msg = cnt === 2 ? I18n.s("u_04b52e212d53", [SUPPLIES[it].n]) : I18n.s("u_8542d2a56bb4", [SUPPLIES[it].n]); }
+      else res.msg = I18n.s("u_885171da72b8", [SUPPLIES[it].n]);
       const task = Challenge.task('l_swap');
       if (task && Challenge.tierOf(task)) {
-        res.taskNote = task.prog >= task.need ? `換道具任務已完成（${task.prog}/${task.need}），可以領獎勵了。` : Challenge.tierOf(task) === 'h' && R < n ? `本輪未全對，困難任務未增加；目前 ${task.prog}/${task.need} 次。可立即重試，已完成次數保留。` : `換道具任務：${task.prog}/${task.need} 次。`;
+        res.taskNote = task.prog >= task.need ? I18n.s("u_5db011cac36e", [task.prog, task.need]) : Challenge.tierOf(task) === 'h' && R < n ? I18n.s("u_23bd970ce5f8", [task.prog, task.need]) : I18n.s("u_30662d80cb83", [task.prog, task.need]);
       }
       Life.track('study', 0);
     } else {
       const day = Life.today(); if (L.pDay !== day) { L.pDay = day; L.pCoins = 0; }
       const c = Math.min(R * 2, Math.max(0, 40 - L.pCoins)); L.pCoins += c; res.coins = c;
-      res.msg = c < R * 2 ? '今天練習的金幣已達上限，經驗照拿。' : '練習完成！';
+      res.msg = c < R * 2 ? I18n.s("u_87b4cbf421fb") : I18n.s("u_17d887526210");
       Life.track('study', 1);
     }
     if (s.kind !== 'levelgate') res.coins += s.mastered * 3;
@@ -225,10 +225,10 @@ window.addEventListener('blur',()=>{SpellKeys.held=false;SpellKeys.pending=null;
 
 /* ---------------- windows ---------------- */
 Object.assign(UI.WIN, {
-  swap: { t: '複習換道具', i: 'i_bag', w: 450, at: ['c', 0] },
-  learn: { t: '學習', i: 'i_learn', w: 450, at: ['l', 0] },
-  study: { t: '單字', i: 'i_learn', w: 460, at: ['c', 0], modal: true },
-  words: { t: '單字本', i: 'i_book', w: 460, at: ['l', 1] },
+  swap: { t: I18n.s("u_e5ce3e7b0e48"), i: 'i_bag', w: 450, at: ['c', 0] },
+  learn: { t: I18n.s("u_dcb9874582c0"), i: 'i_learn', w: 450, at: ['l', 0] },
+  study: { t: I18n.s("u_53a60ddde56e"), i: 'i_learn', w: 460, at: ['c', 0], modal: true },
+  words: { t: I18n.s("u_07ae75b78ba7"), i: 'i_book', w: 460, at: ['l', 1] },
 });
 Object.assign(UI, {
   wq: '', wf: 'all', wt: 0,
@@ -237,65 +237,65 @@ Object.assign(UI, {
   },
   w_swap() {
     const t = Challenge.task('l_swap'), hard = t && Challenge.tierOf(t) === 'h';
-    return [h('p', { text: '選擇想換的道具，再複習 5 個單字。答對 3 題得 1 個，全對得 2 個。' }),
-      t ? h('p', { class: 'swap-rule', text: hard ? `困難任務 ${t.prog}/${t.need}：每輪 5 題全對算 1 次。失敗可立即重試，已完成次數保留。` : `任務 ${t.prog}/${t.need}：換到道具就算 1 次。` }) : null,
+    return [h('p', { text: I18n.s("u_e71c556e229c") }),
+      t ? h('p', { class: 'swap-rule', text: hard ? I18n.s("u_d74b0dd25406", [t.prog, t.need]) : I18n.s("u_d26cea506616", [t.prog, t.need]) }) : null,
       this.swapOptions()];
   },
   w_learn() {
     Learn.ensureDaily(); const L = Learn.L, done = L.dailyDone, rev = Math.min(20, L.reviewed);
     const step = (n, label, on, cur) => h('div', { class: 'lstep' + (on ? ' on' : '') + (cur ? ' cur' : '') }, h('b', { class: 'num', text: String(n) }), h('span', { text: label }));
-    const preview = h('div', { class: 'wchips' }, ...L.dailyWords.slice(0, 8).map(w => h('span', { class: 'wchip', text: w })), L.dailyWords.length > 8 ? h('span', { class: 'hint', text: `…共 ${L.dailyWords.length} 個` }) : null);
-    const today = h('div', { class: 'lcard' }, h('div', { class: 'lhead' }, h('b', { text: '今日單字' }), h('span', { class: 'hint', text: done ? `完成 · 測驗 ${L.dailyScore}` : rev >= 20 ? '複習完成，剩小測驗' : `複習 ${rev}/20` })),
-      h('div', { class: 'lsteps' }, step(1, '複習 20 個字', rev >= 20, rev < 20), step(2, '小測驗 10 題', done, rev >= 20 && !done), step(3, '領取獎勵', done && Life.L.daily && Life.L.daily.tasks[0].claimed, done)), preview,
-      done ? h('button', { class: 'chip', onclick: () => Learn.start('redo') }, ico('i_reset', 20), '再練一次今天的字') : h('button', { class: 'chip big primary', onclick: () => Learn.start('daily') }, ico('i_learn', 22), rev >= 20 ? '開始小測驗' : rev > 0 ? `再 5 個（${rev}/20）` : '先做 5 個'));
+    const preview = h('div', { class: 'wchips' }, ...L.dailyWords.slice(0, 8).map(w => h('span', { class: 'wchip', text: w })), L.dailyWords.length > 8 ? h('span', { class: 'hint', text: I18n.s("u_84515a556895", [L.dailyWords.length]) }) : null);
+    const today = h('div', { class: 'lcard' }, h('div', { class: 'lhead' }, h('b', { text: I18n.s("u_520b669f7f3e") }), h('span', { class: 'hint', text: done ? I18n.s("u_6652ba2ec4e7", [L.dailyScore]) : rev >= 20 ? I18n.s("u_4a871e9ab4af") : I18n.s("u_093339fa02fb", [rev]) })),
+      h('div', { class: 'lsteps' }, step(1, I18n.s("u_e056822f6361"), rev >= 20, rev < 20), step(2, I18n.s("u_24f699917a5d"), done, rev >= 20 && !done), step(3, I18n.s("u_ffdcd522f85e"), done && Life.L.daily && Life.L.daily.tasks[0].claimed, done)), preview,
+      done ? h('button', { class: 'chip', onclick: () => Learn.start('redo') }, ico('i_reset', 20), I18n.s("u_ffae5de7b95d")) : h('button', { class: 'chip big primary', onclick: () => Learn.start('daily') }, ico('i_learn', 22), rev >= 20 ? I18n.s("u_621b53c8d4a3") : rev > 0 ? I18n.s("u_847050f5fd0c", [rev]) : I18n.s("u_c69404c0634c")));
     const tot = VOCAB.length;
     const stat = (n, label) => h('div', { class: 'lstat' }, h('b', { class: 'num', text: String(n) }), h('span', { text: label }));
-    const stats = h('div', { class: 'lstats' }, stat(Learn.countSeen(), '看過'), stat(Learn.countLearned(), '學會'), stat(Learn.countFamiliar(), '熟悉'), stat(Learn.countMastered(), '精熟'), stat(Learn.streakNow(), '連續天數'));
+    const stats = h('div', { class: 'lstats' }, stat(Learn.countSeen(), I18n.s("u_c6db6723c33c")), stat(Learn.countLearned(), I18n.s("u_7e02b75bee98")), stat(Learn.countFamiliar(), I18n.s("u_963d09bf058c")), stat(Learn.countMastered(), I18n.s("u_d93677166837")), stat(Learn.streakNow(), I18n.s("u_4bca91e71efd")));
     if (!this._lvCount) { this._lvCount = {}; for (const v of VOCAB) this._lvCount[v.t] = (this._lvCount[v.t] || 0) + 1; }
     const on = new Set(Learn.levelsOn());
-    const tiers = h('div', { class: 'ltiers' }, ...VLEVELS.map(t => { const all = this._lvCount[t], got = Learn.countLevel(t); return h('div', { class: 'ltier' + (on.has(t) ? '' : ' off') }, h('button', { class: 'lvtog' + (on.has(t) ? ' on' : ''), 'aria-pressed': on.has(t) ? 'true' : 'false', title: on.has(t) ? '新字會從這一級出' : '目前不出這一級的新字', onclick: () => Learn.toggleLevel(t) }, on.has(t) ? ico('i_check', 14) : null), h('span', { class: 'num', text: 'L' + t }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(got / all * 100)}%` })), h('span', { class: 'num hint', text: `${got}/${all}` })); }));
+    const tiers = h('div', { class: 'ltiers' }, ...VLEVELS.map(t => { const all = this._lvCount[t], got = Learn.countLevel(t); return h('div', { class: 'ltier' + (on.has(t) ? '' : ' off') }, h('button', { class: 'lvtog' + (on.has(t) ? ' on' : ''), 'aria-pressed': on.has(t) ? 'true' : 'false', title: on.has(t) ? I18n.s("u_337c5b441fcc") : I18n.s("u_55ca1f9f1727"), onclick: () => Learn.toggleLevel(t) }, on.has(t) ? ico('i_check', 14) : null), h('span', { class: 'num', text: 'L' + t }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(got / all * 100)}%` })), h('span', { class: 'num hint', text: `${got}/${all}` })); }));
     const day = Life.today(), left = L.pDay === day ? Math.max(0, 40 - L.pCoins) : 40;
     const swap = this.swapOptions();
-    return [today, stats, h('div', { class: 'sub', text: '程度 Level 1–6（打勾的程度才會出新字）' }), tiers,
-      h('div', { class: 'sub', text: '複習 5 個單字換道具（答對 3 題得 1 個，全對得 2 個）' }), swap,
-      h('div', { class: 'row wrap' }, h('button', { class: 'chip', onclick: () => Learn.start('practice') }, ico('i_sparkle', 20), `自由練習（今天還能賺 ${left} 金幣）`), h('button', { class: 'chip', onclick: () => this.openWin('words') }, ico('i_book', 20), `單字本（${tot}）`)),
-      h('p', { class: 'hint', text: '答對的字會隔 1、2、4、7、15 天再出現，答錯的字隔天再複習。' })];
+    return [today, stats, h('div', { class: 'sub', text: I18n.s("u_7000eb20ceea") }), tiers,
+      h('div', { class: 'sub', text: I18n.s("u_b86787cac8d4") }), swap,
+      h('div', { class: 'row wrap' }, h('button', { class: 'chip', onclick: () => Learn.start('practice') }, ico('i_sparkle', 20), I18n.s("u_a6a356cb54c8", [left])), h('button', { class: 'chip', onclick: () => this.openWin('words') }, ico('i_book', 20), I18n.s("u_16719b915698", [tot]))),
+      h('p', { class: 'hint', text: I18n.s("u_0f86034eca95") })];
   },
   w_study() {
     const s = Learn.sess;
-    if (!s) return [h('div', { class: 'empty' }, h('p', { text: '從「學習」開始一次複習。' }))];
-    const kindName = s.kind === 'story' ? Story.title(s.opts) : s.kind === 'team' ? '幫隊伍完成' : s.kind === 'chal' ? Challenge.title(s.task) : s.kind === 'daily' ? '今日單字' : s.kind === 'need' ? `換取${SUPPLIES[s.opts.item].n}` : s.kind === 'train' ? Pets.trainTitle(s.opts) : s.kind === 'help' ? Social.helpTitle(s.opts) : '自由練習';
+    if (!s) return [h('div', { class: 'empty' }, h('p', { text: I18n.s("u_4e050d5eddfa") }))];
+    const kindName = s.kind === 'story' ? Story.title(s.opts) : s.kind === 'team' ? I18n.s("u_710a2b764c77") : s.kind === 'chal' ? Challenge.title(s.task) : s.kind === 'daily' ? I18n.s("u_520b669f7f3e") : s.kind === 'need' ? I18n.s("u_c5e7811c416c", [SUPPLIES[s.opts.item].n]) : s.kind === 'train' ? Pets.trainTitle(s.opts) : s.kind === 'help' ? Social.helpTitle(s.opts) : I18n.s("u_747d826c1843");
     const bar = (a, b) => h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(a / b * 100)}%` }));
     if (s.step === 'pause') {
       const left = s.words.length - s.ri;
-      return [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: `複習 ${s.ri}/${s.words.length}` })), bar(s.ri, s.words.length),
-        h('div', { class: 'result' }, ico('i_sparkle', 40), h('p', { class: 'gift-t', text: `${s.ri} 個字看完了` }), h('p', { class: 'hint', text: `還有 ${left} 個字，複習完就是小測驗。進度會留著，晚點回來也可以。` })),
-        h('div', { class: 'row center sbtns' }, h('button', { class: 'chip big', onclick: () => this.closeWin('study') }, '先休息一下'), h('button', { class: 'chip big primary', id: 'more5', onclick: () => Learn.more() }, `再 ${Math.min(5, left)} 個`))];
+      return [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: I18n.s("u_1419fcffa7e1", [s.ri, s.words.length]) })), bar(s.ri, s.words.length),
+        h('div', { class: 'result' }, ico('i_sparkle', 40), h('p', { class: 'gift-t', text: I18n.s("u_9b1ccd11ba29", [s.ri]) }), h('p', { class: 'hint', text: I18n.s("u_d163bed5080c", [left]) })),
+        h('div', { class: 'row center sbtns' }, h('button', { class: 'chip big', onclick: () => this.closeWin('study') }, I18n.s("u_afd0cddd2a62")), h('button', { class: 'chip big primary', id: 'more5', onclick: () => Learn.more() }, I18n.s("u_7607066411e2", [Math.min(5, left)])))];
     }
     if (s.step === 'review') {
       const v = VOCAB[s.words[s.ri]];
       if (s.spoke !== 'r' + s.ri) { s.spoke = 'r' + s.ri; setTimeout(() => Learn.speak(v.w), 150); }
-      return [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: `複習 ${s.ri + 1}/${s.words.length}` })), bar(s.ri, s.words.length),
+      return [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: I18n.s("u_1419fcffa7e1", [s.ri + 1, s.words.length]) })), bar(s.ri, s.words.length),
         h('button', { class: 'fcard' + (s.flip ? ' flip' : ''), id: 'fcard', onclick: () => { s.flip = !s.flip; this.refresh('study'); } },
           h('span', { class: 'ftier', text: TIER_NAME[v.t] }), h('span', { class: 'fword', text: v.w }), v.ph ? h('span', { class: 'fph', text: v.ph }) : null, h('span', { class: 'fpos', text: v.p }),
-          s.flip ? h('span', { class: 'fzh', text: v.z }) : h('span', { class: 'hint', text: '點卡片看中文' })),
-        h('div', { class: 'row center' }, h('button', { class: 'chip', 'aria-label': '發音', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 20), '發音')),
-        h('div', { class: 'row center sbtns' }, h('button', { class: 'chip big', id: 'rv-back', disabled: s.ri <= 0, 'aria-label': '上一個單字', title: '上一個單字（Backspace）', onclick: () => Learn.back() }, ico('i_back', 20), '上一個'), h('button', { class: 'chip big', onclick: () => Learn.review(false) }, '還不熟'), h('button', { class: 'chip big primary', onclick: () => Learn.review(true) }, '記得')),
-        h('p', { class: 'hint center kbd-hint', text: '空白鍵翻面 · ← 還不熟 · → 記得 · Backspace 上一個（測驗時不能回頭）' }),
-        s.kind !== 'daily' ? h('button', { class: 'chip sm', onclick: () => Learn.skipReview() }, '直接測驗') : null];
+          s.flip ? h('span', { class: 'fzh', text: v.z }) : h('span', { class: 'hint', text: I18n.s("u_085cc863c4b1") })),
+        h('div', { class: 'row center' }, h('button', { class: 'chip', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(v.w) }, ico('i_speaker', 20), I18n.s("u_07c1b097b4a1"))),
+        h('div', { class: 'row center sbtns' }, h('button', { class: 'chip big', id: 'rv-back', disabled: s.ri <= 0, 'aria-label': I18n.s("u_f410d9aecc82"), title: I18n.s("u_a97f55fc8ecc"), onclick: () => Learn.back() }, ico('i_back', 20), I18n.s("u_f60cafb25326")), h('button', { class: 'chip big', onclick: () => Learn.review(false) }, I18n.s("u_f816431d3ad1")), h('button', { class: 'chip big primary', onclick: () => Learn.review(true) }, I18n.s("u_defc0240409f"))),
+        h('p', { class: 'hint center kbd-hint', text: I18n.s("u_f25880e19a13") }),
+        s.kind !== 'daily' ? h('button', { class: 'chip sm', onclick: () => Learn.skipReview() }, I18n.s("u_812fb961ff4b")) : null];
     }
     if (s.step === 'quiz') {
       const q = s.qs[s.qi], v = VOCAB[q.i], A = s.ans;
       if (q.type === 'listen' && s.spoke !== 'q' + s.qi) { s.spoke = 'q' + s.qi; setTimeout(() => Learn.speak(v.w), 200); }
       let prompt, sub;
-      if (q.type === 'en2zh') { prompt = h('div', { class: 'qword' }, v.w, h('button', { class: 'xbtn', 'aria-label': '發音', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 22))); sub = `${v.ph ? v.ph + ' · ' : ''}${v.p} · 選出中文意思`; }
-      else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: v.z }); sub = `${v.p} · 選出英文單字`; }
-      else if (q.type === 'listen') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), '再聽一次'); sub = '聽發音，選出中文意思'; }
-      else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), '再聽一次'); sub = '聽發音，拼出英文'; }
-      else { prompt = h('div', { class: 'qzh', text: v.z }); sub = q.noHint ? `${v.p} · 拼出英文` : `${v.p} · 拼出英文（${v.w.length} 個字母）`; }
+      if (q.type === 'en2zh') { prompt = h('div', { class: 'qword' }, v.w, h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(v.w) }, ico('i_speaker', 22))); sub = I18n.s("u_6d4c94ada1df", [v.ph ? v.ph + ' · ' : '', v.p]); }
+      else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: v.z }); sub = I18n.s("u_12c496f4a564", [v.p]); }
+      else if (q.type === 'listen') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_2895e8416b32"); }
+      else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_1fb5519fb68c"); }
+      else { prompt = h('div', { class: 'qzh', text: v.z }); sub = q.noHint ? I18n.s("u_e0bc10bbdefb", [v.p]) : I18n.s("u_a23b5e2f5b3e", [v.p, v.w.length]); }
       const redo = s.redoFrom != null && s.qi >= s.redoFrom;
       const ctx = q.ctx ? h('p', { class: 'qctx', text: q.ctx }) : null;
-      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? `再試一次剛剛答錯的字 ${s.qi - s.redoFrom + 1}/${s.qs.length - s.redoFrom}` : `測驗 ${s.qi + 1}/${s.redoFrom != null ? s.redoFrom : s.qs.length} · 答對 ${s.right}` })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
+      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? I18n.s("u_ac75ea2713f3", [s.qi - s.redoFrom + 1, s.qs.length - s.redoFrom]) : I18n.s("u_a8ce1fb26c0f", [s.qi + 1, s.redoFrom != null ? s.redoFrom : s.qs.length, s.right]) })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
       if (q.type === 'spell' || q.type === 'listenspell') {
         const hintTxt = q.hint || (q.noHint || q.type === 'listenspell' ? '' : v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim());
         const key = 'q' + s.qi;
@@ -304,7 +304,7 @@ Object.assign(UI, {
           oncompositionstart: e => SpellKeys.start(e.target),
           oncompositionend: e => SpellKeys.end(e.target),
           onblur: e => SpellKeys.blur(e.target) });
-        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, '確定')));
+        parts.push(hintTxt ? h('div', { class: 'spellhint num', text: hintTxt }) : null, h('form', { class: 'row', onsubmit: e => { e.preventDefault(); SpellKeys.submit(inp); } }, h('div', { class: 'inset grow' }, inp), h('button', { type:'submit', class: 'chip primary', disabled: !!A }, I18n.s("u_20db9f87b860"))));
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus({preventScroll:true}); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
@@ -316,8 +316,8 @@ Object.assign(UI, {
       // the answer line always has its room: the window keeps the same height before and after answering
       const fbTxt = `${v.w} ${v.ph}  ${v.p} ${v.z}`;
       parts.push(h('div', { class: 'qslot' }, A ? h('div', { class: 'qfb ' + (A.ok ? 'ok' : 'no') + (A.lucky ? ' luck' : '') },
-        h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? '答對了！' : '再記一下：' }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: '幸運！' }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', title: fbTxt, text: fbTxt })),
-        h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? '看結果' : '下一題')) : null));
+        h('div', { class: 'qfb-t' }, h('div', { class: 'qfb-l1' }, h('b', { text: A.ok ? I18n.s("u_97c6bbf85445") : I18n.s("u_be3854998308") }), A.lucky ? h('span', { class: 'lucky' }, ico(A.lucky.icon, 18), h('b', { text: I18n.s("u_786a5b4a0cf2") }), h('span', { text: A.lucky.text })) : null), h('div', { class: 'qfb-l2', title: fbTxt, text: fbTxt })),
+        h('button', { class: 'chip sm primary', id: 'q-next', onclick: () => Learn.next() }, s.qi + 1 >= s.qs.length ? I18n.s("u_3f188107191e") : I18n.s("u_c52524b00455"))) : null));
       const meta=parts.splice(0,2), feedback=parts.pop();
       const entry=parts.find(node=>node&&node.tagName==='FORM');
       const question=parts.filter(node=>node&&node!==entry);
@@ -331,21 +331,21 @@ Object.assign(UI, {
     const r = s.result, n = s.qs.length;
     return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }), r.taskNote ? h('p', { class: 'swap-rule', text: r.taskNote }) : null,
       h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + r.coins })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + r.xp })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))),
-      s.luckyN ? h('p', { class: 'hint', text: `這次遇到 ${s.luckyN} 次幸運題` }) : null,
-      s.newly || s.mastered ? h('p', { class: 'hint', text: `新學會 ${s.newly} 個字` + (s.mastered ? `、精熟 ${s.mastered} 個（每個 +3 金幣）` : '') }) : null),
-      s.wrong.length ? h('div', { class: 'sub', text: '要再記一下的字' }) : null,
-      s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': '發音', onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
+      s.luckyN ? h('p', { class: 'hint', text: I18n.s("u_ecc018bdb57f", [s.luckyN]) }) : null,
+      s.newly || s.mastered ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
+      s.wrong.length ? h('div', { class: 'sub', text: I18n.s("u_dfcac72f08a7") }) : null,
+      s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
       h('div', { class: 'row center wrap' },
-        s.kind === 'need' && r.items.length && s.opts.needId && Life.L.needs.some(x => x.id === s.opts.needId) ? h('button', { class: 'chip primary', onclick: () => { const nd = Life.L.needs.find(x => x.id === s.opts.needId); this.closeWin('study'); if (nd) Life.use(s.opts.item, nd); } }, ico(SUPPLIES[s.opts.item].spr, 20), '馬上使用') : null,
-        s.kind === 'need' ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), r.items.length ? '再換一次' : '再試一次') : null,
-        s.kind === 'need' && r.taskNote ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '查看任務') : null,
-        s.kind === 'daily' || (s.kind === 'chal' && s.task.prog >= s.task.need) ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), '去領獎勵') : null,
-        s.kind === 'story' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Story.open(); } }, ico('i_shop', 20), `回到${MERCHANTS[Story.week().mk].n}那裡`) : null,
-        s.kind === 'chal' && s.task.prog < s.task.need ? h('button', { class: 'chip primary', onclick: () => Learn.start('chal', s.opts) }, ico('i_reset', 20), '繼續挑戰') : null,
-        s.kind === 'train' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Pets.select(s.opts.pid, 'train'); } }, ico('i_paw', 20), '回到寵物') : null,
-        s.kind === 'help' && s.right < 3 ? h('button', { class: 'chip primary', onclick: () => Learn.start('help', s.opts) }, ico('i_reset', 20), '再試一次') : null,
-        s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); if (Visit.active) Visit.refreshMarks(); else UI.openWin('visit'); } }, ico('i_people', 20), '回到好友房間') : null,
-        h('button', { class: 'chip', onclick: () => this.closeWin('study') }, '完成'))];
+        s.kind === 'need' && r.items.length && s.opts.needId && Life.L.needs.some(x => x.id === s.opts.needId) ? h('button', { class: 'chip primary', onclick: () => { const nd = Life.L.needs.find(x => x.id === s.opts.needId); this.closeWin('study'); if (nd) Life.use(s.opts.item, nd); } }, ico(SUPPLIES[s.opts.item].spr, 20), I18n.s("u_22a970cc999a")) : null,
+        s.kind === 'need' ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), r.items.length ? I18n.s("u_a53cdc600e62") : I18n.s("u_2f5a858ab28f")) : null,
+        s.kind === 'need' && r.taskNote ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), I18n.s("u_731ccb418eab")) : null,
+        s.kind === 'daily' || (s.kind === 'chal' && s.task.prog >= s.task.need) ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); this.openTasks('daily'); } }, ico('i_task', 20), I18n.s("u_0105098a9af9")) : null,
+        s.kind === 'story' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Story.open(); } }, ico('i_shop', 20), I18n.s("u_0956b0fb5251", [MERCHANTS[Story.week().mk].n])) : null,
+        s.kind === 'chal' && s.task.prog < s.task.need ? h('button', { class: 'chip primary', onclick: () => Learn.start('chal', s.opts) }, ico('i_reset', 20), I18n.s("u_c9ec7dfd33a7")) : null,
+        s.kind === 'train' ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('study'); Pets.select(s.opts.pid, 'train'); } }, ico('i_paw', 20), I18n.s("u_b8a85ecdf2d2")) : null,
+        s.kind === 'help' && s.right < 3 ? h('button', { class: 'chip primary', onclick: () => Learn.start('help', s.opts) }, ico('i_reset', 20), I18n.s("u_2f5a858ab28f")) : null,
+        s.kind === 'help' ? h('button', { class: 'chip', onclick: () => { this.closeWin('study'); if (Visit.active) Visit.refreshMarks(); else UI.openWin('visit'); } }, ico('i_people', 20), I18n.s("u_7507b3066073")) : null,
+        h('button', { class: 'chip', onclick: () => this.closeWin('study') }, I18n.s("u_c0b3fbff51cc")))];
   },
   w_words() {
     const q = this.wq.trim().toLowerCase();
@@ -355,12 +355,12 @@ Object.assign(UI, {
       if (this.wf === 'new' && seen) return false; if (this.wf === 'learning' && (!seen || b >= 3)) return false; if (this.wf === 'known' && b < 3) return false;
       return !q || v.w.toLowerCase().includes(q) || v.z.includes(q);
     });
-    const tabs = h('div', { class: 'tabs' }, ...[['all', '全部'], ['new', '還沒學'], ['learning', '學習中'], ['known', '熟悉']].map(([k, l]) => h('button', { class: 'tab' + (this.wf === k ? ' on' : ''), onclick: () => { this.wf = k; this.refresh('words'); } }, l)));
-    const ttabs = h('div', { class: 'tabs wrap' }, ...[[0, '全部'], ...VLEVELS.map(t => [t, 'L' + t])].map(([k, l]) => h('button', { class: 'tab' + (this.wt === k ? ' on' : ''), onclick: () => { this.wt = k; this.refresh('words'); } }, l)));
-    const search = h('div', { class: 'inset' }, h('input', { id: 'w-q', type: 'search', value: this.wq, placeholder: '搜尋英文或中文', oninput: e => { this.wq = e.target.value; this.refresh('words'); } }));
+    const tabs = h('div', { class: 'tabs' }, ...[['all', I18n.s("u_5c55a67935af")], ['new', I18n.s("u_6b1e0b08564b")], ['learning', I18n.s("u_44380c741c82")], ['known', I18n.s("u_963d09bf058c")]].map(([k, l]) => h('button', { class: 'tab' + (this.wf === k ? ' on' : ''), onclick: () => { this.wf = k; this.refresh('words'); } }, l)));
+    const ttabs = h('div', { class: 'tabs wrap' }, ...[[0, I18n.s("u_5c55a67935af")], ...VLEVELS.map(t => [t, 'L' + t])].map(([k, l]) => h('button', { class: 'tab' + (this.wt === k ? ' on' : ''), onclick: () => { this.wt = k; this.refresh('words'); } }, l)));
+    const search = h('div', { class: 'inset' }, h('input', { id: 'w-q', type: 'search', value: this.wq, placeholder: I18n.s("u_81fb14424e7e"), oninput: e => { this.wq = e.target.value; this.refresh('words'); } }));
     const MAX = 300;
-    const rows = filt.slice(0, MAX).map(v => { const b = Learn.box(v.i); return h('div', { class: 'wrow' }, h('b', { text: v.w }), h('span', { class: 'hint', text: v.p }), h('span', { class: 'wz', text: v.z }), h('span', { class: 'dots', title: `熟練度 ${b}/5` }, ...[1, 2, 3, 4, 5].map(k => h('i', { class: k <= b ? 'on' : '' }))), h('button', { class: 'xbtn', 'aria-label': '發音', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 18))); });
-    return [search, tabs, ttabs, h('div', { class: 'sub', text: `${filt.length} 個單字` + (filt.length > MAX ? `（顯示前 ${MAX} 個，用搜尋找其他的）` : '') }), h('div', { class: 'scroll wlist' }, ...rows)];
+    const rows = filt.slice(0, MAX).map(v => { const b = Learn.box(v.i); return h('div', { class: 'wrow' }, h('b', { text: v.w }), h('span', { class: 'hint', text: v.p }), h('span', { class: 'wz', text: v.z }), h('span', { class: 'dots', title: I18n.s("u_1c50df01d4e0", [b]) }, ...[1, 2, 3, 4, 5].map(k => h('i', { class: k <= b ? 'on' : '' }))), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(v.w) }, ico('i_speaker', 18))); });
+    return [search, tabs, ttabs, h('div', { class: 'sub', text: I18n.s("u_0e4752b5342e", [filt.length]) + (filt.length > MAX ? I18n.s("u_6a162aee6e09", [MAX]) : '') }), h('div', { class: 'scroll wlist' }, ...rows)];
   },
 });
 document.addEventListener('keydown', e => {

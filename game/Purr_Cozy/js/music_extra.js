@@ -40,7 +40,7 @@ const MusicCache = {
       await this.tx('blobs', 'readwrite', st => st.put(blob, key));
       this.meta[key] = Object.assign({ size, last: Date.now(), at: Date.now() }, info || {}); await this.tx('meta', 'readwrite', st => st.put(this.meta[key], key));
       this.keys.add(key); this.sum(); return true;
-    } catch (e) { console.warn('[music cache] 存不下', e); this.drop(key); return false; }
+    } catch (e) { console.warn(I18n.s("u_106399426095"), e); this.drop(key); return false; }
   },
   async drop(key) { this.keys.delete(key); delete this.meta[key]; this.sum(); try { await this.tx('blobs', 'readwrite', st => st.delete(key)); await this.tx('meta', 'readwrite', st => st.delete(key)); } catch (e) { } },
   // remove the least recently played tracks until `need` more bytes fit under the limit

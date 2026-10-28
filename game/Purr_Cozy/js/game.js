@@ -18,10 +18,10 @@ const Game = {
       items: [], inv: { rug_runner: 1, cushion: 1, books_stack: 1, calendar: 1 },
       ownWP: ['cream_stripe'], ownFL: ['wood_honey'], wp: 'cream_stripe', fl: 'wood_honey', view: 'city', ownViews: ['city'], themes: ['cozy'],
       music: { list: [], idx: -1, vol: 0.7, shuffle: false, repeat: 'all', ctx: 'list', lidx: -1, libAlbum: '' },
-      pets: ['cat:ginger'], pet: 'cat:ginger', petName: '麻糬',
+      pets: ['cat:ginger'], pet: 'cat:ginger', petName: I18n.s("u_cb9eb5933024"),
       avatar: Object.assign(defaultAvatar(), { hairFront: 'short', hairBack: 'bun', topColor: 'rose', bottomColor: 'navy' }), closet: {}, outfits: [],
-      todos: [{ id: 1, t: '把今天最重要的一件事寫在這裡', done: false, ex: true }, { id: 2, t: '喝一杯水', done: true, ex: true }],
-      memos: [{ id: 1, text: '歡迎來到小窩！\n點點看家具和小貓，按番茄鐘開始專注，就能賺金幣買新家具。', color: 'butter', pin: false, x: 40, y: 120 }],
+      todos: [{ id: 1, t: I18n.s("u_08ab3930152c"), done: false, ex: true }, { id: 2, t: I18n.s("u_c166b28c3cad"), done: true, ex: true }],
+      memos: [{ id: 1, text: I18n.s("u_72882e2035c7"), color: 'butter', pin: false, x: 40, y: 120 }],
       timer: { focus: 25, short: 5, long: 15, mode: 'focus', running: false, endsAt: 0, remain: 25 * 60, round: 0, credited: 0 },
       stats: { focusMin: 0, sessions: 0, todos: 0, todoDay: '', todoToday: 0 },
       settings: { timeMode: 'auto', rain: false, autoBreak: true, autoMusic: false, lyrics: true },
@@ -50,12 +50,12 @@ const Game = {
   // ---------- themes ----------
   buyTheme(id) {
     const S = this.S, th = THEMES[id]; if (S.themes.includes(id)) return;
-    if (S.lvl < th.lvl) return UI.toast(`需要 Lv ${th.lvl} 才能買這個主題`, 'i_star');
-    if (S.coins < th.price) return UI.toast(`金幣不夠，還差 ${th.price - S.coins}`, 'i_coin');
+    if (S.lvl < th.lvl) return UI.toast(I18n.s("u_525d8ee78bc0", [th.lvl]), 'i_star');
+    if (S.coins < th.price) return UI.toast(I18n.s("u_55ac75b47b82", [th.price - S.coins]), 'i_coin');
     S.coins -= th.price; S.themes.push(id);
     if (!S.ownWP.includes(th.wp)) S.ownWP.push(th.wp); if (!S.ownFL.includes(th.fl)) S.ownFL.push(th.fl); if (!S.ownViews.includes(th.view)) S.ownViews.push(th.view);
     for (const g of th.grants) S.inv[g] = (S.inv[g] || 0) + 1;
-    UI.toast(`買下「${th.n}」主題，家具放在收納箱`, 'i_theme', 5, { label: '整套佈置', fn: () => UI.themeConfirm(id) });
+    UI.toast(I18n.s("u_d178f758fe49", [th.n]), 'i_theme', 5, { label: I18n.s("u_adb808fe46af"), fn: () => UI.themeConfirm(id) });
     UI.hud(true); UI.refresh('shop'); UI.refresh('storage'); this.save();
   },
   applyTheme(id, mode) {
@@ -71,7 +71,7 @@ const Game = {
       Pets.resetActors();
     }
     Room.buildBg(S.wp, S.fl); this.save(); UI.refresh('storage'); UI.refresh('shop');
-    UI.toast(mode === 'full' ? `換成「${th.n}」了，原本的家具收進收納箱` : `換上「${th.n}」的牆面、地板和窗景`, 'i_theme', 3.5);
+    UI.toast(mode === 'full' ? I18n.s("u_74aa40e985e5", [th.n]) : I18n.s("u_d449380d3b8c", [th.n]), 'i_theme', 3.5);
   },
   applyView(id) { this.S.view = id; this.save(); UI.refresh('storage'); },
   fixPlacements() {
@@ -143,14 +143,14 @@ const Game = {
   levelUp() {
     const S = this.S; const [x, y] = freeFloorSpot(14, 12);
     S.gifts.push({ uid: S.nextUid++, x: Math.round(x - 6), y: Math.round(y), lvl: S.lvl, drop: 70 });
-    UI.toast(`升到 Lv ${S.lvl}！房間裡送來一個禮物，點它打開`, 'i_star', 4.5);
+    UI.toast(I18n.s("u_60016516e5d2", [S.lvl]), 'i_star', 4.5);
     this.save();
   },
   openGift(g) {
     const S = this.S; S.gifts = S.gifts.filter(x => x !== g);
     const p = Rewards.roll({ pity: true, lvl: g.lvl }); Rewards.grant(p);
     for (let i = 0; i < 8; i++) Room.puff('p_spark', g.x + 6, g.y - 8, { vx: (Math.random() - 0.5) * 30, vy: -14 - Math.random() * 10, grav: 20, max: 1 });
-    UI.prizeModal(p, '禮物盒'); UI.hud(true); this.save(); saveSoon();
+    UI.prizeModal(p, I18n.s("u_aa3f01d20cb5")); UI.hud(true); this.save(); saveSoon();
   },
   // ---------- timer ----------
   T() { return this.S.timer; },
@@ -162,7 +162,7 @@ const Game = {
     t.endsAt = Date.now() + t.remain * 1000; t.running = true;
     if (fresh && typeof Ritual !== 'undefined') Ritual.start();
     const task = t.mode === 'focus' && this.S.todos.find(x => String(x.id) === String(this.S.focusTask) && !x.done);
-    if (task && this.avatar) this.bubble(this.avatar, '專心做：' + task.t.slice(0, 18), 3);
+    if (task && this.avatar) this.bubble(this.avatar, I18n.s("u_f553191e7ce5") + task.t.slice(0, 18), 3);
     if (t.mode === 'focus' && this.S.settings.autoMusic && !Music.playing && (this.S.music.list.length || Lib.tracks.length)) Music.toggle(true);
     this.afterTimer();
   },
@@ -186,20 +186,20 @@ const Game = {
       if (!skipped) {
         t.round++; this.S.stats.sessions++;
         const B = this.S.life.buff; let bonus = Math.round(t.focus * 0.4), bxp = Math.round(t.focus * 0.6), why = [];
-        if (B.coin) { bonus += Math.round(t.focus * 2 * 0.3); delete B.coin; why.push('飯糰'); }
-        if (B.xp) { bxp += Math.round(t.focus * 4 * 0.3); delete B.xp; why.push('咖啡'); }
+        if (B.coin) { bonus += Math.round(t.focus * 2 * 0.3); delete B.coin; why.push(I18n.s("u_f45668769e16")); }
+        if (B.xp) { bxp += Math.round(t.focus * 4 * 0.3); delete B.xp; why.push(I18n.s("u_720ec669f15b")); }
         bonus = this.reward(bonus, bxp, 'done');
         if (typeof Ritual !== 'undefined') Ritual.end({ mins: t.focus, bonus, bxp, why });
-        else UI.toast(`完成一輪專注！額外 +${bonus} 金幣、+${bxp} 經驗` + (why.length ? `（${why.join('、')}加成）` : ''), 'i_tomato', 4);
+        else UI.toast(I18n.s("u_ec6d0b75e668", [bonus, bxp]) + (why.length ? I18n.s("u_356db9d72650", [why.join('、')]) : ''), 'i_tomato', 4);
         if (Math.random() < 0.45) setTimeout(() => Life.addNeed(Math.random() < 0.5 ? 'ava_sleepy' : 'ava_hungry'), 5000);
-        if (this.avatar && typeof Ritual === 'undefined') { this.avatar.happy = 3; this.avatar.hop = 0.45; Game.bubble(this.avatar, '完成了！休息一下吧', 3); }
-        UI.flashTitle('專注完成');
+        if (this.avatar && typeof Ritual === 'undefined') { this.avatar.happy = 3; this.avatar.hop = 0.45; Game.bubble(this.avatar, I18n.s("u_c0b7a1dad8f6"), 3); }
+        UI.flashTitle(I18n.s("u_d32dbbb08fdd"));
       }
       const next = t.round > 0 && t.round % 4 === 0 ? 'long' : 'short';
       t.mode = next; t.remain = this.modeLen(next); t.credited = 0;
       if (!skipped && this.S.settings.autoBreak) { t.endsAt = Date.now() + t.remain * 1000; t.running = true; }
     } else {
-      if (!skipped) { UI.toast('休息結束，準備好就再開始吧', 'i_bell', 4); UI.flashTitle('休息結束'); }
+      if (!skipped) { UI.toast(I18n.s("u_f63798269722"), 'i_bell', 4); UI.flashTitle(I18n.s("u_754f16d16a18")); }
       t.mode = 'focus'; t.remain = this.modeLen('focus'); t.credited = 0;
     }
     this.afterTimer();
@@ -210,13 +210,13 @@ const Game = {
     const S = this.S; let d, price;
     if (kind === 'item') d = ITEMS[id]; else if (kind === 'wp') d = WALLPAPERS[id]; else if (kind === 'fl') d = FLOORS[id]; else if (kind === 'view') d = VIEWS[id]; else d = PETS[id];
     const cat = kind; price = Rewards.price(d.price, cat);
-    if (S.lvl < d.lvl) return UI.toast(`需要 Lv ${d.lvl} 才能購買`, 'i_star');
-    if (S.coins < price) return UI.toast(`金幣不夠，還差 ${price - S.coins}`, 'i_coin');
+    if (S.lvl < d.lvl) return UI.toast(I18n.s("u_490cb58ce666", [d.lvl]), 'i_star');
+    if (S.coins < price) return UI.toast(I18n.s("u_55ac75b47b82", [price - S.coins]), 'i_coin');
     S.coins -= price; Rewards.consume(d.price, cat, d.n);
-    if (kind === 'item') { S.inv[id] = (S.inv[id] || 0) + 1; UI.toast(`買下了「${d.n}」，收在收納箱裡`, 'i_box', 3.2, { label: '馬上擺放', fn: () => this.place(id) }); }
-    else if (kind === 'wp') { S.ownWP.push(id); this.applyWP(id); UI.toast(`換上了「${d.n}」壁紙`, 'i_wall'); }
-    else if (kind === 'fl') { S.ownFL.push(id); this.applyFL(id); UI.toast(`換上了「${d.n}」地板`, 'i_floor'); }
-    else if (kind === 'view') { S.ownViews.push(id); this.applyView(id); UI.toast(`窗外換成「${d.n}」`, 'i_view'); }
+    if (kind === 'item') { S.inv[id] = (S.inv[id] || 0) + 1; UI.toast(I18n.s("u_da6f656c455b", [d.n]), 'i_box', 3.2, { label: I18n.s("u_6a1f209d5ec4"), fn: () => this.place(id) }); }
+    else if (kind === 'wp') { S.ownWP.push(id); this.applyWP(id); UI.toast(I18n.s("u_f2b2137b339a", [d.n]), 'i_wall'); }
+    else if (kind === 'fl') { S.ownFL.push(id); this.applyFL(id); UI.toast(I18n.s("u_861b207a1c58", [d.n]), 'i_floor'); }
+    else if (kind === 'view') { S.ownViews.push(id); this.applyView(id); UI.toast(I18n.s("u_2db8b4bf2668", [d.n]), 'i_view'); }
     Life.track('buy', 1, { kind, id });
     UI.hud(true); UI.refresh('shop'); UI.refresh('storage'); UI.refresh('pet'); this.save(); saveSoon();
   },
@@ -250,8 +250,8 @@ const Game = {
     if (Room.sel === it) Room.sel = null;
     UI.editToolbar(); UI.refresh('storage'); this.save();
     // the storage box only counts items, so a stored bowl forgets its owner
-    const whose = it.pet != null && Pets.get(it.pet) ? `${Pets.get(it.pet).name}的` : '';
-    UI.toast((kids.length ? `收起了「${ITEMS[it.k].n}」和上面的小物` : `收起了${whose ? whose + ITEMS[it.k].n : '「' + ITEMS[it.k].n + '」'}`) + (back ? `，碗裡的 ${back} 份食物放回道具` : '') + (whose ? '。再擺出來時要重新指定給牠' : ''), 'i_box', whose ? 3.6 : 2.4);
+    const whose = it.pet != null && Pets.get(it.pet) ? I18n.s("u_21429005030f", [Pets.get(it.pet).name]) : '';
+    UI.toast((kids.length ? I18n.s("u_334b895dcff0", [ITEMS[it.k].n]) : I18n.s("u_9c95a655cf85", [whose ? whose + ITEMS[it.k].n : '「' + ITEMS[it.k].n + '」'])) + (back ? I18n.s("u_d2bd17261abc", [back]) : '') + (whose ? I18n.s("u_6b5c27c52ed0") : ''), 'i_box', whose ? 3.6 : 2.4);
   },
   interact(it) {
     const d = ITEMS[it.k], A = this.avatar; const cv = Room.itemCanvas(it); const cx = it.x + cv.width / 2;
@@ -262,8 +262,8 @@ const Game = {
     if (d.bowl) { const o = Pets.bowlOwner(it); if (o) Pets.Z.sel = o.id; UI.petBowl = it.uid; UI.petBowlPet = Pets.Z.sel; UI.petTab = 'care'; UI.openWin('pet'); UI.refresh('pet'); return; }
     if (d.toggle) { it.on = !it.on; Room.puff('p_spark', cx - 1, it.y - 2, { vy: -6, max: 0.7 }); this.save(); return; }
     if (d.window) { it.closed = !it.closed; this.save(); return; }
-    if (d.bed) { if (this.focusing()) return this.bubbleAt(cx, it.y, '專注時間先不睡喔'); A.stand(); A.goSleep(it); return; }
-    if (d.seat) { if (this.focusing()) return this.bubbleAt(cx, it.y, '等休息時間再來坐'); A.stand(); const [w, h] = itemSize(it); const sx = it.flip ? w - d.seat.x : d.seat.x; A.state = 'walk'; A.walkTo(it.x + sx, it.y + h + 3, () => { if (!Room.uidMap[it.uid]) { A.state = 'idle'; return; } A.state = 'sit'; A.seat = it; A.timer = 12; }); return; }
+    if (d.bed) { if (this.focusing()) return this.bubbleAt(cx, it.y, I18n.s("u_e1c0165e548d")); A.stand(); A.goSleep(it); return; }
+    if (d.seat) { if (this.focusing()) return this.bubbleAt(cx, it.y, I18n.s("u_829866099f13")); A.stand(); const [w, h] = itemSize(it); const sx = it.flip ? w - d.seat.x : d.seat.x; A.state = 'walk'; A.walkTo(it.x + sx, it.y + h + 3, () => { if (!Room.uidMap[it.uid]) { A.state = 'idle'; return; } A.state = 'sit'; A.seat = it; A.timer = 12; }); return; }
     if (d.desk || d.chair) { UI.openWin('timer'); return; }
     const r = d.react;
     if (r === 'water') return Fun.water(it, d, cx);
@@ -272,8 +272,8 @@ const Game = {
     if (r === 'notes') { for (let i = 0; i < 3; i++) Room.puff('p_note', cx - 2 + i * 3, it.y - 2, { vx: (i - 1) * 6, vy: -10 - i * 2, wob: 10, max: 1.8 }); return; }
     if (r === 'bubbles') { for (let i = 0; i < 4; i++) Room.puff('p_bubble', cx - 3 + Math.random() * 6, it.y + 3, { vx: 0, vy: -6 - Math.random() * 4, wob: 6, max: 1.2 }); return; }
     if (r === 'hearts') { Room.puff('p_heart', cx - 2, it.y - 3, { vy: -9 }); return; }
-    if (r === 'time') { const n = new Date(); return this.bubbleAt(cx, it.y, `現在 ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`); }
-    if (r === 'date') { const n = new Date(); return this.bubbleAt(cx, it.y, `${n.getMonth() + 1} 月 ${n.getDate()} 日 星期${'日一二三四五六'[n.getDay()]}`); }
+    if (r === 'time') { const n = new Date(); return this.bubbleAt(cx, it.y, I18n.s("u_9f987a17389a", [String(n.getHours()).padStart(2, '0'), String(n.getMinutes()).padStart(2, '0')])); }
+    if (r === 'date') { const n = new Date(); return this.bubbleAt(cx, it.y, I18n.s("u_e20ffbdcb4b5", [n.getMonth() + 1, n.getDate(), I18n.s("u_006148fb6253")[n.getDay()]])); }
     if (r === 'spin') { Room.puff('p_spark', cx, it.y, { vy: -8 }); return; }
     if (d.steam) { for (let i = 0; i < 3; i++) Room.puff('p_steam', cx - 1, it.y - 2, { vy: -6 - i * 2, vx: (Math.random() - 0.5) * 3, max: 1.4, alpha: 0.7 }); return; }
   },
@@ -293,7 +293,7 @@ const Game = {
   },
   delTodo(id) { this.S.todos = this.S.todos.filter(x => x.id !== id); UI.refresh('todo'); UI.refresh('timer'); this.save(); },
   // ---------- memos ----------
-  addMemo() { const S = this.S; if (S.memos.length >= 20) return UI.toast('便條最多 20 張'); S.memos.unshift({ id: this.uid(S.memos), text: '', color: ['butter', 'rose', 'mint', 'sky', 'lilac'][S.memos.length % 5], pin: false, x: 60 + (S.memos.length % 5) * 24, y: 110 + (S.memos.length % 5) * 18 }); UI.refresh('memo'); this.save(); },
+  addMemo() { const S = this.S; if (S.memos.length >= 20) return UI.toast(I18n.s("u_0862de6c5cf5")); S.memos.unshift({ id: this.uid(S.memos), text: '', color: ['butter', 'rose', 'mint', 'sky', 'lilac'][S.memos.length % 5], pin: false, x: 60 + (S.memos.length % 5) * 24, y: 110 + (S.memos.length % 5) * 18 }); UI.refresh('memo'); this.save(); },
   // ---------- bubbles ----------
   bubble(actor, text, secs = 2) { UI.bubble({ actor }, text, secs); },
   bubbleAt(x, y, text, secs = 2.2) { UI.bubble({ x, y }, text, secs); },
@@ -433,6 +433,6 @@ function boot(data) {
   Cloud.init(); Cowork.init();
   window.claude?.hot?.snapshot?.(() => ({ S: Game.S }));
   document.addEventListener('visibilitychange', () => { if (document.hidden) { Game.save(); Cloud.flush(); } });
-  if (Game.outdated) UI.toast('這份存檔來自比較新的遊戲版本，請重新整理頁面載入新版；這個版本不會儲存進度', 'i_cloud', 10, { label: '重新整理', fn: () => location.reload() });
+  if (Game.outdated) UI.toast(I18n.s("u_91e380c5e20e"), 'i_cloud', 10, { label: I18n.s("u_5f451c71b46a"), fn: () => location.reload() });
   window.addEventListener('pagehide', () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(Game.S)); } catch (e) { } });
 }

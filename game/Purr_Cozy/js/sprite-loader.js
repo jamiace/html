@@ -15,8 +15,8 @@ const SpriteFiles = {
     const report = () => { settled++; window.PurrBoot?.set('pixel', settled / Math.max(1,names.length)); };
     const one = (name) => new Promise(ok => {
       const img = new Image();
-      img.onload = () => { try { SPR.override(name, Grid.fromImage(img)); loaded++; } catch (e) { console.warn('[sprites] 無法讀取', name, e); } report(); ok(); };
-      img.onerror = () => { console.warn('[sprites] 找不到', name + '.png，改用內建圖'); report(); ok(); };
+      img.onload = () => { try { SPR.override(name, Grid.fromImage(img)); loaded++; } catch (e) { console.warn(I18n.s("u_20b56512cb6e"), name, e); } report(); ok(); };
+      img.onerror = () => { console.warn(I18n.s("u_dd22d7ef597d"), name + I18n.s("u_400fe2f9b1f9")); report(); ok(); };
       img.src = this.base + 'assets/sprites/' + encodeURIComponent(name) + '.png?v=' + (idx.version || 1);
     });
     await Promise.race([Promise.all(names.map(one)), new Promise(ok => setTimeout(ok, timeoutMs))]);

@@ -26,16 +26,16 @@
    waiting for teammates) and every 10 min otherwise.
    ============================================================ */
 const TEAM_TYPES = {
-  d: { n: '每日', max: 3, reward: { c: 80, x: 30 } },
-  w: { n: '每週', max: 5, reward: { c: 400, x: 0, coupon: 1 } },
+  d: { n: I18n.s("u_fd7b67c923cd"), max: 3, reward: { c: 80, x: 30 } },
+  w: { n: I18n.s("u_a8a3dfb18c80"), max: 5, reward: { c: 400, x: 0, coupon: 1 } },
 };
 // goals: daily = base x 1.5, weekly = base x 1.2
 const TEAM_TASKS = {
-  focus: { n: '全隊專注', unit: '分鐘', ev: ['focusMin'], d: 90, w: 720, how: '番茄鐘專注的分鐘數', icon: 'i_tomato' },
-  quiz: { n: '全隊答對題目', unit: '題', ev: ['quizRight'], d: 45, w: 216, how: '任何單字測驗答對的題數', icon: 'i_learn' },
-  care: { n: '全隊照顧寵物', unit: '次', ev: ['feed', 'play', 'groom', 'care', 'train'], d: 15, w: 72, how: '餵食、玩耍、梳毛洗澡、吃藥、訓練的次數', icon: 'i_paw' },
+  focus: { n: I18n.s("u_52072ff89466"), unit: I18n.s("u_c26fddc50167"), ev: ['focusMin'], d: 90, w: 720, how: I18n.s("u_b03dee0ec5b9"), icon: 'i_tomato' },
+  quiz: { n: I18n.s("u_fa9b8a79e93f"), unit: I18n.s("u_feb074cc340e"), ev: ['quizRight'], d: 45, w: 216, how: I18n.s("u_d5b04b63fc51"), icon: 'i_learn' },
+  care: { n: I18n.s("u_766a8fdcb3bc"), unit: I18n.s("u_172fb7e67b9b"), ev: ['feed', 'play', 'groom', 'care', 'train'], d: 15, w: 72, how: I18n.s("u_92f6b6b2756f"), icon: 'i_paw' },
   // English challenge: spelling and listening questions answered right anywhere (daily words, practice, challenges, training)
-  eng: { n: '全隊拼字聽力', unit: '題', ev: ['engRight'], d: 30, w: 150, how: '拼字題和聽力題答對的題數（任何單字練習都算）', icon: 'i_speaker' },
+  eng: { n: I18n.s("u_34e4e7ec218a"), unit: I18n.s("u_feb074cc340e"), ev: ['engRight'], d: 30, w: 150, how: I18n.s("u_96c3e5399580"), icon: 'i_speaker' },
 };
 const TEAM_ORDER = ['focus', 'quiz', 'care', 'eng'];
 const TEAM_CFG = { flushMs: 5 * 60e3, pollMs: 10 * 60e3, viewMs: 30e3, lobbyMs: 5 * 60e3, lobbyPollMs: 20e3, claimDays: 7, histMax: 12, matchTry: 10 };
@@ -169,7 +169,7 @@ const Team = {
       t.update(path, { doneAt: '__now__', roster: tm.members, open: false, full: true, at: '__now__' });
     });
     await this.load(type);
-    UI.toast(`${TEAM_TYPES[type].n}團隊任務達成！到「任務」→「團隊」領獎勵`, 'i_people', 4.5, { label: '領取', fn: () => UI.openTasks('team') });
+    UI.toast(I18n.s("u_6029b37ebdce", [TEAM_TYPES[type].n]), 'i_people', 4.5, { label: I18n.s("u_92edf81e0715"), fn: () => UI.openTasks('team') });
   },
   // ---------- starting / joining ----------
   newTeam(type, match) {
@@ -186,11 +186,11 @@ const Team = {
   },
   async start(type, match) {
     if (!this.ready() || this.busy[type]) return;
-    if (this.inTeam(type)) return UI.toast('這一期已經在隊伍裡了', 'i_people');
+    if (this.inTeam(type)) return UI.toast(I18n.s("u_034ad97c2334"), 'i_people');
     this.busy[type] = true; UI.refresh('tasks');
     try {
       if (match) {
-        for (const c of await this.candidates(type)) if (await this.join(type, c.id, false, true)) { UI.toast(`配對成功，加入了 ${(c.members || []).length + 1} 人的隊伍！`, 'i_people', 3.5); return; }
+        for (const c of await this.candidates(type)) if (await this.join(type, c.id, false, true)) { UI.toast(I18n.s("u_d68864217f1b", [(c.members || []).length + 1]), 'i_people', 3.5); return; }
       }
       const id = this.db().newId('teams'), tm = this.newTeam(type, match), uid = this.uid();
       await this.db().tx(async (t) => {
@@ -199,8 +199,8 @@ const Team = {
         t.set('teams/' + id, tm); t.set('tm/' + uid, Object.assign({}, mem || {}, { [type]: { p: tm.period, id }, at: '__now__' }));
       });
       this.mark(type, id, tm.task); await this.load(type);
-      UI.toast(match ? '還沒有可以加入的隊伍，已經幫你開了一隊並開始配對（你也可以先自己做）' : '隊伍建立了！5 分鐘內可以邀請好友，沒滿隊會自動配對', 'i_people', 4);
-    } catch (e) { UI.toast(e && e.code === 'already' ? '這一期你已經在別的隊伍裡了（可能是在另一台裝置加入的）' : '開始失敗：' + cloudErr(e), 'i_people', 4); }
+      UI.toast(match ? I18n.s("u_52b1a5769629") : I18n.s("u_219ea6b87736"), 'i_people', 4);
+    } catch (e) { UI.toast(e && e.code === 'already' ? I18n.s("u_00249180907b") : I18n.s("u_254ef5647b25") + cloudErr(e), 'i_people', 4); }
     finally { this.busy[type] = false; UI.refresh('tasks'); }
   },
   leaveData(tm, uid) {
@@ -231,13 +231,13 @@ const Team = {
       if (fromId) delete this.teams[fromId];
       this.mark(type, id, task); await this.load(type); return true;
     } catch (e) {
-      if (!quiet) UI.toast({ already: '這一期你已經在別的隊伍裡了（可能是在另一台裝置加入的）', gone: '這個隊伍已經不在了', done: '這個隊伍已經完成任務了', full: '這個隊伍已經滿了', closed: '這個隊伍沒有開放加入', member: '你已經在這個隊伍裡了', fromDone: '你目前的隊伍已經完成任務，這一期不能換隊了' }[e && e.code] || '加入失敗：' + cloudErr(e), 'i_people', 3.5);
+      if (!quiet) UI.toast({ already: I18n.s("u_00249180907b"), gone: I18n.s("u_8a62443d08fc"), done: I18n.s("u_8ac03649bf71"), full: I18n.s("u_d31afcf6aa0c"), closed: I18n.s("u_84905a944c7b"), member: I18n.s("u_c5cdfd49c32b"), fromDone: I18n.s("u_55ce0d5953db") }[e && e.code] || I18n.s("u_cccecceb603c") + cloudErr(e), 'i_people', 3.5);
       return false;
     }
   },
   async leave(type, opts = {}) {
     const st = this.inTeam(type); if (!st) return false;
-    if (!opts.noAsk && !confirm('確定要離開隊伍嗎？\n\n你在這隊的貢獻會跟著你離開。離開後可以再開新隊、配對別隊，或被好友邀請回來。')) return false;
+    if (!opts.noAsk && !confirm(I18n.s("u_71d702343410"))) return false;
     const uid = this.uid(), path = 'teams/' + st.id;
     try {
       await this.db().tx(async (t) => {
@@ -247,17 +247,17 @@ const Team = {
         t.set('tm/' + uid, Object.assign({}, mem || {}, { [type]: { p: st.p, id: '', left: true }, at: '__now__' }));
       });
       delete this.teams[st.id]; st.left = true; st.id = ''; st.mine = 0; st.dirty = false; st.urgent = false; Game.save(); saveSoon();
-      UI.toast('已經離開隊伍。想再組隊時，重新開始、配對或接受好友邀請都可以', 'i_people', 3.5);
+      UI.toast(I18n.s("u_09272255d07a"), 'i_people', 3.5);
       UI.refresh('tasks'); return true;
-    } catch (e) { UI.toast(e && e.code === 'done' ? '隊伍已經達成任務，名單固定了，不用離開也能領獎' : '離開失敗：' + cloudErr(e), 'i_people', 3.5); UI.refresh('tasks'); return false; }
+    } catch (e) { UI.toast(e && e.code === 'done' ? I18n.s("u_ac7a8f48a676") : I18n.s("u_0ae08299a97f") + cloudErr(e), 'i_people', 3.5); UI.refresh('tasks'); return false; }
   },
   // matching on / off (also ends the lobby countdown)
   async setOpen(type, open) {
     const st = this.inTeam(type); if (!st || this.busy[type]) return;
     if (open) return this.autoMatch(type, true);
     this.busy[type] = true; UI.refresh('tasks');
-    try { await this.db().update('teams/' + st.id, { open: false, mAt: 0, at: '__now__' }); await this.load(type); UI.toast('已停止配對，只和好友組隊（隊伍和進度都保留）', 'i_people', 3); }
-    catch (e) { UI.toast('設定失敗：' + cloudErr(e), 'i_people', 3.5); }
+    try { await this.db().update('teams/' + st.id, { open: false, mAt: 0, at: '__now__' }); await this.load(type); UI.toast(I18n.s("u_146424d5936c"), 'i_people', 3); }
+    catch (e) { UI.toast(I18n.s("u_691a1fc64e58") + cloudErr(e), 'i_people', 3.5); }
     finally { this.busy[type] = false; UI.refresh('tasks'); }
   },
   // countdown over (or "match now"): a solo player with no contribution yet hops into an open team;
@@ -270,33 +270,33 @@ const Team = {
       if (!manual && (tm.open || !tm.mAt || Date.now() < tm.mAt)) return;   // a teammate already did it, or turned matching off
       const uid = this.uid(), solo = tm.members.length === 1 && !((tm.prog || {})[uid] > 0) && !(st.mine > 0);
       if (solo) {
-        for (const c of (await this.candidates(type)).filter(c => c.id !== st.id)) if (await this.join(type, c.id, false, true)) { UI.toast(`配對成功！加入了 ${(c.members || []).length + 1} 人的隊伍`, 'i_people', 3.5); return; }
+        for (const c of (await this.candidates(type)).filter(c => c.id !== st.id)) if (await this.join(type, c.id, false, true)) { UI.toast(I18n.s("u_ad29cb54cee2", [(c.members || []).length + 1]), 'i_people', 3.5); return; }
       }
       await this.db().update('teams/' + st.id, { open: true, mAt: 0, at: '__now__' }); await this.load(type);
-      UI.toast(manual ? '開始配對了！其他玩家配對時會加入你的隊伍' : '5 分鐘到了還沒滿隊，已經自動開始配對', 'i_people', 3.5);
-    } catch (e) { st.autoErr = Date.now(); if (manual) UI.toast('配對失敗：' + cloudErr(e), 'i_people', 3.5); }
+      UI.toast(manual ? I18n.s("u_3c4b9b0415ef") : I18n.s("u_8584a1f4607f"), 'i_people', 3.5);
+    } catch (e) { st.autoErr = Date.now(); if (manual) UI.toast(I18n.s("u_d20ad1c3f31e") + cloudErr(e), 'i_people', 3.5); }
     finally { this.busy[type] = false; UI.refresh('tasks'); }
   },
   // ---------- invitations: any friend can invite you, even when you are already in a team ----------
   async invite(type, fid) {
     const st = this.inTeam(type), tm = st && this.teams[st.id]; if (!tm) return;
     const nm = Social.friendName(fid), k = st.id + ':' + fid;
-    if (tm.doneAt) return UI.toast('隊伍已經完成任務了', 'i_people');
-    if ((tm.members || []).includes(fid)) return UI.toast(`${nm}已經在隊伍裡了`, 'i_people');
-    if ((tm.members || []).length >= tm.max) return UI.toast('隊伍已經滿了', 'i_people');
-    if (this.sent[k]) return UI.toast(`已經邀請過${nm}了，等對方接受`, 'i_people');
+    if (tm.doneAt) return UI.toast(I18n.s("u_06ffc25471ba"), 'i_people');
+    if ((tm.members || []).includes(fid)) return UI.toast(I18n.s("u_e482651b0bf3", [nm]), 'i_people');
+    if ((tm.members || []).length >= tm.max) return UI.toast(I18n.s("u_113016eb230b"), 'i_people');
+    if (this.sent[k]) return UI.toast(I18n.s("u_72f6de3b2251", [nm]), 'i_people');
     this.sent[k] = Date.now(); UI.refresh('tasks');
     try {
       let note = '';
       const mem = await this.db().get('tm/' + fid).catch(() => null), cur = mem && mem[type];
       if (cur && cur.p === tm.period && cur.id) {
         const other = await this.db().get('teams/' + cur.id).catch(() => null);
-        if (other && other.doneAt) { delete this.sent[k]; UI.refresh('tasks'); return UI.toast(`${nm}這一期的隊伍已經完成任務了，下一期再一起吧`, 'i_people', 3.5); }
-        if (other) note = '（對方目前在別的隊伍，接受後會換過來）';
+        if (other && other.doneAt) { delete this.sent[k]; UI.refresh('tasks'); return UI.toast(I18n.s("u_e85afe078b7d", [nm]), 'i_people', 3.5); }
+        if (other) note = I18n.s("u_8a12c1b8ff20");
       }
       await this.db().set(`tinv/${fid}/list/${st.id}`, { from: this.uid(), name: Social.myName(), type, period: tm.period, task: tm.task, at: '__now__' });
-      UI.toast(`已邀請${nm}${note}，對方打開「任務」→「團隊」就能接受`, 'i_people', 4);
-    } catch (e) { delete this.sent[k]; UI.toast('邀請失敗：' + cloudErr(e), 'i_people', 3.5); }
+      UI.toast(I18n.s("u_f3ecca6bb33d", [nm, note]), 'i_people', 4);
+    } catch (e) { delete this.sent[k]; UI.toast(I18n.s("u_d3b3c1389b6c") + cloudErr(e), 'i_people', 3.5); }
     UI.refresh('tasks');
   },
   async loadInvites(force) {
@@ -315,10 +315,10 @@ const Team = {
     if (cur && cur.id === inv.id) return this.declineInvite(inv);
     if (cur) {
       const tm = this.teams[cur.id];
-      if (tm && tm.doneAt) return UI.toast('你這一期的隊伍已經完成任務，不能換隊了，下一期再一起吧', 'i_people', 3.5);
-      if (!confirm(`要離開目前的隊伍，換到${inv.name}的隊伍嗎？\n\n你在目前隊伍的貢獻會跟著你離開，不會帶到新隊伍。`)) return;
+      if (tm && tm.doneAt) return UI.toast(I18n.s("u_3a301fd782dd"), 'i_people', 3.5);
+      if (!confirm(I18n.s("u_1f331e58bd9d", [inv.name]))) return;
     }
-    if (await this.join(inv.type, inv.id, true)) UI.toast(`加入了${inv.name}的隊伍！`, 'i_people', 3);
+    if (await this.join(inv.type, inv.id, true)) UI.toast(I18n.s("u_823a68eeb386", [inv.name]), 'i_people', 3);
     this.db().del(`tinv/${this.uid()}/list/${inv.id}`).catch(() => { }); this.invites = this.invites.filter(x => x !== inv); UI.refresh('tasks'); UI.badges();
   },
   async declineInvite(inv) { this.db().del(`tinv/${this.uid()}/list/${inv.id}`).catch(() => { }); this.invites = this.invites.filter(x => x !== inv); UI.refresh('tasks'); UI.badges(); },
@@ -331,18 +331,18 @@ const Team = {
   },
   async claim(type, p, id) {
     const T = this.T, k = this.key(type, p); if (T.claims[k]) return;
-    const tm = this.teams[id] || await this.load(type, id); if (!this.canClaim(tm, type, p)) return UI.toast('還沒有達成，或你不在完成時的名單上', 'i_people', 3);
+    const tm = this.teams[id] || await this.load(type, id); if (!this.canClaim(tm, type, p)) return UI.toast(I18n.s("u_c792faad0197"), 'i_people', 3);
     const end = p === this.period(type) ? this.end(type) : ((T.hist.find(h => h.id === id) || {}).end || this.end(type));
-    if (p !== this.period(type) && Date.now() > end + TEAM_CFG.claimDays * 86400000) return UI.toast('已經超過領獎期限（結束後 7 天）', 'i_people', 3);
+    if (p !== this.period(type) && Date.now() > end + TEAM_CFG.claimDays * 86400000) return UI.toast(I18n.s("u_516b8748b726"), 'i_people', 3);
     try { await this.db().set(`teams/${id}/claims/${this.uid()}`, { at: '__now__' }); }
     catch (e) {
-      if (e && e.code === 'permission-denied') { T.claims[k] = true; Game.save(); UI.refresh('tasks'); return UI.toast('這份獎勵已經在別的裝置領過了', 'i_people', 3); }
-      return UI.toast('領取失敗：' + cloudErr(e), 'i_people', 3.5);
+      if (e && e.code === 'permission-denied') { T.claims[k] = true; Game.save(); UI.refresh('tasks'); return UI.toast(I18n.s("u_430e25858e10"), 'i_people', 3); }
+      return UI.toast(I18n.s("u_4a29c3401d2c") + cloudErr(e), 'i_people', 3.5);
     }
     T.claims[k] = true; T.hist = T.hist.filter(h => this.key(h.type, h.p) !== k);
     const R = TEAM_TYPES[type].reward; Game.reward(R.c, R.x, 'raw');   // raw: every member gets exactly the same, no comfort bonus
-    let msg = `領到${TEAM_TYPES[type].n}團隊獎勵：${R.c} 金幣` + (R.x ? `、${R.x} 經驗` : '');
-    if (R.coupon) { const c = Rewards.addCoupon(Rewards.rollCoupon()); msg += `、一張${Rewards.couponName(c)}券`; }
+    let msg = I18n.s("u_7de32986abb6", [TEAM_TYPES[type].n, R.c]) + (R.x ? I18n.s("u_cd0c52b40907", [R.x]) : '');
+    if (R.coupon) { const c = Rewards.addCoupon(Rewards.rollCoupon()); msg += I18n.s("u_b2d92eb5c67c", [Rewards.couponName(c)]); }
     UI.toast(msg, 'i_people', 4); UI.hud(true); UI.badges(); Game.save(); saveSoon(); UI.refresh('tasks');
   },
 };
@@ -364,121 +364,121 @@ Object.assign(UI, {
   // stacked bar: one coloured segment per member, all adding up to the team total
   teamBar(tm, list, def) {
     const vals = list.map(m => Team.contrib(tm, m)), sum = vals.reduce((a, b) => a + b, 0), scale = Math.max(tm.goal, sum);
-    const segs = list.map((m, i) => vals[i] > 0 ? h('i', { class: 'tmseg', style: `width:${(vals[i] / scale * 100).toFixed(2)}%;--c:${TEAM_COLORS[i % 5]}`, title: `${(tm.names || {})[m] || '隊友'}：${vals[i]} ${def.unit}` }) : null);
+    const segs = list.map((m, i) => vals[i] > 0 ? h('i', { class: 'tmseg', style: `width:${(vals[i] / scale * 100).toFixed(2)}%;--c:${TEAM_COLORS[i % 5]}`, title: `${(tm.names || {})[m] || I18n.s("u_ddaa9505f101")}：${vals[i]} ${def.unit}` }) : null);
     const pct = Math.min(100, Math.floor(sum / tm.goal * 100));
     return h('div', { class: 'tmprog2' },
       h('div', { class: 'tmbar' + (tm.doneAt ? ' done' : '') }, h('div', { class: 'tmbar-in' }, ...segs), h('span', { class: 'tmbar-pct num', text: pct + '%' })),
       h('div', { class: 'tmbar-meta' }, h('b', { class: 'num', text: `${Math.min(sum, tm.goal)} / ${tm.goal}` }), h('span', { class: 'hint', text: def.unit }), h('span', { class: 'grow' }),
-        h('span', { class: 'hint', text: sum >= tm.goal ? '達標！' : `還差 ${tm.goal - sum} ${def.unit}` })));
+        h('span', { class: 'hint', text: sum >= tm.goal ? I18n.s("u_afd9a461dae6") : I18n.s("u_cd0dce4fd89f", [tm.goal - sum, def.unit]) })));
   },
   teamSeats(tm, list, def, canInvite) {
     const vals = list.map(m => Team.contrib(tm, m)), sum = vals.reduce((a, b) => a + b, 0), best = Math.max(0, ...vals), uid = Team.uid();
     const seats = list.map((m, i) => {
       const v = vals[i], share = sum ? Math.round(v / sum * 100) : 0, col = TEAM_COLORS[i % 5];
-      return h('button', { class: 'tmseat' + (m === uid ? ' me' : ''), style: `--c:${col}`, title: '看名片', onclick: () => this.openCard(m) },
-        h('span', { class: 'tmava' }, this.teamAva(m, 40), v > 0 && v === best ? h('span', { class: 'tmcrown', title: '目前貢獻最多' }, ico('i_crown', 20)) : null),
-        h('b', { class: 'tmname', text: m === uid ? '你' : clipName((tm.names || {})[m]) || '隊友' }),
+      return h('button', { class: 'tmseat' + (m === uid ? ' me' : ''), style: `--c:${col}`, title: I18n.s("u_6b6387b457a6"), onclick: () => this.openCard(m) },
+        h('span', { class: 'tmava' }, this.teamAva(m, 40), v > 0 && v === best ? h('span', { class: 'tmcrown', title: I18n.s("u_cffd41f6daf0") }, ico('i_crown', 20)) : null),
+        h('b', { class: 'tmname', text: m === uid ? I18n.s("u_a0c7716669b5") : clipName((tm.names || {})[m]) || I18n.s("u_ddaa9505f101") }),
         h('span', { class: 'tmval' }, h('b', { class: 'num', text: String(v) }), h('small', { text: def.unit })),
         h('span', { class: 'tmshare' }, h('i', { style: `width:${share}%` })),
         h('small', { class: 'hint num', text: share + '%' }));
     });
-    for (let i = list.length; i < tm.max; i++) seats.push(canInvite ? h('button', { class: 'tmseat vacant', style: `--c:${TEAM_COLORS[i % 5]}`, onclick: () => { Team.invOpen = true; this.refresh('tasks'); } }, h('span', { class: 'tmava' }, ico('i_plus', 22)), h('b', { class: 'tmname', text: '空位' }), h('small', { class: 'hint', text: '邀請好友' }))
-      : h('div', { class: 'tmseat vacant off', style: `--c:${TEAM_COLORS[i % 5]}` }, h('span', { class: 'tmava' }), h('b', { class: 'tmname', text: '空位' })));
+    for (let i = list.length; i < tm.max; i++) seats.push(canInvite ? h('button', { class: 'tmseat vacant', style: `--c:${TEAM_COLORS[i % 5]}`, onclick: () => { Team.invOpen = true; this.refresh('tasks'); } }, h('span', { class: 'tmava' }, ico('i_plus', 22)), h('b', { class: 'tmname', text: I18n.s("u_dc4641eaff7d") }), h('small', { class: 'hint', text: I18n.s("u_cf7d9d72d709") }))
+      : h('div', { class: 'tmseat vacant off', style: `--c:${TEAM_COLORS[i % 5]}` }, h('span', { class: 'tmava' }), h('b', { class: 'tmname', text: I18n.s("u_dc4641eaff7d") })));
     return h('div', { class: 'tmseats n' + tm.max }, ...seats);
   },
   teamInvitePanel(type, tm) {
     const friends = Social.okFriends();
-    const head = h('div', { class: 'row between' }, h('span', { class: 'sub', text: `邀請好友（還有 ${tm.max - tm.members.length} 個空位）` }), h('button', { class: 'chip sm', onclick: () => { Team.invOpen = false; this.refresh('tasks'); } }, '收起'));
-    if (!friends.length) return h('div', { class: 'tminv' }, head, h('p', { class: 'hint', text: '還沒有好友。到「好友」視窗交換好友代碼，就能邀請對方一起組隊。' }), h('button', { class: 'chip sm', onclick: () => this.openFriends('friends') }, ico('i_people', 16), '打開好友'));
+    const head = h('div', { class: 'row between' }, h('span', { class: 'sub', text: I18n.s("u_0f23e8e5484a", [tm.max - tm.members.length]) }), h('button', { class: 'chip sm', onclick: () => { Team.invOpen = false; this.refresh('tasks'); } }, I18n.s("u_afd4b783536b")));
+    if (!friends.length) return h('div', { class: 'tminv' }, head, h('p', { class: 'hint', text: I18n.s("u_33e0328d8003") }), h('button', { class: 'chip sm', onclick: () => this.openFriends('friends') }, ico('i_people', 16), I18n.s("u_634cee5e5e0e")));
     return h('div', { class: 'tminv' }, head, h('div', { class: 'tminv-list' }, ...friends.map(f => {
       const inTeam = tm.members.includes(f.id), sent = Team.sent[tm.id + ':' + f.id], p = Social.cards[f.id] || {};
       return h('div', { class: 'frrow' }, this.avaPic(p.ava, 28), h('span', { class: 'grow', text: Social.friendName(f.id) }),
-        inTeam ? h('span', { class: 'ptag', text: '已在隊上' }) : sent ? h('span', { class: 'ptag', text: '已邀請' }) : h('button', { class: 'chip sm primary', onclick: () => Team.invite(type, f.id) }, '邀請'));
-    })), h('p', { class: 'hint', text: '任何好友都能邀請，對方就算已經在別的隊伍也可以換過來。' }));
+        inTeam ? h('span', { class: 'ptag', text: I18n.s("u_4d0e7ef6e8ff") }) : sent ? h('span', { class: 'ptag', text: I18n.s("u_68e5b18fa592") }) : h('button', { class: 'chip sm primary', onclick: () => Team.invite(type, f.id) }, I18n.s("u_888d186ddebb")));
+    })), h('p', { class: 'hint', text: I18n.s("u_8d3bb2bfb197") }));
   },
   teamPhase(type, st, tm) {
     const ph = Team.phase(tm), busy = !!Team.busy[type], room = tm.max - tm.members.length;
-    const inviteBtn = h('button', { class: 'chip', disabled: busy, onclick: () => { Team.invOpen = !Team.invOpen; this.refresh('tasks'); } }, ico('i_people', 18), '邀請好友');
+    const inviteBtn = h('button', { class: 'chip', disabled: busy, onclick: () => { Team.invOpen = !Team.invOpen; this.refresh('tasks'); } }, ico('i_people', 18), I18n.s("u_cf7d9d72d709"));
     if (ph === 'lobby') {
       const left = Math.max(0, (tm.mAt - Date.now()) / 1000);
       this.el.tmClock = h('b', { class: 'tmclock num', text: fmt(left) });
       this.el.tmCd = h('i', { style: `width:${(left / (TEAM_CFG.lobbyMs / 1000) * 100).toFixed(1)}%` });
       return h('div', { class: 'tmphase lobby' },
-        h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '組隊中' }), h('p', { class: 'hint', text: `還差 ${room} 人。倒數結束還沒滿隊，會自動幫你配對其他玩家。` })), this.el.tmClock),
+        h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: I18n.s("u_8edeadb32b2e") }), h('p', { class: 'hint', text: I18n.s("u_d0edc123e82c", [room]) })), this.el.tmClock),
         h('div', { class: 'tmcd' }, this.el.tmCd),
-        h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? '配對中…' : '立即配對'),
-          h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, title: '取消倒數，只和好友組隊', onclick: () => Team.setOpen(type, false) }, '不要自動配對')));
+        h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? I18n.s("u_e017de404036") : I18n.s("u_451868e0ce6b")),
+          h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, title: I18n.s("u_6677f573e53b"), onclick: () => Team.setOpen(type, false) }, I18n.s("u_366ef51bc69a"))));
     }
-    if (ph === 'due') return h('div', { class: 'tmphase match' }, h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, '自動配對中', h('span', { class: 'dots' })), h('p', { class: 'hint', text: '5 分鐘到了，正在幫你找隊友…' })), ico('i_sparkle', 32, 'ico tmspin')), h('div', { class: 'row wrap' }, inviteBtn));
+    if (ph === 'due') return h('div', { class: 'tmphase match' }, h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, I18n.s("u_a314e8f8bc68"), h('span', { class: 'dots' })), h('p', { class: 'hint', text: I18n.s("u_e5933db957a5") })), ico('i_sparkle', 32, 'ico tmspin')), h('div', { class: 'row wrap' }, inviteBtn));
     if (ph === 'match') return h('div', { class: 'tmphase match' },
-      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, '配對中', h('span', { class: 'dots' })), h('p', { class: 'hint', text: `其他玩家配對時會加入你的隊伍，還有 ${room} 個空位。不用等，先開始做也會算進隊伍。` })), ico('i_sparkle', 32, 'ico tmspin')),
-      h('div', { class: 'row wrap' }, inviteBtn, h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, onclick: () => Team.setOpen(type, false) }, '停止配對')));
+      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t' }, I18n.s("u_c8fdc8e18e74"), h('span', { class: 'dots' })), h('p', { class: 'hint', text: I18n.s("u_ec33347f90f9", [room]) })), ico('i_sparkle', 32, 'ico tmspin')),
+      h('div', { class: 'row wrap' }, inviteBtn, h('span', { class: 'grow' }), h('button', { class: 'chip sm', disabled: busy, onclick: () => Team.setOpen(type, false) }, I18n.s("u_e95b7ed676bb"))));
     if (ph === 'friends') return h('div', { class: 'tmphase friends' },
-      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '好友隊伍' }), h('p', { class: 'hint', text: `只有收到邀請的好友能加入，還有 ${room} 個空位。` }))),
-      h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? '配對中…' : '開始配對')));
-    if (ph === 'full') return h('div', { class: 'tmphase full' }, h('div', { class: 'tmph-row' }, ico('i_people', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '隊伍滿員！' }), h('p', { class: 'hint', text: '大家一起衝刺吧，達標後名單上每個人都能領完整獎勵。' }))));
+      h('div', { class: 'tmph-row' }, h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: I18n.s("u_f026ebff0d99") }), h('p', { class: 'hint', text: I18n.s("u_547ebe07021e", [room]) }))),
+      h('div', { class: 'row wrap' }, inviteBtn, h('button', { class: 'chip primary', disabled: busy, onclick: () => Team.autoMatch(type, true) }, ico('i_sparkle', 18), busy ? I18n.s("u_e017de404036") : I18n.s("u_0fd075792b55"))));
+    if (ph === 'full') return h('div', { class: 'tmphase full' }, h('div', { class: 'tmph-row' }, ico('i_people', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: I18n.s("u_921c8ed596bb") }), h('p', { class: 'hint', text: I18n.s("u_ecb28d8d3e3b") }))));
     const can = Team.canClaim(tm, type, st.p), got = Team.T.claims[Team.key(type, st.p)];
-    return h('div', { class: 'tmphase done' }, h('div', { class: 'tmph-row' }, ico('i_star', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: '任務達成！' }), h('p', { class: 'hint', text: '名單已經固定，每位隊員都能領完整獎勵。' })),
-      can ? h('button', { class: 'chip primary', onclick: () => Team.claim(type, st.p, st.id) }, ico('i_gift', 18), '領取獎勵') : h('span', { class: 'ptag', text: got ? '已領取' : '你不在完成時的名單上' })));
+    return h('div', { class: 'tmphase done' }, h('div', { class: 'tmph-row' }, ico('i_star', 32), h('div', { class: 'grow' }, h('b', { class: 'tmph-t', text: I18n.s("u_1bf6ac1b49eb") }), h('p', { class: 'hint', text: I18n.s("u_f25880c68245") })),
+      can ? h('button', { class: 'chip primary', onclick: () => Team.claim(type, st.p, st.id) }, ico('i_gift', 18), I18n.s("u_ffdcd522f85e")) : h('span', { class: 'ptag', text: got ? I18n.s("u_792019f09d2e") : I18n.s("u_3feee0c96435") })));
   },
   w_team() {
     const out = [];
-    if (!Team.ready()) return [h('div', { class: 'empty' }, ico('i_people', 40), h('p', { text: Social.enabled() ? '團隊任務需要登入雲端帳號。' : '團隊任務需要網站版的雲端帳號（Firebase）。' }), Social.enabled() ? h('button', { class: 'chip primary', onclick: () => this.openWin('account') }, '登入') : null)];
+    if (!Team.ready()) return [h('div', { class: 'empty' }, ico('i_people', 40), h('p', { text: Social.enabled() ? I18n.s("u_8e0a02e2269e") : I18n.s("u_18f63d3a0dbe") }), Social.enabled() ? h('button', { class: 'chip primary', onclick: () => this.openWin('account') }, I18n.s("u_92fc480bee59")) : null)];
     Team.rollover(); Team.loadInvites();
     const type = this.teamType, st = Team.mine(type), cur = Team.inTeam(type), tm = cur ? Team.teams[cur.id] : null;
     this.el.tmClock = null;
     if (cur && (!tm || Date.now() - (cur.readAt || 0) > TEAM_CFG.viewMs) && !Team.loading['r' + type]) { Team.loading['r' + type] = true; Team.load(type).catch(() => { }).finally(() => { Team.loading['r' + type] = false; }); }
     const invN = (t) => Team.invites.filter(i => i.type === t).length;
-    out.push(h('div', { class: 'tabs' }, ...['d', 'w'].map(t => h('button', { class: 'tab sm' + (type === t ? ' on' : ''), onclick: () => { this.teamType = t; Team.invOpen = false; this.refresh('tasks'); } }, `${TEAM_TYPES[t].n}（${TEAM_TYPES[t].max} 人）` + (invN(t) ? ` · 邀請 ${invN(t)}` : '')))));
+    out.push(h('div', { class: 'tabs' }, ...['d', 'w'].map(t => h('button', { class: 'tab sm' + (type === t ? ' on' : ''), onclick: () => { this.teamType = t; Team.invOpen = false; this.refresh('tasks'); } }, I18n.s("u_86301b319df2", [TEAM_TYPES[t].n, TEAM_TYPES[t].max]) + (invN(t) ? I18n.s("u_53073eae3f7f", [invN(t)]) : '')))));
     const task = tm ? tm.task : Team.task(type), def = TEAM_TASKS[task], goal = tm ? tm.goal : Team.goal(type, task), R = TEAM_TYPES[type].reward;
     const endD = new Date(Team.end(type)), fmtD = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     out.push(h('div', { class: 'tmcard' }, h('div', { class: 'tmcard-ic' }, ico(def.icon, 36)),
-      h('div', { class: 'grow' }, h('b', { class: 'tmcard-t', text: `${def.n} ${goal} ${def.unit}` }), h('div', { class: 'hint', text: `${def.how} · 截止 ${fmtD(endD)}` }),
-        h('div', { class: 'tmrw' }, h('span', { class: 'hint', text: '每人獎勵' }), h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: String(R.c) })), R.x ? h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: String(R.x) })) : null, R.coupon ? h('span', { class: 'rwc', title: '折價券' }, ico('i_ticket', 16), h('b', { class: 'num', text: '1' })) : null)),
+      h('div', { class: 'grow' }, h('b', { class: 'tmcard-t', text: `${def.n} ${goal} ${def.unit}` }), h('div', { class: 'hint', text: I18n.s("u_e7f7369dca19", [def.how, fmtD(endD)]) }),
+        h('div', { class: 'tmrw' }, h('span', { class: 'hint', text: I18n.s("u_dd84a15812da") }), h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: String(R.c) })), R.x ? h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: String(R.x) })) : null, R.coupon ? h('span', { class: 'rwc', title: I18n.s("u_495d7531d276") }, ico('i_ticket', 16), h('b', { class: 'num', text: '1' })) : null)),
     ));
     if (Team.err) out.push(h('p', { class: 'hint warn', text: Team.err }));
     // invitations (also while you are in a team: accepting moves you over)
     const invs = Team.invites.filter(i => i.type === type && (!cur || i.id !== cur.id));
     if (invs.length) {
       const curDone = tm && tm.doneAt;
-      out.push(h('div', { class: 'tminvites' }, h('div', { class: 'sub', text: `隊伍邀請（${invs.length}）` }), ...invs.map(i => h('div', { class: 'frrow tminvrow' }, this.teamAva(i.from, 28),
-        h('button', { class: 'frname grow', onclick: () => this.openCard(i.from) }, h('b', { text: i.name }), h('span', { class: 'hint', text: `邀請你加入${TEAM_TYPES[i.type].n}隊伍` })),
-        curDone ? h('span', { class: 'hint', text: '你已完成這一期' }) : h('button', { class: 'chip sm primary', onclick: () => Team.acceptInvite(i) }, cur ? '換到這隊' : '加入'),
-        h('button', { class: 'chip sm', onclick: () => Team.declineInvite(i) }, '不要')))));
+      out.push(h('div', { class: 'tminvites' }, h('div', { class: 'sub', text: I18n.s("u_6ad331f5fcf6", [invs.length]) }), ...invs.map(i => h('div', { class: 'frrow tminvrow' }, this.teamAva(i.from, 28),
+        h('button', { class: 'frname grow', onclick: () => this.openCard(i.from) }, h('b', { text: i.name }), h('span', { class: 'hint', text: I18n.s("u_93ae7e0c55ad", [TEAM_TYPES[i.type].n]) })),
+        curDone ? h('span', { class: 'hint', text: I18n.s("u_146721ab3093") }) : h('button', { class: 'chip sm primary', onclick: () => Team.acceptInvite(i) }, cur ? I18n.s("u_a44a716f9980") : I18n.s("u_451755e3831f")),
+        h('button', { class: 'chip sm', onclick: () => Team.declineInvite(i) }, I18n.s("u_77af2f337c1d"))))));
       this.wantInviteCards(invs);
     }
     if (!cur) {
       const busy = !!Team.busy[type], max = TEAM_TYPES[type].max;
       out.push(h('div', { class: 'tmstart' },
-        h('div', { class: 'tmseats n' + max + ' ghost' }, ...Array.from({ length: max }, (_, i) => h('div', { class: 'tmseat vacant off', style: `--c:${TEAM_COLORS[i]}` }, h('span', { class: 'tmava' }, i === 0 ? this.avaPic(Game.S.avatar, 40) : ico('i_plus', 18)), h('b', { class: 'tmname', text: i === 0 ? '你' : '空位' })))),
-        st && st.left ? h('p', { class: 'hint center', text: '你離開了上一支隊伍，可以重新組隊、配對，或接受好友的邀請。' }) : null,
+        h('div', { class: 'tmseats n' + max + ' ghost' }, ...Array.from({ length: max }, (_, i) => h('div', { class: 'tmseat vacant off', style: `--c:${TEAM_COLORS[i]}` }, h('span', { class: 'tmava' }, i === 0 ? this.avaPic(Game.S.avatar, 40) : ico('i_plus', 18)), h('b', { class: 'tmname', text: i === 0 ? I18n.s("u_a0c7716669b5") : I18n.s("u_dc4641eaff7d") })))),
+        st && st.left ? h('p', { class: 'hint center', text: I18n.s("u_38402d0500b7") }) : null,
         h('div', { class: 'row wrap center' },
-          h('button', { class: 'chip big primary', disabled: busy, onclick: () => Team.start(type, false) }, ico('i_play', 20), busy ? '處理中…' : '開始團隊任務'),
-          h('button', { class: 'chip big', disabled: busy, title: '直接加入其他玩家開放的隊伍', onclick: () => Team.start(type, true) }, ico('i_sparkle', 20), '快速配對')),
+          h('button', { class: 'chip big primary', disabled: busy, onclick: () => Team.start(type, false) }, ico('i_play', 20), busy ? I18n.s("u_d166e71ff3ae") : I18n.s("u_c7315709337d")),
+          h('button', { class: 'chip big', disabled: busy, title: I18n.s("u_6f3329f914b8"), onclick: () => Team.start(type, true) }, ico('i_sparkle', 20), I18n.s("u_7a10c527fca5"))),
         h('ol', { class: 'tmsteps' },
-          h('li', {}, h('b', { text: '開始後 5 分鐘' }), '：邀請好友組隊，或按「立即配對」。'),
-          h('li', {}, h('b', { text: '5 分鐘到了' }), '：還沒滿隊會自動配對其他玩家（可以取消）。'),
-          h('li', {}, h('b', { text: '一個人也能做' }), '：開始後做的事就會算進隊伍，達標全員同獎。'))));
-    } else if (!tm) out.push(h('p', { class: 'hint center', text: '讀取隊伍中…' }));
+          h('li', {}, h('b', { text: I18n.s("u_11ac0ce6885c") }), I18n.s("u_4ddd44dcc9ce")),
+          h('li', {}, h('b', { text: I18n.s("u_7571713dd281") }), I18n.s("u_50df4d3d19c2")),
+          h('li', {}, h('b', { text: I18n.s("u_b95c994b709d") }), I18n.s("u_d6663c4116c2")))));
+    } else if (!tm) out.push(h('p', { class: 'hint center', text: I18n.s("u_8cff045a51dc") }));
     else {
       const list = Team.shown(tm), done = !!tm.doneAt, canInvite = !done && tm.members.length < tm.max;
       out.push(this.teamPhase(type, cur, tm));
       if (canInvite && Team.invOpen) out.push(this.teamInvitePanel(type, tm));
       out.push(this.teamBar(tm, list, def));
-      out.push(h('div', { class: 'sub', text: `隊員貢獻（${list.length}/${tm.max}）` + (done ? ' · 名單已固定' : '') }));
+      out.push(h('div', { class: 'sub', text: I18n.s("u_d068f255d9e9", [list.length, tm.max]) + (done ? I18n.s("u_2daaa9687a32") : '') }));
       out.push(this.teamSeats(tm, list, def, canInvite));
       if (!done) {
         out.push(h('div', { class: 'row wrap' },
-          cur.dirty ? h('button', { class: 'chip sm', onclick: () => Team.flush(type).catch(e => UI.toast('上傳失敗：' + cloudErr(e), 'i_people')) }, ico('i_cloud', 14), '上傳我的進度') : null,
-          h('span', { class: 'grow' }), h('button', { class: 'chip sm', onclick: () => Team.leave(type) }, '離開隊伍')));
-        out.push(h('p', { class: 'hint', text: '加入後做的事才會算進隊伍。你的進度最多每 5 分鐘上傳一次，快達標時馬上上傳。離開後可以再加入其他隊伍，或被好友邀請回來。' }));
+          cur.dirty ? h('button', { class: 'chip sm', onclick: () => Team.flush(type).catch(e => UI.toast(I18n.s("u_0b84157bdf45") + cloudErr(e), 'i_people')) }, ico('i_cloud', 14), I18n.s("u_cbe9e0dc28f6")) : null,
+          h('span', { class: 'grow' }), h('button', { class: 'chip sm', onclick: () => Team.leave(type) }, I18n.s("u_3564a58774ac"))));
+        out.push(h('p', { class: 'hint', text: I18n.s("u_2bca834868e1") }));
       }
     }
     // earlier periods with rewards still waiting
     const old = Team.T.hist.filter(hh => hh.type === type);
     for (const hh of old) if (!Team.teams[hh.id] && !Team.loading['h' + hh.id]) { Team.loading['h' + hh.id] = true; Team.load(hh.type, hh.id).catch(() => { }); }
     const ready = old.filter(hh => Team.canClaim(Team.teams[hh.id], hh.type, hh.p));
-    if (ready.length) out.push(h('div', { class: 'sub', text: '之前的團隊獎勵（結束後 7 天內可以領）' }), ...ready.map(hh => h('div', { class: 'frrow' }, h('span', { class: 'grow', text: `${hh.p.replace(/^w/, '')} ${TEAM_TASKS[hh.task] ? TEAM_TASKS[hh.task].n : ''}` }), h('button', { class: 'chip sm primary', onclick: () => Team.claim(hh.type, hh.p, hh.id) }, '領取'))));
+    if (ready.length) out.push(h('div', { class: 'sub', text: I18n.s("u_c5ef6a4e1b3e") }), ...ready.map(hh => h('div', { class: 'frrow' }, h('span', { class: 'grow', text: `${hh.p.replace(/^w/, '')} ${TEAM_TASKS[hh.task] ? TEAM_TASKS[hh.task].n : ''}` }), h('button', { class: 'chip sm primary', onclick: () => Team.claim(hh.type, hh.p, hh.id) }, I18n.s("u_92edf81e0715")))));
     return out;
   },
   wantInviteCards(invs) { Team.wantCards(invs.map(i => i.from)); },

@@ -48,12 +48,12 @@
 
 /* ---------------- furniture for pets ---------------- */
 Object.assign(ITEMS, {
-  pet_box: { n: '紙箱', cat: 'furniture', spr: 'pet_box', price: 30, lvl: 1, layer: 'floor', fam: 'pet', petBox: { x: 13, y: 16 }, desc: '貓咪最愛的紙箱，常常鑽進去只露出頭。' },
-  scratch_post: { n: '貓抓柱', cat: 'furniture', spr: 'scratch_post', price: 90, lvl: 2, layer: 'floor', fam: 'pet', scratch: true, desc: '貓咪會站起來磨爪子。' },
-  pet_bed: { n: '寵物窩', cat: 'furniture', spr: 'pet_bed', price: 70, lvl: 1, layer: 'floor', fam: 'pet', petSpot: { x: 14, y: 7 }, soft: true, desc: '軟綿綿的窩，寵物會先踩一踩再捲起來睡。' },
+  pet_box: { n: I18n.s("u_81276f55ed0f"), cat: 'furniture', spr: 'pet_box', price: 30, lvl: 1, layer: 'floor', fam: 'pet', petBox: { x: 13, y: 16 }, desc: I18n.s("u_bc8bb9d36927") },
+  scratch_post: { n: I18n.s("u_1f89dd634599"), cat: 'furniture', spr: 'scratch_post', price: 90, lvl: 2, layer: 'floor', fam: 'pet', scratch: true, desc: I18n.s("u_708c4379b81b") },
+  pet_bed: { n: I18n.s("u_eb4d68452b22"), cat: 'furniture', spr: 'pet_bed', price: 70, lvl: 1, layer: 'floor', fam: 'pet', petSpot: { x: 14, y: 7 }, soft: true, desc: I18n.s("u_67dabcfcefa4") },
 });
 for (const k of ['pet_box', 'scratch_post', 'pet_bed']) ITEMS[k].id = k;
-if (typeof FAM_NAMES !== 'undefined') FAM_NAMES.pet = FAM_NAMES.pet || '寵物家具';
+if (typeof FAM_NAMES !== 'undefined') FAM_NAMES.pet = FAM_NAMES.pet || I18n.s("u_26e29cac5227");
 
 /* ---------------- what can be held ---------------- */
 // kind decides how it is used; foods, treats, shampoo, medicine and catnip are used up, the rest are tools you own
@@ -63,9 +63,9 @@ const HAND = {
   wand: 'wand', ball: 'ball', yarn: 'yarn', catnip: 'nip',
 };
 const HAND_HINT = {
-  food: '點寵物從手上餵牠，或點碗放進碗裡', treat: '點寵物，牠會先坐好討點心', brush: '按住，在寵物身上來回刷',
-  bath: '點寵物幫牠洗澡', med: '點生病的寵物餵牠吃藥', wand: '在房間裡晃一晃，寵物會追著羽毛跑',
-  ball: '點地板丟出去', yarn: '點地板把毛線球滾出去', nip: '點地板撒一點貓薄荷',
+  food: I18n.s("u_b799f7ce579f"), treat: I18n.s("u_7ee266a24b42"), brush: I18n.s("u_04c073733ec2"),
+  bath: I18n.s("u_78ea21923b86"), med: I18n.s("u_e2e4c57f32fb"), wand: I18n.s("u_ed8d3ef46c16"),
+  ball: I18n.s("u_ddac8d6004a7"), yarn: I18n.s("u_0cf98454c245"), nip: I18n.s("u_02f9f881619d"),
 };
 
 const PetPlay = {
@@ -81,8 +81,8 @@ const PetPlay = {
     if (Room.edit) UI.setEdit(false);
     if (this.held === id && pid == null) return this.drop();
     if (!this.owned(id)) {
-      if (PET_TOOLS[id]) UI.toast(`還沒有${this.name(id)}，可以在寵物視窗買（${PET_TOOLS[id].price} 金幣）`, this.spr(id), 3.2);
-      else UI.toast(`沒有${this.name(id)}了，可以到商店買，或複習單字換`, this.spr(id), 3.2);
+      if (PET_TOOLS[id]) UI.toast(I18n.s("u_ada0fe2f050f", [this.name(id), PET_TOOLS[id].price]), this.spr(id), 3.2);
+      else UI.toast(I18n.s("u_d9c40d9eb404", [this.name(id)]), this.spr(id), 3.2);
       return false;
     }
     this.held = id; this.forPid = pid != null ? pid : null; this.endChase(); this.showHint(); this.renderTray(); return true;
@@ -102,7 +102,7 @@ const PetPlay = {
   busy(a) { return !a || ['trick', 'eat', 'hand', 'zoom', 'jump'].includes(a.state) || a.jump; },
   needFor(pid) { return Life.L.needs.find(n => n.pet === pid) || null; },
   say(a, cat, dog, secs = 1.6) { Game.bubble(a, a.kind === 'dog' ? dog : cat, secs); },
-  afterUse() { if (this.held && !PET_TOOLS[this.held] && !this.owned(this.held)) { UI.toast(`${this.name(this.held)}用完了`, this.spr(this.held), 2); this.drop(); } else this.renderTray(); },
+  afterUse() { if (this.held && !PET_TOOLS[this.held] && !this.owned(this.held)) { UI.toast(I18n.s("u_73bf24cfdd20", [this.name(this.held)]), this.spr(this.held), 2); this.drop(); } else this.renderTray(); },
 
   // ---------- pointer (from game.js while something is held) ----------
   down(x, y) {
@@ -114,7 +114,7 @@ const PetPlay = {
       if (k === 'food') { const h = Room.hit(x, y, { itemsOnly: true }); if (h && ITEMS[h.it.k].bowl) { if (Pets.fillBowl(h.it.uid, id)) this.afterUse(); return true; } }
       UI.toast(HAND_HINT[k], this.spr(id), 2.2); return true;
     }
-    if (this.busy(a) && !(k === 'brush' && a.state === 'hand' && this.brushing && this.brushing.a === a)) { this.say(a, '喵？', '汪？', 1.2); return true; }
+    if (this.busy(a) && !(k === 'brush' && a.state === 'hand' && this.brushing && this.brushing.a === a)) { this.say(a, I18n.s("u_9672d1022225"), I18n.s("u_f8b30a7f815b"), 1.2); return true; }
     if (k === 'food') this.feed(a, id);
     else if (k === 'treat') this.treat(a);
     else if (k === 'brush') this.startBrush(a, x);
@@ -185,18 +185,18 @@ const PetPlay = {
     const p = a.data; a.flip = this.ptr ? this.ptr[0] < a.x : a.flip;
     const ok = Pets.feed(p.id, id, this.needFor(p.id), { quiet: true }); if (!ok) return;
     this.seq(a, [{ pose: 'groom', rate: 6, t: 1.6, tick: (t) => { if (t > 0.3 && t < 1.4 && Math.random() < 0.08) Room.puff('p_dot', a.x + (a.flip ? -7 : 7), a.y - 6, { vy: -3, grav: 20, max: 0.4 }); } },
-      { pose: 'sit', t: 0.5, at: () => { a.happy = 2; this.say(a, '喵～好吃', '汪！好吃！'); } }]);
+      { pose: 'sit', t: 0.5, at: () => { a.happy = 2; this.say(a, I18n.s("u_1052da390b08"), I18n.s("u_e2fe8140cfed")); } }]);
     this.afterUse();
   },
   treat(a) {
     const p = a.data; if (!Life.has('cat_treat')) return this.afterUse();
-    this.seq(a, [{ pose: 'beg', rate: 3, t: 1.3, at: () => this.say(a, '喵～給我？', '汪！給我！', 1.2) },
+    this.seq(a, [{ pose: 'beg', rate: 3, t: 1.3, at: () => this.say(a, I18n.s("u_a94af52094f9"), I18n.s("u_3dac12737f3f"), 1.2) },
       { pose: 'groom', rate: 6, t: 0.9, at: () => { if (Pets.feed(p.id, 'cat_treat', this.needFor(p.id), { quiet: true })) { a.happy = 2; Room.puff('p_heart', a.x - 2, a.y - 18, { vy: -9 }); } this.afterUse(); } }]);
   },
   startBrush(a, x) {
     const p = a.data;
     if (!Pets.Z.tools.brush) return this.afterUse();
-    const wait = p.brushAt + 20 * 60000 - Date.now(); if (wait > 0) { UI.toast(`${p.name}剛梳過毛，${Math.ceil(wait / 60000)} 分鐘後再梳`, 't_brush', 2.6); return; }
+    const wait = p.brushAt + 20 * 60000 - Date.now(); if (wait > 0) { UI.toast(I18n.s("u_6a9a2cc978d6", [p.name, Math.ceil(wait / 60000)]), 't_brush', 2.6); return; }
     // brushing happens where the pet is (also on its cushion); it holds still while you brush
     this.seq(a, [{ pose: 'sit', t: null }]);
     this.brushing = { a, lastX: x, dir: 0, strokes: 0 };
@@ -204,7 +204,7 @@ const PetPlay = {
   stroke(b, x, y) {
     const a = b.a; b.strokes++;
     for (let i = 0; i < 2; i++) Room.puff('p_fur', x - 1 + i * 2, y - 2, { vx: (Math.random() - 0.5) * 10, vy: -6 - Math.random() * 4, max: 0.9, wob: 4, alpha: 0.9 });
-    if (b.strokes === 2) this.say(a, '呼嚕…', '嗯～', 1.2);
+    if (b.strokes === 2) this.say(a, I18n.s("u_905e8122e597"), I18n.s("u_5f0615f35f7b"), 1.2);
     if (b.strokes >= 4) {
       this.brushing = null;
       if (Pets.brush(a.data.id)) this.seq(a, [{ pose: 'knead', rate: 3, t: 1.6 }]); else { a.hp = null; a.state = 'sit'; a.timer = 2; }
@@ -213,14 +213,14 @@ const PetPlay = {
   bath(a) {
     const p = a.data; if (!Life.has('shampoo')) return this.afterUse();
     a.leaveSpot(() => this.seq(a, [{ pose: 'sit', t: 1.5, at: () => { Pets.bath(p.id, this.needFor(p.id)); this.afterUse(); } },
-      { pose: 'shake', rate: 9, t: 1.1, jitter: true, at: () => this.say(a, '甩甩！', '甩甩！', 1), tick: () => { if (Math.random() < 0.5) Room.puff('p_drop', a.x - 8 + Math.random() * 16, a.y - 6 - Math.random() * 8, { vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 6, grav: 40, max: 0.6 }); } },
+      { pose: 'shake', rate: 9, t: 1.1, jitter: true, at: () => this.say(a, I18n.s("u_ed243b6dc1aa"), I18n.s("u_ed243b6dc1aa"), 1), tick: () => { if (Math.random() < 0.5) Room.puff('p_drop', a.x - 8 + Math.random() * 16, a.y - 6 - Math.random() * 8, { vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 6, grav: 40, max: 0.6 }); } },
       { pose: 'sit', t: 0.4, at: () => { a.happy = 1.5; } }]));
   },
   medicine(a) {
     const p = a.data;
-    if (!p.sick) { UI.toast(`${p.name}很健康，不用吃藥`, 'it_medicine', 2.4); return; }
+    if (!p.sick) { UI.toast(I18n.s("u_f2f9255c55b7", [p.name]), 'it_medicine', 2.4); return; }
     if (!Life.has('medicine')) return this.afterUse();
-    this.seq(a, [{ pose: 'look', t: 0.7, at: () => this.say(a, '…苦苦的？', '…苦苦的？', 1) },
+    this.seq(a, [{ pose: 'look', t: 0.7, at: () => this.say(a, I18n.s("u_199d2882c9a5"), I18n.s("u_199d2882c9a5"), 1) },
       { pose: 'groom', rate: 4, t: 0.8, at: () => { Pets.medicine(p.id); this.afterUse(); } }]);
   },
 
@@ -243,7 +243,7 @@ const PetPlay = {
     if (d > 7) { a.tx = tx; a.ty = ty; a.walking = true; a.speed = P.lazy ? 24 : 46; a.onArrive = null; a.step(dt); }
     else { a.walking = false; if (Math.random() < dt * 1.6) { P.pounce = 0.6; a.flip = tx < a.x; } }
     if (d < 45 && !idle) P.play += dt;
-    if (P.lazy && P.play > 1.6 && !P.tired) { P.tired = true; P.tiredAt = P.t; a.walking = false; this.say(a, '喵…累了', '汪…累了', 1.5); }
+    if (P.lazy && P.play > 1.6 && !P.tired) { P.tired = true; P.tiredAt = P.t; a.walking = false; this.say(a, I18n.s("u_7f0eac826da2"), I18n.s("u_45b00ab7e88b"), 1.5); }
     if (!P.counted && P.play > 2.6) {
       P.counted = true;
       if (Pets.play(a.data.id, 'wand', this.needFor(a.data.id), { quiet: true })) { a.happy = 2; Room.puff('p_heart', a.x - 2, a.y - 18, { vy: -9 }); }
@@ -256,10 +256,10 @@ const PetPlay = {
   },
   // throwing a ball / rolling yarn / scattering catnip onto the floor
   throwToy(k, x, y) {
-    if (this.toy) { UI.toast('等牠玩完這一個', this.spr(this.held), 1.8); return; }
+    if (this.toy) { UI.toast(I18n.s("u_d3b5a99c8dde"), this.spr(this.held), 1.8); return; }
     if (y < 100) { UI.toast(HAND_HINT[k], this.spr(this.held), 2); return; }
-    const a = this.player(x, y); if (!a) { UI.toast('房間裡沒有寵物', this.spr(this.held), 2); return; }
-    if (this.busy(a)) { this.say(a, '喵？', '汪？', 1.2); return; }
+    const a = this.player(x, y); if (!a) { UI.toast(I18n.s("u_a0a987c5f9e4"), this.spr(this.held), 2); return; }
+    if (this.busy(a)) { this.say(a, I18n.s("u_9672d1022225"), I18n.s("u_f8b30a7f815b"), 1.2); return; }
     const p = a.data, why = Pets.why(p, 'play'); if (why) { UI.toast(why, this.spr(this.held), 2.6); return; }
     if (k === 'nip' && !Life.has('catnip')) return this.afterUse();
     const [xa, xb] = floorX(y), X = Math.max(xa + 6, Math.min(xb - 6, x)), Y = Math.min(166, y);
@@ -272,7 +272,7 @@ const PetPlay = {
       if (k === 'ball' && a.kind === 'dog') {
         const home = A ? [A.x + (A.x > 120 ? -11 : 11), Math.min(167, A.y + 2)] : near(-30);
         this.seq(a, [{ pose: 'sit', t: 0.65 }, { walk: [X, Y], speed: 52 }, { pose: 'groom', rate: 5, t: 0.35, at: () => { toy.held = a; a.hp.carry = true; } },
-          { walk: home, speed: 40 }, { pose: 'sit', t: 0.9, at: () => { a.hp.carry = false; toy.held = null; toy.land(a.x + (a.flip ? -7 : 7), a.y); this.say(a, '汪！再一次！', '汪！再一次！', 1.6); if (A) a.flip = A.x < a.x; count(); } }], done);
+          { walk: home, speed: 40 }, { pose: 'sit', t: 0.9, at: () => { a.hp.carry = false; toy.held = null; toy.land(a.x + (a.flip ? -7 : 7), a.y); this.say(a, I18n.s("u_0d29b23cb0d5"), I18n.s("u_0d29b23cb0d5"), 1.6); if (A) a.flip = A.x < a.x; count(); } }], done);
       } else if (k === 'ball' || (k === 'yarn' && a.kind === 'dog')) {
         // cats pat the ball away, dogs nudge the yarn along
         const push = (dist) => ({ pose: 'look', t: 0.4, at: () => { const d = (a.flip ? -1 : 1) * dist; toy.roll(near(d)); } });
@@ -282,7 +282,7 @@ const PetPlay = {
       } else { // catnip
         this.seq(a, [{ pose: 'look', t: 0.8 }, { walk: near(0), speed: 34 },
           a.kind === 'cat' ? { pose: 'belly', rate: 3, t: 3.2, tick: (t, dt) => { if (Math.random() < dt * 1.2) Room.puff('p_heart', a.x - 2, a.y - 14, { vy: -8, max: 1 }); } }
-            : { pose: 'look', t: 1.2, at: () => this.say(a, '', '哈啾！', 1.2) },
+            : { pose: 'look', t: 1.2, at: () => this.say(a, '', I18n.s("u_9dae53e56128"), 1.2) },
           { pose: 'sit', t: 0.5, at: () => { count(); toy.fade = 0.8; } }], done);
       }
     });
@@ -320,7 +320,7 @@ const PetPlay = {
   front(it, dx = 0, dy = 3) { const [w, h] = itemSize(it); const y = Math.min(167, it.y + h + dy), [xa, xb] = floorX(y); return [Math.max(xa + 6, Math.min(xb - 6, it.x + w / 2 + dx)), y]; },
   sniff(a, it) {
     const [w] = itemSize(it), L = this.front(it, -w / 2 - 6, 2), R = this.front(it, w / 2 + 6, 2), C = this.front(it, 0, 4);
-    this.seq(a, [{ walk: L }, { pose: 'look', t: 0.8, at: () => { a.flip = false; this.say(a, '嗅嗅…', '嗅嗅…', 1.2); } }, { walk: C }, { walk: R }, { pose: 'look', t: 0.7, at: () => { a.flip = true; } }]);
+    this.seq(a, [{ walk: L }, { pose: 'look', t: 0.8, at: () => { a.flip = false; this.say(a, I18n.s("u_aa2df6f1bc91"), I18n.s("u_aa2df6f1bc91"), 1.2); } }, { walk: C }, { walk: R }, { pose: 'look', t: 0.7, at: () => { a.flip = true; } }]);
   },
   atFeet(a, A) {
     const y = Math.min(167, A.y + 3), [xa, xb] = floorX(y), x = Math.max(xa + 8, Math.min(xb - 8, A.x + (A.x > 120 ? -13 : 13)));
@@ -333,7 +333,7 @@ const PetPlay = {
       a.target = null; if (!Room.uidMap[box.uid] || !this.free(box, a)) { a.state = 'sit'; a.timer = 2; return; }
       a.startJump(fx, box.y + sp.y, () => {
         a.on = box; a.onOff = [fx - box.x, sp.y]; a.state = 'inbox'; a.timer = 9 + Math.random() * 9; a.boxNap = Math.random() < 0.35;
-        this.say(a, '喵！', '汪！', 1);
+        this.say(a, I18n.s("u_8cf360cf0d09"), I18n.s("u_28452697f131"), 1);
       }, 9);
     }, true);
   },
@@ -358,7 +358,7 @@ const PetPlay = {
   },
   rugRoll(a, rug) {
     const [w, h] = itemSize(rug), y = Math.min(166, rug.y + h * (0.45 + Math.random() * 0.3)), [xa, xb] = floorX(y), x = Math.max(xa + 8, Math.min(xb - 8, rug.x + w * (0.25 + Math.random() * 0.5)));
-    this.seq(a, [{ walk: [x, y] }, { pose: 'belly', rate: 3, t: 2.8, at: () => this.say(a, '喵嗚～', '汪嗚～', 1.2), tick: (t, dt) => { if (Math.random() < dt * 0.8) Room.puff('p_heart', a.x - 2, a.y - 12, { vy: -7, max: 0.9 }); } }, { pose: 'sit', t: 0.4 }]);
+    this.seq(a, [{ walk: [x, y] }, { pose: 'belly', rate: 3, t: 2.8, at: () => this.say(a, I18n.s("u_c5dcf13f646c"), I18n.s("u_3fd17e9ffa52"), 1.2), tick: (t, dt) => { if (Math.random() < dt * 0.8) Room.puff('p_heart', a.x - 2, a.y - 12, { vy: -7, max: 0.9 }); } }, { pose: 'sit', t: 0.4 }]);
   },
   patPlant(a, pl) {
     const [w, h] = itemSize(pl), y = Math.min(167, pl.y + h + 2), [xa] = floorX(y), x = Math.max(xa + 6, pl.x - 6);
@@ -392,16 +392,16 @@ const PetPlay = {
     let el = this._hint;
     if (!this.held) { if (el) el.hidden = true; return; }
     if (!el) { el = this._hint = h('div', { class: 'hand-hint' }); UI.overlay.append(el); }
-    el.hidden = false; el.replaceChildren(ico(this.spr(this.held), 20), h('span', { text: `拿著${this.name(this.held)}：${HAND_HINT[HAND[this.held]]}` }), h('button', { class: 'chip sm', onclick: () => this.drop() }, '放下'));
+    el.hidden = false; el.replaceChildren(ico(this.spr(this.held), 20), h('span', { text: I18n.s("u_eedf1350189c", [this.name(this.held), HAND_HINT[HAND[this.held]]]) }), h('button', { class: 'chip sm', onclick: () => this.drop() }, I18n.s("u_e0f2d3ead59c")));
   },
   renderTray() {
     const wrap = document.querySelector('.room-wrap'); if (!wrap) return;
     let el = this._tray; if (!el) { el = this._tray = h('div', { class: 'handtray' }); wrap.append(el); }
-    const toggle = h('button', { class: 'chip sm handtray-t' + (this.trayOpen ? ' on' : ''), 'aria-expanded': this.trayOpen ? 'true' : 'false', title: '拿東西照顧寵物、陪牠玩', onclick: () => { this.trayOpen = !this.trayOpen; if (!this.trayOpen && this.held) this.drop(); this.renderTray(); } }, ico('i_paw', 18), '手邊');
+    const toggle = h('button', { class: 'chip sm handtray-t' + (this.trayOpen ? ' on' : ''), 'aria-expanded': this.trayOpen ? 'true' : 'false', title: I18n.s("u_2ba281181e83"), onclick: () => { this.trayOpen = !this.trayOpen; if (!this.trayOpen && this.held) this.drop(); this.renderTray(); } }, ico('i_paw', 18), I18n.s("u_30691e0f6ca5"));
     if (!this.trayOpen || Room.edit) { el.replaceChildren(toggle); return; }
     const btns = Object.keys(HAND).map(id => {
       const own = this.owned(id), n = PET_TOOLS[id] ? null : (Life.L.bag[id] || 0);
-      return h('button', { class: 'handbtn' + (this.held === id ? ' on' : '') + (own ? '' : ' none'), title: `${this.name(id)}：${HAND_HINT[HAND[id]]}` + (own ? '' : PET_TOOLS[id] ? '（還沒有，可以在寵物視窗買）' : '（沒有了）'), onclick: () => this.held === id ? this.drop() : this.pick(id) },
+      return h('button', { class: 'handbtn' + (this.held === id ? ' on' : '') + (own ? '' : ' none'), title: `${this.name(id)}：${HAND_HINT[HAND[id]]}` + (own ? '' : PET_TOOLS[id] ? I18n.s("u_e259191dbdc3") : I18n.s("u_b5c19b33ebfa")), onclick: () => this.held === id ? this.drop() : this.pick(id) },
         ico(this.spr(id), 24), n != null ? h('em', { class: 'num', text: String(n) }) : null);
     });
     el.replaceChildren(toggle, h('div', { class: 'handtray-row' }, ...btns));

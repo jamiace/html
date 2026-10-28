@@ -58,16 +58,16 @@ const Ritual = {
   companyLine(mins) {
     const best = (o) => { let k = null, v = 0; for (const id in o) if (o[id] > v) { v = o[id]; k = +id; } return [k, v]; };
     const [cp, cv] = best(this.comp), [sp, sv] = best(this.slept), secs = mins * 60, nm = (id) => Pets.name(id);
-    if (cp != null && cv >= secs * 0.5) return `${nm(cp)}在旁邊陪了你一整段`;
-    if (cp != null && cv >= 20) return `${nm(cp)}中途過來陪了你一下`;
-    if (sp != null && sv >= secs * 0.4) return `${nm(sp)}睡得很香，一直沒吵你`;
-    const home = Pets.home(); return home.length ? `${home[0].name}在房間裡等你休息` : '';
+    if (cp != null && cv >= secs * 0.5) return I18n.s("u_0a192a890862", [nm(cp)]);
+    if (cp != null && cv >= 20) return I18n.s("u_8d36c28b610a", [nm(cp)]);
+    if (sp != null && sv >= secs * 0.4) return I18n.s("u_99960d26c3af", [nm(sp)]);
+    const home = Pets.home(); return home.length ? I18n.s("u_67311a7041ed", [home[0].name]) : '';
   },
   // ---------- end ----------
   end(o) {
     const A = Game.avatar, day = this.today(), line = this.companyLine(o.mins);
     const seated = A && A.state === 'work' && this.desk();
-    if (A) { A.happy = 3; if (seated) { A.stretchT = 2.4; A.afterStretch = () => this.breakAct(); setTimeout(() => Game.bubble(A, '呼～', 1.4), 300); } else { A.hop = 0.45; setTimeout(() => this.breakAct(), 1800); } }
+    if (A) { A.happy = 3; if (seated) { A.stretchT = 2.4; A.afterStretch = () => this.breakAct(); setTimeout(() => Game.bubble(A, I18n.s("u_c40290cb1346"), 1.4), 300); } else { A.hop = 0.45; setTimeout(() => this.breakAct(), 1800); } }
     this.chime(false);
     setTimeout(() => this.showCard(o, day.m, line), 900);
     setTimeout(() => this.petComes(), 1400);
@@ -75,10 +75,10 @@ const Ritual = {
   },
   showCard(o, todayMin, line) {
     let el = this.card; if (el) el.remove();
-    el = this.card = h('button', { class: 'ritual-card', title: '點一下收起', onclick: () => this.hideCard() },
-      h('div', { class: 'rc-t' }, ico('i_tomato', 22), h('b', { text: '專注完成' })),
-      h('div', { class: 'rc-m num', text: `這次 ${o.mins} 分鐘・今天累積 ${todayMin} 分鐘` }),
-      h('div', { class: 'rc-rw' }, h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: '+' + o.bonus })), h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: '+' + o.bxp })), o.why && o.why.length ? h('span', { class: 'hint', text: `${o.why.join('、')}加成` }) : null),
+    el = this.card = h('button', { class: 'ritual-card', title: I18n.s("u_bbf62cb76174"), onclick: () => this.hideCard() },
+      h('div', { class: 'rc-t' }, ico('i_tomato', 22), h('b', { text: I18n.s("u_d32dbbb08fdd") })),
+      h('div', { class: 'rc-m num', text: I18n.s("u_049efa2d4ef6", [o.mins, todayMin]) }),
+      h('div', { class: 'rc-rw' }, h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: '+' + o.bonus })), h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: '+' + o.bxp })), o.why && o.why.length ? h('span', { class: 'hint', text: I18n.s("u_be642129fd44", [o.why.join('、')]) }) : null),
       line ? h('div', { class: 'rc-pet' }, ico('i_paw', 16), h('span', { text: line })) : null);
     UI.overlay.append(el);
     clearTimeout(this._cardT); this._cardT = setTimeout(() => this.hideCard(), 7000);
@@ -91,7 +91,7 @@ const Ritual = {
     if (!free.length) return;
     const a = free.sort((p, q) => Math.hypot(p.x - A.x, p.y - A.y) - Math.hypot(q.x - A.x, q.y - A.y))[0];
     const y = Math.min(167, A.y + 4), [xa, xb] = floorX(y), x = Math.max(xa + 8, Math.min(xb - 8, A.x + (A.x > 120 ? -12 : 12)));
-    a.leaveSpot(() => { a.state = 'walk'; a.walkTo(x, y, () => { a.state = 'sit'; a.flip = A.x < a.x; a.timer = 4; a.happy = 2; Room.puff('p_heart', a.x - 2, a.y - 18, { vy: -9 }); Game.bubble(a, a.kind === 'dog' ? '汪～辛苦了！' : '喵～辛苦了', 2); }); });
+    a.leaveSpot(() => { a.state = 'walk'; a.walkTo(x, y, () => { a.state = 'sit'; a.flip = A.x < a.x; a.timer = 4; a.happy = 2; Room.puff('p_heart', a.x - 2, a.y - 18, { vy: -9 }); Game.bubble(a, a.kind === 'dog' ? I18n.s("u_c21f85037003") : I18n.s("u_a25625984dce"), 2); }); });
   },
   // a small thing to start the break with
   breakAct() {
@@ -104,13 +104,13 @@ const Ritual = {
       const pl = plants[Math.floor(Math.random() * plants.length)], [w, hh] = itemSize(pl), y = Math.min(167, pl.y + hh + 3), [xa, xb] = floorX(y), x = Math.max(xa + 8, Math.min(xb - 8, pl.x + w / 2 + (pl.x > 120 ? -10 : 10)));
       A.stand(); A.state = 'walk'; A.walkTo(x, y, () => { A.state = 'idle'; A.face = 'side'; A.flip = pl.x + w / 2 < A.x; A.timer = 3.5;
         for (let i = 0; i < 6; i++) setTimeout(() => Room.puff('p_drop', pl.x + w / 2 - 3 + Math.random() * 6, pl.y + 2, { vy: 6, grav: 30, max: 0.5 }), i * 180);
-        setTimeout(() => { Room.puff('p_leaf', pl.x + w / 2, pl.y + 4, { vy: -6, max: 1 }); Game.bubble(A, '喝水囉', 1.6); }, 1100); });
+        setTimeout(() => { Room.puff('p_leaf', pl.x + w / 2, pl.y + 4, { vy: -6, max: 1 }); Game.bubble(A, I18n.s("u_9fcfeef719ff"), 1.6); }, 1100); });
     });
     if (mug) opts.push(() => {
       const [w, hh] = itemSize(mug), host = mug.p != null ? Room.uidMap[mug.p] : mug, [hw, hh2] = itemSize(host), y = Math.min(167, host.y + hh2 + 3);
       A.stand(); A.state = 'walk'; A.walkTo(mug.x + w / 2, y, () => { A.state = 'idle'; A.face = 'back'; A.timer = 3.5;
         for (let i = 0; i < 4; i++) setTimeout(() => Room.puff('p_steam', mug.x + w / 2 - 1, mug.y - 1, { vy: -6, max: 1.6, alpha: 0.7, wob: 3 }), i * 300);
-        setTimeout(() => { A.face = 'front'; A.happy = 1.6; Game.bubble(A, '喝口茶', 1.6); }, 1300); });
+        setTimeout(() => { A.face = 'front'; A.happy = 1.6; Game.bubble(A, I18n.s("u_f028b6780b5f"), 1.6); }, 1300); });
     });
     if (!opts.length) { A.stand(); A.happy = 1.5; A.timer = 2; return; }
     opts[Math.floor(Math.random() * opts.length)]();

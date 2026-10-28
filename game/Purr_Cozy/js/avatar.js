@@ -16,122 +16,122 @@ for (const [n, hex] of [['t1', '#3c5a8c'], ['t2', '#5f86c0'], ['t3', '#93b6e0'],
 
 // ---------- colour tables ----------
 const SKINS = {
-  porcelain: ['#fde8da', '#efc8b2', '#cc9a83', '白皙'], fair: ['#f9dcc6', '#e9b99c', '#c48c72', '淺膚'], peach: ['#f6cfae', '#e2a789', '#b97a62', '蜜桃'], warm: ['#efc39a', '#d99f77', '#ad7553', '暖膚'],
-  tan: ['#e8b48e', '#c68a6a', '#9a6249', '小麥'], olive: ['#d6a87c', '#b58660', '#8a6244', '橄欖'], caramel: ['#c68a6a', '#a36c4f', '#7d4f38', '焦糖'], brown: ['#a8714f', '#8a5a3e', '#6a432d', '棕'],
-  deep: ['#8a5a3e', '#6e4231', '#4e2e22', '深棕'], ebony: ['#6b4330', '#553324', '#3a2219', '黝黑'], mint: ['#cfe8d6', '#a9cfb6', '#7fa88c', '精靈綠'], lilac: ['#e0d4f0', '#c3b1e0', '#9a86bc', '星光紫'],
+  porcelain: ['#fde8da', '#efc8b2', '#cc9a83', I18n.s("u_2a85c6c2bf80")], fair: ['#f9dcc6', '#e9b99c', '#c48c72', I18n.s("u_f92e99c8f4b2")], peach: ['#f6cfae', '#e2a789', '#b97a62', I18n.s("u_9d50afb813da")], warm: ['#efc39a', '#d99f77', '#ad7553', I18n.s("u_c4fc833f8b55")],
+  tan: ['#e8b48e', '#c68a6a', '#9a6249', I18n.s("u_811462c882d4")], olive: ['#d6a87c', '#b58660', '#8a6244', I18n.s("u_dc3bc25414a7")], caramel: ['#c68a6a', '#a36c4f', '#7d4f38', I18n.s("u_b48a73caec46")], brown: ['#a8714f', '#8a5a3e', '#6a432d', I18n.s("u_3eb2456f3b9b")],
+  deep: ['#8a5a3e', '#6e4231', '#4e2e22', I18n.s("u_723c5f3202bf")], ebony: ['#6b4330', '#553324', '#3a2219', I18n.s("u_b6f73c034ad6")], mint: ['#cfe8d6', '#a9cfb6', '#7fa88c', I18n.s("u_f8622c94cce4")], lilac: ['#e0d4f0', '#c3b1e0', '#9a86bc', I18n.s("u_9a67087eae83")],
 };
 const HAIRC = {
-  cocoa: ['#3d2620', '#6b4030', '#96603f', '可可'], ink: ['#1a1420', '#2e2a36', '#4b4560', '黑'], espresso: ['#24160f', '#3d2618', '#5e3b2f', '深咖啡'], chestnut: ['#4a2a1b', '#7a4428', '#a8633a', '栗子'],
-  auburn: ['#5a1f17', '#8a3424', '#b85338', '紅棕'], ginger: ['#8f4230', '#c46a48', '#e59a72', '薑橘'], copper: ['#8a4a18', '#c0702a', '#e8973d', '紅銅'], honey: ['#b86a2a', '#e8973d', '#f6c75a', '蜂蜜'],
-  blonde: ['#c49a3a', '#e8c565', '#f8e3a0', '金'], platinum: ['#c9bfa6', '#e6dfcc', '#fbf8ef', '白金'], snow: ['#9e9aa8', '#cfcbd6', '#f2f0f6', '雪白'], grey: ['#5c5866', '#8a8694', '#b8b4c2', '灰'],
-  rose: ['#7a3045', '#c4566e', '#ee8fa0', '玫瑰'], pink: ['#c46a8a', '#ee9ab8', '#fbd0e0', '粉紅'], lilac: ['#4b3470', '#7a5aa8', '#b496dc', '紫丁香'], violet: ['#2d1f52', '#4b3470', '#7a5aa8', '深紫'],
-  sky: ['#2c3a63', '#4a6aa8', '#7ea6dc', '天藍'], navy: ['#141d38', '#233259', '#3d5087', '藏青'], mint: ['#3f8f6a', '#6fc49a', '#b8e8cc', '薄荷'], teal: ['#245a5c', '#3f8f8a', '#84cbbd', '湖綠'],
-  green: ['#2f5a3d', '#4c8a4f', '#7fbf6a', '森綠'], red: ['#6a1420', '#a82a38', '#d85a62', '紅'],
+  cocoa: ['#3d2620', '#6b4030', '#96603f', I18n.s("u_bafe359f5ed0")], ink: ['#1a1420', '#2e2a36', '#4b4560', I18n.s("u_59650f41f74b")], espresso: ['#24160f', '#3d2618', '#5e3b2f', I18n.s("u_d243a7e5aa40")], chestnut: ['#4a2a1b', '#7a4428', '#a8633a', I18n.s("u_10cb79937328")],
+  auburn: ['#5a1f17', '#8a3424', '#b85338', I18n.s("u_10aa7d61af44")], ginger: ['#8f4230', '#c46a48', '#e59a72', I18n.s("u_b94543f15a21")], copper: ['#8a4a18', '#c0702a', '#e8973d', I18n.s("u_759c83f30dfe")], honey: ['#b86a2a', '#e8973d', '#f6c75a', I18n.s("u_7b026c56a424")],
+  blonde: ['#c49a3a', '#e8c565', '#f8e3a0', I18n.s("u_3c1e31a193cd")], platinum: ['#c9bfa6', '#e6dfcc', '#fbf8ef', I18n.s("u_a883d3ec17ef")], snow: ['#9e9aa8', '#cfcbd6', '#f2f0f6', I18n.s("u_5178e158d4dc")], grey: ['#5c5866', '#8a8694', '#b8b4c2', I18n.s("u_bfd9489948d9")],
+  rose: ['#7a3045', '#c4566e', '#ee8fa0', I18n.s("u_a6664df1efc8")], pink: ['#c46a8a', '#ee9ab8', '#fbd0e0', I18n.s("u_b31cef7bef41")], lilac: ['#4b3470', '#7a5aa8', '#b496dc', I18n.s("u_68e9b02c08eb")], violet: ['#2d1f52', '#4b3470', '#7a5aa8', I18n.s("u_f48bebbe0585")],
+  sky: ['#2c3a63', '#4a6aa8', '#7ea6dc', I18n.s("u_014f0e43dc16")], navy: ['#141d38', '#233259', '#3d5087', I18n.s("u_1a7dfe29ce49")], mint: ['#3f8f6a', '#6fc49a', '#b8e8cc', I18n.s("u_ae506736a67b")], teal: ['#245a5c', '#3f8f8a', '#84cbbd', I18n.s("u_490a4727e4fd")],
+  green: ['#2f5a3d', '#4c8a4f', '#7fbf6a', I18n.s("u_757156234235")], red: ['#6a1420', '#a82a38', '#d85a62', I18n.s("u_7fc93a318670")],
 };
 const CLOTH = {
-  snow: ['#c9c4bd', '#ece8e2', '#ffffff', '白'], cream: ['#d8c1a0', '#efdcc0', '#fff4e0', '奶油'], oat: ['#b49c7c', '#d4bc9c', '#efdcc0', '燕麥'], khaki: ['#8a7a4e', '#b5a26a', '#d6c78f', '卡其'],
-  cocoa: ['#5e3b2f', '#8b5a3c', '#b5794b', '可可'], choco: ['#3d261d', '#5e3b2f', '#7d5240', '巧克力'], coal: ['#1a1420', '#3b3646', '#5c5668', '黑'], grey: ['#6a6676', '#9a96a6', '#c6c2d0', '灰'],
-  navy: ['#1f2b4d', '#2f3f6e', '#4a5f96', '海軍藍'], denim: ['#3c5a8c', '#5f86c0', '#93b6e0', '丹寧'], sky: ['#5c95cf', '#8bbbe8', '#c3dcf5', '天藍'], teal: ['#245a5c', '#3f8f8a', '#84cbbd', '湖水綠'],
-  mint: ['#5fa88d', '#9fd3bf', '#d3ece1', '薄荷'], sage: ['#6b8a5a', '#93b07f', '#c0d6ac', '鼠尾草'], olive: ['#4a5229', '#6b7638', '#8f9b4f', '橄欖'], forest: ['#2f4a3b', '#3f6a4f', '#5f8f6c', '森林'],
-  lemon: ['#d3a33a', '#f3cf6a', '#fbe8a8', '檸檬'], mustard: ['#8a6418', '#b8892a', '#dcae45', '芥末'], orange: ['#b8552a', '#e8833d', '#f6b37a', '橘'], coral: ['#9c3b34', '#d4594d', '#ee8071', '珊瑚'],
-  red: ['#7a1f2a', '#b8323e', '#e0606a', '紅'], wine: ['#4a1426', '#6e2238', '#94344f', '酒紅'], rose: ['#a8455a', '#d36f86', '#f2a7b7', '玫瑰'], blush: ['#d88a9a', '#f3b9c4', '#fde2e7', '淡粉'],
-  lilac: ['#7a5aa8', '#b496dc', '#ddd0f2', '紫丁香'], purple: ['#3d2a66', '#5a3f94', '#8466c4', '紫'], lavender: ['#8c84b8', '#b6aee0', '#e0dbf6', '薰衣草'], butter: ['#c9a13a', '#f6c75a', '#fdeaa0', '奶油黃'],
+  snow: ['#c9c4bd', '#ece8e2', '#ffffff', I18n.s("u_3366645622a7")], cream: ['#d8c1a0', '#efdcc0', '#fff4e0', I18n.s("u_ed3cdb192a56")], oat: ['#b49c7c', '#d4bc9c', '#efdcc0', I18n.s("u_521c15e6533b")], khaki: ['#8a7a4e', '#b5a26a', '#d6c78f', I18n.s("u_2f3bbaa117c2")],
+  cocoa: ['#5e3b2f', '#8b5a3c', '#b5794b', I18n.s("u_bafe359f5ed0")], choco: ['#3d261d', '#5e3b2f', '#7d5240', I18n.s("u_73b9e5c79733")], coal: ['#1a1420', '#3b3646', '#5c5668', I18n.s("u_59650f41f74b")], grey: ['#6a6676', '#9a96a6', '#c6c2d0', I18n.s("u_bfd9489948d9")],
+  navy: ['#1f2b4d', '#2f3f6e', '#4a5f96', I18n.s("u_006706beb4b5")], denim: ['#3c5a8c', '#5f86c0', '#93b6e0', I18n.s("u_eeceda777b89")], sky: ['#5c95cf', '#8bbbe8', '#c3dcf5', I18n.s("u_014f0e43dc16")], teal: ['#245a5c', '#3f8f8a', '#84cbbd', I18n.s("u_483426ff49bb")],
+  mint: ['#5fa88d', '#9fd3bf', '#d3ece1', I18n.s("u_ae506736a67b")], sage: ['#6b8a5a', '#93b07f', '#c0d6ac', I18n.s("u_50cbb376ac47")], olive: ['#4a5229', '#6b7638', '#8f9b4f', I18n.s("u_dc3bc25414a7")], forest: ['#2f4a3b', '#3f6a4f', '#5f8f6c', I18n.s("u_3bfbf21e2f00")],
+  lemon: ['#d3a33a', '#f3cf6a', '#fbe8a8', I18n.s("u_5e3cd6bef7d2")], mustard: ['#8a6418', '#b8892a', '#dcae45', I18n.s("u_45a4bc35a0a1")], orange: ['#b8552a', '#e8833d', '#f6b37a', I18n.s("u_09ee69958977")], coral: ['#9c3b34', '#d4594d', '#ee8071', I18n.s("u_87af97154b23")],
+  red: ['#7a1f2a', '#b8323e', '#e0606a', I18n.s("u_7fc93a318670")], wine: ['#4a1426', '#6e2238', '#94344f', I18n.s("u_b9ddacdd9518")], rose: ['#a8455a', '#d36f86', '#f2a7b7', I18n.s("u_a6664df1efc8")], blush: ['#d88a9a', '#f3b9c4', '#fde2e7', I18n.s("u_0a48ef4193d0")],
+  lilac: ['#7a5aa8', '#b496dc', '#ddd0f2', I18n.s("u_68e9b02c08eb")], purple: ['#3d2a66', '#5a3f94', '#8466c4', I18n.s("u_3d0158cb7cfd")], lavender: ['#8c84b8', '#b6aee0', '#e0dbf6', I18n.s("u_850aaaeaa26c")], butter: ['#c9a13a', '#f6c75a', '#fdeaa0', I18n.s("u_6dbd7586795d")],
 };
 const EYEC = { brown: ['#3b2a37', '#7a4f3a'], dark: ['#1a1420', '#3b2a37'], hazel: ['#5a4020', '#9a7a3a'], green: ['#2f5a3d', '#6faa5a'], blue: ['#2c3a63', '#5c95cf'], grey: ['#4b4560', '#9a96a6'],
   violet: ['#3d2a66', '#8466c4'], red: ['#6a1420', '#c8404c'], gold: ['#8a6418', '#e8b840'], pink: ['#8a3459', '#e08fb2'] };
-const EYEC_N = { brown: '棕', dark: '黑', hazel: '榛', green: '綠', blue: '藍', grey: '灰', violet: '紫', red: '紅', gold: '金', pink: '粉' };
+const EYEC_N = { brown: I18n.s("u_3eb2456f3b9b"), dark: I18n.s("u_59650f41f74b"), hazel: I18n.s("u_086e20a9fb17"), green: I18n.s("u_a45a872a1d38"), blue: I18n.s("u_b7918951a1b9"), grey: I18n.s("u_bfd9489948d9"), violet: I18n.s("u_3d0158cb7cfd"), red: I18n.s("u_7fc93a318670"), gold: I18n.s("u_3c1e31a193cd"), pink: I18n.s("u_d00069a5d3b5") };
 
 // ---------- face parts ----------
 // eye patterns are 3×3, drawn for the left eye at (5,8) and mirrored for the right eye at (10,8); side view uses the right eye at (11,8)
 const EYES = {
-  round: { n: '圓眼', p: ['...', 'D0.', '.0.'] }, dot: { n: '豆豆眼', p: ['...', '.0.', '.0.'] }, bean: { n: '大豆眼', p: ['...', '.00', '.00'] },
-  shiny: { n: '亮亮眼', p: ['...', '.0Z', '.ii'] }, big: { n: '大眼睛', p: ['000', '0Zi', '0ii'] }, doe: { n: '小鹿眼', p: ['.00', '0Zi', '0ij'] },
-  lashes: { n: '長睫毛', p: ['0..', '.00', '.ii'] }, cat: { n: '貓眼', p: ['..0', '.0i', '.i.'] }, droopy: { n: '下垂眼', p: ['...', '00.', '.ii'] },
-  sleepy: { n: '睏睏眼', p: ['...', '...', '000'] }, calm: { n: '瞇瞇眼', p: ['...', '.00', '...'] }, smiley: { n: '笑眼', p: ['...', '.0.', '0.0'] },
-  wink: { n: '眨眼', p: ['...', 'D0.', '.0.'], right: ['...', '.0.', '0.0'] }, star: { n: '星星眼', p: ['.j.', 'jZj', '.j.'] }, heart: { n: '愛心眼', p: ['r.r', 'rrr', '.r.'] },
-  tiny: { n: '小點眼', p: ['...', '.0.', '...'] }, surprised: { n: '驚訝眼', p: ['.0.', '0Z0', '.0.'] }, cross: { n: '><眼', p: ['0..', '.0.', '0..'] },
-  teary: { n: '感動眼', p: ['...', '.0.', 'p.0'] }, glint: { n: '閃光眼', p: ['Z0.', '0i.', '...'] }, narrow: { n: '細長眼', p: ['...', '000', '...'] },
-  spiral: { n: '暈暈眼', p: ['00.', '0.0', '.00'] }, side: { n: '斜眼', p: ['...', '00.', '...'] }, gem: { n: '寶石眼', p: ['.i.', 'iZj', '.j.'] },
+  round: { n: I18n.s("u_71f2658949ef"), p: ['...', 'D0.', '.0.'] }, dot: { n: I18n.s("u_b5b48d4bd809"), p: ['...', '.0.', '.0.'] }, bean: { n: I18n.s("u_0045d3cade66"), p: ['...', '.00', '.00'] },
+  shiny: { n: I18n.s("u_d0ec7c83dccb"), p: ['...', '.0Z', '.ii'] }, big: { n: I18n.s("u_9e76ca0f9b77"), p: ['000', '0Zi', '0ii'] }, doe: { n: I18n.s("u_e006c3d94bf8"), p: ['.00', '0Zi', '0ij'] },
+  lashes: { n: I18n.s("u_0cacead8135c"), p: ['0..', '.00', '.ii'] }, cat: { n: I18n.s("u_882f3c4e988d"), p: ['..0', '.0i', '.i.'] }, droopy: { n: I18n.s("u_2ce33d0fc4b5"), p: ['...', '00.', '.ii'] },
+  sleepy: { n: I18n.s("u_d52732f840e5"), p: ['...', '...', '000'] }, calm: { n: I18n.s("u_fc7ec41d2c0b"), p: ['...', '.00', '...'] }, smiley: { n: I18n.s("u_88386a7ada2c"), p: ['...', '.0.', '0.0'] },
+  wink: { n: I18n.s("u_580df4b9aed1"), p: ['...', 'D0.', '.0.'], right: ['...', '.0.', '0.0'] }, star: { n: I18n.s("u_3e1c5aca9d8f"), p: ['.j.', 'jZj', '.j.'] }, heart: { n: I18n.s("u_35fca5b73ad1"), p: ['r.r', 'rrr', '.r.'] },
+  tiny: { n: I18n.s("u_73701ab57438"), p: ['...', '.0.', '...'] }, surprised: { n: I18n.s("u_6c4367f512f1"), p: ['.0.', '0Z0', '.0.'] }, cross: { n: I18n.s("u_56743c42be69"), p: ['0..', '.0.', '0..'] },
+  teary: { n: I18n.s("u_a0667387ed42"), p: ['...', '.0.', 'p.0'] }, glint: { n: I18n.s("u_ced9591087b7"), p: ['Z0.', '0i.', '...'] }, narrow: { n: I18n.s("u_bd1a190cfdd9"), p: ['...', '000', '...'] },
+  spiral: { n: I18n.s("u_08d2138f81b3"), p: ['00.', '0.0', '.00'] }, side: { n: I18n.s("u_1b922fdf2289"), p: ['...', '00.', '...'] }, gem: { n: I18n.s("u_c561bc88632f"), p: ['.i.', 'iZj', '.j.'] },
 };
 const BROWS = {
-  soft: { n: '柔和', p: ['....', '.OO.'] }, none: { n: '無', p: [] }, thin: { n: '細眉', p: ['....', 'OOO.'] }, thick: { n: '濃眉', p: ['.OO.', 'OOOO'] },
-  arched: { n: '彎眉', p: ['.OO.', 'O...'] }, angry: { n: '生氣', p: ['OO..', '..OO'] }, worried: { n: '擔心', p: ['..OO', 'OO..'] }, dots: { n: '點點眉', p: ['....', '.O..'] },
-  short: { n: '短眉', p: ['....', '..OO'] }, low: { n: '平眉', p: ['....', 'OOOO'] }, raised: { n: '挑眉', p: ['.OO.', '....'] }, bold: { n: '粗眉', p: ['OOOO', 'OOOO'] },
+  soft: { n: I18n.s("u_37e717d5998d"), p: ['....', '.OO.'] }, none: { n: I18n.s("u_da5930e53d54"), p: [] }, thin: { n: I18n.s("u_05fcd5de3a10"), p: ['....', 'OOO.'] }, thick: { n: I18n.s("u_b20f5e682cdd"), p: ['.OO.', 'OOOO'] },
+  arched: { n: I18n.s("u_15df99f58de5"), p: ['.OO.', 'O...'] }, angry: { n: I18n.s("u_eb5d6b09afa8"), p: ['OO..', '..OO'] }, worried: { n: I18n.s("u_7600376d5cd5"), p: ['..OO', 'OO..'] }, dots: { n: I18n.s("u_601b77f24369"), p: ['....', '.O..'] },
+  short: { n: I18n.s("u_ca894c225207"), p: ['....', '..OO'] }, low: { n: I18n.s("u_43bcafb63f3b"), p: ['....', 'OOOO'] }, raised: { n: I18n.s("u_c82a18b17f97"), p: ['.OO.', '....'] }, bold: { n: I18n.s("u_669dc08dbb61"), p: ['OOOO', 'OOOO'] },
 };
 // mouths are 4×2 at (7,12)
 const MOUTHS = {
-  smile: { n: '微笑', p: ['..E.', '....'] }, grin: { n: '大笑', p: ['0000', '.rr.'] }, happy: { n: '開心', p: ['E..E', '.EE.'] }, open: { n: '張嘴', p: ['.00.', '.rr.'] },
-  cat: { n: '貓嘴', p: ['0..0', '.00.'] }, oo: { n: '小 o', p: ['.00.', '.00.'] }, tongue: { n: '吐舌', p: ['0000', '.rs.'] }, smirk: { n: '壞笑', p: ['...E', '.EE.'] },
-  flat: { n: '面無表情', p: ['.EE.', '....'] }, frown: { n: '嘟嘴', p: ['.EE.', 'E..E'] }, laugh: { n: '哈哈', p: ['0000', '0rr0'] }, teeth: { n: '露齒', p: ['0ZZ0', '.00.'] },
-  pout: { n: '噘嘴', p: ['.r..', 'r...'] }, fang: { n: '小虎牙', p: ['0000', '.Z..'] }, kiss: { n: '親親', p: ['.r..', '.r..'] }, wow: { n: '哇', p: ['.00.', '0rr0'] },
-  lips: { n: '紅唇', p: ['.rr.', '.rr.'] }, wobble: { n: '委屈', p: ['.0.0', '0.0.'] },
+  smile: { n: I18n.s("u_b4678e512cca"), p: ['..E.', '....'] }, grin: { n: I18n.s("u_0f7bb921e06d"), p: ['0000', '.rr.'] }, happy: { n: I18n.s("u_10aef138c661"), p: ['E..E', '.EE.'] }, open: { n: I18n.s("u_5a6ae5565461"), p: ['.00.', '.rr.'] },
+  cat: { n: I18n.s("u_d84d33385cd5"), p: ['0..0', '.00.'] }, oo: { n: I18n.s("u_98e2a5348f54"), p: ['.00.', '.00.'] }, tongue: { n: I18n.s("u_f56016646d8f"), p: ['0000', '.rs.'] }, smirk: { n: I18n.s("u_ea12b9a8a8eb"), p: ['...E', '.EE.'] },
+  flat: { n: I18n.s("u_8451c297011e"), p: ['.EE.', '....'] }, frown: { n: I18n.s("u_942ee2f035ed"), p: ['.EE.', 'E..E'] }, laugh: { n: I18n.s("u_7a655569d7aa"), p: ['0000', '0rr0'] }, teeth: { n: I18n.s("u_3ec546dced88"), p: ['0ZZ0', '.00.'] },
+  pout: { n: I18n.s("u_902a4e4289fa"), p: ['.r..', 'r...'] }, fang: { n: I18n.s("u_069d62715ada"), p: ['0000', '.Z..'] }, kiss: { n: I18n.s("u_02c3c395d266"), p: ['.r..', '.r..'] }, wow: { n: I18n.s("u_4ebe60233060"), p: ['.00.', '0rr0'] },
+  lips: { n: I18n.s("u_2dfd315cd4b2"), p: ['.rr.', '.rr.'] }, wobble: { n: I18n.s("u_ad353ac8ff79"), p: ['.0.0', '0.0.'] },
 };
 const CHEEKS = {
-  blush: { n: '腮紅', f: [[4, 11, 's'], [13, 11, 's']] }, none: { n: '無', f: [] }, wide: { n: '大腮紅', f: [[3, 11, 's'], [4, 11, 's'], [5, 11, 't'], [12, 11, 't'], [13, 11, 's'], [14, 11, 's']] },
-  freckles: { n: '雀斑', f: [[4, 11, 'D'], [5, 12, 'D'], [3, 12, 'D'], [13, 11, 'D'], [12, 12, 'D'], [14, 12, 'D']] }, mole_l: { n: '左邊痣', f: [[5, 12, '0'], [4, 11, 's'], [13, 11, 's']] },
-  mole_r: { n: '右邊痣', f: [[12, 12, '0'], [4, 11, 's'], [13, 11, 's']] }, bandaid: { n: 'OK 繃', f: [[12, 11, 'f'], [13, 11, 'g'], [14, 11, 'f'], [4, 11, 's']] },
-  star: { n: '星星貼紙', f: [[13, 10, 'w'], [12, 11, 'w'], [13, 11, 'x'], [14, 11, 'w'], [13, 12, 'w']] }, heart: { n: '愛心貼紙', f: [[3, 11, 'r'], [5, 11, 'r'], [4, 12, 'r'], [4, 11, 'r']] },
-  sweat: { n: '汗滴', f: [[14, 7, 'p'], [14, 8, 'o'], [4, 11, 's'], [13, 11, 's']] }, whisker: { n: '鬍鬚', f: [[3, 11, '0'], [4, 12, '0'], [14, 11, '0'], [13, 12, '0']] }, glitter: { n: '亮片', f: [[4, 10, 'Z'], [13, 10, 'Z'], [3, 12, 'x'], [14, 12, 'x']] },
+  blush: { n: I18n.s("u_2f9a16ace790"), f: [[4, 11, 's'], [13, 11, 's']] }, none: { n: I18n.s("u_da5930e53d54"), f: [] }, wide: { n: I18n.s("u_7348c19ec9cd"), f: [[3, 11, 's'], [4, 11, 's'], [5, 11, 't'], [12, 11, 't'], [13, 11, 's'], [14, 11, 's']] },
+  freckles: { n: I18n.s("u_c5fa4f24494c"), f: [[4, 11, 'D'], [5, 12, 'D'], [3, 12, 'D'], [13, 11, 'D'], [12, 12, 'D'], [14, 12, 'D']] }, mole_l: { n: I18n.s("u_b6b67108b2dc"), f: [[5, 12, '0'], [4, 11, 's'], [13, 11, 's']] },
+  mole_r: { n: I18n.s("u_3e60cdeb5ad0"), f: [[12, 12, '0'], [4, 11, 's'], [13, 11, 's']] }, bandaid: { n: I18n.s("u_78bbbfb00984"), f: [[12, 11, 'f'], [13, 11, 'g'], [14, 11, 'f'], [4, 11, 's']] },
+  star: { n: I18n.s("u_6502f2984069"), f: [[13, 10, 'w'], [12, 11, 'w'], [13, 11, 'x'], [14, 11, 'w'], [13, 12, 'w']] }, heart: { n: I18n.s("u_5ff0d940d607"), f: [[3, 11, 'r'], [5, 11, 'r'], [4, 12, 'r'], [4, 11, 'r']] },
+  sweat: { n: I18n.s("u_c5f140ef1235"), f: [[14, 7, 'p'], [14, 8, 'o'], [4, 11, 's'], [13, 11, 's']] }, whisker: { n: I18n.s("u_5a3762e345f9"), f: [[3, 11, '0'], [4, 12, '0'], [14, 11, '0'], [13, 12, '0']] }, glitter: { n: I18n.s("u_5bd397e2c5df"), f: [[4, 10, 'Z'], [13, 10, 'Z'], [3, 12, 'x'], [14, 12, 'x']] },
 };
 // ---------- hair ----------
 // fringe = bottom row of the bangs for x 4..13 (front view)
 const FRINGES = {
-  short: { n: '短瀏海', f: [8, 7, 6, 6, 7, 6, 6, 7, 6, 7] }, none: { n: '露額頭', f: [5, 4, 4, 4, 4, 4, 4, 4, 4, 5] }, straight: { n: '齊瀏海', f: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7] },
-  heavy: { n: '厚瀏海', f: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8] }, sideL: { n: '左旁分', f: [8, 8, 7, 7, 6, 6, 5, 5, 5, 5] }, sideR: { n: '右旁分', f: [5, 5, 5, 5, 6, 6, 7, 7, 8, 8] },
-  center: { n: '中分', f: [7, 7, 6, 5, 4, 4, 5, 6, 7, 7] }, curtain: { n: '八字瀏海', f: [8, 7, 6, 5, 4, 4, 5, 6, 7, 8] }, spiky: { n: '刺刺頭', f: [7, 5, 7, 5, 7, 5, 7, 5, 7, 5] },
-  wavy: { n: '波浪瀏海', f: [7, 6, 7, 7, 6, 7, 7, 6, 7, 7] }, buzz: { n: '平頭', f: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4], buzz: true }, messy: { n: '凌亂', f: [7, 6, 8, 6, 7, 5, 8, 6, 7, 6] },
-  mshape: { n: 'M 字瀏海', f: [7, 7, 6, 7, 7, 7, 7, 6, 7, 7] }, swoop: { n: '斜瀏海', f: [5, 5, 6, 6, 7, 7, 8, 8, 7, 6] }, ahoge: { n: '呆毛', f: [7, 6, 6, 7, 6, 6, 7, 6, 6, 7], ahoge: true },
-  pomp: { n: '飛機頭', f: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5], pomp: true },
+  short: { n: I18n.s("u_d9f05bc317f7"), f: [8, 7, 6, 6, 7, 6, 6, 7, 6, 7] }, none: { n: I18n.s("u_f03808028916"), f: [5, 4, 4, 4, 4, 4, 4, 4, 4, 5] }, straight: { n: I18n.s("u_80d81d429665"), f: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7] },
+  heavy: { n: I18n.s("u_a0b9dfc6a54c"), f: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8] }, sideL: { n: I18n.s("u_7ce2e7fbb39c"), f: [8, 8, 7, 7, 6, 6, 5, 5, 5, 5] }, sideR: { n: I18n.s("u_aa36d6658971"), f: [5, 5, 5, 5, 6, 6, 7, 7, 8, 8] },
+  center: { n: I18n.s("u_8dd8b4c97194"), f: [7, 7, 6, 5, 4, 4, 5, 6, 7, 7] }, curtain: { n: I18n.s("u_5c404197c356"), f: [8, 7, 6, 5, 4, 4, 5, 6, 7, 8] }, spiky: { n: I18n.s("u_5506d79e8612"), f: [7, 5, 7, 5, 7, 5, 7, 5, 7, 5] },
+  wavy: { n: I18n.s("u_50ee41e0ab20"), f: [7, 6, 7, 7, 6, 7, 7, 6, 7, 7] }, buzz: { n: I18n.s("u_e1cb82999c88"), f: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4], buzz: true }, messy: { n: I18n.s("u_eaa31b97f44c"), f: [7, 6, 8, 6, 7, 5, 8, 6, 7, 6] },
+  mshape: { n: I18n.s("u_06ba7e689ad1"), f: [7, 7, 6, 7, 7, 7, 7, 6, 7, 7] }, swoop: { n: I18n.s("u_2dbc7a6d3292"), f: [5, 5, 6, 6, 7, 7, 8, 8, 7, 6] }, ahoge: { n: I18n.s("u_5d0f37cc41bb"), f: [7, 6, 6, 7, 6, 6, 7, 6, 6, 7], ahoge: true },
+  pomp: { n: I18n.s("u_e90e247bcaf9"), f: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5], pomp: true },
 };
 // back: side = bottom row of side locks in front view, back = bottom row seen from behind, extras = tails/buns
 const BACKS = {
-  short: { n: '短髮', side: 9, back: 12 }, pixie: { n: '精靈短髮', side: 8, back: 11 }, bob: { n: '鮑伯頭', side: 14, back: 14 }, lob: { n: '及肩髮', side: 16, back: 16 },
-  long: { n: '長髮', side: 19, back: 19 }, xlong: { n: '超長髮', side: 21, back: 21 }, wavy: { n: '大波浪', side: 19, back: 19, wave: true }, hime: { n: '公主切', side: 15, back: 20, hime: true },
-  ponyH: { n: '高馬尾', side: 9, back: 11, tail: 'high' }, ponyL: { n: '低馬尾', side: 9, back: 12, tail: 'low' }, twintail: { n: '雙馬尾', side: 9, back: 12, twin: true },
-  bun: { n: '丸子頭', side: 9, back: 11, bun: 'top' }, twinbun: { n: '雙丸子', side: 9, back: 11, bun: 'twin' }, lowbun: { n: '低髮髻', side: 9, back: 12, bun: 'low' },
-  braid: { n: '單辮子', side: 10, back: 12, braid: 1 }, twinbraid: { n: '雙辮子', side: 10, back: 12, braid: 2 }, sidepony: { n: '側馬尾', side: 9, back: 12, sidepony: true },
-  curly: { n: '捲捲頭', side: 13, back: 14, curly: true },
+  short: { n: I18n.s("u_a4fafad3771f"), side: 9, back: 12 }, pixie: { n: I18n.s("u_5701b4f8cb36"), side: 8, back: 11 }, bob: { n: I18n.s("u_82e9970779d9"), side: 14, back: 14 }, lob: { n: I18n.s("u_192df8e8a2b5"), side: 16, back: 16 },
+  long: { n: I18n.s("u_95e6b8e8eed6"), side: 19, back: 19 }, xlong: { n: I18n.s("u_0f4cf30e628d"), side: 21, back: 21 }, wavy: { n: I18n.s("u_b92108dd1d2d"), side: 19, back: 19, wave: true }, hime: { n: I18n.s("u_d1f92e6953ec"), side: 15, back: 20, hime: true },
+  ponyH: { n: I18n.s("u_ea017d6e5436"), side: 9, back: 11, tail: 'high' }, ponyL: { n: I18n.s("u_144aa5f2f1e5"), side: 9, back: 12, tail: 'low' }, twintail: { n: I18n.s("u_55b02653eef9"), side: 9, back: 12, twin: true },
+  bun: { n: I18n.s("u_525a83645f66"), side: 9, back: 11, bun: 'top' }, twinbun: { n: I18n.s("u_83b79098083d"), side: 9, back: 11, bun: 'twin' }, lowbun: { n: I18n.s("u_62ecefd03a45"), side: 9, back: 12, bun: 'low' },
+  braid: { n: I18n.s("u_aa527c5dc401"), side: 10, back: 12, braid: 1 }, twinbraid: { n: I18n.s("u_e9095c7c6d19"), side: 10, back: 12, braid: 2 }, sidepony: { n: I18n.s("u_e3b6fe4ef5f5"), side: 9, back: 12, sidepony: true },
+  curly: { n: I18n.s("u_004f7cac00d9"), side: 13, back: 14, curly: true },
 };
 // ---------- clothes ----------
 const TOPS = {
-  tee: { n: 'T 恤', sl: 'short' }, longtee: { n: '長袖 T', sl: 'long' }, tank: { n: '背心', sl: 'none', tank: true }, crop: { n: '短版上衣', sl: 'short', crop: true },
-  polo: { n: 'POLO 衫', sl: 'short', collar: true, buttons: 2 }, shirt: { n: '襯衫', sl: 'long', collar: true, buttons: 5 }, hoodie: { n: '帽T', sl: 'long', hood: true, pocket: true },
-  sweater: { n: '毛衣', sl: 'long', pat: 'knit' }, cardigan: { n: '開襟外套', sl: 'long', outer: 'open' }, vest: { n: '針織背心', sl: 'long', vest: true },
-  sailor: { n: '水手服', sl: 'short', sailor: true }, kimono: { n: '和風上衣', sl: 'long', kimono: true }, jersey: { n: '球衣', sl: 'short', pat: 'side' },
-  stripe: { n: '條紋 T', sl: 'short', pat: 'hstripe' }, breton: { n: '海軍條紋衫', sl: 'long', pat: 'hstripe2' }, raglan: { n: '拉克蘭', sl: 'long', raglan: true },
-  puff: { n: '泡泡袖', sl: 'puff' }, turtle: { n: '高領毛衣', sl: 'long', turtle: true }, offsh: { n: '露肩上衣', sl: 'short', off: true },
-  denimjk: { n: '牛仔外套', sl: 'long', outer: 'jacket', pockets: true }, blazer: { n: '西裝外套', sl: 'long', outer: 'blazer' }, coat: { n: '長大衣', sl: 'long', outer: 'coat' },
-  apron: { n: '圍裙', sl: 'short', apron: true }, school: { n: '制服', sl: 'long', outer: 'blazer', tie: true }, varsity: { n: '棒球外套', sl: 'long', outer: 'jacket', raglan: true },
-  raincoat: { n: '雨衣', sl: 'long', outer: 'coat', shiny: true }, heart: { n: '愛心 T', sl: 'short', print: 'heart' }, startee: { n: '星星 T', sl: 'short', print: 'star' },
-  plaid: { n: '格子襯衫', sl: 'long', collar: true, pat: 'plaid' }, dots: { n: '點點上衣', sl: 'short', pat: 'dots' }, band: { n: '色帶 T', sl: 'short', pat: 'band' },
-  dress: { n: '短洋裝', sl: 'short', dress: 'short' }, gown: { n: '長洋裝', sl: 'puff', dress: 'long' }, overalldress: { n: '吊帶裙', sl: 'short', dress: 'short', apron: true },
+  tee: { n: I18n.s("u_abdb14eaa774"), sl: 'short' }, longtee: { n: I18n.s("u_f287e1217093"), sl: 'long' }, tank: { n: I18n.s("u_23cc45d3c75d"), sl: 'none', tank: true }, crop: { n: I18n.s("u_dbd89e984c60"), sl: 'short', crop: true },
+  polo: { n: I18n.s("u_d9eaa7aa4b51"), sl: 'short', collar: true, buttons: 2 }, shirt: { n: I18n.s("u_34f436182bbe"), sl: 'long', collar: true, buttons: 5 }, hoodie: { n: I18n.s("u_436c9b3cbf79"), sl: 'long', hood: true, pocket: true },
+  sweater: { n: I18n.s("u_4db0b8f384e0"), sl: 'long', pat: 'knit' }, cardigan: { n: I18n.s("u_b0e362030954"), sl: 'long', outer: 'open' }, vest: { n: I18n.s("u_471e7769432c"), sl: 'long', vest: true },
+  sailor: { n: I18n.s("u_5b03317bc3f1"), sl: 'short', sailor: true }, kimono: { n: I18n.s("u_c525b05bf60b"), sl: 'long', kimono: true }, jersey: { n: I18n.s("u_59724569d2c0"), sl: 'short', pat: 'side' },
+  stripe: { n: I18n.s("u_9711e3e9d529"), sl: 'short', pat: 'hstripe' }, breton: { n: I18n.s("u_7d1beb985383"), sl: 'long', pat: 'hstripe2' }, raglan: { n: I18n.s("u_a085bfd33e64"), sl: 'long', raglan: true },
+  puff: { n: I18n.s("u_b21848fe4583"), sl: 'puff' }, turtle: { n: I18n.s("u_5c2e45e4719e"), sl: 'long', turtle: true }, offsh: { n: I18n.s("u_271c6355f0e0"), sl: 'short', off: true },
+  denimjk: { n: I18n.s("u_ffcdb5ad2869"), sl: 'long', outer: 'jacket', pockets: true }, blazer: { n: I18n.s("u_e61eca22f9f4"), sl: 'long', outer: 'blazer' }, coat: { n: I18n.s("u_97e307c55bde"), sl: 'long', outer: 'coat' },
+  apron: { n: I18n.s("u_436c6b55f387"), sl: 'short', apron: true }, school: { n: I18n.s("u_2176ec46b07c"), sl: 'long', outer: 'blazer', tie: true }, varsity: { n: I18n.s("u_5107911be3fc"), sl: 'long', outer: 'jacket', raglan: true },
+  raincoat: { n: I18n.s("u_c9c1e6e1309d"), sl: 'long', outer: 'coat', shiny: true }, heart: { n: I18n.s("u_4ee5a699424b"), sl: 'short', print: 'heart' }, startee: { n: I18n.s("u_82ce658bc7db"), sl: 'short', print: 'star' },
+  plaid: { n: I18n.s("u_f6feb60e6826"), sl: 'long', collar: true, pat: 'plaid' }, dots: { n: I18n.s("u_f8b8543563a1"), sl: 'short', pat: 'dots' }, band: { n: I18n.s("u_fd760bb28c1f"), sl: 'short', pat: 'band' },
+  dress: { n: I18n.s("u_5448c29c35a7"), sl: 'short', dress: 'short' }, gown: { n: I18n.s("u_49760c314d39"), sl: 'puff', dress: 'long' }, overalldress: { n: I18n.s("u_f64485e316fc"), sl: 'short', dress: 'short', apron: true },
 };
 const BOTTOMS = {
-  pants: { n: '長褲', legs: 'full' }, jeans: { n: '牛仔褲', legs: 'full', cuff: true }, cargo: { n: '工作褲', legs: 'full', pockets: true }, slacks: { n: '西裝褲', legs: 'full', crease: true },
-  joggers: { n: '縮口褲', legs: 'full', band: true }, shorts: { n: '短褲', legs: 'none' }, bermuda: { n: '五分褲', legs: 'half' }, skirt: { n: '短裙', legs: 'none', skirt: 1 },
-  pleated: { n: '百褶裙', legs: 'none', skirt: 1, pleat: true }, tutu: { n: '蓬蓬裙', legs: 'none', skirt: 2 }, longskirt: { n: '長裙', legs: 'fill', skirt: 1 },
-  overalls: { n: '吊帶褲', legs: 'full', bib: true }, leggings: { n: '內搭褲', legs: 'full', tight: true }, hakama: { n: '寬褲', legs: 'fill', skirt: 1, pleat: true },
-  skort: { n: '褲裙', legs: 'none', skirt: 1, pleat: false },
+  pants: { n: I18n.s("u_7a3ee2a6a9a5"), legs: 'full' }, jeans: { n: I18n.s("u_3f64a468427d"), legs: 'full', cuff: true }, cargo: { n: I18n.s("u_5e762adadde5"), legs: 'full', pockets: true }, slacks: { n: I18n.s("u_31699d3f2d24"), legs: 'full', crease: true },
+  joggers: { n: I18n.s("u_af8cf3ef9ea3"), legs: 'full', band: true }, shorts: { n: I18n.s("u_7d6cc7470ac3"), legs: 'none' }, bermuda: { n: I18n.s("u_64676bedb943"), legs: 'half' }, skirt: { n: I18n.s("u_4d8d600abc56"), legs: 'none', skirt: 1 },
+  pleated: { n: I18n.s("u_3de8a6f4f2a6"), legs: 'none', skirt: 1, pleat: true }, tutu: { n: I18n.s("u_34c1a0507d53"), legs: 'none', skirt: 2 }, longskirt: { n: I18n.s("u_579a7fd8f0ca"), legs: 'fill', skirt: 1 },
+  overalls: { n: I18n.s("u_6dd50dcc641a"), legs: 'full', bib: true }, leggings: { n: I18n.s("u_5298a88c371f"), legs: 'full', tight: true }, hakama: { n: I18n.s("u_5ec8c3dcf346"), legs: 'fill', skirt: 1, pleat: true },
+  skort: { n: I18n.s("u_46b137e270f8"), legs: 'none', skirt: 1, pleat: false },
 };
 const SHOES = {
-  sneakers: { n: '運動鞋' }, canvas: { n: '帆布鞋', toe: true }, boots: { n: '短靴', boot: 1 }, tall: { n: '長靴', boot: 2 }, rain: { n: '雨靴', boot: 2, shiny: true },
-  sandals: { n: '涼鞋', sandal: true }, slippers: { n: '毛毛拖鞋', fluffy: true }, loafers: { n: '樂福鞋', dot: true }, mary: { n: '瑪莉珍鞋', strap: true },
-  socks: { n: '襪子＋球鞋', sock: 1 }, knee: { n: '過膝襪', sock: 2 }, flats: { n: '娃娃鞋' }, bare: { n: '赤腳', bare: true }, heels: { n: '高跟鞋', heel: true },
+  sneakers: { n: I18n.s("u_ce5254793476") }, canvas: { n: I18n.s("u_34cfb485fce6"), toe: true }, boots: { n: I18n.s("u_e1191beaa4d2"), boot: 1 }, tall: { n: I18n.s("u_84ed89a6b320"), boot: 2 }, rain: { n: I18n.s("u_531c2eff66ce"), boot: 2, shiny: true },
+  sandals: { n: I18n.s("u_1e4fccfb4373"), sandal: true }, slippers: { n: I18n.s("u_5c7e5a670073"), fluffy: true }, loafers: { n: I18n.s("u_e4a424ebf0de"), dot: true }, mary: { n: I18n.s("u_39ad147052d8"), strap: true },
+  socks: { n: I18n.s("u_85b344543571"), sock: 1 }, knee: { n: I18n.s("u_ed22c39b9a3b"), sock: 2 }, flats: { n: I18n.s("u_829d2ddc64dc") }, bare: { n: I18n.s("u_b06364168d34"), bare: true }, heels: { n: I18n.s("u_f1ea3728d427"), heel: true },
 };
 // ---------- accessories (head coords: 18×22 head grid; negative rows go into the space above) ----------
 const HATS = {
-  none: { n: '無' }, beanie: { n: '毛帽' }, cap: { n: '棒球帽' }, backcap: { n: '反戴帽' }, beret: { n: '貝雷帽' }, bucket: { n: '漁夫帽' }, straw: { n: '草帽' },
-  witch: { n: '魔女帽', price: 120 }, tophat: { n: '紳士帽', price: 100 }, crown: { n: '王冠', price: 200 }, tiara: { n: '小皇冠', price: 160 }, catears: { n: '貓耳髮箍' }, bunny: { n: '兔耳髮箍' },
-  bearears: { n: '熊耳髮箍' }, flowers: { n: '花環', price: 60 }, bow: { n: '大蝴蝶結' }, clips: { n: '髮夾' }, headband: { n: '髮帶' }, santa: { n: '聖誕帽', price: 80 }, chef: { n: '廚師帽', price: 80 },
-  party: { n: '派對帽' }, sprout: { n: '小嫩芽' }, halo: { n: '天使光環', price: 150 }, horns: { n: '小惡魔角', price: 150 },
+  none: { n: I18n.s("u_da5930e53d54") }, beanie: { n: I18n.s("u_811b8fa8b1cf") }, cap: { n: I18n.s("u_638c334ae181") }, backcap: { n: I18n.s("u_35cb6c65dafb") }, beret: { n: I18n.s("u_64faaaecb375") }, bucket: { n: I18n.s("u_a2500a904351") }, straw: { n: I18n.s("u_10e6da00602f") },
+  witch: { n: I18n.s("u_d930b2452e7b"), price: 120 }, tophat: { n: I18n.s("u_0e9e0c07901a"), price: 100 }, crown: { n: I18n.s("u_431e24ca50db"), price: 200 }, tiara: { n: I18n.s("u_be27b4fbb359"), price: 160 }, catears: { n: I18n.s("u_14983343adc9") }, bunny: { n: I18n.s("u_96083d5d5975") },
+  bearears: { n: I18n.s("u_c1e069c58998") }, flowers: { n: I18n.s("u_45ab5883cf73"), price: 60 }, bow: { n: I18n.s("u_3b7b9bcabc2f") }, clips: { n: I18n.s("u_a2e161756078") }, headband: { n: I18n.s("u_b72963a69bcb") }, santa: { n: I18n.s("u_1e9de133ffa7"), price: 80 }, chef: { n: I18n.s("u_7000395df279"), price: 80 },
+  party: { n: I18n.s("u_bbaf588c974f") }, sprout: { n: I18n.s("u_ab2249193a37") }, halo: { n: I18n.s("u_b077f4be00de"), price: 150 }, horns: { n: I18n.s("u_21af6004d4f3"), price: 150 },
 };
-const GLASSES = { none: { n: '無' }, round: { n: '圓框' }, square: { n: '方框' }, cateye: { n: '貓眼框' }, sun: { n: '墨鏡' }, heartsun: { n: '愛心墨鏡', price: 60 }, starsun: { n: '星星墨鏡', price: 60 },
-  nerd: { n: '粗框' }, half: { n: '半框' }, monocle: { n: '單片眼鏡', price: 80 }, goggles: { n: '護目鏡', price: 60 }, patch: { n: '眼罩' } };
-const EARS = { none: { n: '無' }, stud: { n: '耳釘' }, hoop: { n: '圓圈耳環' }, drop: { n: '垂墜耳環' }, star: { n: '星星耳環' }, heart: { n: '愛心耳環' }, pearl: { n: '珍珠耳環', price: 50 }, cuff: { n: '耳骨夾' } };
-const NECKS = { none: { n: '無' }, scarf: { n: '圍巾' }, tie: { n: '領帶' }, bowtie: { n: '領結' }, ribbon: { n: '緞帶' }, pearls: { n: '珍珠項鍊', price: 80 }, pendant: { n: '愛心項鍊' },
-  choker: { n: '頸鍊' }, bandana: { n: '領巾' }, bell: { n: '鈴鐺頸圈' }, lanyard: { n: '識別證' } };
-const BACKS_ACC = { none: { n: '無' }, backpack: { n: '後背包' }, angel: { n: '天使翅膀', price: 220 }, bat: { n: '蝙蝠翅膀', price: 220 }, butterfly: { n: '蝴蝶翅膀', price: 240 },
-  cape: { n: '披風', price: 120 }, cattail: { n: '貓尾巴', price: 80 }, foxtail: { n: '狐狸尾巴', price: 100 }, guitar: { n: '吉他背包', price: 120 } };
+const GLASSES = { none: { n: I18n.s("u_da5930e53d54") }, round: { n: I18n.s("u_ef94a5f3aa26") }, square: { n: I18n.s("u_ada1f79182e3") }, cateye: { n: I18n.s("u_eb1b89bbff5b") }, sun: { n: I18n.s("u_9bcc2463037a") }, heartsun: { n: I18n.s("u_eb29d72e2199"), price: 60 }, starsun: { n: I18n.s("u_a149c3626015"), price: 60 },
+  nerd: { n: I18n.s("u_38b14500b50a") }, half: { n: I18n.s("u_7cf1923f0f7a") }, monocle: { n: I18n.s("u_fbd0d28ad7c9"), price: 80 }, goggles: { n: I18n.s("u_5742b02ec449"), price: 60 }, patch: { n: I18n.s("u_fd31042476d8") } };
+const EARS = { none: { n: I18n.s("u_da5930e53d54") }, stud: { n: I18n.s("u_ff28edf7b3a6") }, hoop: { n: I18n.s("u_885e7c3ce439") }, drop: { n: I18n.s("u_660ec7a4b695") }, star: { n: I18n.s("u_b2c7e72c7974") }, heart: { n: I18n.s("u_fa70f5921440") }, pearl: { n: I18n.s("u_1561f87e44dc"), price: 50 }, cuff: { n: I18n.s("u_b6922b0eed42") } };
+const NECKS = { none: { n: I18n.s("u_da5930e53d54") }, scarf: { n: I18n.s("u_5ccbc26a917a") }, tie: { n: I18n.s("u_9f48c6350ee6") }, bowtie: { n: I18n.s("u_789f0cb339d2") }, ribbon: { n: I18n.s("u_92d56b71ae60") }, pearls: { n: I18n.s("u_4c905c4578b7"), price: 80 }, pendant: { n: I18n.s("u_15e9f50340bf") },
+  choker: { n: I18n.s("u_0eb032fd444a") }, bandana: { n: I18n.s("u_6aea16184e6b") }, bell: { n: I18n.s("u_ef6b3876691c") }, lanyard: { n: I18n.s("u_b99df5748f9f") } };
+const BACKS_ACC = { none: { n: I18n.s("u_da5930e53d54") }, backpack: { n: I18n.s("u_f6d3c94e1ed4") }, angel: { n: I18n.s("u_2960f02aec2d"), price: 220 }, bat: { n: I18n.s("u_f501651372bc"), price: 220 }, butterfly: { n: I18n.s("u_adc461df1331"), price: 240 },
+  cape: { n: I18n.s("u_c34277cc0f54"), price: 120 }, cattail: { n: I18n.s("u_5726edd190f4"), price: 80 }, foxtail: { n: I18n.s("u_d7f52dbd2f0b"), price: 100 }, guitar: { n: I18n.s("u_e1e799335b69"), price: 120 } };
 const AVA_PARTS = {
   skin: SKINS, eyes: EYES, eyeColor: EYEC, brows: BROWS, mouth: MOUTHS, cheeks: CHEEKS, hairFront: FRINGES, hairBack: BACKS, hairColor: HAIRC,
   top: TOPS, topColor: CLOTH, top2: CLOTH, bottom: BOTTOMS, bottomColor: CLOTH, shoes: SHOES, shoesColor: CLOTH,

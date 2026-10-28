@@ -3,67 +3,67 @@
    room comfort — and the windows that show them
    ============================================================ */
 const SUPPLIES = {
-  cat_can: { n: '罐頭', spr: 'it_cat_can', price: 40, pet: 1, desc: '飽足 +45、心情 +5。寵物會走到碗旁邊吃。' },
-  fish_snack: { n: '小魚乾', spr: 'it_fish', price: 25, pet: 1, desc: '飽足 +20、心情 +8，點心大小。' },
-  premium_food: { n: '豪華餐', spr: 'it_premium', price: 75, pet: 1, desc: '飽足 +70、心情 +15、精力 +10，成長經驗加倍。' },
-  cat_treat: { n: '零食', spr: 'it_cat_treat', price: 30, pet: 1, desc: '心情 +12、羈絆 +6。' },
-  catnip: { n: '貓薄荷', spr: 'it_catnip', price: 45, pet: 1, desc: '寵物會興奮地滿屋子跑，心情 +30，消耗精力 25。' },
-  shampoo: { n: '洗毛精', spr: 'it_shampoo', price: 35, pet: 1, desc: '洗澡，清潔直接回滿。貓咪不太喜歡水，愛乾淨的寵物例外。' },
-  medicine: { n: '寵物藥', spr: 'it_medicine', price: 60, pet: 1, desc: '寵物不舒服時吃，馬上恢復健康。' },
-  fertilizer: { n: '植物營養液', spr: 'it_fertilizer', price: 40, desc: '讓枯黃的植物恢復精神。' },
-  spray: { n: '清潔噴霧', spr: 'it_spray', price: 40, desc: '把積灰塵的家具擦乾淨。' },
-  bulb: { n: '燈泡', spr: 'it_bulb', price: 45, desc: '換掉燒壞的燈泡。' },
-  coffee: { n: '咖啡', spr: 'it_coffee', price: 30, desc: '提神，下一輪專注的經驗 +30%。' },
-  onigiri: { n: '飯糰', spr: 'it_onigiri', price: 30, desc: '吃飽，下一輪專注的金幣 +30%。' },
+  cat_can: { n: I18n.s("u_0afa05a28a79"), spr: 'it_cat_can', price: 40, pet: 1, desc: I18n.s("u_f95f203d38c1") },
+  fish_snack: { n: I18n.s("u_4bb21f5dfdad"), spr: 'it_fish', price: 25, pet: 1, desc: I18n.s("u_8780462879bc") },
+  premium_food: { n: I18n.s("u_180fb7304792"), spr: 'it_premium', price: 75, pet: 1, desc: I18n.s("u_09e41cbf4b86") },
+  cat_treat: { n: I18n.s("u_603f16715161"), spr: 'it_cat_treat', price: 30, pet: 1, desc: I18n.s("u_a926bf4a15f3") },
+  catnip: { n: I18n.s("u_6140ad07e9df"), spr: 'it_catnip', price: 45, pet: 1, desc: I18n.s("u_1540d3d6e87b") },
+  shampoo: { n: I18n.s("u_10765b7e3386"), spr: 'it_shampoo', price: 35, pet: 1, desc: I18n.s("u_56f14c312768") },
+  medicine: { n: I18n.s("u_9dc1c495be55"), spr: 'it_medicine', price: 60, pet: 1, desc: I18n.s("u_205434c3306d") },
+  fertilizer: { n: I18n.s("u_d5a5a2d73d92"), spr: 'it_fertilizer', price: 40, desc: I18n.s("u_86445a855e11") },
+  spray: { n: I18n.s("u_eee2a84e4273"), spr: 'it_spray', price: 40, desc: I18n.s("u_3fc55a2d363b") },
+  bulb: { n: I18n.s("u_249d0d8356c8"), spr: 'it_bulb', price: 45, desc: I18n.s("u_c07f8075d37f") },
+  coffee: { n: I18n.s("u_720ec669f15b"), spr: 'it_coffee', price: 30, desc: I18n.s("u_f4d669f2210f") },
+  onigiri: { n: I18n.s("u_f45668769e16"), spr: 'it_onigiri', price: 30, desc: I18n.s("u_4fdd8a0e730d") },
 };
-const PETNAME = (n) => (typeof Pets !== 'undefined' && Game.S && Game.S.zoo) ? Pets.name(n && n.pet != null ? n.pet : (Pets.sel() || {}).id) : '寵物';
+const PETNAME = (n) => (typeof Pets !== 'undefined' && Game.S && Game.S.zoo) ? Pets.name(n && n.pet != null ? n.pet : (Pets.sel() || {}).id) : I18n.s("u_5b825353b534");
 const NEED_DEFS = {
-  cat_hungry: { who: 'pet', item: 'cat_can', alt: ['fish_snack', 'premium_food'], t: (n) => `${PETNAME(n)}肚子餓了`, d: '牠一直盯著碗。罐頭、小魚乾、豪華餐都可以。', rw: { c: 12, x: 10, b: 8 } },
-  cat_play: { who: 'pet', item: 'catnip', t: (n) => `${PETNAME(n)}好無聊`, d: '想玩！用貓薄荷，或在寵物視窗用逗貓棒、毛線球陪牠玩。', rw: { c: 10, x: 8, b: 8 } },
-  cat_treat: { who: 'pet', item: 'cat_treat', t: (n) => `${PETNAME(n)}在撒嬌`, d: '蹭著你的腳，想討點心吃。', rw: { c: 8, x: 6, b: 10 } },
-  cat_pet: { who: 'pet', action: 'pet', count: 3, icon: 'n_heart', t: (n) => `${PETNAME(n)}想被摸摸`, d: '摸牠三下：在房間裡點牠，或按下面的「摸摸牠」。', rw: { c: 6, x: 6, b: 6 } },
-  pet_want: { who: 'pet', action: 'want', icon: 'n_seat', t: (n) => `${PETNAME(n)}想要${ITEMS[n.k] ? ITEMS[n.k].n : '新家具'}`, d: '在房間擺一個給牠，收納箱沒有的話可以到商店買。', rw: { c: 20, x: 15, b: 10 } },
-  pet_dirty: { who: 'pet', item: 'shampoo', t: (n) => `${PETNAME(n)}身上髒髒的`, d: '用洗毛精幫牠洗澡，或在寵物視窗用梳子梳一梳。', rw: { c: 10, x: 8, b: 6 } },
-  pet_sick: { who: 'pet', item: 'medicine', t: (n) => `${PETNAME(n)}不太舒服`, d: '餓太久或太髒會生病。餵牠吃寵物藥就會好。', rw: { c: 10, x: 10, b: 8 } },
-  pet_train: { who: 'pet', action: 'train', icon: 'n_star', t: (n) => `${PETNAME(n)}想學新把戲`, d: '到寵物視窗的「把戲」訓練牠一次（訓練成功才算）。', rw: { c: 15, x: 15, b: 6 } },
-  plant_wilt: { who: 'item', item: 'fertilizer', t: (n) => `${Life.targetName(n)}的葉子枯黃了`, d: '用植物營養液讓它恢復精神。', rw: { c: 12, x: 8 } },
-  dusty: { who: 'item', item: 'spray', t: (n) => `${Life.targetName(n)}積了灰塵`, d: '用清潔噴霧擦乾淨。', rw: { c: 10, x: 8 } },
-  bulb: { who: 'item', item: 'bulb', t: (n) => `${Life.targetName(n)}的燈泡燒壞了`, d: '換一顆新燈泡才能再打開。', rw: { c: 12, x: 10 } },
-  curtain: { who: 'item', action: 'curtain', icon: 'n_sun', t: () => '外面天氣很好', d: '點一下窗戶，拉開窗簾讓陽光進來。', rw: { c: 6, x: 6 } },
-  ava_hungry: { who: 'avatar', item: 'onigiri', t: () => '肚子有點餓', d: '來顆飯糰，下一輪專注的金幣 +30%。', rw: { c: 8, x: 8 } },
-  ava_sleepy: { who: 'avatar', item: 'coffee', t: () => '好睏…', d: '來杯咖啡，下一輪專注的經驗 +30%。', rw: { c: 8, x: 8 } },
-  arrange: { who: 'avatar', action: 'place', icon: 'n_box', t: () => '想佈置一下房間', d: '把收納箱裡的任一件東西擺到房間裡。', rw: { c: 10, x: 10 } },
-  lights: { who: 'avatar', action: 'light', icon: 'n_light', t: () => '房間好暗', d: '打開任一盞燈。', rw: { c: 6, x: 6 } },
+  cat_hungry: { who: 'pet', item: 'cat_can', alt: ['fish_snack', 'premium_food'], t: (n) => I18n.s("u_37bba33d8a2d", [PETNAME(n)]), d: I18n.s("u_39c209458844"), rw: { c: 12, x: 10, b: 8 } },
+  cat_play: { who: 'pet', item: 'catnip', t: (n) => I18n.s("u_43d2dc1306f3", [PETNAME(n)]), d: I18n.s("u_cfc0c09528b8"), rw: { c: 10, x: 8, b: 8 } },
+  cat_treat: { who: 'pet', item: 'cat_treat', t: (n) => I18n.s("u_8b32fa19920b", [PETNAME(n)]), d: I18n.s("u_a7d7ce38c010"), rw: { c: 8, x: 6, b: 10 } },
+  cat_pet: { who: 'pet', action: 'pet', count: 3, icon: 'n_heart', t: (n) => I18n.s("u_085ad3c7901a", [PETNAME(n)]), d: I18n.s("u_944c13708689"), rw: { c: 6, x: 6, b: 6 } },
+  pet_want: { who: 'pet', action: 'want', icon: 'n_seat', t: (n) => I18n.s("u_04070113cbb5", [PETNAME(n), ITEMS[n.k] ? ITEMS[n.k].n : I18n.s("u_589b81598e43")]), d: I18n.s("u_c1eb4fd9d7f3"), rw: { c: 20, x: 15, b: 10 } },
+  pet_dirty: { who: 'pet', item: 'shampoo', t: (n) => I18n.s("u_f2e4194705f8", [PETNAME(n)]), d: I18n.s("u_053d645997bc"), rw: { c: 10, x: 8, b: 6 } },
+  pet_sick: { who: 'pet', item: 'medicine', t: (n) => I18n.s("u_0458ba5a515e", [PETNAME(n)]), d: I18n.s("u_7ff64df59f05"), rw: { c: 10, x: 10, b: 8 } },
+  pet_train: { who: 'pet', action: 'train', icon: 'n_star', t: (n) => I18n.s("u_562d0d8144cb", [PETNAME(n)]), d: I18n.s("u_f31423bb01d7"), rw: { c: 15, x: 15, b: 6 } },
+  plant_wilt: { who: 'item', item: 'fertilizer', t: (n) => I18n.s("u_69231186d4b8", [Life.targetName(n)]), d: I18n.s("u_1931bf1df892"), rw: { c: 12, x: 8 } },
+  dusty: { who: 'item', item: 'spray', t: (n) => I18n.s("u_f783c46d9176", [Life.targetName(n)]), d: I18n.s("u_e325af1e3e60"), rw: { c: 10, x: 8 } },
+  bulb: { who: 'item', item: 'bulb', t: (n) => I18n.s("u_b870c9660c25", [Life.targetName(n)]), d: I18n.s("u_de564c264330"), rw: { c: 12, x: 10 } },
+  curtain: { who: 'item', action: 'curtain', icon: 'n_sun', t: () => I18n.s("u_fa9a0b8d9440"), d: I18n.s("u_5db258f63962"), rw: { c: 6, x: 6 } },
+  ava_hungry: { who: 'avatar', item: 'onigiri', t: () => I18n.s("u_1eb04bf4c2ad"), d: I18n.s("u_2faaf0af58c6"), rw: { c: 8, x: 8 } },
+  ava_sleepy: { who: 'avatar', item: 'coffee', t: () => I18n.s("u_2a01c63838ca"), d: I18n.s("u_40a66f913d8f"), rw: { c: 8, x: 8 } },
+  arrange: { who: 'avatar', action: 'place', icon: 'n_box', t: () => I18n.s("u_5585c3add77d"), d: I18n.s("u_a5d5ce0f7ba1"), rw: { c: 10, x: 10 } },
+  lights: { who: 'avatar', action: 'light', icon: 'n_light', t: () => I18n.s("u_6ebd9284fba2"), d: I18n.s("u_3a59263fdd3f"), rw: { c: 6, x: 6 } },
 };
 const TASK_DEFS = {
-  vocab: { t: () => '完成今日 20 個單字複習與小測驗', need: () => 1, rw: { c: 50, x: 40, item: 1 }, go: 'learn' },
-  buy: { t: (k) => `購買「${ITEMS[k.item] ? ITEMS[k.item].n : '家具'}」`, need: () => 1, rw: null, go: 'shopItem' },
-  focus: { t: (k) => `專注 ${k.need} 分鐘`, need: () => (Game.S.lvl >= 4 ? 50 : 25), rw: { c: 30, x: 25 }, go: 'timer' },
-  todo: { t: () => '完成 2 件待辦', need: () => 2, rw: { c: 20, x: 15 }, go: 'todo' },
-  need: { t: () => '滿足 2 個房間需求', need: () => 2, rw: { c: 25, x: 20, item: 1 }, go: 'needs' },
-  feed: { t: () => '餵寵物吃 2 次東西', need: () => 2, rw: { c: 15, x: 10 }, go: 'pet' },
-  pet: { t: () => '摸摸寵物 5 次', need: () => 5, rw: { c: 10, x: 10 }, go: null },
-  play: { t: () => '陪寵物玩 2 次', need: () => 2, rw: { c: 15, x: 12 }, go: 'pet' },
-  groom: { t: () => '幫寵物梳毛或洗澡', need: () => 1, rw: { c: 12, x: 10 }, go: 'pet' },
-  train: { t: () => '訓練寵物 1 次', need: () => 1, rw: { c: 20, x: 20 }, go: 'petTrain' },
-  quiz: { t: () => '小測驗累積答對 15 題', need: () => 15, rw: { c: 25, x: 25 }, go: 'learn' },
-  place: { t: () => '擺放或移動家具 3 次', need: () => 3, rw: { c: 15, x: 10 }, go: 'edit' },
-  study: { t: () => '完成 1 次自由練習', need: () => 1, rw: { c: 20, x: 20 }, go: 'learn' },
-  buyany: { t: () => '在商店買任意一樣東西', need: () => 1, rw: { c: 15, x: 10 }, go: 'shop' },
+  vocab: { t: () => I18n.s("u_138e3b78ecc1"), need: () => 1, rw: { c: 50, x: 40, item: 1 }, go: 'learn' },
+  buy: { t: (k) => I18n.s("u_cf644553e4b9", [ITEMS[k.item] ? ITEMS[k.item].n : I18n.s("u_62bd927cebc0")]), need: () => 1, rw: null, go: 'shopItem' },
+  focus: { t: (k) => I18n.s("u_ae22604d4b57", [k.need]), need: () => (Game.S.lvl >= 4 ? 50 : 25), rw: { c: 30, x: 25 }, go: 'timer' },
+  todo: { t: () => I18n.s("u_377394a4b1e7"), need: () => 2, rw: { c: 20, x: 15 }, go: 'todo' },
+  need: { t: () => I18n.s("u_8138deb7c6f4"), need: () => 2, rw: { c: 25, x: 20, item: 1 }, go: 'needs' },
+  feed: { t: () => I18n.s("u_db76106e7b29"), need: () => 2, rw: { c: 15, x: 10 }, go: 'pet' },
+  pet: { t: () => I18n.s("u_b4a0a60c6fe9"), need: () => 5, rw: { c: 10, x: 10 }, go: null },
+  play: { t: () => I18n.s("u_6ec71afc8635"), need: () => 2, rw: { c: 15, x: 12 }, go: 'pet' },
+  groom: { t: () => I18n.s("u_f1c05cf7afdb"), need: () => 1, rw: { c: 12, x: 10 }, go: 'pet' },
+  train: { t: () => I18n.s("u_a2a25127e362"), need: () => 1, rw: { c: 20, x: 20 }, go: 'petTrain' },
+  quiz: { t: () => I18n.s("u_90d0394a8215"), need: () => 15, rw: { c: 25, x: 25 }, go: 'learn' },
+  place: { t: () => I18n.s("u_b675895435df"), need: () => 3, rw: { c: 15, x: 10 }, go: 'edit' },
+  study: { t: () => I18n.s("u_6eb868aa4880"), need: () => 1, rw: { c: 20, x: 20 }, go: 'learn' },
+  buyany: { t: () => I18n.s("u_3154b1d9ed45"), need: () => 1, rw: { c: 15, x: 10 }, go: 'shop' },
 };
 const ACHS = [
-  { id: 'words', n: '單字收藏家', d: (v) => `學會 ${v} 個單字`, m: () => Learn.countLearned(), tiers: [20, 50, 100, 200, 500, 1000, 2000, 4000, 6800], special: { 2: 'trophy' } },
-  { id: 'master', n: '單字精熟', d: (v) => `精熟 ${v} 個單字`, m: () => Learn.countMastered(), tiers: [10, 50, 150, 300, 1000, 3000, 6000] },
-  { id: 'streak', n: '每天都來', d: (v) => `連續 ${v} 天完成每日單字`, m: () => (Game.S.learn.best || 0), tiers: [3, 7, 14, 30, 60], special: { 1: 'diploma' } },
-  { id: 'quiz', n: '測驗高手', d: (v) => `小測驗累積答對 ${v} 題`, m: () => Life.L.stats.quizRight, tiers: [50, 200, 500, 1500, 3000] },
-  { id: 'focus', n: '專注達人', d: (v) => `累積專注 ${v} 小時`, m: () => Math.floor(Game.S.stats.focusMin / 60), tiers: [1, 5, 20, 50, 100] },
-  { id: 'needs', n: '貼心室友', d: (v) => `滿足 ${v} 個需求`, m: () => Life.L.stats.needs, tiers: [5, 20, 50, 120, 300] },
-  { id: 'bond', n: '最好的朋友', d: (v) => `和一隻寵物的羈絆達到 Lv ${v}`, m: () => Pets.maxBlv(), tiers: [2, 4, 6, 8, 10], special: { 0: 'cushion' } },
-  { id: 'family', n: '毛小孩家族', d: (v) => `一起生活的寵物有 ${v} 隻`, m: () => Pets.list().length, tiers: [2, 3, 5, 8] },
-  { id: 'grow', n: '拉拔長大', d: (v) => `一隻寵物成長到 Lv ${v}`, m: () => Pets.maxLv(), tiers: [5, 10, 15, 20] },
-  { id: 'trainer', n: '馴獸師', d: (v) => `寵物們一共學會 ${v} 個把戲`, m: () => Pets.trickCount(), tiers: [1, 3, 6, 12, 20, 30] },
-  { id: 'decor', n: '佈置高手', d: (v) => `房間裡擺了 ${v} 件東西`, m: () => Game.S.items.length, tiers: [15, 25, 40, 60] },
-  { id: 'rich', n: '小富翁', d: (v) => `累積賺到 ${v} 金幣`, m: () => Life.L.stats.coins, tiers: [500, 2000, 6000, 15000, 40000, 100000, 250000] },
+  { id: 'words', n: I18n.s("u_3187e079542d"), d: (v) => I18n.s("u_0fb2c4ce6ea4", [v]), m: () => Learn.countLearned(), tiers: [20, 50, 100, 200, 500, 1000, 2000, 4000, 6800], special: { 2: 'trophy' } },
+  { id: 'master', n: I18n.s("u_666ee64415c0"), d: (v) => I18n.s("u_043f2711d266", [v]), m: () => Learn.countMastered(), tiers: [10, 50, 150, 300, 1000, 3000, 6000] },
+  { id: 'streak', n: I18n.s("u_90bbfb254e86"), d: (v) => I18n.s("u_e05f2a103ce0", [v]), m: () => (Game.S.learn.best || 0), tiers: [3, 7, 14, 30, 60], special: { 1: 'diploma' } },
+  { id: 'quiz', n: I18n.s("u_030fc74fcd30"), d: (v) => I18n.s("u_e0bcca1112cb", [v]), m: () => Life.L.stats.quizRight, tiers: [50, 200, 500, 1500, 3000] },
+  { id: 'focus', n: I18n.s("u_80c3fc937f3c"), d: (v) => I18n.s("u_297d1a1324bb", [v]), m: () => Math.floor(Game.S.stats.focusMin / 60), tiers: [1, 5, 20, 50, 100] },
+  { id: 'needs', n: I18n.s("u_cedf6efcbce6"), d: (v) => I18n.s("u_502986d86066", [v]), m: () => Life.L.stats.needs, tiers: [5, 20, 50, 120, 300] },
+  { id: 'bond', n: I18n.s("u_65f53813c107"), d: (v) => I18n.s("u_f9356401e524", [v]), m: () => Pets.maxBlv(), tiers: [2, 4, 6, 8, 10], special: { 0: 'cushion' } },
+  { id: 'family', n: I18n.s("u_e6d69ee3ed30"), d: (v) => I18n.s("u_e1d815f855ac", [v]), m: () => Pets.list().length, tiers: [2, 3, 5, 8] },
+  { id: 'grow', n: I18n.s("u_1bcf9f0471be"), d: (v) => I18n.s("u_2d867664352e", [v]), m: () => Pets.maxLv(), tiers: [5, 10, 15, 20] },
+  { id: 'trainer', n: I18n.s("u_0eb77f070c26"), d: (v) => I18n.s("u_b8b25b7bc6b3", [v]), m: () => Pets.trickCount(), tiers: [1, 3, 6, 12, 20, 30] },
+  { id: 'decor', n: I18n.s("u_cf1e9f461d77"), d: (v) => I18n.s("u_7455adb89443", [v]), m: () => Game.S.items.length, tiers: [15, 25, 40, 60] },
+  { id: 'rich', n: I18n.s("u_c7d27cbef76a"), d: (v) => I18n.s("u_aff95f14af4d", [v]), m: () => Life.L.stats.coins, tiers: [500, 2000, 6000, 15000, 40000, 100000, 250000] },
 ];
 const WILT_MAP = { k: 'w', l: 'x', j: 'v', i: 'u' };
 const clamp100 = (v) => Math.max(0, Math.min(100, v));
@@ -99,7 +99,7 @@ const Life = {
   bondNeed(lv) { return Pets.bondNeed(lv); },
   onPet() { const p = Pets.sel(); if (p) Pets.pet(p.id); },
   // ---------- needs ----------
-  targetName(n) { const it = Room.uidMap[n.target]; return it ? ITEMS[it.k].n : '家具'; },
+  targetName(n) { const it = Room.uidMap[n.target]; return it ? ITEMS[it.k].n : I18n.s("u_62bd927cebc0"); },
   needOf(who, key) { return this.L.needs.find(n => NEED_DEFS[n.type].who === who && (who === 'avatar' || (who === 'item' ? n.target === key : n.pet === key))); },
   activeCount() { return this.L.needs.filter(n => !['cat_hungry', 'pet_sick', 'pet_dirty', 'cat_play'].includes(n.type)).length; },
   candidates(type) {
@@ -134,8 +134,8 @@ const Life = {
     }
     if (type === 'ava_hungry' || type === 'ava_sleepy') { if (Game.focusing()) return false; }
     L.needs.push(n);
-    if (!quiet) UI.toast(`新的需求：${def.t(n)}`, def.item ? SUPPLIES[def.item].spr : def.icon, 3.5, { label: '看看', fn: () => UI.needCard(n.id) });
-    if (def.who === 'pet') { const a = Pets.actor(Pets.get(pid)); if (a) Game.bubble(a, a.kind === 'dog' ? (type === 'cat_hungry' ? '汪…肚子餓' : '汪～') : (type === 'cat_hungry' ? '喵…肚子餓' : '喵～'), 2.2); }
+    if (!quiet) UI.toast(I18n.s("u_f044e3e47d6f", [def.t(n)]), def.item ? SUPPLIES[def.item].spr : def.icon, 3.5, { label: I18n.s("u_d87059e4c8ca"), fn: () => UI.needCard(n.id) });
+    if (def.who === 'pet') { const a = Pets.actor(Pets.get(pid)); if (a) Game.bubble(a, a.kind === 'dog' ? (type === 'cat_hungry' ? I18n.s("u_bd6e8b5d6b66") : I18n.s("u_7ef80a98849c")) : (type === 'cat_hungry' ? I18n.s("u_78755e68bf60") : I18n.s("u_b5d7570da46d")), 2.2); }
     UI.refresh('tasks'); UI.badges(); Game.save(); saveSoon();
     return true;
   },
@@ -177,12 +177,12 @@ const Life = {
     this.L.stats.needs++; this.track('need', 1);
     const pos = this.anchor(n) || [120, 120];
     for (let i = 0; i < 4; i++) Room.puff('p_spark', pos[0] - 4 + Math.random() * 8, pos[1] - 6, { vy: -10 - Math.random() * 6, vx: (Math.random() - 0.5) * 10, max: 0.9 });
-    if (!silent) UI.toast(`完成需求：${def.t(n)}`, 'i_sparkle', 3);
+    if (!silent) UI.toast(I18n.s("u_4b087db4d415", [def.t(n)]), 'i_sparkle', 3);
     UI.refresh('tasks'); UI.refresh('need'); UI.badges(); Game.save(); saveSoon();
   },
   // ---------- using supplies ----------
   use(id, need, pid) {
-    const L = this.L; if (!this.has(id)) { UI.toast(`沒有${SUPPLIES[id].n}了，可以學習換取或到商店買`, SUPPLIES[id].spr, 3.5); return false; }
+    const L = this.L; if (!this.has(id)) { UI.toast(I18n.s("u_a69ae09bed39", [SUPPLIES[id].n]), SUPPLIES[id].spr, 3.5); return false; }
     const find = (type) => need && need.type === type ? need : L.needs.find(n => n.type === type);
     if (SUPPLIES[id].pet) {
       const p = Pets.get(need && need.pet != null ? need.pet : pid != null ? pid : (Pets.sel() || {}).id); if (!p) return false;
@@ -195,11 +195,11 @@ const Life = {
       return ok;
     }
     let target = null;
-    if (id === 'coffee') { L.buff.xp = true; if (Game.avatar) { Game.avatar.happy = 2; Game.bubble(Game.avatar, '精神來了！', 2); } target = find('ava_sleepy'); }
-    else if (id === 'onigiri') { L.buff.coin = true; if (Game.avatar) { Game.avatar.happy = 2; Game.bubble(Game.avatar, '好吃！', 2); } target = find('ava_hungry'); }
+    if (id === 'coffee') { L.buff.xp = true; if (Game.avatar) { Game.avatar.happy = 2; Game.bubble(Game.avatar, I18n.s("u_42dff08b43a0"), 2); } target = find('ava_sleepy'); }
+    else if (id === 'onigiri') { L.buff.coin = true; if (Game.avatar) { Game.avatar.happy = 2; Game.bubble(Game.avatar, I18n.s("u_6cd8481a5ee6"), 2); } target = find('ava_hungry'); }
     else {
       const type = { fertilizer: 'plant_wilt', spray: 'dusty', bulb: 'bulb' }[id]; target = find(type);
-      if (!target) { UI.toast({ fertilizer: '植物們都很健康', spray: '家具都很乾淨', bulb: '燈都好好的' }[id], SUPPLIES[id].spr); return false; }
+      if (!target) { UI.toast({ fertilizer: I18n.s("u_3024dacc1cb9"), spray: I18n.s("u_3383157d3573"), bulb: I18n.s("u_2cb9673a0494") }[id], SUPPLIES[id].spr); return false; }
       const it = Room.uidMap[target.target];
       if (it) { const cv = Room.itemCanvas(it); for (let i = 0; i < 6; i++) Room.puff(id === 'fertilizer' ? 'p_leaf' : id === 'spray' ? 'p_bubble' : 'p_spark', it.x + Math.random() * cv.width, it.y + Math.random() * 8, { vy: -8, vx: (Math.random() - 0.5) * 8, max: 1, wob: 6 }); }
     }
@@ -236,7 +236,7 @@ const Life = {
       if (ev === 'buy' && t.k === 'buy' && data.kind === 'item' && data.id === t.item) hit = true;
       if (!hit) continue;
       t.prog = Math.min(t.need, t.prog + n);
-      if (t.prog >= t.need) UI.toast(`任務完成：${TASK_DEFS[t.k].t(t)}，到「任務」領獎勵`, 'i_task', 3.5, { label: '領取', fn: () => UI.openTasks('daily') });
+      if (t.prog >= t.need) UI.toast(I18n.s("u_202ec2a6caff", [TASK_DEFS[t.k].t(t)]), 'i_task', 3.5, { label: I18n.s("u_92edf81e0715"), fn: () => UI.openTasks('daily') });
     }
     this.checkAch(); UI.refresh('tasks'); UI.badges();
   },
@@ -246,13 +246,13 @@ const Life = {
     let extra = 0; if (t.k === 'vocab') extra = Math.min(50, (Learn.L.streak || 0) * 5);
     Game.reward(rw.c + extra, rw.x, 'task');
     let got = ''; if (rw.item) { const s = this.randomSupply(); this.give(s, 1); got = `、${SUPPLIES[s].n}`; }
-    UI.toast(`領取 ${rw.c + extra} 金幣、${rw.x} 經驗${got}` + (extra ? `（連續 ${Learn.L.streak} 天加碼 ${extra}）` : ''), 'i_coin', 3.5);
+    UI.toast(I18n.s("u_783c11ebd3ea", [rw.c + extra, rw.x, got]) + (extra ? I18n.s("u_9f22a86fd942", [Learn.L.streak, extra]) : ''), 'i_coin', 3.5);
     UI.refresh('tasks'); UI.badges(); Game.save(); saveSoon();
   },
   claimBonus() {
     const D = this.L.daily; if (D.bonus || !D.tasks.every(t => t.claimed)) return;
     D.bonus = true; Game.reward(40, 30, 'task'); const a = this.randomSupply(), b = this.randomSupply(); this.give(a, 1); this.give(b, 1);
-    UI.toast(`今天的任務全部完成！獲得 40 金幣、30 經驗、${SUPPLIES[a].n}、${SUPPLIES[b].n}`, 'i_star', 4.5);
+    UI.toast(I18n.s("u_49f4d2a97a54", [SUPPLIES[a].n, SUPPLIES[b].n]), 'i_star', 4.5);
     UI.refresh('tasks'); UI.badges(); Game.save(); saveSoon();
   },
   // ---------- achievements ----------
@@ -263,7 +263,7 @@ const Life = {
     const rw = this.achReward(a, st.done); this.L.ach[id] = st.done + 1;
     Game.reward(rw.c, rw.x, 'task'); const s = this.randomSupply(); this.give(s, 1);
     if (rw.item) Game.S.inv[rw.item] = (Game.S.inv[rw.item] || 0) + 1;
-    UI.toast(`成就「${a.n}」：${a.d(st.next)}！獲得 ${rw.c} 金幣、${rw.x} 經驗、${SUPPLIES[s].n}` + (rw.item ? `，還有「${ITEMS[rw.item].n}」` : ''), 'i_star', 5);
+    UI.toast(I18n.s("u_4edeea2f249d", [a.n, a.d(st.next), rw.c, rw.x, SUPPLIES[s].n]) + (rw.item ? I18n.s("u_26fd273f6374", [ITEMS[rw.item].n]) : ''), 'i_star', 5);
     UI.refresh('tasks'); UI.refresh('storage'); UI.badges(); Game.save(); saveSoon();
   },
   checkAch() { let n = 0; for (const a of ACHS) if (this.achState(a).ready) n++; this._achReady = n; },
@@ -308,8 +308,8 @@ const Life = {
 
 /* ---------------- windows ---------------- */
 Object.assign(UI.WIN, {
-  tasks: { t: '任務', i: 'i_task', w: 430, at: ['r', 0] },
-  need: { t: '需求', i: 'i_sparkle', w: 340, at: ['c', 0], modal: true },
+  tasks: { t: I18n.s("u_c72c7750015b"), i: 'i_task', w: 430, at: ['r', 0] },
+  need: { t: I18n.s("u_128a7a03668b"), i: 'i_sparkle', w: 340, at: ['c', 0], modal: true },
 });
 Object.assign(UI, {
   tasksTab: 'daily', needId: null,
@@ -317,7 +317,7 @@ Object.assign(UI, {
   needCard(id) { this.needId = id; this.openWin('need'); },
   rewardChips(rw, extraItem) {
     return h('span', { class: 'rw' }, h('span', { class: 'rwc' }, ico('i_coin', 16), h('b', { class: 'num', text: String(rw.c) })), h('span', { class: 'rwc' }, ico('i_star', 16), h('b', { class: 'num', text: String(rw.x) })),
-      rw.b ? h('span', { class: 'rwc' }, ico('i_heart', 16), h('b', { class: 'num', text: String(rw.b) })) : null, (rw.item || extraItem) ? h('span', { class: 'rwc', title: '隨機道具' }, ico('i_bag', 16)) : null);
+      rw.b ? h('span', { class: 'rwc' }, ico('i_heart', 16), h('b', { class: 'num', text: String(rw.b) })) : null, (rw.item || extraItem) ? h('span', { class: 'rwc', title: I18n.s("u_6d12c2a80ce5") }, ico('i_bag', 16)) : null);
   },
   go(where, t) {
     if (where === 'swap') return this.openWin('swap');
@@ -334,9 +334,9 @@ Object.assign(UI, {
   w_tasks() {
     Life.ensureDaily(); const L = Life.L, tab = this.tasksTab;
     const nNeeds = L.needs.length;
-    const tabs = h('div', { class: 'tabs' }, ...[['daily', '每日任務'], ['needs', `需求${nNeeds ? '（' + nNeeds + '）' : ''}`], ['ach', '成就'], ...(typeof Team !== 'undefined' && Social.enabled() ? [['team', '團隊' + (Team.claimableN() + Team.invites.length ? `（${Team.claimableN() + Team.invites.length}）` : '')]] : [])].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
+    const tabs = h('div', { class: 'tabs' }, ...[['daily', I18n.s("u_de86b365c994")], ['needs', I18n.s("u_f360055f5688", [nNeeds ? '（' + nNeeds + '）' : ''])], ['ach', I18n.s("u_52b0e1703d14")], ...(typeof Team !== 'undefined' && Social.enabled() ? [['team', I18n.s("u_833bf74895bf") + (Team.claimableN() + Team.invites.length ? `（${Team.claimableN() + Team.invites.length}）` : '')]] : [])].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => { this.tasksTab = k; this.refresh('tasks'); } }, l)));
     const cl = Life.comfortLv();
-    const head = h('div', { class: 'tsum' }, h('span', {}, ico('i_theme', 18), `舒適度 Lv ${cl}`), h('span', { class: 'hint', text: cl ? `金幣收入 +${cl * 3}%` : '多擺些家具提升舒適度，金幣收入會增加' }), h('span', {}, ico('i_fire', 18), `連續 ${Learn.L.streak || 0} 天`));
+    const head = h('div', { class: 'tsum' }, h('span', {}, ico('i_theme', 18), I18n.s("u_5dd67dfb6a28", [cl])), h('span', { class: 'hint', text: cl ? I18n.s("u_4a11f0e116df", [cl * 3]) : I18n.s("u_9db58cdffadc") }), h('span', {}, ico('i_fire', 18), I18n.s("u_eae047483b84", [Learn.L.streak || 0])));
     const body = [];
     if (tab === 'daily') {
       const D = L.daily;
@@ -344,31 +344,31 @@ Object.assign(UI, {
         const def = TASK_DEFS[t.k], rw = Life.taskReward(t), done = t.prog >= t.need;
         let goBtn = null;
         const tier = def.tiers ? Challenge.tierOf(t) : null, info = def.tiers ? Challenge.info(t.k) : null;
-        if (!done && def.go) goBtn = h('button', { class: 'chip sm', onclick: () => { if (def.go === 'shopItem') { this.shopTab = ITEMS[t.item] ? ITEMS[t.item].cat : 'furniture'; this.shopFocus = t.item; this.openWin('shop'); } else this.go(def.go, t); } }, def.go === 'chal' ? (t.prog > 0 || (t.got && t.got.length) ? '繼續' : '開始') : '前往');
+        if (!done && def.go) goBtn = h('button', { class: 'chip sm', onclick: () => { if (def.go === 'shopItem') { this.shopTab = ITEMS[t.item] ? ITEMS[t.item].cat : 'furniture'; this.shopFocus = t.item; this.openWin('shop'); } else this.go(def.go, t); } }, def.go === 'chal' ? (t.prog > 0 || (t.got && t.got.length) ? I18n.s("u_d9d1f08fa5ce") : I18n.s("u_cc147e162c82")) : I18n.s("u_fa96079c3b2f"));
         // tasks with tiers: pick normal or hard first (hard = x1.5 reward); fixed for the day once chosen
         if (def.tiers && !tier && !t.claimed) {
           const base = TASK_DEFS[t.k].rw || t.rw;
           goBtn = h('div', { class: 'tierpick' },
-            h('button', { class: 'chip sm', title: info.d.n, onclick: () => Challenge.choose(t.k, 'n') }, `普通 ${def.tiers.n}`),
-            h('button', { class: 'chip sm hard', title: `${info.d.h}，獎勵 ×1.5（${Math.round(base.c * 1.5)} 金幣）`, onclick: () => Challenge.choose(t.k, 'h') }, `困難 ${def.tiers.h}`));
+            h('button', { class: 'chip sm', title: info.d.n, onclick: () => Challenge.choose(t.k, 'n') }, I18n.s("u_86206c8bb407", [def.tiers.n])),
+            h('button', { class: 'chip sm hard', title: I18n.s("u_5b94e67e5684", [info.d.h, Math.round(base.c * 1.5)]), onclick: () => Challenge.choose(t.k, 'h') }, I18n.s("u_928d54e1087c", [def.tiers.h])));
         }
         body.push(h('div', { class: 'task' + (t.claimed ? ' claimed' : done ? ' ready' : '') },
           h('div', { class: 'task-main' }, h('div', { class: 'task-t' }, def.t(t), tier ? h('span', { class: 'tiertag' + (tier === 'h' ? ' hard' : ''), text: TIER_N[tier] }) : null),
-            info ? h('div', { class: 'hint', text: tier ? info.d[tier] : `普通：${info.d.n}。困難：${info.d.h}，獎勵 ×1.5。` }) : null, h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(t.prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${t.prog}/${t.need}` }), this.rewardChips(rw), t.k === 'vocab' && Learn.L.streak ? h('span', { class: 'hint', text: `連續加碼 +${Math.min(50, Learn.L.streak * 5)}` }) : null)),
-          t.claimed ? h('span', { class: 'own', text: '已領取' }) : done ? h('button', { class: 'chip sm primary', onclick: () => Life.claimTask(i) }, '領取') : goBtn));
+            info ? h('div', { class: 'hint', text: tier ? info.d[tier] : I18n.s("u_09a921be1fa5", [info.d.n, info.d.h]) }) : null, h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(t.prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${t.prog}/${t.need}` }), this.rewardChips(rw), t.k === 'vocab' && Learn.L.streak ? h('span', { class: 'hint', text: I18n.s("u_2d0d007959e0", [Math.min(50, Learn.L.streak * 5)]) }) : null)),
+          t.claimed ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : done ? h('button', { class: 'chip sm primary', onclick: () => Life.claimTask(i) }, I18n.s("u_92edf81e0715")) : goBtn));
       });
       const all = D.tasks.every(t => t.claimed);
-      body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: '全部完成獎勵' }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: '＋2 個道具' }))),
-        D.bonus ? h('span', { class: 'own', text: '已領取' }) : h('button', { class: 'chip sm primary', disabled: !all, onclick: () => Life.claimBonus() }, '領取')));
-      body.push(h('p', { class: 'hint', text: '每天早上 6 點換一批新任務。英文挑戰不計時，答錯不用重來，可以中途離開，答對的字都會留著。' }));
+      body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: I18n.s("u_558b6255aa95") }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: I18n.s("u_1f71b7077ef3") }))),
+        D.bonus ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : h('button', { class: 'chip sm primary', disabled: !all, onclick: () => Life.claimBonus() }, I18n.s("u_92edf81e0715"))));
+      body.push(h('p', { class: 'hint', text: I18n.s("u_06ee916e0076") }));
     } else if (tab === 'team') {
       body.push(...this.w_team());
     } else if (tab === 'needs') {
-      if (!L.needs.length) body.push(h('div', { class: 'empty' }, ico('i_sparkle', 40), h('p', { text: '目前沒有需求。房間裡偶爾會冒出泡泡，點泡泡或點對象就能處理。' })));
+      if (!L.needs.length) body.push(h('div', { class: 'empty' }, ico('i_sparkle', 40), h('p', { text: I18n.s("u_17ebf8e992e0") })));
       for (const n of L.needs) {
         const def = NEED_DEFS[n.type], icon = def.item ? SUPPLIES[def.item].spr : def.icon;
         body.push(h('div', { class: 'task' }, ico(icon, 32), h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: def.t(n) }), h('div', { class: 'hint', text: def.d }), h('div', { class: 'task-meta' }, this.rewardChips(def.rw))),
-          h('button', { class: 'chip sm primary', onclick: () => this.needCard(n.id) }, '處理')));
+          h('button', { class: 'chip sm primary', onclick: () => this.needCard(n.id) }, I18n.s("u_cece58780d3c"))));
       }
     } else {
       for (const a of ACHS) {
@@ -376,51 +376,51 @@ Object.assign(UI, {
         const rw = maxed ? null : Life.achReward(a, st.done);
         body.push(h('div', { class: 'task' + (st.ready ? ' ready' : maxed ? ' claimed' : '') },
           h('div', { class: 'ach-tier num', text: `${st.done}/${a.tiers.length}` }),
-          h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: a.n }), h('div', { class: 'hint', text: maxed ? '全部達成！' : a.d(goal) }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.min(100, Math.round(st.v / goal * 100))}%` })),
+          h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: a.n }), h('div', { class: 'hint', text: maxed ? I18n.s("u_f8a52655ab9d") : a.d(goal) }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.min(100, Math.round(st.v / goal * 100))}%` })),
             h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${Math.min(st.v, goal)}/${goal}` }), rw ? this.rewardChips(rw, true) : null, rw && rw.item ? h('span', { class: 'hint', text: `＋「${ITEMS[rw.item].n}」` }) : null)),
-          st.ready ? h('button', { class: 'chip sm primary', onclick: () => Life.claimAch(a.id) }, '領取') : null));
+          st.ready ? h('button', { class: 'chip sm primary', onclick: () => Life.claimAch(a.id) }, I18n.s("u_92edf81e0715")) : null));
       }
     }
     // the redeem box only lives on the achievements tab
     if (tab !== 'ach') return [tabs, head, h('div', { class: 'scroll tasks' }, ...body)];
-    const code = h('input', { id: 'redeem-in', type: 'text', maxlength: '24', autocomplete: 'off', spellcheck: 'false', placeholder: '輸入兌換碼', 'aria-label': '兌換碼', onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { Dev.redeem(e.target.value); e.target.value = ''; } } });
-    const redeem = h('div', { class: 'row redeem' }, h('div', { class: 'inset grow' }, code), h('button', { class: 'chip sm', onclick: () => { Dev.redeem(code.value); code.value = ''; } }, '兌換'), Dev.on ? h('button', { class: 'chip sm', onclick: () => this.openWin('dev') }, ico('i_dev', 16), '開發者') : null);
+    const code = h('input', { id: 'redeem-in', type: 'text', maxlength: '24', autocomplete: 'off', spellcheck: 'false', placeholder: I18n.s("u_29c97f589c39"), 'aria-label': I18n.s("u_af00727f615e"), onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { Dev.redeem(e.target.value); e.target.value = ''; } } });
+    const redeem = h('div', { class: 'row redeem' }, h('div', { class: 'inset grow' }, code), h('button', { class: 'chip sm', onclick: () => { Dev.redeem(code.value); code.value = ''; } }, I18n.s("u_312791e41e6a")), Dev.on ? h('button', { class: 'chip sm', onclick: () => this.openWin('dev') }, ico('i_dev', 16), I18n.s("u_7f4b958db72f")) : null);
     return [tabs, head, h('div', { class: 'scroll tasks' }, ...body), redeem];
   },
   w_need() {
     const n = Life.L.needs.find(x => x.id === this.needId);
-    if (!n) return [h('div', { class: 'empty' }, ico('i_sparkle', 40), h('p', { text: '這個需求已經完成了。' })), h('button', { class: 'chip', onclick: () => this.closeWin('need') }, '好')];
+    if (!n) return [h('div', { class: 'empty' }, ico('i_sparkle', 40), h('p', { text: I18n.s("u_d7be2856e519") })), h('button', { class: 'chip', onclick: () => this.closeWin('need') }, I18n.s("u_f867f3417859"))];
     const def = NEED_DEFS[n.type], sup = def.item && SUPPLIES[def.item];
     const out = [h('div', { class: 'need-head' }, ico(sup ? sup.spr : def.icon, 48), h('div', {}, h('div', { class: 'gift-t', text: def.t(n) }), h('p', { class: 'hint', text: def.d }))),
-      h('div', { class: 'task-meta' }, h('span', { class: 'hint', text: '完成獎勵' }), this.rewardChips(def.rw))];
+      h('div', { class: 'task-meta' }, h('span', { class: 'hint', text: I18n.s("u_8c9d5a0a3520") }), this.rewardChips(def.rw))];
     // the care page only helps where it can actually do the job (feeding, grooming, playing, training)
-    if (n.pet != null && !['cat_pet', 'pet_want'].includes(n.type)) { const pp = Pets.get(n.pet); if (pp) out.splice(1, 0, h('button', { class: 'chip sm', onclick: () => { this.closeWin('need'); Pets.select(pp.id, n.type === 'pet_train' ? 'train' : 'care'); } }, ico('i_paw', 16), `打開${pp.name}的照顧頁`)); }
+    if (n.pet != null && !['cat_pet', 'pet_want'].includes(n.type)) { const pp = Pets.get(n.pet); if (pp) out.splice(1, 0, h('button', { class: 'chip sm', onclick: () => { this.closeWin('need'); Pets.select(pp.id, n.type === 'pet_train' ? 'train' : 'care'); } }, ico('i_paw', 16), I18n.s("u_4baa9af5fc87", [pp.name]))); }
     if (sup) {
       const have = Life.L.bag[def.item] || 0;
       // pet supplies are picked up and used on the pet in the room; the card closes so the room is visible
       const forPet = n.pet != null && sup.pet, take = (id) => () => { if (PetPlay.pick(id, n.pet)) this.closeWin('need'); };
-      out.push(h('button', { class: 'chip primary', disabled: !have, onclick: forPet ? take(def.item) : () => { Life.use(def.item, n); } }, ico(sup.spr, 22), !have ? `沒有${sup.n}` : forPet ? `拿起${sup.n}（有 ${have} 個）` : `使用${sup.n}（有 ${have} 個）`));
-      for (const alt of def.alt || []) if (Life.L.bag[alt]) out.push(h('button', { class: 'chip', onclick: forPet && SUPPLIES[alt].pet ? take(alt) : () => { Life.use(alt, n); } }, ico(SUPPLIES[alt].spr, 22), `${forPet ? '改拿' : '改用'}${SUPPLIES[alt].n}（有 ${Life.L.bag[alt]} 個）`));
-      if (n.type === 'pet_dirty' && Pets.Z.tools.brush) out.push(h('button', { class: 'chip', onclick: take('brush') }, ico('t_brush', 22), '拿起梳子幫牠梳一梳'));
-      if (n.type === 'cat_play') for (const t of ['wand', 'yarn', 'ball']) if (Pets.Z.tools[t]) { out.push(h('button', { class: 'chip', onclick: take(t) }, ico(PET_TOOLS[t].spr, 22), `拿起${PET_TOOLS[t].n}陪牠玩`)); break; }
-      out.push(h('button', { class: 'chip', onclick: () => { this.closeWin('need'); Learn.start('need', { item: def.item, needId: n.id }); } }, ico('i_learn', 22), `複習 5 個單字換${sup.n}`));
-      out.push(h('button', { class: 'chip', disabled: Game.S.coins < sup.price, onclick: () => { Life.buySupply(def.item, 1); } }, ico('i_coin', 20), `用 ${sup.price} 金幣買一個`));
+      out.push(h('button', { class: 'chip primary', disabled: !have, onclick: forPet ? take(def.item) : () => { Life.use(def.item, n); } }, ico(sup.spr, 22), !have ? I18n.s("u_290ddcf07458", [sup.n]) : forPet ? I18n.s("u_23269552b613", [sup.n, have]) : I18n.s("u_f67f47c378b7", [sup.n, have])));
+      for (const alt of def.alt || []) if (Life.L.bag[alt]) out.push(h('button', { class: 'chip', onclick: forPet && SUPPLIES[alt].pet ? take(alt) : () => { Life.use(alt, n); } }, ico(SUPPLIES[alt].spr, 22), I18n.s("u_bd00da1153b8", [forPet ? I18n.s("u_8d261136317d") : I18n.s("u_9369ac8db7c9"), SUPPLIES[alt].n, Life.L.bag[alt]])));
+      if (n.type === 'pet_dirty' && Pets.Z.tools.brush) out.push(h('button', { class: 'chip', onclick: take('brush') }, ico('t_brush', 22), I18n.s("u_300814c1ae42")));
+      if (n.type === 'cat_play') for (const t of ['wand', 'yarn', 'ball']) if (Pets.Z.tools[t]) { out.push(h('button', { class: 'chip', onclick: take(t) }, ico(PET_TOOLS[t].spr, 22), I18n.s("u_0cabb48b4b6d", [PET_TOOLS[t].n]))); break; }
+      out.push(h('button', { class: 'chip', onclick: () => { this.closeWin('need'); Learn.start('need', { item: def.item, needId: n.id }); } }, ico('i_learn', 22), I18n.s("u_e31c3c0817cf", [sup.n])));
+      out.push(h('button', { class: 'chip', disabled: Game.S.coins < sup.price, onclick: () => { Life.buySupply(def.item, 1); } }, ico('i_coin', 20), I18n.s("u_6d192649509f", [sup.price])));
     } else {
       if (n.type === 'cat_pet') {
         const pp = Pets.get(n.pet), a = pp && Pets.actor(pp), busy = a && ['eat', 'zoom', 'trick'].includes(a.state);
-        out.push(h('p', { class: 'hint', text: `已經摸了 ${n.prog || 0} 下，還差 ${Math.max(0, 3 - (n.prog || 0))} 下。` }));
+        out.push(h('p', { class: 'hint', text: I18n.s("u_d3d64079ee51", [n.prog || 0, Math.max(0, 3 - (n.prog || 0))]) }));
         // the button only takes you to the pet: the card closes, the pet sits still and asks to be petted; the petting itself happens in the room
-        out.push(h('button', { class: 'chip primary', disabled: !a, onclick: () => { this.closeWin('need'); UI.askPet(n.pet, n.id); } }, ico('n_heart', 20), !a ? `${pp ? pp.name : '牠'}不在房間裡` : busy ? '摸摸牠（牠正在忙，等一下會過來）' : '摸摸牠'));
+        out.push(h('button', { class: 'chip primary', disabled: !a, onclick: () => { this.closeWin('need'); UI.askPet(n.pet, n.id); } }, ico('n_heart', 20), !a ? I18n.s("u_0c8a925bd452", [pp ? pp.name : I18n.s("u_7cca8843b3a7")]) : busy ? I18n.s("u_c3ed33f9591a") : I18n.s("u_4174b8aa3f64")));
       }
       if (n.type === 'pet_want' && ITEMS[n.k]) {
         const own = (Game.S.inv[n.k] || 0) > 0;
         out.push(h('div', { class: 'need-want' }, sprPreview(SPR.get(ITEMS[n.k].spr, ITEMS[n.k].map, false, n.k), 80, 3)));
-        out.push(own ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); Game.place(n.k); } }, ico('i_brush', 20), '從收納箱擺出來') : h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); this.shopTab = ITEMS[n.k].cat; this.shopFocus = n.k; this.openWin('shop'); } }, ico('i_shop', 20), `到商店買（${ITEMS[n.k].price} 金幣）`));
+        out.push(own ? h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); Game.place(n.k); } }, ico('i_brush', 20), I18n.s("u_4633809a97c8")) : h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); this.shopTab = ITEMS[n.k].cat; this.shopFocus = n.k; this.openWin('shop'); } }, ico('i_shop', 20), I18n.s("u_a165be9d6985", [ITEMS[n.k].price])));
       }
-      if (n.type === 'pet_train') out.push(h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); Pets.select(n.pet, 'train'); } }, ico('i_learn', 20), '去訓練'));
-      if (n.type === 'arrange') out.push(h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); this.stoTab = 'items'; this.openWin('storage'); } }, ico('i_box', 20), '打開收納箱'));
+      if (n.type === 'pet_train') out.push(h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); Pets.select(n.pet, 'train'); } }, ico('i_learn', 20), I18n.s("u_ce19fb077ce5")));
+      if (n.type === 'arrange') out.push(h('button', { class: 'chip primary', onclick: () => { this.closeWin('need'); this.stoTab = 'items'; this.openWin('storage'); } }, ico('i_box', 20), I18n.s("u_8267d86834bf")));
     }
-    out.push(h('button', { class: 'chip', onclick: () => this.closeWin('need') }, '晚點再說'));
+    out.push(h('button', { class: 'chip', onclick: () => this.closeWin('need') }, I18n.s("u_df65fcb0e4f9")));
     return out;
   },
   badges() {
@@ -433,7 +433,7 @@ Object.assign(UI, {
   },
 });
 Life.buySupply = function (id, n) {
-  const sup = SUPPLIES[id], cost = sup.price * n; if (Game.S.coins < cost) { UI.toast(`金幣不夠，還差 ${cost - Game.S.coins}`, 'i_coin'); return false; }
+  const sup = SUPPLIES[id], cost = sup.price * n; if (Game.S.coins < cost) { UI.toast(I18n.s("u_55ac75b47b82", [cost - Game.S.coins]), 'i_coin'); return false; }
   Game.S.coins -= cost; this.give(id, n); this.track('buy', 1, { kind: 'supply', id });
-  UI.toast(`買了 ${n} 個${sup.n}`, sup.spr, 2.4); UI.hud(true); UI.refresh('shop'); UI.refresh('need'); Game.save(); saveSoon(); return true;
+  UI.toast(I18n.s("u_5eb6c2bd6dd0", [n, sup.n]), sup.spr, 2.4); UI.hud(true); UI.refresh('shop'); UI.refresh('need'); Game.save(); saveSoon(); return true;
 };

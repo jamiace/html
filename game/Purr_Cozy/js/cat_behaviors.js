@@ -15,16 +15,16 @@ const CatScenes = {
 };
 (function(){
  const C=CatScenes,def=(id,match,act,weight)=>C.defs.push({id,match,act,weight});
- def('window_watch',d=>!!d.window,(a,it)=>{C.pause(a,'look',7,()=>C.pause(a,'beg',1.6,()=>C.pause(a,'look',5)));C.say(a,Room.env.rain?'滴答、滴答…':'外面有什麼？')},a=>Room.env.rain||PetAI.has(a,'H12')?3:1);
- def('warm_nap',(d,it)=>!!d.light&&(!d.toggle||it.on),(a,it)=>{C.pause(a,'stretch',2,()=>{a.state='sleep';a.timer=24+Math.random()*16;PetAI.sleepSpin(a)});C.say(a,'這裡暖暖的')},a=>PetAI.has(a,'H13')?3:1);
- def('rug_knead',d=>d.layer==='rug',(a,it)=>{C.pause(a,'knead',5,()=>{a.state='sleep';a.timer=22;PetAI.sleepSpin(a)});C.say(a,'踩一踩，再躺下')},a=>PetAI.has(a,'H09')?3:1);
- def('leaf_sniff',d=>!!d.react&&d.react==='rustle',(a,it)=>{C.pause(a,'look',3,()=>{it.shake=.4;C.pause(a,'beg',2,()=>C.pause(a,'groom',3))});C.say(a,'葉子動了耶')});
- def('gift_ribbon',(d,it)=>/gift_tower|yarn_basket/.test(it.k),(a,it)=>{C.pause(a,'look',2,()=>{it.shake=.5;C.pause(a,'scratch',3,()=>C.pause(a,'look',4))});C.say(a,'這個結，讓我研究一下')});
- def('balloon_reach',(d,it)=>it.k==='balloon_bouquet',(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'beg',2,()=>{it.shake=.5;C.pause(a,'stare',4)}));C.say(a,'再高一點點…')});
- def('desk_inspect',d=>!!d.desk,(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'groom',3,()=>C.pause(a,'lie',8)));C.say(a,Game.focusing()?'我在這裡陪你':'桌下也是我的位置')},a=>PetAI.has(a,'H14')?3:1);
- def('litter_inspect',d=>!!d.litter,(a,it)=>{C.pause(a,'look',3,()=>C.pause(a,'knead',2));C.say(a,it.used?'沙沙…該清一下了':'嗯，乾淨的')});
- def('clock_listen',d=>!!d.clock||d.id==='constellation_clock',(a,it)=>{C.pause(a,'look',5,()=>{a.flip=!a.flip;C.pause(a,'stare',3)});C.say(a,'滴答…？')});
- def('music_sway',d=>!!d.music,(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'stretch',2,()=>C.pause(a,'lie',7)));if(Music.playing)Room.puff('p_note',a.x+5,a.y-18,{vy:-5});C.say(a,'這首我好像聽過')},()=>Music.playing?3:0);
+ def('window_watch',d=>!!d.window,(a,it)=>{C.pause(a,'look',7,()=>C.pause(a,'beg',1.6,()=>C.pause(a,'look',5)));C.say(a,Room.env.rain?I18n.s("u_194e49cd88e6"):I18n.s("u_692cf7299412"))},a=>Room.env.rain||PetAI.has(a,'H12')?3:1);
+ def('warm_nap',(d,it)=>!!d.light&&(!d.toggle||it.on),(a,it)=>{C.pause(a,'stretch',2,()=>{a.state='sleep';a.timer=24+Math.random()*16;PetAI.sleepSpin(a)});C.say(a,I18n.s("u_348a8af6faff"))},a=>PetAI.has(a,'H13')?3:1);
+ def('rug_knead',d=>d.layer==='rug',(a,it)=>{C.pause(a,'knead',5,()=>{a.state='sleep';a.timer=22;PetAI.sleepSpin(a)});C.say(a,I18n.s("u_12bddeacb27c"))},a=>PetAI.has(a,'H09')?3:1);
+ def('leaf_sniff',d=>!!d.react&&d.react==='rustle',(a,it)=>{C.pause(a,'look',3,()=>{it.shake=.4;C.pause(a,'beg',2,()=>C.pause(a,'groom',3))});C.say(a,I18n.s("u_3a93302a4199"))});
+ def('gift_ribbon',(d,it)=>/gift_tower|yarn_basket/.test(it.k),(a,it)=>{C.pause(a,'look',2,()=>{it.shake=.5;C.pause(a,'scratch',3,()=>C.pause(a,'look',4))});C.say(a,I18n.s("u_da14bec663ae"))});
+ def('balloon_reach',(d,it)=>it.k==='balloon_bouquet',(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'beg',2,()=>{it.shake=.5;C.pause(a,'stare',4)}));C.say(a,I18n.s("u_6d24d8425684"))});
+ def('desk_inspect',d=>!!d.desk,(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'groom',3,()=>C.pause(a,'lie',8)));C.say(a,Game.focusing()?I18n.s("u_6c12cbc69aff"):I18n.s("u_42322a691106"))},a=>PetAI.has(a,'H14')?3:1);
+ def('litter_inspect',d=>!!d.litter,(a,it)=>{C.pause(a,'look',3,()=>C.pause(a,'knead',2));C.say(a,it.used?I18n.s("u_17b4685a2334"):I18n.s("u_615571e818d1"))});
+ def('clock_listen',d=>!!d.clock||d.id==='constellation_clock',(a,it)=>{C.pause(a,'look',5,()=>{a.flip=!a.flip;C.pause(a,'stare',3)});C.say(a,I18n.s("u_ac2417a9a24d"))});
+ def('music_sway',d=>!!d.music,(a,it)=>{C.pause(a,'look',4,()=>C.pause(a,'stretch',2,()=>C.pause(a,'lie',7)));if(Music.playing)Room.puff('p_note',a.x+5,a.y-18,{vy:-5});C.say(a,I18n.s("u_f612dd506789"))},()=>Music.playing?3:0);
  const think=Pet.prototype.think;Pet.prototype.think=function(){if(this.careLock)return;if(Room.state===Game.S&&Lights.mode==='on'&&!Room.edit&&Math.random()<.5){if(Math.random()<.3&&CatScenes.friend(this))return;if(CatScenes.choose(this))return;}return think.call(this)};
  const load=Game.load.bind(Game);Game.load=function(snapshot){const r=load(snapshot);if(this.S.gates){for(const g of [this.S.gates.owner,...Object.values(this.S.gates.pets||{})])if(g&&g.attempt){g.retryAt=Math.max(g.retryAt||0,g.attempt.at+LevelGate.cooldown);g.attempt=null;g.passed=false;}}return r};
 })();

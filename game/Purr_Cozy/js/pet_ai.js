@@ -9,35 +9,35 @@
    - players never see the lists; developer mode shows them
    ============================================================ */
 const HABITS = {
-  H01: { n: '窗邊發呆', d: '閒暇時走到窗前看外面' },
-  H02: { n: '睡前轉圈', d: '躺下睡覺前先轉兩圈' },
-  H03: { n: '喜歡角落', d: '常常窩到房間角落' },
-  H04: { n: '巡邏', d: '沿著房間走一圈，每個點停一下' },
-  H05: { n: '偷看主人', d: '偶爾停下來轉頭看你' },
-  H06: { n: '喜歡高處', d: '喜歡跳到櫃子、床這類高的地方' },
-  H07: { n: '飯後整理', d: '吃完飯會舔爪子整理' },
-  H08: { n: '跟著同伴', d: '會跟在別的寵物後面走一段' },
-  H09: { n: '喜歡地毯', d: '常常跑到地毯上趴著' },
-  H10: { n: '看魚', d: '房間有魚缸、水族箱時會去盯著看' },
-  H11: { n: '聽音樂', d: '放音樂時會靠近唱機或喇叭' },
-  H12: { n: '看雨', d: '下雨時特別常到窗邊' },
-  H13: { n: '找暖光', d: '喜歡趴在亮著的燈、暖爐旁邊' },
-  H14: { n: '躲桌下', d: '會鑽到桌子底下趴著' },
-  H15: { n: '伸懶腰', d: '閒暇時伸個大懶腰' },
-  H16: { n: '聞新物件', d: '新擺的家具會過去聞一聞' },
-  H17: { n: '回頭確認', d: '走一走會停下來回頭看' },
-  H18: { n: '坐姿整理', d: '坐著坐著會換成趴著' },
-  H19: { n: '追自己的尾巴', d: '偶爾原地追尾巴' },
-  H20: { n: '抬頭看燈', d: '會抬頭盯著亮著的燈' },
+  H01: { n: I18n.s("u_818330441314"), d: I18n.s("u_e6a9685ab0fc") },
+  H02: { n: I18n.s("u_fa584602c492"), d: I18n.s("u_ff449729b8a9") },
+  H03: { n: I18n.s("u_2b5477cbbd8f"), d: I18n.s("u_2835ce5fc97b") },
+  H04: { n: I18n.s("u_4b88a5a6dc89"), d: I18n.s("u_53905fd065a4") },
+  H05: { n: I18n.s("u_d41239b89065"), d: I18n.s("u_891e8a8bbf2a") },
+  H06: { n: I18n.s("u_6b5344c2b0a9"), d: I18n.s("u_10e60576c483") },
+  H07: { n: I18n.s("u_379319f1b7f3"), d: I18n.s("u_ca57fb7821ee") },
+  H08: { n: I18n.s("u_08142c0c8e4d"), d: I18n.s("u_df12b839f72e") },
+  H09: { n: I18n.s("u_0367549acf32"), d: I18n.s("u_e869af1a72c4") },
+  H10: { n: I18n.s("u_60afc87a2272"), d: I18n.s("u_66af40ec5338") },
+  H11: { n: I18n.s("u_c06d51699247"), d: I18n.s("u_75186a283884") },
+  H12: { n: I18n.s("u_db23c52ec9f0"), d: I18n.s("u_7dba54d6f6c5") },
+  H13: { n: I18n.s("u_ddd752547325"), d: I18n.s("u_e74c0802207f") },
+  H14: { n: I18n.s("u_94fdb9613b62"), d: I18n.s("u_4f22121022dd") },
+  H15: { n: I18n.s("u_310145b5b09a"), d: I18n.s("u_6186a97e7dcf") },
+  H16: { n: I18n.s("u_0233c332d26d"), d: I18n.s("u_d19746c43b79") },
+  H17: { n: I18n.s("u_d36cfa9660b4"), d: I18n.s("u_9e3879f33726") },
+  H18: { n: I18n.s("u_2a3f8a480f32"), d: I18n.s("u_4c612cfb2079") },
+  H19: { n: I18n.s("u_1a4cb876f391"), d: I18n.s("u_1a0cb857dec0") },
+  H20: { n: I18n.s("u_4cd8bc8e77b3"), d: I18n.s("u_d92c6232c26e") },
 };
 const RELS = {
-  R01: { n: '喜歡跟著對方走', good: true }, R02: { n: '喜歡並排坐', good: true }, R03: { n: '喜歡靠近午睡', good: true },
-  R04: { n: '主動聞聞打招呼', good: true }, R05: { n: '邀請短暫追逐', good: true }, R06: { n: '模仿對方動作', good: true },
-  R07: { n: '看到對方會靠近', good: true }, R08: { n: '喜歡一起看窗外', good: true }, R09: { n: '對方醒來時過去看看', good: true },
-  R10: { n: '偶爾互相整理毛髮', good: true },
-  R11: { n: '對方靠近便移開' }, R12: { n: '不願並排坐' }, R13: { n: '被跟隨時短暫回頭抗議' }, R14: { n: '遇到對方時背過身' },
-  R15: { n: '對方太靠近時短促叫一聲' }, R16: { n: '不願加入對方玩耍' }, R17: { n: '看見對方後另找休息處' }, R18: { n: '經過對方身旁時加快離開' },
-  R19: { n: '對方示好時暫不回應' }, R20: { n: '同處一區時刻意拉開距離' },
+  R01: { n: I18n.s("u_2f3d70475dd3"), good: true }, R02: { n: I18n.s("u_ac17c872b76a"), good: true }, R03: { n: I18n.s("u_81b28681fcfd"), good: true },
+  R04: { n: I18n.s("u_84925f03d405"), good: true }, R05: { n: I18n.s("u_c3a969f27ea4"), good: true }, R06: { n: I18n.s("u_455045a86e26"), good: true },
+  R07: { n: I18n.s("u_82fff41a7411"), good: true }, R08: { n: I18n.s("u_b91d0aa01b0e"), good: true }, R09: { n: I18n.s("u_11786a817fb9"), good: true },
+  R10: { n: I18n.s("u_7732a65ad61e"), good: true },
+  R11: { n: I18n.s("u_f2d886c18b6f") }, R12: { n: I18n.s("u_370eb48fc70c") }, R13: { n: I18n.s("u_f60c743ee380") }, R14: { n: I18n.s("u_ea8d60cddf29") },
+  R15: { n: I18n.s("u_e17dfbd36eed") }, R16: { n: I18n.s("u_75269a58a9cb") }, R17: { n: I18n.s("u_4413211e7e25") }, R18: { n: I18n.s("u_7b3fc1e4dcd7") },
+  R19: { n: I18n.s("u_6372c297cbaf") }, R20: { n: I18n.s("u_d51e53bb77c7") },
 };
 const REL_LOW = 40, REL_COOLDOWN = [18, 34], HABIT_CHANCE = 0.32, REL_CHANCE = 0.22;
 
@@ -125,7 +125,7 @@ const PetAI = {
       return go(() => this.walkAct(a, it.x + w / 2 + (Math.random() - 0.5) * (w / 3), it.y + h - 2, 'lie', 8 + Math.random() * 6)), true;
     },
     H15(a) { this.act(a, 'stretch', 2.2); return true; },
-    H16(a, go) { const r = this.recent.find(x => !x.by.has(a.pid) && Room.uidMap[x.uid] && Date.now() - x.at < 15 * 60e3); if (!r) return false; r.by.add(a.pid); const it = Room.uidMap[r.uid], base = it.p != null && Room.uidMap[it.p] ? Room.uidMap[it.p] : it, [x, y] = this.itemFront(base, 3); return go(() => this.walkAct(a, x + 8, y, 'look', 2.5, () => { Game.bubble(a, '嗅嗅…', 1.4); a.state = 'sit'; a.timer = 2; })), true; },
+    H16(a, go) { const r = this.recent.find(x => !x.by.has(a.pid) && Room.uidMap[x.uid] && Date.now() - x.at < 15 * 60e3); if (!r) return false; r.by.add(a.pid); const it = Room.uidMap[r.uid], base = it.p != null && Room.uidMap[it.p] ? Room.uidMap[it.p] : it, [x, y] = this.itemFront(base, 3); return go(() => this.walkAct(a, x + 8, y, 'look', 2.5, () => { Game.bubble(a, I18n.s("u_aa2df6f1bc91"), 1.4); a.state = 'sit'; a.timer = 2; })), true; },
     H17(a, go) { const [x, y] = randFloor(12); return go(() => { a.state = 'walk'; a.walkTo(x, y, () => { a.flip = !a.flip; this.act(a, 'look', 0.9, () => { a.flip = !a.flip; a.state = 'sit'; a.timer = 2; }); }); }), true; },
     H18(a) { if (a.on) return false; this.act(a, 'lie', 6 + Math.random() * 6); return true; },
     H19(a) { if (a.on) return false; this.act(a, 'chase', 2.4); return true; },
@@ -153,7 +153,7 @@ const PetAI = {
     },
     R02(a, t, go) { if (t.state !== 'sit' && !(t.state === 'act' && t.actPose === 'lie') || t.on || t.walking) return false; return go(() => this.walkAct(a, t.x + (t.x > 120 ? -13 : 13), t.y, 'sit', 6, () => { Room.puff('p_heart', (a.x + t.x) / 2, a.y - 16, { vy: -7, max: 0.9 }); a.state = 'sit'; a.timer = 2; })), true; },
     R03() { return false; },   // used when choosing where to nap (napNear)
-    R04(a, t, go) { if (t.on) return false; return go(() => this.walkAct(a, t.x + (t.x > a.x ? -12 : 12), t.y + 1, 'look', 1.4, () => { this.face(a, t.x); Game.bubble(a, '嗅嗅', 1.2); Room.puff('p_heart', (a.x + t.x) / 2, a.y - 16, { vy: -7, max: 0.8 }); a.state = 'sit'; a.timer = 2; })), true; },
+    R04(a, t, go) { if (t.on) return false; return go(() => this.walkAct(a, t.x + (t.x > a.x ? -12 : 12), t.y + 1, 'look', 1.4, () => { this.face(a, t.x); Game.bubble(a, I18n.s("u_552f5e278c48"), 1.2); Room.puff('p_heart', (a.x + t.x) / 2, a.y - 16, { vy: -7, max: 0.8 }); a.state = 'sit'; a.timer = 2; })), true; },
     R05(a, t, go) {
       if (t.on || t.state === 'sleep' || t.state === 'eat' || t.state === 'trick') return false;
       return go(() => { a.state = 'walk'; a.speed = 46; a.walkTo(t.x + (t.x > a.x ? -10 : 10), t.y, () => {
@@ -187,9 +187,9 @@ const PetAI = {
       let did = false;
       if (r === 'R11' && idle && (coming || d < 18)) { const [x, y] = this.away(a, t, 36); a.state = 'walk'; a.walkTo(x, y, () => { a.state = 'sit'; a.timer = 2; }); did = true; }
       else if (r === 'R12' && idle && d < 20 && (t.state === 'sit' || (t.state === 'act' && t.actPose === 'lie')) && !t.walking) { const [x, y] = this.away(a, t, 34); a.state = 'walk'; a.walkTo(x, y, () => { a.state = 'sit'; a.timer = 3; }); did = true; }
-      else if (r === 'R13' && a.walking && t.walking && d < 22) { a.walking = false; this.face(a, t.x); this.act(a, 'look', 0.9, () => { a.state = 'sit'; a.timer = 1.5; }); Game.bubble(a, a.kind === 'dog' ? '汪！' : '喵！', 1); did = true; }
+      else if (r === 'R13' && a.walking && t.walking && d < 22) { a.walking = false; this.face(a, t.x); this.act(a, 'look', 0.9, () => { a.state = 'sit'; a.timer = 1.5; }); Game.bubble(a, a.kind === 'dog' ? I18n.s("u_28452697f131") : I18n.s("u_8cf360cf0d09"), 1); did = true; }
       else if (r === 'R14' && idle && d < 26) { a.flip = t.x > a.x; this.act(a, 'sit', 2.5); did = true; }
-      else if (r === 'R15' && d < 16) { Game.bubble(a, a.kind === 'dog' ? '汪！' : '嘶！', 1); did = true; }
+      else if (r === 'R15' && d < 16) { Game.bubble(a, a.kind === 'dog' ? I18n.s("u_28452697f131") : I18n.s("u_bdef793974b0"), 1); did = true; }
       else if (r === 'R16' && idle && d < 50 && (t.state === 'zoom' || t.state === 'trick')) { const [x, y] = this.away(a, t, 50); a.state = 'walk'; a.walkTo(x, y, () => { a.state = 'sit'; a.timer = 3; }); did = true; }
       else if (r === 'R18' && a.walking && d < 22) { a.speed = a.baseSpeed() * 1.8; a.fastT = 1.2; did = true; }
       if (did) { a.relCd = REL_COOLDOWN[0] + Math.random() * (REL_COOLDOWN[1] - REL_COOLDOWN[0]); return; }
