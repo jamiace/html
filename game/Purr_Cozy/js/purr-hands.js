@@ -66,7 +66,7 @@ const PurrHands = {
   const cursor=PetPlay.cursor.bind(PetPlay);
   PetPlay.cursor=function(pt) {
     if(!this.held||!pt) { if(PurrHands.visual)PurrHands.visual.hidden=true;return cursor(pt); }
-    if(PurrHands.touch()||(HD2D.enabled&&HAND[this.held]==='wand')) {
+    if(PurrHands.touch()) {
       if(this._cur)this._cur.hidden=true;
       PurrHands.show(pt);return;
     }

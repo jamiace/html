@@ -1,11 +1,4 @@
-/* ============================================================
-   Version
-   - NOOK_VERSION / NOOK_VERSION_DATE: this build (shown in Settings)
-   - version.json at the site root: the newest build on the server
-     → when you publish an update, change BOTH (same numbers)
-   - when the game saves, it checks version.json at most every 10 minutes (and when it comes back
-     to the front); a newer one shows a bar at the top with a "reload" button
-   ============================================================ */
+/* Release identity comes from version.json through bootstrap.js. */
 window.NOOK_VERSION = window.PURR_BUILD.version;
 window.NOOK_VERSION_DATE = window.PURR_BUILD.date;
 

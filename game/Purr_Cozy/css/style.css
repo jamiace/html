@@ -1085,46 +1085,16 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
 .levelgate-card { border-color:#ddbb6c; background:#fff4d9; }
 
 /* HD-2D scene surface; the original canvas remains the pointer/drag surface. */
-#hd2d-room {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  /* 關鍵優化：強制啟用 GPU 獨立合成層與硬體像素縮放 */
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  transform: translateZ(0);
-  will-change: contents;
-  border-radius: 3px;
-}
-.hd2d-on #overlay{z-index:2}
-.hd2d-on .room-wrap{filter:drop-shadow(0 18px 30px rgba(14,10,22,.38))}
-/* 預設隱藏控制列（普通模式不顯示） */
-.hd-controls {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  width: min(960px, 100%);
-  box-sizing: border-box;
-  background: var(--paper);
-  color: var(--ink);
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(12, 7, 18, .1);
-}
 
-/* 只有開啟 HD-2D 模式（body 帶有 .hd2d-on）時才顯現（桌機與手機均生效） */
-body.hd2d-on .hd-controls {
-  display: flex !important;
-}
-.hd-title{display:flex;flex-direction:column;gap:1px}.hd-title b{font-size:15px}.hd-title span{font-size:12px;color:var(--ink-2)}
-.hd-actions{display:flex;gap:5px;flex-wrap:wrap}.hd-btn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:6px 9px;cursor:pointer;font-size:13px}.hd-btn.active{background:var(--primary);color:var(--on-primary)}
-@media(max-width:700px){.hd-controls{gap:7px;padding:8px}.hd-actions{width:100%}.hd-btn{flex:1 0 auto;min-height:36px}.hd-title span{font-size:12px}}
+
+
+/* 預設隱藏控制列（普通模式不顯示） */
+
+
+/* 只有開啟 HD-2D 模式（body 帶有 
+
+
+@media(max-width:700px){}
 
 /* Shared readable surfaces: the same semantic pair is used in both UI themes. */
 :root{--ink-2:#655168;--rose:#b03c58;--mint:#356b3d;--berry:#9b3658;--leaf:#356b3d}
@@ -1145,11 +1115,7 @@ body.hd2d-on .hd-controls {
 .malbum.on .hint,.task.ready .hint,.pcard.cur .hint,.fcard.flip .hint,.tminvrow .hint,.tmphase.full .hint,.tmseat.me .hint{color:var(--ink)}
 
 /* Keep the HD image and the existing mobile pointer/overlay zoom on the same plane. */
-body.m .room-wrap > #hd2d-room {
-  transform-origin: 0 0;
-  transform: var(--zt, translate(0, 0)) translateZ(0);
-  transition: transform .18s steps(4);
-}
+
 
 /* Purr Cozy / 2026-10-27: the visible viewport, not the phone screen, defines room for UI. */
 body.purr-loading #app, body.purr-loading #pins, body.purr-loading #toasts,
@@ -1171,7 +1137,7 @@ body.purr-save-choice #windows { visibility: visible; z-index: 100001; }
 body.purr-save-choice #windows > .win:not([data-id="cloudpick"]) { visibility: hidden; }
 body.purr-save-choice #windows > .win[data-id="cloudpick"] { visibility: visible; z-index: 100002 !important; }
 body.purr-save-choice #loading { pointer-events: none; }
-.hd-controls, body.hd2d-on .hd-controls { display: none !important; }
+
 .status-word { display: inline-block; white-space: nowrap; overflow-wrap: normal; word-break: keep-all; }
 .tm-mode, .mt-mode { line-height: 1.3; min-width: 2em; overflow-wrap: normal; word-break: keep-all; }
 .cpbar { gap: 6px; align-items: stretch; }

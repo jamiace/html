@@ -3,11 +3,10 @@
   const B = window.PurrBoot;
   try {
     const pixel = SpriteFiles.load(20000).then(result => { B.set('pixel',1); return result; });
-    const hd = HD2D.load();
-    const results = await Promise.all([pixel, hd, document.fonts.ready]);
+    const chairs = ChairViews.ready;
+    const results = await Promise.all([pixel, chairs, document.fonts.ready]);
     B.set('pixel', 1);
-    if (!results[1]) throw Error('HD-2D 素材尚未完整載入，請檢查網路後重試。');
-    B.set('hd', 1);
+
     B.message('正在讀取帳號與雲端存檔…');
     const originalOnUser = Cloud.onUser.bind(Cloud);
     let authPending = 0;
@@ -33,9 +32,7 @@
       }, 100);
     });
     B.set('cloud', 1);
-    HD2D.attach();
-    HD2D.enabled = !!(Game.S.settings.hd2d || window.NOOK_HD_DEMO);
-    HD2D.sync();
+    delete Game.S.settings.hd2d;
     Room.indexItems(); Room.buildBg(Game.S.wp, Game.S.fl); Room.computeEnv(Game.S.settings);
     UI.refreshAll(); Mobile.render(); UI.layout(); Room.render(0);
     B.message(outcome === 'timeout' ? '雲端讀取逾時，先載入這台裝置的房間。' : '小窩準備好了');

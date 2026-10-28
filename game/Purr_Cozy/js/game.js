@@ -1,7 +1,7 @@
 /* ============================================================
    Game: state, economy, timer, saving, co-working, main loop
    ============================================================ */
-const SAVE_KEY = window.NOOK_HD_DEMO ? 'pocketnook.hd2d-preview.v1' : 'pocketnook.save.v1';
+const SAVE_KEY = 'pocketnook.save.v1';
 // save schema: bump when the shape of Game.S changes and add a step to MIGRATIONS
 //   1  original release
 //   2  vocabulary progress keyed by the English word (was an index into the 500-word list)

@@ -50,9 +50,7 @@
   const replace = Game.replaceState.bind(Game);
   Game.replaceState = function (S) {
     const r = replace(S);
-    if (Game.S.settings.hd2d || window.NOOK_HD_DEMO) HD2D.attach();
-    HD2D.enabled = !!(Game.S.settings.hd2d || window.NOOK_HD_DEMO);
-    HD2D.sync();
+    delete Game.S.settings.hd2d;
     Mobile.render();
     return r;
   };
