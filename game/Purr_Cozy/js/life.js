@@ -359,7 +359,7 @@ Object.assign(UI, {
       });
       const all = D.tasks.every(t => t.claimed);
       body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: I18n.s("u_558b6255aa95") }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: I18n.s("u_1f71b7077ef3") }))),
-        D.bonus ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : h('button', { class: 'chip sm primary', disabled: !all, onclick: () => Life.claimBonus() }, I18n.s("u_92edf81e0715"))));
+        D.bonus ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : h('button', { class: 'chip sm' + (all ? ' primary' : ''), disabled: !all, onclick: () => Life.claimBonus() }, I18n.s("u_92edf81e0715"))));
       body.push(h('p', { class: 'hint', text: I18n.s("u_06ee916e0076") }));
     } else if (tab === 'team') {
       body.push(...this.w_team());

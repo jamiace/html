@@ -9,11 +9,11 @@ const PetCare = {
   label(pair){return pair.score>=80?I18n.s("u_27bb9927cba4"):pair.score>=65?I18n.s("u_e0411a7555f3"):pair.score>=45?I18n.s("u_4503877f0368"):pair.score>=28?I18n.s("u_6add5e760cf9"):I18n.s("u_4b6464fecf36")},
   log(text){const C=Game.S.homeCare;C.log.unshift({at:Date.now(),text});C.log=C.log.slice(0,30)},
   boxes(){return Game.S.items.filter(it=>ITEMS[it.k]&&ITEMS[it.k].litter)},
-  boxFree(it){return (it.used||0)<(ITEMS[it.k].capacity||3)&&!it._toilet},
+  boxFree(it){return (it.used||0)<(ITEMS[it.k].capacity||3)&&it._toilet==null},
   canAct(a){return a&&a.data&&a.data.home&&!a.walking&&!a.jump&&!a.on&&!a.climbItem&&!a.perchPause&&['sit','act'].includes(a.state)&&!a.careLock&&!a.hp},
   changePair(a,b,n){const r=this.pair(a,b);r.score=clamp100(r.score+n);return r},
   tick(dt){if(!Game.S||Room.state!==Game.S)return;this.ensure();this.clock+=Math.min(.2,dt);this.syncMesses();if(Room.edit||Lights.busy||document.hidden)return;
-    if(this.clock-this.lastCheck<5)return;const seconds=Math.min(10,this.clock-this.lastCheck);this.lastCheck=this.clock;const mins=seconds/60,home=Pets.home();
+    if(this.clock-this.lastCheck<5)return;const seconds=Math.min(10,this.clock-this.lastCheck);this.lastCheck=this.clock;const mins=seconds/60,home=Pets.home();for(const it of this.boxes())if(it._toilet!=null&&!(Game.pets||[]).some(a=>a.pid===it._toilet&&a.toiletToken))delete it._toilet;
     for(const p of home){const a=Pets.actor(p);if(Lights.mode==='on'){p.bladder=clamp100(p.bladder+mins*(p.hunger>20?1.25:.65));const low=PetAI.low(p),dirty=this.boxes().length&&this.boxes().every(it=>!this.boxFree(it));p.stress=clamp100(p.stress+mins*(low?1.8:dirty?.6:-.8));}
       if(p.bandaged>0&&a&&a.state==='sleep'){p.injury=Math.max(0,p.injury-mins*1.5);if(!p.injury){p.bandaged=0;this.log(p.name+I18n.s("u_204b4ddf91aa"));UI.toast(p.name+I18n.s("u_afb52c8a9e50"),'i_heart',3);Game.save();}}
       if(Lights.mode==='on'&&p.bladder>=90&&this.canAct(a)){const box=this.boxes().filter(it=>this.boxFree(it)).sort((x,y)=>Math.hypot(x.x-a.x,x.y-a.y)-Math.hypot(y.x-a.x,y.y-a.y))[0];if(box)this.toilet(a,box);else if(p.bladder>=100)this.accident(a);}
@@ -34,11 +34,63 @@ const PetCare = {
     UI.toast(early?I18n.s("u_2f5c96ba35fd"):I18n.s("u_f23be0e104ef"),'i_paw',3);UI.refresh('pet');Game.save();
   },
   accident(a){const p=a.data;if(!p||Game.S.homeCare.messes.length>=8)return false;const m={id:Date.now()+'-'+p.id,x:Math.round(a.x),y:Math.round(a.y),pet:p.id,at:Date.now()};Game.S.homeCare.messes.push(m);p.bladder=8;p.clean=clamp100(p.clean-8);p.stress=clamp100(p.stress+5);this.log(p.name+I18n.s("u_2e3d3a2916ce"));Game.bubble(a,I18n.s("u_6bb82ad758d2"),2);UI.toast(p.name+I18n.s("u_091d5eb73142"),'it_spray',4);this.syncMesses();Game.save();return true;},
-  toilet(a,it){if(!this.canAct(a)||!this.boxFree(it))return false;it._toilet=a.pid;a.careLock=true;const token={};a.toiletToken=token;const [w,h]=itemSize(it);a.state='walk';const ok=a.walkTo(it.x+w/2,Math.min(166,it.y+h-2),()=>{
-    if(a.toiletToken!==token)return;if(!Room.uidMap[it.uid]||!this.boxFree(Object.assign({},it,{_toilet:null}))){this.releaseToilet(a,it);return;}
-    PetAI.act(a,'knead',4,()=>{if(a.toiletToken!==token)return;it.used=(it.used||0)+1;if(a.data){a.data.bladder=5;a.data.clean=clamp100(a.data.clean-1);a.data.stress=Math.max(0,a.data.stress-5);}this.releaseToilet(a,it);a.state='sit';a.timer=4;Game.bubble(a,I18n.s("u_15303342942d"),1.5);Game.save();UI.refresh('pet');});
-  },true);if(ok===false){this.releaseToilet(a,it);return false;}a.toiletStarted=Date.now();return true;},
-  releaseToilet(a,it){if(it&&it._toilet===a.pid)delete it._toilet;a.careLock=false;a.toiletToken=null;},
+  toilet(a,it){
+    if(!this.canAct(a)||!this.boxFree(it))return false;
+    it._toilet=a.pid;a.careLock=true;const token={};a.toiletToken=token;a.toiletStarted=Date.now();
+    const [w,h]=itemSize(it);a.state='walk';
+    const ok=a.walkTo(it.x+w/2,Math.min(166,it.y+h+2),()=>{
+      if(a.toiletToken!==token)return;
+      if(!Room.uidMap[it.uid]||!this.boxFree({...it,_toilet:null})){this.releaseToilet(a,it);return;}
+      a.walking=false;a.state='toilet';a.toiletScene={box:it,t:0,phase:'enter'};a.flip=false;
+    },true);
+    if(ok===false){this.releaseToilet(a,it);return false}return true;
+  },
+  releaseToilet(a,it){
+    if(it&&it._toilet===a.pid)delete it._toilet;
+    a.careLock=false;a.toiletToken=null;a.toiletScene=null;a.walking=false;a.onArrive=null;
+    if(a.state==='toilet'||a.state==='walk'){a.state='sit';a.timer=3;}
+  },
+  updateToilet(a,dt){
+    const s=a.toiletScene;if(!s)return;s.t+=Math.min(.2,dt);
+    const t=s.t;s.phase=t<.5?'enter':t<1.65?'dig':t<3.65?'squat':t<4.85?'cover':'leave';
+    if((s.phase==='dig'||s.phase==='cover')&&Math.floor(t*6)!==s.puff){s.puff=Math.floor(t*6);Room.puff('p_dot',a.x+Math.sin(t*13)*5,a.y-5,{vx:Math.sin(t*11)*9,vy:-7,grav:22,max:.35});}
+    if(t<5.45)return;
+    const it=s.box;if(a.toiletToken&&Room.uidMap[it.uid]){
+      it.used=Math.min(ITEMS[it.k].capacity||3,(it.used||0)+1);
+      if(a.data){a.data.bladder=5;a.data.clean=clamp100(a.data.clean-1);a.data.stress=Math.max(0,a.data.stress-5);}
+      a.x=it.x+itemSize(it)[0]/2;a.y=Math.min(166,it.y+itemSize(it)[1]+3);
+      this.releaseToilet(a,it);Game.bubble(a,I18n.s('u_15303342942d'),1.5);Game.save();UI.refresh('pet');
+    }
+  },
+  drawToilet(c,a){
+    const s=a.toiletScene;if(!s)return false;const it=s.box,[w,h]=itemSize(it),t=s.t;
+    const tray=it.k==='litter_tray',inside=it.y+h-5,outside=Math.min(166,it.y+h+3);
+    let y=s.phase==='enter'?outside+(inside-outside)*Math.min(1,t/.5):s.phase==='leave'?inside+(outside-inside)*Math.min(1,(t-4.85)/.6):inside;
+    const digging=s.phase==='dig'||s.phase==='cover',pose=digging?'knead':s.phase==='enter'||s.phase==='leave'?'walk':'sit',f=Math.floor(t*(digging?7:5))%(pose==='walk'?4:2);
+    const cv=petCanvas(a.kind,a.color,pose,f,a.flip,a.data?.acc),x=it.x+w/2;
+    c.save();
+    if(!tray&&s.phase!=='enter'&&s.phase!=='leave'){
+      const doorX=it.k==='litter_house'?9:10;c.beginPath();c.rect(it.x+(it.flip?w-doorX-16:doorX),it.y+11,16,h-11);c.clip();
+    }
+    c.translate(Math.round(x),Math.round(y)+(digging?Math.floor(t*9)%2:0));
+    if(s.phase==='squat')c.scale(1.05,.82);
+    c.drawImage(cv,-Math.floor(cv.width/2),-canvasBottom(cv));c.restore();
+    // Front rim occludes paws/body while the cat is inside, rather than drawing it on top.
+    if(s.phase!=='leave'){const box=Room.itemCanvas(it);c.drawImage(box,0,h-5,w,5,it.x,it.y+h-5,w,5);}
+    return true;
+  },
+  litterFrames:new WeakMap(),
+  litterCanvas(base,it){
+    const used=Math.min(ITEMS[it.k].capacity||3,Math.max(0,Math.floor(it.used||0)));if(!used)return base;
+    let cache=this.litterFrames.get(base);if(!cache){cache=new Map();this.litterFrames.set(base,cache)}
+    const key=used+'|'+!!it.flip;if(cache.has(key))return cache.get(key);
+    const cv=document.createElement('canvas');cv.width=base.width;cv.height=base.height;const c=cv.getContext('2d');c.drawImage(base,0,0);c.save();if(it.flip){c.translate(cv.width,0);c.scale(-1,1)}
+    const tray=it.k==='litter_tray',x=tray?5:12,y=tray?5:23,width=tray?23:11,full=used>=(ITEMS[it.k].capacity||3);
+    c.fillStyle=full?'#93806a':'#b7a17a';c.fillRect(x,y,width,3);
+    for(let i=0;i<used;i++){const xx=x+1+(i*5)%(width-3),yy=y-1+(i%2);c.fillStyle='#69503b';c.fillRect(xx,yy,3,2);c.fillStyle='#96724e';c.fillRect(xx+1,yy-1,2,1);}
+    if(full){c.fillStyle='#984d42';c.fillRect(25,1,7,7);c.fillStyle='#fff0c3';c.fillRect(28,2,1,3);c.fillRect(28,6,1,1)}
+    c.restore();cache.set(key,cv);return cv;
+  },
   syncMesses(){const C=Game.S.homeCare;if(!C)return;const alive=new Set(C.messes.map(m=>m.id));Room.actors=Room.actors.filter(a=>!a.isMess||alive.has(a.id));for(const m of C.messes)if(!Room.actors.some(a=>a.isMess&&a.id===m.id))Room.actors.push(new CatMess(m));},
   ownerAt(x,y,done){if(Room.state!==Game.S)return UI.toast(I18n.s("u_ad826a02fbf6"),'i_people',2);if(this.ownerBusy)return UI.toast(I18n.s("u_c1868d47ebd4"),'i_paw',2);if(Room.edit||Lights.mode!=='on')return UI.toast(I18n.s("u_945e82a9a288"),'i_paw',2);if(Game.focusing())return UI.toast(I18n.s("u_2b73ae9fdf80"),'i_paw',3);
     const A=Game.avatar;if(!A)return;this.ownerBusy=true;const state=Game.S;A.stand();A.state='walk';const finish=()=>{if(Game.S!==state){this.ownerBusy=false;return;}A.state='idle';A.timer=2;A.lp={at:Room.t,end:Room.t+1.5,frame:()=> 'type0'};setTimeout(()=>{this.ownerBusy=false;if(Game.S===state){done();UI.refresh('pet');Game.save();}},1000)};
@@ -66,12 +118,12 @@ class CatMess{
  const after=Pets.after.bind(Pets);Pets.after=function(p,ev){if(['play','pet','groom','care','fed','feed'].includes(ev)){PetCare.ensure();p.stress=Math.max(0,p.stress-3)}return after(p,ev)};
  // Relationships are persistent; weekly hidden behaviours are selected from that shared history.
  PetAI.relsOf=function(p){if(!p)return[];PetCare.ensure();const out=[];for(const q of Pets.home()){if(q.id===p.id)continue;const pair=PetCare.pair(p,q);const ids=pair.score>=65?['R02','R03','R10']:pair.score>=45?['R04','R07','R08']:['R11','R15','R20'];for(const r of ids)out.push({r,t:q.id})}return out};
- const update=Pet.prototype.update;Pet.prototype.update=function(dt){if(this.scuffle){const g=this.scuffle;if(g.a===this)g.t+=dt;if(g.t>=3){PetCare.endFight(g);return;}this.x=(g.a===this?g.ax:g.bx)+Math.sin(g.t*35+(g.a===this?0:Math.PI))*2;this.flip=g.a===this;return;}if(this.toiletToken&&(Date.now()-this.toiletStarted>25000||!Game.S.items.some(i=>i._toilet===this.pid))){for(const it of Game.S.items)if(it._toilet===this.pid)delete it._toilet;this.careLock=false;this.toiletToken=null;}if(this.careLock&&this.toiletToken){if(this.walking)Walker.prototype.step.call(this,dt);else if(this.state==='act')PetAI.update(this,dt);return;}return update.call(this,dt)};
- const draw=Pet.prototype.draw;Pet.prototype.draw=function(c){if(this.scuffle){const g=this.scuffle;c.save();c.fillStyle='#dcd6e8';for(let i=0;i<5;i++){const x=(g.ax+g.bx)/2+Math.sin(g.t*9+i)*9,y=(g.ay+g.by)/2-7+Math.cos(g.t*11+i)*4;c.fillRect(Math.round(x)-4,Math.round(y)-3,8,6);}c.fillStyle='#f6c75a';c.fillRect(Math.round(this.x),Math.round(this.y)-20,3,1);c.restore();return;}draw.call(this,c);const p=this.data;if(p&&p.injury){c.save();c.fillStyle=p.bandaged?'#fff4e0':'#d988a3';c.fillRect(Math.round(this.x)+(this.flip?-4:3),Math.round(this.y)-11,4,2);c.restore()}};
+ const update=Pet.prototype.update;Pet.prototype.update=function(dt){if(this.scuffle){const g=this.scuffle;if(g.a===this)g.t+=dt;if(g.t>=3){PetCare.endFight(g);return;}this.x=(g.a===this?g.ax:g.bx)+Math.sin(g.t*35+(g.a===this?0:Math.PI))*2;this.flip=g.a===this;return;}if(this.toiletToken&&(Room.edit||Room.state!==Game.S||Date.now()-this.toiletStarted>25000||!Game.S.items.some(i=>i._toilet===this.pid))){for(const it of Game.S.items)if(it._toilet===this.pid)delete it._toilet;PetCare.releaseToilet(this,this.toiletScene?.box);}if(this.careLock&&this.toiletToken){if(this.walking)Walker.prototype.step.call(this,dt);else PetCare.updateToilet(this,dt);return;}return update.call(this,dt)};
+ const draw=Pet.prototype.draw;Pet.prototype.draw=function(c){if(this.toiletScene&&PetCare.drawToilet(c,this))return;if(this.scuffle){const g=this.scuffle;c.save();c.fillStyle='#dcd6e8';for(let i=0;i<5;i++){const x=(g.ax+g.bx)/2+Math.sin(g.t*9+i)*9,y=(g.ay+g.by)/2-7+Math.cos(g.t*11+i)*4;c.fillRect(Math.round(x)-4,Math.round(y)-3,8,6);}c.fillStyle='#f6c75a';c.fillRect(Math.round(this.x),Math.round(this.y)-20,3,1);c.restore();return;}draw.call(this,c);const p=this.data;if(p&&p.injury){c.save();c.fillStyle=p.bandaged?'#fff4e0':'#d988a3';c.fillRect(Math.round(this.x)+(this.flip?-4:3),Math.round(this.y)-11,4,2);c.restore()}};
  const poke=Pet.prototype.poke;Pet.prototype.poke=function(){if(this.scuffle){PetCare.endFight(this.scuffle,true);return;}if(this.data&&this.data.injury){Pets.select(this.pid,'care');return;}return poke.call(this)};
  const why=Pets.why.bind(Pets);Pets.why=function(p,act){if(p&&p.injury&&['play','train'].includes(act))return p.name+I18n.s("u_4ac206cb0ab6");return why(p,act)};
  const interact=Game.interact.bind(Game);Game.interact=function(it){if(ITEMS[it.k]&&ITEMS[it.k].litter){PetCare.cleanBox(it.uid);return;}return interact(it)};
- const item=Room.drawItem.bind(Room);Room.drawItem=function(c,it){item(c,it);if(ITEMS[it.k].litter&&it.used){const cv=this.itemCanvas(it);c.fillStyle='#8b6a4a';for(let i=0;i<Math.min(5,it.used);i++)c.fillRect(it.x+9+i*3,it.y+cv.height-8+(i%2),2,1);}};
+ const itemCanvas=Room.itemCanvas.bind(Room);Room.itemCanvas=function(it){const cv=itemCanvas(it);return ITEMS[it.k]?.litter?PetCare.litterCanvas(cv,it):cv};
  const petUI=UI.w_pet.bind(UI);UI.w_pet=function(){const out=petUI();const p=Pets.sel();if(p&&this.petTab==='care')out.splice(4,0,PetCare.panel(p));return out};
  const rows=Mobile.rows.bind(Mobile);Mobile.rows=function(){const out=rows();if(Game.S.homeCare&&Game.S.homeCare.messes.length)out.unshift(h('button',{class:'mrow need',onclick:()=>{UI.petTab='care';UI.openWin('pet')}},ico('it_spray',26),h('span',{class:'mrow-t'},h('b',{text:I18n.s("u_9a92d27e2d34")}))));return out};
 })();

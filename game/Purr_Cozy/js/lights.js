@@ -53,7 +53,7 @@ const Lights = {
   tick() { },
   music(k) {
     this.musicK = k; const M = Game.S.music; if (typeof Music === 'undefined' || !M) return;
-    try { if (Music.audio) Music.audio.volume = M.vol * k; if (Music.yt && Music.ytReady) Music.yt.setVolume(Math.round(M.vol * k * 100)); } catch (e) { }
+    Music.applyVolume();
   },
   musicBack() { if (this.musicK != null) { this.music(1); this.musicK = null; } },
   // ---------- who is in the room ----------
@@ -264,7 +264,7 @@ const Lights = {
       for (const it of lit) { it.on = false; const cv = Room.itemCanvas(it); Room.puff('p_spark', it.x + cv.width / 2, it.y, { vy: -4, max: 0.5 }); this.sound(false); this.setDark(Math.min(0.8, this.dark + 0.8 / (lit.length + 1))); await this.wait(420); }
       this.store(LIGHTS.nightKey, { at: Date.now(), lamps: lit.map(it => it.uid) });
       this.click(false);
-      if (typeof Music !== 'undefined' && Music.playing) { this.music(1); for (let k = 1; k > 0.05; k -= 0.1) { this.music(k); await this.wait(120); } Music.toggle(false); this.musicK = null; try { Music.audio.volume = Game.S.music.vol; } catch (e) { } }
+      if (typeof Music !== 'undefined' && Music.playing) { this.music(1); for (let k = 1; k > 0.05; k -= 0.1) { this.music(k); await this.wait(120); } Music.toggle(false); this.musicK = null; Music.applyVolume(); }
       const pet = this.pets()[0]; if (pet) setTimeout(() => Game.bubble(pet, pet.kind === 'dog' ? I18n.s("u_60d35572941d") : I18n.s("u_6bb82ad758d2"), 1.6), 400);
       Game.save();
     } finally { this.busy = false; this.lastInput = Date.now(); }

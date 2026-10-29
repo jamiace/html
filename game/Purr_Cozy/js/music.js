@@ -7,8 +7,19 @@ const AUDIO_EXT = /\.(mp3|flac|m4a|aac|ogg|oga|opus|wav|webm)$/i;
 const Music = {
   audio: null, yt: null, ytReady: false, ytApi: null, playing: false, cur: null, urls: {}, dbp: null, fails: 0,
   get M() { return Game.S.music; },
+  volumeLevel() {
+    const dim=typeof Lights!=='undefined'&&Lights.musicK!=null?Lights.musicK:1;
+    const quiz=typeof Duck!=='undefined'?Duck.quizK:1,voice=typeof Duck!=='undefined'?Duck.k:1;
+    return Math.max(0,Math.min(1,this.M.vol*dim*quiz*voice));
+  },
+  applyVolume() {
+    const v=this.volumeLevel();
+    if(this.audio&&Math.abs(this.audio.volume-v)>0.00001)this.audio.volume=v;
+    if(this.yt&&this.ytReady){const percent=Math.round(v*100);if(this._volumeYT!==this.yt||this._volumePercent!==percent){try{this.yt.setVolume(percent);this._volumeYT=this.yt;this._volumePercent=percent}catch{}}}
+    return v;
+  },
   init() {
-    const a = this.audio = new Audio(); a.preload = 'auto'; a.volume = this.M.vol;
+    const a = this.audio = new Audio(); a.preload = 'auto'; this.applyVolume();
     a.addEventListener('loadedmetadata', () => {
       if (this.cur && this.cur.type !== 'yt' && this._loadedId === this.cur.id && this._resume > 0) {
         try { a.currentTime = Math.min(this._resume, Number.isFinite(a.duration) ? Math.max(0, a.duration - 0.1) : this._resume); this._resume = 0; } catch (e) { }
@@ -154,7 +165,7 @@ const Music = {
     if (this.cur !== e || src === 'abort') return;   // another track was picked while this one downloaded
     if (!src) { e.missing = true; this.changed(); if (++this.fails < Q.length) return this.next(false); this.fails = 0; UI.toast(I18n.s("u_4b1dbb5bb0bc"), 'i_music'); return; }
     e.missing = false; this.fails = 0;
-    this._loadedId = e.id; this.audio.src = src; this.audio.volume = M.vol;
+    this._loadedId = e.id; this.audio.src = src; this.applyVolume();
     if (M.shuffle && Q.length > 1) { let j; do { j = Math.floor(Math.random() * Q.length); } while (j === i); this.shufNext = j; }
     try { await this.audio.play(); } catch (err) { this.playing = false; this.changed(); }
     MusicCache.init().then(() => this.prefetch());
@@ -189,7 +200,7 @@ const Music = {
   },
   stop() { this.audio.pause(); this.stopYT(); this.playing = false; this.changed(); },
   onEnded() { if (this.M.repeat === 'one') { this.audio.currentTime = 0; this.audio.play().catch(() => { }); return; } this.next(false); },
-  setVol(v) { const M = this.M; M.vol = Math.max(0, Math.min(1, v)); this.audio.volume = M.vol; if (this.yt && this.ytReady) try { this.yt.setVolume(Math.round(M.vol * 100)); } catch (e) { } clearTimeout(this._vs); this._vs = setTimeout(() => Game.save(), 500); },
+  setVol(v) { const M = this.M; M.vol = Math.max(0, Math.min(1, v)); this.applyVolume(); clearTimeout(this._vs); this._vs = setTimeout(() => Game.save(), 500); },
   cycleRepeat() { const M = this.M; M.repeat = M.repeat === 'all' ? 'one' : M.repeat === 'one' ? 'off' : 'all'; Game.save(); UI.refresh('music'); },
   toggleShuffle() { this.M.shuffle = !this.M.shuffle; Game.save(); UI.refresh('music'); },
   progress() {
@@ -230,7 +241,7 @@ const Music = {
     UI.ytPanel(true, e, 'ok');
     const saved = this.M.last;
     if (saved && saved.id === e.id && saved.vid && typeof MusicDefault !== 'undefined' && e.id === NOOK_YT.id && !MusicDefault.target && !MusicDefault.shuffleNext) MusicDefault.target = saved.vid;
-    const load = () => { try { if (e.list) this.yt.loadPlaylist({ listType: 'playlist', list: e.list, index: 0 }); else this.yt.loadVideoById({ videoId: e.vid, startSeconds: this._resume || 0 }); this.yt.setVolume(Math.round(this.M.vol * 100)); } catch (x) { } };
+    const load = () => { try { if (e.list) this.yt.loadPlaylist({ listType: 'playlist', list: e.list, index: 0 }); else this.yt.loadVideoById({ videoId: e.vid, startSeconds: this._resume || 0 }); this.applyVolume(); } catch (x) { } };
     if (!this.yt) {
       this.yt = new YT.Player('yt-player', {
         width: '100%', height: '100%', playerVars: { playsinline: 1, rel: 0 },

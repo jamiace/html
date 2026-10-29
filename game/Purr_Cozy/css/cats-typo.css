@@ -99,34 +99,17 @@ body.ct-open #toasts{display:none!important}.ct-slot{border-bottom:2px solid #88
 
 @media(max-width:759px){body.ct-open #ytpanel{visibility:hidden!important;pointer-events:none!important}}
 
-/* Intro and results: a quiet wood surface keeps rules clear of the copy. */
-.ct-shell.ct-intro{
- box-sizing:border-box;width:100%;flex:1 0 auto;min-height:100%;
- background:#e3b883;padding:24px 28px 28px;gap:16px;
-}
-.ct-intro .ct-top{text-align:left;align-items:center;gap:16px}
-.ct-intro .ct-top h3{font-size:20px;line-height:1.4;margin-top:4px}
-.ct-intro .ct-top small{display:block;font-size:12px;line-height:1.5}
-.ct-intro .ct-counter{font-size:13px;line-height:1.5}
-.ct-intro .ct-intro-cat{display:block;flex:none;width:220px;height:160px;max-width:100%;margin:4px 0;image-rendering:pixelated}
-.ct-intro h2{max-width:100%;font-size:24px;line-height:1.5;text-wrap:balance;overflow-wrap:anywhere}
-.ct-intro p{box-sizing:border-box;width:100%;max-width:620px;font-size:16px;line-height:1.85;text-wrap:pretty;overflow-wrap:anywhere}
-.ct-intro .ct-help{max-width:560px;font-size:14px;line-height:1.8;color:#6b5239}
-.ct-intro .ct-primary{flex:none;min-height:44px;margin-top:2px;padding:10px 20px;font-size:16px;line-height:1.5}
-@media(max-width:759px){
- .ct-shell.ct-intro{padding:20px 18px max(24px,env(safe-area-inset-bottom));gap:18px}
- .ct-intro .ct-top{flex-wrap:wrap;gap:8px 16px}
- .ct-intro .ct-top h3{font-size:18px}
- .ct-intro .ct-top small{display:block;font-size:12px}
- .ct-intro .ct-counter{font-size:12px;margin-left:auto}
- .ct-intro .ct-intro-cat{width:190px;height:140px;margin:8px 0}
- .ct-intro h2{font-size:22px}
- .ct-intro p{max-width:36em;font-size:16px;line-height:1.8}
- .ct-intro .ct-help{font-size:14px;line-height:1.8;text-align:left}
- .ct-intro .ct-primary{min-height:46px;max-width:100%}
-}
-@media(max-height:550px){
- .ct-shell.ct-intro{padding:16px 20px;gap:12px}
- .ct-intro .ct-intro-cat{width:140px;height:96px;margin:0}
- .ct-intro h2{font-size:21px}
-}
+/* Solid reading surfaces keep headings and copy clear of the wooden plank seams. */
+.ct-intro{padding:20px;gap:16px;align-items:center;overflow-wrap:break-word}
+.ct-intro .ct-top{box-sizing:border-box;width:100%;padding:12px 16px;background:#fff2db;border:1px solid #be9466;border-radius:10px;text-align:left;align-items:center}
+.ct-intro .ct-top small{display:block;font-size:13px;line-height:1.4;letter-spacing:.08em}
+.ct-intro .ct-top h3{font-size:20px;line-height:1.4;margin:2px 0 0}
+.ct-intro .ct-counter{font-size:14px;line-height:1.45;max-width:38%;white-space:normal;text-align:right}
+.ct-intro .ct-intro-cat{width:190px;height:130px;flex:none;max-height:none}
+.ct-info-card{width:100%;max-width:640px;box-sizing:border-box;background:#fff5e3;border:1px solid #bb9268;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:12px;color:#543c2d;text-align:left;box-shadow:0 3px 0 #b78c60}
+.ct-intro .ct-info-card h2{font-size:25px;line-height:1.45;text-align:center;margin:0;text-wrap:balance}
+.ct-intro .ct-info-card p{font-size:17px;line-height:1.85;max-width:none;margin:0;text-align:left;overflow-wrap:break-word;word-break:normal}
+.ct-intro .ct-info-card .ct-help{font-size:15px;line-height:1.75;color:#755b43;border-top:1px solid #dfc6a5;padding-top:10px}
+.ct-intro>.ct-btn{min-height:44px;padding:8px 22px;font-size:17px;line-height:1.4;margin-top:2px}
+@media(max-width:759px){.ct-intro{padding:12px;gap:12px}.ct-intro .ct-top{padding:10px 12px;gap:8px}.ct-intro .ct-top h3{font-size:17px}.ct-intro .ct-top small{font-size:12px}.ct-intro .ct-counter{font-size:13px}.ct-info-card{padding:16px}.ct-intro .ct-info-card h2{font-size:22px}.ct-intro .ct-info-card p{font-size:16px;line-height:1.8}.ct-intro .ct-info-card .ct-help{font-size:14px}.ct-intro .ct-intro-cat{width:150px;height:100px}.ct-intro>.ct-btn{font-size:16px;min-height:44px}}
+@media(max-height:550px){.ct-intro{gap:9px;padding:10px}.ct-intro .ct-intro-cat{width:110px;height:74px}.ct-info-card{padding:14px 16px;gap:10px}.ct-intro .ct-info-card h2{font-size:21px}.ct-intro .ct-info-card p{font-size:16px}.ct-intro .ct-info-card .ct-help{font-size:14px}.ct-intro .ct-top small{display:none}}

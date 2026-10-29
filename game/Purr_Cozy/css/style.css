@@ -1103,8 +1103,8 @@ button.sdot[aria-pressed=true] { outline: 3px solid var(--honey); outline-offset
 .brand-sub{color:var(--ink)}
 .levelgate-card,.swap-rule{background:var(--hl);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
 .levelgate-card .hint,.levelgate-card .sub,.swap-rule .hint{color:var(--ink)}
-.chip:disabled,.swapbtn:disabled,body.m .mtab:disabled,.task.claimed,.pcard.away,.cl-opt.dis,.sdot,.sdot.open{opacity:1}
-.chip:disabled,.swapbtn:disabled{cursor:not-allowed;border-style:dashed}
+.task.claimed,.pcard.away,.cl-opt.dis,.sdot,.sdot.open{opacity:1}
+.chip:disabled,.swapbtn:disabled{cursor:not-allowed}
 .chip:disabled:not(.primary),.swapbtn:disabled{color:var(--ink-2)}
 .chip.primary .hint,.chip.on .hint,.tab.on .hint,.mlist li.cur .hint{color:inherit}
 .lstep.on b{background:var(--primary);color:var(--on-primary)}

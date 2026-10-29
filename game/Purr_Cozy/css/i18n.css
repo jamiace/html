@@ -80,3 +80,12 @@ body.purr-quiz-open .quiz-shell.answered .quiz-input{display:none}
 @media(max-width:350px){.ct-banner img,.win[data-id="timer"] .ct-banner img{width:52px;height:56px}.ct-banner-copy small{display:block}.ct-banner-copy strong,.win[data-id="timer"] .ct-banner-copy strong{font-size:24px}}
 
 .spell-separator{align-self:center;font-size:18px;color:var(--ink)}
+
+/* Inactive actions are gray in both themes; preserve quiz result option colors. */
+button.chip:disabled,button.swapbtn:disabled,button.tab:disabled,button.mtab:disabled,
+button.ct-btn:disabled,button.ct-key:disabled,button.xbtn:disabled{
+ filter:grayscale(1)!important;opacity:.65!important;cursor:not-allowed!important;
+ background:#d3d0cc!important;color:#585552!important;text-shadow:none!important;
+ transform:none!important;box-shadow:none!important
+}
+button.chip:disabled:active,button.tab:disabled:active{border-image-source:var(--f-btn)}

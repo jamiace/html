@@ -247,28 +247,36 @@ const YTMini = {
   };
 })();
 
-// a word being read aloud: the music steps back to a quarter of its volume, then comes back
-// (the browser's voice is already at full volume, so the music makes room for it)
+// Temporary gains never overwrite the player's saved volume setting.
 const Duck = {
-  k: 1, t: null,
-  vol(k) {
-    this.k = k; const M = Game.S && Game.S.music; if (!M) return;
-    const dim = (typeof Lights !== 'undefined' && Lights.musicK != null) ? Lights.musicK : 1, v = M.vol * dim * k;
-    try { if (Music.audio) Music.audio.volume = v; if (Music.yt && Music.ytReady) Music.yt.setVolume(Math.round(v * 100)); } catch (e) { }
-  },
-  start(ms) { if (!Music.playing) return; clearTimeout(this.t); this.vol(0.25); this.t = setTimeout(() => this.end(), ms || 4000); },
-  end() { clearTimeout(this.t); this.t = null; if (this.k !== 1) this.vol(1); },
-};
-(function () {
-  const say = Learn.say.bind(Learn);
-  Learn.say = function (w) {
-    if (this.tts && this.tts() && Music.playing) {
-      Duck.start(2500 + String(w).length * 120);
-      // end the ducking when the voice finishes
-      try { const done = () => setTimeout(() => Duck.end(), 250); const poll = setInterval(() => { if (!speechSynthesis.speaking && !speechSynthesis.pending) { clearInterval(poll); done(); } }, 200); setTimeout(() => clearInterval(poll), 8000); } catch (e) { }
+  k:1,quizK:1,focus:null,t:null,request:0,
+  vol(k){this.k=k;Music.applyVolume()},
+  start(ms){const id=++this.request;clearTimeout(this.t);this.vol(.25);this.t=setTimeout(()=>this.end(id),ms||5000);return id},
+  end(id){if(id!=null&&id!==this.request)return;clearTimeout(this.t);this.t=null;this.vol(1)},
+  released(id){if(id!==this.request)return;clearTimeout(this.t);this.t=setTimeout(()=>this.end(id),250)},
+  syncQuiz(){
+    const w=UI.wins[this.focus];let active=false;
+    if(w&&!w.el.hidden){
+      if(this.focus==='study')active=Learn.sess?.step==='quiz';
+      if(this.focus==='catstypo'&&typeof CatsTypo!=='undefined')active=!!(CatsTypo.engaged&&CatsTypo.session&&!CatsTypo.session.done);
     }
-    return say(w);
-  };
-  // the volume slider while ducked: keep the duck
-  const sv = Music.setVol.bind(Music); Music.setVol = function (v) { const r = sv(v); if (Duck.k !== 1) Duck.vol(Duck.k); return r; };
+    const k=active?.7:1;if(this.quizK!==k){this.quizK=k;Music.applyVolume()}
+  }
+};
+(function(){
+ const say=Learn.say.bind(Learn);
+ Learn.say=function(w){
+  if(!this.tts()||!String(w||'').trim())return say(w);
+  Duck.syncQuiz();const id=Duck.start(Math.min(30000,5000+String(w).length*150));
+  const result=say(w),u=this.utterance;
+  if(!result){Duck.end(id);return result}
+  if(u)for(const name of ['onend','onerror']){const previous=u[name];u[name]=function(...args){try{previous?.apply(this,args)}finally{Duck.released(id)}}}
+  return result;
+ };
+ for(const name of ['openWin','closeWin','raise','render']){
+  const previous=UI[name].bind(UI);
+  UI[name]=function(...args){const result=previous(...args);if(name==='openWin')Duck.focus=args[0];if(name==='raise')Duck.focus=args[0].id;Duck.syncQuiz();return result};
+ }
+ for(const name of ['toQuiz','finish']){const previous=Learn[name].bind(Learn);Learn[name]=function(...args){const result=previous(...args);Duck.syncQuiz();return result}}
+ const changed=Music.changed.bind(Music);Music.changed=function(...args){this.applyVolume();return changed(...args)};
 })();

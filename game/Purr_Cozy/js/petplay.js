@@ -85,29 +85,28 @@ const PetPlay = {
       else UI.toast(I18n.s("u_d9c40d9eb404", [this.name(id)]), this.spr(id), 3.2);
       return false;
     }
-    this.held = id; this.forPid = pid != null ? pid : null; this.endChase(); this.showHint(); this.renderTray(); return true;
+    this.cancelBrush();this.held = id; this.forPid = pid != null ? pid : null; this.endChase(); this.showHint(); this.renderTray(); return true;
   },
-  drop() { this.held = null; this.forPid = null; this.brushing = null; this.endChase(); this.showHint(); this.renderTray(); this.cursor(null); },
+  drop() { this.cancelBrush();this.held = null; this.forPid = null; this.endChase(); this.showHint(); this.renderTray(); this.cursor(null); },
   // ---------- who ----------
   pets() { return (Game.pets || []).filter(a => a.data && a.data.home); },
   petAt(x, y) {
     const h = Room.hit(x, y); if (h && h.kind === 'actor' && h.a instanceof Pet) return h.a;
     let best = null, bd = 13; for (const a of this.pets()) { const d = Math.hypot(a.x - x, (a.y - 7 - y) * 1.3); if (d < bd) { bd = d; best = a; } } return best;
   },
-  // the pet a thrown toy is for: the one you picked the toy up for, else the selected one, else the nearest
+  // Every throw uses distance from this click, independent of the roster selection.
   player(x, y) {
-    const pick = (pid) => this.pets().find(a => a.pid === pid);
-    return pick(this.forPid) || pick((Pets.sel() || {}).id) || this.pets().sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0] || null;
+    return this.pets().sort((a,b)=>Math.hypot(a.x-x,a.y-7-y)-Math.hypot(b.x-x,b.y-7-y))[0]||null;
   },
-  busy(a) { return !a || ['trick', 'eat', 'hand', 'zoom', 'jump'].includes(a.state) || a.jump; },
+  busy(a) { return !a || a.careLock || a.toiletToken || a.scuffle || ['trick', 'eat', 'hand', 'zoom', 'jump'].includes(a.state) || a.jump; },
   needFor(pid) { return Life.L.needs.find(n => n.pet === pid) || null; },
   say(a, cat, dog, secs = 1.6) { Game.bubble(a, a.kind === 'dog' ? dog : cat, secs); },
   afterUse() { if (this.held && !PET_TOOLS[this.held] && !this.owned(this.held)) { UI.toast(I18n.s("u_73bf24cfdd20", [this.name(this.held)]), this.spr(this.held), 2); this.drop(); } else this.renderTray(); },
 
   // ---------- pointer (from game.js while something is held) ----------
-  down(x, y) {
+  down(x, y, click=[x,y]) {
     const id = this.held, k = HAND[id]; this.ptr = [x, y]; this.ptrAt = performance.now();
-    if (k === 'wand') return true;
+    if (k === 'wand') { const nearest=this.player(click[0],click[1]);if(this.chaser!==nearest)this.endChase();this.wandMove(x,y,nearest);return true; }
     if (k === 'ball' || k === 'yarn' || k === 'nip') { this.throwToy(k, x, y); return true; }
     const a = this.petAt(x, y);
     if (!a) {
@@ -133,7 +132,9 @@ const PetPlay = {
     }
     if (HAND[this.held] === 'wand') this.wandMove(x, y);
   },
-  up() { if (this.brushing && this.brushing.strokes < 4) { this.brushing.a.hp = null; this.brushing.a.state = 'sit'; this.brushing.a.timer = 2; } this.brushing = null; },
+  // A tap starts a visible brushing scene; releasing the pointer does not abort it.
+  up() { },
+  cancelBrush(){const b=this.brushing;this.brushing=null;if(b?.a.hp){b.a.hp=null;b.a.state='sit';b.a.timer=2}},
   leave() { this.ptrIn = false; this.cursor(null); if (this.brushing) this.up(); },
 
   // ---------- step-by-step little scenes on one pet ----------
@@ -159,6 +160,8 @@ const PetPlay = {
   petUpdate(a, dt) {
     const P = a.hp; if (!P) { a.state = 'sit'; a.timer = 1; return; }
     if (P.chase) return this.chaseUpdate(a, dt);
+    const b=this.brushing;
+    if(b?.a===a){b.elapsed+=dt;P.t+=dt;if(b.elapsed>=b.nextAt){b.nextAt+=.5;this.stroke(b,a.x+Math.sin(b.elapsed*8)*6,a.y-9)}return;}
     const s = P.steps[P.i]; if (!s) return;
     if (s.walk) { a.step(dt); return; }
     P.t += dt; if (s.tick) s.tick(P.t, dt);
@@ -176,6 +179,7 @@ const PetPlay = {
     const d = a.data, cv = petCanvas(a.kind, a.color, pose, f, a.flip, d && d.acc), x = Math.round(a.x) + jx, y = Math.round(a.y);
     c.fillStyle = 'rgba(46,34,48,0.2)'; c.fillRect(x - 6, y - 1, 12, 2);
     c.drawImage(cv, x - Math.floor(cv.width / 2), y - canvasBottom(cv) - lift);
+    if(this.brushing?.a===a){const b=this.brushing,brush=SPR.get('t_brush'),bx=Math.round(x+Math.sin(b.elapsed*8)*7-brush.width/2),by=y-18+Math.round(Math.cos(b.elapsed*8));c.drawImage(brush,bx,by);}
     if (P.carry) { const bs = SPR.get('toy_ball'); c.drawImage(bs, x + (a.flip ? -Math.floor(cv.width / 2) + 1 : Math.floor(cv.width / 2) - 5), y - 8 - lift); }
     return true;
   },
@@ -197,9 +201,9 @@ const PetPlay = {
     const p = a.data;
     if (!Pets.Z.tools.brush) return this.afterUse();
     const wait = p.brushAt + 20 * 60000 - Date.now(); if (wait > 0) { UI.toast(I18n.s("u_6a9a2cc978d6", [p.name, Math.ceil(wait / 60000)]), 't_brush', 2.6); return; }
-    // brushing happens where the pet is (also on its cushion); it holds still while you brush
+    if(this.brushing?.a===a)return;this.cancelBrush();
     this.seq(a, [{ pose: 'sit', t: null }]);
-    this.brushing = { a, lastX: x, dir: 0, strokes: 0 };
+    this.brushing = { a, lastX: x, dir: 0, strokes: 0, elapsed:0, nextAt:.45 };
   },
   stroke(b, x, y) {
     const a = b.a; b.strokes++;
@@ -225,9 +229,9 @@ const PetPlay = {
   },
 
   // ---------- B: play ----------
-  wandMove(x, y) {
-    if (this.chaser) return;
-    const a = this.player(x, y); if (!a || (this.busy(a) && a.state !== 'hand')) return;
+  wandMove(x, y, chosen) {
+    if (this.chaser||!chosen) return;
+    const a = chosen; if (!a || this.busy(a)) return;
     const p = a.data, why = Pets.why(p, 'play'); if (why) { if (!this.wandNag) { this.wandNag = true; UI.toast(why, 't_wand', 2.6); } return; }
     this.chaser = a;
     a.leaveSpot(() => { if (this.chaser !== a) return; a.walking = false; a.state = 'hand'; a.hp = { chase: true, t: 0, play: 0, counted: false, pounce: 0, lazy: p.trait === 'sleepy' || p.energy < 30 }; });

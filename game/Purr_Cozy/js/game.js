@@ -373,7 +373,7 @@ function setupInput(cv) {
       UI.editToolbar(); e.preventDefault(); return;
     }
     // holding food, a brush or a toy: the click is used on the pet / the floor
-    if (PetPlay.held) { cv.setPointerCapture(e.pointerId); PetPlay.move(x,y); PetPlay.down(x, y); down = null; e.preventDefault(); return; }
+    if (PetPlay.held) { cv.setPointerCapture(e.pointerId); PetPlay.move(x,y); const r=cv.getBoundingClientRect();PetPlay.down(x,y,[(e.clientX-r.left)/r.width*RW,(e.clientY-r.top)/r.height*RH]); down = null; e.preventDefault(); return; }
     down = { x, y, t: performance.now() };
   });
   cv.addEventListener('pointermove', e => {

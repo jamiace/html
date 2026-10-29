@@ -510,7 +510,7 @@ Object.assign(UI, {
       for (const t of TRICKS) {
         const prog = p.tricks[t.id] || 0, known = prog >= t.need, locked = p.lv < t.lv;
         body.push(h('div', { class: 'task' + (known ? ' claimed' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: t.n + (locked ? `（Lv ${t.lv}）` : '') }), h('div', { class: 'hint', text: t.d }), h('div', { class: 'pbar' }, h('i', { style: `width:${Math.round(prog / t.need * 100)}%` })), h('div', { class: 'task-meta' }, h('span', { class: 'num hint', text: `${prog}/${t.need}` }), known ? h('span', { class: 'hint', text: p.day.d === Life.today() && p.day.show[t.id] ? I18n.s("u_7dad488a10cd") : I18n.s("u_ab07d1a8dd81") }) : null)),
-          known ? h('button', { class: 'chip sm primary', onclick: () => Pets.perform(p.id, t.id) }, I18n.s("u_1596ad4e4e5c")) : h('button', { class: 'chip sm', disabled: locked, onclick: () => Pets.train(p.id, t.id) }, ico('i_learn', 16), I18n.s("u_2504f9b08203"))));
+          known ? h('button', { class: 'chip sm primary', onclick: () => Pets.perform(p.id, t.id) }, I18n.s("u_1596ad4e4e5c")) : h('button', { class: 'chip sm', disabled: locked || !!Pets.why(p, 'train'), title: locked ? I18n.s('u_58e7ba40b186', [p.name, t.lv, t.n]) : Pets.why(p, 'train'), onclick: () => Pets.train(p.id, t.id) }, ico('i_learn', 16), I18n.s("u_2504f9b08203"))));
       }
     } else if (this.petTab === 'acc') {
       for (const slot of ['neck', 'head']) {
