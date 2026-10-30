@@ -205,9 +205,10 @@ function mergeSaves(a, b, common, cloudBase) {
     for (const g of O.guest || []) { const m = seenG.get(gk(g)); if (m) { m.read = m.read || g.read; m.back = m.back || g.back; } else seenG.set(gk(g), g); }
     Z.guest = [...seenG.values()].sort((x, y) => y.at - x.at).slice(0, 100);
     const readIds = new Set(Z.guest.filter(g => g.read).map(gk)); Z.marks = (Z.marks || []).filter(m => { const g = Z.guest.find(x => x.id === m.g); return !g || !readIds.has(gk(g)); });
-    if (!Z.code && O.code) { Z.code = O.code; Z.codeUid = O.codeUid; } if (!Z.status && O.status) Z.status = O.status; Z.gb = Z.gb || O.gb;
+    if (!Z.code && O.code) { Z.code = O.code; Z.codeUid = O.codeUid; } if ((O.statusEditedAt || 0) > (Z.statusEditedAt || 0) || !Object.prototype.hasOwnProperty.call(Z,'status')) { Z.status=O.status || ''; Z.statusEditedAt=O.statusEditedAt || 0; } Z.gb = Z.gb || O.gb;
   }
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
+  if(o.playProgress){const A=M.playProgress||{},B=o.playProgress;const newest=(B.day||'')>(A.day||'')?B:A;M.playProgress=Object.assign({},newest,{total:Math.max(A.total||0,B.total||0)});if(A.day===B.day){M.playProgress.today=Math.max(A.today||0,B.today||0);M.playProgress.helpClaimed=!!(A.helpClaimed||B.helpClaimed);if(A.helpCredit||B.helpCredit)M.playProgress.helpCredit=[A.helpCredit,B.helpCredit].find(c=>c&&c.day===M.playProgress.day)||null;}}
   M.savedAt = Date.now();
   return M;
 }
@@ -245,8 +246,8 @@ function progressKey(S) {
   const v = Object.values(S.vocab || {}), pets = (S.zoo && S.zoo.pets) || [];
   // only things that change because you did something (no counters that move on their own, nothing reset by the 6 a.m. rollover)
   return saveHash(JSON.stringify([totalXp(S), S.coins || 0, v.length, v.reduce((n, r) => n + (r ? (r[0] || 0) * 1000 + (r[1] || 0) : 0), 0),
-    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0]), S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
-    (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => m.text), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
+    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
+    (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => [m.text,m.w,m.h,m.pin]), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
 }
 function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
 // real progress made on this device since its stamp (no stamp: an older version's save, treated as unknown)

@@ -333,7 +333,7 @@ const UI = {
   },
   closeWin(id) { const w = this.wins[id]; if (!w) return; w.el.hidden = true; this.syncDock(); if (this.WIN[id].modal) document.getElementById('scrim').hidden = !Object.values(this.wins).some(o => !o.el.hidden && o.conf.modal); },
   toggleWin(id) { const w = this.wins[id]; if (w && !w.el.hidden) this.closeWin(id); else this.openWin(id); },
-  refresh(id) { if (id === 'music' && this._musicResize) { this._musicRefreshPending = true; return; } const w = this.wins[id]; if (w && !w.el.hidden) this.render(id); if (id === 'memo') this.renderPins(); },
+  refresh(id) { if(id==='account'&&this.wins.account?.body?.contains(document.activeElement)&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)){this._accountRefreshPending=true;return;} if (id === 'music' && this._musicResize) { this._musicRefreshPending = true; return; } const w = this.wins[id]; if (w && !w.el.hidden) this.render(id); if (id === 'memo') this.renderPins(); },
   refreshAll() { for (const id in this.wins) this.refresh(id); this.hud(true); this.renderPins(); },
   render(id) {
     const w = this.getWin(id), b = w.body;
@@ -417,7 +417,7 @@ const UI = {
   shopTab: 'furniture',
   w_shop() {
     const S = Game.S, tab = this.shopTab;
-    const tabs = h('select', { class: 'shop-category', 'aria-label': I18n.s("u_33cf4db69d12"), onchange: e => { this.shopTab = e.target.value; this.shopOptionsOpen = false; this.refresh('shop'); } }, ...CATS.map(c => h('option', { value: c.id, selected: tab === c.id }, c.n)));
+    const tabs = h('select', { class: 'shop-category', 'aria-label': I18n.s("u_33cf4db69d12"), onchange: e => { this.shopTab = e.target.value; this.shopOptionsOpen = false; this.refresh('shop'); } }, ...this.shopCategoryOptions(tab));
     const cards = [];
     const owned = (id) => (S.inv[id] || 0) + S.items.filter(i => i.k === id).length;
     const card = (pv, name, d, has, onBuy, extra, cat) => {
@@ -460,9 +460,9 @@ const UI = {
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), h('p', { class: 'hint', text: I18n.s("u_ce44332e7357", [n, PET_MAX, PET_ROOM_MAX]) }), h('div', { class: 'scroll grid' }, ...cards)];
     }
     else {
-      const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return d.cat === tab && !d.giftOnly && !d.merchant && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
+      const all = Object.keys(ITEMS).filter(id => { const d = ITEMS[id]; return (typeof CozyShop!=='undefined'?CozyShop.matches(d,tab):d.cat===tab) && !d.giftOnly && !d.merchant && !d.special; }).map(id => ({ id, d: ITEMS[id] }));
       const list = this.filterList('shop:' + tab, all, this.shopFocus);
-      for (const e of list.page) { const d = e.d, el = card(sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3, 80), d.n, d, owned(e.id), () => Game.buy('item', e.id), null, 'item'); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
+      for (const e of list.page) { const d = e.d, el = card(sprPreview(Room.itemCanvas({k:e.id,on:!!d.light||!!d.screen||!!d.tv}), 100, 3, 80), d.n, d, owned(e.id), () => Game.buy('item', e.id), null, 'item'); if (d.fun) el.classList.add('fun'); if (this.shopFocus === e.id) { el.classList.add('focus'); setTimeout(() => el.scrollIntoView({ block: 'center' }), 50); } cards.push(el); }
       this.shopFocus = null;
       return [h('div', { class: 'row between' }, tabs, h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }))), this.couponBar(), list.bar, h('div', { class: 'scroll grid' }, ...cards), list.nav];
     }
@@ -512,7 +512,7 @@ const UI = {
       const idsAll = Object.keys(S.inv).filter(k => S.inv[k] > 0 && ITEMS[k]);
       const list = this.filterList('sto:items', idsAll.map(id => ({ id, d: ITEMS[id] })), null, true); const ids = list.page.map(e => e.id);
       if (idsAll.length) cards.push(list.bar);
-      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(SPR.get(d.spr, d.map, false, d.id), 100, 3, 80)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, I18n.s("u_d652527e2e2d"))))); }
+      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(Room.itemCanvas({k:e.id,on:!!d.light||!!d.screen||!!d.tv}), 100, 3, 80)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, I18n.s("u_d652527e2e2d"))))); }
       if (!idsAll.length) cards.push(h('div', { class: 'empty' }, ico('i_box', 48), h('p', { text: I18n.s("u_c4a605094620") }), h('button', { class: 'chip', onclick: () => this.openWin('shop') }, ico('i_shop', 20), I18n.s("u_0ae148c4b35d"))));
       if (idsAll.length) cards.push(list.nav);
     } else {

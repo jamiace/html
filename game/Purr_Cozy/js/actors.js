@@ -369,7 +369,7 @@ class Pet extends Walker {
       return;
     }
     if (this.jump) {
-      const j = this.jump; j.t += dt / 0.42; const k = Math.min(1, j.t);
+      const j = this.jump; j.t += dt / 0.60; const k = Math.min(1, j.t);
       this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * (j.hgt || 10);
       if (k >= 1) { this.jump = null; this.landSquash = .14; this.y = j.y1; if (this.state !== 'trick' && this.state !== 'hand') { this.state = 'sit'; this.timer = 2; } j.cb && j.cb();
         if (!this.jump && !this.perchPause && !this.climbItem) { const w = this.afterJump; this.afterJump = null; if (w) { this.state = 'walk'; this.walkTo(w[0], w[1], w[2], w[3]); } } }

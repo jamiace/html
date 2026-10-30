@@ -22,7 +22,7 @@ const PetCare = {
     for(let i=0;i<home.length;i++)for(let j=i+1;j<home.length;j++){const a=Pets.actor(home[i]),b=Pets.actor(home[j]);if(!a||!b)continue;const r=this.pair(home[i],home[j]);
       if(PetAI.dist(a,b)<36&&home[i].stress<45&&home[j].stress<45){r.familiar+=seconds;r.score=clamp100(r.score+mins*.12);}
       const unsettled=PetAI.low(home[i])||PetAI.low(home[j])||home[i].stress>65||home[j].stress>65;
-      if(r.score<40&&unsettled&&PetAI.dist(a,b)<22&&this.canAct(a)&&this.canAct(b)&&Date.now()-(r.lastFight||0)>8*60000&&Date.now()-(Game.S.homeCare.lastFight||0)>3*60000&&Math.random()<.08){this.fight(a,b);return;}
+      // Conflict selection is handled by the balanced active-play event scheduler.
     }
   },
   fight(a,b){if(!this.canAct(a)||!this.canAct(b)||PetAI.dist(a,b)>28)return false;const pa=a.data,pb=b.data,r=this.pair(pa,pb),now=Date.now();r.lastFight=now;r.conflicts++;r.score=Math.max(0,r.score-9);Game.S.homeCare.lastFight=now;
@@ -30,7 +30,7 @@ const PetCare = {
     for(const p of [a,b]){p.state='scuffle';p.scuffle=group;p.walking=false;p.actCb=null;p.timer=3;p.careLock=true;}
     this.log(pa.name+I18n.s("u_3d7114281f5b")+pb.name+I18n.s("u_1a9b4cb51484"));Game.bubble(a,I18n.s("u_1d802fa70ff2"),1.5);Game.bubble(b,I18n.s("u_8cf360cf0d09"),1.5);UI.toast(I18n.s("u_7ed015228d8e"),'i_paw',4);Game.save();return true;
   },
-  endFight(g,early=false){if(g.finished)return;g.finished=true;for(const a of [g.a,g.b]){const p=a.data;if(p&&!early&&Math.random()<.55)p.injury=Math.max(p.injury,20+Math.floor(Math.random()*16));a.scuffle=null;a.careLock=false;a.state='sit';a.timer=6;a.x=a===g.a?g.ax:g.bx;a.y=a===g.a?g.ay:g.by;if(p){p.stress=Math.max(0,p.stress-(early?20:5));const other=a===g.a?g.b:g.a;const pos=PetAI.away(a,other,22);a.state='walk';a.walkTo(pos[0],pos[1],()=>{a.state='sit';a.timer=8});}}
+  endFight(g,early=false){if(g.finished)return;g.finished=true;for(const a of [g.a,g.b]){const p=a.data;if(p&&!early&&Math.random()<.15)p.injury=Math.max(p.injury,20+Math.floor(Math.random()*16));a.scuffle=null;a.careLock=false;a.state='sit';a.timer=6;a.x=a===g.a?g.ax:g.bx;a.y=a===g.a?g.ay:g.by;if(p){p.stress=Math.max(0,p.stress-(early?20:5));const other=a===g.a?g.b:g.a;const pos=PetAI.away(a,other,22);a.state='walk';a.walkTo(pos[0],pos[1],()=>{a.state='sit';a.timer=8});}}
     UI.toast(early?I18n.s("u_2f5c96ba35fd"):I18n.s("u_f23be0e104ef"),'i_paw',3);UI.refresh('pet');Game.save();
   },
   accident(a){const p=a.data;if(!p||Game.S.homeCare.messes.length>=8)return false;const m={id:Date.now()+'-'+p.id,x:Math.round(a.x),y:Math.round(a.y),pet:p.id,at:Date.now()};Game.S.homeCare.messes.push(m);p.bladder=8;p.clean=clamp100(p.clean-8);p.stress=clamp100(p.stress+5);this.log(p.name+I18n.s("u_2e3d3a2916ce"));Game.bubble(a,I18n.s("u_6bb82ad758d2"),2);UI.toast(p.name+I18n.s("u_091d5eb73142"),'it_spray',4);this.syncMesses();Game.save();return true;},
@@ -94,7 +94,7 @@ const PetCare = {
     return h('section',{class:'settings-card pet-life'},h('b',{text:I18n.s("u_61e956358d43")}),h('div',{class:'row wrap'},h('span',{class:'ptag',text:p.injury?(p.bandaged?I18n.s("u_085ac06bbedb"):I18n.s("u_8bb6e75154bb")):I18n.s("u_cc3fc7ae6225")}),h('span',{class:'ptag',text:p.stress>=65?I18n.s("u_d5c03714b3d9"):p.stress>=35?I18n.s("u_877907d16e21"):I18n.s("u_055e8f15c89b")}),h('button',{class:'chip sm',onclick:()=>this.soothe(p.id)},I18n.s("u_f36a7c51477b"))),p.injury?h('div',{class:'row wrap'},h('button',{class:'chip',disabled:p.bandaged>0,onclick:()=>this.bandage(p.id)},ico('bandage',18),p.bandaged?I18n.s("u_1eade4b02e59"):I18n.s("u_e704be6fd2e1")),!Life.has('bandage')?h('button',{class:'chip sm',onclick:()=>{Life.buySupply('bandage',1);UI.refresh('pet')}},I18n.s("u_d1841892e7e8")):null):null,
       h('div',{class:'sub',text:I18n.s("u_f79ea9a9c765")}),...boxes.map(it=>h('div',{class:'care-line'},h('span',{text:ITEMS[it.k].n+' · '+((it.used||0)>=ITEMS[it.k].capacity?I18n.s("u_e1662dfab227"):(it.used||0)?I18n.s("u_88cecdc9163d"):I18n.s("u_fbcbff55104f"))}),h('button',{class:'chip sm',disabled:!(it.used>0)||it._toilet!=null,onclick:()=>this.cleanBox(it.uid)},I18n.s("u_25303df26428")))),!boxes.length?h('div',{class:'care-line'},h('span',{text:I18n.s("u_c0b313f531e7")}),h('button',{class:'chip sm',onclick:()=>{UI.shopTab='furniture';UI.openWin('shop')}},I18n.s("u_fc1570b51682"))):null,
       ...C.messes.map(m=>h('div',{class:'care-line'},h('span',{text:(Pets.get(m.pet)||{name:I18n.s("u_7f5b7b018e77")}).name+I18n.s("u_bb4b5afff215")}),h('button',{class:'chip sm',onclick:()=>this.cleanMess(m.id)},I18n.s("u_9d2998cca517")))),
-      h('div',{class:'sub',text:I18n.s("u_120c0ef4cce9")}),...others.map(q=>{const r=this.pair(p,q);return h('div',{class:'care-line'},h('span',{text:q.name}),h('span',{class:'ptag',text:this.label(r)}),h('span',{class:'hint num',text:Math.round(r.score)+'/100'}))}),!others.length?h('p',{class:'hint',text:I18n.s("u_601d15f3a21b")}):null,
+      // Cat-to-cat relationships remain hidden; room actions tell their story.
       h('details',{},h('summary',{text:I18n.s("u_4b786f8d789c")}),...C.log.slice(0,8).map(x=>h('p',{class:'hint',text:new Date(x.at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' '+x.text}))))
   },
 };

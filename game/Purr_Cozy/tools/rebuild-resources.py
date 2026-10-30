@@ -32,7 +32,7 @@ def main():
   if not p.is_file():continue
   rel=p.relative_to(ROOT).as_posix()
   if p.suffix.lower() in AUDIO or any(part.startswith('.') for part in p.relative_to(ROOT).parts):continue
-  if rel in {'version.json','resources.json','resources.bin','music/playlist.json'} or rel.startswith(('tools/','godot/','docs/','build-manifests/')) or p.suffix.lower() not in SUPPORTED:continue
+  if rel in {'version.json','resources.json','resources.bin','music/playlist.json','js/hd-furniture.js'} or rel.startswith(('tools/','godot/','docs/','build-manifests/','assets/png/hd/')) or p.suffix.lower() not in SUPPORTED:continue
   b=p.read_bytes();text=p.suffix.lower() in TEXT
   if text:b=b.replace(b'\r\n',b'\n')
   if p.suffix.lower() in {'.json','.webmanifest'}:

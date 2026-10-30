@@ -15,35 +15,37 @@ function cleanName(s) { return String(s || '').replace(NAME_JUNK, '').replace(/\
 function clipName(s) { let out = '', w = 0; for (const g of graphemes(cleanName(s))) { const c = WIDE_RE.test(g) ? 2 : 1; if (w + c > NAME_UNITS) break; out += g; w += c; } return out.trim(); }
 function playerName() { return clipName((Game.S.avatar && Game.S.avatar.name) || '') || NAME_DEFAULT; }
 UI.nameField = function () {
-  const a = Game.S.avatar, msg = h('span', { class: 'hint' });
+  const profileState=Game.S;
+  const msg = h('span', { class: 'hint' });
   const show = (v) => { const w = nameWidth(cleanName(v)), left = NAME_UNITS - w; msg.textContent = left >= 0 ? I18n.s("u_986df2b09ab7", [left]) : I18n.s("u_c76866d40b8f", [-left]); msg.classList.toggle('warn', left < 0); };
   let composing = false;
-  const commit = (inp) => {
+  const commit = (inp) => { if(Game.S!==profileState)return;
     const v = clipName(inp.value);
-    if (!v) { inp.value = a.name || ''; show(inp.value); return UI.toast(I18n.s("u_0e897c6f7572"), 'i_people', 2); }
-    inp.value = v; show(v); if (v === (a.name || '')) return;
-    a.name = v; Game.save(); saveSoon(); if (typeof Cowork !== 'undefined' && Cowork.push) Cowork.push(); UI.refresh('avatar');
-    if (typeof Social !== 'undefined' && Social.ready()) Social.publish(true).catch(() => { });
+    if (!v) { inp.value = Game.S.avatar.name || ''; show(inp.value); return UI.toast(I18n.s("u_0e897c6f7572"), 'i_people', 2); }
+    inp.value = v; show(v); if (v === (Game.S.avatar.name || '')) return;
+    Game.S.avatar.name = v; Game.save(); saveSoon(); if (typeof Cowork !== 'undefined' && Cowork.push) Cowork.push(); UI.refresh('avatar');
+    if (typeof Social !== 'undefined' && Social.ready()) Social.publish(true).catch(() => UI.toast(I18n.t('cozy.syncRetry'),'i_cloud',3));
     UI.toast(I18n.s("u_3adbb97125e4", [v]), 'i_people', 2);
   };
-  const inp = h('input', { id: 'acct-name', type: 'text', value: a.name || '', placeholder: NAME_DEFAULT, autocomplete: 'nickname', 'aria-describedby': 'acct-name-hint',
+  const inp = h('input', { id: 'acct-name', type: 'text', value: Game.S.avatar.name || '', placeholder: NAME_DEFAULT, autocomplete: 'nickname', 'aria-describedby': 'acct-name-hint',
     oncompositionstart: () => { composing = true; }, oncompositionend: e => { composing = false; show(e.target.value); },
     oninput: e => { if (!composing) show(e.target.value); },
-    onchange: e => { if (!composing) commit(e.target); },
+    onchange: e => { if (!composing) commit(e.target); }, onblur:e=>{if(!composing)commit(e.target)},
     onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); commit(e.target); } } });
   msg.id = 'acct-name-hint'; show(inp.value);
-  return h('label', { class: 'field' }, h('span', { text: I18n.s("u_6773310492a9") }), h('div', { class: 'inset grow' }, inp), msg);
+  return h('label', { class: 'field' }, h('span', { text: I18n.s("u_6773310492a9") }), h('div', { class: 'inset grow' }, inp), h('button',{type:'button',class:'chip cozy-field-save',onclick:()=>{if(!composing)commit(inp)}},I18n.t('cozy.save')), msg);
 };
 
 // short status line on the name card (20 units, same counting as the name, no word filter)
 UI.statusField = function () {
-  const Z = Social.Z, msg = h('span', { class: 'hint' }); let composing = false;
+  const profileState=Game.S;
+  const msg = h('span', { class: 'hint' }); let composing = false;
   const show = (v) => { const left = 20 - nameWidth(cleanName(v)); msg.textContent = left >= 0 ? I18n.s("u_d2c01dbd5ff0", [left]) : I18n.s("u_c76866d40b8f", [-left]); msg.classList.toggle('warn', left < 0); };
-  const commit = (inp) => { const v = clipStatus(inp.value); inp.value = v; show(v); if (v === (Z.status || '')) return; Z.status = v; Game.save(); saveSoon(); if (Social.ready()) Social.publish(true).catch(() => { }); UI.toast(v ? I18n.s("u_ef59a5313c68") : I18n.s("u_95c9a3a7d296"), 'i_people', 2); };
-  const inp = h('input', { id: 'acct-status', type: 'text', value: Z.status || '', placeholder: I18n.s("u_7fb71b3d76c2"), autocomplete: 'off',
+  const commit = (inp) => { if(Game.S!==profileState)return; const v = clipStatus(inp.value); inp.value = v; show(v); if (v === (Social.Z.status || '')) return; Social.Z.status = v; Social.Z.statusEditedAt=Date.now(); Game.save(); saveSoon(); if (Social.ready()) Social.publish(true).catch(() => UI.toast(I18n.t('cozy.syncRetry'),'i_cloud',3)); UI.toast(I18n.t('cozy.profileSaved'), 'i_people', 2); };
+  const inp = h('input', { id: 'acct-status', type: 'text', value: Social.Z.status || '', placeholder: I18n.s("u_7fb71b3d76c2"), autocomplete: 'off',
     oncompositionstart: () => { composing = true; }, oncompositionend: e => { composing = false; show(e.target.value); },
-    oninput: e => { if (!composing) show(e.target.value); }, onchange: e => { if (!composing) commit(e.target); },
+    oninput: e => { if (!composing) show(e.target.value); }, onchange: e => { if (!composing) commit(e.target); }, onblur:e=>{if(!composing)commit(e.target)},
     onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); commit(e.target); } } });
   show(inp.value);
-  return h('label', { class: 'field' }, h('span', { text: I18n.s("u_e01b94ddd5d5") }), h('div', { class: 'inset grow' }, inp), msg);
+  return h('label', { class: 'field' }, h('span', { text: I18n.s("u_e01b94ddd5d5") }), h('div', { class: 'inset grow' }, inp), h('button',{type:'button',class:'chip cozy-field-save',onclick:()=>{if(!composing)commit(inp)}},I18n.t('cozy.save')), msg);
 };

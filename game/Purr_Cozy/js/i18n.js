@@ -13,7 +13,7 @@ window.I18n={
   if(typeof value!=='string'||!value||depth>12)return value;
   if(this.localizedOutputs?.has(value))return value;
   if(typeof Music!=='undefined'&&Music.cur?.title){const title=Music.cur.title;if(title===value)return value;if(/\p{Script=Han}/u.test(title)&&value.includes(title))return value.split(title).map(part=>this.render(part,depth+1)).join(title)}
-  if(typeof Game!=='undefined'&&Game.S){const S=Game.S;if(value===S.name||value===S.profile?.name||(S.zoo?.pets||[]).some(p=>p.name===value))return value}
+  if(typeof Game!=='undefined'&&Game.S){const S=Game.S;if(value===S.name||value===S.avatar?.name||value===S.social?.status||value===S.profile?.name||(S.zoo?.pets||[]).some(p=>p.name===value))return value}
   if(this.cache.has(value))return this.cache.get(value);
   let result=value;const origin=this.origins.get(value),exact=this.sourceIndex.get(value);
   if(origin)result=this.resolve(origin,depth);else if(exact)result=this.resolve({id:exact},depth);

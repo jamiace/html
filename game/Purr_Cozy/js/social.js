@@ -65,7 +65,7 @@ const Social = {
     this.boot().catch(e => { this.err = cloudErr(e); UI.refresh('friends'); });
     this.timer = setInterval(() => this.tick(), 60000);
   },
-  stop() { clearInterval(this.timer); this.timer = null; this.started = false; this.uid = null; this.friends = []; this.friendsAt = 0; this.cards = {}; this.board = null; this.visitSt = null; },
+  stop() { clearInterval(this.timer); clearTimeout(this.publishTimer); this.publishTimer=null; this.timer = null; this.started = false; this.uid = null; this.friends = []; this.friendsAt = 0; this.cards = {}; this.board = null; this.visitSt = null; },
   async boot() {
     const Z = this.Z;
     if (!Z.gb) { if (!(Game.S.inv.guestbook > 0) && !Game.S.items.some(i => i.k === 'guestbook')) { Game.S.inv.guestbook = (Game.S.inv.guestbook || 0) + 1; UI.toast(I18n.s("u_4bf00cc5e114"), 'i_book', 5); } Z.gb = true; Game.save(); }
@@ -104,16 +104,19 @@ const Social = {
   async publish(force) {
     const Z = this.Z; if (!this.ready()) return;
     const now = Date.now(); if (!force && now - (Z.pubAt || 0) < SOCIAL.boardMs) return;
-    if (force && now - (this.lastForce || 0) < 60000 && Z.pubAt) return; this.lastForce = now;
+    if(this.publishBusy){this.publishAgain=this.publishAgain||force;return false;}
+    if (force && now - (this.lastForce || 0) < 60000 && Z.pubAt) { clearTimeout(this.publishTimer); const uid=this.uid; this.publishTimer=setTimeout(()=>{this.publishTimer=null;if(this.uid===uid&&this.ready())this.publish(true).catch(e=>{this.err=cloudErr(e)});},60050-(now-this.lastForce)); return false; } this.lastForce = now; this.publishBusy=true; try {
     const S = Game.S, c = this.card();
     await this.db().set('profiles/' + this.uid, c);
     // leaderboard row; a developer save is listed only with the developer switch on (its old row is removed otherwise)
     if (this.dev() && !this.devListed()) { if (!Z.boardGone) { await this.db().del('board/' + this.uid).catch(() => { }); Z.boardGone = true; } }
     else { await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' }); Z.boardGone = false; }
-    Z.pubAt = now; Game.save();
+    Z.pubAt = now; this.cards[this.uid]=Object.assign({},c,{id:this.uid,got:now,roomD:JSON.parse(c.room||'null')});if(this.cardSt?.uid===this.uid){this.cardSt.c=this.cards[this.uid];UI.refresh('card');}Game.save();return true;
+    } finally {this.publishBusy=false;if(this.publishAgain){this.publishAgain=false;this.publish(true).catch(e=>{this.err=cloudErr(e)});}}
   },
   // name card of anyone (cached on this device for 3 h)
   async getCard(uid, force) {
+    if(uid===this.uid)return Object.assign({},this.card(),{id:uid,got:Date.now(),roomD:this.roomPreview()});
     const c = this.cards[uid]; if (!force && c && Date.now() - c.got < SOCIAL.cardMs) return c;
     const p = await this.db().get('profiles/' + uid); if (!p) return null;
     p.id = uid; p.got = Date.now(); try { p.roomD = JSON.parse(p.room || 'null'); } catch (e) { p.roomD = null; }
@@ -265,7 +268,7 @@ const Social = {
     const Z = this.Z, per = {}, lines = [];
     for (const r of rows) {
       const key = r.from + ':' + r.day; per[key] = (per[key] || 0) + 1;
-      if (per[key] <= SOCIAL.helpsPerDay && HELP_KINDS[r.kind] && !Z.guest.some(g => g.nk === r.id && g.uid === r.from)) {
+      if (per[key] <= SOCIAL.helpsPerDay + 1 && HELP_KINDS[r.kind] && !Z.guest.some(g => g.nk === r.id && g.uid === r.from)) {
         const n = Life.L.needs.find(x => this.needKey(x) === r.need && NEED_HELP[x.type] === r.kind);
         const nm = clipName(r.name) || I18n.s("u_b9b1480dd6ec"); let what, res = 'ok', mark = null;
         if (n) {
@@ -391,7 +394,7 @@ Object.assign(UI, {
     const wk = c.wk === boardWeek() ? c.wm : 0;
     return [h('div', { class: 'cardtop' }, this.avaPic(c.ava, 72), h('div', { class: 'grow' },
         h('div', { class: 'cardname' }, h('b', { text: clipName(c.name) || I18n.s("u_1b5a5abc14d1") }), h('span', { class: 'ptag', text: 'Lv ' + (c.lvl || 1) })),
-        c.status ? h('p', { class: 'cardstatus', text: c.status }) : null,
+        c.status ? h('p', { class: 'cardstatus', 'data-i18n-skip':true, text: c.status }) : null,
         h('p', { class: 'hint', text: I18n.s("u_342d82b4a734", [c.code || '—']) }),
         h('p', { class: 'hint', text: I18n.s("u_2d697fcc0d8f", [fmtMins(wk), fmtMins(c.tm)]) }))),
       room, (c.pets || []).length ? h('div', { class: 'sub', text: I18n.s("u_406e3dc6ef01", [c.pets.length]) }) : null, pets, btns,
@@ -416,7 +419,7 @@ Object.assign(UI, {
       if (Social.loading.friends && !Social.friends.length) out.push(h('p', { class: 'hint', text: I18n.s("u_f92612d11856") }));
       else if (!oks.length) out.push(h('p', { class: 'hint', text: I18n.s("u_8f448ea6e65f") }));
       out.push(h('div', { class: 'scroll frlist' }, ...oks.map(f => { const p = Social.cards[f.id] || {};
-        return h('div', { class: 'frrow' }, this.avaPic(p.ava, 32), h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: p.name || f.name }), h('span', { class: 'hint', text: p.lvl ? I18n.s("u_936dd9cc315f", [p.lvl, (p.pets || []).length]) : '' }), p.status ? h('span', { class: 'hint frst', text: p.status }) : null),
+        return h('div', { class: 'frrow' }, this.avaPic(p.ava, 32), h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: p.name || f.name }), h('span', { class: 'hint', text: p.lvl ? I18n.s("u_936dd9cc315f", [p.lvl, (p.pets || []).length]) : '' }), p.status ? h('span', { class: 'hint frst', 'data-i18n-skip':true, text: p.status }) : null),
           h('button', { class: 'chip sm primary', onclick: () => Social.visit(f.id) }, I18n.s("u_a55baf30c49a")), h('button', { class: 'chip sm', 'aria-label': I18n.s("u_cfdd3c6dcb89"), onclick: () => Social.remove(f.id, true) }, ico('i_trash', 14))); }),
         ...outs.map(f => h('div', { class: 'frrow' }, h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: f.name }), h('span', { class: 'hint', text: I18n.s("u_38410dba2678") })), h('button', { class: 'chip sm', onclick: () => Social.remove(f.id) }, I18n.s("u_2cd0f3be8738"))))));
       out.push(h('div', { class: 'row' }, h('button', { class: 'chip sm', onclick: () => Social.loadFriends(true) }, ico('i_reset', 14), I18n.s("u_5f451c71b46a"))));
