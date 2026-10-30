@@ -1,8 +1,7 @@
 {
-  "version": "0.92.16",
+  "version": "0.92.17",
   "date": "2026/10/30",
   "resources": {
-    "manifest": "resources.json",
-    "sha256": "cc9a3de3a1351fd56d9293430b909ebafe3e5c01837b7c49e05e7daa170abec3"
+    "manifest": "resources.json"
   }
 }

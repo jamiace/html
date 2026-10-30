@@ -1,5 +1,5 @@
 from pathlib import Path
-import hashlib, json, mimetypes, re
+import json, mimetypes, re
 root = Path(__file__).resolve().parent.parent
 version_path = root / 'version.json'
 build = json.loads(version_path.read_text(encoding='utf-8'))
@@ -23,13 +23,13 @@ for p in sorted(root.rglob('*')):
     mime = mimetypes.guess_type(p.name)[0] or 'application/octet-stream'
     if p.suffix == '.js':
         mime = 'application/javascript'
-    e = {'path': rel, 'bytes': len(b), 'sha256': hashlib.sha256(b).hexdigest(), 'mime': mime, 'offset': len(data)}
+    e = {'path': rel, 'bytes': len(b), 'mime': mime, 'offset': len(data)}
     files.append(e)
     data.extend(b)
-(root / 'resources.bin').write_bytes(data)
-manifest = {'schema': 1, 'version': build['version'], 'files': files, 'bundle': {'path': 'resources.bin', 'sha256': hashlib.sha256(data).hexdigest()}}
+# Individual files are downloaded directly; no packed PNG copies.
+manifest = {'schema': 2, 'version': build['version'], 'files': files}
 m = json.dumps(manifest, ensure_ascii=False, separators=(',', ':')).encode()
 (root / 'resources.json').write_bytes(m)
-build['resources'] = {'manifest': 'resources.json', 'sha256': hashlib.sha256(m).hexdigest()}
+build['resources'] = {'manifest': 'resources.json'}
 version_path.write_text(json.dumps(build, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 print('build', build['version'], 'files', len(files), 'bytes', len(data), 'PNG', sum((f['path'].endswith('.png') for f in files)))

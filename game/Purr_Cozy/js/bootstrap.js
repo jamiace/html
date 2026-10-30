@@ -5,7 +5,10 @@
  try{
  await script('js/purr-boot.js');await script('js/asset-cache.js');
  let build;try{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw Error('version');build=await response.json()}catch(e){const cached=localStorage.getItem('purr-cozy.cached-build');if(!cached)throw Error(PurrBoot.text('bootResourceNoBuild'));build=JSON.parse(cached)}
- if(!/^\d+\.\d+\.\d+$/.test(build.version)||!build.resources?.sha256)throw Error(PurrBoot.text('bootResourceFormat'));window.PURR_BUILD=Object.freeze(build);
+ if(!/^\d+\.\d+\.\d+$/.test(build.version)||!build.resources?.manifest)throw Error(PurrBoot.text('bootResourceFormat'));window.PURR_BUILD=Object.freeze(build);
+ // Replace legacy hash-based controllers before any asset request.
+ if('serviceWorker' in navigator){const controlled=navigator.serviceWorker.controller;let changed;const change=new Promise(resolve=>{changed=resolve;navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true})});
+ try{const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});if(!controlled||reg.installing||reg.waiting)await Promise.race([change,new Promise(resolve=>setTimeout(resolve,8000))])}catch(error){console.warn('Service worker update',error)}}
  await PurrAssets.prepare(build);await PurrAssets.decode();
  for(const link of document.querySelectorAll('link[rel="stylesheet"]')){const u=new URL(link.href),path=u.pathname.slice(PurrAssets.base.pathname.length);const href=await PurrAssets.css(path);await new Promise((ok,fail)=>{link.onload=ok;link.onerror=()=>fail(Error(PurrBoot.text('bootResourceCss',[path])));link.href=href})}
 
