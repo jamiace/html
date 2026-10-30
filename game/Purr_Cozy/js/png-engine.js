@@ -8,7 +8,7 @@ Object.assign(Room,{
   const frames=a.states[it.on&&!it.broken?'on':'off'];if(frames?.length&&!d.chair&&!d.jar&&!it.wilt){cv=PNGArt.frame(frames[Math.floor(this.t*6)%frames.length]);if(it.flip)cv=PNGArt.flip(cv)}
   if(d.layer!=='wall'&&d.layer!=='rug'&&it.p==null){c.fillStyle='rgba(46,34,48,0.18)';c.fillRect(x+2,y+cv.height-2,cv.width-4,2);c.fillRect(x+4,y+cv.height,cv.width-8,1)}c.drawImage(cv,x,y);
   if(d.jar)StarJar.draw(c,x,y,it,this.t,cv);
-  if(d.clock){const n=new Date(),co=d.clock===true?{cx:8,cy:8}:d.clock,cx=x+(it.flip?cv.width-1-co.cx:co.cx),cy=y+co.cy;c.drawImage(PNGArt.image('assets/png/clock/minute_'+n.getMinutes()+'.png'),cx-4,cy-4);const hour=Math.floor(((n.getHours()%12)*60+n.getMinutes())/5);c.drawImage(PNGArt.image('assets/png/clock/hour_'+hour+'.png'),cx-4,cy-4)}
+  if(d.clock){const n=new Date(),co=d.clock===true?{cx:8,cy:8}:d.clock,cx=x+(it.flip?cv.width-1-co.cx:co.cx),cy=y+co.cy,prefix=co.assetPrefix||'',radius=co.radius||4;c.drawImage(PNGArt.image('assets/png/clock/'+prefix+'minute_'+n.getMinutes()+'.png'),cx-radius,cy-radius);const hour=Math.floor(((n.getHours()%12)*60+n.getMinutes())/5);c.drawImage(PNGArt.image('assets/png/clock/'+prefix+'hour_'+hour+'.png'),cx-radius,cy-radius)}
   if(d.calendar)c.drawImage(PNGArt.image('assets/png/calendar/'+new Date().getDate()+'.png'),x+4,y+11);
   if(it.dust)Life.drawDust(c,it,x,y,cv);if(it.broken&&Math.random()<.01)this.puff('p_spark',x+cv.width/2,y+4,{vy:-4,max:.4});
   if(d.steam&&Math.random()<.025)this.puff('p_steam',x+cv.width/2-1,y-2,{vx:(Math.random()-.5)*2,vy:-5,max:1.6,alpha:.6});

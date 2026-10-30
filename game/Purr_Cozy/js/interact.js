@@ -231,5 +231,5 @@ setInterval(() => { try { const Z = Game.S && Game.S.zoo; if (!Z || !Z.dogsGone 
 
 (function () {
   const interact = Game.interact.bind(Game);
-  Game.interact = function (it) { UI.clearBubbles('furniture'); return interact(it); };
+  Game.interact = function (it) { UI.clearBubbles('furniture'); const target=ITEMS[it.k]?.openWin; if(target && !Room.edit){it.shake=0.25;return UI.openWin(target)} return interact(it); };
 })();

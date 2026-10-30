@@ -1,8 +1,8 @@
 {
-  "version": "0.92.14",
+  "version": "0.92.15",
   "date": "2026/10/30",
   "resources": {
     "manifest": "resources.json",
-    "sha256": "8e140ce4021654048d9b5a1ae6d7dcde9731a37c3c3f32065a826aba70b708e5"
+    "sha256": "b0a9d90e0b0b68c63cc1a9439f058e64a3e772b2ca725feaa8b831eb3bfbcaa8"
   }
 }

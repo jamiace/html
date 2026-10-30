@@ -12617,7 +12617,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tall_walnut": {
       "image": "assets/png/furniture/st_tall_walnut.png",
@@ -12647,7 +12648,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tall_white": {
       "image": "assets/png/furniture/st_tall_white.png",
@@ -12677,7 +12679,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tall_black": {
       "image": "assets/png/furniture/st_tall_black.png",
@@ -12707,7 +12710,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tall_pink": {
       "image": "assets/png/furniture/st_tall_pink.png",
@@ -12737,7 +12741,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tall_mint": {
       "image": "assets/png/furniture/st_tall_mint.png",
@@ -12767,7 +12772,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "avatar"
     },
     "st_tv_stand_oak": {
       "image": "assets/png/furniture/st_tv_stand_oak.png",
@@ -12977,7 +12983,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_cube_walnut": {
       "image": "assets/png/furniture/st_cube_walnut.png",
@@ -13007,7 +13014,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_cube_white": {
       "image": "assets/png/furniture/st_cube_white.png",
@@ -13037,7 +13045,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_cube_black": {
       "image": "assets/png/furniture/st_cube_black.png",
@@ -13067,7 +13076,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_cube_pink": {
       "image": "assets/png/furniture/st_cube_pink.png",
@@ -13097,7 +13107,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_cube_mint": {
       "image": "assets/png/furniture/st_cube_mint.png",
@@ -13127,7 +13138,8 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "openWin": "storage"
     },
     "st_ladder_oak": {
       "image": "assets/png/furniture/st_ladder_oak.png",
@@ -30754,7 +30766,13 @@
       "light": null,
       "desk": false,
       "chair": false,
-      "fps": 6
+      "fps": 6,
+      "clock": {
+        "cx": 13,
+        "cy": 13,
+        "assetPrefix": "constellation_",
+        "radius": 8
+      }
     },
     "window_small": {
       "image": "assets/png/furniture/window_small.png",
