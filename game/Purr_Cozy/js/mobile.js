@@ -146,7 +146,7 @@ const Mobile = {
     const stage = document.querySelector('.stage'), cv = document.getElementById('room'), wrap = document.querySelector('.room-wrap');
     const W = stage.getBoundingClientRect().width, H = window.innerHeight, dpr = window.devicePixelRatio || 1;
     let s = Math.min(W / RW, (H * 0.5) / RH);
-    const crisp = Math.floor(s * dpr) / dpr; s = crisp >= s * 0.86 ? Math.max(1 / dpr, crisp) : Math.max(1, Math.floor(s * 8) / 8);
+    s = Math.max(1 / 16, Math.floor(s * RW * dpr) / (RW * dpr));
     Game.scale = s; cv.style.width = RW * s + 'px'; cv.style.height = RH * s + 'px'; wrap.style.width = RW * s + 'px'; wrap.style.height = RH * s + 'px';
     this.applyZoom();
   },

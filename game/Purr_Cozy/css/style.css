@@ -818,7 +818,7 @@ body.m .cloudchip .cl-t { display: none; }
 /* the room on top, the "today" panel under it */
 body.m .stage { justify-content: flex-start; align-items: stretch; gap: 8px; overflow-y: auto; overflow-x: hidden; padding: 6px 0 10px; -webkit-overflow-scrolling: touch; }
 body.m .room-wrap { align-self: center; flex: none; overflow: hidden; }
-body.m .room-wrap > #room, body.m .room-wrap > #overlay { transform-origin: 0 0; transform: var(--zt, none); transition: transform .18s steps(4); }
+body.m .room-wrap > #room, body.m .room-wrap > #overlay { transform-origin: 0 0; transform: var(--zt, none); transition: none; }
 body.m .mzoom { display: grid; place-items: center; position: absolute; right: 6px; top: 6px; z-index: 7; width: 34px; height: 34px; padding: 0; border: 0; background: var(--paper); box-shadow: 0 0 0 2px #2e2230, 0 3px 0 rgba(46, 34, 48, .2); opacity: .9; }
 body.m .room-wrap.zoomed .mzoom { background: var(--hl-2); }
 body.m .mtoday { display: flex; flex-direction: column; gap: 8px; }

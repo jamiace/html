@@ -101,12 +101,11 @@ const UI = {
     const mini = document.body.classList.contains('mini');
     const stage = document.querySelector('.stage'), cv = document.getElementById('room'), wrap = document.querySelector('.room-wrap');
     const r = stage.getBoundingClientRect();
-    const availW = Math.max(200, r.width - (this.narrow() ? 0 : 24)), availH = Math.max(160, r.height - 16);
+    const availW = Math.max(1, r.width - (this.narrow() ? 0 : 24)), availH = Math.max(1, r.height - 16);
     const dpr = window.devicePixelRatio || 1;
     let s = Math.min(availW / RW, availH / RH);
     if (mini) s = Math.min(s, 2);
-    const crisp = Math.floor(s * dpr) / dpr;
-    s = crisp >= s * 0.86 ? Math.max(1 / dpr, crisp) : Math.max(1, Math.floor(s * 8) / 8);
+    s = Math.max(1 / 16, Math.floor(s * RW * dpr) / (RW * dpr));
     Game.scale = s; cv.style.width = RW * s + 'px'; cv.style.height = RH * s + 'px'; wrap.style.width = RW * s + 'px'; wrap.style.height = RH * s + 'px';
     for (const id in this.wins) this.placeWin(this.wins[id]);
   },
