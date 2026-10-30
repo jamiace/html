@@ -1,19 +1,21 @@
 /* A verified build is committed only after every listed local resource is available. */
 window.PurrAssets={
  base:new URL('./',location.href), entries:new Map(), images:new Map(), masks:new Map(), urls:new Map(), stats:{downloaded:0,reused:0,bytes:0,recovered:0},
+ crc32(bytes){let c=0xffffffff;for(const b of new Uint8Array(bytes)){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return ((c^0xffffffff)>>>0).toString(16).padStart(8,'0')},
  async network(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),90000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok)throw Error(PurrBoot.text('bootResourceHTTP',[r.status]));return await r.arrayBuffer()}finally{clearTimeout(timer)}},
  async prepare(build){
   if(!isSecureContext||!window.caches)throw Error(PurrBoot.text('bootResourceSecure'));
   this.cache=await caches.open('purr-content-v2');this.index=await caches.open('purr-index-v2');
-  const manifestURL=new URL(build.resources.manifest,this.base);manifestURL.searchParams.set('v',build.version);
-  let data;try{data=await this.network(manifestURL)}catch(error){const hit=await this.index.match(manifestURL);if(!hit)throw error;data=await hit.arrayBuffer()}const manifest=JSON.parse(new TextDecoder().decode(data));
-  if(manifest.version!==build.version)throw Error(PurrBoot.text('bootResourceVersion'));
+  const manifestURL=new URL(build.resources.manifest,this.base);manifestURL.searchParams.set('checksum',build.resources.checksum);
+  let data;const stored=await this.index.match(manifestURL);if(stored)data=await stored.arrayBuffer();else data=await this.network(manifestURL);
+  if(this.crc32(data)!==build.resources.checksum)throw Error(PurrBoot.text('bootResourceManifest'));
+  const manifest=JSON.parse(new TextDecoder().decode(data));
   let complete=0,at=0;const files=manifest.files;
   await Promise.all(Array.from({length:12},async()=>{while(at<files.length){const e=files[at++];
-   e.key=new URL('.purr-files/'+build.version+'/'+e.path,this.base).href;this.entries.set(new URL(e.path,this.base).href,e);
-   const url=new URL(e.path,this.base);url.searchParams.set('purrVersion',build.version);
-   let res;try{res=new Response(await this.network(url),{headers:{'Content-Type':e.mime}});await this.cache.put(e.key,res.clone());this.stats.downloaded++}
-   catch(error){res=await this.cache.match(e.key);if(!res)throw error;this.stats.reused++}
+   e.key=new URL('.purr-crc/'+e.crc32+'/'+e.path,this.base).href;this.entries.set(new URL(e.path,this.base).href,e);
+   const url=new URL(e.path,this.base);url.searchParams.set('crc',e.crc32);
+   const hit=await this.cache.match(e.key);
+   if(hit)this.stats.reused++;else{const bytes=await this.network(url);if(bytes.byteLength!==e.bytes||this.crc32(bytes)!==e.crc32)throw Error(PurrBoot.text('bootResourceFile',[e.path]));await this.cache.put(e.key,new Response(bytes,{headers:{'Content-Type':e.mime}}));this.stats.downloaded++;this.stats.bytes+=bytes.byteLength}
    complete++;PurrBoot.set('pixel',.9*complete/files.length);PurrBoot.message(PurrBoot.text('bootResourceProgress',[Math.floor(complete/files.length*100)]));
   }}));
   const nativeFetch=window.fetch.bind(window);this.nativeFetch=nativeFetch;

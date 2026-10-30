@@ -1,7 +1,8 @@
 {
-  "version": "0.92.17",
+  "version": "0.92.18",
   "date": "2026/10/30",
   "resources": {
-    "manifest": "resources.json"
+    "manifest": "resources.json",
+    "checksum": "f6d5de29"
   }
 }
