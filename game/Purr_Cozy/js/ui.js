@@ -579,15 +579,15 @@ const UI = {
     const vol = h('div', { class: 'row' }, ico('i_vol', 22), h('input', { type: 'range', id: 'm-vol', min: '0', max: '100', value: String(Math.round(M.vol * 100)), 'aria-label': I18n.s("u_8bf8b9780d34"), oninput: e => Music.setVol(e.target.value / 100) }));
     const file = h('input', { type: 'file', id: 'm-file', accept: 'audio/*,.mp3,.flac,.m4a,.aac,.ogg,.opus,.wav', multiple: true, hidden: true, onchange: e => { Music.addFiles([...e.target.files]); e.target.value = ''; } });
     const yt = h('input', { id: 'm-yt', type: 'text', placeholder: I18n.s("u_13eb7312f6c3"), autocomplete: 'off', onkeydown: e => { if (e.key === 'Enter' && !e.isComposing) { if (Music.addYT(e.target.value)) e.target.value = ''; } } });
-    const list = h('ol', { class: 'mlist' }, ...M.list.map((e, i) => h('li', { class: (i === M.idx ? 'cur ' : '') + (e.missing ? 'missing' : '') },
+    const list = h('ol', { class: 'mlist' }, ...M.list.map((e,i)=>({e,i})).filter(({e})=>!MusicPlaylists.builtin(e)).map(({e,i}) => h('li', { class: (i === M.idx ? 'cur ' : '') + (e.missing ? 'missing' : '') },
       h('button', { class: 'mplay', onclick: () => Music.playIdx(i), title: e.title }, h('span', { class: 'mi num', text: String(i + 1) }), h('span', { class: 'mn', text: e.title }), h('em', { class: 'mb', text: e.type === 'yt' ? 'YT' : e.type === 'url' ? I18n.s("u_b3cf484b0ad2") : e.missing ? I18n.s("u_f773ac0cb584") : (e.stored === false ? I18n.s("u_049bc88d2bf1") : I18n.s("u_019e29ea514a")) })),
       h('button', { class: 'del', 'aria-label': I18n.s("u_f853a70b1204"), onclick: () => Music.move(e.id, -1) }, '▲'),
       h('button', { class: 'del', 'aria-label': I18n.s("u_80222cd0b0a6"), onclick: () => Music.remove(e.id) }, ico('i_trash', 18)))));
     const ytNote = window.NOOK_ENV === 'artifact' ? h('p', { class: 'hint', text: I18n.s("u_f3158b5e4480") }) : null;
     this.tickMusic();
     const tab = this.mTab || (Lib.enabled() && !M.list.length ? 'lib' : 'list');
-    const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (tab === 'lib' ? ' on' : ''), onclick: () => { this.mTab = 'lib'; this.refresh('music'); } }, ico('i_music', 18), I18n.s("u_2495f93430e2")),
-      h('button', { class: 'tab' + (tab === 'list' ? ' on' : ''), onclick: () => { this.mTab = 'list'; this.refresh('music'); } }, ico('i_folder', 18), I18n.s("u_2bb68ef72947", [M.list.length])));
+    const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (tab === 'lib' ? ' on' : ''), onclick: () => { this.mTab = 'lib'; this.refresh('music'); } }, ico('i_music', 18), I18n.s("musicBuiltinTab")),
+      h('button', { class: 'tab' + (tab === 'list' ? ' on' : ''), onclick: () => { this.mTab = 'list'; this.refresh('music'); } }, ico('i_folder', 18), I18n.s("musicUserTab", [MusicPlaylists.users(M).length])));
     vol.classList.add('mvol'); ctl.append(vol);
     const head = [now, h('div', { class: 'mprog' }, this.el.mProg, h('div', { class: 'mtimes num' }, this.el.mT, this.el.mD)), ctl, tabs];
     const auto = h('div', { class: 'row' }, h('button', { class: 'chip sm' + (Game.S.settings.autoMusic ? ' on' : ''), 'aria-pressed': Game.S.settings.autoMusic ? 'true' : 'false', onclick: () => { Game.S.settings.autoMusic = !Game.S.settings.autoMusic; Game.save(); this.refresh('music'); }, title: I18n.s("u_51ca76c83cf8") }, ico('i_tomato', 16), Game.S.settings.autoMusic ? I18n.s("u_acec4f59140e") : I18n.s("u_c1a1a97796af")));

@@ -336,8 +336,8 @@ const Lib = {
   },
   async loadBundled() {
     try {
-      const r = await fetch('music/playlist.json', { cache: 'no-cache' }); if (!r.ok) return [];
-      const list = await r.json(); if (!Array.isArray(list)) return [];
+      const r = await fetch('data/music-builtins.json'); if (!r.ok) return [];
+      const data = await r.json(); const list = data.tracks; if (!Array.isArray(list)) return [];
       return list.map((t, i) => { const src = typeof t === 'string' ? t : t && t.src; if (!src) return null;
         return { id: 'u:' + src, type: 'url', src, fid: t.drive || '', lrc: (t && t.lrc) || '', album: (t && t.album) || I18n.s("u_b3cf484b0ad2"), title: (t && t.title) || decodeURIComponent(src.split('/').pop().replace(AUDIO_EXT, '')) }; }).filter(Boolean);
     } catch (e) { return []; }

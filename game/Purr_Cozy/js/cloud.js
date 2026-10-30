@@ -246,7 +246,7 @@ function progressKey(S) {
   // only things that change because you did something (no counters that move on their own, nothing reset by the 6 a.m. rollover)
   return saveHash(JSON.stringify([totalXp(S), S.coins || 0, v.length, v.reduce((n, r) => n + (r ? (r[0] || 0) * 1000 + (r[1] || 0) : 0), 0),
     (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0]), S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
-    (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => m.text), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
+    (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => m.text), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
 }
 function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
 // real progress made on this device since its stamp (no stamp: an older version's save, treated as unknown)

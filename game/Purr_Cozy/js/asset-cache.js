@@ -1,22 +1,25 @@
 /* A verified build is committed only after every listed local resource is available. */
 window.PurrAssets={
+ schema:4,
  base:new URL('./',location.href), entries:new Map(), images:new Map(), masks:new Map(), urls:new Map(), stats:{downloaded:0,reused:0,bytes:0,recovered:0},
  crc32(bytes){let c=0xffffffff;for(const b of new Uint8Array(bytes)){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return ((c^0xffffffff)>>>0).toString(16).padStart(8,'0')},
- async network(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),90000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok)throw Error(PurrBoot.text('bootResourceHTTP',[r.status]));return await r.arrayBuffer()}finally{clearTimeout(timer)}},
+ canonical(e,bytes){if(!e.text)return bytes;const src=new Uint8Array(bytes),out=new Uint8Array(src.length);let n=0;for(let i=0;i<src.length;i++){if(src[i]===13&&src[i+1]===10)continue;out[n++]=src[i]}return out.slice(0,n).buffer},
+ async network(url){let error;for(let attempt=0;attempt<3;attempt++){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok){error=Error(PurrBoot.text('bootResourceHTTP',[r.status]));if(r.status<500&&r.status!==429)throw Object.assign(error,{permanent:true});throw error}return await r.arrayBuffer()}catch(e){error=e;if(e.permanent||attempt===2)throw e}finally{clearTimeout(timer)}await new Promise(resolve=>setTimeout(resolve,250*(attempt+1)))}throw error},
  async prepare(build){
   if(!isSecureContext||!window.caches)throw Error(PurrBoot.text('bootResourceSecure'));
   this.cache=await caches.open('purr-content-v2');this.index=await caches.open('purr-index-v2');
   const manifestURL=new URL(build.resources.manifest,this.base);manifestURL.searchParams.set('checksum',build.resources.checksum);
   let data;const stored=await this.index.match(manifestURL);if(stored)data=await stored.arrayBuffer();else data=await this.network(manifestURL);
   if(this.crc32(data)!==build.resources.checksum)throw Error(PurrBoot.text('bootResourceManifest'));
-  const manifest=JSON.parse(new TextDecoder().decode(data));
-  let complete=0,at=0;const files=manifest.files;
-  await Promise.all(Array.from({length:12},async()=>{while(at<files.length){const e=files[at++];
+  const manifest=JSON.parse(new TextDecoder().decode(data));if(manifest.schema!==4)throw Error('Resource list format mismatch; upload resources.json and all update files.');
+  let complete=0,at=0,failed=null;const files=manifest.files;
+  await Promise.all(Array.from({length:12},async()=>{while(!failed&&at<files.length){const e=files[at++];try{
    e.key=new URL('.purr-crc/'+e.crc32+'/'+e.path,this.base).href;this.entries.set(new URL(e.path,this.base).href,e);
    const url=new URL(e.path,this.base);url.searchParams.set('crc',e.crc32);
    const hit=await this.cache.match(e.key);
-   if(hit)this.stats.reused++;else{const bytes=await this.network(url);if(bytes.byteLength!==e.bytes||this.crc32(bytes)!==e.crc32)throw Error(PurrBoot.text('bootResourceFile',[e.path]));await this.cache.put(e.key,new Response(bytes,{headers:{'Content-Type':e.mime}}));this.stats.downloaded++;this.stats.bytes+=bytes.byteLength}
-   complete++;PurrBoot.set('pixel',.9*complete/files.length);PurrBoot.message(PurrBoot.text('bootResourceProgress',[Math.floor(complete/files.length*100)]));
+   if(hit)this.stats.reused++;else{let bytes;for(let attempt=0;attempt<3;attempt++){if(attempt){url.searchParams.set('retry',String(Date.now()));await new Promise(resolve=>setTimeout(resolve,500*attempt))}bytes=this.canonical(e,await this.network(url));if(bytes.byteLength===e.bytes&&this.crc32(bytes)===e.crc32)break;if(attempt===2)throw Error(PurrBoot.text('bootResourceFile',[e.path]))}await this.cache.put(e.key,new Response(bytes,{headers:{'Content-Type':e.mime}}));this.stats.downloaded++;this.stats.bytes+=bytes.byteLength}
+   if(failed)return;complete++;PurrBoot.set('pixel',.9*complete/files.length);PurrBoot.message(PurrBoot.text('bootResourceProgress',[Math.floor(complete/files.length*100)]));
+   }catch(error){if(!failed){error.message+=' ['+e.path+']';failed=error;PurrBoot.fail(error.message)}throw error}
   }}));
   const nativeFetch=window.fetch.bind(window);this.nativeFetch=nativeFetch;
   window.fetch=async(input,opts)=>{const u=new URL(input instanceof Request?input.url:input,this.base);u.search='';const e=this.entries.get(u.href);if(e&&(!opts?.method||opts.method==='GET')&&(!(input instanceof Request)||input.method==='GET')){const res=await this.cache.match(e.key);if(!res)throw Error(PurrBoot.text('bootResourceMissing',[e.path]));return res}return nativeFetch(input,opts)};

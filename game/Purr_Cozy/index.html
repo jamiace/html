@@ -46,6 +46,8 @@
 </div>
 <div id="toasts" aria-live="polite"></div>
 <div id="loading" class="loading" role="status" aria-live="polite"><div class="purr-splash"><img src="apple-touch-icon.png" width="132" height="132" alt="呼嚕小窩遊戲圖示"><h1>Purr Cozy</h1><p class="purr-subtitle">呼嚕小窩</p><progress id="load-progress" max="100" value="0" aria-label="載入進度"></progress><div class="purr-load-info"><span id="load-status">正在準備房間…</span><span id="load-percent">0%</span></div><button id="load-retry" type="button" hidden>重新載入</button></div></div>
-<script src="js/bootstrap.js"></script>
+<script>
+(async()=>{try{let build;try{const response=await fetch('version.json',{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);build=await response.json()}catch(error){build=JSON.parse(localStorage.getItem('purr-cozy.cached-build')||'null');if(!build)throw error}window.PURR_EARLY_BUILD=build;const s=document.createElement('script');s.src='js/bootstrap.js?boot='+encodeURIComponent(build.resources?.checksum||build.version);s.onerror=()=>{document.getElementById('load-status').textContent='無法載入 js/bootstrap.js';document.getElementById('load-retry').hidden=false};document.head.append(s)}catch(error){document.getElementById('load-status').textContent=String(error.message);document.getElementById('load-retry').hidden=false}document.getElementById('load-retry').onclick=()=>location.reload()})();
+</script>
 </body>
 </html>
