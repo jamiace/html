@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/shell__navy.png" id="1"]
+
+[resource]
+metadata/id = "shell__navy"
+metadata/name = "貝殼・海軍藍"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 9)
+metadata/size = Vector2i(12, 10)
+metadata/base = ExtResource("1")

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lf_arc_sun.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lf_arc_sun__on.png" id="2"]
+
+[resource]
+metadata/id = "lf_arc_sun"
+metadata/name = "暖黃弧形燈"
+metadata/layer = "floor"
+metadata/pivot = Vector2(14, 43)
+metadata/size = Vector2i(28, 44)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

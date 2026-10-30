@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/poster_sakura.png" id="1"]
+
+[resource]
+metadata/id = "poster_sakura"
+metadata/name = "櫻花枝海報"
+metadata/layer = "wall"
+metadata/pivot = Vector2(9, 27)
+metadata/size = Vector2i(18, 28)
+metadata/base = ExtResource("1")

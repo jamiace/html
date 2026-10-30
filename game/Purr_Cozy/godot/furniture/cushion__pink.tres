@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/cushion__pink.png" id="1"]
+
+[resource]
+metadata/id = "cushion__pink"
+metadata/name = "圓坐墊・粉"
+metadata/layer = "floor"
+metadata/pivot = Vector2(11, 10)
+metadata/size = Vector2i(22, 11)
+metadata/base = ExtResource("1")

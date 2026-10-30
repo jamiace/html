@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/chabudai__black.png" id="1"]
+
+[resource]
+metadata/id = "chabudai__black"
+metadata/name = "圓矮桌・黑色"
+metadata/layer = "floor"
+metadata/pivot = Vector2(21, 14)
+metadata/size = Vector2i(42, 15)
+metadata/base = ExtResource("1")

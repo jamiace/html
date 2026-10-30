@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/snowman.png" id="1"]
+
+[resource]
+metadata/id = "snowman"
+metadata/name = "雪人擺飾"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 16)
+metadata/size = Vector2i(13, 17)
+metadata/base = ExtResource("1")

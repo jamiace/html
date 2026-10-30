@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/photo_frame__mustard.png" id="1"]
+
+[resource]
+metadata/id = "photo_frame__mustard"
+metadata/name = "相框・芥末"
+metadata/layer = "decor"
+metadata/pivot = Vector2(5, 11)
+metadata/size = Vector2i(11, 12)
+metadata/base = ExtResource("1")

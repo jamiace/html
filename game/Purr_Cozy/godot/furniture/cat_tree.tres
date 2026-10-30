@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/cat_tree.png" id="1"]
+
+[resource]
+metadata/id = "cat_tree"
+metadata/name = "貓跳台"
+metadata/layer = "floor"
+metadata/pivot = Vector2(13, 47)
+metadata/size = Vector2i(26, 48)
+metadata/base = ExtResource("1")

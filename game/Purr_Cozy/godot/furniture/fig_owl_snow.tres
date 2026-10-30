@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/fig_owl_snow.png" id="1"]
+
+[resource]
+metadata/id = "fig_owl_snow"
+metadata/name = "白瓷貓頭鷹擺飾"
+metadata/layer = "decor"
+metadata/pivot = Vector2(4, 11)
+metadata/size = Vector2i(9, 12)
+metadata/base = ExtResource("1")

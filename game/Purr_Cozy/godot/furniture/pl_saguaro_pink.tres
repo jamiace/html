@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_saguaro_pink.png" id="1"]
+
+[resource]
+metadata/id = "pl_saguaro_pink"
+metadata/name = "柱狀仙人掌（粉盆）"
+metadata/layer = "floor"
+metadata/pivot = Vector2(9, 35)
+metadata/size = Vector2i(18, 36)
+metadata/base = ExtResource("1")

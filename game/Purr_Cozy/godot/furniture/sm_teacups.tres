@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_teacups.png" id="1"]
+
+[resource]
+metadata/id = "sm_teacups"
+metadata/name = "下午茶杯組"
+metadata/layer = "decor"
+metadata/pivot = Vector2(9, 9)
+metadata/size = Vector2i(18, 10)
+metadata/base = ExtResource("1")

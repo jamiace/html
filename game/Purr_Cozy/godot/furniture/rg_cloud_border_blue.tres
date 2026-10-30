@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/rg_cloud_border_blue.png" id="1"]
+
+[resource]
+metadata/id = "rg_cloud_border_blue"
+metadata/name = "藍鑲邊雲朵地毯"
+metadata/layer = "rug"
+metadata/pivot = Vector2(23, 17)
+metadata/size = Vector2i(46, 18)
+metadata/base = ExtResource("1")

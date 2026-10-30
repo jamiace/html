@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ch_bar_berry_oak.png" id="1"]
+
+[resource]
+metadata/id = "ch_bar_berry_oak"
+metadata/name = "莓果吧檯椅"
+metadata/layer = "floor"
+metadata/pivot = Vector2(7, 29)
+metadata/size = Vector2i(14, 30)
+metadata/base = ExtResource("1")

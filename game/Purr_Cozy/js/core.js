@@ -1,6 +1,6 @@
 /* ============================================================
-   Pixel core: palette, painter grids, sprite registry
-   Every sprite in the game is painted pixel-by-pixel here.
+   Pixel core: palette, PNG layer composition and sprite registry
+   Runtime artwork is loaded from assets/png by png-registry.js.
    ============================================================ */
 const PAL = {
   '0': '#2e2230', '1': '#4a3540',

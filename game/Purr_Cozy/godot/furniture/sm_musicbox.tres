@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_musicbox.png" id="1"]
+
+[resource]
+metadata/id = "sm_musicbox"
+metadata/name = "音樂盒"
+metadata/layer = "decor"
+metadata/pivot = Vector2(7, 11)
+metadata/size = Vector2i(14, 12)
+metadata/base = ExtResource("1")

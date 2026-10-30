@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/neon_note__sun.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/neon_note__sun__on.png" id="2"]
+
+[resource]
+metadata/id = "neon_note__sun"
+metadata/name = "霓虹音符・黃"
+metadata/layer = "wall"
+metadata/pivot = Vector2(9, 21)
+metadata/size = Vector2i(18, 22)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_rubik.png" id="1"]
+
+[resource]
+metadata/id = "sm_rubik"
+metadata/name = "魔術方塊"
+metadata/layer = "decor"
+metadata/pivot = Vector2(4, 7)
+metadata/size = Vector2i(8, 8)
+metadata/base = ExtResource("1")

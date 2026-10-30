@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/string_lights_blue.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/string_lights_blue__on.png" id="2"]
+
+[resource]
+metadata/id = "string_lights_blue"
+metadata/name = "冰藍串燈"
+metadata/layer = "wall"
+metadata/pivot = Vector2(32, 13)
+metadata/size = Vector2i(64, 14)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

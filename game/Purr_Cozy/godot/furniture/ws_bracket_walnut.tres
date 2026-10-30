@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ws_bracket_walnut.png" id="1"]
+
+[resource]
+metadata/id = "ws_bracket_walnut"
+metadata/name = "胡桃木鐵架層板"
+metadata/layer = "wall"
+metadata/pivot = Vector2(15, 11)
+metadata/size = Vector2i(30, 12)
+metadata/base = ExtResource("1")

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/neon_wave_yellow.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/neon_wave_yellow__on.png" id="2"]
+
+[resource]
+metadata/id = "neon_wave_yellow"
+metadata/name = "金黃霓虹海浪"
+metadata/layer = "wall"
+metadata/pivot = Vector2(8, 11)
+metadata/size = Vector2i(16, 12)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

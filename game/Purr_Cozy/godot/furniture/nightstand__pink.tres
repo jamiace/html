@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/nightstand__pink.png" id="1"]
+
+[resource]
+metadata/id = "nightstand__pink"
+metadata/name = "床頭櫃・粉彩"
+metadata/layer = "floor"
+metadata/pivot = Vector2(10, 21)
+metadata/size = Vector2i(20, 22)
+metadata/base = ExtResource("1")

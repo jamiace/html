@@ -19,9 +19,9 @@
     g.px(2, 4, GL[2]);
     return g.outline();
   };
-  SPR.def('star_jar_d', jar(9, 13, 5));
-  SPR.def('star_jar_w', jar(13, 19, 7));
-  SPR.def('p_star', () => Grid.rows(['.X.', 'XWX', '.X.']));
+  ;
+  ;
+  ;
 })();
 // inner area that fills with stars, in sprite pixels: x0..x1, y0 (top) .. y1 (bottom)
 const JARS = { d: { k: 'star_jar_d', x0: 2, x1: 6, y0: 4, y1: 10 }, w: { k: 'star_jar_w', x0: 2, x1: 10, y0: 4, y1: 16 } };
@@ -42,24 +42,8 @@ const StarJar = {
     const done = !!(tm && tm.doneAt) || total >= goal;
     return { total: Math.min(total, goal), goal, k: done ? 1 : Math.min(1, total / Math.max(1, goal)), done, claim: done && Team.claimableN && Team.claimableN() > 0, task: tm ? tm.task : st.task };
   },
-  draw(c, x, y, it, t, cv) {
-    if (Room.uidMap[it.uid] !== it) return;   // a friend's room preview: their progress is not known here
-    const d = ITEMS[it.k], J = JARS[d.jar], s = this.state(d.jar); if (!s) return;
-    const rows = J.y1 - J.y0 + 1, n = s.k > 0 ? Math.max(1, Math.round(s.k * rows)) : 0;
-    for (let r = 0; r < n; r++) {
-      const yy = J.y1 - r;
-      for (let xx = J.x0; xx <= J.x1; xx++) {
-        // little stars: bright points on a warm gold pile, a few of them twinkling
-        const hv = hsh(xx, yy, it.uid), star = hv % 4 === 0, tw = star && Math.floor(t * 1.2 + (hv % 11)) % 6 === 0;
-        c.fillStyle = tw ? '#ffffff' : star ? '#fff1a8' : hv % 3 === 0 ? '#f2b23c' : '#ffd45a';
-        c.fillRect(x + (it.flip ? cv.width - 1 - xx : xx), y + yy, 1, 1);
-      }
-    }
-    if (s.done) {   // lid tied with a ribbon; sparkles while the reward waits
-      const nx = Math.floor(cv.width / 2); c.fillStyle = '#e86a7a'; c.fillRect(x + nx - 2, y + 2, 5, 1); c.fillRect(x + nx + 2, y + 3, 1, 2);
-      if (s.claim && Math.random() < 0.04) Room.puff('p_star', x + Math.random() * cv.width, y + 2 + Math.random() * 6, { vy: -6, max: 0.8 });
-    }
-  },
+  draw(c,x,y,it,t,cv){if(Room.uidMap[it.uid]!==it)return;const type=ITEMS[it.k].jar,J=JARS[type],state=this.state(type);if(!state)return;const rows=J.y1-J.y0+1,n=state.k>0?Math.max(1,Math.round(state.k*rows)):0,phase=Math.floor(t*1.2)%2;let im=PNGArt.image(`assets/png/jars/${type}_${n}_${state.done?1:0}_${phase}.png`);if(it.flip)im=PNGArt.flip(im);c.drawImage(im,x,y);if(state.claim&&Math.random()<.04)Room.puff('p_star',x+Math.random()*cv.width,y+2+Math.random()*6,{vy:-6,max:.8});},
+
   placed(type) { return Room.state.items.filter(i => ITEMS[i.k] && ITEMS[i.k].jar === type); },
   // a star falls into the jar
   drop(type) {

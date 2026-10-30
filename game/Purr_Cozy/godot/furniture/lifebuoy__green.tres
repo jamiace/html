@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lifebuoy__green.png" id="1"]
+
+[resource]
+metadata/id = "lifebuoy__green"
+metadata/name = "救生圈・綠"
+metadata/layer = "wall"
+metadata/pivot = Vector2(10, 19)
+metadata/size = Vector2i(20, 20)
+metadata/base = ExtResource("1")

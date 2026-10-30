@@ -36,6 +36,7 @@
     Room.indexItems(); Room.buildBg(Game.S.wp, Game.S.fl); Room.computeEnv(Game.S.settings);
     UI.refreshAll(); Mobile.render(); UI.layout(); Room.render(0);
     B.message(outcome === 'timeout' ? I18n.s("u_825b2d6577ca") : I18n.s("u_161321786a04"));
+    await PurrAssets.commit();
     await B.minimumDisplay();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     document.body.classList.remove('purr-loading', 'purr-save-choice');

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ch_rocking_coral_walnut.png" id="1"]
+
+[resource]
+metadata/id = "ch_rocking_coral_walnut"
+metadata/name = "珊瑚胡桃木搖椅"
+metadata/layer = "floor"
+metadata/pivot = Vector2(11, 25)
+metadata/size = Vector2i(22, 26)
+metadata/base = ExtResource("1")

@@ -343,14 +343,7 @@ const Social = {
 function clipStatus(s) { let out = '', w = 0; for (const g of graphemes(cleanName(s))) { const c = WIDE_RE.test(g) ? 2 : 1; if (w + c > SOCIAL.statusUnits) break; out += g; w += c; } return out.trim(); }
 
 /* ---------------- guestbook item ---------------- */
-SPR.def('guestbook', () => {
-  const g = new Grid(16, 22);
-  g.rect(7, 9, 2, 11, 'b'); g.vl(7, 9, 11, 'a'); g.rect(4, 19, 8, 2, 'b'); g.hl(4, 20, 8, 'a');
-  g.rect(1, 4, 14, 6, 'b'); g.hl(1, 9, 14, 'a');
-  g.rect(2, 2, 6, 6, 'w'); g.rect(8, 2, 6, 6, 'v'); g.vl(8, 2, 6, 'x');
-  g.hl(3, 4, 4, 'z'); g.hl(3, 6, 3, 'z'); g.hl(9, 4, 4, 'z'); g.hl(9, 6, 3, 'z'); g.pts([[12, 1], [12, 2], [13, 0]], 'r');
-  return g.outline();
-});
+;
 ITEMS.guestbook = { id: 'guestbook', n: I18n.s("u_93a9e22cb641"), cat: 'furniture', spr: 'guestbook', price: 0, lvl: 1, layer: 'floor', special: true, comfort: 1 };
 
 /* ---------------- windows ---------------- */

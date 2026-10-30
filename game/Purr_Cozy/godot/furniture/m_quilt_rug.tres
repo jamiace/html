@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_quilt_rug.png" id="1"]
+
+[resource]
+metadata/id = "m_quilt_rug"
+metadata/name = "拼布地毯"
+metadata/layer = "rug"
+metadata/pivot = Vector2(19, 17)
+metadata/size = Vector2i(38, 18)
+metadata/base = ExtResource("1")

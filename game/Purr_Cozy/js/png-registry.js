@@ -1,0 +1,20 @@
+/* PNGs define artwork. Code only selects frames, layers, palette colours and positions. */
+const PNGArt={meta:PurrAssets.catalog,cache:new Map(),canvases:new Map(),
+ grid(id){if(this.cache.has(id))return this.cache.get(id);const f=this.meta.frames[id];if(!f)throw Error('Missing PNG frame: '+id);const g=this.region(f.mask,f.region);this.cache.set(id,g);return g},
+ region(path,rect){const m=PurrAssets.masks.get(path);if(!m)throw Error('Missing PNG mask: '+path);const[x,y,w,h]=rect,g=new Grid(w,h);for(let j=0;j<h;j++)for(let i=0;i<w;i++){const n=m.data[(y+j)*m.width+x+i];if(n)g.a[j][i]=String.fromCharCode(n)}return g},
+ paste(dst,src,x=0,y=0){for(let j=0;j<src.h;j++)for(let i=0;i<src.w;i++){const c=src.a[j][i];if(c!=='.')dst.px(x+i,y+j,c==='\uffff'?'.':c)}return dst},
+ frame(id){if(!this.canvases.has(id))this.canvases.set(id,this.grid(id).toCanvas());return this.canvases.get(id)},
+ image(path){const im=PurrAssets.images.get(path);if(!im)throw Error('Missing decoded PNG: '+path);if(this.canvases.has(path))return this.canvases.get(path);const cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);cv.alpha=x.getImageData(0,0,cv.width,cv.height).data;this.canvases.set(path,cv);return cv},
+ flip(cv){if(this.canvases.has(cv))return this.canvases.get(cv);const out=document.createElement('canvas');out.width=cv.width;out.height=cv.height;const x=out.getContext('2d',{willReadFrequently:true});x.translate(out.width,0);x.scale(-1,1);x.drawImage(cv,0,0);out.alpha=x.getImageData(0,0,out.width,out.height).data;this.canvases.set(cv,out);return out},
+ body(view,frame,cfg){const B=this.meta.body,pose=B.poses.find(k=>{const a=this.meta.avatarFrames[k];return a[1]===view&&a[2]===frame})||'front0',top=B.tops.includes(cfg.top)?cfg.top:B.tops[0],bi=Math.max(0,B.bottoms.indexOf(cfg.bottom)),si=Math.max(0,B.shoes.indexOf(cfg.shoes)),pi=B.poses.indexOf(pose),index=(bi*B.shoes.length+si)*B.poses.length+pi;return this.region('assets/png/masks/body_'+top+'.png',[index%B.cols*18,Math.floor(index/B.cols)*13,18,13])},
+ head(view,eyes,cfg){const g=this.grid(`head/${view}/${cfg.hairFront}/${cfg.hairBack}`).clone();if(view!=='back'){const state=['closed','happy'].includes(eyes)?eyes:'open';for(const[part,id]of [['brows',cfg.brows],['eyes',cfg.eyes],['cheeks',cfg.cheeks],['mouth',cfg.mouth]])this.paste(g,this.grid(`face/${view}/${part}/${id}`+(part==='eyes'?'/'+state:'')));if(view==='side'&&g.get(9,10)==='C')this.paste(g,this.grid('face/side/nose'))}return g},
+ headAcc(g,view,cfg,ox,oy){for(const part of ['hat','glasses','ear'])this.paste(g,this.grid(`acc/${view}/${part}/${cfg[part]||'none'}`),ox-3,oy-6)},
+};
+for(const[k,rgba]of Object.entries(PNGArt.meta.palette)){PAL_RGBA[k]=rgba;PAL[k]=`rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]/255})`}
+SPR.defs=Object.fromEntries(Object.keys(PNGArt.meta.sprites).map(n=>[n,true]));SPR.cache={};SPR.def=function(name){if(PNGArt.meta.sprites[name])this.defs[name]=true};SPR.grid=function(name){const id=PNGArt.meta.sprites[name];if(!id)throw Error('Missing PNG sprite: '+name);return PNGArt.grid(id)};
+SPR.get=function(name,map,flip,mapKey){const key=name+'|'+(mapKey||(map?JSON.stringify(map):''))+'|'+!!flip;if(this.cache[key])return this.cache[key];let cv;if(!map)cv=PNGArt.image('assets/png/sprites/'+name+'.png');else cv=this.grid(name).recolor(map).toCanvas();if(flip)cv=PNGArt.flip(cv);return this.cache[key]=cv};
+SPR.override=function(){throw Error('PNG-only runtime: regenerate the asset catalog before replacing sprites')};
+function icon(){return ()=>{throw Error('Icon painters are disabled; use the exported PNG')}}
+function gridDataURL(g,scale){const cv=g.toCanvas(),out=document.createElement('canvas');out.width=cv.width*scale;out.height=cv.height*scale;const c=out.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(cv,0,0,out.width,out.height);return out.toDataURL()}
+function spriteDataURL(name,scale){return gridDataURL(SPR.grid(name),scale)}
+const L=(x,y,r,col='warm',k=1)=>({x,y,r,col,k});

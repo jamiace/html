@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_giant_monstera.png" id="1"]
+
+[resource]
+metadata/id = "m_giant_monstera"
+metadata/name = "巨型龜背芋"
+metadata/layer = "floor"
+metadata/pivot = Vector2(14, 35)
+metadata/size = Vector2i(28, 36)
+metadata/base = ExtResource("1")

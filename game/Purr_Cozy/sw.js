@@ -1,22 +1,8 @@
-/* Purr Cozy: fresh code online; exact build files remain available offline. */
-const buildReady=fetch(new URL('version.json',self.registration.scope),{cache:'no-store'}).catch(async()=>{const cached=await caches.match(new URL('version.json',self.registration.scope),{ignoreSearch:true});if(!cached)throw Error('version unavailable offline');return cached;}).then(r=>{if(!r.ok)throw Error('version');return r.json();}).then(j=>'purr-cozy-web-'+j.version);
-const codeRequest=url=>/\.(?:html|js|css|webmanifest)$/.test(url.pathname)||url.pathname.endsWith('/')||url.pathname.endsWith('/version.json');
-self.addEventListener('install',e=>{self.skipWaiting();});
-self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
-self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting();});
-self.addEventListener('fetch',e=>{
-  const req=e.request,url=new URL(req.url);
-  if(req.method!=='GET'||url.origin!==location.origin||!url.href.startsWith(self.registration.scope)||url.pathname.includes('/music/'))return;
-  const request=codeRequest(url)?new Request(req,{cache:'no-store'}):req;
-  e.respondWith(fetch(request).then(async response=>{
-    if(response.ok){const cache=await caches.open(await buildReady);cache.put(req,response.clone()).catch(()=>{});}
-    return response;
-  }).catch(async()=>{
-    const cache=await caches.open(await buildReady);
-    const exact=await cache.match(req);
-    if(exact)return exact;
-    if(req.mode==='navigate')return await cache.match(new URL('index.html',self.registration.scope).href)||Response.error();
-    return Response.error();
-  }));
+/* No release version is duplicated here. version.json owns the build identity. */
+self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting()});
+self.addEventListener('fetch',e=>{const r=e.request,u=new URL(r.url),base=new URL('./',self.registration.scope);if(r.method!=='GET'||u.origin!==location.origin||!u.href.startsWith(base.href))return;
+ const relative=u.pathname.slice(base.pathname.length),shell=['','index.html','version.json','js/bootstrap.js','js/asset-cache.js','js/purr-boot.js'];
+ if(shell.includes(relative)){e.respondWith(fetch(new Request(r,{cache:'no-store'})).catch(async()=>{const c=await caches.open('purr-shell-v2');return await c.match(new URL(relative||'index.html',base))||Response.error()}));return}
+ e.respondWith((async()=>{try{const idx=await caches.open('purr-index-v2'),active=await idx.match(new URL('.purr-active-build',base));if(active){const b=await active.json(),res=await idx.match(new URL(b.resources.manifest,base).href+'?sha='+b.resources.sha256);if(res){const m=await res.json(),entry=m.files.find(f=>f.path===relative);if(entry){const c=await caches.open('purr-content-v2'),hit=await c.match(new URL('.purr-content/'+entry.sha256,base));if(hit)return hit}}}}catch{}return fetch(r)})())
 });
-self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window'}).then(cs=>cs.length?cs[0].focus():self.clients.openWindow('./')));});
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window'}).then(cs=>cs.length?cs[0].focus():self.clients.openWindow('./')))});

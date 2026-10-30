@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_diffuser.png" id="1"]
+
+[resource]
+metadata/id = "sm_diffuser"
+metadata/name = "香氛水氧機"
+metadata/layer = "decor"
+metadata/pivot = Vector2(5, 9)
+metadata/size = Vector2i(10, 10)
+metadata/base = ExtResource("1")

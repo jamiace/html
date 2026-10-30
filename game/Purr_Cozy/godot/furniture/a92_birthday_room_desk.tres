@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/a92_birthday_room_desk.png" id="1"]
+
+[resource]
+metadata/id = "a92_birthday_room_desk"
+metadata/name = "生日驚喜屋・收納書桌"
+metadata/layer = "floor"
+metadata/pivot = Vector2(21, 25)
+metadata/size = Vector2i(42, 26)
+metadata/base = ExtResource("1")

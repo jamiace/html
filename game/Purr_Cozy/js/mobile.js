@@ -15,8 +15,8 @@
    ============================================================ */
 // magnifier with + / - (zoom the room in and out) and a chevron for the "today" rows
 const magn = (minus) => icon(g => { const W = palAdd('#fff6ec'), D = palAdd('#4b4560'), B = palAdd('#cfe6ee'); g.ellipse(6.5, 6.5, 5, 5, D); g.ellipse(6.5, 6.5, 3.8, 3.8, B); g.hl(4, 6, 6, D); if (!minus) g.vl(6, 4, 6, D); g.px(4, 4, W); for (let i = 0; i < 4; i++) { g.px(10 + i, 11 + i, D); g.px(11 + i, 11 + i, D); g.px(11 + i, 10 + i, D); } });
-SPR.def('i_zoomin', magn(false)); SPR.def('i_zoomout', magn(true));
-SPR.def('i_chev', icon(g => { const D = palAdd('#7a6f8c'); for (let i = 0; i < 4; i++) { g.px(6 + i, 4 + i, D); g.px(7 + i, 4 + i, D); g.px(6 + i, 11 - i, D); g.px(7 + i, 11 - i, D); } }));
+; ;
+;
 const MOBILE = { maxW: 900, idleMs: 20000, longMs: 450, zoom: 2 };
 const HALF_WINS = new Set(['need', 'timer', 'todo', 'memo', 'account', 'cowork', 'visit', 'gacha']);
 const FULL_WINS = new Set(['study', 'shop', 'avatar', 'words', 'storage', 'merchant', 'story', 'learn', 'tasks', 'friends', 'music', 'settings', 'dev', 'more']);

@@ -42,7 +42,7 @@ const TEAM_CFG = { flushMs: 5 * 60e3, pollMs: 10 * 60e3, viewMs: 30e3, lobbyMs: 
 // one colour per seat (join order), used for the stacked progress bar and the member cards
 const TEAM_COLORS = ['#ef7b6c', '#f2b84b', '#5fbf8f', '#5aa2e0', '#a77bd6'];
 
-SPR.def('i_crown', icon(g => { g.pts([[2, 4], [8, 2], [14, 4]], 'w'); for (const [x, y] of [[2, 5], [3, 6], [5, 7], [6, 6], [7, 4], [8, 3], [9, 4], [10, 6], [11, 7], [13, 6], [14, 5]]) g.px(x, y, 'w'); g.rect(2, 7, 13, 5, 'w'); g.rect(4, 6, 2, 1, 'w'); g.rect(11, 6, 2, 1, 'w'); g.hl(2, 11, 13, 'v'); g.hl(3, 8, 11, 'x'); g.pts([[5, 9], [8, 9], [11, 9]], 'r'); g.pts([[2, 4], [8, 2], [14, 4]], 'x'); }));
+;
 
 const teamErr = (code) => Object.assign(new Error(code), { code });
 

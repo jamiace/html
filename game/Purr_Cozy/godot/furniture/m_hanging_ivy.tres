@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_hanging_ivy.png" id="1"]
+
+[resource]
+metadata/id = "m_hanging_ivy"
+metadata/name = "吊掛常春藤"
+metadata/layer = "wall"
+metadata/pivot = Vector2(8, 25)
+metadata/size = Vector2i(16, 26)
+metadata/base = ExtResource("1")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/dual_monitor__green.png" id="1"]
+
+[resource]
+metadata/id = "dual_monitor__green"
+metadata/name = "雙螢幕・綠"
+metadata/layer = "decor"
+metadata/pivot = Vector2(20, 19)
+metadata/size = Vector2i(40, 20)
+metadata/base = ExtResource("1")

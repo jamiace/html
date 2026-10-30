@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/zabuton__navy.png" id="1"]
+
+[resource]
+metadata/id = "zabuton__navy"
+metadata/name = "座布團・海軍藍"
+metadata/layer = "floor"
+metadata/pivot = Vector2(10, 8)
+metadata/size = Vector2i(20, 9)
+metadata/base = ExtResource("1")

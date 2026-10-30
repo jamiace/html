@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lt_bell_cream.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lt_bell_cream__on.png" id="2"]
+
+[resource]
+metadata/id = "lt_bell_cream"
+metadata/name = "奶油鈴鐺檯燈"
+metadata/layer = "decor"
+metadata/pivot = Vector2(7, 17)
+metadata/size = Vector2i(14, 18)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

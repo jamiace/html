@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/a92_winter_party_rug_round.png" id="1"]
+
+[resource]
+metadata/id = "a92_winter_party_rug_round"
+metadata/name = "冬日星光派對・織花地毯"
+metadata/layer = "rug"
+metadata/pivot = Vector2(29, 21)
+metadata/size = Vector2i(58, 22)
+metadata/base = ExtResource("1")

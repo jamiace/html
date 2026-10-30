@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ch_shell_olive_oak.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ch_shell_olive_oak__back.png" id="2"]
+
+[resource]
+metadata/id = "ch_shell_olive_oak"
+metadata/name = "橄欖造型椅"
+metadata/layer = "floor"
+metadata/pivot = Vector2(9, 25)
+metadata/size = Vector2i(18, 26)
+metadata/base = ExtResource("1")
+metadata/back = ExtResource("2")
+metadata/seated_foreground = ExtResource("2")

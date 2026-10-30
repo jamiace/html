@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sf_love_coral.png" id="1"]
+
+[resource]
+metadata/id = "sf_love_coral"
+metadata/name = "珊瑚雙人沙發"
+metadata/layer = "floor"
+metadata/pivot = Vector2(22, 21)
+metadata/size = Vector2i(44, 22)
+metadata/base = ExtResource("1")

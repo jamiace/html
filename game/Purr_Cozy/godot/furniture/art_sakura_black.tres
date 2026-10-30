@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/art_sakura_black.png" id="1"]
+
+[resource]
+metadata/id = "art_sakura_black"
+metadata/name = "櫻花枝（黑框）"
+metadata/layer = "wall"
+metadata/pivot = Vector2(10, 29)
+metadata/size = Vector2i(20, 30)
+metadata/base = ExtResource("1")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/guitar.png" id="1"]
+
+[resource]
+metadata/id = "guitar"
+metadata/name = "木吉他"
+metadata/layer = "floor"
+metadata/pivot = Vector2(8, 35)
+metadata/size = Vector2i(16, 36)
+metadata/base = ExtResource("1")

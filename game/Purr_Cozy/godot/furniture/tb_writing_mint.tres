@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/tb_writing_mint.png" id="1"]
+
+[resource]
+metadata/id = "tb_writing_mint"
+metadata/name = "薄荷寫字桌"
+metadata/layer = "floor"
+metadata/pivot = Vector2(20, 25)
+metadata/size = Vector2i(40, 26)
+metadata/base = ExtResource("1")

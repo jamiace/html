@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_orchid_white.png" id="1"]
+
+[resource]
+metadata/id = "pl_orchid_white"
+metadata/name = "蝴蝶蘭（白瓷盆）"
+metadata/layer = "decor"
+metadata/pivot = Vector2(9, 23)
+metadata/size = Vector2i(18, 24)
+metadata/base = ExtResource("1")

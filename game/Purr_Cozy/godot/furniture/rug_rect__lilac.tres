@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/rug_rect__lilac.png" id="1"]
+
+[resource]
+metadata/id = "rug_rect__lilac"
+metadata/name = "菱紋地毯・紫"
+metadata/layer = "rug"
+metadata/pivot = Vector2(31, 23)
+metadata/size = Vector2i(62, 24)
+metadata/base = ExtResource("1")

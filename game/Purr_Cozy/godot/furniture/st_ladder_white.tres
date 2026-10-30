@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/st_ladder_white.png" id="1"]
+
+[resource]
+metadata/id = "st_ladder_white"
+metadata/name = "白色梯形書架"
+metadata/layer = "floor"
+metadata/pivot = Vector2(13, 41)
+metadata/size = Vector2i(26, 42)
+metadata/base = ExtResource("1")

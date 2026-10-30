@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/rg_runner_fringe_green.png" id="1"]
+
+[resource]
+metadata/id = "rg_runner_fringe_green"
+metadata/name = "綠流蘇長條地毯"
+metadata/layer = "rug"
+metadata/pivot = Vector2(20, 9)
+metadata/size = Vector2i(40, 10)
+metadata/base = ExtResource("1")

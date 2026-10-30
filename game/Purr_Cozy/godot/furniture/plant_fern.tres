@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/plant_fern.png" id="1"]
+
+[resource]
+metadata/id = "plant_fern"
+metadata/name = "小蕨盆栽"
+metadata/layer = "decor"
+metadata/pivot = Vector2(11, 21)
+metadata/size = Vector2i(22, 22)
+metadata/base = ExtResource("1")

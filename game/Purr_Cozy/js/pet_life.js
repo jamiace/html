@@ -80,17 +80,7 @@ const PetCare = {
     return true;
   },
   litterFrames:new WeakMap(),
-  litterCanvas(base,it){
-    const used=Math.min(ITEMS[it.k].capacity||3,Math.max(0,Math.floor(it.used||0)));if(!used)return base;
-    let cache=this.litterFrames.get(base);if(!cache){cache=new Map();this.litterFrames.set(base,cache)}
-    const key=used+'|'+!!it.flip;if(cache.has(key))return cache.get(key);
-    const cv=document.createElement('canvas');cv.width=base.width;cv.height=base.height;const c=cv.getContext('2d');c.drawImage(base,0,0);c.save();if(it.flip){c.translate(cv.width,0);c.scale(-1,1)}
-    const tray=it.k==='litter_tray',x=tray?5:12,y=tray?5:23,width=tray?23:11,full=used>=(ITEMS[it.k].capacity||3);
-    c.fillStyle=full?'#93806a':'#b7a17a';c.fillRect(x,y,width,3);
-    for(let i=0;i<used;i++){const xx=x+1+(i*5)%(width-3),yy=y-1+(i%2);c.fillStyle='#69503b';c.fillRect(xx,yy,3,2);c.fillStyle='#96724e';c.fillRect(xx+1,yy-1,2,1);}
-    if(full){c.fillStyle='#984d42';c.fillRect(25,1,7,7);c.fillStyle='#fff0c3';c.fillRect(28,2,1,3);c.fillRect(28,6,1,1)}
-    c.restore();cache.set(key,cv);return cv;
-  },
+  litterCanvas(base,it){const used=Math.min(ITEMS[it.k].capacity||3,Math.max(0,Math.floor(it.used||0)));if(!used)return base;const cv=PNGArt.image('assets/png/furniture/'+it.k+'__used'+used+'.png');return it.flip?PNGArt.flip(cv):cv},
   syncMesses(){const C=Game.S.homeCare;if(!C)return;const alive=new Set(C.messes.map(m=>m.id));Room.actors=Room.actors.filter(a=>!a.isMess||alive.has(a.id));for(const m of C.messes)if(!Room.actors.some(a=>a.isMess&&a.id===m.id))Room.actors.push(new CatMess(m));},
   ownerAt(x,y,done){if(Room.state!==Game.S)return UI.toast(I18n.s("u_ad826a02fbf6"),'i_people',2);if(this.ownerBusy)return UI.toast(I18n.s("u_c1868d47ebd4"),'i_paw',2);if(Room.edit||Lights.mode!=='on')return UI.toast(I18n.s("u_945e82a9a288"),'i_paw',2);if(Game.focusing())return UI.toast(I18n.s("u_2b73ae9fdf80"),'i_paw',3);
     const A=Game.avatar;if(!A)return;this.ownerBusy=true;const state=Game.S;A.stand();A.state='walk';const finish=()=>{if(Game.S!==state){this.ownerBusy=false;return;}A.state='idle';A.timer=2;A.lp={at:Room.t,end:Room.t+1.5,frame:()=> 'type0'};setTimeout(()=>{this.ownerBusy=false;if(Game.S===state){done();UI.refresh('pet');Game.save();}},1000)};

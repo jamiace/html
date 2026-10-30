@@ -8,7 +8,7 @@
  * 2. Pixelify Sans — 英文的像素字，SIL Open Font License 1.1，已附在這個資料夾。
  * 3. Silkscreen — 只用在數字 0–9（unicode-range），比較好辨認，SIL Open Font License 1.1，已附在這個資料夾。
  */
-@import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap");
+@import url("lxgw-wenkai-tc.css");
 
 @font-face {
   font-family: "Pixelify Sans";

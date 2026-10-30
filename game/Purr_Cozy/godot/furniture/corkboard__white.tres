@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/corkboard__white.png" id="1"]
+
+[resource]
+metadata/id = "corkboard__white"
+metadata/name = "軟木留言板・白色"
+metadata/layer = "wall"
+metadata/pivot = Vector2(15, 22)
+metadata/size = Vector2i(30, 23)
+metadata/base = ExtResource("1")

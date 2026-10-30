@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/tb_coffee_mint.png" id="1"]
+
+[resource]
+metadata/id = "tb_coffee_mint"
+metadata/name = "薄荷茶几"
+metadata/layer = "floor"
+metadata/pivot = Vector2(19, 15)
+metadata/size = Vector2i(38, 16)
+metadata/base = ExtResource("1")

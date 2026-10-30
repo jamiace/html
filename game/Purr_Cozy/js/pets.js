@@ -68,26 +68,7 @@ const ACC_ANCHOR = {
     stretch: { neck: _col(14, 9, 13), dir: [-1, 0], bell: [14, 14], head: [19, 4], crown: [16, 5] },
   },
 };
-function applyPetAcc(g, kind, pose, acc) {
-  const ap = ['look', 'groom', 'knead', 'beg', 'shake', 'yawn', 'stare'].includes(pose) ? 'sit' : pose === 'lie' ? 'sleep' : pose;
-  const A = ACC_ANCHOR[kind] && ACC_ANCHOR[kind][ap]; if (!A || !acc) return g;
-  g = g.clone();
-  const inside = (x, y) => { const c = g.get(x, y); return c && c !== '.' && c !== '0'; };
-  const stamp = (x0, y0, rows) => {
-    const put = [];
-    rows.forEach((r, j) => [...r].forEach((c, i) => { if (c !== '.') { const x = x0 + i, y = y0 + j; if (x >= 0 && y >= 0 && x < g.w && y < g.h) { g.px(x, y, c); put.push([x, y]); } } }));
-    for (const [x, y] of put) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < g.w && ny < g.h && g.get(nx, ny) === '.') g.px(nx, ny, '0'); }
-  };
-  const n = acc.neck && PET_ACCS[acc.neck];
-  if (n) {
-    A.neck.forEach(([x, y], i) => { if (inside(x, y)) g.px(x, y, n.wide ? n.c[i % 2] : n.c[0]); });
-    if (n.wide) A.neck.forEach(([x, y], i) => { const X = x + A.dir[0], Y = y + A.dir[1]; if (inside(X, Y)) g.px(X, Y, n.c[(i + 1) % 2]); });
-    if (n.bell) stamp(A.bell[0], A.bell[1], ['w']);
-  }
-  const hd = acc.head && PET_ACCS[acc.head];
-  if (hd) { const [x, y] = hd.crown ? A.crown : A.head; stamp(x, y + (hd.dy || 0), hd.pat); }
-  return g;
-}
+function applyPetAcc(g, kind, pose, acc) {return PNGArt.grid(`cat/${pose}/0/${acc?.neck||""}/${acc?.head||""}`).clone();}
 
 const Pets = {
   get Z() { return Game.S.zoo; },

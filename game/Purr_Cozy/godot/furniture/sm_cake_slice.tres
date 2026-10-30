@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_cake_slice.png" id="1"]
+
+[resource]
+metadata/id = "sm_cake_slice"
+metadata/name = "草莓蛋糕"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 9)
+metadata/size = Vector2i(12, 10)
+metadata/base = ExtResource("1")

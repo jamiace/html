@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/calendar__green.png" id="1"]
+
+[resource]
+metadata/id = "calendar__green"
+metadata/name = "月曆・綠"
+metadata/layer = "wall"
+metadata/pivot = Vector2(8, 20)
+metadata/size = Vector2i(17, 21)
+metadata/base = ExtResource("1")

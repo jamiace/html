@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_moneytree_blue.png" id="1"]
+
+[resource]
+metadata/id = "pl_moneytree_blue"
+metadata/name = "馬拉巴栗（藍釉盆）"
+metadata/layer = "floor"
+metadata/pivot = Vector2(11, 37)
+metadata/size = Vector2i(22, 38)
+metadata/base = ExtResource("1")

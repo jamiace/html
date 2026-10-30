@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_lavender_white.png" id="1"]
+
+[resource]
+metadata/id = "pl_lavender_white"
+metadata/name = "薰衣草（白瓷盆）"
+metadata/layer = "decor"
+metadata/pivot = Vector2(8, 21)
+metadata/size = Vector2i(16, 22)
+metadata/base = ExtResource("1")

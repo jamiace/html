@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/rubber_duck__mustard.png" id="1"]
+
+[resource]
+metadata/id = "rubber_duck__mustard"
+metadata/name = "小黃鴨・芥末"
+metadata/layer = "decor"
+metadata/pivot = Vector2(5, 9)
+metadata/size = Vector2i(10, 10)
+metadata/base = ExtResource("1")

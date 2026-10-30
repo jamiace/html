@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/litter_capsule.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/occlusion/litter_capsule_front.png" id="2"]
+
+[resource]
+metadata/id = "litter_capsule"
+metadata/name = "奶油膠囊砂盆"
+metadata/layer = "floor"
+metadata/pivot = Vector2(17, 28)
+metadata/size = Vector2i(34, 29)
+metadata/base = ExtResource("1")
+metadata/toilet_foreground = ExtResource("2")

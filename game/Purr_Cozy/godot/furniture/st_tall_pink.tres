@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/st_tall_pink.png" id="1"]
+
+[resource]
+metadata/id = "st_tall_pink"
+metadata/name = "粉彩高櫃"
+metadata/layer = "floor"
+metadata/pivot = Vector2(11, 43)
+metadata/size = Vector2i(22, 44)
+metadata/base = ExtResource("1")

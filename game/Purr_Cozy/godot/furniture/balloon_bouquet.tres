@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/balloon_bouquet.png" id="1"]
+
+[resource]
+metadata/id = "balloon_bouquet"
+metadata/name = "生日氣球束"
+metadata/layer = "floor"
+metadata/pivot = Vector2(15, 45)
+metadata/size = Vector2i(30, 46)
+metadata/base = ExtResource("1")

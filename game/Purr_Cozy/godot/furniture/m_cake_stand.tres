@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_cake_stand.png" id="1"]
+
+[resource]
+metadata/id = "m_cake_stand"
+metadata/name = "三層點心架"
+metadata/layer = "decor"
+metadata/pivot = Vector2(8, 19)
+metadata/size = Vector2i(16, 20)
+metadata/base = ExtResource("1")

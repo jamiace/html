@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lt_tiffany_cream.png" id="1"]
+
+[resource]
+metadata/id = "lt_tiffany_cream"
+metadata/name = "彩繪玻璃燈"
+metadata/layer = "decor"
+metadata/pivot = Vector2(8, 17)
+metadata/size = Vector2i(16, 18)
+metadata/base = ExtResource("1")

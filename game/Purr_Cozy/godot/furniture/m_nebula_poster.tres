@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_nebula_poster.png" id="1"]
+
+[resource]
+metadata/id = "m_nebula_poster"
+metadata/name = "星雲海報"
+metadata/layer = "wall"
+metadata/pivot = Vector2(8, 21)
+metadata/size = Vector2i(16, 22)
+metadata/base = ExtResource("1")

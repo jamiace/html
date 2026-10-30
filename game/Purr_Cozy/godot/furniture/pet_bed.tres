@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pet_bed.png" id="1"]
+
+[resource]
+metadata/id = "pet_bed"
+metadata/name = "寵物窩"
+metadata/layer = "floor"
+metadata/pivot = Vector2(14, 13)
+metadata/size = Vector2i(28, 14)
+metadata/base = ExtResource("1")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/star_jar_w.png" id="1"]
+
+[resource]
+metadata/id = "star_jar_w"
+metadata/name = "每週星星罐"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 18)
+metadata/size = Vector2i(13, 19)
+metadata/base = ExtResource("1")

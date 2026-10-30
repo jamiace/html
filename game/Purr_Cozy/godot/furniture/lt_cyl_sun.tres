@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lt_cyl_sun.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/lt_cyl_sun__on.png" id="2"]
+
+[resource]
+metadata/id = "lt_cyl_sun"
+metadata/name = "暖黃圓筒檯燈"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 17)
+metadata/size = Vector2i(12, 18)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

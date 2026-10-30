@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/alarm_clock__sun.png" id="1"]
+
+[resource]
+metadata/id = "alarm_clock__sun"
+metadata/name = "鬧鐘・黃"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 11)
+metadata/size = Vector2i(12, 12)
+metadata/base = ExtResource("1")

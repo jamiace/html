@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/window_sage.png" id="1"]
+
+[resource]
+metadata/id = "window_sage"
+metadata/name = "綠窗簾窗戶"
+metadata/layer = "wall"
+metadata/pivot = Vector2(20, 43)
+metadata/size = Vector2i(40, 44)
+metadata/base = ExtResource("1")

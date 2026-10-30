@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/poster__mustard.png" id="1"]
+
+[resource]
+metadata/id = "poster__mustard"
+metadata/name = "月夜海報・芥末"
+metadata/layer = "wall"
+metadata/pivot = Vector2(9, 24)
+metadata/size = Vector2i(19, 25)
+metadata/base = ExtResource("1")

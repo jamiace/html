@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sf_chester_berry.png" id="1"]
+
+[resource]
+metadata/id = "sf_chester_berry"
+metadata/name = "莓果雀斯特菲沙發"
+metadata/layer = "floor"
+metadata/pivot = Vector2(26, 21)
+metadata/size = Vector2i(52, 22)
+metadata/base = ExtResource("1")

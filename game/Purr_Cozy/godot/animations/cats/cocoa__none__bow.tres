@@ -1,0 +1,166 @@
+[gd_resource type="SpriteFrames" load_steps=31 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/cats/cocoa.png" id="1"]
+
+[sub_resource type="AtlasTexture" id="Atlas_1"]
+atlas = ExtResource("1")
+region = Rect2(24, 0, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_2"]
+atlas = ExtResource("1")
+region = Rect2(600, 0, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_3"]
+atlas = ExtResource("1")
+region = Rect2(168, 18, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_4"]
+atlas = ExtResource("1")
+region = Rect2(744, 18, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_5"]
+atlas = ExtResource("1")
+region = Rect2(312, 36, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_6"]
+atlas = ExtResource("1")
+region = Rect2(888, 36, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_7"]
+atlas = ExtResource("1")
+region = Rect2(456, 54, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_8"]
+atlas = ExtResource("1")
+region = Rect2(24, 72, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_9"]
+atlas = ExtResource("1")
+region = Rect2(600, 72, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_10"]
+atlas = ExtResource("1")
+region = Rect2(168, 90, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_11"]
+atlas = ExtResource("1")
+region = Rect2(744, 90, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_12"]
+atlas = ExtResource("1")
+region = Rect2(312, 108, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_13"]
+atlas = ExtResource("1")
+region = Rect2(888, 108, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_14"]
+atlas = ExtResource("1")
+region = Rect2(456, 126, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_15"]
+atlas = ExtResource("1")
+region = Rect2(24, 144, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_16"]
+atlas = ExtResource("1")
+region = Rect2(600, 144, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_17"]
+atlas = ExtResource("1")
+region = Rect2(168, 162, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_18"]
+atlas = ExtResource("1")
+region = Rect2(744, 162, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_19"]
+atlas = ExtResource("1")
+region = Rect2(312, 180, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_20"]
+atlas = ExtResource("1")
+region = Rect2(888, 180, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_21"]
+atlas = ExtResource("1")
+region = Rect2(456, 198, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_22"]
+atlas = ExtResource("1")
+region = Rect2(24, 216, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_23"]
+atlas = ExtResource("1")
+region = Rect2(600, 216, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_24"]
+atlas = ExtResource("1")
+region = Rect2(168, 234, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_25"]
+atlas = ExtResource("1")
+region = Rect2(744, 234, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_26"]
+atlas = ExtResource("1")
+region = Rect2(312, 252, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_27"]
+atlas = ExtResource("1")
+region = Rect2(888, 252, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_28"]
+atlas = ExtResource("1")
+region = Rect2(456, 270, 22, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_29"]
+atlas = ExtResource("1")
+region = Rect2(24, 288, 22, 16)
+filter_clip = true
+
+[resource]
+animations = [
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_1")}, {"duration": 1.0, "texture": SubResource("Atlas_2")}, {"duration": 1.0, "texture": SubResource("Atlas_3")}, {"duration": 1.0, "texture": SubResource("Atlas_4")}], "loop": true, "name": &"walk", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_5")}, {"duration": 1.0, "texture": SubResource("Atlas_6")}], "loop": true, "name": &"sit", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_7")}, {"duration": 1.0, "texture": SubResource("Atlas_8")}], "loop": true, "name": &"sleep", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_9")}], "loop": true, "name": &"look", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_10")}, {"duration": 1.0, "texture": SubResource("Atlas_11")}], "loop": true, "name": &"groom", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_12")}, {"duration": 1.0, "texture": SubResource("Atlas_13")}], "loop": true, "name": &"lie", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_14")}, {"duration": 1.0, "texture": SubResource("Atlas_15")}], "loop": true, "name": &"stretch", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_16")}, {"duration": 1.0, "texture": SubResource("Atlas_17")}], "loop": true, "name": &"knead", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_18")}, {"duration": 1.0, "texture": SubResource("Atlas_19")}], "loop": true, "name": &"beg", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_20")}, {"duration": 1.0, "texture": SubResource("Atlas_21")}], "loop": true, "name": &"shake", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_22")}, {"duration": 1.0, "texture": SubResource("Atlas_23")}], "loop": true, "name": &"belly", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_24")}, {"duration": 1.0, "texture": SubResource("Atlas_25")}], "loop": true, "name": &"scratch", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_26")}, {"duration": 1.0, "texture": SubResource("Atlas_27")}], "loop": true, "name": &"yawn", "speed": 6.0},
+{"frames": [{"duration": 1.0, "texture": SubResource("Atlas_28")}, {"duration": 1.0, "texture": SubResource("Atlas_29")}], "loop": true, "name": &"stare", "speed": 6.0}
+]

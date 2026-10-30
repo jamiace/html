@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_roundcactus_white.png" id="1"]
+
+[resource]
+metadata/id = "pl_roundcactus_white"
+metadata/name = "金琥仙人球（白瓷盆）"
+metadata/layer = "decor"
+metadata/pivot = Vector2(7, 15)
+metadata/size = Vector2i(14, 16)
+metadata/base = ExtResource("1")

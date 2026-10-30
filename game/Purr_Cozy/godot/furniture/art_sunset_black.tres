@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/art_sunset_black.png" id="1"]
+
+[resource]
+metadata/id = "art_sunset_black"
+metadata/name = "夕陽海（黑框）"
+metadata/layer = "wall"
+metadata/pivot = Vector2(15, 23)
+metadata/size = Vector2i(30, 24)
+metadata/base = ExtResource("1")

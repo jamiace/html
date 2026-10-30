@@ -12,38 +12,16 @@
 /* ---------------- sprites ---------------- */
 (function () {
   const BOX = ['#7d5232', '#a0703f', '#c08a52', '#dcaa6c', '#efcb92'].map(palAdd);
-  SPR.def('pet_box', () => {
-    const g = new Grid(26, 18), [a, b, c, d, e] = BOX;
-    // inside back wall, then two open flaps leaning out, then the front panel with a strip of tape
-    g.rect(3, 4, 20, 4, a); g.hl(3, 4, 20, b);
-    for (let i = 0; i < 5; i++) { g.hl(1 + i, 1 + i, 3 - Math.min(2, i >> 1), d); g.hl(22 - i - (2 - Math.min(2, i >> 1)), 1 + i, 3 - Math.min(2, i >> 1), c); }
-    g.rect(2, 7, 22, 10, c); g.hl(2, 7, 22, e); g.hl(2, 8, 22, d); g.hl(2, 16, 22, b);
-    for (let y = 9; y < 16; y++) { g.px(12, y, e); g.px(13, y, e); if (y % 3 === 0) { g.px(5, y, b); g.px(20, y, b); } }
-    g.pts([[4, 11], [5, 11], [6, 11], [4, 13], [5, 13]], b);
-    return g.outline();
-  });
-  SPR.def('scratch_post', () => {
-    const g = new Grid(16, 36);
-    g.rect(1, 31, 14, 4, 'z'); g.hl(1, 31, 14, 'A'); g.hl(1, 34, 14, 'y');
-    for (let y = 8; y < 31; y++) for (let x = 6; x < 10; x++) g.px(x, y, (y + (x > 7 ? 1 : 0)) % 3 === 0 ? 'd' : x === 6 ? 'e' : 'c');
-    g.ellipse(8, 5.5, 7.2, 3, 'z'); g.ellipse(8, 4.8, 6, 1.9, 'A'); g.hl(4, 4, 6, 'B');
-    for (let y = 8; y < 15; y++) g.px(13, y, 'h'); g.ellipse(13, 16, 1.8, 1.8, 's'); g.px(12, 15, 't');
-    return g.outline();
-  });
-  SPR.def('pet_bed', () => {
-    const g = new Grid(28, 14);
-    g.ellipse(14, 8, 13, 5.4, 'r'); g.ellipse(14, 7.2, 12, 4.2, 's'); g.ellipse(14, 6.8, 8.6, 2.8, 'g'); g.ellipse(13, 6.2, 6.5, 1.8, 'f');
-    for (let x = 0; x < 28; x++) if (g.get(x, 12) !== '.') g.px(x, 12, 'q');
-    g.hl(6, 3, 6, 't'); g.px(5, 4, 't');
-    return g.outline();
-  });
+  ;
+  ;
+  ;
   const sprite = (name, w, h, fn) => SPR.def(name, () => { const g = new Grid(w, h); fn(g); return g.outline(); });
   sprite('toy_ball', 5, 5, g => { g.ellipse(2.5, 2.5, 2.4, 2.4, 'r'); g.hl(1, 2, 3, 'f'); g.px(1, 1, 't'); });
   sprite('toy_yarn', 6, 6, g => { g.ellipse(3, 3, 2.8, 2.8, 's'); g.px(2, 2, 't'); g.px(1, 3, 'r'); g.px(4, 2, 'r'); g.px(3, 4, 'r'); });
   sprite('toy_nip', 11, 4, g => { for (const [x, y] of [[1, 2], [3, 1], [4, 2], [6, 1], [7, 2], [9, 2], [5, 3], [2, 3], [8, 3]]) g.px(x, y, (x + y) % 2 ? 'k' : 'j'); });
   sprite('toy_feather', 5, 8, g => { g.vl(2, 3, 5, 'b'); g.ellipse(2.5, 2.5, 2, 2.6, 's'); g.px(2, 1, 't'); g.px(1, 2, 'r'); });
-  SPR.def('p_fur', () => { const g = new Grid(3, 2); g.pts([[0, 1], [1, 0], [2, 1]], 'g'); g.px(1, 1, 'f'); return g; });
-  SPR.def('p_drop', () => { const g = new Grid(2, 3); g.pts([[0, 1], [1, 1], [0, 2], [1, 2]], 'o'); g.px(0, 0, 'p'); return g; });
+  ;
+  ;
 })();
 
 /* ---------------- furniture for pets ---------------- */

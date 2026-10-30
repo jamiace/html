@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_radio.png" id="1"]
+
+[resource]
+metadata/id = "sm_radio"
+metadata/name = "復古收音機"
+metadata/layer = "decor"
+metadata/pivot = Vector2(9, 11)
+metadata/size = Vector2i(18, 12)
+metadata/base = ExtResource("1")

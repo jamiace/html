@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/st_sideboard_black.png" id="1"]
+
+[resource]
+metadata/id = "st_sideboard_black"
+metadata/name = "黑色餐邊櫃"
+metadata/layer = "floor"
+metadata/pivot = Vector2(21, 21)
+metadata/size = Vector2i(42, 22)
+metadata/base = ExtResource("1")

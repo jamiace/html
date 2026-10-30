@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/art_rainbow_wood.png" id="1"]
+
+[resource]
+metadata/id = "art_rainbow_wood"
+metadata/name = "彩虹（木框）"
+metadata/layer = "wall"
+metadata/pivot = Vector2(15, 21)
+metadata/size = Vector2i(30, 22)
+metadata/base = ExtResource("1")

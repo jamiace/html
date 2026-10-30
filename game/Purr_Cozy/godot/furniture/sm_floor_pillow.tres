@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/sm_floor_pillow.png" id="1"]
+
+[resource]
+metadata/id = "sm_floor_pillow"
+metadata/name = "大地墊"
+metadata/layer = "floor"
+metadata/pivot = Vector2(12, 9)
+metadata/size = Vector2i(24, 10)
+metadata/base = ExtResource("1")

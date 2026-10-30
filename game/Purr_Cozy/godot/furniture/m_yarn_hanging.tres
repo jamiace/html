@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_yarn_hanging.png" id="1"]
+
+[resource]
+metadata/id = "m_yarn_hanging"
+metadata/name = "流蘇毛線壁掛"
+metadata/layer = "wall"
+metadata/pivot = Vector2(9, 23)
+metadata/size = Vector2i(18, 24)
+metadata/base = ExtResource("1")

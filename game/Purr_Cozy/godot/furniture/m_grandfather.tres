@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/m_grandfather.png" id="1"]
+
+[resource]
+metadata/id = "m_grandfather"
+metadata/name = "落地老爺鐘"
+metadata/layer = "floor"
+metadata/pivot = Vector2(8, 41)
+metadata/size = Vector2i(16, 42)
+metadata/base = ExtResource("1")

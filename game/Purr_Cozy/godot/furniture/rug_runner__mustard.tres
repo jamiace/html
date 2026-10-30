@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/rug_runner__mustard.png" id="1"]
+
+[resource]
+metadata/id = "rug_runner__mustard"
+metadata/name = "小腳墊・芥末"
+metadata/layer = "rug"
+metadata/pivot = Vector2(15, 15)
+metadata/size = Vector2i(30, 16)
+metadata/base = ExtResource("1")

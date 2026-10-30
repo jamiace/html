@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/xmas_tree.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/xmas_tree__on.png" id="2"]
+
+[resource]
+metadata/id = "xmas_tree"
+metadata/name = "聖誕樹"
+metadata/layer = "floor"
+metadata/pivot = Vector2(15, 45)
+metadata/size = Vector2i(30, 46)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

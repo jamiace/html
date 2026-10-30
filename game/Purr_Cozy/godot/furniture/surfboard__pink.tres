@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/surfboard__pink.png" id="1"]
+
+[resource]
+metadata/id = "surfboard__pink"
+metadata/name = "衝浪板・粉"
+metadata/layer = "floor"
+metadata/pivot = Vector2(7, 39)
+metadata/size = Vector2i(14, 40)
+metadata/base = ExtResource("1")

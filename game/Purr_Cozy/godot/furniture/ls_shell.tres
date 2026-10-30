@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ls_shell.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/ls_shell__on.png" id="2"]
+
+[resource]
+metadata/id = "ls_shell"
+metadata/name = "貝殼壁燈"
+metadata/layer = "wall"
+metadata/pivot = Vector2(7, 11)
+metadata/size = Vector2i(14, 12)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

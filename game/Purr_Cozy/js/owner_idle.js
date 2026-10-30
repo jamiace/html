@@ -13,45 +13,19 @@
    ============================================================ */
 
 // ---------- new poses in the body template ----------
-(function () {
-  const base = mannequin;
-  // take the arms off; where an arm lay over the body, the shirt shows instead
-  const strip = (m) => {
-    const lab = m.lab.map(r => r.slice()), sh = m.sh.map(r => r.slice()), side = m.view === 'side';
-    const inBody = (x, y) => side ? x >= 6 && x <= 11 && y >= 1 && y <= 6 : x >= 4 && x <= 13 && y >= 2 && y <= 6;
-    for (let y = 0; y < m.H; y++) for (let x = 0; x < m.W; x++) if (lab[y][x] && 'ufh'.includes(lab[y][x])) {
-      if (inBody(x, y)) { lab[y][x] = 't'; sh[y][x] = side ? (x === 6 && y < 6 ? 3 : x === 11 && y >= 2 ? 1 : y === 6 ? 1 : 2) : (x === 13 ? 1 : y === 6 ? 1 : 2); } else { lab[y][x] = ''; sh[y][x] = 0; }
-    }
-    return Object.assign({}, m, { lab, sh });
-  };
-  const put = (m, pts) => { for (const [x, y, l, s] of pts) if (x >= 0 && y >= 0 && x < m.W && y < m.H) { m.lab[y][x] = l; m.sh[y][x] = s == null ? 2 : s; } return m; };
-  // eslint-disable-next-line no-global-assign
-  mannequin = function (view, frame) {
-    // front 8: both forearms across the chest, hands together in front (a book, a cup)
-    if (view === 'front' && frame === 8) return put(strip(base('front', 0)), [[3, 2, 'u', 3], [3, 3, 'f'], [4, 4, 'f'], [5, 5, 'f'], [6, 5, 'h', 3], [7, 5, 'h', 3], [14, 2, 'u', 1], [14, 3, 'f', 1], [13, 4, 'f', 1], [12, 5, 'f', 1], [11, 5, 'h', 3], [10, 5, 'h', 3]]);
-    // side 6 / 7: the near arm reaching forward and down (sweeping, petting, watering, making the bed); 7 reaches a little further
-    if (view === 'side' && (frame === 6 || frame === 7)) {
-      const k = frame === 7 ? 1 : 0;
-      return put(strip(base('side', 0)), [[8, 2, 'u', 1], [9, 2, 'u'], [9, 3, 'u', 1], [10, 4, 'f'], [10, 5, 'f', 1], [11 + k, 6, 'f'], [11, 5, 'f', 1], [12 + k, 7, 'h', 3], [13 + k, 7, 'h', 3], [12 + k, 8, 'h'], [13 + k, 8, 'h', 1]]);
-    }
-    // sitting, facing you, holding a book up in both hands
-    if (view === 'sitfront' && frame === 1) return put(strip(base('sitfront', 0)), [[3, 2, 'u', 3], [3, 3, 'f'], [4, 4, 'f'], [5, 4, 'f'], [6, 4, 'h', 3], [7, 4, 'h', 3], [14, 2, 'u', 1], [14, 3, 'f', 1], [13, 4, 'f', 1], [12, 4, 'f', 1], [11, 4, 'h', 3], [10, 4, 'h', 3]]);
-    return base(view, frame);
-  };
-  Object.assign(AVATAR_FRAMES, { hold0: ['front', 'front', 8], reach0: ['side', 'side', 6], reach1: ['side', 'side', 7], sitread: ['front', 'sitfront', 1] });
-})();
+Object.assign(AVATAR_FRAMES, PNGArt.meta.avatarFrames);
 
 // ---------- props ----------
 (function () {
   const C = (hex) => palAdd(hex);
   const R = C('#c4566e'), Rd = C('#8f3a52'), Pg = C('#fff7ea'), Pg2 = C('#e8d8bc'), Ln = C('#b7a58c');
-  SPR.def('prop_book', () => { const g = new Grid(9, 5); g.rect(0, 0, 9, 5, R); g.rect(1, 0, 3, 4, Pg); g.rect(5, 0, 3, 4, Pg); g.hl(1, 3, 3, Pg2); g.hl(5, 3, 3, Pg2); g.px(4, 0, Rd); g.px(4, 1, Rd); g.px(4, 2, Rd); g.px(4, 3, Rd); g.hl(1, 1, 2, Ln); g.hl(5, 1, 3, Ln); g.hl(6, 2, 2, Ln); g.hl(1, 4, 8, Rd); return g.outline(); });
+  ;
   const M1 = C('#fff3df'), M2 = C('#e3cfb4'), Ms = C('#7ea6dc'), Tea = C('#9a6249');
-  SPR.def('prop_mug', () => { const g = new Grid(6, 5); g.rect(0, 0, 4, 5, M1); g.vl(3, 0, 5, M2); g.hl(0, 2, 4, Ms); g.hl(0, 0, 4, Tea); g.px(4, 1, M1); g.px(5, 2, M1); g.px(4, 3, M1); return g.outline(); });
+  ;
   const G1 = C('#5ea055'), G2 = C('#3e7f4a'), G3 = C('#8cc068');
-  SPR.def('prop_can', () => { const g = new Grid(9, 6); g.rect(2, 1, 5, 5, G1); g.hl(2, 1, 5, G3); g.vl(6, 1, 5, G2); g.px(1, 2, G2); g.px(0, 2, G2); g.px(1, 3, G2); g.px(7, 2, G1); g.px(8, 1, G1); g.px(8, 0, G3); g.hl(3, 0, 2, G2); return g.outline(); });
+  ;
   const F1 = C('#f6a8c0'), F2 = C('#ee8fa0'), Wd = C('#9a6a44');
-  SPR.def('prop_duster', () => { const g = new Grid(5, 10); g.rect(0, 0, 5, 4, F1); g.px(0, 0, '.'); g.px(4, 0, '.'); g.hl(1, 3, 3, F2); g.px(2, 1, F2); g.vl(2, 4, 6, Wd); return g.outline(); });
+  ;
 })();
 const BROOM = { stick: '#a06a3c', stickD: '#6e4a30', straw: '#e8c46a', strawD: '#c49a3c', band: '#c4566e' };
 

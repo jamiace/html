@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/plush_whale_sky.png" id="1"]
+
+[resource]
+metadata/id = "plush_whale_sky"
+metadata/name = "藍鯨魚玩偶"
+metadata/layer = "decor"
+metadata/pivot = Vector2(5, 7)
+metadata/size = Vector2i(11, 8)
+metadata/base = ExtResource("1")

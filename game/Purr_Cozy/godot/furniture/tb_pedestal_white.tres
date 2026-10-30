@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/tb_pedestal_white.png" id="1"]
+
+[resource]
+metadata/id = "tb_pedestal_white"
+metadata/name = "白色花台"
+metadata/layer = "floor"
+metadata/pivot = Vector2(7, 25)
+metadata/size = Vector2i(14, 26)
+metadata/base = ExtResource("1")

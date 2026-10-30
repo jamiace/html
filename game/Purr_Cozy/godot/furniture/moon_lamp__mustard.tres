@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/moon_lamp__mustard.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/furniture/moon_lamp__mustard__on.png" id="2"]
+
+[resource]
+metadata/id = "moon_lamp__mustard"
+metadata/name = "月亮壁燈・芥末"
+metadata/layer = "wall"
+metadata/pivot = Vector2(8, 16)
+metadata/size = Vector2i(17, 17)
+metadata/base = ExtResource("1")
+metadata/on = ExtResource("2")

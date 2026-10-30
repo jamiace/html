@@ -16,6 +16,7 @@ function h(tag, attrs, ...kids) {
     if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else if (k === 'class') el.className = v; else if (k === 'style') el.style.cssText = v;
     else if (k === 'text') el.textContent = skipI18n ? v : I18n.render(v); else if (k === 'html') el.innerHTML = v;
+    else if(k==='src'&&typeof v==='string')el.setAttribute(k,PurrAssets.cachedURL(v));
     else el.setAttribute(k, v === true ? '' : ['title','placeholder','aria-label','alt'].includes(k) ? I18n.render(v) : v);
   }
   for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(skipI18n ? String(c) : I18n.render(String(c))));
@@ -29,15 +30,7 @@ function sprPreview(cv, box = 64, maxScale = 4, boxH = box) {
   const c = document.createElement('canvas'); c.width = cv.width * s; c.height = cv.height * s; c.className = 'pv';
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.drawImage(cv, 0, 0, c.width, c.height); return c;
 }
-function swatch(fn, kind) {
-  const W = 36, H = 26, s = 2; const c = document.createElement('canvas'); c.width = W * s; c.height = H * s; c.className = 'pv';
-  const x = c.getContext('2d');
-  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
-    let col; if (kind === 'wp') col = fn(i + 20, j + 10); else { const y = 120 + Math.floor(j * 1.4), [xa, xb] = floorX(y), sc = (xb - xa) / 180; col = fn((i * 3 - 54), y, sc); }
-    x.fillStyle = col; x.fillRect(i * s, j * s, s, s);
-  }
-  return c;
-}
+function swatch(fn, kind) {const id=Object.keys(kind==='wp'?WALL:FLOOR).find(k=>(kind==='wp'?WALL:FLOOR)[k]===fn);const cv=document.createElement('canvas'),im=PNGArt.image('assets/png/swatches/'+kind+'_'+id+'.png');cv.width=im.width;cv.height=im.height;cv.className='pv';cv.getContext('2d').drawImage(im,0,0);return cv;}
 const THEME_PV = {};
 function themePreview(id) {
   let src = THEME_PV[id];

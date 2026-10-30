@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/tv_retro__white.png" id="1"]
+
+[resource]
+metadata/id = "tv_retro__white"
+metadata/name = "復古電視・白色"
+metadata/layer = "decor"
+metadata/pivot = Vector2(12, 21)
+metadata/size = Vector2i(24, 22)
+metadata/base = ExtResource("1")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/plush_bear_choco.png" id="1"]
+
+[resource]
+metadata/id = "plush_bear_choco"
+metadata/name = "棕熊玩偶"
+metadata/layer = "decor"
+metadata/pivot = Vector2(4, 10)
+metadata/size = Vector2i(9, 11)
+metadata/base = ExtResource("1")

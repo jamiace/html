@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/monitor.png" id="1"]
+
+[resource]
+metadata/id = "monitor"
+metadata/name = "電腦螢幕"
+metadata/layer = "decor"
+metadata/pivot = Vector2(12, 18)
+metadata/size = Vector2i(24, 19)
+metadata/base = ExtResource("1")

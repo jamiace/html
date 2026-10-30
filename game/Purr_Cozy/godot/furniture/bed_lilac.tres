@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/bed_lilac.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/png/occlusion/bed_lilac_blanket.png" id="2"]
+
+[resource]
+metadata/id = "bed_lilac"
+metadata/name = "薰衣草床"
+metadata/layer = "floor"
+metadata/pivot = Vector2(24, 34)
+metadata/size = Vector2i(48, 35)
+metadata/base = ExtResource("1")
+metadata/sleep_foreground = ExtResource("2")

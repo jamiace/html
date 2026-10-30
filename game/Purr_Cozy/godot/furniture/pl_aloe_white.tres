@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/pl_aloe_white.png" id="1"]
+
+[resource]
+metadata/id = "pl_aloe_white"
+metadata/name = "蘆薈（白瓷盆）"
+metadata/layer = "decor"
+metadata/pivot = Vector2(8, 17)
+metadata/size = Vector2i(16, 18)
+metadata/base = ExtResource("1")

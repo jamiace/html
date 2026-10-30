@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/fv_rose_bottle.png" id="1"]
+
+[resource]
+metadata/id = "fv_rose_bottle"
+metadata/name = "玫瑰玻璃瓶"
+metadata/layer = "decor"
+metadata/pivot = Vector2(6, 21)
+metadata/size = Vector2i(13, 22)
+metadata/base = ExtResource("1")

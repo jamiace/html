@@ -35,18 +35,7 @@ function petStandCanvas(kind, color, flip) {
   return STAND_CACHE[key] = out.toCanvas();
 }
 // the standing pose before the outline (also the source the baked lean frames were made from)
-function petStandGrid(kind) {
-  const w = SPR.grid(kind + '_walk0'), W = w.w, g = new Grid(16, 24), light = kind === 'dog' ? 'f' : 'x';
-  let top = 0; while (top < w.h && w.a[top].every((c, x) => x < W - 11 || c === '.')) top++;
-  g.ellipse(8, 14.5, 4.2, 6, 'v');
-  for (let y = 10; y < 20; y++) for (let x = 9; x < 13; x++) if (g.get(x, y) === 'v') g.px(x, y, light);
-  if (kind === 'cat') { g.pts([[4, 11], [5, 11], [4, 13], [5, 13], [4, 15], [5, 15]], 'u'); for (const [x, y] of [[3, 19], [2, 18], [1, 17], [1, 16], [1, 15], [2, 14], [2, 13]]) { g.px(x, y, 'v'); g.px(x + 1, y, 'v'); } }
-  else for (const [x, y] of [[3, 16], [2, 15], [1, 14], [1, 13]]) { g.px(x, y, 'v'); g.px(x + 1, y, 'v'); }
-  g.rect(5, 19, 3, 4, 'v'); g.rect(9, 19, 3, 4, 'v'); g.hl(5, 22, 3, light); g.hl(9, 22, 3, light); g.vl(8, 20, 3, 'u');
-  for (let y = top; y < top + 10; y++) for (let x = W - 11; x < W; x++) { const c = w.get(x, y); if (c !== '.' && c !== '0') g.px(x - (W - 11) + 3, y - top, c); }
-  g.rect(11, 12, 3, 2, 'v'); g.px(13, 12, light); g.px(13, 13, light);
-  return g;
-}
+function petStandGrid(kind) {return PNGArt.grid("cat/stand");}
 
 const TrickShow = {
   cur: null,

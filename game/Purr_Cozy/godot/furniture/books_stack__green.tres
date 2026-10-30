@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/png/furniture/books_stack__green.png" id="1"]
+
+[resource]
+metadata/id = "books_stack__green"
+metadata/name = "一疊書・綠"
+metadata/layer = "decor"
+metadata/pivot = Vector2(7, 9)
+metadata/size = Vector2i(15, 10)
+metadata/base = ExtResource("1")

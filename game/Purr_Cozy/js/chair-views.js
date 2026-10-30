@@ -11,14 +11,7 @@ const ChairViews = {
       return Math.abs(x-desk.x-cv.width/2)<=Math.max(6,cv.width*.38) && it.y>=desk.y-2 && it.y<=desk.y+cv.height+14;
     });
   },
-  async load() {
-    try {
-      const response=await fetch('assets/sprites/chair-backs.json');
-      if(!response.ok)return;
-      const pack=await response.json();
-      for(const [name,entry] of Object.entries(pack.sprites))SPR.def(name,Grid.rows(entry.rows));
-    } catch { /* A missing optional pack leaves the original chair available. */ }
-  }
+  async load() {return true;}
 };
 ChairViews.ready=ChairViews.load();
 (function(){
