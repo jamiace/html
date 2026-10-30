@@ -1,8 +1,7 @@
 /* ============================================================
    How it feels to play (none of these numbers are shown in the game)
-   - answer rate kept around 70-85%: from your last 30 answers the next word mixes and
-     question types get a little easier or harder (a "hard" daily challenge you picked
-     yourself is left alone)
+   - adaptive.js owns the 85% target and per-skill difficulty; legacy answer
+     history remains available for compatibility. Explicit hard task rules remain.
    - lucky answers: each right answer has a 5% chance; in a quiz of 8 or more questions,
      all right so far and no lucky one yet, the last right answer is always lucky.
      One random reward: coins, a star for your team, a pet treat, experience, and for
@@ -25,9 +24,8 @@ const Feel = {
     const a = this.hist(); a.push(ok ? 1 : 0); if (a.length > FEEL.win) a.splice(0, a.length - FEEL.win);
   },
   types(easy) {
-    const sp = Learn.canSpeak(), m = easy ? 'easy' : this.mode();
-    if (m === 'easy') return sp ? ['en2zh', 'zh2en', 'listen', 'en2zh'] : ['en2zh', 'zh2en'];
-    if (m === 'hard') return sp ? ['en2zh', 'spell', 'zh2en', 'listen', 'spell'] : ['en2zh', 'spell', 'zh2en', 'spell'];
+    const sp = Learn.canSpeak();
+    if (easy) return sp ? ['en2zh', 'zh2en', 'listen'] : ['en2zh', 'zh2en'];
     return sp ? ['en2zh', 'zh2en', 'spell', 'listen'] : ['en2zh', 'zh2en', 'spell'];
   },
   // words you know best (for the training safety net)
@@ -104,7 +102,7 @@ const Feel = {
     }
   },
   finishTeam(type) { const n = this.nearLeft(type); if (n && n.quiz) Learn.start('team', { type, n: Math.min(n.left, 12), task: n.task }); else UI.openTasks('team'); },
-  teamWords(o) { return Learn.pick(o.n * 2).filter(i => TEAM_TASKS[o.task].ev.includes('quizRight') || Challenge.spellable(VOCAB[i]) || Learn.canSpeak()).slice(0, o.n); },
+  teamWords(o) { const general=TEAM_TASKS[o.task].ev.includes('quizRight');return Adaptive.select(Adaptive.pool().filter(i=>general||Challenge.spellable(VOCAB[i])||Learn.canSpeak()),o.n,i=>({type:general?'en2zh':Challenge.spellable(VOCAB[i])?'spell':'listen'})); },
   teamQs(o, ids) {
     if (!TEAM_TASKS[o.task].ev.includes('engRight')) return Learn.makeQs(ids);
     // spelling and listening only, so every right answer counts for this task

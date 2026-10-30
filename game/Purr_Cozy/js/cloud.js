@@ -158,6 +158,7 @@ function mergeSaves(a, b, common, cloudBase) {
   }
   M.vocab = M.vocab || {}; for (const w in o.vocab || {}) { const r = o.vocab[w], m = M.vocab[w]; if (!m || r[0] > m[0] || (r[0] === m[0] && r[1] > m[1])) M.vocab[w] = r.slice(); }
   const L = M.learn, OL = o.learn || {}; if (L) { L.streak = max(L.streak, OL.streak); L.best = max(L.best, OL.best); if ((OL.lastDone || '') > (L.lastDone || '')) L.lastDone = OL.lastDone; }
+  if (L && OL.adaptive && (!L.adaptive || (OL.adaptive.at || 0) > (L.adaptive.at || 0))) L.adaptive = JSON.parse(JSON.stringify(OL.adaptive));
   for (const k in o.inv || {}) M.inv[k] = max(M.inv[k], o.inv[k]);
   for (const k of ['ownWP', 'ownFL', 'ownViews', 'themes', 'pets']) M[k] = [...new Set([...(M[k] || []), ...(o[k] || [])])];
   if (!common) for (const k in o.stats || {}) if (typeof o.stats[k] === 'number') M.stats[k] = max(M.stats[k], o.stats[k]);

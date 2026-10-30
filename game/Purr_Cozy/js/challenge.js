@@ -49,14 +49,14 @@ const Challenge = {
     else if (k === 'c_listen') pool = shuffle(seen.slice()).sort((a, b) => box(a) - box(b));
     else if (k === 'c_review') pool = shuffle(seen.filter(v => P[v.w] && P[v.w][4] > 0)).sort((a, b) => (P[b.w][4] - P[b.w][3] * 0.3) - (P[a.w][4] - P[a.w][3] * 0.3));
     else if (k === 'c_new') {
-      const up = this.nextLevel();
-      pool = shuffle(VOCAB.filter(v => v.t === up && !P[v.w]));
-      if (pool.length < n) pool.push(...shuffle(VOCAB.filter(v => v.t === up && P[v.w] && P[v.w][0] < 3)));
+      const lv = new Set(Learn.levelsOn());
+      pool = VOCAB.filter(v => lv.has(v.t) && !P[v.w]);
     }
     if (tier === 'h' && k !== 'c_listen') pool = pool.filter(v => k !== 'c_spell' || this.spellable(v));
-    const out = pool.slice(0, n).map(v => v.w);
+    const query = i => this.qType({k, tier}, VOCAB[i], 0);
+    const out = Adaptive.select(pool.map(v => v.i), n, query).map(i => VOCAB[i].w);
     // not enough words of that kind yet (a new player): fill from the normal word picker
-    if (out.length < n) for (const i of Learn.pick(n * 3)) { const v = VOCAB[i]; if (out.length >= n) break; if (out.includes(v.w)) continue; if ((k === 'c_spell' || (k === 'c_listen' && tier === 'h')) && !this.spellable(v)) continue; out.push(v.w); }
+    if (out.length < n) for (const i of Adaptive.pick(n * 3, null, query)) { const v = VOCAB[i]; if (out.length >= n) break; if (out.includes(v.w)) continue; if ((k === 'c_spell' || (k === 'c_listen' && tier === 'h')) && !this.spellable(v)) continue; out.push(v.w); }
     return out;
   },
   // your level = the lowest checked level that still has words you have never seen (where new words come from); one above it

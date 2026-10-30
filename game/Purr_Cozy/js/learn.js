@@ -33,24 +33,7 @@ const Learn = {
   countSeen() { return Object.keys(this.P).length; },
   streakNow() { const L = this.L; return L.lastDone && L.lastDone >= this.yesterday() ? L.streak : 0; },
   pick(n, exclude) {
-    const today = this.dayNum(), due = [], fresh = [], weak = [], known = [], lv = new Set(this.levelsOn());
-    for (const v of VOCAB) {
-      if (exclude && exclude.has(v.i)) continue;
-      const r = this.P[v.w];
-      if (!r || (r[0] === 0 && r[3] === 0)) { if (lv.has(v.t)) fresh.push(v.i); } else if (r[1] <= today) due.push(v.i); else if (r[0] <= 2) weak.push(v.i); else known.push(v.i);
-    }
-    due.sort((a, b) => this.rec(a)[1] - this.rec(b)[1] || this.rec(a)[0] - this.rec(b)[0]);
-    fresh.sort((a, b) => VOCAB[a].t - VOCAB[b].t || hsh(a, 17) % 997 - hsh(b, 17) % 997);
-    // the mix follows how you have been doing lately (kept around 70-85% right, never shown)
-    const m = Feel.mode(), out = [], nDue = Math.min(due.length, Math.ceil(n * (m === 'easy' ? 0.8 : m === 'hard' ? 0.45 : 0.6)));
-    out.push(...due.slice(0, nDue));
-    if (m === 'easy') out.push(...shuffle(known).slice(0, Math.max(0, Math.floor(n * 0.75) - out.length)));
-    out.push(...fresh.slice(0, Math.min(n - out.length, m === 'easy' ? Math.ceil(n * 0.25) : n)));
-    if (m === 'easy' && out.length < n) out.push(...shuffle(weak).slice(0, n - out.length));
-    if (out.length < n) out.push(...due.slice(nDue, nDue + n - out.length));
-    if (out.length < n) out.push(...shuffle(weak).slice(0, n - out.length));
-    if (out.length < n) { const rest = shuffle(VOCAB.filter(v => lv.has(v.t) && !out.includes(v.i)).map(v => v.i)); out.push(...rest.slice(0, n - out.length)); }
-    return out.slice(0, n);
+    return Adaptive.pick(n, exclude);
   },
   ensureDaily() {
     const L = this.L, day = Life.today(); if (L.dailyDay && L.dailyDay >= day && L.dailyWords.length) return;   // >=: keeps a day started before the 06:00 rollover existed
@@ -82,7 +65,7 @@ const Learn = {
     if (kind === 'daily') { words = this.dailyIdx(); nq = 10; }
     else if (kind === 'redo') { words = shuffle(this.dailyIdx()).slice(0, 10); nq = 8; kind = 'practice'; }
     else if (kind === 'need') { words = this.pick(5); nq = 5; }
-    else if (kind === 'train' || kind === 'help') { words = kind === 'train' && Feel.trainEasy(opts.pid) ? Feel.easyWords(4) : this.pick(4); nq = 4; }
+    else if (kind === 'train' || kind === 'help') { words = Adaptive.pick(4); nq = 4; }
     else if (kind === 'levelgate') { words = opts.questions.map(q => q.i); nq = words.length; opts.preset = opts.questions; }
     else if (kind === 'story') { const pk = Story.pack(opts.ch); if (!pk) return; words = pk.ids; nq = pk.qs.length; opts.preset = pk.qs; opts.strict = true; }
     else if (kind === 'team') { words = Feel.teamWords(opts); nq = words.length; if (!nq) return UI.openTasks('team'); }
@@ -112,16 +95,20 @@ const Learn = {
   skipReview() { const s = this.sess; if (s && s.step === 'review' && s.kind !== 'daily') { if (s.kind === 'chal') s.task.reviewed = true; this.toQuiz(); UI.refresh('study'); } },
   toQuiz() {
     const s = this.sess; s.step = 'quiz';
-    if (s.opts.preset) { s.qs = s.opts.preset; s.qi = 0; s.ans = null; return; }   // a story chapter: questions in story order
+    if (s.opts.preset) { s.qs = s.opts.preset; s.qi = 0; s.ans = null; Adaptive.prepare(s); return; }   // a story chapter: questions in story order
     const rest = shuffle(s.words.filter(i => !s.unsure.includes(i)));
-    const ids = shuffle([...s.unsure, ...rest].slice(0, s.nq));
-    s.qs = s.kind === 'chal' ? Challenge.makeQs(s.task, ids) : s.kind === 'team' ? Feel.teamQs(s.opts, ids) : this.makeQs(ids, s.easy); s.qi = 0; s.ans = null;
+    const ids = Adaptive.select([...s.unsure, ...rest], s.nq);
+    s.qs = s.kind === 'chal' ? Challenge.makeQs(s.task, ids) : s.kind === 'team' ? Feel.teamQs(s.opts, ids) : this.makeQs(ids, s.easy); s.qi = 0; s.ans = null; Adaptive.prepare(s);
   },
   makeQs(ids, easy) {
     const types = Feel.types(easy);
     const off = Math.floor(Math.random() * types.length);
+    const remaining = ids.slice();
     return ids.map((i, k) => {
-      const v = VOCAB[i]; let type = types[(k + off) % types.length];
+      let type = types[(k + off) % types.length];
+      [i] = Adaptive.select(remaining, 1, type, {mix:false});
+      remaining.splice(remaining.indexOf(i), 1);
+      const v = VOCAB[i];
       if (type === 'spell' && (v.w.length > 11 || !/^[A-Za-z][A-Za-z'-]*$/.test(v.w))) type = 'zh2en';
       return { i, type, opts: type === 'spell' ? null : this.options(v, type === 'zh2en' ? 'w' : 'z') };
     });
@@ -142,6 +129,7 @@ const Learn = {
     if(typed && document.activeElement?.id==='spell-in')document.activeElement.blur();
     s.ans = { ok, val };
     const r = this.recMake(q.i, [0, 0, 1, 0, 0]), today = this.dayNum();
+    Adaptive.note(s, q.i, q.type, ok, q);
     Feel.note(s, ok);
     if (ok) { const before = r[0]; r[0] = Math.min(5, r[0] + 1); r[1] = today + SRS_INT[r[0]]; r[3]++; s.right++; if (before === 0) s.newly++; if (r[0] === 5 && before < 5) s.mastered++; Life.track('quizRight', 1);
       if (typed || q.type === 'listen') Life.track('engRight', 1);
@@ -163,7 +151,7 @@ const Learn = {
       s.redo = true; const again = [...new Set(s.wrong)].filter(i => !(s.task.got || []).includes(VOCAB[i].w));
       if (again.length) { s.redoFrom = s.qs.length; s.qs.push(...Challenge.makeQs(s.task, shuffle(again))); }
     }
-    if (s.qi >= s.qs.length) this.finish(); UI.refresh('study');
+    if (s.qi >= s.qs.length) this.finish(); else Adaptive.prepare(s); UI.refresh('study');
   },
   finish() {
     const s = this.sess; if (!s || s.step !== 'quiz' || s.result || !s.qs?.length || s.qi < s.qs.length) return;

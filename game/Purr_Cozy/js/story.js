@@ -172,7 +172,9 @@ const Story = {
     const scenes = shuffle(STORY_SCENE_IDS.slice()), ch = [];
     for (let i = 0; i < 5; i++) {
       const sc = i < 4 ? scenes[i] : this.pick(['letter', 'find', 'board', 'guest']), n = STORY_SCENES[sc].n - (i === 4 ? 1 : 0);
-      const words = pool.splice(0, n); const sv = Math.floor(Math.random() * STORY_SCENES[sc].lines.length);
+      const type = sc === 'label' ? 'spell' : (sc === 'machine' || sc === 'guest') && Learn.canSpeak() ? 'listen' : 'zh2en';
+      const words = Adaptive.select(pool.map(w => VIDX[w]), n, type).map(id => VOCAB[id].w);
+      pool = pool.filter(w => !words.includes(w)); const sv = Math.floor(Math.random() * STORY_SCENES[sc].lines.length);
       ch.push({ sc, sv, words, done: false, bridge: Math.floor(Math.random() * 3), sent: Math.floor(Math.random() * 5) });
     }
     Object.assign(St, { wk, mk, arc: arcI, ch, name: null, names: shuffle(M.arcs[arcI].names.filter(w => VIDX[w] != null)).slice(0, 3), toldDay: '' });

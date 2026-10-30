@@ -12,7 +12,7 @@ const LevelGate = {
  notifyPet(p){if(!this.pending('pet',p.id))return;const g=this.gate('pet',p.id,p.lv+1);if(!g.notified){g.notified=true;UI.toast(p.name+I18n.s("u_9bf713458b5b"),'i_paw',5)}},
  start(kind,pid){if(!this.pending(kind,pid))return;const p=this.subject(kind,pid),g=this.gate(kind,pid,this.level(kind,p)+1);if(Date.now()<g.retryAt)return UI.toast(I18n.s("u_689b9f6f9c0b")+Math.ceil(this.wait(g))+I18n.s("u_99ad82985c54"),'i_learn',3);if(Learn.sess&&Learn.sess.kind==='levelgate'&&Learn.sess.step!=='result')this.abandon();
    const token=Date.now()+'-'+Math.random().toString(36).slice(2);g.attempt={token,at:Date.now(),from:this.level(kind,p)};g.retryAt=Date.now()+this.cooldown;g.passed=false;Game.save();
-   const ids=Learn.pick(24).slice(0,this.questions);if(ids.length<this.questions)for(const v of shuffle(VOCAB.slice())){if(!ids.includes(v.i))ids.push(v.i);if(ids.length===this.questions)break;}
+   const ids=Adaptive.pick(this.questions,null,i=>({type:Challenge.spellable(VOCAB[i])?'spell':'zh2en',noHint:true}));if(ids.length<this.questions)for(const v of shuffle(VOCAB.slice())){if(!ids.includes(v.i))ids.push(v.i);if(ids.length===this.questions)break;}
    Learn.start('levelgate',{kind,pid,target:g.target,token,questions:this.hardQs(ids),strict:true});
  },
  hardOptions(v,field){const first=v.z.split('；')[0],pos=v.p.split('/')[0],value=v[field];const used=new Set([value]);let pool=VOCAB.filter(o=>o.i!==v.i&&o.p.split('/')[0]===pos&&o[field]!==value&&o.z.split('；')[0]!==first&&o.w.toLowerCase()!==v.w.toLowerCase());
