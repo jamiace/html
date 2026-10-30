@@ -1,6 +1,6 @@
 /* A verified build is committed only after every listed local resource is available. */
 window.PurrAssets={
- base:new URL('./',location.href), entries:new Map(), images:new Map(), masks:new Map(), urls:new Map(), stats:{downloaded:0,reused:0,bytes:0},
+ base:new URL('./',location.href), entries:new Map(), images:new Map(), masks:new Map(), urls:new Map(), stats:{downloaded:0,reused:0,bytes:0,recovered:0},
  async digest(bytes){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(v=>v.toString(16).padStart(2,'0')).join('')},
  async network(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),90000);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok)throw Error(PurrBoot.text('bootResourceHTTP',[r.status]));return await r.arrayBuffer()}finally{clearTimeout(timer)}},
  async prepare(build){
@@ -14,8 +14,14 @@ window.PurrAssets={
   const progress=()=>{PurrBoot.set('pixel',.9*complete/Math.max(total,1));PurrBoot.message(PurrBoot.text('bootResourceProgress',[Math.floor(complete/Math.max(total,1)*100)]))};
   const install=async(e,bytes)=>{if(bytes.byteLength!==e.bytes||await this.digest(bytes)!==e.sha256)throw Error(PurrBoot.text('bootResourceFile',[e.path]));const res=new Response(bytes,{headers:{'Content-Type':e.mime}});await this.cache.put(e.key,res);complete+=e.bytes;progress()};
   for(const e of manifest.files){e.key=new URL('.purr-content/'+e.sha256,this.base).href;this.entries.set(new URL(e.path,this.base).href,e);const hit=await this.cache.match(e.key);if(hit){const bytes=await hit.arrayBuffer();if(bytes.byteLength===e.bytes&&await this.digest(bytes)===e.sha256){complete+=e.bytes;this.stats.reused++;continue}}missing.push(e)}progress();
-  if(missing.length>40&&missing.reduce((n,e)=>n+e.bytes,0)>total*.35){const bytes=await this.network(new URL(manifest.bundle.path,this.base));if(await this.digest(bytes)!==manifest.bundle.sha256)throw Error(PurrBoot.text('bootResourceBundle'));this.stats.bytes+=bytes.byteLength;for(const e of missing){await install(e,bytes.slice(e.offset,e.offset+e.bytes));this.stats.downloaded++}}
-  else {let at=0;await Promise.all(Array.from({length:Math.min(6,missing.length)},async()=>{while(at<missing.length){const e=missing[at++],url=new URL(e.path,this.base);url.searchParams.set('sha',e.sha256);const bytes=await this.network(url);await install(e,bytes);this.stats.downloaded++;this.stats.bytes+=bytes.byteLength}}))}
+  let bundlePromise;
+  const verifiedBundle=()=>{if(!bundlePromise)bundlePromise=(async()=>{const url=new URL(manifest.bundle.path,this.base);url.searchParams.set('sha',manifest.bundle.sha256);const bytes=await this.network(url);if(await this.digest(bytes)!==manifest.bundle.sha256)throw Error(PurrBoot.text('bootResourceBundle'));this.stats.bytes+=bytes.byteLength;return bytes})();return bundlePromise};
+  if(missing.length>40&&missing.reduce((n,e)=>n+e.bytes,0)>total*.35){const bytes=await verifiedBundle();for(const e of missing){await install(e,bytes.slice(e.offset,e.offset+e.bytes));this.stats.downloaded++}}
+  else {let at=0;await Promise.all(Array.from({length:Math.min(6,missing.length)},async()=>{while(at<missing.length){const e=missing[at++],url=new URL(e.path,this.base);url.searchParams.set('sha',e.sha256);let bytes=await this.network(url);this.stats.bytes+=bytes.byteLength;
+   // Old controllers can ignore ?sha= and return an obsolete PNG. Recover from the independently verified bundle.
+   if(bytes.byteLength!==e.bytes||await this.digest(bytes)!==e.sha256){PurrBoot.message(PurrBoot.text('bootResourceRepair'));const bundle=await verifiedBundle();bytes=bundle.slice(e.offset,e.offset+e.bytes);this.stats.recovered++}
+   await install(e,bytes);this.stats.downloaded++}}))}
+
   await this.index.put(indexKey,new Response(data,{headers:{'Content-Type':'application/json'}}));
   const nativeFetch=window.fetch.bind(window);this.nativeFetch=nativeFetch;
   window.fetch=async(input,opts)=>{const u=new URL(input instanceof Request?input.url:input,this.base);u.search='';const e=this.entries.get(u.href);if(e&&(!opts?.method||opts.method==='GET')&&(!(input instanceof Request)||input.method==='GET')){const res=await this.cache.match(e.key);if(!res)throw Error(PurrBoot.text('bootResourceMissing',[e.path]));return res}return nativeFetch(input,opts)};
