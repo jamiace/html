@@ -363,6 +363,18 @@ Object.assign(UI, {
     return [search, tabs, ttabs, h('div', { class: 'sub', text: I18n.s("u_0e4752b5342e", [filt.length]) + (filt.length > MAX ? I18n.s("u_6a162aee6e09", [MAX]) : '') }), h('div', { class: 'scroll wlist' }, ...rows)];
   },
 });
+// Choice shortcuts use physical key codes as well as locale-dependent key values.
+Learn.choiceKey=function(e){
+ if(e.defaultPrevented||e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+ const target=e.target;if(target&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(target.tagName)))return;
+ const w=UI.wins?.study,s=this.sess;if(!w||w.el.hidden||!s||s.step!=='quiz'||s.ans)return;
+ const q=s.qs?.[s.qi];if(!q||['spell','listenspell'].includes(q.type)||!Array.isArray(q.opts))return;
+ const other=Object.values(UI.wins).some(v=>v!==w&&!v.el.hidden&&(Number(v.el.style.zIndex)||0)>(Number(w.el.style.zIndex)||0));if(other)return;
+ const physical=/^(?:Digit|Numpad)([1-4])$/.exec(e.code||''),key=String(e.key||'').replace(/[１２３４]/g,ch=>String(ch.charCodeAt(0)-0xff10));
+ const n=physical?Number(physical[1]):/^[1-4]$/.test(key)?Number(key):0;if(!n||n>q.opts.length)return;
+ e.preventDefault();e.stopImmediatePropagation();this.answer(q.opts[n-1]);
+};
+window.addEventListener('keydown',e=>Learn.choiceKey(e),true);
 document.addEventListener('keydown', e => {
   const w = UI.wins && UI.wins.study; if (!w || w.el.hidden || !Learn.sess) return;
   const tag = (e.target && e.target.tagName) || ''; const s = Learn.sess;
@@ -385,8 +397,7 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'ArrowRight' || e.key === '2') Learn.review(true);
   } else if (s.step === 'quiz') {
     const q = s.qs[s.qi];
-    if (!s.ans && q.opts && /^[1-4]$/.test(e.key)) Learn.answer(q.opts[+e.key - 1]);
-    else if (s.ans && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); Learn.next(); }
+    if (s.ans && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); Learn.next(); }
   }
 });
 
