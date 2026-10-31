@@ -1,0 +1,122 @@
+[
+  {
+    "id": "record_player",
+    "name": "黑膠唱機"
+  },
+  {
+    "id": "headphones",
+    "name": "耳機"
+  },
+  {
+    "id": "speaker",
+    "name": "落地喇叭"
+  },
+  {
+    "id": "sm_radio",
+    "name": "復古收音機"
+  },
+  {
+    "id": "sm_musicbox",
+    "name": "音樂盒"
+  },
+  {
+    "id": "record_player__walnut",
+    "name": "黑膠唱機・胡桃木"
+  },
+  {
+    "id": "record_player__white",
+    "name": "黑膠唱機・白色"
+  },
+  {
+    "id": "record_player__black",
+    "name": "黑膠唱機・黑色"
+  },
+  {
+    "id": "record_player__pink",
+    "name": "黑膠唱機・粉彩"
+  },
+  {
+    "id": "headphones__green",
+    "name": "耳機・綠"
+  },
+  {
+    "id": "headphones__sun",
+    "name": "耳機・黃"
+  },
+  {
+    "id": "headphones__lilac",
+    "name": "耳機・紫"
+  },
+  {
+    "id": "headphones__navy",
+    "name": "耳機・海軍藍"
+  },
+  {
+    "id": "headphones__mustard",
+    "name": "耳機・芥末"
+  },
+  {
+    "id": "m_gramophone",
+    "name": "留聲機"
+  },
+  {
+    "id": "cozy_speaker_1",
+    "name": "圓弧音箱"
+  },
+  {
+    "id": "cozy_speaker_2",
+    "name": "雙層音箱"
+  },
+  {
+    "id": "cozy_speaker_3",
+    "name": "星形音箱"
+  },
+  {
+    "id": "cozy_speaker_4",
+    "name": "格柵音箱"
+  },
+  {
+    "id": "cozy_speaker_5",
+    "name": "復古音箱"
+  },
+  {
+    "id": "cozy_record_1",
+    "name": "圓弧唱盤"
+  },
+  {
+    "id": "cozy_record_2",
+    "name": "雙層唱盤"
+  },
+  {
+    "id": "cozy_record_3",
+    "name": "星形唱盤"
+  },
+  {
+    "id": "cozy_record_4",
+    "name": "格柵唱盤"
+  },
+  {
+    "id": "cozy_record_5",
+    "name": "復古唱盤"
+  },
+  {
+    "id": "cozy_musicbox_1",
+    "name": "圓弧音樂盒"
+  },
+  {
+    "id": "cozy_musicbox_2",
+    "name": "雙層音樂盒"
+  },
+  {
+    "id": "cozy_musicbox_3",
+    "name": "星形音樂盒"
+  },
+  {
+    "id": "cozy_musicbox_4",
+    "name": "格柵音樂盒"
+  },
+  {
+    "id": "cozy_musicbox_5",
+    "name": "復古音樂盒"
+  }
+]

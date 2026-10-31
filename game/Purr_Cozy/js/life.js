@@ -277,6 +277,16 @@ const Life = {
     if (!this._tickN || this._tickN++ % 10 === 0) { this._tickN = this._tickN || 1; this.checkAch(); UI.badges(); }
   },
   // ---------- room bubbles ----------
+  // Pet requests stay in the save; only their room hints are scheduled.
+  visibleBubbleNeeds(now=performance.now()) {
+    if(this._petCueState!==Game.S){this._petCueState=Game.S;this._petCueClocks=new Map()}
+    const groups=new Map(),visible=new Set();
+    for(const n of this.L.needs){const d=NEED_DEFS[n.type];if(!d)continue;if(d.who!=='pet'){visible.add(n);continue}if(!groups.has(n.pet))groups.set(n.pet,[]);groups.get(n.pet).push(n)}
+    for(const pid of this._petCueClocks.keys())if(!groups.has(pid))this._petCueClocks.delete(pid);
+    for(const [pid,list]of groups){if(!this._petCueClocks.has(pid))this._petCueClocks.set(pid,now);const elapsed=Math.max(0,now-this._petCueClocks.get(pid)),phase=elapsed%60000;if(phase>=10000)continue;const cycle=Math.floor(elapsed/60000),slot=Math.floor(phase/2500);visible.add(list[(cycle*4+slot)%list.length])}
+    return this.L.needs.filter(n=>visible.has(n));
+  },
+
   anchor(n) {
     const def = NEED_DEFS[n.type];
     if (def.who === 'pet') { const p = Pets.actor(Pets.get(n.pet)); if (!p) return null; return [p.x + (p.flip ? -3 : 3), p.y - 14 - (p.state === 'sleep' ? -4 : 0)]; }
@@ -285,7 +295,7 @@ const Life = {
   },
   drawBubbles(c) {
     this._hits = []; const t = Room.t, placed = [];
-    for (const n of this.L.needs) {
+    for (const n of this.visibleBubbleNeeds()) {
       const pos = this.anchor(n); if (!pos) continue; const def = NEED_DEFS[n.type];
       let bx = Math.round(pos[0] - 4), by = Math.round(pos[1] - 20);
       for (let tries = 0; tries < 6 && placed.some(p => Math.abs(p[0] - bx) < 19 && Math.abs(p[1] - by) < 17); tries++) bx += 19;
@@ -298,7 +308,7 @@ const Life = {
       this._hits.push({ n, x, y, w: 20, h: 18 });
     }
   },
-  hitBubble(x, y) { for (let i = this._hits.length - 1; i >= 0; i--) { const h = this._hits[i]; if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) return h.n; } return null; },
+  hitBubble(x, y) { for (let i = this._hits.length - 1; i >= 0; i--) { const h = this._hits[i]; if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) { if(NEED_DEFS[h.n.type]?.who==='pet'&&!this.visibleBubbleNeeds().includes(h.n))continue; return h.n; } } return null; },
   drawDust(c, it, x, y, cv) {
     const cnt = Math.max(4, Math.floor(cv.width / 3));
     for (let i = 0; i < cnt; i++) { const dx = hsh(it.uid, i, 3) % cv.width, dy = 1 + hsh(i, it.uid, 7) % Math.min(8, cv.height - 2); if (!hitAlpha(cv, dx, dy)) continue; c.fillStyle = i % 3 ? 'rgba(120,112,130,0.55)' : 'rgba(200,196,206,0.7)'; c.fillRect(x + dx, y + dy, 1, 1); }
