@@ -254,6 +254,7 @@ const Room = {
       if (e.kind === 'actor') { if (opts.itemsOnly) continue; if (e.a.hit(x, y)) return e; continue; }
       if (e.kind === 'gift') { if (opts.itemsOnly) continue; const cv = SPR.get('gift_box'); if (x >= e.g.x && x < e.g.x + cv.width && y >= e.g.y - cv.height - 2 && y < e.g.y) return e; continue; }
       const it = e.it, cv = this.itemCanvas(it), d = ITEMS[it.k];
+      if(it.fallen&&typeof CozyRefine!=='undefined'){const b=CozyRefine.spill(it);if(x>=b.x-2&&x<b.x+b.w+2&&y>=b.y-2&&y<b.y+b.h+2)return e;}
       if (d.window) { if (x >= it.x && x < it.x + cv.width && y >= it.y && y < it.y + cv.height) return e; continue; }
       if (hitAlpha(cv, x - it.x, y - it.y)) return e;
     }
