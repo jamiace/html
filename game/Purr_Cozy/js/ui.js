@@ -512,7 +512,7 @@ const UI = {
       const idsAll = Object.keys(S.inv).filter(k => S.inv[k] > 0 && ITEMS[k]);
       const list = this.filterList('sto:items', idsAll.map(id => ({ id, d: ITEMS[id] })), null, true); const ids = list.page.map(e => e.id);
       if (idsAll.length) cards.push(list.bar);
-      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(Room.itemCanvas({k:e.id,on:!!d.light||!!d.screen||!!d.tv}), 100, 3, 80)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, I18n.s("u_d652527e2e2d"))))); }
+      for (const id of ids) { const d = ITEMS[id]; cards.push(h('div', { class: 'card' }, h('div', { class: 'pvbox' }, sprPreview(Room.itemCanvas({k:id,on:!!d.light||!!d.screen||!!d.tv}), 100, 3, 80)), h('div', { class: 'cn', text: d.n }), h('div', { class: 'cfoot' }, h('span', { class: 'own', text: '×' + S.inv[id] }), h('button', { class: 'chip sm', onclick: () => Game.place(id) }, I18n.s("u_d652527e2e2d"))))); }
       if (!idsAll.length) cards.push(h('div', { class: 'empty' }, ico('i_box', 48), h('p', { text: I18n.s("u_c4a605094620") }), h('button', { class: 'chip', onclick: () => this.openWin('shop') }, ico('i_shop', 20), I18n.s("u_0ae148c4b35d"))));
       if (idsAll.length) cards.push(list.nav);
     } else {

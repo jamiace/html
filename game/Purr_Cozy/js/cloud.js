@@ -143,6 +143,13 @@ function totalXp(S) { let t = S.xp || 0; for (let l = 1; l < (S.lvl || 1); l++) 
 function progressBase(S) { return { coins: S.coins || 0, xp: totalXp(S), stats: Object.assign({}, S.stats), life: Object.assign({}, (S.life || {}).stats) }; }
 // a = cloud, b = this device; base = what both started from (known only for a simultaneous save, not for a first-time import)
 // cloudBase: the cloud holds the newer progress (decided by the progress stamp), so its room, tasks and needs are kept
+function mergeHomeCare(a={},b={}) {
+  const base=(b.messUpdatedAt||0)>(a.messUpdatedAt||0)?b:a,other=base===a?b:a,cleaned={...(a.cleanedMesses||{})};
+  for(const [id,at]of Object.entries(b.cleanedMesses||{}))cleaned[id]=Math.max(cleaned[id]||0,at||0);
+  const entries=new Map();for(const mark of [...(a.messes||[]),...(b.messes||[])]){if(!mark||!mark.id||cleaned[mark.id])continue;const prev=entries.get(mark.id);if(!prev||(mark.at||0)>(prev.at||0))entries.set(mark.id,{...mark});}
+  const logs=new Map();for(const row of [...(a.log||[]),...(b.log||[])])logs.set(row.at+':'+row.text,row);
+  return {...other,...base,messes:[...entries.values()].sort((x,y)=>(x.at||0)-(y.at||0)),cleanedMesses:cleaned,messUpdatedAt:Math.max(a.messUpdatedAt||0,b.messUpdatedAt||0),lastFight:Math.max(a.lastFight||0,b.lastFight||0),lastFishSpill:Math.max(a.lastFishSpill||0,b.lastFishSpill||0),log:[...logs.values()].sort((x,y)=>y.at-x.at).slice(0,30)};
+}
 function mergeSaves(a, b, common, cloudBase) {
   const base = cloudBase ? a : (b.savedAt || 0) > (a.savedAt || 0) ? b : a, o = base === a ? b : a, M = JSON.parse(JSON.stringify(base));
   const max = (x, y) => Math.max(x || 0, y || 0);
@@ -209,6 +216,7 @@ function mergeSaves(a, b, common, cloudBase) {
   }
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
   if(o.playProgress){const A=M.playProgress||{},B=o.playProgress;const newest=(B.day||'')>(A.day||'')?B:A;M.playProgress=Object.assign({},newest,{total:Math.max(A.total||0,B.total||0)});if(A.day===B.day){M.playProgress.today=Math.max(A.today||0,B.today||0);M.playProgress.helpClaimed=!!(A.helpClaimed||B.helpClaimed);if(A.helpCredit||B.helpCredit)M.playProgress.helpCredit=[A.helpCredit,B.helpCredit].find(c=>c&&c.day===M.playProgress.day)||null;}}
+  if(a.homeCare||b.homeCare)M.homeCare=mergeHomeCare(a.homeCare||{},b.homeCare||{});
   M.savedAt = Date.now();
   return M;
 }
@@ -246,7 +254,7 @@ function progressKey(S) {
   const v = Object.values(S.vocab || {}), pets = (S.zoo && S.zoo.pets) || [];
   // only things that change because you did something (no counters that move on their own, nothing reset by the 6 a.m. rollover)
   return saveHash(JSON.stringify([totalXp(S), S.coins || 0, v.length, v.reduce((n, r) => n + (r ? (r[0] || 0) * 1000 + (r[1] || 0) : 0), 0),
-    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
+    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, [(S.homeCare?.messes||[]).map(m=>[m.id,m.x,m.y,m.pet,m.at]),S.homeCare?.cleanedMesses||{}], S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
     (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => [m.text,m.w,m.h,m.pin]), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
 }
 function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }

@@ -1,0 +1,4023 @@
+{
+  "zip": "Purr_Cozy_0.92.24_SNES_Pixel.zip",
+  "source_library_file_id": "libfile_68cba8cac88c81918d27a5973684d542",
+  "frames": [
+    {
+      "file": "assets/png/actions/ginger_jump_0.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2180584c"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_1.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7d662288"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_2.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cfa24c19"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_3.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7ba92e3f"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_4.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "50a187b3"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_5.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0a21c20f"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_6.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "35940ca4"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_7.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "84b984cc"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_8.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f5c19f0c"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_9.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "623af3fd"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_10.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0f18b8ee"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_11.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c317f5ff"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_12.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "dfb392d2"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_13.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9a69c1f7"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_14.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "67777253"
+    },
+    {
+      "file": "assets/png/actions/ginger_jump_15.png",
+      "coat": "ginger",
+      "mode": "jump",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "05297e75"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_0.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2180584c"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_1.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "475029f3"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_2.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3c799f97"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_3.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "38112b41"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_4.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4a0169f4"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_5.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "93c6c23e"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_6.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a8c3dde1"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_7.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f5e21d68"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_8.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e565b4d1"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_9.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4f55d855"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_10.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "aa555b22"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_11.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0d08f572"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_12.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "47c76a67"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_13.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ecac65a7"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_14.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6537fc2c"
+    },
+    {
+      "file": "assets/png/actions/ginger_down_15.png",
+      "coat": "ginger",
+      "mode": "down",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8f6c706b"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_0.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "02b7c11c"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_1.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6b31cba2"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_2.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "47addbb7"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_3.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "96379767"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_4.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "aa0f77bf"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_5.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d8522651"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_6.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7754dd87"
+    },
+    {
+      "file": "assets/png/actions/ginger_run_7.png",
+      "coat": "ginger",
+      "mode": "run",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b3a13bd0"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_0.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "31f6e5ef"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_1.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "bdec68ff"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_2.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "140b6c3a"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_3.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ae64a3f8"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_4.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fb0a449c"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_5.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "33b2846d"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_6.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fc20ad0b"
+    },
+    {
+      "file": "assets/png/actions/ginger_dig_7.png",
+      "coat": "ginger",
+      "mode": "dig",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4bbc1e69"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_0.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "06ad8fb0"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_1.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "94c9d3ef"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_2.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d83d2201"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_3.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "37bda59f"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_4.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f9e0bc60"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_5.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e70db032"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_6.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cb1c4b3d"
+    },
+    {
+      "file": "assets/png/actions/ginger_squat_7.png",
+      "coat": "ginger",
+      "mode": "squat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "34482122"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_0.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a697ce25"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_1.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c8d833a1"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_2.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "29b21f4d"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_3.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cb2c7d7c"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_4.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0a91c0b7"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_5.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f9b06192"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_6.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4b350f94"
+    },
+    {
+      "file": "assets/png/actions/ginger_swat_7.png",
+      "coat": "ginger",
+      "mode": "swat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c9f1a072"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_0.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0ef64514"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_1.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7c780903"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_2.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "df7e4a84"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_3.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a634082b"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_4.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9f1e7d66"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_5.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "09b863df"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_6.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "87a18a57"
+    },
+    {
+      "file": "assets/png/actions/ginger_hiss_7.png",
+      "coat": "ginger",
+      "mode": "hiss",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "41f4c902"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_0.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "bdbc456d"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_1.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "54822f9c"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_2.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3052f566"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_3.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2f58c4b7"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_4.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "774f105f"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_5.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "06f88138"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_6.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "bf7d6356"
+    },
+    {
+      "file": "assets/png/actions/ginger_fight_7.png",
+      "coat": "ginger",
+      "mode": "fight",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0aaeff4b"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_0.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77784f63"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_1.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "aca12b89"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_2.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1c6ecc03"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_3.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b1899bec"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_4.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9fd22070"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_5.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "25c45573"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_6.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "864ba38a"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_7.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2786adf2"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_8.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4abd41e4"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_9.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "78bbd02d"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_10.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "09d665f6"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_11.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c635b75d"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_12.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "819534f5"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_13.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "62eeb292"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_14.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c7a443ad"
+    },
+    {
+      "file": "assets/png/actions/grey_jump_15.png",
+      "coat": "grey",
+      "mode": "jump",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "59438afe"
+    },
+    {
+      "file": "assets/png/actions/grey_down_0.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77784f63"
+    },
+    {
+      "file": "assets/png/actions/grey_down_1.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b1f964ba"
+    },
+    {
+      "file": "assets/png/actions/grey_down_2.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a2002eae"
+    },
+    {
+      "file": "assets/png/actions/grey_down_3.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1128dcc6"
+    },
+    {
+      "file": "assets/png/actions/grey_down_4.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c77779e3"
+    },
+    {
+      "file": "assets/png/actions/grey_down_5.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "23c76dd0"
+    },
+    {
+      "file": "assets/png/actions/grey_down_6.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7376caff"
+    },
+    {
+      "file": "assets/png/actions/grey_down_7.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8e7ac427"
+    },
+    {
+      "file": "assets/png/actions/grey_down_8.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9f98760d"
+    },
+    {
+      "file": "assets/png/actions/grey_down_9.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "52ea36a0"
+    },
+    {
+      "file": "assets/png/actions/grey_down_10.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "48ef1f6a"
+    },
+    {
+      "file": "assets/png/actions/grey_down_11.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "dc8a3fcc"
+    },
+    {
+      "file": "assets/png/actions/grey_down_12.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f908b132"
+    },
+    {
+      "file": "assets/png/actions/grey_down_13.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fb7b795b"
+    },
+    {
+      "file": "assets/png/actions/grey_down_14.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "69dfcbce"
+    },
+    {
+      "file": "assets/png/actions/grey_down_15.png",
+      "coat": "grey",
+      "mode": "down",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cd6e98e7"
+    },
+    {
+      "file": "assets/png/actions/grey_run_0.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77919569"
+    },
+    {
+      "file": "assets/png/actions/grey_run_1.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ddc895a5"
+    },
+    {
+      "file": "assets/png/actions/grey_run_2.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d05b8bf5"
+    },
+    {
+      "file": "assets/png/actions/grey_run_3.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b8c80c23"
+    },
+    {
+      "file": "assets/png/actions/grey_run_4.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7ec11ea8"
+    },
+    {
+      "file": "assets/png/actions/grey_run_5.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "65b7169a"
+    },
+    {
+      "file": "assets/png/actions/grey_run_6.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "726f57c3"
+    },
+    {
+      "file": "assets/png/actions/grey_run_7.png",
+      "coat": "grey",
+      "mode": "run",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a4590bf7"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_0.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "91c73f68"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_1.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "86a50942"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_2.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e0285f61"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_3.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b9d92abf"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_4.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "540a7256"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_5.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3bc8b983"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_6.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5a650e8c"
+    },
+    {
+      "file": "assets/png/actions/grey_dig_7.png",
+      "coat": "grey",
+      "mode": "dig",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5d9d81c9"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_0.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "43e8f303"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_1.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c5b26428"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_2.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "92080268"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_3.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d21c961a"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_4.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "677e2840"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_5.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9843664a"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_6.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b661e9ba"
+    },
+    {
+      "file": "assets/png/actions/grey_squat_7.png",
+      "coat": "grey",
+      "mode": "squat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2405ec52"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_0.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8b9ce1f8"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_1.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ce0cd3ff"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_2.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "053be1ca"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_3.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5fe4b16e"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_4.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e97b828e"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_5.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "13aa84e3"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_6.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a37f1fe3"
+    },
+    {
+      "file": "assets/png/actions/grey_swat_7.png",
+      "coat": "grey",
+      "mode": "swat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ca5cf3c5"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_0.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "613faa79"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_1.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "92e94643"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_2.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9eafee86"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_3.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1a1e01e2"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_4.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "605f3630"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_5.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "95033c65"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_6.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1eb878a0"
+    },
+    {
+      "file": "assets/png/actions/grey_hiss_7.png",
+      "coat": "grey",
+      "mode": "hiss",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a631827e"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_0.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "dd262db3"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_1.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ea76288d"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_2.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7265d1c5"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_3.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "14d352cf"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_4.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f0f22e66"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_5.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d397451a"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_6.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "873e1473"
+    },
+    {
+      "file": "assets/png/actions/grey_fight_7.png",
+      "coat": "grey",
+      "mode": "fight",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "08dab786"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_0.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "110226ac"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_1.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cab3c34e"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_2.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6c1df73a"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_3.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4441c3fb"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_4.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3cbafec2"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_5.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7346b2ee"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_6.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8f5bc67a"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_7.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4a56cf35"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_8.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "90a19fd3"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_9.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a9217e12"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_10.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "223f85a8"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_11.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fdcabbed"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_12.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4ddb8302"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_13.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5b580a53"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_14.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6c90ae44"
+    },
+    {
+      "file": "assets/png/actions/snow_jump_15.png",
+      "coat": "snow",
+      "mode": "jump",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2d4e2c29"
+    },
+    {
+      "file": "assets/png/actions/snow_down_0.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "110226ac"
+    },
+    {
+      "file": "assets/png/actions/snow_down_1.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "21da3dd9"
+    },
+    {
+      "file": "assets/png/actions/snow_down_2.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7a043064"
+    },
+    {
+      "file": "assets/png/actions/snow_down_3.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b1ed84ac"
+    },
+    {
+      "file": "assets/png/actions/snow_down_4.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "28351484"
+    },
+    {
+      "file": "assets/png/actions/snow_down_5.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4348d5b0"
+    },
+    {
+      "file": "assets/png/actions/snow_down_6.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c8c28afc"
+    },
+    {
+      "file": "assets/png/actions/snow_down_7.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "121bfbb4"
+    },
+    {
+      "file": "assets/png/actions/snow_down_8.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2a15c595"
+    },
+    {
+      "file": "assets/png/actions/snow_down_9.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "78374fcb"
+    },
+    {
+      "file": "assets/png/actions/snow_down_10.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cb05b9ff"
+    },
+    {
+      "file": "assets/png/actions/snow_down_11.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e3847cbc"
+    },
+    {
+      "file": "assets/png/actions/snow_down_12.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "18a8e6d0"
+    },
+    {
+      "file": "assets/png/actions/snow_down_13.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b627d1b8"
+    },
+    {
+      "file": "assets/png/actions/snow_down_14.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "db233487"
+    },
+    {
+      "file": "assets/png/actions/snow_down_15.png",
+      "coat": "snow",
+      "mode": "down",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "79e7c8c5"
+    },
+    {
+      "file": "assets/png/actions/snow_run_0.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3e986cfc"
+    },
+    {
+      "file": "assets/png/actions/snow_run_1.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f1d251df"
+    },
+    {
+      "file": "assets/png/actions/snow_run_2.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b958c5ed"
+    },
+    {
+      "file": "assets/png/actions/snow_run_3.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "683cf66f"
+    },
+    {
+      "file": "assets/png/actions/snow_run_4.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "84081088"
+    },
+    {
+      "file": "assets/png/actions/snow_run_5.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8972504a"
+    },
+    {
+      "file": "assets/png/actions/snow_run_6.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5d361be2"
+    },
+    {
+      "file": "assets/png/actions/snow_run_7.png",
+      "coat": "snow",
+      "mode": "run",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0d3d90a8"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_0.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cff4f5a6"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_1.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f080522a"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_2.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0b0cec20"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_3.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1b08d480"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_4.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a2df450b"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_5.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1ab216d6"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_6.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "70f9771d"
+    },
+    {
+      "file": "assets/png/actions/snow_dig_7.png",
+      "coat": "snow",
+      "mode": "dig",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9cb0d4a7"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_0.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c7794590"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_1.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "eb49a101"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_2.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b3966d89"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_3.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "93e6717a"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_4.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c713e627"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_5.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8f15dacf"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_6.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "46ae5e96"
+    },
+    {
+      "file": "assets/png/actions/snow_squat_7.png",
+      "coat": "snow",
+      "mode": "squat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5332ee4e"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_0.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "19b77b59"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_1.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2c0a3fcd"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_2.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3f7339c9"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_3.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5515c558"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_4.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "daf45daa"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_5.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "73443f64"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_6.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e5635a91"
+    },
+    {
+      "file": "assets/png/actions/snow_swat_7.png",
+      "coat": "snow",
+      "mode": "swat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4d03e441"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_0.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "61a4b566"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_1.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fae366b3"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_2.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "467fb73d"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_3.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c3d939b3"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_4.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "df0ab0d5"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_5.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f6b44d60"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_6.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "801fb32c"
+    },
+    {
+      "file": "assets/png/actions/snow_hiss_7.png",
+      "coat": "snow",
+      "mode": "hiss",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "05bf2ab0"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_0.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e117abd2"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_1.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2977e430"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_2.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "138c7fcf"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_3.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a4ecf8b2"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_4.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e729f426"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_5.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "38838430"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_6.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f5aeb23e"
+    },
+    {
+      "file": "assets/png/actions/snow_fight_7.png",
+      "coat": "snow",
+      "mode": "fight",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9e445bd2"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_0.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77d7e658"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_1.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ad002943"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_2.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "423792bd"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_3.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "cfc4cc65"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_4.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7ec24627"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_5.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ef4912ca"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_6.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "05ae4aa3"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_7.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1a002691"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_8.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f415f07c"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_9.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1f4ec26d"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_10.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6bcaf99a"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_11.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f78b0835"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_12.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "54b7b9dd"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_13.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "534ecec5"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_14.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4c5c3339"
+    },
+    {
+      "file": "assets/png/actions/ink_jump_15.png",
+      "coat": "ink",
+      "mode": "jump",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b7946ea4"
+    },
+    {
+      "file": "assets/png/actions/ink_down_0.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77d7e658"
+    },
+    {
+      "file": "assets/png/actions/ink_down_1.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "89684d32"
+    },
+    {
+      "file": "assets/png/actions/ink_down_2.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3501f29a"
+    },
+    {
+      "file": "assets/png/actions/ink_down_3.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "942d95aa"
+    },
+    {
+      "file": "assets/png/actions/ink_down_4.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1ddfb0ad"
+    },
+    {
+      "file": "assets/png/actions/ink_down_5.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e9b2ee74"
+    },
+    {
+      "file": "assets/png/actions/ink_down_6.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6fcfc9b7"
+    },
+    {
+      "file": "assets/png/actions/ink_down_7.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "30d264fd"
+    },
+    {
+      "file": "assets/png/actions/ink_down_8.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fc371b16"
+    },
+    {
+      "file": "assets/png/actions/ink_down_9.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "975a3bd2"
+    },
+    {
+      "file": "assets/png/actions/ink_down_10.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c00735a9"
+    },
+    {
+      "file": "assets/png/actions/ink_down_11.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9f4c3cae"
+    },
+    {
+      "file": "assets/png/actions/ink_down_12.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "93567c4b"
+    },
+    {
+      "file": "assets/png/actions/ink_down_13.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2d970788"
+    },
+    {
+      "file": "assets/png/actions/ink_down_14.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d8c15e9a"
+    },
+    {
+      "file": "assets/png/actions/ink_down_15.png",
+      "coat": "ink",
+      "mode": "down",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ca5480e6"
+    },
+    {
+      "file": "assets/png/actions/ink_run_0.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1357eb4b"
+    },
+    {
+      "file": "assets/png/actions/ink_run_1.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "844ad309"
+    },
+    {
+      "file": "assets/png/actions/ink_run_2.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "16e34d55"
+    },
+    {
+      "file": "assets/png/actions/ink_run_3.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a19a52df"
+    },
+    {
+      "file": "assets/png/actions/ink_run_4.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1ad0c4f0"
+    },
+    {
+      "file": "assets/png/actions/ink_run_5.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a262df04"
+    },
+    {
+      "file": "assets/png/actions/ink_run_6.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "354a7e07"
+    },
+    {
+      "file": "assets/png/actions/ink_run_7.png",
+      "coat": "ink",
+      "mode": "run",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "def9fbc4"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_0.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5691ffa5"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_1.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f4224a01"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_2.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "58e8f3e6"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_3.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "92c47956"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_4.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3e1792ed"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_5.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b226523e"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_6.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1aeab24a"
+    },
+    {
+      "file": "assets/png/actions/ink_dig_7.png",
+      "coat": "ink",
+      "mode": "dig",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "48035861"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_0.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d64ebc83"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_1.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2a8ec799"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_2.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3d01e4e5"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_3.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e483108f"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_4.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8323a34a"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_5.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e5a2c665"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_6.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3babe2dc"
+    },
+    {
+      "file": "assets/png/actions/ink_squat_7.png",
+      "coat": "ink",
+      "mode": "squat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1f7b80cf"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_0.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6b9bd16d"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_1.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0242f5f4"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_2.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "84571b71"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_3.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "be3d3077"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_4.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d53a8121"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_5.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "95b4ffd8"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_6.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "dbbfc769"
+    },
+    {
+      "file": "assets/png/actions/ink_swat_7.png",
+      "coat": "ink",
+      "mode": "swat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "59868b12"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_0.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a3a7e5a0"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_1.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2efd015b"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_2.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b3558195"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_3.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "549c5d4a"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_4.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e3a31a6f"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_5.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "28afce80"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_6.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e45c5683"
+    },
+    {
+      "file": "assets/png/actions/ink_hiss_7.png",
+      "coat": "ink",
+      "mode": "hiss",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1a49e8b2"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_0.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a4bd4cf7"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_1.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2cc3ed80"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_2.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "313dd29e"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_3.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2f5473d6"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_4.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6d465ee3"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_5.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5bcfd5f8"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_6.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5d36d9d2"
+    },
+    {
+      "file": "assets/png/actions/ink_fight_7.png",
+      "coat": "ink",
+      "mode": "fight",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6d204b60"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_0.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c61e3f9f"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_1.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f2685b57"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_2.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4cdc84e3"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_3.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f072bc6c"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_4.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0afff0ed"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_5.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "300ab617"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_6.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1fea0345"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_7.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "50576035"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_8.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b480cbde"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_9.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9fecc1e6"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_10.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c7d85665"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_11.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ba2d33fb"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_12.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5c21117f"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_13.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ad559a93"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_14.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "92d39719"
+    },
+    {
+      "file": "assets/png/actions/cocoa_jump_15.png",
+      "coat": "cocoa",
+      "mode": "jump",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "69fc2e21"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_0.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c61e3f9f"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_1.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6e9b62f9"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_2.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2b6731f4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_3.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "dfb1f51c"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_4.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "84da3dd3"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_5.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "96437d45"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_6.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a0380fa4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_7.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "fed4bd9b"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_8.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 8,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c9b6d6d4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_9.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 9,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4c295d52"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_10.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 10,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "afb4c0ee"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_11.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 11,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f59c50b6"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_12.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 12,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "475d333f"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_13.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 13,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9ee7e150"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_14.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 14,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5f709cac"
+    },
+    {
+      "file": "assets/png/actions/cocoa_down_15.png",
+      "coat": "cocoa",
+      "mode": "down",
+      "frame": 15,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "207e6c2a"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_0.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "2159708a"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_1.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e96a92ab"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_2.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "0bfee48c"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_3.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b80827c5"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_4.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "f3bbbb90"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_5.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e3f7194d"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_6.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "b844f4e3"
+    },
+    {
+      "file": "assets/png/actions/cocoa_run_7.png",
+      "coat": "cocoa",
+      "mode": "run",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ec72e83b"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_0.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ef658614"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_1.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "7f0d69d0"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_2.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5d67eca4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_3.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d5b8914b"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_4.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "e45492e9"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_5.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6d540109"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_6.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "757704b7"
+    },
+    {
+      "file": "assets/png/actions/cocoa_dig_7.png",
+      "coat": "cocoa",
+      "mode": "dig",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c1980ef4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_0.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "13d4ab26"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_1.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "1d18a445"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_2.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a9ee9cd9"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_3.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9d84884a"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_4.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "68fea8c4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_5.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "24442fb9"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_6.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c4cf6ca0"
+    },
+    {
+      "file": "assets/png/actions/cocoa_squat_7.png",
+      "coat": "cocoa",
+      "mode": "squat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c9c75bcc"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_0.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "d1eba646"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_1.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "c57bf4c5"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_2.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "baec3bca"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_3.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6c554127"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_4.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ee27855b"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_5.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "111ec973"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_6.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "595c265c"
+    },
+    {
+      "file": "assets/png/actions/cocoa_swat_7.png",
+      "coat": "cocoa",
+      "mode": "swat",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "9e72c193"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_0.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "439ccdad"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_1.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "77941c03"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_2.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "ccc7234b"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_3.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "4068106f"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_4.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "87c5bf35"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_5.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "333929c4"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_6.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3f0eee1c"
+    },
+    {
+      "file": "assets/png/actions/cocoa_hiss_7.png",
+      "coat": "cocoa",
+      "mode": "hiss",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "6c196b57"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_0.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 0,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "75ec2b75"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_1.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 1,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "3c7da861"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_2.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 2,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "a96e0367"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_3.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 3,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "529bb9c3"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_4.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 4,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "8cc3ea86"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_5.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 5,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "838f57cb"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_6.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 6,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "5d6a00fe"
+    },
+    {
+      "file": "assets/png/actions/cocoa_fight_7.png",
+      "coat": "cocoa",
+      "mode": "fight",
+      "frame": 7,
+      "source": "user ZIP",
+      "width": 28,
+      "height": 36,
+      "crc32": "98449148"
+    }
+  ],
+  "effects_from_zip": [
+    "assets/png/actions/effect_urine.png",
+    "assets/png/actions/effect_spill.png",
+    "assets/png/actions/effect_snow.png",
+    "assets/png/actions/effect_spark.png",
+    "assets/png/actions/effect_food.png"
+  ],
+  "cartoon_smoke_overlay": [
+    "assets/png/effects/scuffle_0.png",
+    "assets/png/effects/scuffle_1.png",
+    "assets/png/effects/scuffle_2.png",
+    "assets/png/effects/scuffle_3.png",
+    "assets/png/effects/scuffle_4.png",
+    "assets/png/effects/scuffle_5.png",
+    "assets/png/effects/scuffle_6.png",
+    "assets/png/effects/scuffle_7.png"
+  ]
+}
