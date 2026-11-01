@@ -1,4 +1,4 @@
-/* 0.92.24: explicit device states, classified PNG shop, small games and cat events. */
+/* 0.92.24 (+0.92.29 legacy table/piano branches removed; see minigame-*.js): explicit device states, classified PNG shop, small games and cat events. */
 const Cozy={t:(k,a=[])=>I18n.t('cozy.'+k,a),item:uid=>Game.S.items.find(it=>it.uid===uid),
  active:()=>Room.state===Game.S&&!Room.edit&&!document.hidden&&Lights.mode==='on'&&!Lights.busy,
  action(a,name,f=0){if(name==='fight'&&PNGArt.meta.catEffects?.scuffle?.length){const list=PNGArt.meta.catEffects.scuffle;return PNGArt.image(list[Math.abs(Math.floor(f))%list.length]);}const set=PNGArt.meta.cozyActions[a.color]||PNGArt.meta.cozyActions.ginger;const frames=set?.[name];return frames&&PNGArt.image(frames[Math.min(frames.length-1,Math.max(0,f))]);},
@@ -60,44 +60,37 @@ const cozyPlace=Game.place.bind(Game);Game.place=function(id){const oldIds=new S
 // All electronics have a real dark PNG and no emissive light when off.
 const cozyItem=Room.itemCanvas.bind(Room);Room.itemCanvas=function(it){const d=ITEMS[it.k],meta=PNGArt.meta.items[it.k];if(it.fallen&&meta?.fallen){const cv=PNGArt.image(meta.fallen);return it.flip?PNGArt.flip(cv):cv;}if(d?.powerDevice&&!it.on&&meta?.off){const cv=PNGArt.image(meta.off);return it.flip?PNGArt.flip(cv):cv;}if(d?.powerDevice&&!it.on&&meta?.states?.off?.length){let cv=PNGArt.frame(meta.states.off[0]);return it.flip?PNGArt.flip(cv):cv;}return cozyItem(it)};
 const CozyGames={session:null,raf:null,
- animate(){const s=this.session;if(!s||!UI.wins.cozygame||UI.wins.cozygame.el.hidden)return;const body=UI.wins.cozygame.body,now=performance.now(),dt=Math.min(.05,Math.max(.001,(now-(s.lastAnim||now))/1000));s.lastAnim=now;if(!document.hidden){const bar=body.querySelector('.cozy-meter i');if(bar)bar.style.left=(45+45*Math.sin((performance.now()-s.began)/1000*(s.mode==='toss'?1.3:1.7)))+'%';if(s.mode==='pinball'&&!s.done){const b=s.ball;b.vy+=110*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x<2||b.x>94){b.vx=-b.vx;b.x=Math.max(2,Math.min(94,b.x));}if(b.y<1){b.y=1;b.vy=Math.abs(b.vy);}if(b.y>130){b.y=15;b.vy=0;}const node=body.querySelector('.cozy-ball i');if(node){node.style.left=b.x+'%';node.style.top=b.y+'px';}}}this.raf=requestAnimationFrame(()=>this.animate());},
+ animate(){const s=this.session;if(!s||!UI.wins.cozygame||UI.wins.cozygame.el.hidden)return;const body=UI.wins.cozygame.body,now=performance.now(),dt=Math.min(.05,Math.max(.001,(now-(s.lastAnim||now))/1000));s.lastAnim=now;if(!document.hidden){const bar=body.querySelector('.cozy-meter i');if(bar)bar.style.left=(45+45*Math.sin((performance.now()-s.began)/1000*1.7))+'%';}this.raf=requestAnimationFrame(()=>this.animate());},
  open(it,mode){this.session={uid:it.uid,mode,began:performance.now(),seed:Math.random(),credited:false,steps:0,done:false};this.reset();UI.openWin('cozygame');cancelAnimationFrame(this.raf);this.animate()},
- reset(){const s=this.session;s.steps=0;s.done=false;s.credited=false;s.began=performance.now();s.first=null;s.lock=false;s.matches=[];s.ball={x:45,y:10,vx:30,vy:0};
+ reset(){const s=this.session;s.steps=0;s.done=false;s.credited=false;s.began=performance.now();s.first=null;s.lock=false;s.matches=[];
   if(s.mode==='memory'){s.cards=shuffle([0,1,2,3,0,1,2,3]);s.flipped=[]}
   if(s.mode==='puzzle'){s.cells=[1,2,3,4,5,6,7,8,0];let at=8;for(let i=0;i<60;i++){const n=[at-3,at+3,at%3?at-1:-1,at%3<2?at+1:-1].filter(x=>x>=0&&x<9);const b=n[Math.floor(Math.random()*n.length)];[s.cells[at],s.cells[b]]=[s.cells[b],s.cells[at]];at=b;}}
-  if(s.mode==='instrument'){s.sequence=Array.from({length:3},()=>Math.floor(Math.random()*4));s.input=[];s.listening=false;}
   if(s.mode==='wire')s.cells=Array.from({length:9},()=>Math.floor(Math.random()*4));
-  s.maze=[0,0,1,0,0,1,0,1,0,1,0,0,0,0,0,0,1,1,1,0,0,0,0,1,0];s.position=0;s.odd=Math.floor(Math.random()*9);s.target=2+Math.floor(Math.random()*5);s.waitAt=performance.now()+1500+Math.random()*1800;s.car=0;
+  s.position=0;s.odd=Math.floor(Math.random()*9);s.target=2+Math.floor(Math.random()*5);s.waitAt=performance.now()+1500+Math.random()*1800;s.car=0;
  },
  finish(){const s=this.session;if(!s||s.done)return;s.done=true;Cozy.complete(s);UI.refresh('cozygame')},
  move(i){const s=this.session;if(s.done||s.lock)return;s.steps++;
   if(s.mode==='memory'){if(s.matches.includes(i)||s.flipped.includes(i))return;s.flipped.push(i);if(s.flipped.length===2){const [a,b]=s.flipped;if(s.cards[a]===s.cards[b]){s.matches.push(a,b);s.flipped=[];if(s.matches.length===8)this.finish()}else{s.lock=true;const ref=s;setTimeout(()=>{if(this.session!==ref)return;s.lock=false;s.flipped=[];UI.refresh('cozygame')},650)}}}
   else if(s.mode==='puzzle'){const z=s.cells.indexOf(0);if(Math.abs(z%3-i%3)+Math.abs(Math.floor(z/3)-Math.floor(i/3))===1)[s.cells[z],s.cells[i]]=[s.cells[i],s.cells[z]];if(s.cells.every((x,j)=>x===(j+1)%9))this.finish()}
   else if(s.mode==='wire'){s.cells[i]=(s.cells[i]+1)%4;if(s.cells.every(n=>n===0))this.finish()}
-  else if(s.mode==='instrument'){if(s.listening)return;this.note(i);s.input.push(i);if(i!==s.sequence[s.input.length-1])s.input=[];else if(s.input.length===s.sequence.length)this.finish()}
   else if(s.mode==='diff'){if(i===s.odd)this.finish();}
   else if(s.mode==='stars'){if(i===s.steps-1&&s.steps>=6)this.finish();else if(i!==s.steps-1)s.steps--;}
   UI.refresh('cozygame');
  },
- note(i){const A=TypoSound.unlock();if(!A)return;const o=A.createOscillator(),g=A.createGain(),at=A.currentTime;o.type='triangle';o.frequency.value=[261.63,293.66,329.63,392][i%4];g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(.12,at+.015);g.gain.exponentialRampToValueAtTime(.0001,at+.42);o.connect(g);g.connect(A.destination);o.start(at);o.stop(at+.45)},
- listen(){const s=this.session;if(s.listening)return;s.input=[];s.listening=true;UI.refresh('cozygame');s.sequence.forEach((n,i)=>setTimeout(()=>{if(this.session===s){this.note(n);s.lit=n;UI.refresh('cozygame')}},i*600));setTimeout(()=>{if(this.session===s){s.listening=false;s.lit=null;UI.refresh('cozygame')}},s.sequence.length*600+200)},
- step(delta){const s=this.session;if(s.done)return;if(s.mode==='maze'){const next=s.position+delta;if(next>=0&&next<25&&s.maze[next]===0&&(Math.abs(delta)===5||Math.floor(next/5)===Math.floor(s.position/5)))s.position=next;}else s.position=Math.max(0,Math.min(8,s.position+delta));s.steps++;if(s.mode==='maze'&&s.position===24||s.mode==='parking'&&s.position===8)this.finish();UI.refresh('cozygame')},
+ // 0.92.29: music-box chime effect plays through the shared MiniAudio bus (minigame-audio.js).
+ note(i){if(typeof MiniAudio!=='undefined')MiniAudio.note([60,62,64,67][i%4],{voice:'musicbox',vel:.6,dur:.4})},
+ step(delta){const s=this.session;if(s.done)return;s.position=Math.max(0,Math.min(8,s.position+delta));s.steps++;if(s.mode==='parking'&&s.position===8)this.finish();UI.refresh('cozygame')},
  tap(){const s=this.session;if(s.done)return;const elapsed=(performance.now()-s.began)/1000;s.steps++;
   if(['reaction','fish'].includes(s.mode)){if(performance.now()>=s.waitAt)this.finish();else{s.waitAt=performance.now()+1000;s.message='wait'}}
   else if(s.mode==='balance'){if(Math.abs(Math.sin(elapsed*1.7))<.55)s.position++;else s.position=Math.max(0,s.position-1);if(s.position>=5)this.finish()}
-  else if(s.mode==='toss'){if(Math.abs(Math.sin(elapsed*1.3))<.65)s.position++;if(s.position>=3)this.finish()}
-  else if(s.mode==='pinball'){if(s.ball.y>80){s.ball.vy=-120;s.ball.vx=s.steps%2?35:-35;}if(elapsed>=8&&s.steps>=8)this.finish();else s.position=(s.position+3)%9;}
   UI.refresh('cozygame')},
  render(){const s=this.session,it=s&&Cozy.item(s.uid);if(!it)return[h('p',{text:Cozy.t('missing')})];const d=ITEMS[it.k],p=Cozy.progress(),out=[h('p',{text:d.n}),h('p',{class:'hint',text:Cozy.t('gameHelp.'+s.mode)}),h('p',{class:'hint',text:Cozy.t('gameProgress',[p.today,p.luck])})];
   if(s.done)out.push(h('p',{class:'cozy-result',text:Cozy.t('complete')}));
   else if(s.mode==='memory')out.push(h('div',{class:'cozy-grid cols4'},...s.cards.map((n,i)=>h('button',{class:'cozy-card',disabled:s.lock||s.matches.includes(i)||s.flipped.includes(i),onclick:()=>this.move(i)},s.matches.includes(i)||s.flipped.includes(i)?['★','☀','♬','♡'][n]:'?'))));
   else if(s.mode==='puzzle'||s.mode==='wire')out.push(h('div',{class:'cozy-grid cols3'},...s.cells.map((n,i)=>h('button',{class:'cozy-card',onclick:()=>this.move(i)},s.mode==='wire'?['─','│','┐','└'][n]:n||''))));
-  else if(s.mode==='instrument')out.push(h('button',{class:'chip',disabled:s.listening,onclick:()=>this.listen()},Cozy.t('listen')),h('div',{class:'cozy-grid cols4'},...[0,1,2,3].map(n=>h('button',{class:'cozy-card'+(s.lit===n?' lit':''),disabled:s.listening,onclick:()=>this.move(n)},['Do','Re','Mi','Sol'][n]))));
   else if(s.mode==='diff')out.push(h('div',{class:'cozy-grid cols3'},...Array.from({length:9},(_,i)=>h('button',{class:'cozy-card',onclick:()=>this.move(i)},i===s.odd?'✧':'✦'))));
   else if(s.mode==='stars')out.push(h('div',{class:'cozy-grid cols3'},...Array.from({length:9},(_,i)=>h('button',{class:'cozy-card',disabled:i<s.steps,onclick:()=>this.move(i)},i<6?'★ '+(i+1):'·'))));
-  else if(s.mode==='maze')out.push(h('div',{class:'cozy-maze'},...s.maze.map((n,i)=>h('span',{class:n?'wall':'',text:i===s.position?'●':i===24?'⚑':''}))),h('div',{class:'cozy-keyrow'},...[["←",-1],["↑",-5],["↓",5],["→",1]].map(([label,n])=>h('button',{class:'chip',onclick:()=>this.step(n)},label))));
   else if(s.mode==='parking')out.push(h('div',{class:'cozy-track'},...Array.from({length:9},(_,i)=>h('span',{text:i===s.position?'●':i===8?'⚑':'·'}))),h('div',{class:'row'},h('button',{class:'chip',onclick:()=>this.step(-1)},'←'),h('button',{class:'chip',onclick:()=>this.step(1)},'→')));
-  else if(s.mode==='pinball')out.push(h('div',{class:'cozy-ball'},h('i')),h('div',{class:'cozy-keyrow'},...['←','→'].map(label=>h('button',{class:'chip',onclick:()=>this.tap()},label))));
   else out.push(h('div',{class:'cozy-meter '+s.mode,style:['reaction','fish'].includes(s.mode)?'animation:cozy-ready 0s steps(1) '+Math.max(0,(s.waitAt-performance.now())/1000)+'s forwards':''},h('i')),h('button',{class:'chip primary cozy-big',onclick:()=>this.tap()},Cozy.t('tap')),h('p',{class:'hint',text:Cozy.t('steps',[s.position||s.steps])}));
   out.push(h('button',{class:'chip',onclick:()=>{this.reset();UI.refresh('cozygame')}},Cozy.t('restart')),h('button',{class:'chip',disabled:p.today<15||p.helpClaimed||Social.helpsToday()<=0,onclick:()=>Cozy.restoreHelp()},Cozy.t('restoreHelp')));return out;}
 };
@@ -146,6 +139,6 @@ document.addEventListener('compositionstart',e=>{if(e.target.id?.startsWith('q-'
 const cozyRefresh=UI.refresh.bind(UI);UI.refresh=function(id){if(UI._cozySearchIME&&(id==='shop'||id==='storage'))return;return cozyRefresh(id);};
 
 CatMess.prototype.draw=function(c){c.drawImage(PNGArt.image('assets/png/actions/effect_urine.png'),Math.round(this.x)-16,Math.round(this.y)-7)};CatMess.prototype.hit=function(x,y){return Math.abs(x-this.x)<17&&Math.abs(y-this.y)<8};
-document.addEventListener('keydown',e=>{const w=UI.wins.cozygame,s=CozyGames.session;if(!s||!w||w.el.hidden||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const z=Number(w.el.style.zIndex)||0;if(Object.values(UI.wins).some(o=>o!==w&&!o.el.hidden&&(Number(o.el.style.zIndex)||0)>z))return;const arrows={ArrowLeft:-1,ArrowRight:1,ArrowUp:-5,ArrowDown:5};if(['maze','parking'].includes(s.mode)&&arrows[e.key]!=null){e.preventDefault();CozyGames.step(arrows[e.key]);}else if(e.code==='Space'&&!e.repeat&&['balance','reaction','toss','pinball','fish'].includes(s.mode)){e.preventDefault();CozyGames.tap();}});
+document.addEventListener('keydown',e=>{const w=UI.wins.cozygame,s=CozyGames.session;if(!s||!w||w.el.hidden||e.isComposing||e.ctrlKey||e.altKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const z=Number(w.el.style.zIndex)||0;if(Object.values(UI.wins).some(o=>o!==w&&!o.el.hidden&&(Number(o.el.style.zIndex)||0)>z))return;const arrows={ArrowLeft:-1,ArrowRight:1};if(s.mode==='parking'&&arrows[e.key]!=null){e.preventDefault();CozyGames.step(arrows[e.key]);}else if(e.code==='Space'&&!e.repeat&&['balance','reaction','fish'].includes(s.mode)){e.preventDefault();CozyGames.tap();}});
 
 if(typeof FurnPlay!=='undefined'){const refresh=FurnPlay.refresh.bind(FurnPlay);FurnPlay.refresh=function(){const s=this.session;if(s){if(s.phase==='won'&&!s._cozyWon){s._cozyWon=true;Cozy.complete({credited:false,began:0});}else if(s.phase!=='won')s._cozyWon=false;}return refresh();};}
