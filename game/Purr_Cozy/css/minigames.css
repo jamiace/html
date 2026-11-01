@@ -81,3 +81,14 @@
 @media(max-width:480px){.mi-kb{padding:6px 4px 4px}.mi-keys{gap:2px}.mi-name{font-size:11px}.mi-tab{min-height:36px;font-size:14px}.mi-bub{width:30px;height:30px}}
 @media(max-height:560px){.mi-kb{height:clamp(90px,28dvh,140px)}.mi-panel{min-height:0}.mi-tip{display:none}.fp-shell:has(.mi-root) .fp-heading p{display:none}.fp-shell:has(.mi-root) .fp-object{flex-basis:44px;min-height:44px}.fp-shell:has(.mi-root){gap:6px}}
 @media(prefers-reduced-motion:reduce){.mi-float{display:none}.mi-lane{transition:none}.mi-key{transition:none}}
+
+/* Window height: mini games may use the whole visible height (the content sizes itself in JS, so nothing scrolls). */
+.win[data-id=cozygame] .win-b,.win[data-id=furnplay] .win-b:has(.mi-root){max-height:calc(var(--purr-vh,100dvh) - 96px)}
+body.m .win[data-id=cozygame] .win-b,body.m .win[data-id=furnplay] .win-b:has(.mi-root){max-height:calc(var(--purr-vh,100dvh) - var(--mobile-nav-height,60px) - var(--yt-mini-height,0px) - env(safe-area-inset-top,0px) - 84px)}
+.win[data-id=cozygame] .win-b{gap:6px;padding:8px 10px}
+.mg-root{gap:6px}.mg-top{min-height:30px}.mg-help summary{min-height:28px;font-size:12px}
+.mg-foot{flex-wrap:nowrap}.mg-foot .mg-progress{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mg-foot .chip[hidden]{display:none}
+.mi-kb{height:160px}
+.fp-shell.mi-compact .fp-heading p,.fp-shell.mi-compact .mi-tip{display:none}.fp-shell.mi-compact .fp-object{flex-basis:40px;min-height:40px}.fp-shell.mi-compact .fp-object canvas{max-width:36px;max-height:36px}.fp-shell.mi-compact{gap:6px}.fp-shell.mi-compact .fp-heading h3{font-size:16px;margin:0}
+.fp-shell.mi-compact .mi-bar{flex-wrap:nowrap;gap:4px}.fp-shell.mi-compact .mi-bar .chip{min-height:32px!important;padding:2px 8px!important;font-size:12px!important;white-space:nowrap}
+.fp-shell.mi-compact .mi-tabs .mi-tab{min-height:32px}.fp-shell.mi-compact .mi-lane-wrap{height:38px}.fp-shell.mi-compact .mi-bub{width:28px;height:28px}.fp-shell.mi-compact .mi-status{min-height:0}

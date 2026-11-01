@@ -114,7 +114,14 @@ const MiniInstrument={
  // ---------------- names ----------------
  name(midi,flat=false){const pc=((midi%12)+12)%12,wi=this.WHITE.indexOf(pc),sol=this.t('solfege').split(','),let_='CDEFGAB';if(wi<0){const n=flat?this.WHITE.indexOf(pc+1):this.WHITE.indexOf(pc-1);return(this.st.labels==='letter'?let_[n]:sol[n])+(flat?'♭':'♯')}return this.st.labels==='letter'?let_[wi]+Math.floor(midi/12-1):sol[wi]},
  // ---------------- view ----------------
- render(){this.ensure();if(!this.st)return[];if(!this.dom)this.build();this.renderAll();return[this.dom.root]},
+ render(){this.ensure();if(!this.st)return[];if(!this.dom)this.build();this.renderAll();this.fitSoon();return[this.dom.root]},
+ // Keyboard height follows the free space in the FurnPlay window so nothing needs scrolling; very short screens get a compact header.
+ fitSoon(){if(this.dom)requestAnimationFrame(()=>this.fit())},
+ fit(){const w=UI.wins.furnplay,d=this.dom;if(!d||!this.active()||!w||w.el.hidden||!d.root.isConnected)return;const room=MiniHost.room(w);if(!room)return;
+  const shell=w.body.querySelector('.fp-shell')||w.body,kb=d.kb,pad=(parseFloat(getComputedStyle(w.body).paddingTop)||0)+(parseFloat(getComputedStyle(w.body).paddingBottom)||0),
+   measure=()=>w.body.scrollHeight-pad-kb.offsetHeight;
+  shell.classList.remove('mi-compact');let free=room.height-measure()-2;if(free<130){shell.classList.add('mi-compact');free=room.height-measure()-2}
+  kb.style.height=Math.round(Math.max(84,Math.min(230,free)))+'px';UI.placeWin?.(w)},
  build(){const st=this.st,T=k=>this.t(k);
   const tabs=h('div',{class:'mi-tabs',role:'tablist'},...['free','memory','song'].map(m=>h('button',{class:'mi-tab',type:'button',role:'tab','data-mode':m,onclick:()=>this.setMode(m)},T('mode_'+m))));
   const panel=h('div',{class:'mi-panel'}),floats=h('div',{class:'mi-floats','aria-hidden':'true'});
@@ -158,7 +165,7 @@ const MiniInstrument={
    const lane=h('div',{class:'mi-lane'});const wrap=h('div',{class:'mi-lane-wrap'},lane);this.dom.lane=lane;this.dom.laneWrap=wrap;
    const song=this.book()[so.i];for(const n of song.notes)lane.append(h('span',{class:'mi-bub',text:this.name(n.m,song.flat)}));
    out=[chips,h('p',{class:'hint mi-tip',text:T('acc_'+st.voice)}),wrap,h('div',{class:'mi-row'},btn(so.auto?T('songStop'):T('songDemo'),()=>this.songDemo(),so.auto?'primary':'',st.locked&&!so.auto),btn(T('songRestart'),()=>this.songPick(so.i),'',so.auto),h('span',{class:'mi-count hint'}))];}
-  this.dom.panel.replaceChildren(...out.filter(Boolean));if(st.mode==='song')this.syncSong();this.syncStatus();this.syncBar()},
+  this.dom.panel.replaceChildren(...out.filter(Boolean));if(st.mode==='song')this.syncSong();this.syncStatus();this.syncBar();this.fitSoon()},
  syncSong(){const d=this.dom,st=this.st;if(!d)return;for(const k of d.keys)k.classList.remove('hint');if(st.mode!=='song'||!d.lane)return;const so=st.song,song=this.book()[so.i],at=so.demo>=0?so.demo:so.pos;
   [...d.lane.children].forEach((b,i)=>{b.className='mi-bub'+(i<so.pos?' done':'')+(i===at&&!so.done?' now':'');b.textContent=this.name(song.notes[i].m,song.flat)});
   const w=d.laneWrap.clientWidth||300,kids=d.lane.children,step=kids.length>1?(kids[1].offsetLeft-kids[0].offsetLeft)||40:40,half=(kids[0]?.offsetWidth||34)/2;d.lane.style.transform=`translateX(${Math.round(w*.32-at*step-half)}px)`;

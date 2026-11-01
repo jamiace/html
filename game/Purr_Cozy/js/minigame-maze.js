@@ -78,26 +78,41 @@ const MiniMaze=(()=>{
   controls(s,host){const g=s.g,out=[];if('DeviceOrientationEvent'in window){out.push(h('button',{class:'chip'+(g.motion?' primary':''),type:'button','aria-pressed':String(!!g.motion),onclick:()=>motion(s,host)},t(g.motion?'motionOff':'motionStart')));if(g.motion)out.push(h('button',{class:'chip',type:'button',onclick:()=>{g.base=null;host.say(s,t('calibrated'));UI.toast(t('calibrated'),'i_sparkle',2)}},t('calibrate')))}
    out.push(h('span',{class:'hint mg-keys',text:t('mazeKeys')}));return out},
   // ---------- drawing ----------
-  draw(c,s){const g=s.g,L=g.L,th=g.th,b=g.ball,tl=g.tilt;
-   c.fillStyle=th.floor;c.fillRect(0,0,W,H);c.save();c.translate(0,TOP);
-   const shape=()=>{c.beginPath();if(L.shape==='circle')c.arc(180,180,158,0,7);else{const[o,,sz]=L.box;MiniTable.round(c,o-10,o-10,sz+20,sz+20,14)}};
-   c.save();c.translate(3+tl.x*3,5+tl.y*3);shape();c.fillStyle='rgba(0,0,0,.35)';c.fill();c.restore();
-   const bg=c.createRadialGradient(150-tl.x*30,140-tl.y*30,20,180,180,220);bg.addColorStop(0,th.board[0]);bg.addColorStop(1,th.board[1]);shape();c.fillStyle=bg;c.fill();
-   c.save();shape();c.clip();c.globalAlpha=.09;c.strokeStyle='#000';for(let y=-10;y<370;y+=6){c.beginPath();c.moveTo(0,y);c.bezierCurveTo(120,y+4,240,y-4,360,y+2);c.stroke()}c.globalAlpha=1;
-   if(L.stars){c.fillStyle='rgba(255,240,190,.25)';const r=P.rng(3);for(let i=0;i<30;i++){const x=30+r()*300,y=30+r()*300,k=2+r()*3;c.beginPath();for(let j=0;j<10;j++){const a=j*Math.PI/5-Math.PI/2,q=j%2?k*.45:k;c.lineTo(x+Math.cos(a)*q,y+Math.sin(a)*q)}c.fill()}}c.restore();
-   // goal and holes
-   const G=L.goal,gl=c.createRadialGradient(G.x,G.y,2,G.x,G.y,G.r+10);gl.addColorStop(0,th.goal);gl.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=gl;c.beginPath();c.arc(G.x,G.y,G.r+10+Math.sin(g.t*3)*2,0,7);c.fill();
-   c.fillStyle='#1d1420';c.beginPath();c.arc(G.x,G.y,G.r-3,0,7);c.fill();c.strokeStyle=th.goal;c.lineWidth=3;c.beginPath();c.arc(G.x,G.y,G.r-2,0,7);c.stroke();
-   c.fillStyle=th.goal;c.globalAlpha=.9;fish(c,G.x,G.y,G.r*.5);c.globalAlpha=1;
-   for(const o of L.holes){const hg=c.createRadialGradient(o.x+tl.x*2,o.y+tl.y*2,1,o.x,o.y,o.r);hg.addColorStop(0,'#000');hg.addColorStop(.75,'#21141a');hg.addColorStop(1,'#5a3b30');c.fillStyle=hg;c.beginPath();c.arc(o.x,o.y,o.r,0,7);c.fill();c.strokeStyle='rgba(255,230,190,.35)';c.lineWidth=1.5;c.beginPath();c.arc(o.x,o.y,o.r+1,Math.PI*.1,Math.PI*.9);c.stroke()}
-   // walls: shadow follows tilt for a sense of depth
-   const stroke=(col,w,dx=0,dy=0)=>{c.strokeStyle=col;c.lineWidth=w;c.lineCap=c.lineJoin='round';for(const p of L.paths){c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x+dx,y+dy):c.moveTo(x+dx,y+dy));c.stroke()}};
-   stroke('rgba(0,0,0,.32)',WR*2+2,2-tl.x*2.5,3-tl.y*2.5);stroke(th.edge,WR*2+2);stroke(th.wall,WR*2-1.5);
-   // ball
-   const sc=g.mode==='sink'?Math.max(.15,1-g.sink/.45):g.appear>0?1-g.appear/.35*.6:1;
-   if(g.mode!=='done'){c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.arc(b.x+2-tl.x*2,b.y+3-tl.y*2,R*sc,0,7);c.fill();const bb=c.createRadialGradient(b.x-2.5,b.y-2.5,1,b.x,b.y,R*sc);bb.addColorStop(0,'#fff');bb.addColorStop(.5,'#d9d6e2');bb.addColorStop(1,'#6b6680');c.fillStyle=bb;c.beginPath();c.arc(b.x,b.y,R*sc,0,7);c.fill()}
-   if(g.joy){c.strokeStyle='rgba(255,248,230,.55)';c.lineWidth=2;c.beginPath();c.arc(g.joy.ox,g.joy.oy-TOP,56,0,7);c.stroke();c.fillStyle='rgba(255,248,230,.45)';c.beginPath();c.arc(g.joy.x,g.joy.y-TOP,14,0,7);c.fill()}
+  // ---------- drawing: real 3D ----------
+  // The board is a wooden slab (thickness SLAB) with walls of height WALLH standing on it. It rotates about its centre:
+  // tilt.y > 0 lowers the bottom edge (ball rolls down), tilt.x > 0 lowers the right edge. A perspective camera looks
+  // straight down from CAM units above the board, so the raised edge comes closer (bigger, its outer side face shows)
+  // and the lowered edge moves away (smaller, its side face is hidden). Every point is projected; nothing is faked.
+  draw(c,s){const g=s.g,L=g.L,th=g.th,b=g.ball,P3=project(g.tilt);
+   c.fillStyle=th.floor;c.fillRect(0,0,W,H);
+   const outline=g.outline||(g.outline=boardOutline(L)),poly=(pts,z,dx=0,dy=0)=>{c.beginPath();pts.forEach(([x,y],i)=>{const[p,q]=P3(x,y,z);i?c.lineTo(p+dx,q+dy):c.moveTo(p+dx,q+dy)});c.closePath()};
+   // table shadow, slab side faces, top surface
+   poly(outline,-SLAB-6,5,8);c.fillStyle='rgba(0,0,0,.32)';c.fill();
+   poly(outline,-SLAB);c.fillStyle=th.edge;c.fill();
+   poly(outline,0);const n=P3.normal,lit=n[0]*LIGHT[0]+n[1]*LIGHT[1]+n[2]*LIGHT[2]-LIGHT[2];
+   const tc=P3(180,180,0),bg=c.createRadialGradient(tc[0]-40,tc[1]-50,20,tc[0],tc[1],240);bg.addColorStop(0,th.board[0]);bg.addColorStop(1,th.board[1]);c.fillStyle=bg;c.fill();
+   c.save();poly(outline,0);c.clip();
+   if(Math.abs(lit)>.001){c.fillStyle=lit>0?`rgba(255,248,230,${Math.min(.22,lit*2.2)})`:`rgba(20,10,20,${Math.min(.28,-lit*2.8)})`;c.fillRect(0,0,W,H)}
+   c.globalAlpha=.09;c.strokeStyle='#000';c.lineWidth=1;for(let y=-10;y<370;y+=6){c.beginPath();for(let x=-10;x<=370;x+=40){const[p,q]=P3(x,y+Math.sin(x/60+y)*2,0);x>-10?c.lineTo(p,q):c.moveTo(p,q)}c.stroke()}c.globalAlpha=1;
+   if(L.stars){c.fillStyle='rgba(255,240,190,.25)';const r=MiniPhys.rng(3);for(let i=0;i<30;i++){const x=30+r()*300,y=30+r()*300,k=2+r()*3,pts=[];for(let j=0;j<10;j++){const a=j*Math.PI/5-Math.PI/2,q=j%2?k*.45:k;pts.push([x+Math.cos(a)*q,y+Math.sin(a)*q])}poly(pts,0);c.fill()}}
    c.restore();
+   // goal and holes (circles on the surface, projected; the hole wall shows on the far side)
+   const circ=(x,y,r,n=28)=>Array.from({length:n},(_,i)=>[x+r*Math.cos(i/n*Math.PI*2),y+r*Math.sin(i/n*Math.PI*2)]);
+   const G=L.goal;poly(circ(G.x,G.y,G.r+9),0);c.fillStyle='rgba(255,240,190,.18)';c.fill();
+   for(const o of[...L.holes,{...G,goal:true}]){const rim=circ(o.x,o.y,o.goal?o.r-2:o.r);poly(rim,0);c.fillStyle=o.goal?th.goal:'#5a3b30';c.fill();poly(rim,-6);c.fillStyle='#1a1018';c.save();poly(rim,0);c.clip();poly(rim,-6);c.fill();c.restore();
+    if(o.goal){const[p,q,k]=P3(o.x,o.y,-6);c.fillStyle=th.goal;c.globalAlpha=.9;fish(c,p,q,o.r*.45*k);c.globalAlpha=1}}
+   // walls: base edge, side, top — drawn bottom-up so the visible side faces come out of the projection
+   const wallPath=(z)=>{for(const pts of L.paths){c.beginPath();pts.forEach(([x,y],i)=>{const[p,q]=P3(x,y,z);i?c.lineTo(p,q):c.moveTo(p,q)});c.stroke()}};
+   c.lineCap=c.lineJoin='round';
+   c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=WR*2+3;c.save();c.translate(1.5,2.5);wallPath(0);c.restore();
+   c.strokeStyle=th.edge;c.lineWidth=WR*2+1.5;for(const z of[0,WALLH*.35,WALLH*.7])wallPath(z);
+   c.strokeStyle=th.wall;c.lineWidth=WR*2-.5;wallPath(WALLH);
+   // ball: contact shadow on the surface, sphere centred one radius above it
+   const sc=g.mode==='sink'?Math.max(.15,1-g.sink/.45):g.appear>0?1-g.appear/.35*.6:1;
+   if(g.mode!=='done'){const z=g.mode==='sink'?R*(1-g.sink/.45)*2-R:R,[sx,sy]=P3(b.x+2,b.y+2.5,0),[px,py,k]=P3(b.x,b.y,z),r=R*k*sc;
+    c.fillStyle='rgba(0,0,0,.32)';c.beginPath();c.ellipse(sx,sy,r*1.05,r*.8,0,0,7);c.fill();
+    const bb=c.createRadialGradient(px-r*.35,py-r*.4,r*.15,px,py,r);bb.addColorStop(0,'#fff');bb.addColorStop(.5,'#d9d6e2');bb.addColorStop(1,'#6b6680');c.fillStyle=bb;c.beginPath();c.arc(px,py,r,0,7);c.fill()}
+   if(g.joy){c.strokeStyle='rgba(255,248,230,.55)';c.lineWidth=2;c.beginPath();c.arc(g.joy.ox,g.joy.oy,56,0,7);c.stroke();c.fillStyle='rgba(255,248,230,.45)';c.beginPath();c.arc(g.joy.x,g.joy.y,14,0,7);c.fill()}
    if(!g.started&&!s.over){c.fillStyle='rgba(255,248,232,.85)';c.font='700 13px system-ui,sans-serif';c.textAlign='center';c.fillText(t(g.motion?'motionOn':'mazeHint'),180,H-8)}
    this.hud(c,s)},
   hud(c,s){const g=s.g;MiniTable.round(c,8,5,344,30,10);c.fillStyle='rgba(30,22,36,.8)';c.fill();c.textAlign='left';c.font='800 14px system-ui,sans-serif';c.fillStyle='#fff3dc';c.fillText('⏱ '+MiniHost.time(g.time),20,25);
@@ -105,6 +120,13 @@ const MiniMaze=(()=>{
    // bubble level
    c.strokeStyle='#cbbfd8';c.lineWidth=1.5;c.beginPath();c.arc(326,20,11,0,7);c.stroke();c.beginPath();c.moveTo(320,20);c.lineTo(332,20);c.moveTo(326,14);c.lineTo(326,26);c.globalAlpha=.4;c.stroke();c.globalAlpha=1;c.fillStyle=g.motion?'#9fe0b0':'#ffe58a';c.beginPath();c.arc(326+g.tilt.x*8,20+g.tilt.y*8,3.5,0,7);c.fill()}
  };
+ // 3D projection for the current tilt (see draw). Returns (x,y,z) -> [screenX, screenY, scale] with .normal (board up-vector).
+ const MAXA=10*Math.PI/180,CAM=620,SLAB=10,WALLH=9,CY=180+TOP,LIGHT=[-.32,-.45,.83];
+ function project(tl){const th=tl.y*MAXA,ph=tl.x*MAXA,ct=Math.cos(th),st=Math.sin(th),cp=Math.cos(ph),sp=Math.sin(ph);
+  const f=(x,y,z=0)=>{const X=x-180,Y=y-180,y1=Y*ct+z*st,z1=z*ct-Y*st,x2=X*cp+z1*sp,z2=z1*cp-X*sp,k=CAM/(CAM-z2);return[180+x2*k,CY+y1*k,k]};
+  f.normal=[ct*sp,st,ct*cp];return f}
+ function boardOutline(L){if(L.shape==='circle')return Array.from({length:120},(_,i)=>[180+158*Math.cos(i/120*Math.PI*2),180+158*Math.sin(i/120*Math.PI*2)]);
+  const[o,,sz]=L.box,x0=o-10,y0=o-10,x1=o+sz+10,y1=o+sz+10,r=14,pts=[];for(const[cx,cy,a0]of[[x1-r,y0+r,-Math.PI/2],[x1-r,y1-r,0],[x0+r,y1-r,Math.PI/2],[x0+r,y0+r,Math.PI]])for(let i=0;i<=8;i++){const a=a0+i/8*Math.PI/2;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}return pts}
  function fish(c,x,y,r){c.beginPath();c.ellipse(x-r*.15,y,r*.75,r*.45,0,0,7);c.fill();c.beginPath();c.moveTo(x+r*.5,y);c.lineTo(x+r,y-r*.4);c.lineTo(x+r,y+r*.4);c.closePath();c.fill()}
  MiniTable.register('maze',game);
  return{game,level,LEVELS,TOP,R};

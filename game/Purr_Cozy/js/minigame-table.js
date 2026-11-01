@@ -12,6 +12,10 @@ const MiniHost={
  // One reward per token. Cozy.complete marks the token, so repeated calls in the same round never pay twice.
  reward(token){if(!token||token.credited)return false;Cozy.complete(token);return true},
  topmost(id){const w=UI.wins[id];if(!w||w.el.hidden)return false;const z=Number(w.el.style.zIndex)||0;return!Object.values(UI.wins).some(v=>v!==w&&!v.el.hidden&&(Number(v.el.style.zIndex)||0)>z)},
+ // Usable height inside a window body: limited by .win-b max-height, the window max-height and the visible viewport.
+ room(w){const body=w.body,bcs=getComputedStyle(body),wcs=getComputedStyle(w.el),vh=window.visualViewport?.height||innerHeight,num=v=>{const n=parseFloat(v);return isFinite(n)?n:1e9};
+  const pad=(parseFloat(bcs.paddingTop)||0)+(parseFloat(bcs.paddingBottom)||0),frame=w.el.offsetHeight-body.offsetHeight;
+  return{height:Math.min(num(bcs.maxHeight),num(wcs.maxHeight)-frame,vh-16-frame)-pad,width:body.clientWidth-(parseFloat(bcs.paddingLeft)||0)-(parseFloat(bcs.paddingRight)||0)}},
  typing(e){return e.isComposing||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||'')},
  time(sec){const m=Math.floor(sec/60),s=sec-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1)},
  // Hold-to-press button: multi-touch safe (own pointer capture), releases on cancel / lost capture.
@@ -33,7 +37,7 @@ const MiniTable={
   this.close();
   const game=this.games[mode],s=this.session={uid:it.uid,k:it.k,mode,game,state:Game.S,variant:this.variant(it.k),last:0,acc:0,paused:false,pointers:new Map(),fx:[],shake:0};
   this.build(s);this.reset(s);
-  UI.openWin('cozygame');
+  UI.openWin('cozygame');this.fitSoon(s);
   this.raf=requestAnimationFrame(t=>this.loop(t));
  },
  reset(s=this.session){if(!s)return;s.game.release?.(s,this);s.pointers.clear();s.token={credited:false};s.won=false;s.over=false;s.result=null;s.time=0;s.acc=0;s.fx=[];s.g=s.game.create(s,this);this.syncControls(s);this.foot(s)},
@@ -59,9 +63,16 @@ const MiniTable={
   cv.addEventListener('contextmenu',e=>e.preventDefault());
   if(typeof ResizeObserver!=='undefined'){s.ro=new ResizeObserver(()=>{s.cssW=0});s.ro.observe(cv)}
  },
- syncControls(s=this.session){if(!s?.dom)return;s.dom.controls.replaceChildren(...(s.game.controls?.(s,this)||[]).filter(Boolean))},
- foot(s=this.session){if(!s?.dom)return;const p=Cozy.progress();s.dom.progress.textContent=Cozy.t('gameProgress',[p.today,p.luck]);s.dom.restore.disabled=p.today<15||p.helpClaimed||Social.helpsToday()<=0},
- render(){const s=this.session;if(!s||!Cozy.item(s.uid))return[h('p',{text:Cozy.t('missing')})];this.foot(s);s.cssW=0;return[s.dom.root]},
+ syncControls(s=this.session){if(!s?.dom)return;s.dom.controls.replaceChildren(...(s.game.controls?.(s,this)||[]).filter(Boolean));this.fitSoon(s)},
+ foot(s=this.session){if(!s?.dom)return;const p=Cozy.progress();s.dom.progress.textContent=Cozy.t('gameProgress',[p.today,p.luck]);s.dom.restore.hidden=s.dom.restore.disabled=p.today<15||p.helpClaimed||Social.helpsToday()<=0},
+ render(){const s=this.session;if(!s||!Cozy.item(s.uid))return[h('p',{text:Cozy.t('missing')})];this.foot(s);s.cssW=0;this.fitSoon(s);return[s.dom.root]},
+ // Size the canvas to the space the window really has (the game's .win-b max-height, the window's own max-height and the
+ // visible viewport), so the board, score and buttons are always visible without scrolling on desktop and phone.
+ fitSoon(s){requestAnimationFrame(()=>this.fit(s))},
+ fit(s=this.session){const w=UI.wins.cozygame;if(!s?.dom||s!==this.session||!w||w.el.hidden||!s.dom.root.isConnected)return;
+  const room=MiniHost.room(w);if(!room)return;const cv=s.dom.cv,G=s.game,other=s.dom.root.offsetHeight-cv.offsetHeight;
+  const cw=Math.max(150,Math.floor(Math.min(s.dom.stage.clientWidth||room.width,(room.height-other-2)*G.size.w/G.size.h)));
+  if(Math.abs(cv.offsetWidth-cw)>1){cv.style.width=cw+'px';s.cssW=0}UI.placeWin?.(w)},
  text(s,k,a){return MiniHost.t(k,a)},
  say(s,text){if(s?.dom&&text)s.dom.status.textContent=text},
  // ---- round results ----
@@ -109,4 +120,5 @@ const MiniTable={
 document.addEventListener('keydown',e=>MiniTable.key(e,true),true);
 document.addEventListener('keyup',e=>MiniTable.key(e,false),true);
 window.addEventListener('blur',()=>MiniTable.releaseAll());
+for(const t of[window,window.visualViewport].filter(Boolean))t.addEventListener('resize',()=>{if(MiniTable.session)MiniTable.fitSoon(MiniTable.session);if(typeof MiniInstrument!=='undefined')MiniInstrument.fitSoon?.()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)MiniTable.releaseAll()});

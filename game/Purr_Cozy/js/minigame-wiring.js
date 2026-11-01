@@ -8,6 +8,8 @@
  UI.WIN.cozygame.w=Math.max(UI.WIN.cozygame.w||380,400);
  const legacyOpen=CozyGames.open.bind(CozyGames);
  CozyGames.open=function(it,mode){
+  // 0.92.30: the vending machines keep cozyGame 'reaction' in the catalog but get their own game.
+  if(mode==='reaction'&&/^cozy_vending_/.test(it.k)&&MiniTable.games.vending)mode='vending';
   if(MiniTable.games[mode]){this.session=null;cancelAnimationFrame(this.raf);return MiniTable.open(it,mode)}
   MiniTable.close();
   if(mode==='instrument'){if(UI.wins.cozygame&&!UI.wins.cozygame.el.hidden)UI.closeWin('cozygame');it.shake=.2;return FurnPlay.open(it,'instrument')}

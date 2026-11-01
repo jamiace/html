@@ -92,13 +92,26 @@ const run=(s,sec)=>s.step(sec);
  {const s=session(env,'toss','cozy_basket_2',1),g=s.g;g.phase='fly';g.ball={x:g.hoop.x-23,y:g.hoop.y-40,vx:0,vy:150,r:12,spin:0};let n=0;for(let i=0;i<480&&g.phase==='fly';i++){s.game.step(s,1/240,T)}ok(g.rimHits>=1,'volleyball rim contacts are counted')}
  {const s=session(env,'toss','cozy_basket_4',3),g=s.g;g.phase='fly';g.ball={x:g.hoop.x,y:g.hoop.y-30,vx:0,vy:100,r:10,spin:0};for(let i=0;i<60;i++)s.game.step(s,1/240,T);ok(g.makes===1&&g.score===3,'shot put basket scores 3')}}
 
+// ---------- vending ----------
+{const V=X.MiniVending;
+ for(let v=0;v<5;v++){const s=session(env,'vending','cozy_vending_'+(v+1),v),g=s.g;ok(g.slots.length===12&&new Set(g.slots.map(x=>x.item)).size===12,`vending ${v+1}: 12 distinct items`);
+  s.step(1.2);ok(g.cat&&g.cat.want.length>=1,`vending ${v+1}: a customer arrives`);
+  const need=g.cat.want[0],i=g.slots.findIndex(x=>x.item===need);V.press(s,T,V.code(i)[0]);V.press(s,T,V.code(i)[1]);ok(g.drop&&g.slots[i].stock===2,`vending ${v+1}: code dispenses from the right slot`);
+  for(let n=0;n<400&&g.drop;n++){if(g.drop.phase==='stuck')V.shake(s,T);s.step(.05)}ok(!g.drop&&g.cat.got[0],`vending ${v+1}: item reaches the cat (stuck items shake free)`)}
+ {const s=session(env,'vending','cozy_vending_1',0),g=s.g;s.step(1.2);V.press(s,T,'1');ok(!g.drop,'number without letter does nothing');for(let k=0;k<5;k++)V.shake(s,T);ok(g.lock>0,'shaking too hard tilts the machine');}
+ {const s=session(env,'vending','cozy_vending_1',0),g=s.g;s.step(1.2);const wrong=g.slots.findIndex(x=>!g.cat.want.includes(x.item));V.press(s,T,V.code(wrong)[0]);V.press(s,T,V.code(wrong)[1]);g.drop.stuck=false;s.step(2);ok(g.served===0&&g.combo===0,'wrong item is refused')}
+ {const r0=counters.reward,s=session(env,'vending','cozy_vending_1',0),g=s.g;let guard=0;
+  while(!s.over&&guard++<5000){s.step(.1);if(g.drop){if(g.drop.phase==='stuck')V.shake(s,T);continue}if(g.cat&&g.cat.mood==='wait'){const need=g.cat.want.find((w,j)=>!g.cat.got[j]),i=g.slots.findIndex(x=>x.item===need&&x.stock>0);if(i>=0){s.step(.5);V.press(s,T,V.code(i)[0]);V.press(s,T,V.code(i)[1])}}}
+  ok(s.over&&g.served>=g.R.goal&&counters.reward===r0+1,'vending round: goal reached, rewarded once, ends at 75 s')}
+ ok(V.RULES.some(r=>r.pairs)&&V.RULES.some(r=>r.shuffle)&&new Set(V.RULES.map(r=>r.stuck)).size>=3,'machines have different rules')}
+
 // ---------- i18n coverage ----------
-{const add=JSON.parse(fs.readFileSync(path.join(__dirname,'..','i18n','minigames-0.92.29.json'),'utf8')).messages;
+{const add=JSON.parse(fs.readFileSync(path.join(__dirname,'..','i18n','minigames-0.92.30.json'),'utf8')).messages;
  const src=fs.readdirSync(path.join(__dirname,'..','js')).filter(f=>f.startsWith('minigame-')).map(f=>fs.readFileSync(path.join(__dirname,'..','js',f),'utf8')).join('\n');
  const used=new Set();for(const m of src.matchAll(/(?:\bt|T|MiniHost\.t|this\.t|say\(g,)\(?'([A-Za-z_]+)'/g))used.add(m[1]);
  for(const pre of['mode_free','mode_memory','mode_song','labels_solfege','labels_letter','labels_none',...X.MiniInstrument.SONGS.map(s=>'song_'+s.id),'pinHelp','tossHelp','mazeHelp','motionOff','motionStart','mazeHint','resultWin','resultEnd','memRecord','memWin','songDone','songPerfect'])used.add(pre);
- for(const k of['gameProgress','missing','restoreHelp','mode_','labels_','song_','acc_','ballTip_','ball_','pinHelp','pmis_'])used.delete(k);
- for(const k of[...[0,1,2,3,4].map(i=>'pinHelp'+i),...X.MiniToss.BALLS.flatMap(b=>['ball_'+b.id,'ballTip_'+b.id]),...['piano','guitar','musicbox','chime','toy'].map(v=>'acc_'+v),'songStop','pinDrops','pinStars','pinKick','pinKickLit','pinTopHole','pinDoubleMouse','pinRetroLit','tossRimN','tossBank2','pinMissionDone',...['bumper','sling','lanes','set','hole','post','peg'].map(k=>'pmis_'+k),...['kick','paw','extra','points'].map(k=>'prew_'+k)])used.add(k);
+ for(const k of['gameProgress','missing','restoreHelp','mode_','labels_','song_','acc_','ballTip_','ball_','pinHelp','pmis_','vendHelp'])used.delete(k);
+ for(const k of[...[0,1,2,3,4].map(i=>'pinHelp'+i),...X.MiniToss.BALLS.flatMap(b=>['ball_'+b.id,'ballTip_'+b.id]),...['piano','guitar','musicbox','chime','toy'].map(v=>'acc_'+v),'songStop','pinDrops','pinStars','pinKick','pinKickLit','pinTopHole','pinDoubleMouse','pinRetroLit','tossRimN','tossBank2','pinMissionDone',...['bumper','sling','lanes','set','hole','post','peg'].map(k=>'pmis_'+k),...['kick','paw','extra','points'].map(k=>'prew_'+k),...[0,1,2,3,4].map(i=>'vendHelp'+i)])used.add(k);
  const missing=[...used].filter(k=>!add['mini.'+k]||!['zh-TW','zh-CN','ja'].every(l=>add['mini.'+k][l]));ok(!missing.length,'i18n missing: '+missing.join(','));}
 
 console.log('PASS '+checks+' checks');

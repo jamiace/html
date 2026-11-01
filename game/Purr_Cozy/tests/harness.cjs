@@ -1,7 +1,7 @@
 // Loads the real mini-game scripts into a Node VM with small host stand-ins (no browser, no rendering).
 const fs=require('fs'),vm=require('vm'),path=require('path');
 const ROOT=path.join(__dirname,'..');
-function load(files=['minigame-audio.js','minigame-physics.js','minigame-table.js','minigame-pinball.js','minigame-toss.js','minigame-maze.js','minigame-instrument.js']){
+function load(files=['minigame-audio.js','minigame-physics.js','minigame-table.js','minigame-pinball.js','minigame-toss.js','minigame-maze.js','minigame-vending.js','minigame-instrument.js']){
  const noop=()=>{},listeners={};
  const el=()=>{const e={style:{},classList:{add:noop,remove:noop,toggle:noop,contains:()=>false},children:[],dataset:{},append(...c){e.children.push(...c)},replaceChildren(...c){e.children=c},addEventListener:noop,removeEventListener:noop,setAttribute:noop,querySelector:()=>null,querySelectorAll:()=>[],getBoundingClientRect:()=>({left:0,top:0,width:360,height:560}),getContext:()=>new Proxy({},{get:(t,k)=>k==='createRadialGradient'||k==='createLinearGradient'?()=>({addColorStop:noop}):noop}),remove:noop,setPointerCapture:noop,textContent:''};return e};
  const counters={reward:0,saved:0,refresh:0,opened:[],closed:[]};
@@ -23,7 +23,7 @@ function load(files=['minigame-audio.js','minigame-physics.js','minigame-table.j
   ResizeObserver:undefined};
  ctx.Room.state=S;ctx.globalThis=ctx;vm.createContext(ctx);
  for(const f of files)vm.runInContext(fs.readFileSync(path.join(ROOT,'js',f),'utf8'),ctx,{filename:f});
- vm.runInContext('globalThis.X={MiniAudio,MiniPhys,MiniHost,MiniTable,'+['MiniPinball','MiniToss','MiniMaze','MiniInstrument'].map(n=>`${n}:typeof ${n}!=='undefined'?${n}:null`).join(',')+'}',ctx);
+ vm.runInContext('globalThis.X={MiniAudio,MiniPhys,MiniHost,MiniTable,'+['MiniPinball','MiniToss','MiniMaze','MiniVending','MiniInstrument'].map(n=>`${n}:typeof ${n}!=='undefined'?${n}:null`).join(',')+'}',ctx);
  return{ctx,X:ctx.X,S,item,counters,listeners};
 }
 // Builds a table session without the DOM loop; step() advances fixed steps.
