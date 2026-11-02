@@ -1,8 +1,8 @@
 {
-  "version": "0.92.34",
-  "date": "2026/10/31",
+  "version": "0.92.35",
+  "date": "2026/11/02",
   "resources": {
-    "manifest": "build-manifests/6f69ea0e.json",
-    "checksum": "6f69ea0e"
+    "manifest": "build-manifests/4ec3218f.json",
+    "checksum": "4ec3218f"
   }
 }
