@@ -106,7 +106,7 @@ const run=(s,sec)=>s.step(sec);
  ok(V.RULES.some(r=>r.pairs)&&V.RULES.some(r=>r.shuffle)&&new Set(V.RULES.map(r=>r.stuck)).size>=3,'machines have different rules')}
 
 // ---------- i18n coverage ----------
-{const add=JSON.parse(fs.readFileSync(path.join(__dirname,'..','i18n','minigames-0.92.30.json'),'utf8')).messages;
+{const add=JSON.parse(fs.readFileSync(path.join(__dirname,'..','i18n','minigames-0.92.32.json'),'utf8')).messages;
  const src=fs.readdirSync(path.join(__dirname,'..','js')).filter(f=>f.startsWith('minigame-')).map(f=>fs.readFileSync(path.join(__dirname,'..','js',f),'utf8')).join('\n');
  const used=new Set();for(const m of src.matchAll(/(?:\bt|T|MiniHost\.t|this\.t|say\(g,)\(?'([A-Za-z_]+)'/g))used.add(m[1]);
  for(const pre of['mode_free','mode_memory','mode_song','labels_solfege','labels_letter','labels_none',...X.MiniInstrument.SONGS.map(s=>'song_'+s.id),'pinHelp','tossHelp','mazeHelp','motionOff','motionStart','mazeHint','resultWin','resultEnd','memRecord','memWin','songDone','songPerfect'])used.add(pre);
@@ -114,6 +114,15 @@ const run=(s,sec)=>s.step(sec);
  for(const k of[...[0,1,2,3,4].map(i=>'pinHelp'+i),...X.MiniToss.BALLS.flatMap(b=>['ball_'+b.id,'ballTip_'+b.id]),...['piano','guitar','musicbox','chime','toy'].map(v=>'acc_'+v),'songStop','pinDrops','pinStars','pinKick','pinKickLit','pinTopHole','pinDoubleMouse','pinRetroLit','tossRimN','tossBank2','pinMissionDone',...['bumper','sling','lanes','set','hole','post','peg'].map(k=>'pmis_'+k),...['kick','paw','extra','points'].map(k=>'prew_'+k),...[0,1,2,3,4].map(i=>'vendHelp'+i)])used.add(k);
  const missing=[...used].filter(k=>!add['mini.'+k]||!['zh-TW','zh-CN','ja'].every(l=>add['mini.'+k][l]));ok(!missing.length,'i18n missing: '+missing.join(','));}
 
+// 0.92.31: a ball pushed against a maze wall rolls along it instead of sticking (no friction on resting contact)
+{const s=session(env,'maze','cozy_maze_4',3),g=s.g,mat=g.L.walls[0].mat;ok(mat.soft>0,'maze walls use soft resting contact');
+ g.L={...g.L,holes:[],goal:{x:-999,y:-999,r:1},walls:[{ax:0,ay:100,bx:360,by:100,r0:3,r1:3,mat,x0:-20,x1:380,y0:80,y1:120}]};
+ Object.assign(g.ball,{x:20,y:111,vx:0,vy:0});g.started=true;for(let i=0;i<120;i++){g.tilt={x:.5,y:-.8};s.game.step(s,1/120,T)}
+ ok(g.ball.x-20>90&&g.ball.vx>120,'ball slides along a wall it is pressed against ('+(g.ball.x-20).toFixed(0)+' px in 1 s)');ok(Math.abs(g.ball.y-110)<1.5,'ball stays on the wall without bouncing')}
+// 0.92.31: vending canvas is shorter (fits phones at a larger scale) and the on-panel shake button works
+{const s=session(env,'vending','cozy_vending_1',0),G=s.game;ok(G.size.h===470,'vending canvas 360x470');
+ const m0=s.g.meter;G.pointer(s,'down',{x:306,y:316},{pointerId:1},T);ok(s.g.meter>m0,'panel shake button shakes the machine');
+ for(const b of X.MiniVending.KEYS)ok(b.y+44<=296,'keypad key '+b.k+' sits above the shake button')}
 console.log('PASS '+checks+' checks');
 // pull sensitivity: the same 65 px pull gives half the power it gave in the first 0.92.29 build (65/130 -> 65/260)
 {const d=session(env,'toss','cozy_basket_1');d.game.pointer(d,'down',{x:200,y:200},{pointerId:9},T);d.game.pointer(d,'move',{x:154,y:246},{pointerId:9},T);d.game.pointer(d,'up',{x:154,y:246},{pointerId:9},T);

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Merges i18n/minigames-0.92.30.json into the game's FULL i18n/ui.json without dropping any existing key.
-//   node tools/merge-i18n.cjs <path/to/i18n/ui.json> [i18n/minigames-0.92.30.json] [--dry]
+// Merges i18n/minigames-0.92.32.json into the game's FULL i18n/ui.json without dropping any existing key.
+//   node tools/merge-i18n.cjs <path/to/i18n/ui.json> [i18n/minigames-0.92.32.json] [--dry]
 // Supports both layouts: { messages: { key: { "zh-TW": .., "zh-CN": .., ja: .. } } }  and  { "zh-TW": { key: .. }, ... }.
 // New keys are added; mini.* keys and keys listed under "replace" overwrite their old text; everything else is left untouched.
 const fs=require('fs'),path=require('path');
-const [target,addFile=path.join(__dirname,'..','i18n','minigames-0.92.30.json')]=process.argv.slice(2).filter(a=>!a.startsWith('--')),dry=process.argv.includes('--dry');
+const [target,addFile=path.join(__dirname,'..','i18n','minigames-0.92.32.json')]=process.argv.slice(2).filter(a=>!a.startsWith('--')),dry=process.argv.includes('--dry');
 if(!target){console.error('usage: node tools/merge-i18n.cjs <ui.json> [additions.json] [--dry]');process.exit(1)}
 const raw=fs.readFileSync(target,'utf8'),ui=JSON.parse(raw.replace(/^﻿/,'')),add=JSON.parse(fs.readFileSync(addFile,'utf8'));
 const langs=add.languages;let added=0,replaced=0,kept=0;

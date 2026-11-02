@@ -100,20 +100,36 @@ const MiniToss=(()=>{
      if(ok){let x=b.x,y=b.y,vx=Math.cos(a.angle)*v,vy=Math.sin(a.angle)*v;c.fillStyle='rgba(80,60,90,.55)';for(let i=1;i<=9;i++){const tt=.034,dr=1-B.drag*tt;vx*=dr;vy*=dr;x+=vx*tt;y+=vy*tt;vy+=B.g*tt;c.beginPath();c.arc(x,y,2.6-i*.18,0,7);c.fill()}}
      c.save();c.translate(b.x,b.y);c.rotate(a.angle);c.strokeStyle=col;c.fillStyle=col;c.lineWidth=4;c.lineCap='round';const L=18+a.power*34;c.beginPath();c.moveTo(BR+3,0);c.lineTo(BR+L,0);c.stroke();c.beginPath();c.moveTo(BR+L+7,0);c.lineTo(BR+L-2,-6);c.lineTo(BR+L-2,6);c.fill();c.restore();
      c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.arc(b.x,b.y,BR+6,-Math.PI/2,-Math.PI/2+a.power*Math.PI*2);c.stroke()}
-    if(!g.shot&&!g.drag&&!g.kb.used){c.fillStyle='rgba(60,45,70,.8)';c.font='700 14px system-ui,sans-serif';c.textAlign='center';c.fillText(t('tossHint'),180,300);c.font='600 12px system-ui,sans-serif';c.fillText(t('ballTip_'+B.id),180,320)}}
+    if(!g.shot&&!g.drag&&!g.kb.used){c.fillStyle='rgba(60,45,70,.8)';c.font='800 17px system-ui,sans-serif';c.textAlign='center';c.fillText(t('tossHint'),180,268);c.font='600 15px system-ui,sans-serif';c.fillText(t('ballTip_'+B.id),180,291)}}
    this.hud(c,s)},
   hud(c,s){const g=s.g;MiniTable.round(c,8,6,344,34,10);c.fillStyle='rgba(40,30,50,.78)';c.fill();
    for(let i=0;i<5;i++){const r=g.results[i],x=24+i*22,cur=i===g.shot&&g.phase!=='over';c.fillStyle=r==='swish'?'#ffd27a':r==='make'?'#8fd39a':r==='miss'?'#6b6074':'#3c3148';c.beginPath();c.arc(x,23,7,0,7);c.fill();if(cur){c.strokeStyle='#fff';c.lineWidth=2;c.stroke()}if(r==='miss'){c.strokeStyle='#bfb3cc';c.lineWidth=1.5;c.beginPath();c.moveTo(x-3,20);c.lineTo(x+3,26);c.moveTo(x+3,20);c.lineTo(x-3,26);c.stroke()}}
-   c.textAlign='left';c.fillStyle=s.won?'#8fd39a':'#fff3dc';c.font='800 14px system-ui,sans-serif';c.fillText(s.won?t('tossMakes',[g.makes]):t('tossMadeBar',[g.makes]),134,28);c.fillStyle='#cbbfd8';c.font='700 11px system-ui,sans-serif';c.fillText(t('ball_'+g.B.id),226,28);
+   c.textAlign='left';c.fillStyle=s.won?'#8fd39a':'#fff3dc';c.font='800 16px system-ui,sans-serif';c.fillText(s.won?t('tossMakes',[g.makes]):t('tossMadeBar',[g.makes]),134,28);c.fillStyle='#cbbfd8';c.font='700 13px system-ui,sans-serif';c.fillText(t('ball_'+g.B.id),236,28);
    c.textAlign='right';c.fillStyle='#fff3dc';c.fillText(t('scoreShort',[g.score]),342,28)}
  };
+ // Classic volleyball face: three seams leave a central junction and bend as they reach the rim; the panel group
+ // clockwise of each seam is split into three strips by curves parallel to that seam, which end on the next seam.
+ function volley(c,r){const T=Math.PI*2/3,lw=Math.max(1,r*.085),ink='#3b3a46',J=[r*.02,-r*.05],W=r*.31;
+  const seam=k=>{const a=k*T-Math.PI/2,b=a+.8,P1=[J[0]+Math.cos(b)*r*.62,J[1]+Math.sin(b)*r*.62],P2=[Math.cos(a)*r,Math.sin(a)*r];
+   // quadratic J -> P2 (control P1), sampled and extrapolated past both ends; d offsets it to the clockwise side
+   return(d=0,t0=0,t1=1.5)=>{const out=[];for(let i=0;i<=24;i++){const t=t0+(t1-t0)*i/24,u=1-t,x=u*u*J[0]+2*u*t*P1[0]+t*t*P2[0],y=u*u*J[1]+2*u*t*P1[1]+t*t*P2[1],tx=2*(u*(P1[0]-J[0])+t*(P2[0]-P1[0])),ty=2*(u*(P1[1]-J[1])+t*(P2[1]-P1[1])),l=Math.hypot(tx,ty)||1;out.push([x-ty/l*d,y+tx/l*d])}return out}};
+  const line=pts=>{c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke()};
+  c.fillStyle='#fbfaf6';c.beginPath();c.arc(0,0,r,0,7);c.fill();
+  c.save();c.beginPath();c.arc(0,0,r,0,7);c.clip();c.strokeStyle=ink;c.lineWidth=lw;c.lineJoin=c.lineCap='round';
+  for(let k=0;k<3;k++){const A=seam(k),Bs=seam(k+1),a=k*T-Math.PI/2;
+   c.save();c.beginPath();const pa=A(),pb=Bs();pa.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.arc(0,0,r*1.8,Math.atan2(pa[pa.length-1][1],pa[pa.length-1][0]),Math.atan2(pb[pb.length-1][1],pb[pb.length-1][0]));for(let i=pb.length-1;i>=0;i--)c.lineTo(pb[i][0],pb[i][1]);c.closePath();c.clip();
+   c.fillStyle=['rgba(110,110,130,.05)','rgba(110,110,130,.12)','rgba(255,255,255,0)'][k];c.fillRect(-r,-r,2*r,2*r);
+   for(const d of[W,2*W])line(A(d,-.8,1.6));c.restore()}
+  for(let k=0;k<3;k++)line(seam(k)());
+  c.restore();const sh=c.createRadialGradient(-r*.35,-r*.4,r*.1,0,0,r);sh.addColorStop(0,'rgba(255,255,255,.35)');sh.addColorStop(.65,'rgba(255,255,255,0)');sh.addColorStop(1,'rgba(40,40,70,.28)');c.fillStyle=sh;c.beginPath();c.arc(0,0,r,0,7);c.fill();
+  c.strokeStyle=ink;c.lineWidth=lw*1.25;c.beginPath();c.arc(0,0,r-lw*.6,0,7);c.stroke()}
  function drawBall(c,B,x,y,spin){const r=B.r;c.save();c.translate(x,y);
   if(B.id==='basket'){const g=c.createRadialGradient(-4,-4,2,0,0,r);g.addColorStop(0,'#ffc28a');g.addColorStop(.6,'#ee8a45');g.addColorStop(1,'#b5562a');c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,7);c.fill();c.rotate(spin);c.strokeStyle='#6b3418';c.lineWidth=1.2;c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke();c.beginPath();c.arc(-r*1.25,0,r*.9,-.8,.8);c.stroke();c.beginPath();c.arc(r*1.25,0,r*.9,Math.PI-.8,Math.PI+.8);c.stroke()}
-  else if(B.id==='volley'){c.fillStyle='#fbf7ee';c.beginPath();c.arc(0,0,r,0,7);c.fill();c.save();c.beginPath();c.arc(0,0,r,0,7);c.clip();c.rotate(spin);c.lineWidth=4;c.strokeStyle='#f2c14e';c.beginPath();c.arc(-r*.9,0,r*1.1,-.9,.9);c.stroke();c.strokeStyle='#5b8fd6';c.beginPath();c.arc(r*.9,-r*.5,r*1.1,1.9,3.6);c.stroke();c.restore();c.strokeStyle='rgba(60,60,80,.35)';c.lineWidth=1;c.beginPath();c.arc(0,0,r,0,7);c.stroke()}
+  else if(B.id==='volley'){c.rotate(spin);volley(c,r);c.rotate(-spin)}
   else if(B.id==='tennis'){const g=c.createRadialGradient(-2,-2,1,0,0,r);g.addColorStop(0,'#f4ff9a');g.addColorStop(1,'#b8d43a');c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,7);c.fill();c.rotate(spin);c.strokeStyle='#fff';c.lineWidth=1.3;c.beginPath();c.arc(-r*1.15,0,r*.95,-.75,.75);c.stroke();c.beginPath();c.arc(r*1.15,0,r*.95,Math.PI-.75,Math.PI+.75);c.stroke()}
   else if(B.id==='shot'){const g=c.createRadialGradient(-3,-4,1,0,0,r);g.addColorStop(0,'#d8d8de');g.addColorStop(.35,'#7c7c88');g.addColorStop(1,'#2e2e36');c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,7);c.fill()}
   else{c.fillStyle='#ef94a8';c.beginPath();c.arc(0,0,r,0,7);c.fill();c.rotate(spin);c.strokeStyle='#c8607a';c.lineWidth=1.2;for(let k=-2;k<=2;k++){c.beginPath();c.ellipse(0,0,r*.95,Math.abs(k)*r*.22+1,k*.5,0,7);c.stroke()}}
   c.restore()}
  MiniTable.register('toss',game);
- return{game,HOOPS,HALF,START,STAND,BALLS,speedOf,FLOOR,PULL};
+ return{game,HOOPS,HALF,START,STAND,BALLS,speedOf,FLOOR,PULL,drawBall};
 })();

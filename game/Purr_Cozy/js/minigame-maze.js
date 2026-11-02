@@ -4,7 +4,7 @@
    Tilt comes from a drag joystick, arrow/WASD keys, or the device orientation sensor (permission, calibration, fallback). */
 const MiniMaze=(()=>{
  const P=MiniPhys,W=360,H=400,TOP=40,R=7,WR=3,ACC=560,MAXV=520,D=Math.PI/180;
- const WALL={e:.32,f:.06};
+ const WALL={e:.3,f:.02,soft:60};
  const t=(k,a)=>MiniHost.t(k,a);
  // ---------- level builders ----------
  function rings(def){const L={shape:'circle',walls:[],paths:[],holes:def.holes||[],goal:{x:180,y:180,r:18},start:def.start,stars:def.stars};
@@ -38,23 +38,32 @@ const MiniMaze=(()=>{
   ()=>rings({rings:[[112,[[-90,.46]]],[74,[[90,.62]]]],holes:[[-40,123],[-140,123],[0,101],[180,101],[45,123]],start:{x:311,y:180},stars:true}),
   ()=>grid(7,44,40961,0),
   ()=>grid(8,38,52507,7)];
- const cache=[];const level=v=>cache[v]||(cache[v]=LEVELS[v]());
+ const cache=[];const level=v=>{if(!cache[v]){const L=LEVELS[v]();for(const w of L.walls){const m=Math.max(w.r0,w.r1??w.r0)+R+2;w.x0=Math.min(w.ax,w.bx)-m;w.x1=Math.max(w.ax,w.bx)+m;w.y0=Math.min(w.ay,w.by)-m;w.y1=Math.max(w.ay,w.by)+m}cache[v]=L}return cache[v]};
  const THEMES=[{board:['#9b6b4c','#6e4630'],floor:'#5b3a2a',wall:'#f2d49b',edge:'#7a4f33',goal:'#8ed2b3'},{board:['#8a7a68','#5f5244'],floor:'#4b4036',wall:'#e8e2cf',edge:'#5e5446',goal:'#9fd4e6'},{board:['#4b4677','#2f2b55'],floor:'#241f44',wall:'#f5e3b3',edge:'#2a2550',goal:'#ffd97a'},{board:['#7c9a6a','#55704a'],floor:'#3f5536',wall:'#f3ecd2',edge:'#4a5c3c',goal:'#f6c27a'},{board:['#a0714d','#6b4429'],floor:'#4e2f1b',wall:'#e9c991',edge:'#6b4429',goal:'#9ed0a0'}];
  // ---------- device orientation ----------
- async function motion(s,host){const g=s.g;if(g.motion){stopMotion(s);host.syncControls(s);return}
+ async function motion(s,host,auto=false){const g=s.g;g.motionWait=false;if(g.motion){stopMotion(s);pref('off');host.syncControls(s);return}
+  if(!auto)pref('on');
   try{const D=window.DeviceOrientationEvent;if(!window.isSecureContext||!D)throw Error('unsupported');if(typeof D.requestPermission==='function'&&await D.requestPermission()!=='granted')throw Error('denied');
    if(host.session!==s||!host.valid())return;g.base=null;g.raw={x:0,y:0};
    g.sensor=e=>{if(host.session!==s||!Number.isFinite(e.gamma)||!Number.isFinite(e.beta))return;const a=(screen.orientation?.angle??window.orientation??0)*D2R;if(!g.base)g.base={g:e.gamma,b:e.beta};
-    const x=(e.gamma-g.base.g)/18,y=(e.beta-g.base.b)/18,rx=x*Math.cos(a)+y*Math.sin(a),ry=y*Math.cos(a)-x*Math.sin(a),dz=v=>Math.abs(v)<.04?0:v;g.raw={x:P.clamp(dz(rx),-1,1),y:P.clamp(dz(ry),-1,1)};g.seen=true};
+    const x=(e.gamma-g.base.g)/18,y=(e.beta-g.base.b)/18,rx=x*Math.cos(a)+y*Math.sin(a),ry=y*Math.cos(a)-x*Math.sin(a),dz=v=>Math.abs(v)<.04?0:v;let ox=dz(rx),oy=dz(ry);const l=Math.hypot(ox,oy);if(l>1){ox/=l;oy/=l}g.raw={x:ox,y:oy};g.seen=true};
    window.addEventListener('deviceorientation',g.sensor);g.motion=true;g.seen=false;host.syncControls(s);host.say(s,t('motionOn'));
-   setTimeout(()=>{if(host.session===s&&g.motion&&!g.seen){stopMotion(s);UI.toast(t('noMotion'),'i_sparkle',4);host.syncControls(s)}},2500)}
-  catch{UI.toast(t('noMotion'),'i_sparkle',4)}}
+   setTimeout(()=>{if(host.session===s&&g.motion&&!g.seen){stopMotion(s);if(!auto)UI.toast(t('noMotion'),'i_sparkle',4);host.syncControls(s)}},2500)}
+  catch{if(!auto)UI.toast(t('noMotion'),'i_sparkle',4);host.syncControls(s)}}
+ // Phones start with the motion sensor on (unless the player switched it off before). Android can start right away;
+ // iOS only allows the permission prompt inside a tap, so the first touch on the board turns it on there.
+ const PREF='purrcozy.mazeMotion';function pref(v){try{if(v)localStorage.setItem(PREF,v);else return localStorage.getItem(PREF)}catch{}}
+ const phone=()=>'DeviceOrientationEvent'in window&&window.isSecureContext&&(document.body?.classList.contains('m')||matchMedia('(pointer:coarse)').matches);
+ async function autoMotion(s,host){const g=s.g;if(!g||g.motion||!phone()||pref()==='off')return;const D=DeviceOrientationEvent;
+  if(typeof D.requestPermission==='function'){let st=null;try{st=await D.requestPermission()}catch{}
+   if(host.session!==s||s.g!==g||g.motion)return;if(st!=='granted'){g.motionWait=true;host.syncControls(s);return}}
+  motion(s,host,true)}
  const D2R=Math.PI/180;
  function stopMotion(s){const g=s.g;if(g?.sensor)window.removeEventListener('deviceorientation',g.sensor);if(g){g.sensor=null;g.motion=false;g.raw={x:0,y:0}}}
  function respawn(g){const st=g.L.start;g.ball={x:st.x,y:st.y,vx:0,vy:0,r:R};g.mode='play';g.sink=0;g.appear=.35}
  const game={
-  size:{w:W,h:H},dt:1/240,help:()=>'mazeHelp',
-  create(s){const L=level(s.variant),g={L,th:THEMES[s.variant],tilt:{x:0,y:0},target:{x:0,y:0},keys:new Set(),joy:null,motion:false,raw:{x:0,y:0},falls:0,time:0,started:false,best:MiniHost.record(s.k).mazeBest,t:0,hitCd:0};respawn(g);g.appear=0;return g},
+  size:{w:W,h:H},dt:1/120,maxDpr:2,help:()=>'mazeHelp',
+  create(s,host){if(s.g)stopMotion(s);if(host)setTimeout(()=>{if(host.session===s)autoMotion(s,host)},0);const L=level(s.variant),g={L,th:THEMES[s.variant],tilt:{x:0,y:0},target:{x:0,y:0},keys:new Set(),joy:null,motion:false,raw:{x:0,y:0},falls:0,time:0,started:false,best:MiniHost.record(s.k).mazeBest,t:0,hitCd:0};respawn(g);g.appear=0;return g},
   dispose(s){stopMotion(s)},
   step(s,dt,host){const g=s.g,b=g.ball;g.t+=dt;g.hitCd-=dt;if(g.appear>0)g.appear-=dt;
    // input -> target tilt -> eased tilt (no instant jumps)
@@ -66,10 +75,10 @@ const MiniMaze=(()=>{
    if(!g.started&&Math.hypot(g.tilt.x,g.tilt.y)>.08)g.started=true;if(g.started)g.time+=dt;
    const n=P.substeps(b,dt,R*.45),h=dt/n;
    for(let i=0;i<n;i++){b.vx+=g.tilt.x*ACC*h;b.vy+=g.tilt.y*ACC*h;const damp=Math.exp(-1.15*h);b.vx*=damp;b.vy*=damp;b.x+=b.vx*h;b.y+=b.vy*h;
-    for(const w of g.L.walls){const c=P.capsule(b,w);if(c&&c.impact>70&&g.hitCd<=0){g.hitCd=.06;MiniAudio.sfx('wall',Math.min(1,c.impact/400))}}P.cap(b,MAXV)}
+    for(const w of g.L.walls){if(b.x<w.x0||b.x>w.x1||b.y<w.y0||b.y>w.y1)continue;const c=P.capsule(b,w);if(c&&c.impact>70&&g.hitCd<=0){g.hitCd=.06;MiniAudio.sfx('wall',Math.min(1,c.impact/400))}}P.cap(b,MAXV)}
    for(const o of g.L.holes)if(Math.hypot(b.x-o.x,b.y-o.y)<o.r-2){g.mode='sink';g.sink=0;g.sinkTo=o;g.sinkGoal=false;g.falls++;MiniAudio.sfx('hole');host.say(s,t('mazeFell'));s.shake=.4;return}
    const G=g.L.goal;if(Math.hypot(b.x-G.x,b.y-G.y)<G.r-4){g.mode='sink';g.sink=0;g.sinkTo=G;g.sinkGoal=true;MiniAudio.sfx('goal');host.burst(s,G.x,G.y+TOP,'#fff1c9',18,140)}},
-  pointer(s,kind,p,e){const g=s.g;if(g.motion)return;
+  pointer(s,kind,p,e,host){const g=s.g;if(kind==='down'&&g.motionWait&&host){motion(s,host);return}if(g.motion)return;
    if(kind==='down')g.joy={id:e.pointerId,ox:p.x,oy:p.y,x:p.x,y:p.y,dx:0,dy:0};
    else if(kind==='move'&&g.joy?.id===e.pointerId){const dx=p.x-g.joy.ox,dy=p.y-g.joy.oy,l=Math.hypot(dx,dy),k=l>56?56/l:1;g.joy.x=g.joy.ox+dx*k;g.joy.y=g.joy.oy+dy*k;g.joy.dx=dx*k/56;g.joy.dy=dy*k/56}
    else if((kind==='up'||kind==='cancel')&&g.joy?.id===e.pointerId)g.joy=null},
@@ -93,7 +102,7 @@ const MiniMaze=(()=>{
    const tc=P3(180,180,0),bg=c.createRadialGradient(tc[0]-40,tc[1]-50,20,tc[0],tc[1],240);bg.addColorStop(0,th.board[0]);bg.addColorStop(1,th.board[1]);c.fillStyle=bg;c.fill();
    c.save();poly(outline,0);c.clip();
    if(Math.abs(lit)>.001){c.fillStyle=lit>0?`rgba(255,248,230,${Math.min(.22,lit*2.2)})`:`rgba(20,10,20,${Math.min(.28,-lit*2.8)})`;c.fillRect(0,0,W,H)}
-   c.globalAlpha=.09;c.strokeStyle='#000';c.lineWidth=1;for(let y=-10;y<370;y+=6){c.beginPath();for(let x=-10;x<=370;x+=40){const[p,q]=P3(x,y+Math.sin(x/60+y)*2,0);x>-10?c.lineTo(p,q):c.moveTo(p,q)}c.stroke()}c.globalAlpha=1;
+   c.globalAlpha=.09;c.strokeStyle='#000';c.lineWidth=1;for(let y=-10;y<370;y+=9){c.beginPath();for(let x=-10;x<=370;x+=40){const[p,q]=P3(x,y+Math.sin(x/60+y)*2,0);x>-10?c.lineTo(p,q):c.moveTo(p,q)}c.stroke()}c.globalAlpha=1;
    if(L.stars){c.fillStyle='rgba(255,240,190,.25)';const r=MiniPhys.rng(3);for(let i=0;i<30;i++){const x=30+r()*300,y=30+r()*300,k=2+r()*3,pts=[];for(let j=0;j<10;j++){const a=j*Math.PI/5-Math.PI/2,q=j%2?k*.45:k;pts.push([x+Math.cos(a)*q,y+Math.sin(a)*q])}poly(pts,0);c.fill()}}
    c.restore();
    // goal and holes (circles on the surface, projected; the hole wall shows on the far side)
@@ -105,7 +114,7 @@ const MiniMaze=(()=>{
    const wallPath=(z)=>{for(const pts of L.paths){c.beginPath();pts.forEach(([x,y],i)=>{const[p,q]=P3(x,y,z);i?c.lineTo(p,q):c.moveTo(p,q)});c.stroke()}};
    c.lineCap=c.lineJoin='round';
    c.strokeStyle='rgba(0,0,0,.28)';c.lineWidth=WR*2+3;c.save();c.translate(1.5,2.5);wallPath(0);c.restore();
-   c.strokeStyle=th.edge;c.lineWidth=WR*2+1.5;for(const z of[0,WALLH*.35,WALLH*.7])wallPath(z);
+   c.strokeStyle=th.edge;c.lineWidth=WR*2+1.5;for(const z of[0,WALLH*.5])wallPath(z);
    c.strokeStyle=th.wall;c.lineWidth=WR*2-.5;wallPath(WALLH);
    // ball: contact shadow on the surface, sphere centred one radius above it
    const sc=g.mode==='sink'?Math.max(.15,1-g.sink/.45):g.appear>0?1-g.appear/.35*.6:1;
@@ -113,15 +122,15 @@ const MiniMaze=(()=>{
     c.fillStyle='rgba(0,0,0,.32)';c.beginPath();c.ellipse(sx,sy,r*1.05,r*.8,0,0,7);c.fill();
     const bb=c.createRadialGradient(px-r*.35,py-r*.4,r*.15,px,py,r);bb.addColorStop(0,'#fff');bb.addColorStop(.5,'#d9d6e2');bb.addColorStop(1,'#6b6680');c.fillStyle=bb;c.beginPath();c.arc(px,py,r,0,7);c.fill()}
    if(g.joy){c.strokeStyle='rgba(255,248,230,.55)';c.lineWidth=2;c.beginPath();c.arc(g.joy.ox,g.joy.oy,56,0,7);c.stroke();c.fillStyle='rgba(255,248,230,.45)';c.beginPath();c.arc(g.joy.x,g.joy.y,14,0,7);c.fill()}
-   if(!g.started&&!s.over){c.fillStyle='rgba(255,248,232,.85)';c.font='700 13px system-ui,sans-serif';c.textAlign='center';c.fillText(t(g.motion?'motionOn':'mazeHint'),180,H-8)}
+   if(!g.started&&!s.over){c.fillStyle='rgba(255,248,232,.85)';c.font='800 16px system-ui,sans-serif';c.textAlign='center';c.fillText(t(g.motion?'motionOn':g.motionWait?'motionTap':'mazeHint'),180,H-8)}
    this.hud(c,s)},
-  hud(c,s){const g=s.g;MiniTable.round(c,8,5,344,30,10);c.fillStyle='rgba(30,22,36,.8)';c.fill();c.textAlign='left';c.font='800 14px system-ui,sans-serif';c.fillStyle='#fff3dc';c.fillText('⏱ '+MiniHost.time(g.time),20,25);
-   c.fillStyle='#cbbfd8';c.font='700 12px system-ui,sans-serif';c.fillText(t('bestShort',[g.best!=null?MiniHost.time(g.best):'—']),108,25);if(g.L.holes.length)c.fillText(t('mazeFallsShort',[g.falls]),210,25);
+  hud(c,s){const g=s.g;MiniTable.round(c,8,5,344,30,10);c.fillStyle='rgba(30,22,36,.8)';c.fill();c.textAlign='left';c.font='800 16px system-ui,sans-serif';c.fillStyle='#fff3dc';c.fillText('⏱ '+MiniHost.time(g.time),20,25);
+   c.fillStyle='#cbbfd8';c.font='700 14px system-ui,sans-serif';c.fillText(t('bestShort',[g.best!=null?MiniHost.time(g.best):'—']),108,25);if(g.L.holes.length)c.fillText(t('mazeFallsShort',[g.falls]),210,25);
    // bubble level
    c.strokeStyle='#cbbfd8';c.lineWidth=1.5;c.beginPath();c.arc(326,20,11,0,7);c.stroke();c.beginPath();c.moveTo(320,20);c.lineTo(332,20);c.moveTo(326,14);c.lineTo(326,26);c.globalAlpha=.4;c.stroke();c.globalAlpha=1;c.fillStyle=g.motion?'#9fe0b0':'#ffe58a';c.beginPath();c.arc(326+g.tilt.x*8,20+g.tilt.y*8,3.5,0,7);c.fill()}
  };
  // 3D projection for the current tilt (see draw). Returns (x,y,z) -> [screenX, screenY, scale] with .normal (board up-vector).
- const MAXA=10*Math.PI/180,CAM=620,SLAB=10,WALLH=9,CY=180+TOP,LIGHT=[-.32,-.45,.83];
+ const MAXA=15*Math.PI/180,CAM=600,SLAB=10,WALLH=9,CY=180+TOP,LIGHT=[-.32,-.45,.83];
  function project(tl){const th=tl.y*MAXA,ph=tl.x*MAXA,ct=Math.cos(th),st=Math.sin(th),cp=Math.cos(ph),sp=Math.sin(ph);
   const f=(x,y,z=0)=>{const X=x-180,Y=y-180,y1=Y*ct+z*st,z1=z*ct-Y*st,x2=X*cp+z1*sp,z2=z1*cp-X*sp,k=CAM/(CAM-z2);return[180+x2*k,CY+y1*k,k]};
   f.normal=[ct*sp,st,ct*cp];return f}

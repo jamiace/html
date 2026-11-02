@@ -527,6 +527,13 @@ canvas.view-pv { width: 60px; height: 52px; image-rendering: pixelated; box-shad
 .devh.auto { opacity: .75; }
 .ltier .pbar { min-width: 0; }
 .ltier > span.num.hint { flex: none; min-width: 5.2em; text-align: right; }
+/* 0.92.32: the L1-L6 count (e.g. 1131/1131) is the data, the bar is decoration. The count keeps its full width on one
+   line; the bar is capped and is the part that shrinks when the window is narrow. */
+.ltier { gap: 6px; }
+.ltier > span.num { flex: none; white-space: nowrap; }
+.ltier .pbar { flex: 1 1 auto; width: auto; min-width: 28px; max-width: 160px; }
+.ltier .pbar i { max-width: calc(100% - 4px); }
+.ltier > span.num.hint { flex: none; width: 6.8em; min-width: max-content; margin-left: auto; white-space: nowrap; text-align: right; }
 .devjson { width: 100%; box-sizing: border-box; font: 11px/1.4 ui-monospace, monospace; border: 3px solid var(--edge); background: var(--cb-bg); color: var(--ink); resize: vertical; }
 .cl-cards.one { grid-template-columns: 1fr; }
 .cl-card .stats dd { overflow-wrap: anywhere; }

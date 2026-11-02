@@ -10,7 +10,9 @@ const MiniPhys={
   b.x+=nx*pen;b.y+=ny*pen;
   const svx=m.svx||0,svy=m.svy||0,rvx=b.vx-svx,rvy=b.vy-svy,vn=rvx*nx+rvy*ny;
   if(vn>=0)return{nx,ny,impact:0};
-  const e=m.e??.5,f=m.f??.02,tx=rvx-vn*nx,ty=rvy-vn*ny;
+  // m.soft: below this approach speed the contact is a resting/rolling one: no bounce and no friction, so a ball
+  // pushed against a wall slides along it instead of sticking or jittering.
+  const hard=-vn>(m.soft||0),e=hard?m.e??.5:0,f=hard?m.f??.02:0,tx=rvx-vn*nx,ty=rvy-vn*ny;
   b.vx=svx+tx*(1-f)-e*vn*nx;b.vy=svy+ty*(1-f)-e*vn*ny;
   return{nx,ny,impact:-vn};
  },
