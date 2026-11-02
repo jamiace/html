@@ -123,7 +123,7 @@ const MiniVending=(()=>{
    this.customers(c,s);this.hud(c,s)},
   customers(c,s){const g=s.g,cat=g.cat;
    g.queue.forEach((col,i)=>{drawCat(c,300+i*34,428,.5,col,'wait')});
-   if(!cat){c.fillStyle='rgba(60,45,70,.5)';c.font='700 15px system-ui,sans-serif';c.textAlign='center';c.fillText(t('vendNext'),130,410);return}
+   if(!cat){c.fillStyle='#3a2618';c.font='700 15px system-ui,sans-serif';c.textAlign='center';c.fillText(t('vendNext'),130,410);return}
    const x=40+(1-cat.enter)*-60;drawCat(c,x+30,418,.85,cat.color,cat.mood,cat.huh);
    if(cat.mood!=='sad'){const bw=34+cat.want.length*48,bx=x+68,by=360;c.fillStyle='#fffaf0';MiniTable.round(c,bx,by,bw,56,12);c.fill();c.beginPath();c.moveTo(bx+4,by+40);c.lineTo(bx-10,by+50);c.lineTo(bx+14,by+46);c.fill();c.strokeStyle='#d9c6a8';c.lineWidth=2;MiniTable.round(c,bx,by,bw,56,12);c.stroke();
     cat.want.forEach((it,j)=>{c.globalAlpha=cat.got[j]?.35:1;drawItem(c,it,bx+40+j*48,by+28,1);c.globalAlpha=1;if(cat.got[j]){c.strokeStyle='#5bb36a';c.lineWidth=3;c.beginPath();c.moveTo(bx+30+j*48,by+30);c.lineTo(bx+38+j*48,by+38);c.lineTo(bx+52+j*48,by+18);c.stroke()}});

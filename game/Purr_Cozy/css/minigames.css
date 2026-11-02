@@ -17,10 +17,13 @@
 .mg-pinball .mg-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .mg-hold{font-size:15px;font-weight:700;min-height:52px!important;padding:0 6px!important}
 .mg-hold.down{transform:translateY(2px);filter:brightness(.92)}
-.mg-keys{font-size:13px;margin:0;opacity:.75}
+.mg-keys{font-size:13px;margin:0;opacity:1;color:#5a4a5e}
 @media(pointer:coarse){.mg-keys{display:none}}
 /* 0.92.31 vending: on touch screens the shake button lives on the machine panel, so the row below the canvas is dropped */
 @media(pointer:coarse){.mg-vending .mg-controls{display:none}}
+/* 0.92.36: a controls row holding only the keyboard hint is empty on touch screens; give its height to the canvas */
+.mg-controls:empty{display:none}
+@media(pointer:coarse){.mg-controls:not(:has(> :not(.mg-keys))){display:none}}
 .mg-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:13px}
 .mg-progress{flex:1 1 140px;opacity:.8;line-height:1.4}
 .mg-small{min-height:34px!important;font-size:13px!important;padding:4px 10px!important}
@@ -60,9 +63,9 @@
 .mi-keys{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:3px;height:100%}
 .mi-key{font:inherit;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;padding:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;transition:background .06s,transform .06s}
 .mi-white{position:relative;background:var(--key);border:1px solid #0003;border-radius:0 0 7px 7px;box-shadow:inset 0 -6px 0 #0000001a;color:#5a4a52;padding-bottom:8px}
-.mi-black{position:absolute;top:0;width:7.8%;height:58%;background:var(--ebony);border:1px solid #0006;border-radius:0 0 5px 5px;box-shadow:inset 0 -5px 0 #ffffff22,0 2px 3px #0005;color:#ffffffaa;z-index:2;padding-bottom:5px}
+.mi-black{position:absolute;top:0;width:7.8%;height:58%;background:var(--ebony);border:1px solid #0006;border-radius:0 0 5px 5px;box-shadow:inset 0 -5px 0 #ffffff22,0 2px 3px #0005;color:#fff;z-index:2;padding-bottom:5px}
 .mi-name{font-size:13px;font-weight:800;line-height:1.2}
-.mi-kbd{font-size:11px;opacity:.6;line-height:1.2;margin-top:2px}
+.mi-kbd{font-size:11px;opacity:1;line-height:1.2;margin-top:2px}
 @media(pointer:coarse){.mi-kbd{display:none}}
 .mi-voice-toy .mi-white:nth-child(8n+1){--key:#ffe0e6}.mi-voice-toy .mi-white:nth-child(8n+2){--key:#ffeccc}.mi-voice-toy .mi-white:nth-child(8n+3){--key:#fff7c6}.mi-voice-toy .mi-white:nth-child(8n+4){--key:#dff5d8}.mi-voice-toy .mi-white:nth-child(8n+5){--key:#d6eefa}.mi-voice-toy .mi-white:nth-child(8n+6){--key:#e3e0fb}.mi-voice-toy .mi-white:nth-child(8n+7){--key:#f6dff7}.mi-voice-toy .mi-white:nth-child(8n+8){--key:#ffe0e6}
 .mi-key.hint{box-shadow:inset 0 0 0 3px var(--glow),0 0 12px var(--glow)}
@@ -94,3 +97,6 @@ body.m .win[data-id=cozygame] .win-b,body.m .win[data-id=furnplay] .win-b:has(.m
 .fp-shell.mi-compact .fp-heading p,.fp-shell.mi-compact .mi-tip{display:none}.fp-shell.mi-compact .fp-object{flex-basis:40px;min-height:40px}.fp-shell.mi-compact .fp-object canvas{max-width:36px;max-height:36px}.fp-shell.mi-compact{gap:6px}.fp-shell.mi-compact .fp-heading h3{font-size:16px;margin:0}
 .fp-shell.mi-compact .mi-bar{flex-wrap:nowrap;gap:4px}.fp-shell.mi-compact .mi-bar .chip{min-height:32px!important;padding:2px 8px!important;font-size:13px!important;white-space:nowrap}
 .fp-shell.mi-compact .mi-tabs .mi-tab{min-height:32px}.fp-shell.mi-compact .mi-lane-wrap{height:38px}.fp-shell.mi-compact .mi-bub{width:28px;height:28px}.fp-shell.mi-compact .mi-status{min-height:0}
+
+/* 0.92.37: readable hint text inside the game windows (the shared .hint is semi-transparent) */
+.mg-root .hint,.mi-root .hint,.fp-shell .mi-tip,.fp-shell .fp-heading .hint{opacity:1;color:#5a4a5e}

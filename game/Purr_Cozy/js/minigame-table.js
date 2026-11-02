@@ -109,7 +109,7 @@ const MiniTable={
   c.fillStyle='rgba(255,248,232,.97)';this.round(c,w/2-130,y,260,bh,16);c.fill();c.textAlign='center';c.fillStyle='#4a3a52';c.font='800 22px system-ui,sans-serif';c.fillText(title,w/2,y+38);
   c.font='600 17px system-ui,sans-serif';c.fillStyle='#5d4c62';lines.forEach((t,i)=>c.fillText(t,w/2,y+68+i*24));
   if(badge){c.fillStyle='#d9822b';c.font='800 15px system-ui,sans-serif';c.fillText('★ '+badge+' ★',w/2,y+68+lines.length*24+4)}
-  if(s.over){c.fillStyle='#8a7a90';c.font='600 15px system-ui,sans-serif';c.fillText(MiniHost.t('playAgain'),w/2,y+bh-14)}c.restore()},
+  if(s.over){c.fillStyle='#64526a';c.font='600 15px system-ui,sans-serif';c.fillText(MiniHost.t('playAgain'),w/2,y+bh-14)}c.restore()},
  round(c,x,y,w,hh,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+hh,r);c.arcTo(x+w,y+hh,x,y+hh,r);c.arcTo(x,y+hh,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()},
  // ---- keyboard (registered once; ignored unless this window is on top) ----
  key(e,down){const s=this.session;if(!s||!this.valid()||MiniHost.typing(e))return;if(down&&!MiniHost.topmost('cozygame'))return;

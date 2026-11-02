@@ -1,4 +1,5 @@
-/* 0.92.29 Purr Cozy mini games: host wiring. Load after cozy-refine.js / furniture-motion.js and before main.js.
+/* 0.92.29 Purr Cozy mini games: host wiring (0.92.36: memory, puzzle, wire, diff, stars, parking, reaction, fish, balance and
+   weave are canvas games too — any CozyGames mode or FurnPlay game profile with a registered MiniTable game opens there). Load after cozy-refine.js / furniture-motion.js and before main.js.
    - cozyGame 'pinball' | 'toss' | 'maze'  -> MiniTable (window `cozygame`)
    - cozyGame 'instrument' (cozy_piano_1..5) and interactionProfile 'instrument' (fun_piano, guitars, music box, chime)
      -> FurnPlay window with the shared MiniInstrument panel
@@ -18,6 +19,11 @@
  const close=UI.closeWin.bind(UI);UI.closeWin=function(id){if(id==='cozygame')MiniTable.close();if(id==='furnplay')MiniInstrument.close();return close(id)};
  const load=Game.load.bind(Game);Game.load=function(){MiniTable.close();MiniInstrument.close();MiniAudio.stopAll();return load(...arguments)};
  FurnPlay.render_instrument=()=>MiniInstrument.render();
+ // 0.92.36: the small-item FurnPlay games (sm_console, sm_rubik, sm_blocks, embroidery / loom / sewing machine) open the
+ // canvas versions in the mini-game window; every other FurnPlay activity is unchanged.
+ const FP_GAMES={reaction:'reaction',puzzle:'puzzle',balance:'balance',weave:'weave'};
+ const fpOpen=FurnPlay.open.bind(FurnPlay);
+ FurnPlay.open=function(it,profile){const mode=FP_GAMES[profile];if(mode&&MiniTable.games[mode]){this.close();if(UI.wins.furnplay&&!UI.wins.furnplay.el.hidden)UI.closeWin('furnplay');CozyGames.session=null;return MiniTable.open(it,mode)}return fpOpen(it,profile)};
  // Stylesheet: served through the asset cache like css/i18n.css (falls back to a plain link outside the loader).
  (async()=>{const link=document.createElement('link');link.rel='stylesheet';try{link.href=typeof PurrAssets!=='undefined'&&PurrAssets.css?await PurrAssets.css('css/minigames.css'):'css/minigames.css'}catch(e){console.warn('minigames.css',e);link.href='css/minigames.css'}document.head.append(link)})();
 })();
