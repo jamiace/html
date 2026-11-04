@@ -17,7 +17,7 @@
 1. 備份原本的整個資料夾及 Firebase 設定。
 2. 將本包遊戲資料夾內容放到原網站位置。使用原本的同一個網域與路徑，瀏覽器快取和登入狀態才沿用同一個來源。
 3. **本次收到的專案沒有 music 音樂資料夾。請把你原有的 `music/` 原封不動保留或放回；本包沒有重新提供歌曲與同步歌詞檔。**
-4. 若要將放回的本地歌曲也納入啟動前預載，放好 `music/` 後，執行 `Rebuild-Resources.cmd`。需要 Python 3，工具只用標準函式庫。未執行時，歌曲仍走原本的音樂載入方式。
+4. 若要將放回的本地歌曲也納入啟動前預載，放好 `music/` 後，執行 `Update-Game.cmd`。需要 Python 3，工具只用標準函式庫。之後每次加歌、刪歌、改名也都要執行一次，遊戲的歌單 `data/music-builtins.json` 才會更新。
 5. 本包沿用已提供的 `js/firebase-config.js`、`firebase.json`、`firestore.rules`，沒有替換後端資料庫或變更權限規則。本地測試未登入你的 Google 帳號，雲端資料未被修改。
 6. `apple-touch-icon.png` 已從目前公開網站取回原圖（1024×1024），不是放大的小圖示。
 7. 靜態網站須使用 HTTPS。本機可在遊戲資料夾執行 `python -m http.server 8000`，然後打開 `http://localhost:8000/`。請勿用 file:// 雙擊執行。
@@ -26,7 +26,7 @@
 
 1. 修改對應的 PNG 或程式。
 2. 在 `version.json` 增加 `version` 並更新 `date`，不要在其他 JS 寫死版號。
-3. 執行 `Rebuild-Resources.cmd` 或 `python tools/rebuild-resources.py`。
+3. 執行 `Update-Game.cmd` 或 `python tools/rebuild-resources.py`。
 4. 一起上傳 PNG／程式、`resources.json`、`resources.bin`、`version.json`；建議最後上傳 `version.json`，讓版本公告在素材可下載後生效。
 5. 使用原有分層紙娃娃時，`masks/` 是換色角色索引，不是一般插圖；請參考 `godot/README.md`，不要把索引圖當彩色成品修圖。
 

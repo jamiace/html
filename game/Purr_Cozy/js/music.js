@@ -1,7 +1,7 @@
 /* ============================================================
    Music player: local files (MP3 / FLAC / M4A / OGG / WAV)
    stored in IndexedDB, YouTube links via the IFrame Player API,
-   and bundled tracks listed in music/playlist.json (web build)
+   and bundled tracks listed in data/music-builtins.json (web build)
    ============================================================ */
 const AUDIO_EXT = /\.(mp3|flac|m4a|aac|ogg|oga|opus|wav|webm)$/i;
 const Music = {
@@ -296,7 +296,7 @@ const Music = {
 };
 
 /* ------------------------------------------------------------
-   Built-in library: music/playlist.json (bundled files) plus a
+   Built-in library: data/music-builtins.json (bundled files) plus a
    public Google Drive folder read with the Drive API v3 and an
    API key (config: NOOK_DRIVE_FOLDER / NOOK_DRIVE_API_KEY).
    Kept out of the save file; only the play position is saved.

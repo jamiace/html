@@ -20,12 +20,39 @@ def version():
   build=json.loads(data.decode('utf-8-sig'));print('version.json missing: recovered its build identity from Git HEAD.');return build
  except (OSError,subprocess.CalledProcessError,ValueError,UnicodeError):
   raise ValueError('Missing '+str(p)+' . Restore version.json from the update ZIP; it is required in the game root. Python is already working.')
+# Built-in music: the game reads data/music-builtins.json, which is part of the verified resource list.
+# It is regenerated from the music/ folder on every rebuild so new songs always reach the online build.
+MUSIC_AUDIO=re.compile(r'\.(mp3|flac|m4a|aac|ogg|oga|opus|wav|webm)$',re.I)
+def natural(s):return [(0,int(x),'') if x.isdigit() else (1,0,x.casefold()) for x in re.split(r'(\d+)',s)]
+def sync_music():
+ music=ROOT/'music'
+ if not music.is_dir():return
+ from urllib.parse import quote
+ url=lambda p:'music/'+'/'.join(quote(part,safe="-_.!~*'()") for part in p.relative_to(music).parts)
+ files=[p for p in music.rglob('*') if p.is_file() and not any(x.startswith('.') for x in p.relative_to(music).parts)]
+ lrc={p.with_suffix('').as_posix().lower():p for p in files if p.suffix.lower()=='.lrc'}
+ tracks=[]
+ for p in files:
+  if not MUSIC_AUDIO.search(p.name):continue
+  folder=p.parent.relative_to(music).parts;t={'src':url(p),'title':p.stem,'album':' / '.join(folder) if folder else '內建'}
+  l=lrc.get(p.with_suffix('').as_posix().lower())
+  if l:t['lrc']=url(l)
+  tracks.append(t)
+ tracks.sort(key=lambda t:(natural(t['album']),natural(t['title'])))
+ def write(path,text,crlf):
+  data=(text.replace('\n','\r\n') if crlf else text).encode('utf-8')
+  if not path.exists() or path.read_bytes()!=data:atomic(path,data);return True
+  return False
+ changed=write(ROOT/'data'/'music-builtins.json',json.dumps({'schema':1,'tracks':tracks},ensure_ascii=False,indent=2)+'\n',True)
+ albums=len({t['album'] for t in tracks})
+ print('MUSIC:',len(tracks),'songs,',albums,'albums,',sum('lrc' in t for t in tracks),'with lyrics','(list updated)' if changed else '(no change)')
 def main():
  build=version()
  if not isinstance(build,dict) or not isinstance(build.get('version'),str):raise ValueError('version.json must contain a version string.')
  required=['index.html','js/bootstrap.js','js/asset-cache.js','js/purr-boot.js','js/main.js','js/music-playlists.js','data/music-builtins.json','assets/png/catalog.json']
  missing=[p for p in required if not (ROOT/p).is_file()]
  if missing:raise ValueError('Incomplete update. Extract ALL ZIP subfolders. Missing: '+', '.join(missing))
+ sync_music()
  if not re.search(r'schema\s*:\s*4', (ROOT/'js/asset-cache.js').read_text(encoding='utf-8-sig')):raise ValueError('Old js/asset-cache.js detected. Extract the complete update ZIP before rebuilding.')
  files=[]
  for p in sorted(ROOT.rglob('*')):

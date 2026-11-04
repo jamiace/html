@@ -16,9 +16,9 @@ music/
 - 一個子資料夾就是一個分類（專輯），可以整個分類播放；子資料夾裡還有子資料夾時，分類寫成「外層 / 內層」。
 - 標題就是檔名（不含副檔名）。想照順序排，檔名前面加 01、02……。
 - 支援 MP3、FLAC、M4A、AAC、OGG、OPUS、WAV、WEBM。GitHub 單一檔案上限 100 MB，建議用 MP3。
-- 加歌、刪歌、改名之後，在專案根目錄執行 `node tools/make-playlist.mjs` 更新 `playlist.json`。
-  推上 GitHub 時 `.github/workflows/playlist.yml` 也會自動更新，忘了跑也沒關係。
-- `playlist.json` 是自動產生的，不用手寫。
+- 加歌、刪歌、改名之後，把 `version.json` 的版本號加一號，執行專案根目錄的 `Update-Game.cmd`，再把所有變更一起 commit、push。
+  Rebuild 會重新掃描這個資料夾，更新遊戲讀取的歌單 `data/music-builtins.json`（自動產生，不用手寫）。
+  只 push 音樂檔、沒有 Rebuild，新歌不會出現在遊戲裡。
 - 只放你有權利公開的音樂。
 
 玩家自己加入的本機檔案只存在他們的瀏覽器裡（IndexedDB），不會上傳。

@@ -10,7 +10,7 @@ window.NOOK_AUDIO_BASE = '';
  *                     請在 Google Cloud Console 把金鑰限制為：
  *                       1. API 限制：只允許 Google Drive API
  *                       2. 應用程式限制：HTTP 參照網址，只允許你的網站（例如 https://你的帳號.github.io/*）
- *                     留空就不會連到雲端硬碟，只播放 music/playlist.json 裡的歌。
+ *                     留空就不會連到雲端硬碟，只播放 music/ 資料夾裡的歌（歌單在 data/music-builtins.json）。
  *
  * 子資料夾會變成播放清單裡的分類。歌曲清單會在玩家的瀏覽器快取 12 小時，
  * 不會寫進存檔，也不會占用 Firestore 用量。

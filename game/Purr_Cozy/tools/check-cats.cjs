@@ -7,4 +7,4 @@ const crc=b=>{let c=0xFFFFFFFF;for(const x of b)c=table[(c^x)&255]^(c>>>8);retur
 const root=path.resolve(process.argv[2]||process.cwd());if(!fs.existsSync(path.join(root,'js','bootstrap.js'))){console.log('找不到遊戲檔案：'+root);process.exit(2)}
 let done=0,diff=[];for(const[f,c]of Object.entries(FILES)){const p=path.join(root,f);if(fs.existsSync(p)&&crc(fs.readFileSync(p))===c)done++;else diff.push(f)}
 console.log('已是新版：'+done+' 個；需要更新：'+diff.length+' 個');diff.slice(0,30).forEach(f=>console.log('  DIFF '+f));if(diff.length>30)console.log('  …');
-console.log(diff.length?'\n把 purrcozy\\ 整包複製到遊戲根目錄覆蓋即可。':'\n全部已是新版：只要更新 version.json 並執行 Rebuild-Resources.cmd。');
+console.log(diff.length?'\n把 purrcozy\\ 整包複製到遊戲根目錄覆蓋即可。':'\n全部已是新版：只要更新 version.json 並執行 Update-Game.cmd。');
