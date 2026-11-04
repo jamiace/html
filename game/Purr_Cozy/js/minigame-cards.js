@@ -23,7 +23,7 @@ const MiniCards=(()=>{
   flip(s,host,c){const g=s.g;if(s.over||g.peek>0||g.lock>0||c.done||c.want||c.slide)return;c.want=1;g.flips++;K.sfx('lane',.5);g.open.push(c);
    if(g.open.length<2)return;const[a,b]=g.open;
    if(a.ic===b.ic){a.done=b.done=true;a.glow=b.glow=.8;g.open=[];g.matched++;g.combo++;K.sfx('target');host.burst(s,b.x+b.w/2,b.y+b.h/2,'#ffe58a',12,150);if(g.combo>1)host.pop(s,b.x+b.w/2,b.y,t('combo',[g.combo]),'#ffd27a',16);
-    if(g.matched===g.cards.length/2){host.win(s);const best=g.best==null?g.flips:Math.min(g.best,g.flips);host.end(s,{field:'memoryBest',value:g.flips,lower:true,lines:[t('memFlips',[g.flips]),t('timeLine',[fmt(g.time)]),t('bestLine',[best])],say:t('memWin')});K.sfx('win')}}
+    if(g.matched===g.cards.length/2){host.win(s);const best=g.best==null?g.flips:Math.min(g.best,g.flips);host.end(s,{field:'memoryBest',value:g.flips,lower:true,lines:[t('memFlips',[g.flips]),t('timeLine',[fmt(g.time)]),t('bestLine',[best])],say:t('memCardWin')});K.sfx('win')}}
    else{g.combo=0;g.misses++;g.lock=.75;a.shake=b.shake=.3;K.sfx('error',.5)}},
   pointer(s,kind,p,e,host){if(kind!=='down')return;const c=s.g.cards.find(c=>K.hit(p,c.x,c.y,c.w,c.h));if(c){s.g.cur=s.g.cards.indexOf(c);this.flip(s,host,c)}},
   key(s,code,down,e,host){if(!down)return/^Arrow|Enter|Space/.test(code);const g=s.g,C=g.R.cols,n=g.cards.length;const m={ArrowLeft:-1,ArrowRight:1,ArrowUp:-C,ArrowDown:C}[code];

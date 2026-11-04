@@ -86,8 +86,8 @@ const UI = {
     document.getElementById('yt-close').addEventListener('click', () => Music.closeYT());
     const yh = yp.querySelector('.yt-h');
     yh.addEventListener('pointerdown', e => { if (yp.classList.contains('min') || this.narrow() || e.target.closest('button')) return; const r = yp.getBoundingClientRect(), ox = e.clientX - r.left, oy = e.clientY - r.top; yh.setPointerCapture(e.pointerId);
-      const mv = ev => { yp.style.left = Math.max(0, Math.min(window.innerWidth - r.width, ev.clientX - ox)) + 'px'; yp.style.top = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, ev.clientY - oy)) + 'px'; yp.style.bottom = 'auto'; };
-      const up = () => { yh.removeEventListener('pointermove', mv); yh.removeEventListener('pointerup', up); }; yh.addEventListener('pointermove', mv); yh.addEventListener('pointerup', up); });
+      const mv = ev => { yp.style.left = Math.max(0, Math.min(window.innerWidth - r.width, ev.clientX - ox)) + 'px'; yp.style.top = Math.max(0, Math.min(window.innerHeight - r.height, ev.clientY - oy)) + 'px'; yp.style.bottom = 'auto'; };
+      const up = () => { yh.removeEventListener('pointermove', mv); yh.removeEventListener('pointerup', up); yh.removeEventListener('pointercancel', up); }; yh.addEventListener('pointermove', mv); yh.addEventListener('pointerup', up); yh.addEventListener('pointercancel', up); });
     const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
     document.addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); document.body.classList.add('dropping'); } });
     document.addEventListener('dragleave', e => { if (e.target === document.documentElement || !e.relatedTarget) document.body.classList.remove('dropping'); });
