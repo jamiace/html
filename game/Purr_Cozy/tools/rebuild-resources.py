@@ -46,6 +46,19 @@ def sync_music():
  changed=write(ROOT/'data'/'music-builtins.json',json.dumps({'schema':1,'tracks':tracks},ensure_ascii=False,indent=2)+'\n',True)
  albums=len({t['album'] for t in tracks})
  print('MUSIC:',len(tracks),'songs,',albums,'albums,',sum('lrc' in t for t in tracks),'with lyrics','(list updated)' if changed else '(no change)')
+# Windows and Git ignore letter case, GitHub Pages does not. A file renamed only in case (abc.lrc -> ABC.lrc)
+# keeps its old name in Git, so the online game would request a name that does not exist (HTTP 404).
+def check_git_case(paths):
+ try:out=subprocess.check_output(['git','-C',str(ROOT),'ls-files','-z'],stderr=subprocess.DEVNULL)
+ except (OSError,subprocess.CalledProcessError):return
+ tracked={}
+ for raw in out.split(b'\0'):
+  if raw:name=raw.decode('utf-8','replace');tracked[name.lower()]=name
+ bad=[(tracked[p.lower()],p) for p in paths if p.lower() in tracked and tracked[p.lower()]!=p]
+ if not bad:return
+ lines=['Letter case differs between this folder and Git (GitHub Pages would answer 404):']
+ for old,new in bad:lines+=['  Git:    '+old,'  Folder: '+new,'  Fix:    git mv -f "'+old+'" "'+old+'.tmp"  then  git mv -f "'+old+'.tmp" "'+new+'"']
+ raise ValueError('\n'.join(lines)+'\nRun the Fix lines inside this game folder, then run Update-Game.cmd again.')
 def main():
  build=version()
  if not isinstance(build,dict) or not isinstance(build.get('version'),str):raise ValueError('version.json must contain a version string.')
@@ -66,6 +79,7 @@ def main():
    try:json.loads(b.decode('utf-8-sig'))
    except (ValueError,UnicodeError) as e:raise ValueError('Invalid JSON: '+rel+' : '+str(e))
   files.append({'path':rel,'text':text,'bytes':len(b),'crc32':crc(b),'mime':'application/javascript' if p.suffix=='.js' else mimetypes.guess_type(p.name)[0] or 'application/octet-stream'})
+ check_git_case([f['path'] for f in files]+[p.relative_to(ROOT).as_posix() for p in (ROOT/'music').rglob('*') if p.is_file() and p.suffix.lower() in AUDIO])
  m=json.dumps({'schema':4,'files':files},ensure_ascii=False,separators=(',',':')).encode('utf-8');checksum=crc(m)
  folder=ROOT/'build-manifests';folder.mkdir(exist_ok=True);manifest=folder/(checksum+'.json')
  if manifest.exists() and manifest.read_bytes()!=m:raise ValueError('CRC32 manifest name collision. Existing manifest was not changed.')
