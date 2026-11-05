@@ -19,9 +19,19 @@ const CatsTypo={
  start(){this.clear();const levels=new Set(Learn.levelsOn());let pool=VOCAB.filter(v=>levels.has(v.t)&&/^[a-z]+(?:[ '-][a-z]+)*$/i.test(v.w)&&v.w.length<=22);pool=Adaptive.select(pool.map(v=>v.i),5,'spell').map(i=>VOCAB[i]);this.session={words:pool.slice(0,5),at:0,correct:0,helped:0,typos:0,attempts:0,done:false};this.nextQuestion()},
  nextQuestion(){this.clear();this.value='';this.cursor=0;this.mark=-1;this.fitQuestion();this.catFlags=[];this.session.answered=false;this.session.revealed=false;this.active=true;this.engaged=true;TypoSound.unlock();UI.refresh('catstypo');Duck.syncQuiz();Learn.speak(this.current().w);this.schedule()},
  current(){return this.session?.words[this.session.at]},
+ // 0.92.44: free practice no longer sticks to L1. Spelling is aimed a little harder than quizzes (~70% instead of 85%, it
+ // allows retries), each round of five mixes: 3 words at the player's level, 1 word they have studied in the daily review,
+ // and 1 "stretch" word from the next checked level up, and the same level is not repeated three times in a row.
+ practicePick(pool,q){const s=this.session,slot=s.at%5,recent=s.words.slice(Math.max(0,s.at-2),s.at).map(v=>v.t),seen=new Set((Adaptive.state().recent||[]).slice(-20));
+  const sample=pool.length>600?shuffle(pool.slice()).slice(0,600):pool;
+  const best=(list,T)=>{let b=null,score=Infinity;for(const i of list){const v=VOCAB[i],p=Adaptive.probability(i,'spell',q),sc=Math.abs(p-T)+(recent.length===2&&recent[0]===v.t&&recent[1]===v.t?.2:0)+(seen.has(i)?.1:0)+Math.random()*.06;if(sc<score){score=sc;b=i}}return b};
+  const fit=best(sample,.7);if(fit==null)return null;
+  if(slot===1){const studied=pool.filter(i=>{const r=Learn.P[VOCAB[i].w];return r&&r[0]>=1});if(studied.length)return best(studied.length>600?shuffle(studied).slice(0,600):studied,.6)}
+  if(slot===3){const lv=VOCAB[fit].t,up=Learn.levelsOn().filter(l=>l>lv)[0];if(up){const harder=sample.filter(i=>VOCAB[i].t===up);if(harder.length)return best(harder,.5)}}
+  return fit},
  fitQuestion(){const s=this.session,used=new Set(s.words.slice(0,s.at).map(v=>v.i)),q={noHint:s.task?.tier==='h'};
   const pool=s.mode==='daily'?s.words.slice(s.at).map(v=>v.i):Adaptive.pool().filter(i=>!used.has(i)&&/^[a-z]+(?:[ '-][a-z]+)*$/i.test(VOCAB[i].w)&&VOCAB[i].w.length<=22);
-  const [id]=Adaptive.select(pool,1,'spell',{mix:false,q});if(id==null)return;
+  const [id]=s.mode==='daily'?Adaptive.select(pool,1,'spell',{mix:false,q}):[this.practicePick(pool,q)];if(id==null)return;
   if(s.mode==='daily'){const at=s.words.findIndex((v,k)=>k>=s.at&&v.i===id);[s.words[s.at],s.words[at]]=[s.words[at],s.words[s.at]]}else s.words[s.at]=VOCAB[id];
  },
  setValue(next){const old=this.value;let a=0,b=0;while(a<old.length&&a<next.length&&old[a]===next[a])a++;while(b<old.length-a&&b<next.length-a&&old[old.length-1-b]===next[next.length-1-b])b++;this.catFlags=(this.catFlags||[]).slice(0,a).concat(Array(next.length-a-b).fill(false),b?(this.catFlags||[]).slice(old.length-b):[]);this.value=next},

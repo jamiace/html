@@ -61,13 +61,6 @@ html,body{overflow-x:hidden}main,section{min-width:0}
 </header>
 <main>
  <section id="intro">
-  <h2>怎麼用</h2>
-  <p class="why">這個頁面讀取遊戲上傳的匿名學習紀錄（Firestore 的 <code>learnlog</code>），在你的瀏覽器裡計算，不會把資料送到別的地方（除非你在最下面按「產生 AI 報告」）。</p>
-  <ol>
-   <li>第一次使用：按「用 Google 登入」，登入後這裡會顯示你的 UID。把 UID 貼到 <code>firestore.rules</code> 的 <code>isAnalyst()</code> 裡並發布規則（詳見教學文件第 3 步），再按一次登入就能讀資料。</li>
-   <li>每次讀取都算 Firestore 讀取次數（一個回合一次）。讀完可以按「下載目前資料」存成 JSON，下次用「開啟 JSON 檔」就不用再讀雲端。</li>
-   <li>還沒有資料時，按「用示範資料看看」可以先看每張圖表長什麼樣子。</li>
-  </ol>
   <div id="uidbox" class="note hidden"></div>
  </section>
 
@@ -79,6 +72,7 @@ html,body{overflow-x:hidden}main,section{min-width:0}
    <label>入口 <select id="f-kind"><option value="">全部</option></select></label>
    <label>程度 <select id="f-level"><option value="">全部</option></select></label>
    <label>版本 <select id="f-app"><option value="">全部</option></select></label>
+   <label>玩家 <select id="f-who"><option value="">全部（不含測試）</option><option value="real">只看真實玩家</option><option value="sim">只看模擬學生</option><option value="test">只看測試資料</option></select></label>
    <label>單字最少作答數 <input type="number" id="f-min" value="20" min="1" style="width:70px"></label>
    <button id="btn-apply" class="primary">套用</button>
   </div>
@@ -196,9 +190,12 @@ function demo(){
  return out}
 
 /* ---------- analysis ---------- */
+// simulated students have a device id starting with sim (tools/sim), test runs with test-
+const whoOf=r=>/^test-/.test(r.dev||'')?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
+function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
 function filtered(){
  const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0;
- const sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app));
+ const sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&who(r));
  const ans=[],rev=[],typo=[];
  for(const r of sess){for(const a of r.ans)if(!lvl||a.l===lvl)ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if(!lvl||a.l===lvl)rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if(!lvl||a.l===lvl)typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
  return {sess,ans,rev,typo}}
@@ -299,7 +296,7 @@ function analyse(){
  summary.dropOff={unfinishedSessions:undone.length,share:sess.length?+(undone.length/sess.length).toFixed(3):null,topStops:dl.slice(0,12).map(([k,n])=>({where:k,sessions:n})),byEntry:Object.fromEntries(Object.entries(dk2).map(([k,v])=>[k,+(v.u/v.s).toFixed(3)]))};
 
  /* 9 retention */
- const allSess=S.raw,first=new Map(),active=new Map();for(const r of allSess){const d=Math.floor(new Date(dayKey(r.t0)+'T00:00').getTime()/864e5);if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
+ const allSess=S.raw.filter(who),first=new Map(),active=new Map();for(const r of allSess){const d=Math.floor(new Date(dayKey(r.t0)+'T00:00').getTime()/864e5);if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
  const lastDay=Math.max(...[...active.values()].flatMap(s=>[...s]),0),coh={};
  // back = active on any day in [from, to] after the first day; counted only when that window has fully passed
  const W3=[['d1',1,1],['w2',7,13],['w5',28,34]];
@@ -328,7 +325,8 @@ function analyse(){
  grp('回合前半（第 1–4 題）',ans.filter(a=>a.i<4));grp('回合後半（第 5 題以後）',ans.filter(a=>a.i>=4));
  table('t-help',['情況','題數','答對率','作答時間'],hp);
  summary.hintsAndFatigue=hp.map(r=>({case:r[0],n:r[1],accuracy:+(r[2].v||0).toFixed(3)}));
- summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all'},game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣高中 6 級單字 L1–L6），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
+ const pop={real:0,sim:0,test:0};for(const r of sess)pop[whoOf(r)]++;
+ summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣高中 6 級單字 L1–L6），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
  S.summary=summary;
 }
 

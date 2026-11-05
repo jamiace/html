@@ -35,7 +35,7 @@ for(const [id,d]of Object.entries(ITEMS)){if(/pendulum/.test(id))d.cozyEffect='p
 if(ITEMS.sm_snowglobe)ITEMS.sm_snowglobe.cozyEffect='snow';if(ITEMS.trophy)ITEMS.trophy.cozyEffect='trophy';
 for(const [id,d]of Object.entries(ITEMS)){if(/card|album|postcard|poker|boardgame/.test(id))d.cozyGame='memory';if(d.cozyType==='console')d.cozyGame=['memory','wire','fish','diff','stars'][Number(id.split('_').at(-1))-1];}
 UI.shopCategoryOptions=selected=>CozyShop.options(selected);
-const cozyShopWindow=UI.w_shop.bind(UI);UI.w_shop=function(){this.shopTab=({furniture:'work',decor:'collect',plant:'nature',rug:'fabric'})[this.shopTab]||this.shopTab;return cozyShopWindow();};
+const cozyShopWindow=UI.w_shop.bind(UI);UI.w_shop=function(){const f=this.shopFocus&&ITEMS[this.shopFocus];if(f&&f.shopGroup)this.shopTab=f.shopGroup;/* 0.92.44: a task or room need opens the category the item is really listed in */this.shopTab=({furniture:'work',decor:'collect',plant:'nature',rug:'fabric'})[this.shopTab]||this.shopTab;return cozyShopWindow();};
 Object.assign(FAM_NAMES,Object.fromEntries(['work','rest','storage','media','lighting','nature','play','collect','cat','wall','fabric','window'].map(k=>[k,Cozy.t('category.'+k)])));
 CATS.splice(0,CATS.length,...['theme','supply','work','rest','storage','media','lighting','nature','play','collect','cat','wall','fabric','window','wallpaper','floor','view','pet'].map(id=>({id,n:Cozy.t('category.'+id)})));
 // New generic sprite users point at the canonical furniture PNG, not a second exported thumbnail.

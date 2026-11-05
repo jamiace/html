@@ -1,0 +1,884 @@
+{
+ "created": "2026-11-05T08:48:34.931Z",
+ "types": {
+  "bedtime": {
+   "label": "睡前固定型",
+   "w": 5,
+   "slot": {
+    "morning": 0.03,
+    "noon": 0.05,
+    "evening": 0.15,
+    "night": 0.75
+   },
+   "decay": 0.97,
+   "minutes": [
+    8,
+    22
+   ],
+   "quit": 0.05
+  },
+  "cram": {
+   "label": "補習晚歸型",
+   "w": 7,
+   "slot": {
+    "morning": 0.05,
+    "noon": 0.12,
+    "evening": 0.05,
+    "night": 0.55
+   },
+   "decay": 0.92,
+   "minutes": [
+    4,
+    12
+   ],
+   "quit": 0.12
+  },
+  "burst": {
+   "label": "三分鐘熱度型",
+   "w": 6,
+   "slot": {
+    "morning": 0.05,
+    "noon": 0.15,
+    "evening": 0.45,
+    "night": 0.55
+   },
+   "decay": 0.55,
+   "minutes": [
+    15,
+    45
+   ],
+   "quit": 0.1
+  },
+  "casual": {
+   "label": "隨性型",
+   "w": 5,
+   "slot": {
+    "morning": 0.08,
+    "noon": 0.15,
+    "evening": 0.2,
+    "night": 0.25
+   },
+   "decay": 0.9,
+   "minutes": [
+    3,
+    15
+   ],
+   "quit": 0.15
+  },
+  "weekend": {
+   "label": "週末型",
+   "w": 3,
+   "slot": {
+    "morning": 0.05,
+    "noon": 0.1,
+    "evening": 0.15,
+    "night": 0.2
+   },
+   "weekend": 2.8,
+   "decay": 0.95,
+   "minutes": [
+    10,
+    35
+   ],
+   "quit": 0.08
+  },
+  "oneshot": {
+   "label": "試玩就走型",
+   "w": 4,
+   "slot": {
+    "morning": 0.05,
+    "noon": 0.2,
+    "evening": 0.5,
+    "night": 0.5
+   },
+   "decay": 0.05,
+   "minutes": [
+    3,
+    10
+   ],
+   "quit": 0.25
+  }
+ },
+ "students": [
+  {
+   "id": "sim01",
+   "nick": "小安",
+   "grade": "高三",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 7,
+   "theta": -0.33,
+   "cram": true,
+   "phone": true,
+   "startDay": 1,
+   "speed": 1.21,
+   "typing": 0.75,
+   "honesty": 0.91,
+   "distract": 0.056,
+   "likes": {
+    "daily": 0.91,
+    "practice": 0.54,
+    "typo": 0.48
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim02",
+   "nick": "阿哲",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 11,
+   "theta": 1,
+   "cram": true,
+   "phone": true,
+   "startDay": 3,
+   "speed": 0.92,
+   "typing": 0.88,
+   "honesty": 0.98,
+   "distract": 0.023,
+   "likes": {
+    "daily": 0.65,
+    "practice": 0.54,
+    "typo": 0.27
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim03",
+   "nick": "芊芊",
+   "grade": "高三",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 4,
+   "theta": -1.33,
+   "cram": false,
+   "phone": false,
+   "startDay": 2,
+   "speed": 1.07,
+   "typing": 0.79,
+   "honesty": 0.8,
+   "distract": 0.027,
+   "likes": {
+    "daily": 0.91,
+    "practice": 0.66,
+    "typo": 0.42
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim04",
+   "nick": "柏宇",
+   "grade": "高一",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 9,
+   "theta": 0.33,
+   "cram": true,
+   "phone": true,
+   "startDay": 0,
+   "speed": 0.83,
+   "typing": 0.83,
+   "honesty": 0.89,
+   "distract": 0.068,
+   "likes": {
+    "daily": 0.81,
+    "practice": 0.46,
+    "typo": 0.39
+   },
+   "levels": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sim05",
+   "nick": "小米",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 9,
+   "theta": 0.33,
+   "cram": true,
+   "phone": true,
+   "startDay": 2,
+   "speed": 0.84,
+   "typing": 0.79,
+   "honesty": 0.78,
+   "distract": 0.036,
+   "likes": {
+    "daily": 0.78,
+    "practice": 0.2,
+    "typo": 0.24
+   },
+   "levels": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sim06",
+   "nick": "品妍",
+   "grade": "高二",
+   "type": "weekend",
+   "typeLabel": "週末型",
+   "gsat": 2,
+   "theta": -2,
+   "cram": false,
+   "phone": true,
+   "startDay": 0,
+   "speed": 1.04,
+   "typing": 0.72,
+   "honesty": 0.88,
+   "distract": 0.043,
+   "likes": {
+    "daily": 0.8,
+    "practice": 0.54,
+    "typo": 0.43
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim07",
+   "nick": "冠廷",
+   "grade": "高一",
+   "type": "casual",
+   "typeLabel": "隨性型",
+   "gsat": 12,
+   "theta": 1.33,
+   "cram": true,
+   "phone": false,
+   "startDay": 0,
+   "speed": 0.88,
+   "typing": 0.93,
+   "honesty": 0.95,
+   "distract": 0.037,
+   "likes": {
+    "daily": 0.71,
+    "practice": 0.28,
+    "typo": 0.36
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim08",
+   "nick": "語彤",
+   "grade": "高二",
+   "type": "bedtime",
+   "typeLabel": "睡前固定型",
+   "gsat": 9,
+   "theta": 0.33,
+   "cram": false,
+   "phone": true,
+   "startDay": 2,
+   "speed": 1.07,
+   "typing": 0.91,
+   "honesty": 0.8,
+   "distract": 0.029,
+   "likes": {
+    "daily": 0.42,
+    "practice": 0.62,
+    "typo": 0.26
+   },
+   "levels": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sim09",
+   "nick": "子軒",
+   "grade": "高二",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 5,
+   "theta": -1,
+   "cram": true,
+   "phone": true,
+   "startDay": 1,
+   "speed": 0.88,
+   "typing": 0.73,
+   "honesty": 0.9,
+   "distract": 0.047,
+   "likes": {
+    "daily": 0.82,
+    "practice": 0.68,
+    "typo": 0.12
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim10",
+   "nick": "心怡",
+   "grade": "高二",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 3,
+   "theta": -1.67,
+   "cram": true,
+   "phone": false,
+   "startDay": 0,
+   "speed": 1.18,
+   "typing": 0.66,
+   "honesty": 0.9,
+   "distract": 0.033,
+   "likes": {
+    "daily": 0.42,
+    "practice": 0.3,
+    "typo": 0.49
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim11",
+   "nick": "宥辰",
+   "grade": "高三",
+   "type": "oneshot",
+   "typeLabel": "試玩就走型",
+   "gsat": 14,
+   "theta": 2,
+   "cram": false,
+   "phone": false,
+   "startDay": 1,
+   "speed": 0.76,
+   "typing": 0.87,
+   "honesty": 0.87,
+   "distract": 0.05,
+   "likes": {
+    "daily": 0.85,
+    "practice": 0.46,
+    "typo": 0.11
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim12",
+   "nick": "詩涵",
+   "grade": "高二",
+   "type": "bedtime",
+   "typeLabel": "睡前固定型",
+   "gsat": 14,
+   "theta": 2,
+   "cram": true,
+   "phone": false,
+   "startDay": 0,
+   "speed": 1.2,
+   "typing": 0.86,
+   "honesty": 0.91,
+   "distract": 0.044,
+   "likes": {
+    "daily": 0.53,
+    "practice": 0.67,
+    "typo": 0.27
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim13",
+   "nick": "承恩",
+   "grade": "高三",
+   "type": "weekend",
+   "typeLabel": "週末型",
+   "gsat": 4,
+   "theta": -1.33,
+   "cram": true,
+   "phone": true,
+   "startDay": 0,
+   "speed": 0.8,
+   "typing": 0.78,
+   "honesty": 0.86,
+   "distract": 0.056,
+   "likes": {
+    "daily": 0.71,
+    "practice": 0.26,
+    "typo": 0.46
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim14",
+   "nick": "欣妤",
+   "grade": "高二",
+   "type": "casual",
+   "typeLabel": "隨性型",
+   "gsat": 2,
+   "theta": -2,
+   "cram": false,
+   "phone": true,
+   "startDay": 0,
+   "speed": 1.12,
+   "typing": 0.76,
+   "honesty": 0.86,
+   "distract": 0.075,
+   "likes": {
+    "daily": 0.76,
+    "practice": 0.33,
+    "typo": 0.68
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim15",
+   "nick": "家豪",
+   "grade": "高三",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 1,
+   "theta": -2.33,
+   "cram": true,
+   "phone": false,
+   "startDay": 1,
+   "speed": 1.11,
+   "typing": 0.64,
+   "honesty": 0.76,
+   "distract": 0.034,
+   "likes": {
+    "daily": 0.6,
+    "practice": 0.7,
+    "typo": 0.46
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim16",
+   "nick": "佳穎",
+   "grade": "高三",
+   "type": "oneshot",
+   "typeLabel": "試玩就走型",
+   "gsat": 10,
+   "theta": 0.67,
+   "cram": true,
+   "phone": true,
+   "startDay": 2,
+   "speed": 1.01,
+   "typing": 0.77,
+   "honesty": 0.86,
+   "distract": 0.04,
+   "likes": {
+    "daily": 0.44,
+    "practice": 0.14,
+    "typo": 0.23
+   },
+   "levels": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sim17",
+   "nick": "彥廷",
+   "grade": "高三",
+   "type": "weekend",
+   "typeLabel": "週末型",
+   "gsat": 8,
+   "theta": 0,
+   "cram": true,
+   "phone": true,
+   "startDay": 1,
+   "speed": 0.9,
+   "typing": 0.77,
+   "honesty": 0.82,
+   "distract": 0.076,
+   "likes": {
+    "daily": 0.95,
+    "practice": 0.16,
+    "typo": 0.75
+   },
+   "levels": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "sim18",
+   "nick": "思妤",
+   "grade": "高二",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 3,
+   "theta": -1.67,
+   "cram": false,
+   "phone": false,
+   "startDay": 0,
+   "speed": 1.04,
+   "typing": 0.68,
+   "honesty": 0.79,
+   "distract": 0.077,
+   "likes": {
+    "daily": 0.62,
+    "practice": 0.61,
+    "typo": 0.47
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim19",
+   "nick": "宇翔",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 14,
+   "theta": 2,
+   "cram": true,
+   "phone": true,
+   "startDay": 1,
+   "speed": 1.35,
+   "typing": 0.88,
+   "honesty": 0.95,
+   "distract": 0.023,
+   "likes": {
+    "daily": 0.99,
+    "practice": 0.48,
+    "typo": 0.33
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim20",
+   "nick": "亭妤",
+   "grade": "高三",
+   "type": "oneshot",
+   "typeLabel": "試玩就走型",
+   "gsat": 13,
+   "theta": 1.67,
+   "cram": true,
+   "phone": true,
+   "startDay": 0,
+   "speed": 1.16,
+   "typing": 0.93,
+   "honesty": 0.94,
+   "distract": 0.075,
+   "likes": {
+    "daily": 0.77,
+    "practice": 0.36,
+    "typo": 0.24
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim21",
+   "nick": "俊宏",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 6,
+   "theta": -0.67,
+   "cram": true,
+   "phone": true,
+   "startDay": 0,
+   "speed": 0.84,
+   "typing": 0.74,
+   "honesty": 0.82,
+   "distract": 0.07,
+   "likes": {
+    "daily": 0.44,
+    "practice": 0.48,
+    "typo": 0.78
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim22",
+   "nick": "筱涵",
+   "grade": "高一",
+   "type": "oneshot",
+   "typeLabel": "試玩就走型",
+   "gsat": 6,
+   "theta": -0.67,
+   "cram": false,
+   "phone": false,
+   "startDay": 3,
+   "speed": 0.99,
+   "typing": 0.78,
+   "honesty": 0.97,
+   "distract": 0.036,
+   "likes": {
+    "daily": 0.66,
+    "practice": 0.63,
+    "typo": 0.15
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim23",
+   "nick": "睿哲",
+   "grade": "高一",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 3,
+   "theta": -1.67,
+   "cram": false,
+   "phone": true,
+   "startDay": 1,
+   "speed": 1.13,
+   "typing": 0.7,
+   "honesty": 0.9,
+   "distract": 0.035,
+   "likes": {
+    "daily": 0.72,
+    "practice": 0.52,
+    "typo": 0.51
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim24",
+   "nick": "雨晴",
+   "grade": "高二",
+   "type": "weekend",
+   "typeLabel": "週末型",
+   "gsat": 11,
+   "theta": 1,
+   "cram": true,
+   "phone": true,
+   "startDay": 0,
+   "speed": 0.92,
+   "typing": 0.87,
+   "honesty": 0.77,
+   "distract": 0.044,
+   "likes": {
+    "daily": 0.87,
+    "practice": 0.28,
+    "typo": 0.71
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim25",
+   "nick": "昱安",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 6,
+   "theta": -0.67,
+   "cram": true,
+   "phone": true,
+   "startDay": 2,
+   "speed": 1.28,
+   "typing": 0.86,
+   "honesty": 0.93,
+   "distract": 0.033,
+   "likes": {
+    "daily": 0.69,
+    "practice": 0.21,
+    "typo": 0.56
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim26",
+   "nick": "宜蓁",
+   "grade": "高三",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 1,
+   "theta": -2.33,
+   "cram": false,
+   "phone": true,
+   "startDay": 2,
+   "speed": 0.81,
+   "typing": 0.68,
+   "honesty": 0.9,
+   "distract": 0.024,
+   "likes": {
+    "daily": 0.82,
+    "practice": 0.56,
+    "typo": 0.79
+   },
+   "levels": [
+    1,
+    2
+   ]
+  },
+  {
+   "id": "sim27",
+   "nick": "博凱",
+   "grade": "高一",
+   "type": "cram",
+   "typeLabel": "補習晚歸型",
+   "gsat": 7,
+   "theta": -0.33,
+   "cram": true,
+   "phone": false,
+   "startDay": 1,
+   "speed": 0.92,
+   "typing": 0.86,
+   "honesty": 0.81,
+   "distract": 0.03,
+   "likes": {
+    "daily": 0.51,
+    "practice": 0.55,
+    "typo": 0.79
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim28",
+   "nick": "若晴",
+   "grade": "高一",
+   "type": "bedtime",
+   "typeLabel": "睡前固定型",
+   "gsat": 5,
+   "theta": -1,
+   "cram": true,
+   "phone": true,
+   "startDay": 2,
+   "speed": 0.94,
+   "typing": 0.7,
+   "honesty": 0.83,
+   "distract": 0.066,
+   "likes": {
+    "daily": 0.91,
+    "practice": 0.36,
+    "typo": 0.19
+   },
+   "levels": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "sim29",
+   "nick": "紹宇",
+   "grade": "高二",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 12,
+   "theta": 1.33,
+   "cram": false,
+   "phone": true,
+   "startDay": 0,
+   "speed": 1.16,
+   "typing": 0.9,
+   "honesty": 0.84,
+   "distract": 0.08,
+   "likes": {
+    "daily": 0.74,
+    "practice": 0.13,
+    "typo": 0.73
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "id": "sim30",
+   "nick": "采潔",
+   "grade": "高二",
+   "type": "burst",
+   "typeLabel": "三分鐘熱度型",
+   "gsat": 15,
+   "theta": 2.33,
+   "cram": false,
+   "phone": true,
+   "startDay": 1,
+   "speed": 1.33,
+   "typing": 0.9,
+   "honesty": 0.95,
+   "distract": 0.065,
+   "likes": {
+    "daily": 0.88,
+    "practice": 0.2,
+    "typo": 0.71
+   },
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ]
+  }
+ ]
+}
