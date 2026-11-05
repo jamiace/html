@@ -24,8 +24,8 @@
   :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   img { max-width: 100%; }
   [hidden] { display: none !important; }
-  html, body { margin: 0; background: #f6efe8; }
-  body.purr-loading { overflow: hidden; }
+  /* Only while loading: afterwards style.css paints the page with the light / dark theme colours. */
+  body.purr-loading { margin: 0; overflow: hidden; background: #f6efe8; }
   body.purr-loading #app, body.purr-loading #pins, body.purr-loading #toasts,
   body.purr-loading #windows, body.purr-loading #ytpanel { visibility: hidden; }
   .loading { position: fixed; inset: 0; display: grid; place-items: center; font: 16px "LXGW WenKai TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
