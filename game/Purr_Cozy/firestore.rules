@@ -135,6 +135,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ---------- 學習紀錄（0.92.42）----------
+    // 遊戲用「匿名帳號」寫入：每個回合一份 learnlog/{logId}/lsess/{sessionId}，只能新增、不能修改。
+    // 只有下面 isAnalyst() 名單裡的帳號（你自己）能讀全部紀錄，分析頁面就是用這個權限讀資料。
+    match /learnlog/{logId}/lsess/{sessionId} {
+      allow create: if isOwner(logId) && validLearnLog(request.resource.data, logId, sessionId);
+      allow get, list: if isOwner(logId) || isAnalyst();
+      allow update: if false;
+      allow delete: if isOwner(logId) || isAnalyst();
+    }
+    // 分析頁面一次讀所有人的回合（collection group 查詢）
+    match /{path=**}/lsess/{sessionId} {
+      allow read: if isAnalyst();
+    }
+
     // 其他所有路徑一律拒絕
     match /{document=**} {
       allow read, write: if false;
@@ -142,6 +156,25 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
+    }
+
+    // 能讀全部學習紀錄的帳號：把 PASTE_YOUR_UID_HERE 換成你自己的 UID（教學第 3 步），可以放好幾個，用逗號隔開。
+    function isAnalyst() {
+      return request.auth != null && request.auth.uid in ['PASTE_YOUR_UID_HERE'];
+    }
+
+    function validLearnLog(d, logId, sessionId) {
+      return d.keys().hasOnly(['v', 'id', 'lid', 'acct', 'dev', 'app', 'lang', 'kind', 'sub', 't0', 't1', 'dur', 'done', 'stop',
+                               'n', 'right', 'coins', 'xp', 'streak', 'lv', 'ans', 'rev', 'typo', 'at'])
+        && d.v == 1 && d.id == sessionId && d.lid == logId
+        && d.kind is string && d.kind.size() <= 16
+        && d.sub is string && d.sub.size() <= 40
+        && d.t0 is int && d.t1 is int && d.dur is int
+        && d.ans is list && d.ans.size() <= 300
+        && d.rev is list && d.rev.size() <= 300
+        && d.typo is list && d.typo.size() <= 100
+        && d.acct is string && d.acct.size() <= 128
+        && d.at == request.time;
     }
 
     function signedIn() {
