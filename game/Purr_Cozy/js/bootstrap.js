@@ -10,7 +10,9 @@
  if('serviceWorker' in navigator){const controlled=navigator.serviceWorker.controller;let changed;const change=new Promise(resolve=>{changed=resolve;navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true})});
  try{const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});if(!controlled||reg.installing||reg.waiting)await Promise.race([change,new Promise(resolve=>setTimeout(resolve,8000))])}catch(error){console.warn('Service worker update',error)}}
  await PurrAssets.prepare(build);await PurrAssets.decode();
- for(const link of document.querySelectorAll('link[rel="stylesheet"]')){const u=new URL(link.href),path=u.pathname.slice(PurrAssets.base.pathname.length);const href=await PurrAssets.css(path);await new Promise((ok,fail)=>{link.onload=ok;link.onerror=()=>fail(Error(PurrBoot.text('bootResourceCss',[path])));link.href=href})}
+ // Load the verified copy next to the original and drop the original only afterwards: re-pointing href would
+ // unstyle the page (and the loading screen) until the new copy is parsed.
+ for(const link of [...document.querySelectorAll('link[rel="stylesheet"]')]){const u=new URL(link.href),path=u.pathname.slice(PurrAssets.base.pathname.length);const href=await PurrAssets.css(path);await new Promise((ok,fail)=>{const copy=document.createElement('link');copy.rel='stylesheet';copy.onload=ok;copy.onerror=()=>fail(Error(PurrBoot.text('bootResourceCss',[path])));copy.href=href;link.after(copy)});link.remove()}
 
  await script(await PurrAssets.url('js/i18n.js'));await I18n.init(build);I18n.attach();
  const languageStyle=document.createElement('link');languageStyle.rel='stylesheet';languageStyle.href=await PurrAssets.css('css/i18n.css');document.head.append(languageStyle);
