@@ -175,8 +175,19 @@ const Room = {
       const strength = Math.min(1, Math.min(env.h - 6.5, 18.6 - env.h) / 1.5) * 0.09;
       for (const it of this.state.items) {
         const d = ITEMS[it.k]; if (!d.window || it.closed) continue;
-        const gx0 = it.x + d.window.x, gx1 = gx0 + d.window.w, sh = (env.h - 12) * -2.2;
-        c.fillStyle = `rgba(255,236,190,${strength})`; c.beginPath(); c.moveTo(gx0 + 2, 100); c.lineTo(gx1 - 2, 100); c.lineTo(gx1 + sh + 4, 132); c.lineTo(gx0 + sh - 4, 132); c.closePath(); c.fill();
+        c.fillStyle = `rgba(255,236,190,${strength})`; c.beginPath();
+        const side = typeof WallMount !== 'undefined' && WallMount.side(it);
+        if (side) {
+          // Window on a side wall: the light falls on the floor along the foot of that wall and reaches into the room
+          // (longer in the morning / evening), instead of being painted on the wall itself.
+          const cv = this.itemCanvas(it), a = it.x + 1, b = it.x + cv.width - 1, dir = side === 'left' ? 1 : -1;
+          const foot = x => 96 + (side === 'left' ? 30 - x : x - 210) * 74 / 24, reach = 20 + Math.abs(env.h - 12) * 3, drop = (env.h - 12) * (side === 'left' ? 1.2 : -1.2);
+          c.moveTo(a, foot(a)); c.lineTo(b, foot(b)); c.lineTo(b + dir * reach, foot(b) + 4 + drop); c.lineTo(a + dir * reach, foot(a) + 4 + drop);
+        } else {
+          const gx0 = it.x + d.window.x, gx1 = gx0 + d.window.w, sh = (env.h - 12) * -2.2;
+          c.moveTo(gx0 + 2, 100); c.lineTo(gx1 - 2, 100); c.lineTo(gx1 + sh + 4, 132); c.lineTo(gx0 + sh - 4, 132);
+        }
+        c.closePath(); c.fill();
       }
     }
     } finally { c.restore(); }
