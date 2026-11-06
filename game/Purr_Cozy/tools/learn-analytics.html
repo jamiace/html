@@ -167,13 +167,19 @@ async function firebase(){
  if(fb)return fb;const cfg=window.NOOK_FIREBASE;if(!cfg||!cfg.apiKey)throw Error('讀不到 ../js/firebase-config.js：請把這個檔案放在遊戲的 tools 資料夾，從網站上開啟。');
  const base='https://www.gstatic.com/firebasejs/10.12.2/';const [A,U,F]=await Promise.all(['firebase-app.js','firebase-auth.js','firebase-firestore.js'].map(f=>import(base+f)));
  const app=A.initializeApp(cfg,'analytics'),auth=U.getAuth(app);fb={A,U,F,app,auth,db:F.getFirestore(app)};return fb}
+// Who may read: the Firestore collection analysts/{gmail}. Add or remove people in the Firebase console;
+// the security rules check the same collection, so this page only shows the result.
 $('btn-login').onclick=async()=>{
  try{status('登入中…');const {U,F,auth,db}=await firebase();if(!auth.currentUser)await U.signInWithPopup(auth,new U.GoogleAuthProvider());
-  const uid=auth.currentUser.uid,box=$('uidbox');box.classList.remove('hidden');box.innerHTML=`已登入：${auth.currentUser.email||''}<br>你的 UID：<b class="mono" id="uidtext">${uid}</b> <button id="copyuid">複製</button>`;$('copyuid').onclick=()=>navigator.clipboard.writeText(uid);
+  const u=auth.currentUser,mail=(u.email||'').toLowerCase(),box=$('uidbox');box.classList.remove('hidden');
+  let allowed=false;if(u.emailVerified&&mail)try{allowed=(await F.getDoc(F.doc(db,'analysts',mail))).exists()}catch(e){allowed=false}
+  box.innerHTML=`已登入：<b class="mono">${esc(mail||'（這個帳號沒有 Email）')}</b>${u.emailVerified?'':'（Email 未驗證）'} <button id="copyuid">複製 Gmail</button><br>${allowed?'✅ 在 Firebase 的分析者名單（analysts）內':'⛔ 不在 Firebase 的分析者名單（analysts）內，無法讀取學習紀錄'}`;
+  $('copyuid').onclick=()=>navigator.clipboard.writeText(mail);
+  if(!allowed){status('沒有讀取權限：請到 Firebase 主控台的 analysts 集合新增一份文件，文件 ID 填這個 Gmail（小寫）。');await U.signOut(auth);return}
   status('讀取紀錄中…');const out=[];let last=null;
   for(;;){const q=last?F.query(F.collectionGroup(db,'lsess'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'lsess'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();if(x.at&&x.at.toMillis)x.at=x.at.toMillis();out.push(x)});status(`讀取紀錄中… ${out.length}`);if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
   load(out,'Firestore');
- }catch(e){console.error(e);status(e.code==='permission-denied'?'沒有讀取權限：請把上面的 UID 貼到 firestore.rules 的 isAnalyst() 並發布規則（教學第 3 步）。':'失敗：'+(e.message||e))}
+ }catch(e){console.error(e);status(e.code==='permission-denied'?'沒有讀取權限：確認 Firebase 的 analysts 集合有這個 Gmail 的文件，而且 firestore.rules 已發布。':'失敗：'+(e.message||e))}
 };
 $('btn-file').onclick=()=>$('file').click();
 $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());load(Array.isArray(j)?j:j.sessions||[],f.name)}catch(err){status('JSON 讀取失敗：'+err.message)}};

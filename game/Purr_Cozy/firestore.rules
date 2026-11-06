@@ -137,7 +137,7 @@ service cloud.firestore {
 
     // ---------- 學習紀錄（0.92.42）----------
     // 遊戲用「匿名帳號」寫入：每個回合一份 learnlog/{logId}/lsess/{sessionId}，只能新增、不能修改。
-    // 只有下面 isAnalyst() 名單裡的帳號（你自己）能讀全部紀錄，分析頁面就是用這個權限讀資料。
+    // 只有下面 isAnalyst() 名單裡的 Gmail（你自己）能讀全部紀錄，分析頁面就是用這個權限讀資料。
     match /learnlog/{logId}/lsess/{sessionId} {
       allow create: if isOwner(logId) && validLearnLog(request.resource.data, logId, sessionId);
       allow get, list: if isOwner(logId) || isAnalyst();
@@ -149,6 +149,14 @@ service cloud.firestore {
       allow read: if isAnalyst();
     }
 
+    // 分析者名單：只能在 Firebase 主控台管理（主控台不受這些規則限制）。
+    // 登入的人只能查自己在不在名單上（分析頁用來顯示是否有權限），不能列出整份名單，也不能自己加入。
+    match /analysts/{email} {
+      allow get: if request.auth != null && request.auth.token.email_verified == true
+        && request.auth.token.email is string && request.auth.token.email.lower() == email;
+      allow list, create, update, delete: if false;
+    }
+
     // 其他所有路徑一律拒絕
     match /{document=**} {
       allow read, write: if false;
@@ -158,9 +166,13 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // 能讀全部學習紀錄的帳號：把 PASTE_YOUR_UID_HERE 換成你自己的 UID（教學第 3 步），可以放好幾個，用逗號隔開。
+    // 誰能讀全部學習紀錄：Firestore 的 analysts 集合。每個允許的 Gmail 是一份文件，文件 ID 就是 Gmail（小寫）。
+    // 在 Firebase 主控台新增或刪除文件就能加減人，不用改這個檔。
+    // email_verified 一定要檢查：沒驗證的 Email 帳號可以填任何信箱，不檢查就能冒充。
     function isAnalyst() {
-      return request.auth != null && request.auth.uid in ['PASTE_YOUR_UID_HERE'];
+      return request.auth != null && request.auth.token.email_verified == true
+        && request.auth.token.email is string
+        && exists(/databases/$(database)/documents/analysts/$(request.auth.token.email.lower()));
     }
 
     function validLearnLog(d, logId, sessionId) {
