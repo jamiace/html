@@ -137,24 +137,48 @@ service cloud.firestore {
 
     // ---------- 學習紀錄（0.92.42）----------
     // 遊戲用「匿名帳號」寫入：每個回合一份 learnlog/{logId}/lsess/{sessionId}，只能新增、不能修改。
-    // 只有下面 isAnalyst() 名單裡的 Gmail（你自己）能讀全部紀錄，分析頁面就是用這個權限讀資料。
+    // 後台（tools/admin.html）：分析者以上可以讀全部紀錄；刪除只限管理者以上（例如玩家要求刪除資料時）。
     match /learnlog/{logId}/lsess/{sessionId} {
       allow create: if isOwner(logId) && validLearnLog(request.resource.data, logId, sessionId);
       allow get, list: if isOwner(logId) || isAnalyst();
       allow update: if false;
-      allow delete: if isOwner(logId) || isAnalyst();
+      allow delete: if isOwner(logId) || isManager();
     }
     // 分析頁面一次讀所有人的回合（collection group 查詢）
     match /{path=**}/lsess/{sessionId} {
       allow read: if isAnalyst();
     }
 
-    // 分析者名單：只能在 Firebase 主控台管理（主控台不受這些規則限制）。
-    // 登入的人只能查自己在不在名單上（分析頁用來顯示是否有權限），不能列出整份名單，也不能自己加入。
-    match /analysts/{email} {
-      allow get: if request.auth != null && request.auth.token.email_verified == true
-        && request.auth.token.email is string && request.auth.token.email.lower() == email;
-      allow list, create, update, delete: if false;
+    // ---------- 後台帳號與權限 ----------
+    // admins/{gmail}：最高管理者。只能在 Firebase 主控台新增或刪除（主控台不受規則限制），網頁不能改。
+    // staff/{gmail}：在後台新增的帳號，角色 analyst（分析者）或 manager（管理者）。
+    //   最高管理者可以新增、修改、刪除任何 staff；管理者只能管理「分析者」，不能動其他管理者，也不能改自己的權限。
+    // adminlog：後台操作紀錄，只能新增、不能改刪；管理者以上可以查看。
+    match /admins/{email} {
+      allow get: if verified() && myEmail() == email;
+      allow list: if isSuper();
+      allow create, update, delete: if false;
+    }
+
+    match /staff/{email} {
+      allow get: if verified() && (myEmail() == email || isManager());
+      allow list: if isManager();
+      allow create: if validStaff(email) && staffCreateStamp()
+        && (isSuper() || (isManager() && request.resource.data.role == 'analyst'));
+      allow update: if validStaff(email) && staffKeepsOrigin() && email != myEmail()
+        && (isSuper() || (isManager() && resource.data.role == 'analyst' && request.resource.data.role == 'analyst'));
+      allow delete: if email != myEmail() && (isSuper() || (isManager() && resource.data.role == 'analyst'));
+    }
+
+    match /adminlog/{logId} {
+      allow create: if isAnalyst()
+        && request.resource.data.keys().hasOnly(['by', 'role', 'act', 'target', 'detail', 'at'])
+        && request.resource.data.by == myEmail()
+        && shortText(request.resource.data.role, 16) && shortText(request.resource.data.act, 40)
+        && shortText(request.resource.data.target, 120) && shortText(request.resource.data.detail, 400)
+        && request.resource.data.at == request.time;
+      allow get, list: if isManager();
+      allow update, delete: if false;
     }
 
     // 其他所有路徑一律拒絕
@@ -166,13 +190,42 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // 誰能讀全部學習紀錄：Firestore 的 analysts 集合。每個允許的 Gmail 是一份文件，文件 ID 就是 Gmail（小寫）。
-    // 在 Firebase 主控台新增或刪除文件就能加減人，不用改這個檔。
+    // ---------- 角色判斷 ----------
+    // 最高管理者（super）＞ 管理者（manager）＞ 分析者（analyst）。上層角色擁有下層全部權限。
     // email_verified 一定要檢查：沒驗證的 Email 帳號可以填任何信箱，不檢查就能冒充。
+    function verified() {
+      return request.auth != null && request.auth.token.email_verified == true && request.auth.token.email is string;
+    }
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+    function isSuper() {
+      return verified() && exists(/databases/$(database)/documents/admins/$(myEmail()));
+    }
+    function staffRoleIn(roles) {
+      return verified() && exists(/databases/$(database)/documents/staff/$(myEmail()))
+        && get(/databases/$(database)/documents/staff/$(myEmail())).data.active == true
+        && get(/databases/$(database)/documents/staff/$(myEmail())).data.role in roles;
+    }
+    function isManager() {
+      return isSuper() || staffRoleIn(['manager']);
+    }
     function isAnalyst() {
-      return request.auth != null && request.auth.token.email_verified == true
-        && request.auth.token.email is string
-        && exists(/databases/$(database)/documents/analysts/$(request.auth.token.email.lower()));
+      return isSuper() || staffRoleIn(['manager', 'analyst']);
+    }
+    function validStaff(email) {
+      let d = request.resource.data;
+      return email.matches('^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$')
+        && d.keys().hasOnly(['role', 'active', 'name', 'note', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
+        && d.role in ['analyst', 'manager'] && d.active is bool
+        && shortText(d.name, 40) && shortText(d.note, 200)
+        && d.updatedBy == myEmail() && d.updatedAt == request.time;
+    }
+    function staffCreateStamp() {
+      return request.resource.data.createdBy == myEmail() && request.resource.data.createdAt == request.time;
+    }
+    function staffKeepsOrigin() {
+      return request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt;
     }
 
     function validLearnLog(d, logId, sessionId) {

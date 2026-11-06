@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>呼嚕小窩 學習分析</title>
+<meta name="robots" content="noindex">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="../js/firebase-config.js"></script>
+<style>
+:root{--bg:#f6f2ee;--card:#fffdf9;--ink:#2f2433;--ink2:#6b5a6e;--line:#e6dcd2;--acc:#8c5aa8;--acc2:#d9566f;--good:#3f8a4f;--warn:#b86a12;--chip:#f1e7f6;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1724;--card:#262033;--ink:#f1e9f3;--ink2:#b9a8bd;--line:#3d3449;--acc:#c49ae0;--acc2:#ef8fa1;--good:#7cc58a;--warn:#f0b35a;--chip:#33294a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header h1{font-size:18px;margin:0 12px 0 0}
+main{max-width:1200px;margin:0 auto;padding:16px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px}
+section h2{font-size:17px;margin:0 0 4px}
+.why{color:var(--ink2);font-size:13px;margin:0 0 12px}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+select,input[type=text],input[type=password],input[type=date],input[type=number]{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--ink2);font-size:13px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.chart{position:relative;height:260px}
+.chart-xl{height:440px}.chart-lg{height:340px}
+.kpi.bad b{color:var(--acc2)}.kpi.good b{color:var(--good)}.kpi small{display:block;color:var(--ink2);font-size:12px}
+@media (max-width:600px){.chart-xl{height:340px}.chart-lg{height:280px}}
+.tbl{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);cursor:pointer;user-select:none}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td:first-child,th:first-child{text-align:left}
+.tag{display:inline-block;padding:0 6px;border-radius:6px;font-size:12px;background:var(--chip)}
+.tag.hard{background:#f6d3c4;color:#7a2d14}.tag.easy{background:#d6efd9;color:#1f5a2b}
+@media (prefers-color-scheme:dark){.tag.hard{background:#5a2c22;color:#ffd2c4}.tag.easy{background:#24452b;color:#c9f1d1}}
+.muted{color:var(--ink2)}
+.note{background:var(--chip);border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0}
+#status{font-size:13px;color:var(--ink2)}
+.report{line-height:1.75}.report h1,.report h2,.report h3{margin:16px 0 6px}.report table{margin:8px 0}.report code{font-family:var(--mono);background:var(--chip);padding:0 4px;border-radius:4px}
+.hidden{display:none!important}
+.mono{font-family:var(--mono);font-size:12px}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+nav.toc a{color:var(--acc);text-decoration:none;background:var(--chip);border-radius:20px;padding:2px 10px;font-size:13px}
+@media (max-width:600px){main{padding:10px}section{padding:12px}.grid2{grid-template-columns:1fr}header{position:static}header h1{width:100%}.row>label{flex:1 1 100%}.row input[type=text],.row input[type=password]{width:100%!important;min-width:0}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+html,body{overflow-x:hidden}main,section{min-width:0}
+</style>
+</head>
+<body>
+<header>
+ <h1>呼嚕小窩・學習分析</h1>
+ <button id="btn-login" class="primary">用 Google 登入並讀取紀錄</button>
+ <label class="row"><span class="muted">或</span> <input id="file" type="file" accept=".json" hidden><button id="btn-file">開啟 JSON 檔</button></label>
+ <button id="btn-demo">用示範資料看看</button>
+ <button id="btn-save" disabled>下載目前資料（JSON）</button>
+ <span id="status">尚未載入資料</span>
+</header>
+<main>
+ <section id="intro">
+  <div id="uidbox" class="note hidden"></div>
+ </section>
+
+ <div id="dash" class="hidden">
+ <section>
+  <h2>篩選</h2>
+  <div class="row">
+   <label>從 <input type="date" id="f-from"></label><label>到 <input type="date" id="f-to"></label>
+   <label>入口 <select id="f-kind"><option value="">全部</option></select></label>
+   <label>程度 <select id="f-level"><option value="">全部</option></select></label>
+   <label>年級帶 <select id="f-grade"><option value="">全部</option><option value="e">國小</option><option value="j">國中</option><option value="s1">高一</option><option value="s2">高二</option><option value="s3">高三</option></select></label>
+   <label>版本 <select id="f-app"><option value="">全部</option></select></label>
+   <label>玩家 <select id="f-who"><option value="">全部（不含測試）</option><option value="real">只看真實玩家</option><option value="sim">只看模擬學生</option><option value="test">只看測試資料</option></select></label>
+   <label>單字最少作答數 <input type="number" id="f-min" value="20" min="1" style="width:70px"></label>
+   <button id="btn-apply" class="primary">套用</button>
+  </div>
+ </section>
+ <nav class="toc" id="toc"></nav>
+
+ <section id="s-overview"><h2>1. 總覽</h2><p class="why">有多少人在學、學了多少、答對率和作答時間。</p><div class="kpis" id="kpis"></div><div class="chart" style="margin-top:12px"><canvas id="c-daily"></canvas></div></section>
+
+ <section id="s-words"><h2>2. 單字實測難度</h2><p class="why">每個字真正的答對率和作答時間。「程度可能標錯」= 答對率和「同程度、同題型」的平均差很多（標 L2 但難得像 L5，或反過來）。拼字題本來就比選擇題難，所以比較時會照每個字實際被考的題型組合算期望值，不會因為某個字剛好常被考拼字就被誤判。點表頭可以排序。</p>
+  <div class="row" style="margin-bottom:8px"><input type="text" id="w-search" placeholder="搜尋單字"><label><input type="checkbox" id="w-flag"> 只看可能標錯的</label><button id="w-csv">下載 CSV</button></div>
+  <div class="tbl"><table id="t-words"></table></div></section>
+
+ <section id="s-matrix"><h2>3. 程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div><h3>年級帶 × 題型</h3><p class="why">0.92.45 起每題會記錄單字的建議年級（gr）。舊資料沒有這個欄位，不會出現在這張表。</p><div class="tbl"><table id="t-grade"></table></div></section>
+
+ <section id="s-confuse"><h2>4. 易混淆字與拼錯</h2><p class="why">選擇題最常被選成哪個錯誤答案，以及拼字最常見的錯法。可以拿來改干擾選項、做「易混淆字」專題。</p><div class="grid2"><div><h3>選擇題：答案 → 被誤選的字</h3><p class="why" id="pairs-note"></p><div class="tbl"><table id="t-pairs"></table></div><h3 style="margin-top:12px">最常被誤選的字（不論題目）</h3><div class="tbl"><table id="t-lure"></table></div></div><div><h3>拼字：常見錯誤類型</h3><div class="chart"><canvas id="c-spell"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-spell"></table></div></div></div></section>
+
+ <section id="s-forget"><h2>5. 遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。0.92.45 以前的紀錄只能用「到期日」反推上次作答日，答錯過的字會被算成間隔太長；有精確間隔的資料時，這張圖只用精確資料（作答紀錄 ge=0）。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section>
+
+ <section id="s-calib"><h2>6. 自適應模型校正</h2>
+  <p class="why">遊戲出題前會預測每題的「答對機率」p。這一節回答三個問題：<b>① 預測準不準</b>（說 80% 的題，實際是不是約 80% 答對）、<b>② 偏在哪裡</b>（哪種技能、哪個程度、哪個預測區間）、<b>③ 要怎麼調</b>（給出可以直接套用的修正量）。四種技能分開看，因為選擇題有 25% 猜中下限、拼字沒有。</p>
+  <div class="row calib-ctl"><label>分組數 <select id="cal-bins"><option value="10">10 組</option><option value="15" selected>15 組</option><option value="20">20 組</option></select></label>
+   <label>資料 <select id="cal-scope"><option value="all">全部有預測值的作答</option><option value="adaptive">只看自適應入口（不含升級考、故事、重練）</option></select></label>
+   <span class="muted">每組人數相同；點圖例可以隱藏某條線。</span></div>
+  <div class="kpis" id="calib-kpis" style="margin-top:10px"></div>
+  <h3 style="margin-top:16px">偏差圖：實際答對率 − 預測答對率</h3>
+  <p class="why">0 線＝預測完全準確。點在 0 線下方＝模型高估（以為會答對，其實沒那麼容易）；上方＝低估。直線段是 95% 信賴區間：<b>區間完全沒碰到 0 線</b>，就代表這個偏差不是運氣造成的。灰色帶是 ±5 個百分點的可接受範圍。縱軸會自動放大到資料的範圍，所以幾個百分點的差距也看得清楚。</p>
+  <div class="chart chart-xl"><canvas id="c-calib-gap"></canvas></div>
+  <div class="grid2" style="margin-top:16px">
+   <div><h3>校正曲線（放大到資料範圍）</h3><p class="why">斜虛線是完美校正。橫軸、縱軸都只顯示有資料的區間，不再壓縮在 0–100%。</p><div class="chart chart-lg"><canvas id="c-calib"></canvas></div></div>
+   <div><h3>預測值分布</h3><p class="why">每個預測區間有多少題。自適應出題會讓預測擠在目標 85% 附近；分布太窄代表模型很少出「有挑戰」的題。</p><div class="chart chart-lg"><canvas id="c-calib-hist"></canvas></div></div>
+  </div>
+  <h3 style="margin-top:16px">每週趨勢：平均預測 vs 實際</h3>
+  <p class="why">兩條線之間的距離就是那一週的整體偏差。改版（例如 0.92.45 改了難度 d）前後如果距離變小，代表修正有效。</p>
+  <div class="chart chart-lg"><canvas id="c-calib-trend"></canvas></div>
+  <div id="calib-text" class="note" style="margin-top:12px"></div>
+  <h3>依技能</h3><div class="tbl"><table id="t-calib-skill"></table></div>
+  <h3>依單字程度：建議的難度修正</h3>
+  <p class="why">把「預測和實際的落差」換算回遊戲的難度刻度（每個字的 d，Level 刻度；模型的難度項是 0.75 × d）。<b>建議 Δd 為正＝這個程度的字比模型以為的難，d 應該加大</b>。已扣除選擇題的猜中下限；每格至少 150 題才計算。</p>
+  <div class="tbl"><table id="t-calib-level"></table></div>
+  <h3>依年級帶</h3><div class="tbl"><table id="t-calib-grade"></table></div>
+  <h3>依入口</h3><p class="why">升級考、故事用的是刻意加難的干擾選項或無提示拼字，模型沒有把這點算進去，所以預測通常偏高；它們也不參與 85% 目標的檢查。</p><div class="tbl"><table id="t-calib-kind"></table></div>
+  <h3>整體修正公式</h3><div id="calib-fix" class="note"></div>
+ </section>
+
+ <section id="s-kinds"><h2>7. 哪個入口學得最好</h2><p class="why">每個學習入口的答題量、答對率、完成率，以及「下次再遇到同一個字時答對率」（記得住的程度）。</p><div class="tbl"><table id="t-kinds"></table></div></section>
+
+ <section id="s-drop"><h2>8. 在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題）。集中在某一步就代表那裡太難、太長或卡住。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div></section>
+
+ <section id="s-retain"><h2>9. 留存與習慣</h2><p class="why">第一次學習後，隔天、第 2 週（第 7–13 天）、第 5 週（第 28–34 天）還回來學習的比例（依第一次學習的週分組），以及一週中什麼時段最多人學。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section>
+
+ <section id="s-typo"><h2>10. 貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section>
+
+ <section id="s-help"><h2>11. 提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section>
+
+ <section id="s-ai"><h2>12. AI 分析報告</h2>
+  <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
+  <div class="row">
+   <label>服務 <select id="ai-provider"><option value="anthropic">Claude（Anthropic）</option><option value="openai">ChatGPT（OpenAI）</option></select></label>
+   <label>模型 <input type="text" id="ai-model" list="ai-models" style="width:220px"></label><datalist id="ai-models"></datalist>
+   <label>API 金鑰 <input type="password" id="ai-key" style="width:260px" placeholder="sk-..."></label>
+   <label><input type="checkbox" id="ai-remember"> 記住金鑰</label>
+  </div>
+  <div class="row" style="margin-top:8px">
+   <label>報告重點 <select id="ai-focus"><option value="all">完整報告</option><option value="content">給編輯：單字與題目</option><option value="product">給產品：留存與玩法</option><option value="model">給工程：模型與複習間隔</option></select></label>
+   <label>補充說明 <input type="text" id="ai-extra" style="width:360px" placeholder="例如：這週剛把每日任務從 20 字改成 15 字"></label>
+   <button id="ai-go" class="primary">產生 AI 報告</button><button id="ai-preview">先看要送出的摘要</button><button id="ai-dl" disabled>下載報告（.md）</button>
+  </div>
+  <pre id="ai-summary" class="mono hidden" style="white-space:pre-wrap;max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px"></pre>
+  <div id="ai-out" class="report" style="margin-top:12px"></div>
+ </section>
+ </div>
+</main>
+
+<script>
+/* ---------- data ---------- */
+const S={raw:[],sess:[],ans:[],rev:[],typo:[],charts:{},summary:null,report:''};
+const KIND={daily:'每日複習',practice:'自由練習',need:'房間泡泡',train:'寵物訓練',help:'幫朋友',story:'故事',team:'團隊',chal:'挑戰',levelgate:'升級考',typo:'貓咪打字',redo:'重練'};
+const QT={en2zh:'看英選中',zh2en:'看中選英',listen:'聽音選義',spell:'拼字',listenspell:'聽寫'};
+const $=id=>document.getElementById(id),fmt=(x,d=0)=>x==null||isNaN(x)?'–':Number(x).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d}),pct=x=>x==null||isNaN(x)?'–':(x*100).toFixed(1)+'%';
+const dayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const median=a=>{if(!a||!a.length)return null;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const status=t=>$('status').textContent=t;
+// local calendar day number (the player's day changes at local midnight, not at UTC midnight)
+const dayNo=t=>{const d=new Date(t);return Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)};
+const dayNoKey=n=>new Date(n*864e5).toISOString().slice(0,10);
+const GB={e:[1,6],j:[7,9],s1:[10,10],s2:[11,11],s3:[12,12]},GBN={e:'國小',j:'國中',s1:'高一',s2:'高二',s3:'高三'};
+const GRADE_NAME=g=>g<=6?'小'+['一','二','三','四','五','六'][g-1]:g<=9?'國'+['一','二','三'][g-7]:'高'+['一','二','三'][g-10];
+const bandOf=g=>{for(const k in GB)if(g>=GB[k][0]&&g<=GB[k][1])return k;return ''};
+
+// word metadata from the game (../i18n/vocab.json): estimated grade for records that predate the gr field,
+// and the 0.92.45 headword renames so old and new records of the same word are counted together
+const RENAMED={'O.K. / OK':'OK','Thur. / Thurs.':'Thur.','Tue. / Tues.':'Tue.','Wed. / Weds.':'Wed.','afterward(s)':'afterward','a.m. / am / A.M. / AM':'a.m.','AIDS / acquired immune deficiency syndrome':'AIDS','AI / artificial intelligence':'AI'};
+const VMETA={};let vmetaReady=null;
+function loadVocabMeta(){return vmetaReady||(vmetaReady=fetch('../i18n/vocab.json').then(r=>r.ok?r.json():null).then(j=>{for(const e of (j&&j.entries)||[])if(!VMETA[e.word])VMETA[e.word]={t:e.level,g:e.grade||0};return Object.keys(VMETA).length}).catch(()=>0))}
+function normalizeRecords(list){for(const r of list){for(const a of [...(r.ans||[]),...(r.rev||[]),...(r.typo||[])]){if(RENAMED[a.w])a.w=RENAMED[a.w];if(typeof a.g==='string'&&RENAMED[a.g])a.g=RENAMED[a.g];if(a.gr==null&&VMETA[a.w])a.gr=VMETA[a.w].g}}}
+async function load(list,label){
+ await loadVocabMeta();normalizeRecords(list);
+ S.raw=list.filter(r=>r&&r.v===1&&Array.isArray(r.ans));
+ status(`${label}：${S.raw.length} 個回合`);$('btn-save').disabled=!S.raw.length;$('dash').classList.remove('hidden');
+ let lo=Infinity,hi=-Infinity;for(const r of S.raw)if(r.t0){if(r.t0<lo)lo=r.t0;if(r.t0>hi)hi=r.t0}if(hi>0){$('f-from').value=dayKey(lo);$('f-to').value=dayKey(hi)}
+ fillSelect('f-kind',[...new Set(S.raw.map(r=>r.kind))].sort(),k=>KIND[k]||k);
+ fillSelect('f-level',[1,2,3,4,5,6],l=>'L'+l);
+ fillSelect('f-app',[...new Set(S.raw.map(r=>r.app).filter(Boolean))].sort(),x=>x);
+ analyse();
+}
+function fillSelect(id,vals,label){const el=$(id),cur=el.value;el.replaceChildren(new Option('全部',''),...vals.map(v=>new Option(label(v),v)));el.value=cur}
+
+/* ---------- loading ---------- */
+let fb=null;
+async function firebase(){
+ if(fb)return fb;const cfg=window.NOOK_FIREBASE;if(!cfg||!cfg.apiKey)throw Error('讀不到 ../js/firebase-config.js：請把這個檔案放在遊戲的 tools 資料夾，從網站上開啟。');
+ const base='https://www.gstatic.com/firebasejs/10.12.2/';const [A,U,F]=await Promise.all(['firebase-app.js','firebase-auth.js','firebase-firestore.js'].map(f=>import(base+f)));
+ const app=A.initializeApp(cfg,'analytics'),auth=U.getAuth(app);fb={A,U,F,app,auth,db:F.getFirestore(app)};return fb}
+// Who may read: the Firestore collection analysts/{gmail}. Add or remove people in the Firebase console;
+// the security rules check the same collection, so this page only shows the result.
+$('btn-login').onclick=async()=>{
+ try{status('登入中…');const {U,F,auth,db}=await firebase();if(!auth.currentUser)await U.signInWithPopup(auth,new U.GoogleAuthProvider());
+  const u=auth.currentUser,mail=(u.email||'').toLowerCase(),box=$('uidbox');box.classList.remove('hidden');
+  let allowed=false;if(u.emailVerified&&mail)try{allowed=(await F.getDoc(F.doc(db,'analysts',mail))).exists()}catch(e){allowed=false}
+  box.innerHTML=`已登入：<b class="mono">${esc(mail||'（這個帳號沒有 Email）')}</b>${u.emailVerified?'':'（Email 未驗證）'} <button id="copyuid">複製 Gmail</button><br>${allowed?'✅ 在 Firebase 的分析者名單（analysts）內':'⛔ 不在 Firebase 的分析者名單（analysts）內，無法讀取學習紀錄'}`;
+  $('copyuid').onclick=()=>navigator.clipboard.writeText(mail);
+  if(!allowed){status('沒有讀取權限：請到 Firebase 主控台的 analysts 集合新增一份文件，文件 ID 填這個 Gmail（小寫）。');await U.signOut(auth);return}
+  status('讀取紀錄中…');const out=[];let last=null;
+  for(;;){const q=last?F.query(F.collectionGroup(db,'lsess'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'lsess'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();if(x.at&&x.at.toMillis)x.at=x.at.toMillis();out.push(x)});status(`讀取紀錄中… ${out.length}`);if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
+  load(out,'Firestore');
+ }catch(e){console.error(e);status(e.code==='permission-denied'?'沒有讀取權限：確認 Firebase 的 analysts 集合有這個 Gmail 的文件，而且 firestore.rules 已發布。':'失敗：'+(e.message||e))}
+};
+$('btn-file').onclick=()=>$('file').click();
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());load(Array.isArray(j)?j:j.sessions||[],f.name)}catch(err){status('JSON 讀取失敗：'+err.message)}};
+$('btn-save').onclick=()=>{const b=new Blob([JSON.stringify({exported:new Date().toISOString(),sessions:S.raw})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='purr-learnlog-'+dayKey(Date.now())+'.json';a.click()};
+$('btn-demo').onclick=()=>load(demo(),'示範資料');
+$('btn-apply').onclick=analyse;
+$('cal-bins').onchange=()=>S.raw.length&&analyse();$('cal-scope').onchange=()=>S.raw.length&&analyse();
+
+/* ---------- demo data (same format the game uploads) ---------- */
+function demo(){
+ let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ const words=[];const base=['apple','book','cat','dog','eye','family','garden','happy','island','juice','kitchen','library','mountain','neighbor','ocean','pencil','question','river','science','tomorrow','umbrella','village','weather','yesterday','zebra','affect','effect','accept','except','advice','advise','desert','dessert','principal','principle','stationary','stationery','receive','believe','necessary','occasion','recommend','separate','definitely','environment','government','knowledge','opportunity','responsibility','temperature'];
+ base.forEach((w,k)=>words.push({w,l:1+Math.min(5,Math.floor(k/9)),d:(k%9)/9+(k>24?.8:0)}));
+ words.find(x=>x.w==='necessary').l=2;words.find(x=>x.w==='cat').d=-.5;
+ const pairs={affect:'effect',effect:'affect',accept:'except',advice:'advise',desert:'dessert',principal:'principle',stationary:'stationery'};
+ const kinds=['daily','daily','daily','practice','need','train','story','chal','typo'];const out=[];const T0=Date.now()-60*864e5;
+ for(let u=0;u<120;u++){const lid='demo'+u,skill=r()*2-.5,days=Math.floor(r()*60),active=.2+r()*.7;const mem={};
+  for(let d=0;d<days;d++){if(r()>active)continue;const n=1+Math.floor(r()*3);
+   for(let k=0;k<n;k++){const kind=kinds[Math.floor(r()*kinds.length)],t0=T0+(60-days+d)*864e5+(8+Math.floor(r()*14))*36e5,rec={v:1,id:lid+'-'+d+'-'+k,lid,acct:'',dev:'',app:d<30?'0.92.41':'0.92.42',lang:'zh-TW',kind,sub:'',t0,t1:0,dur:0,done:false,stop:'',n:0,right:0,coins:0,xp:0,streak:0,lv:'123456',ans:[],rev:[],typo:[]};
+    const len=kind==='typo'?5:8,quit=r()<.15?Math.floor(r()*len):len;let t=0;
+    if(kind==='daily')for(let c=0;c<Math.min(10,quit+4);c++){const w=words[Math.floor(r()*words.length)];rec.rev.push({w:w.w,l:w.l,k:r()<.7?1:0,ms:1500+Math.floor(r()*5000)})}
+    for(let q=0;q<quit;q++){const w=words[Math.floor(r()*words.length)],m=mem[w.w]||(mem[w.w]={box:0,last:-1});const gap=m.last<0?-1:d-m.last;
+     const types=['en2zh','zh2en','listen','spell','listenspell'],qt=kind==='typo'?'spell':types[Math.floor(r()*types.length)];
+     const hard=w.d+(qt==='spell'||qt==='listenspell'?.8:0)+(qt.startsWith('listen')?.3:0)+w.l*.35;
+     let p=1/(1+Math.exp(-(skill+2.3-hard+m.box*.35-(gap>0?Math.log(gap+1)*.25:0))));p=Math.min(.98,Math.max(.05,p));
+     const pred=Math.min(.98,Math.max(.05,p+(r()-.5)*.15+(p>.7?.06:-.04))),ok=r()<p;t+=2000+Math.floor(r()*9000);
+     const typed=qt==='spell'||qt==='listenspell';const g=ok?'':typed?(w.w.length>4?w.w.slice(0,2)+w.w.slice(3):w.w+'e'):(pairs[w.w]||words[Math.floor(r()*words.length)].w);
+     if(kind==='typo'){rec.typo.push({w:w.w,l:w.l,ok:ok?1:0,att:ok?1+(r()<.3?1:0):2,ms:4000+Math.floor(r()*12000),rv:ok?0:(r()<.6?1:0),cat:r()<.25?1:0,g:ok?[]:[g]})}
+     else rec.ans.push({t,w:w.w,l:w.l,gr:Math.min(12,5+w.l),ge:d<30?1:0,q:qt,ok:ok?1:0,ms:Math.floor(1200+r()*6000+(ok?0:2500)+(typed?3000:0)),g,b0:m.box,b1:ok?Math.min(5,m.box+1):Math.max(1,m.box-1),gap,p:Math.round(pred*1000)/1000,h:typed&&r()<.5?1:0,r:qt.startsWith('listen')?Math.floor(r()*3):0,i:q,re:0});
+     m.box=ok?Math.min(5,m.box+1):Math.max(1,m.box-1);m.last=d}
+    rec.done=quit===len;rec.stop=rec.done?'result':(r()<.5?'quiz@'+quit+'/'+len:'review@'+quit+'/10');rec.t1=t0+t+5000;rec.dur=rec.t1-t0;
+    rec.n=rec.ans.length||rec.typo.length;rec.right=rec.ans.filter(a=>a.ok).length+rec.typo.filter(a=>a.ok&&!a.rv).length;out.push(rec)}}}
+ return out}
+
+/* ---------- analysis ---------- */
+// simulated students have a device id starting with sim (tools/sim), test runs with test-
+const whoOf=r=>/^test-/.test(r.dev||'')?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
+function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
+function filtered(){
+ const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
+ const sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&who(r));
+ const ans=[],rev=[],typo=[];
+ for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
+ return {sess,ans,rev,typo}}
+
+function chart(id,cfg){if(S.charts[id])S.charts[id].destroy();const css=getComputedStyle(document.documentElement);Chart.defaults.color=css.getPropertyValue('--ink2').trim();Chart.defaults.borderColor=css.getPropertyValue('--line').trim();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:false},cfg.options||{});S.charts[id]=new Chart($(id),cfg)}
+// vertical 95% error bars for scatter datasets: each point may carry lo / hi in y units
+const ErrorBars={id:'errorBars',afterDatasetsDraw(c){const{ctx,scales:{x,y}}=c;c.data.datasets.forEach((ds,i)=>{if(!ds.errorBars||!c.isDatasetVisible(i))return;ctx.save();ctx.strokeStyle=ds.borderColor||'#888';ctx.lineWidth=1.5;
+ for(const p of ds.data){if(p.lo==null)continue;const px=x.getPixelForValue(p.x),a=y.getPixelForValue(p.lo),b=y.getPixelForValue(p.hi);ctx.beginPath();ctx.moveTo(px,a);ctx.lineTo(px,b);ctx.moveTo(px-4,a);ctx.lineTo(px+4,a);ctx.moveTo(px-4,b);ctx.lineTo(px+4,b);ctx.stroke()}ctx.restore()})}};
+// shaded horizontal band, e.g. the ±5 point tolerance around zero
+const Band=lo=>({id:'band',beforeDatasetsDraw(c){const{ctx,chartArea:A,scales:{y}}=c;const a=Math.max(A.top,Math.min(A.bottom,y.getPixelForValue(lo[1]))),b=Math.max(A.top,Math.min(A.bottom,y.getPixelForValue(lo[0])));ctx.save();ctx.fillStyle='rgba(127,127,127,.12)';ctx.fillRect(A.left,a,A.right-A.left,b-a);ctx.restore()}});
+const wilson=(k,n,z=1.96)=>{if(!n)return[0,1];const p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return[Math.max(0,c-h),Math.min(1,c+h)]};
+// regularised lower incomplete gamma, for the chi-square p-value of the Hosmer-Lemeshow test
+const gammaP=(a,x)=>{if(x<=0)return 0;const gln=(()=>{const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,.1208650973866179e-2,-.5395239384953e-5];let y=a,t=a+5.5;t-=(a+.5)*Math.log(t);let s=1.000000000190015;for(const v of c)s+=v/++y;return -t+Math.log(2.5066282746310005*s/a)})();
+ if(x<a+1){let ap=a,sum=1/a,del=sum;for(let n=0;n<200;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-10)break}return sum*Math.exp(-x+a*Math.log(x)-gln)}
+ let b=x+1-a,c=1/1e-30,d=1/b,h=d;for(let i=1;i<200;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-10)break}return 1-Math.exp(-x+a*Math.log(x)-gln)*h};
+const chi2p=(x,df)=>df>0?1-gammaP(df/2,x/2):null;
+function table(id,head,rows,opts={}){
+ const t=$(id);t.replaceChildren();const tr=document.createElement('tr');
+ head.forEach((h,k)=>{const th=document.createElement('th');th.textContent=h;th.onclick=()=>{const dir=t.dataset.sort==k?-+t.dataset.dir||-1:1;t.dataset.sort=k;t.dataset.dir=dir;rows.sort((a,b)=>{const x=a[k]?.v??a[k],y=b[k]?.v??b[k];return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*dir});body()};tr.append(th)});
+ const thead=document.createElement('thead');thead.append(tr);t.append(thead);const tb=document.createElement('tbody');t.append(tb);
+ const body=()=>{tb.replaceChildren(...rows.slice(0,opts.max||500).map(r=>{const tr=document.createElement('tr');r.forEach(c=>{const td=document.createElement('td');if(c&&typeof c==='object'&&'v'in c){td.innerHTML=c.h??fmt(c.v);if(c.n!==false)td.className='n'}else if(typeof c==='number'){td.textContent=fmt(c,Number.isInteger(c)?0:2);td.className='n'}else td.textContent=c??'';tr.append(td)});return tr}))};body();
+ // numbers sit on the right, so their headers do too
+ const cells=[...tb.rows].slice(0,20);[...tr.cells].forEach((th,k)=>{const nums=cells.filter(r=>r.cells[k]&&r.cells[k].classList.contains('n')).length;th.classList.toggle('n',k>0&&cells.length>0&&nums>=cells.length/2)})}
+const P=v=>({v,h:pct(v)});
+
+function analyse(){
+ const {sess,ans,rev,typo}=filtered(),minN=+$('f-min').value||20,summary={};
+ const toc=$('toc');toc.replaceChildren(...[...document.querySelectorAll('#dash section[id]')].map(s=>{const a=document.createElement('a');a.href='#'+s.id;a.textContent=s.querySelector('h2').textContent.replace(/^\d+\.\s*/,'');return a}));
+ /* 1 overview */
+ const learners=new Set(sess.map(r=>r.lid)),acc=ans.length?ans.filter(a=>a.ok).length/ans.length:null,done=sess.filter(r=>r.done).length;
+ const days=new Map();for(const r of sess){const k=dayKey(r.t0);const d=days.get(k)||{u:new Set(),n:0,ok:0};d.u.add(r.lid);days.set(k,d)}for(const a of ans){const d=days.get(dayKey(a.at));if(d){d.n++;d.ok+=a.ok}}
+ const dk=[...days.keys()].sort();
+ const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:ans.length?median(ans.map(a=>a.ms))/1000:null,completionRate:sess.length?done/sess.length:null,medianSessionMin:sess.some(r=>r.dur>0)?median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000:null,avgDailyActive:dk.length?[...days.values()].reduce((s,d)=>s+d.u.size,0)/dk.length:null};
+ summary.overview=ov;
+ $('kpis').innerHTML=[['學習人數',fmt(ov.learners)],['回合數',fmt(ov.sessions)],['作答題數',fmt(ov.answers)],['整體答對率',pct(ov.accuracy)],['每題作答時間（中位數）',fmt(ov.medianSecPerAnswer,1)+' 秒'],['回合完成率',pct(ov.completionRate)],['每回合時間（中位數）',fmt(ov.medianSessionMin,1)+' 分'],['平均每日學習人數',fmt(ov.avgDailyActive,1)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
+ chart('c-daily',{type:'bar',data:{labels:dk,datasets:[{type:'line',label:'學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566f55'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
+ summary.daily=dk.slice(-30).map(k=>({day:k,learners:days.get(k).u.size,answers:days.get(k).n,accuracy:days.get(k).n?+(days.get(k).ok/days.get(k).n).toFixed(3):null}));
+
+ /* 2 words */
+ // accuracy of every level x question type: the yardstick for "is this word harder than its level?"
+ const LT={};for(const a of ans){const k=a.l+'|'+a.q,x=LT[k]||(LT[k]={n:0,ok:0});x.n++;x.ok+=a.ok}
+ const ltAcc=(l,q)=>{const x=LT[l+'|'+q];return x&&x.n?x.ok/x.n:null};
+ const W=new Map();for(const a of ans){const w=W.get(a.w)||{w:a.w,l:a.l,gr:a.gr||0,n:0,ok:0,ms:[],q:{}};w.n++;w.ok+=a.ok;w.ms.push(a.ms);const q=w.q[a.q]||(w.q[a.q]={n:0,ok:0});q.n++;q.ok+=a.ok;W.set(a.w,w)}
+ const lvAcc={};for(const w of W.values()){const L=lvAcc[w.l]||(lvAcc[w.l]={n:0,ok:0});L.n+=w.n;L.ok+=w.ok}
+ const lvlMean={};for(const l in lvAcc)lvlMean[l]=lvAcc[l].ok/lvAcc[l].n;
+ const means=Object.keys(lvlMean).map(Number).sort();const nearest=acc=>means.reduce((b,l)=>Math.abs(lvlMean[l]-acc)<Math.abs(lvlMean[b]-acc)?l:b,means[0]);
+ // expected accuracy for this word = the same level's accuracy on the same question types, weighted by how often
+ // this word met each type; "looks like level X" compares against every level with that same mix
+ const expectFor=(w,l)=>{let e=0,n=0,v=0;for(const q in w.q){const p=ltAcc(l,q);if(p==null)continue;const k=w.q[q].n;e+=p*k;v+=p*(1-p)*k;n+=k}return n?{e:e/n,v:v/(n*n),n}:null};
+ const wl=[...W.values()].filter(w=>w.n>=minN).map(w=>{const a=w.ok/w.n,ex=expectFor(w,w.l)||{e:lvlMean[w.l],v:lvlMean[w.l]*(1-lvlMean[w.l])/w.n},z=(a-ex.e)/(Math.sqrt(ex.v)||1);
+  let like=w.l,best=Infinity;for(const l of means){const x=expectFor(w,l);if(x&&Math.abs(x.e-a)<best){best=Math.abs(x.e-a);like=l}}
+  return Object.assign(w,{acc:a,exp:ex.e,z,like,flag:Math.abs(z)>2.5&&like!==w.l,med:median(w.ms)/1000})});
+ const wordRows=()=>{const q=$('w-search').value.trim().toLowerCase(),only=$('w-flag').checked;return wl.filter(w=>(!q||w.w.toLowerCase().includes(q))&&(!only||w.flag)).map(w=>[w.w,'L'+w.l,{v:w.gr||0,h:w.gr?GRADE_NAME(w.gr):'–'},w.n,P(w.acc),P(w.exp),{v:w.med,h:fmt(w.med,1)+' 秒'},...['en2zh','zh2en','listen','spell','listenspell'].map(k=>w.q[k]&&w.q[k].n>=3?P(w.q[k].ok/w.q[k].n):{v:-1,h:'–'}),{v:w.flag?(w.like>w.l?2:1):0,h:w.flag?`<span class="tag ${w.like>w.l?'hard':'easy'}">像 L${w.like}</span>`:'',n:false}])};
+ const drawWords=()=>table('t-words',['單字','標示程度','建議年級','作答數','答對率','同程度同題型期望','時間','看英選中','看中選英','聽音選義','拼字','聽寫','程度可能標錯'],wordRows().sort((a,b)=>a[4].v-b[4].v));
+ drawWords();$('w-search').oninput=drawWords;$('w-flag').onchange=drawWords;
+ $('w-csv').onclick=()=>{const rows=[['word','level','n','accuracy','expected','median_sec','looks_like_level','flag'],...wl.map(w=>[w.w,w.l,w.n,w.acc.toFixed(3),w.exp.toFixed(3),w.med.toFixed(2),w.like,w.flag?1:0])];const b=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='word-difficulty.csv';a.click()};
+ summary.levelAccuracy=Object.fromEntries(Object.entries(lvlMean).map(([l,v])=>['L'+l,+v.toFixed(3)]));
+ summary.hardestWords=[...wl].sort((a,b)=>a.acc-b.acc).slice(0,25).map(w=>({word:w.w,level:w.l,n:w.n,accuracy:+w.acc.toFixed(3)}));
+ summary.easiestWords=[...wl].sort((a,b)=>b.acc-a.acc).slice(0,10).map(w=>({word:w.w,level:w.l,n:w.n,accuracy:+w.acc.toFixed(3)}));
+ summary.levelMismatch=wl.filter(w=>w.flag).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z)).slice(0,25).map(w=>({word:w.w,labeled:'L'+w.l,behavesLike:'L'+w.like,n:w.n,accuracy:+w.acc.toFixed(3),expectedForLabel:+w.exp.toFixed(3)}));
+ summary.wordsWithEnoughData=wl.length;
+
+ /* 3 matrix */
+ const M={};for(const a of ans){const k=a.l+'|'+a.q;const m=M[k]||(M[k]={n:0,ok:0});m.n++;m.ok+=a.ok}
+ const qts=Object.keys(QT),lvls=[1,2,3,4,5,6].filter(l=>qts.some(q=>M[l+'|'+q]));
+ table('t-matrix',['程度',...qts.map(q=>QT[q])],lvls.map(l=>['L'+l,...qts.map(q=>{const m=M[l+'|'+q];return m?{v:m.ok/m.n,h:pct(m.ok/m.n)+` <span class="muted">(${m.n})</span>`}:{v:-1,h:'–'}})]));
+ chart('c-level',{type:'line',data:{labels:lvls.map(l=>'L'+l),datasets:qts.map((q,k)=>({label:QT[q],data:lvls.map(l=>{const m=M[l+'|'+q];return m?+(m.ok/m.n*100).toFixed(1):null}),borderColor:['#8c5aa8','#d9566f','#3f8a4f','#b86a12','#3a7bd5'][k]}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}}}}});
+ const GM={};for(const a of ans){const b=bandOf(a.gr||0);if(!b)continue;const k=b+'|'+a.q,m=GM[k]||(GM[k]={n:0,ok:0});m.n++;m.ok+=a.ok}
+ const bands=Object.keys(GB).filter(b=>qts.some(q=>GM[b+'|'+q]));
+ table('t-grade',['年級帶',...qts.map(q=>QT[q])],bands.map(b=>[GBN[b],...qts.map(q=>{const m=GM[b+'|'+q];return m?{v:m.ok/m.n,h:pct(m.ok/m.n)+` <span class="muted">(${m.n})</span>`}:{v:-1,h:'–'}})]));
+ summary.gradeBandByType=Object.fromEntries(bands.map(b=>[GBN[b],Object.fromEntries(qts.filter(q=>GM[b+'|'+q]).map(q=>[q,{n:GM[b+'|'+q].n,accuracy:+(GM[b+'|'+q].ok/GM[b+'|'+q].n).toFixed(3)}]))]));
+ summary.levelByType=Object.fromEntries(lvls.map(l=>['L'+l,Object.fromEntries(qts.filter(q=>M[l+'|'+q]).map(q=>[q,{n:M[l+'|'+q].n,accuracy:+(M[l+'|'+q].ok/M[l+'|'+q].n).toFixed(3)}]))]));
+
+ /* 4 confusions */
+ const pair=new Map();for(const a of ans)if(!a.ok&&a.g&&(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen')){const k=a.w+'→'+a.g;pair.set(k,(pair.get(k)||0)+1)}
+ const pairTot={};for(const a of ans)if(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen')pairTot[a.w]=(pairTot[a.w]||0)+1;
+ // The game draws new random distractors every time, so the same answer -> wrong-word pair rarely repeats.
+ // The old fixed cut-off (3 or more) left this table empty on real data; the cut-off now follows the data size.
+ const wrongPicks=[...pair.values()].reduce((s,n)=>s+n,0),minPair=wrongPicks>=20000?3:wrongPicks>=3000?2:1;
+ const pairs=[...pair.entries()].map(([k,n])=>{const[w,g]=k.split('→');return{w,g,n,share:n/(pairTot[w]||1)}}).filter(p=>p.n>=minPair).sort((a,b)=>b.n-a.n||b.share-a.share);
+ $('pairs-note').textContent=wrongPicks?`共 ${fmt(wrongPicks)} 次選錯；列出出現 ${minPair} 次以上的組合。干擾選項每次隨機抽，同一組合重複出現代表學生真的把這兩個字搞混。`:'還沒有選擇題答錯的紀錄。';
+ table('t-pairs',['正確答案','被誤選成','次數','佔該字作答'],pairs.slice(0,200).map(p=>[p.w,p.g,p.n,P(p.share)]));
+ const lure=new Map(),shown=new Map();for(const a of ans)if(!a.ok&&a.g&&(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen'))lure.set(a.g,(lure.get(a.g)||0)+1);
+ const byLure=new Map();for(const [k,c] of pair){const i=k.indexOf('→'),w=k.slice(0,i),g=k.slice(i+1);(byLure.get(g)||byLure.set(g,[]).get(g)).push([w,c])}
+ const lures=[...lure.entries()].map(([g,n])=>({g,n,ans:(byLure.get(g)||[]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]+'×'+x[1]).join('、')})).sort((a,b)=>b.n-a.n);
+ table('t-lure',['被誤選的字','次數','常被誤認為哪些字的答案'],lures.slice(0,100).map(x=>[x.g,x.n,x.ans]));
+ summary.topLures=lures.slice(0,15).map(x=>({word:x.g,chosenWrongly:x.n}));
+ summary.topConfusions=pairs.slice(0,25).map(p=>({answer:p.w,chosen:p.g,count:p.n,shareOfAttempts:+p.share.toFixed(3)}));
+ const spellWrong=[...ans.filter(a=>!a.ok&&(a.q==='spell'||a.q==='listenspell')&&a.g).map(a=>({w:a.w,g:a.g})),...typo.flatMap(t=>(t.g||[]).map(g=>({w:t.w,g})))];
+ const cat=c=>{const{w,g}=c,W=w.toLowerCase();if(!g)return'空白';if(g===W)return'正確';if(Math.abs(g.length-W.length)>=3)return'差很多';
+  if(g.length===W.length){const d=[...W].map((ch,i)=>ch!==g[i]?i:-1).filter(i=>i>=0);if(d.length===2&&d[1]===d[0]+1&&W[d[0]]===g[d[1]]&&W[d[1]]===g[d[0]])return'相鄰字母對調';if(d.length===1)return/[aeiou]/.test(W[d[0]])&&/[aeiou]/.test(g[d[0]])?'母音寫錯':'錯一個字母';return'多處錯誤'}
+  const short=g.length<W.length?g:W,long=g.length<W.length?W:g;for(let i=0;i<long.length;i++)if(long.slice(0,i)+long.slice(i+1)===short){const dbl=long[i]===long[i-1]||long[i]===long[i+1];return g.length<W.length?(dbl?'少寫重複字母':'漏一個字母'):(dbl?'多寫重複字母':'多一個字母')}
+  if(/(ie|ei)/.test(W)&&g.replace(/ie|ei/g,'_')===W.replace(/ie|ei/g,'_'))return'ie / ei 混淆';return'多處錯誤'};
+ const sc={};const sw=new Map();for(const c of spellWrong){const t=cat(c);sc[t]=(sc[t]||0)+1;const k=c.w+'|'+c.g;sw.set(k,(sw.get(k)||{w:c.w,g:c.g,n:0,t})),sw.get(k).n++}
+ const sct=Object.entries(sc).sort((a,b)=>b[1]-a[1]);
+ chart('c-spell',{type:'bar',data:{labels:sct.map(x=>x[0]),datasets:[{label:'次數',data:sct.map(x=>x[1]),backgroundColor:'#8c5aa8'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+ const swl=[...sw.values()].sort((a,b)=>b.n-a.n);table('t-spell',['單字','打成','類型','次數'],swl.slice(0,200).map(x=>[x.w,x.g,x.t,x.n]));
+ summary.spellingErrorTypes=Object.fromEntries(sct);summary.topMisspellings=swl.slice(0,20).map(x=>({word:x.w,typed:x.g,type:x.t,count:x.n}));
+
+ /* 5 forgetting */
+ const B=[[1,1],[2,2],[3,4],[5,7],[8,15],[16,30],[31,9999]],bl=b=>b[1]>999?'31天以上':b[0]===b[1]?b[0]+'天':b[0]+'–'+b[1]+'天',SRS=[0,1,2,4,7,15];
+ const exactOnly=ans.some(a=>a.ge===0&&a.gap>=1);const F={};for(const a of ans){if(a.gap==null||a.gap<1||a.b0<1)continue;if(exactOnly&&a.ge!==0)continue;const bi=B.findIndex(b=>a.gap>=b[0]&&a.gap<=b[1]);const k=a.b0+'|'+bi;const f=F[k]||(F[k]={n:0,ok:0});f.n++;f.ok+=a.ok}
+ const boxes=[1,2,3,4,5];
+ chart('c-forget',{type:'line',data:{labels:B.map(bl),datasets:boxes.map((b,k)=>({label:'盒'+b+'（間隔 '+SRS[b]+' 天）',data:B.map((_,bi)=>{const f=F[b+'|'+bi];return f&&f.n>=10?+(f.ok/f.n*100).toFixed(1):null}),borderColor:['#d9566f','#b86a12','#3f8a4f','#3a7bd5','#8c5aa8'][k],spanGaps:true}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}},x:{title:{display:true,text:'距離上次作答'}}}}});
+ table('t-forget',['熟練盒','目前間隔',...B.map(bl)],boxes.map(b=>['盒'+b,SRS[b]+' 天',...B.map((_,bi)=>{const f=F[b+'|'+bi];return f?{v:f.ok/f.n,h:pct(f.ok/f.n)+` <span class="muted">(${f.n})</span>`}:{v:-1,h:'–'}})]));
+ summary.forgettingCurve={gapSource:exactOnly?'exact (0.92.45+)':'estimated from due day (older logs; inflated after wrong answers)',currentIntervalsDays:{box1:1,box2:2,box3:4,box4:7,box5:15},accuracyByBoxAndGap:Object.fromEntries(boxes.map(b=>['box'+b,Object.fromEntries(B.map((x,bi)=>[bl(x),F[b+'|'+bi]?{n:F[b+'|'+bi].n,accuracy:+(F[b+'|'+bi].ok/F[b+'|'+bi].n).toFixed(3)}:null]).filter(x=>x[1]))]))};
+
+ /* 6 calibration */
+ const SK=q=>q==='listenspell'?'listenspell':q==='spell'?'spell':q==='listen'?'listen':'meaning';
+ const SKN={meaning:'看字選義',listen:'聽音選義',spell:'拼字',listenspell:'聽寫'},GUESS={meaning:.25,listen:.25,spell:0,listenspell:0};
+ const COL={meaning:'#8c5aa8',listen:'#3f8a4f',spell:'#d9566f',listenspell:'#b86a12'};
+ const ADAPTIVE=new Set(['daily','practice','need','train','help','team','chal']);
+ const scope=$('cal-scope').value,NB=+$('cal-bins').value||15;
+ const PA=ans.filter(a=>typeof a.p==='number'&&a.p>=0&&a.p<=1&&(scope!=='adaptive'||(ADAPTIVE.has(a.kind)&&!a.re)));
+ const lg=x=>{x=Math.min(1-1e-6,Math.max(1e-6,x));return Math.log(x/(1-x))},sig=x=>1/(1+Math.exp(-x));
+ const calStats=(list,k=NB)=>{const n=list.length;if(!n)return null;let sp=0,sy=0,br=0,ll=0,vv=0;for(const a of list){sp+=a.p;sy+=a.ok;vv+=a.p*(1-a.p);br+=(a.p-a.ok)**2;const q=Math.min(1-1e-6,Math.max(1e-6,a.p));ll-=a.ok?Math.log(q):Math.log(1-q)}
+  const mp=sp/n,my=sy/n,base=my*(1-my),bs=br/n,se=Math.sqrt(vv)/n,z=se?(my-mp)/se:0;
+  let b0=0,b1=1;if(n>=30&&my>0&&my<1)for(let it=0;it<30;it++){let g0=0,g1=0,h00=0,h01=0,h11=0;for(const a of list){const x=lg(a.p),m=sig(b0+b1*x),w=m*(1-m);g0+=a.ok-m;g1+=(a.ok-m)*x;h00+=w;h01+=w*x;h11+=w*x*x}const det=h00*h11-h01*h01;if(Math.abs(det)<1e-9)break;const d0=(h11*g0-h01*g1)/det,d1=(h00*g1-h01*g0)/det;b0+=d0;b1+=d1;if(Math.abs(d0)+Math.abs(d1)<1e-7)break}
+  const srt=[...list].sort((a,b)=>a.p-b.p),bins=[],kk=Math.min(k,Math.max(1,Math.floor(n/25)));let ece=0,hl=0;
+  for(let i=0;i<kk;i++){const part=srt.slice(Math.floor(i*n/kk),Math.floor((i+1)*n/kk));if(!part.length)continue;const m=part.length,e=part.reduce((s,a)=>s+a.p,0),o=part.reduce((s,a)=>s+a.ok,0),px=e/m,py=o/m,[lo,hi]=wilson(o,m);
+   bins.push({x:px,y:py,n:m,lo,hi,pmin:part[0].p,pmax:part[m-1].p});ece+=m/n*Math.abs(px-py);const ev=part.reduce((s,a)=>s+a.p*(1-a.p),0);if(ev>0)hl+=(o-e)**2/ev}
+  return{n,meanP:mp,actual:my,gap:my-mp,gapLo:my-mp-1.96*se,gapHi:my-mp+1.96*se,z,brier:bs,baseBrier:base,bss:base>0?1-bs/base:null,logloss:ll/n,slope:n>=30?b1:null,intercept:n>=30?b0:null,ece,hl,hlP:bins.length>2?chi2p(hl,bins.length-2):null,bins}};
+ const all=calStats(PA),bySkill={};for(const k in SKN){const c=calStats(PA.filter(a=>SK(a.q)===k));if(c)bySkill[k]=c}
+ const pp=x=>(x>0?'+':'')+(x*100).toFixed(1),pts=x=>pp(x)+' 個百分點',f2=x=>x==null?'–':x.toFixed(2),f3=x=>x==null?'–':x.toFixed(3);
+ const sigTxt=c=>c.gapLo>0||c.gapHi<0?'顯著':'不顯著';
+ // ---- KPI tiles
+ const TA=ans.filter(a=>ADAPTIVE.has(a.kind)&&!a.re),taAcc=TA.length?TA.reduce((s,a)=>s+a.ok,0)/TA.length:null;
+ const kpi=(v,l,sub,cls='')=>`<div class="kpi ${cls}"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+ $('calib-kpis').innerHTML=all?[
+  kpi(fmt(all.n),'有預測值的作答',scope==='adaptive'?'只含自適應入口':'全部入口'),
+  kpi(pct(all.meanP),'平均預測答對率'),kpi(pct(all.actual),'實際答對率'),
+  kpi(pp(all.gap)+' 點','整體偏差（百分點）',`95% 信賴區間 ${pp(all.gapLo)} ～ ${pp(all.gapHi)}（${sigTxt(all)}）`,Math.abs(all.gap)>=.03&&sigTxt(all)==='顯著'?'bad':'good'),
+  kpi(f2(all.slope),'校正斜率','理想 1；<1 太極端、>1 太保守',all.slope!=null&&(all.slope<.8||all.slope>1.25)?'bad':'good'),
+  kpi(pct(all.ece),'平均校正誤差 ECE','各組 |實際−預測| 的加權平均',all.ece>.05?'bad':'good'),
+  kpi(f3(all.bss),'技巧分數 BSS','>0 才比「猜平均」準',all.bss!=null&&all.bss<=0?'bad':''),
+  kpi(pct(taAcc),'自適應入口實際答對率','目標約 85%',taAcc!=null&&Math.abs(taAcc-.85)>.05?'bad':'good')].join(''):'<p class="muted">還沒有預測值資料。</p>';
+ // ---- gap chart (zoomed y)
+ const gapPts=Object.entries(bySkill).flatMap(([k,c])=>c.bins.map(b=>[b.lo-b.x,b.hi-b.x]));const gl=Math.min(-.06,...gapPts.map(g=>g[0])),gh=Math.max(.06,...gapPts.map(g=>g[1]));
+ const xs=Object.values(bySkill).flatMap(c=>c.bins.map(b=>b.x)),xl=xs.length?Math.max(0,Math.floor((Math.min(...xs)-.03)*20)/20):0,xh=xs.length?Math.min(1,Math.ceil((Math.max(...xs)+.03)*20)/20):1;
+ const tip={callbacks:{label:t=>{const d=t.raw;return `${t.dataset.label}：預測 ${(d.px*100).toFixed(1)}% → 實際 ${(d.py*100).toFixed(1)}%（偏差 ${pp(d.py-d.px)}，95% 區間 ${pp(d.lo0-d.px)}～${pp(d.hi0-d.px)}，${d.n} 題，預測範圍 ${(d.pmin*100).toFixed(0)}–${(d.pmax*100).toFixed(0)}%）`}}};
+ chart('c-calib-gap',{type:'scatter',plugins:[ErrorBars,Band([-5,5])],data:{datasets:[...Object.entries(bySkill).map(([k,c])=>({label:SKN[k]+`（${fmt(c.n)} 題）`,errorBars:true,showLine:true,borderColor:COL[k],backgroundColor:COL[k],pointRadius:c.bins.map(b=>Math.max(3,Math.min(9,Math.sqrt(b.n)/5))),
+   data:c.bins.map(b=>({x:+(b.x*100).toFixed(2),y:+((b.y-b.x)*100).toFixed(2),lo:+((b.lo-b.x)*100).toFixed(2),hi:+((b.hi-b.x)*100).toFixed(2),px:b.x,py:b.y,lo0:b.lo,hi0:b.hi,n:b.n,pmin:b.pmin,pmax:b.pmax}))})),
+   {type:'line',label:'0（完全準確）',data:[{x:xl*100,y:0},{x:xh*100,y:0}],borderColor:'#999',borderWidth:1.5,pointRadius:0}]},
+  options:{plugins:{tooltip:tip},scales:{x:{type:'linear',min:xl*100,max:xh*100,title:{display:true,text:'預測答對率 %（每組的平均）'}},y:{min:Math.floor(gl*100)-1,max:Math.ceil(gh*100)+1,title:{display:true,text:'實際 − 預測（百分點）'},ticks:{callback:v=>(v>0?'+':'')+v}}}}});
+ // ---- reliability curve, zoomed
+ const ys=Object.values(bySkill).flatMap(c=>c.bins.flatMap(b=>[b.lo,b.hi])),yl=ys.length?Math.max(0,Math.floor((Math.min(xl,...ys))*20)/20):0,yh=ys.length?Math.min(1,Math.ceil((Math.max(xh,...ys))*20)/20):1;
+ chart('c-calib',{type:'scatter',plugins:[ErrorBars],data:{datasets:[...Object.entries(bySkill).map(([k,c])=>({label:SKN[k],errorBars:true,showLine:true,borderColor:COL[k],backgroundColor:COL[k],pointRadius:3,
+   data:c.bins.map(b=>({x:+(b.x*100).toFixed(2),y:+(b.y*100).toFixed(2),lo:+(b.lo*100).toFixed(2),hi:+(b.hi*100).toFixed(2),px:b.x,py:b.y,lo0:b.lo,hi0:b.hi,n:b.n,pmin:b.pmin,pmax:b.pmax}))})),
+   {type:'line',label:'完美校正',data:[{x:Math.min(xl,yl)*100,y:Math.min(xl,yl)*100},{x:Math.max(xh,yh)*100,y:Math.max(xh,yh)*100}],borderColor:'#999',borderDash:[5,5],pointRadius:0}]},
+  options:{plugins:{tooltip:tip},scales:{x:{min:Math.min(xl,yl)*100,max:Math.max(xh,yh)*100,title:{display:true,text:'預測答對率 %'}},y:{min:Math.min(xl,yl)*100,max:Math.max(xh,yh)*100,title:{display:true,text:'實際答對率 %'}}}}});
+ // ---- histogram of predictions, stacked by skill
+ const HB=20,hist={};for(const a of PA){const k=SK(a.q),i=Math.min(HB-1,Math.floor(a.p*HB));(hist[k]||(hist[k]=Array(HB).fill(0)))[i]++}
+ chart('c-calib-hist',{type:'bar',data:{labels:Array.from({length:HB},(_,i)=>(i*100/HB)+'–'+((i+1)*100/HB)),datasets:Object.keys(hist).map(k=>({label:SKN[k],data:hist[k],backgroundColor:COL[k]}))},options:{scales:{x:{stacked:true,title:{display:true,text:'預測答對率 %'}},y:{stacked:true,title:{display:true,text:'題數'}}}}});
+ // ---- weekly trend
+ const WK={};for(const a of PA){const d=dayNo(a.at),k=dayNoKey(d-((d+4)%7)),w=WK[k]||(WK[k]={n:0,p:0,y:0});w.n++;w.p+=a.p;w.y+=a.ok}
+ const wks=Object.keys(WK).sort();
+ chart('c-calib-trend',{type:'bar',data:{labels:wks,datasets:[{type:'line',label:'平均預測',data:wks.map(k=>+(WK[k].p/WK[k].n*100).toFixed(1)),borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',yAxisID:'y'},{type:'line',label:'實際答對率',data:wks.map(k=>+(WK[k].y/WK[k].n*100).toFixed(1)),borderColor:'#d9566f',backgroundColor:'#d9566f',yAxisID:'y'},{type:'bar',label:'題數',data:wks.map(k=>WK[k].n),backgroundColor:'#8c5aa833',yAxisID:'y2'}]},
+  options:{scales:{y:{title:{display:true,text:'答對率 %'},grace:'5%'},y2:{position:'right',grid:{display:false},title:{display:true,text:'題數'}}}}});
+ // ---- tables
+ const verdict=c=>{if(!c||c.n<30)return'資料不足';const v=[];if(sigTxt(c)==='顯著'&&Math.abs(c.gap)>=.02)v.push(c.gap<0?'整體高估 '+pts(-c.gap).replace('+',''):'整體低估 '+pts(c.gap));
+  if(c.slope!=null){if(c.slope<.8)v.push('預測太極端');else if(c.slope>1.25)v.push('預測太保守')}if(c.hlP!=null&&c.hlP<.05)v.push('各區間有系統性偏差（HL p='+c.hlP.toFixed(3)+'）');if(c.bss!=null&&c.bss<=0)v.push('沒有比猜平均準');return v.length?v.join('；'):'校正良好'};
+ const ciCell=c=>({v:c.gap,h:`${pts(c.gap)}<br><span class="muted">${pp(c.gapLo)}～${pp(c.gapHi)}</span>`});
+ table('t-calib-skill',['技能','題數','平均預測','實際','偏差（95% 區間）','Brier／基準','BSS','Log loss','斜率','截距','ECE','HL χ²（p）','判讀'],Object.entries(bySkill).map(([k,c])=>[SKN[k],c.n,P(c.meanP),P(c.actual),ciCell(c),{v:c.brier,h:c.brier.toFixed(3)+' / '+c.baseBrier.toFixed(3)},{v:c.bss??-9,h:f3(c.bss)},+c.logloss.toFixed(3),{v:c.slope??0,h:f2(c.slope)},{v:c.intercept??0,h:f2(c.intercept)},{v:c.ece,h:pct(c.ece)},{v:c.hl,h:c.hl.toFixed(1)+(c.hlP==null?'':` (${c.hlP<.001?'<0.001':c.hlP.toFixed(3)})`)},{v:0,h:verdict(c),n:false}]));
+ // difficulty correction: residual on the logistic part (guessing floor removed), converted to the d scale (0.75 per unit)
+ const corr=list=>{let w=0,sum=0;for(const k in SKN){const L=list.filter(a=>SK(a.q)===k);if(L.length<50)continue;const g=GUESS[k],mp=L.reduce((s,a)=>s+a.p,0)/L.length,my=L.reduce((s,a)=>s+a.ok,0)/L.length,cl=x=>Math.min(.99,Math.max(.01,(x-g)/(1-g)));sum+=(lg(cl(mp))-lg(cl(my)))*L.length;w+=L.length}return w?sum/w/.75:null};
+ const grpTable=(id,key,label,order)=>{const G={};for(const a of PA){const k=key(a);if(k==null)continue;(G[k]||(G[k]=[])).push(a)}
+  table(id,[label,'題數','平均預測','實際','偏差（95% 區間）','斜率','各技能偏差','建議 Δd'],order(Object.keys(G)).map(k=>{const L=G[k],c=calStats(L,10),sk=Object.keys(SKN).map(s=>{const x=L.filter(a=>SK(a.q)===s);if(x.length<30)return'';const g=x.reduce((t,a)=>t+a.ok-a.p,0)/x.length;return SKN[s]+' '+pp(g)}).filter(Boolean).join('　'),d=L.length>=150?corr(L):null;
+   return[k,c.n,P(c.meanP),P(c.actual),ciCell(c),{v:c.slope??0,h:f2(c.slope)},{v:0,h:sk||'–',n:false},{v:d??0,h:d==null?'資料不足':`<b>${(d>0?'+':'')+d.toFixed(2)}</b>`}]}));return G};
+ const LV=grpTable('t-calib-level',a=>a.l?'L'+a.l:null,'程度',ks=>ks.sort());
+ grpTable('t-calib-grade',a=>a.gr?(GBN[bandOf(a.gr)]||null):null,'年級帶',ks=>Object.values(GBN).filter(x=>ks.includes(x)));
+ const KINDCAL={};for(const a of ans.filter(a=>typeof a.p==='number'&&a.p>=0&&a.p<=1))(KINDCAL[a.kind]||(KINDCAL[a.kind]=[])).push(a);
+ table('t-calib-kind',['入口','題數','平均預測','實際','偏差（95% 區間）','Brier','參與 85% 目標'],Object.entries(KINDCAL).map(([k,l])=>{const c=calStats(l,10);return[KIND[k]||k,c.n,P(c.meanP),P(c.actual),ciCell(c),+c.brier.toFixed(3),ADAPTIVE.has(k)?'是':'否']}).sort((a,b)=>b[1]-a[1]));
+ // ---- text + fix formula
+ const taBy={};for(const a of TA){const k=SK(a.q),x=taBy[k]||(taBy[k]={n:0,ok:0});x.n++;x.ok+=a.ok}
+ const worst=Object.entries(bySkill).filter(([,c])=>sigTxt(c)==='顯著').sort((a,b)=>Math.abs(b[1].gap)-Math.abs(a[1].gap))[0];
+ $('calib-text').innerHTML=all?`<b>判讀</b>：${verdict(all)}。${worst?`偏差最大的是<b>${SKN[worst[0]]}</b>（${pts(worst[1].gap)}）。`:''}
+  Brier ${all.brier.toFixed(3)}，只猜平均答對率的基準是 ${all.baseBrier.toFixed(3)}（答對率 85% 時，什麼都不會的模型也只有 0.13，所以 Brier 要和基準比，不能和固定數字比）。
+  自適應入口的實際答對率 ${pct(taAcc)}（目標 85%）：${Object.entries(taBy).map(([k,x])=>SKN[k]+' '+pct(x.ok/x.n)).join('、')}。`:'';
+ $('calib-fix').innerHTML=all&&all.slope!=null?`用整體校正斜率與截距修正預測：<code>p′ = 1 / (1 + e^−(${f2(all.intercept)} + ${f2(all.slope)} × logit p))</code>。各技能：${Object.entries(bySkill).filter(([,c])=>c.slope!=null).map(([k,c])=>`${SKN[k]} 截距 ${f2(c.intercept)}、斜率 ${f2(c.slope)}`).join('；')}。<br>
+  若要直接改遊戲：斜率明顯偏離 1 時，把 <code>adaptive.js</code> 的 <code>probability()</code> 裡 logistic 的指數乘上斜率、再加上截距（猜中下限另外保留）；各程度的偏差則用上表的「建議 Δd」加到該程度單字的 <code>d</code>（<code>tools/vocab.json</code> 的 <code>purr_cozy.adaptive_tier</code>），再執行 <code>tools/build-vocab.py</code>。`:'資料不足，無法估計修正公式（至少需要 30 題有預測值的作答）。';
+ const pack=c=>c&&{n:c.n,meanPredicted:+c.meanP.toFixed(3),actual:+c.actual.toFixed(3),gap:+c.gap.toFixed(3),gap95:[+c.gapLo.toFixed(3),+c.gapHi.toFixed(3)],brier:+c.brier.toFixed(3),baseRateBrier:+c.baseBrier.toFixed(3),brierSkill:c.bss==null?null:+c.bss.toFixed(3),logLoss:+c.logloss.toFixed(3),calibrationSlope:c.slope==null?null:+c.slope.toFixed(2),calibrationIntercept:c.intercept==null?null:+c.intercept.toFixed(2),ece:+c.ece.toFixed(3),hosmerLemeshow:{chi2:+c.hl.toFixed(2),p:c.hlP==null?null:+c.hlP.toFixed(4)},bins:c.bins.map(b=>({predicted:+b.x.toFixed(3),actual:+b.y.toFixed(3),n:b.n}))};
+ summary.modelCalibration={scope,overall:pack(all),bySkill:Object.fromEntries(Object.entries(bySkill).map(([k,c])=>[k,pack(c)])),byLevel:Object.fromEntries(Object.entries(LV).map(([k,L])=>{const c=calStats(L,10);return[k,{n:c.n,gap:+c.gap.toFixed(3),suggestedDeltaD:L.length>=150?+corr(L).toFixed(2):null}]})),byEntry:Object.fromEntries(Object.entries(KINDCAL).map(([k,l])=>[k,{n:l.length,meanPredicted:+(l.reduce((s,a)=>s+a.p,0)/l.length).toFixed(3),actual:+(l.reduce((s,a)=>s+a.ok,0)/l.length).toFixed(3)}])),target:{value:.85,adaptiveEntriesAccuracy:taAcc==null?null:+taAcc.toFixed(3),n:TA.length,bySkill:Object.fromEntries(Object.entries(taBy).map(([k,x])=>[k,+(x.ok/x.n).toFixed(3)]))},notes:'p 含選擇題 25% 猜中下限；升級考與故事的干擾選項較難，模型未建模，不納入目標檢查；建議 Δd 以 d 刻度（0.75/單位）表示'};
+
+ /* 7 kinds */
+ const K={};for(const r of sess){const k=K[r.kind]||(K[r.kind]={s:0,d:0,n:0,ok:0,ms:[],next:0,nextOk:0,dur:[]});k.s++;if(r.done)k.d++;if(r.dur>0)k.dur.push(r.dur)}
+ const byUserWord=new Map();for(const a of ans.slice().sort((x,y)=>x.at-y.at)){const key=a.lid+'|'+a.w;(byUserWord.get(key)||byUserWord.set(key,[]).get(key)).push(a)}
+ for(const a of ans){const k=K[a.kind];if(!k)continue;k.n++;k.ok+=a.ok;k.ms.push(a.ms)}
+ for(const list of byUserWord.values())for(let i=0;i+1<list.length;i++){const a=list[i],b=list[i+1];if(b.at-a.at<36e5)continue;const k=K[a.kind];if(!k)continue;k.next++;k.nextOk+=b.ok}
+ for(const t of typo){const k=K.typo;if(k){k.n++;k.ok+=t.ok&&!t.rv?1:0;k.ms.push(t.ms)}}
+ const kr=Object.entries(K).sort((a,b)=>b[1].n-a[1].n);
+ table('t-kinds',['入口','回合','完成率','作答題數','答對率','每題時間','每回合時間','下次再遇到時答對率'],kr.map(([k,v])=>[KIND[k]||k,v.s,P(v.d/v.s),v.n,P(v.n?v.ok/v.n:null),{v:median(v.ms)/1000,h:fmt(median(v.ms)/1000,1)+' 秒'},{v:median(v.dur)/60000,h:fmt(median(v.dur)/60000,1)+' 分'},v.next>=20?{v:v.nextOk/v.next,h:pct(v.nextOk/v.next)+` <span class="muted">(${v.next})</span>`}:{v:-1,h:'資料不足'}]));
+ summary.entries=Object.fromEntries(kr.map(([k,v])=>[k,{sessions:v.s,completion:+(v.d/v.s).toFixed(3),answers:v.n,accuracy:v.n?+(v.ok/v.n).toFixed(3):null,nextTimeRecall:v.next>=20?+(v.nextOk/v.next).toFixed(3):null,nextTimeSamples:v.next}]));
+
+ /* 8 drop-off */
+ const undone=sess.filter(r=>!r.done),D={};for(const r of undone){const m=/^(\w+)@(\d+)\/(\d+)/.exec(r.stop||'');const key=m?(m[1]==='quiz'?'測驗第 '+(+m[2]+1)+' 題':m[1]==='review'||m[1]==='pause'?'複習第 '+(+m[2]+1)+' 張':m[1]):({left:'中途離開',restart:'改做別的',idle:'閒置太久'}[r.stop]||r.stop||'不明');D[key]=(D[key]||0)+1}
+ const dl=Object.entries(D).sort((a,b)=>b[1]-a[1]);
+ chart('c-drop',{type:'bar',data:{labels:dl.slice(0,15).map(x=>x[0]),datasets:[{label:'回合數',data:dl.slice(0,15).map(x=>x[1]),backgroundColor:'#d9566f'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+ const dk2={};for(const r of sess){const k=dk2[r.kind]||(dk2[r.kind]={s:0,u:0});k.s++;if(!r.done)k.u++}
+ table('t-drop',['入口','回合','沒完成','放棄率'],Object.entries(dk2).map(([k,v])=>[KIND[k]||k,v.s,v.u,P(v.u/v.s)]).sort((a,b)=>b[3].v-a[3].v));
+ summary.dropOff={unfinishedSessions:undone.length,share:sess.length?+(undone.length/sess.length).toFixed(3):null,topStops:dl.slice(0,12).map(([k,n])=>({where:k,sessions:n})),byEntry:Object.fromEntries(Object.entries(dk2).map(([k,v])=>[k,+(v.u/v.s).toFixed(3)]))};
+
+ /* 9 retention */
+ const allSess=S.raw.filter(who),first=new Map(),active=new Map();let lastDay=0;for(const r of allSess){const d=dayNo(r.t0);if(d>lastDay)lastDay=d;if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
+ const coh={};
+ // back = active on any day in [from, to] after the first day; counted only when that window has fully passed
+ const W3=[['d1',1,1],['w2',7,13],['w5',28,34]];
+ // cohort week starts on Sunday of the local calendar (dayNo 0 = 1970-01-01, a Thursday)
+ for(const [lid,d0] of first){if(!learners.has(lid))continue;const wk=dayNoKey(d0-((d0+4)%7));const c=coh[wk]||(coh[wk]={n:0});c.n++;const set=active.get(lid);
+  for(const [k,from,to] of W3){if(d0+to>lastDay)continue;c['e'+k]=(c['e'+k]||0)+1;let back=false;for(let x=d0+from;x<=d0+to;x++)if(set.has(x))back=true;if(back)c[k]=(c[k]||0)+1}}
+ const cr=Object.entries(coh).sort();
+ table('t-retain',['第一次學習那週','人數','隔天回來','第 2 週有回來','第 5 週有回來'],cr.map(([w,c])=>[w,c.n,...W3.map(([k])=>c['e'+k]?P((c[k]||0)/c['e'+k]):{v:-1,h:'還沒到'})]));
+ const H=Array.from({length:7},()=>Array(24).fill(0));for(const r of sess){const d=new Date(r.t0);H[d.getDay()][d.getHours()]++}
+ const wd=['日','一','二','三','四','五','六'];
+ chart('c-hour',{type:'bar',data:{labels:Array.from({length:24},(_,h)=>h+'時'),datasets:[{label:'平日',data:Array.from({length:24},(_,h)=>[1,2,3,4,5].reduce((s,d)=>s+H[d][h],0)),backgroundColor:'#8c5aa8'},{label:'週末',data:Array.from({length:24},(_,h)=>H[0][h]+H[6][h]),backgroundColor:'#d9566f'}]},options:{scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'回合數'}}}}});
+ const sum=k=>cr.reduce((s,[,c])=>s+(c[k]||0),0),rate=k=>sum('e'+k)?+(sum(k)/sum('e'+k)).toFixed(3):null;
+ summary.retention={nextDay:rate('d1'),week2:rate('w2'),week5:rate('w5'),cohorts:cr.slice(-8).map(([w,c])=>({week:w,learners:c.n}))};
+ summary.sessionsByHour=Array.from({length:24},(_,h)=>H.reduce((s,d)=>s+d[h],0));
+
+ /* 10 typo */
+ const tn=typo.length,first1=typo.filter(t=>t.ok&&!t.rv&&t.att<=1).length,rv=typo.filter(t=>t.rv).length,catN=typo.filter(t=>t.cat),catOk=catN.filter(t=>t.ok&&!t.rv).length,noCat=typo.filter(t=>!t.cat),noCatOk=noCat.filter(t=>t.ok&&!t.rv).length;
+ $('typo-kpis').innerHTML=[['拼過的字',fmt(tn)],['一次就拼對',pct(tn?first1/tn:null)],['平均嘗試次數',fmt(tn?typo.reduce((s,t)=>s+t.att,0)/tn:null,2)],['直接看答案',pct(tn?rv/tn:null)],['小貓搗蛋時拼對',pct(catN.length?catOk/catN.length:null)],['沒搗蛋時拼對',pct(noCat.length?noCatOk/noCat.length:null)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
+ const TW=new Map();for(const t of typo){const x=TW.get(t.w)||{w:t.w,l:t.l,n:0,ok:0,rv:0,att:0};x.n++;x.ok+=t.ok&&!t.rv?1:0;x.rv+=t.rv;x.att+=t.att;TW.set(t.w,x)}
+ table('t-typo',['單字','程度','次數','拼對率','看答案率','平均嘗試'],[...TW.values()].filter(x=>x.n>=3).sort((a,b)=>a.ok/a.n-b.ok/b.n).map(x=>[x.w,'L'+x.l,x.n,P(x.ok/x.n),P(x.rv/x.n),+(x.att/x.n).toFixed(2)]));
+ summary.meowTypo={words:tn,firstTryCorrect:tn?+(first1/tn).toFixed(3):null,revealRate:tn?+(rv/tn).toFixed(3):null,withCatInterference:catN.length?+(catOk/catN.length).toFixed(3):null,withoutCat:noCat.length?+(noCatOk/noCat.length).toFixed(3):null};
+
+ /* 11 hints / replays */
+ const hp=[];const grp=(label,list)=>{if(list.length)hp.push([label,list.length,P(list.filter(a=>a.ok).length/list.length),{v:median(list.map(a=>a.ms))/1000,h:fmt(median(list.map(a=>a.ms))/1000,1)+' 秒'}])};
+ const sp=ans.filter(a=>a.q==='spell'),spNew=sp.filter(a=>a.ge!=null),spOld=sp.filter(a=>a.ge==null);
+ grp('拼字：無提示',spNew.filter(a=>!a.h));grp('拼字：首字母提示',spNew.filter(a=>a.h===1));grp('拼字：遮字提示（故事標籤）',spNew.filter(a=>a.h===2));grp('拼字：0.92.45 以前（無法區分提示）',spOld);
+ const ls=ans.filter(a=>a.q==='listen'||a.q==='listenspell');grp('聽力：沒重聽',ls.filter(a=>!a.r));grp('聽力：重聽 1 次',ls.filter(a=>a.r===1));grp('聽力：重聽 2 次以上',ls.filter(a=>a.r>=2));
+ grp('回合前半（第 1–4 題）',ans.filter(a=>a.i<4));grp('回合後半（第 5 題以後）',ans.filter(a=>a.i>=4));
+ table('t-help',['情況','題數','答對率','作答時間'],hp);
+ summary.hintsAndFatigue=hp.map(r=>({case:r[0],n:r[1],accuracy:+(r[2].v||0).toFixed(3)}));
+ const pop={real:0,sim:0,test:0};for(const r of sess)pop[whoOf(r)]++;
+ summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,vocabulary:'0.92.45 起：國小～高中 6,924 字（大考 L1–6 ＋ 108 課綱國中小 2000 字，含 60 個新字），每題記錄建議年級 gr；舊紀錄的年級由 i18n/vocab.json 補上，改名詞條已合併',populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣大考中心 L1–L6，加上 108 課綱國中小 2000 字；0.92.45 起每題另有建議年級 g），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
+ S.summary=summary;
+}
+
+/* ---------- AI report ---------- */
+// 2026-11 model names (Anthropic: platform.claude.com/docs/en/models/overview, OpenAI: developers.openai.com/api/docs/models). The field is editable.
+const MODELS={anthropic:['claude-opus-5-5','claude-sonnet-5-5','claude-haiku-5-5','claude-fable-5-1'],openai:['gpt-6.1-sol','gpt-6-astra','gpt-6-luna']};
+const aiP=$('ai-provider'),aiM=$('ai-model'),aiK=$('ai-key');
+const keyName=()=>'purr-analytics.key.'+aiP.value;
+function syncProvider(){$('ai-models').replaceChildren(...MODELS[aiP.value].map(m=>new Option(m,m)));aiM.value=localStorage.getItem('purr-analytics.model.'+aiP.value)||MODELS[aiP.value][0];aiK.value=localStorage.getItem(keyName())||'';$('ai-remember').checked=!!aiK.value}
+aiP.onchange=syncProvider;try{aiP.value=localStorage.getItem('purr-analytics.provider')||'anthropic'}catch(e){}syncProvider();
+const FOCUS={all:'完整報告：涵蓋內容、學習成效、產品留存、模型與複習間隔。',content:'讀者是教材編輯：重點放在單字難度、程度標錯、易混淆字、常見拼錯，並給出可以直接修改的單字清單。',product:'讀者是產品經理：重點放在留存、放棄點、各學習入口的效果、使用時段，並提出 A/B 測試。',model:'讀者是工程師：重點放在自適應模型校正、複習間隔是否合理、題型難度，並提出具體參數調整。'};
+function prompt(){return `你是教育科技公司的資深學習數據分析師。以下是英文單字學習遊戲「呼嚕小窩」的匿名學習統計（JSON，已彙總，不含個人資料）。
+
+請用繁體中文寫一份給團隊看的 Markdown 報告。${FOCUS[$('ai-focus').value]}
+${$('ai-extra').value?'團隊補充：'+$('ai-extra').value+'\n':''}
+報告結構：
+1. 一段話摘要（最重要的 3 件事）
+2. 主要發現：每點都要引用具體數字，並說明資料量是否足夠下結論（樣本太小要明說）
+3. 問題與可能原因
+4. 建議行動：依優先順序，每項寫清楚「做什麼、預期影響、怎麼驗證（例如 A/B 測試設計與要看的指標）」
+5. 需要的額外資料或下次要追蹤的指標
+
+規則：只根據資料說話，不要捏造沒有的數字；推測請標明是推測；不要重述整份 JSON。
+
+資料：
+${JSON.stringify(S.summary)}`}
+$('ai-preview').onclick=()=>{if(!S.summary)return;const el=$('ai-summary');el.textContent=prompt();el.classList.toggle('hidden')};
+$('ai-go').onclick=async()=>{
+ if(!S.summary)return alert('請先載入資料');const key=aiK.value.trim(),model=aiM.value.trim();if(!key)return alert('請輸入 API 金鑰');
+ try{localStorage.setItem('purr-analytics.provider',aiP.value);localStorage.setItem('purr-analytics.model.'+aiP.value,model);if($('ai-remember').checked)localStorage.setItem(keyName(),key);else localStorage.removeItem(keyName())}catch(e){}
+ const out=$('ai-out');out.innerHTML='<p class="muted">AI 分析中，通常需要 30–90 秒…</p>';$('ai-go').disabled=true;
+ try{let text='';
+  if(aiP.value==='anthropic'){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:6000,messages:[{role:'user',content:prompt()}]})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.content.map(c=>c.text||'').join('')}
+  else{const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+key},body:JSON.stringify({model,input:prompt()})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.output_text||(j.output||[]).flatMap(o=>o.content||[]).filter(c=>c.type==='output_text').map(c=>c.text).join('')}
+  S.report=text;out.innerHTML=md(text);$('ai-dl').disabled=false;
+ }catch(e){out.innerHTML='<p style="color:var(--acc2)">失敗：'+esc(e.message)+'</p><p class="muted">常見原因：金鑰錯誤、帳戶沒有額度、模型名稱打錯（到 Anthropic / OpenAI 文件查最新的模型名稱）。</p>'}
+ finally{$('ai-go').disabled=false}};
+$('ai-dl').onclick=()=>{const b=new Blob([S.report],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='purr-learning-report-'+dayKey(Date.now())+'.md';a.click()};
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
+ const inline=s=>s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>');
+ const flush=()=>{if(list){out.push(`<${list.t}>`+list.items.map(i=>'<li>'+inline(i)+'</li>').join('')+`</${list.t}>`);list=null}if(tbl){out.push('<div class="tbl"><table>'+tbl.map((r,k)=>'<tr>'+r.map(c=>k?'<td>'+inline(c)+'</td>':'<th>'+inline(c)+'</th>').join('')+'</tr>').join('')+'</table></div>');tbl=null}};
+ for(const l of lines){let m;
+  if(/^\s*\|.*\|\s*$/.test(l)){if(/^\s*\|[\s:-]+\|/.test(l)&&!/[a-z0-9一-鿿]/i.test(l))continue;if(list)flush();(tbl||(tbl=[])).push(l.trim().slice(1,-1).split('|').map(c=>c.trim()));continue}
+  if(tbl)flush();
+  if(m=/^(#{1,4})\s+(.*)/.exec(l)){flush();out.push(`<h${m[1].length+1}>${inline(m[2])}</h${m[1].length+1}>`)}
+  else if(m=/^\s*[-*]\s+(.*)/.exec(l)){if(!list||list.t!=='ul'){flush();list={t:'ul',items:[]}}list.items.push(m[1])}
+  else if(m=/^\s*\d+[.)]\s+(.*)/.exec(l)){if(!list||list.t!=='ol'){flush();list={t:'ol',items:[]}}list.items.push(m[1])}
+  else if(!l.trim()){flush()}else{flush();out.push('<p>'+inline(l)+'</p>')}}
+ flush();return out.join('')}
+</script>
+</body>
+</html>
