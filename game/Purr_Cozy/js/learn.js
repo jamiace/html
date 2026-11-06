@@ -345,7 +345,7 @@ Object.assign(UI, {
       else { prompt = h('div', { class: 'qzh', text: Learn.qz(v) }); sub = q.noHint ? I18n.s("u_e0bc10bbdefb", [v.p]) : I18n.s("u_a23b5e2f5b3e", [v.p, v.w.length]); }
       const redo = s.redoFrom != null && s.qi >= s.redoFrom;
       const ctx = q.ctx ? h('p', { class: 'qctx', text: q.ctx }) : null;
-      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? I18n.s("u_ac75ea2713f3", [s.qi - s.redoFrom + 1, s.qs.length - s.redoFrom]) : I18n.s("u_a8ce1fb26c0f", [s.qi + 1, s.redoFrom != null ? s.redoFrom : s.qs.length, s.right]) })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
+      const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? I18n.s("u_ac75ea2713f3", [s.qi - s.redoFrom + 1, s.qs.length - s.redoFrom]) : I18n.s("u_a8ce1fb26c0f", [s.qi + 1, s.redoFrom != null ? s.redoFrom : s.qs.length, s.right]) })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, s.kind !== 'grade' ? h('span', { class: 'qlv', title: TIER_NAME[v.t], text: 'L' + v.t }) : null, ctx, prompt, h('p', { class: 'hint', text: sub }))];
       let spellingSlots = null;
       if (q.type === 'spell' || q.type === 'listenspell') {
         const hintTxt = q.hint || (q.noHint || q.type === 'listenspell' ? '' : v.w[0] + ' ' + '_ '.repeat(v.w.length - 1).trim());
@@ -390,7 +390,7 @@ Object.assign(UI, {
       s.luckyN ? h('p', { class: 'hint', text: I18n.s("u_ecc018bdb57f", [s.luckyN]) }) : null,
       s.newly || s.mastered ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
       s.wrong.length ? h('div', { class: 'sub', text: I18n.s("u_dfcac72f08a7") }) : null,
-      s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
+      s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'qlv sm', text: 'L' + VOCAB[i].t }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
       h('div', { class: 'row center wrap' },
         s.kind === 'need' && r.items.length && s.opts.needId && Life.L.needs.some(x => x.id === s.opts.needId) ? h('button', { class: 'chip primary', onclick: () => { const nd = Life.L.needs.find(x => x.id === s.opts.needId); this.closeWin('study'); if (nd) Life.use(s.opts.item, nd); } }, ico(SUPPLIES[s.opts.item].spr, 20), I18n.s("u_22a970cc999a")) : null,
         s.kind === 'need' ? h('button', { class: 'chip primary', onclick: () => Learn.start('need', s.opts) }, ico('i_reset', 20), r.items.length ? I18n.s("u_a53cdc600e62") : I18n.s("u_2f5a858ab28f")) : null,

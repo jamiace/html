@@ -286,14 +286,16 @@ const PetPlay = {
     const pick = (list) => list[Math.floor(Math.random() * list.length)];
     const boxes = items.filter(i => ITEMS[i.k].petBox && this.free(i, a));
     if (a.kind === 'cat' && boxes.length) opts.push(() => this.intoBox(a, pick(boxes)));
-    const posts = items.filter(i => ITEMS[i.k].scratch || i.k === 'cat_tree');
+    // things across the room do not pull a pet over (0.92.47): it picks among what is near it
+    const reach = (i, R) => { const [w, hh] = itemSize(i); return Math.hypot(i.x + w / 2 - a.x, (i.y + hh - a.y) * 1.2) <= R; };
+    const posts = items.filter(i => (ITEMS[i.k].scratch || i.k === 'cat_tree') && reach(i, 100));
     if (a.kind === 'cat' && posts.length) opts.push(() => { const post = pick(posts), spot = a.spots().find(s => s.it === post); if (ITEMS[post.k].petSteps && spot && this.free(post, a)) a.goSpot(spot, Math.random() < 0.7 ? 'sleep' : 'sit'); else this.scratch(a, post); });
     const rugs = items.filter(i => ITEMS[i.k].layer === 'rug');
     if (rugs.length) opts.push(() => this.rugRoll(a, pick(rugs)));
-    const plants = items.filter(i => ITEMS[i.k].cat === 'plant' && ITEMS[i.k].layer === 'floor');
+    const plants = items.filter(i => ITEMS[i.k].cat === 'plant' && ITEMS[i.k].layer === 'floor' && reach(i, 100));
     if (a.kind === 'cat' && plants.length) opts.push(() => this.patPlant(a, pick(plants)));
     const softs = items.filter(i => this.isSoft(i) && ITEMS[i.k].petSpot && this.free(i, a));
-    if (a.kind === 'dog' && Pets.Z.tools.ball && softs.length && !this.toy) opts.push(() => this.carryToBed(a, pick(softs)));
+    if (a.kind === 'dog' && Pets.Z.tools.ball && softs.length && !this.toy && !(this.toys || []).length) opts.push(() => this.carryToBed(a, pick(softs)));
     const fav = this.favSpot(p), favIt = fav && items.find(i => i.k === fav && this.free(i, a) && (ITEMS[i.k].petSpot || ITEMS[i.k].bed));
     if (favIt) opts.push(() => { const s = a.spots().find(s => s.it === favIt); if (s) a.goSpot(s, Math.random() < 0.6 ? 'sleep' : 'sit'); else a.state = 'sit'; });
     if (!opts.length) return false;

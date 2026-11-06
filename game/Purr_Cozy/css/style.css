@@ -1388,3 +1388,28 @@ body.m .stage > .lyrics .ly-cur { height:24px; line-height:24px; }
   top: 0;
   bottom: 0;
 }
+/* 0.92.47 mode bar: visiting card and decorating bar in the top-left corner of the room (js/room-feel.js) */
+.room-wrap > .modebar { position:absolute; left:10px; top:10px; z-index:7; display:flex; flex-direction:column; align-items:flex-start; gap:6px; pointer-events:none; max-width:calc(100% - 20px); }
+.room-wrap > .modebar.empty { display:none; }
+.modebar > * { pointer-events:auto; }
+.mode-pill { display:flex; align-items:center; gap:6px; max-width:100%; box-sizing:border-box; background:var(--paper); color:var(--ink); box-shadow:0 0 0 3px #2e2230, 0 5px 0 rgba(46,34,48,.2); padding:4px 5px 4px 8px; font-size:14px; }
+.mode-pill .mp-title { display:flex; align-items:center; gap:5px; min-width:0; font-weight:700; white-space:nowrap; }
+.mode-pill .mp-title > span { overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.mode-pill .mp-title > img { flex:none; }
+.mode-pill .chip { flex:none; white-space:nowrap; }
+.mode-pill .mp-help { min-width:28px; justify-content:center; padding-inline:6px; }
+.modebar #editbar.mode-pill { position:static; transform:none; left:auto; top:auto; flex-wrap:nowrap; justify-content:flex-start; gap:6px; }
+.mode-tip { margin:0; max-width:300px; padding:6px 9px; background:var(--paper-2); color:var(--ink-2); font-size:12px; line-height:1.5; box-shadow:0 0 0 2px #2e2230; }
+.visit-pill { box-shadow:0 0 0 3px #2e2230, 0 0 0 5px #e5cd83, 0 7px 0 rgba(46,34,48,.2); }
+.etool.below { transform:translate(-50%, 0); }
+body.m .room-wrap > .modebar { left:6px; top:6px; max-width:calc(100% - 12px); }
+body.m .mode-pill { font-size:13px; padding:3px 4px 3px 7px; box-shadow:0 0 0 2px #2e2230, 0 3px 0 rgba(46,34,48,.2); }
+body.m .visit-pill { box-shadow:0 0 0 2px #2e2230, 0 0 0 4px #e5cd83, 0 5px 0 rgba(46,34,48,.2); }
+body.m .mode-pill .chip.sm { min-height:30px; padding-block:2px; }
+body.m.has-modebar .hand-hint { top:auto; bottom:6px; }
+@media (max-width:520px) { .mode-pill .mp-title > img { display:none; } }
+/* 0.92.47 the word's Level in every quiz and in the list of missed words */
+.qbox { position:relative; }
+.qlv { position:absolute; left:6px; top:6px; padding:0 6px; font-family:var(--pix); font-size:12px; line-height:18px; background:var(--chip-on); color:var(--ink); box-shadow:inset 0 0 0 2px var(--line); }
+.qlv.sm { position:static; flex:none; font-size:11px; line-height:16px; }
+body.purr-quiz-open .qlv { top:4px; left:4px; }

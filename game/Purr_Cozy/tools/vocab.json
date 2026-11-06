@@ -66,7 +66,8 @@
     "meaning_checked": 2,
     "new_in_purr_cozy": 60
    }
-  }
+  },
+  "level_note": "purr_cozy.level：大考 Level 1–6 為基礎；108 課綱基本 1200 字一律歸 L1、其他常用 800 字最高到 L2（0.92.47 調整，原大考 Level 保留在 lists.ceec_level 與 purr_cozy.level_ceec）"
  },
  "words": [
   {
@@ -84045,13 +84046,16 @@
    ],
    "purr_cozy": {
     "index": 1132,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "abroad.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1134,
@@ -85882,13 +85886,16 @@
    ],
    "purr_cozy": {
     "index": 1159,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "anyone.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1161,
@@ -86187,13 +86194,16 @@
    ],
    "purr_cozy": {
     "index": 1164,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "apartment.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1166,
@@ -86257,13 +86267,16 @@
    ],
    "purr_cozy": {
     "index": 1165,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "appear.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1167,
@@ -86727,13 +86740,16 @@
    ],
    "purr_cozy": {
     "index": 1172,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "arm.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1174,
@@ -87128,13 +87144,16 @@
    ],
    "purr_cozy": {
     "index": 1178,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "arrive.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1180,
@@ -87486,13 +87505,16 @@
    ],
    "purr_cozy": {
     "index": 1183,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "attack.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1185,
@@ -88024,13 +88046,16 @@
    ],
    "purr_cozy": {
     "index": 1191,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "bake.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1193,
@@ -88087,13 +88112,16 @@
    ],
    "purr_cozy": {
     "index": 1192,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "bakery.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1194,
@@ -88151,13 +88179,16 @@
    ],
    "purr_cozy": {
     "index": 1193,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "balcony.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1195,
@@ -88903,13 +88934,16 @@
    ],
    "purr_cozy": {
     "index": 1204,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "bean.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1206,
@@ -89035,14 +89069,16 @@
    ],
    "purr_cozy": {
     "index": 1206,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.5,
     "audio": "bear.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -89176,13 +89212,16 @@
    ],
    "purr_cozy": {
     "index": 1208,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "bedroom.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1210,
@@ -89254,13 +89293,16 @@
    ],
    "purr_cozy": {
     "index": 1209,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "beef.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1211,
@@ -89782,13 +89824,16 @@
    ],
    "purr_cozy": {
     "index": 1217,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "belt.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1219,
@@ -89845,13 +89890,16 @@
    ],
    "purr_cozy": {
     "index": 1218,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "bench.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1220,
@@ -90448,13 +90496,16 @@
    ],
    "purr_cozy": {
     "index": 1226,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "blackboard.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1228,
@@ -90540,13 +90591,16 @@
    ],
    "purr_cozy": {
     "index": 1227,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "blank.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1229,
@@ -90636,13 +90690,16 @@
    ],
    "purr_cozy": {
     "index": 1228,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "blind.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1230,
@@ -90858,13 +90915,16 @@
    ],
    "purr_cozy": {
     "index": 1231,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "boil.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1233,
@@ -91129,13 +91189,16 @@
    ],
    "purr_cozy": {
     "index": 1235,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "bookstore.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1237,
@@ -91277,13 +91340,16 @@
    ],
    "purr_cozy": {
     "index": 1237,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "borrow.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1239,
@@ -91361,13 +91427,16 @@
    ],
    "purr_cozy": {
     "index": 1238,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "boss.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1240,
@@ -91522,13 +91591,16 @@
    ],
    "purr_cozy": {
     "index": 1240,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "bottle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1242,
@@ -91695,13 +91767,16 @@
    ],
    "purr_cozy": {
     "index": 1242,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "bow_1.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1244,
@@ -92474,13 +92549,16 @@
    ],
    "purr_cozy": {
     "index": 1252,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "brush.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1254,
@@ -92537,13 +92615,16 @@
    ],
    "purr_cozy": {
     "index": 1253,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "bun.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1255,
@@ -92756,13 +92837,16 @@
    ],
    "purr_cozy": {
     "index": 1256,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "burn.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1258,
@@ -92908,13 +92992,16 @@
    ],
    "purr_cozy": {
     "index": 1258,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "business.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1260,
@@ -92977,13 +93064,16 @@
    ],
    "purr_cozy": {
     "index": 1259,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "businessman.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1261,
@@ -93057,13 +93147,16 @@
    ],
    "purr_cozy": {
     "index": 1260,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "button.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1262,
@@ -93771,13 +93864,16 @@
    ],
    "purr_cozy": {
     "index": 1270,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "candle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1272,
@@ -94361,13 +94457,16 @@
    ],
    "purr_cozy": {
     "index": 1278,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "castle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1280,
@@ -94849,14 +94948,16 @@
    ],
    "purr_cozy": {
     "index": 1285,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "chalk.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -94933,13 +95034,16 @@
    ],
    "purr_cozy": {
     "index": 1286,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "change.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1288,
@@ -95149,13 +95253,16 @@
    ],
    "purr_cozy": {
     "index": 1289,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "cheap.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1291,
@@ -95229,13 +95336,16 @@
    ],
    "purr_cozy": {
     "index": 1290,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "cheat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1292,
@@ -95627,13 +95737,16 @@
    ],
    "purr_cozy": {
     "index": 1296,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "chocolate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1298,
@@ -95704,13 +95817,16 @@
    ],
    "purr_cozy": {
     "index": 1297,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "choice.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1299,
@@ -95774,13 +95890,16 @@
    ],
    "purr_cozy": {
     "index": 1298,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "choose.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1300,
@@ -95896,13 +96015,16 @@
    ],
    "purr_cozy": {
     "index": 1300,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "chopsticks.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1302,
@@ -95978,13 +96100,16 @@
    ],
    "purr_cozy": {
     "index": 1301,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "circle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1303,
@@ -96205,13 +96330,16 @@
    ],
    "purr_cozy": {
     "index": 1304,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "clap.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1306,
@@ -96342,13 +96470,16 @@
    ],
    "purr_cozy": {
     "index": 1306,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "classmate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1308,
@@ -96623,13 +96754,16 @@
    ],
    "purr_cozy": {
     "index": 1310,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "clerk.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1312,
@@ -97033,13 +97167,16 @@
    ],
    "purr_cozy": {
     "index": 1316,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "clothes.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1318,
@@ -97160,13 +97297,16 @@
    ],
    "purr_cozy": {
     "index": 1318,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "cloudy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1320,
@@ -97317,13 +97457,16 @@
    ],
    "purr_cozy": {
     "index": 1320,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "club.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1322,
@@ -97764,13 +97907,16 @@
    ],
    "purr_cozy": {
     "index": 1326,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "collect.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1328,
@@ -97910,14 +98056,16 @@
    ],
    "purr_cozy": {
     "index": 1328,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "comb.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -97973,13 +98121,16 @@
    ],
    "purr_cozy": {
     "index": 1329,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "comfortable.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1331,
@@ -98344,13 +98495,16 @@
    ],
    "purr_cozy": {
     "index": 1334,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "computer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1336,
@@ -99100,13 +99254,16 @@
    ],
    "purr_cozy": {
     "index": 1345,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "convenient.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1347,
@@ -99306,13 +99463,16 @@
    ],
    "purr_cozy": {
     "index": 1348,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "copy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1350,
@@ -99385,13 +99545,16 @@
    ],
    "purr_cozy": {
     "index": 1349,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "corner.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1351,
@@ -100016,13 +100179,16 @@
    ],
    "purr_cozy": {
     "index": 1358,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "cousin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1360,
@@ -100317,13 +100483,16 @@
    ],
    "purr_cozy": {
     "index": 1362,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "crazy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1364,
@@ -100745,13 +100914,16 @@
    ],
    "purr_cozy": {
     "index": 1368,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "cross.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1370,
@@ -101769,13 +101941,16 @@
    ],
    "purr_cozy": {
     "index": 1382,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "dangerous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1384,
@@ -102450,13 +102625,16 @@
    ],
    "purr_cozy": {
     "index": 1392,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "delicious.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1394,
@@ -102587,13 +102765,16 @@
    ],
    "purr_cozy": {
     "index": 1394,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "dentist.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1396,
@@ -103784,13 +103965,16 @@
    ],
    "purr_cozy": {
     "index": 1411,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "dictionary.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1413,
@@ -105164,13 +105348,16 @@
    ],
    "purr_cozy": {
     "index": 1431,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "dot.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1433,
@@ -105868,13 +106055,16 @@
    ],
    "purr_cozy": {
     "index": 1441,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "drawer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1443,
@@ -105949,13 +106139,16 @@
    ],
    "purr_cozy": {
     "index": 1442,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "dress.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1444,
@@ -106093,14 +106286,16 @@
    ],
    "purr_cozy": {
     "index": 1444,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "drop.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -106317,13 +106512,16 @@
    ],
    "purr_cozy": {
     "index": 1447,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "drum.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1449,
@@ -106862,13 +107060,16 @@
    ],
    "purr_cozy": {
     "index": 1455,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "earthquake.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1457,
@@ -107909,13 +108110,16 @@
    ],
    "purr_cozy": {
     "index": 1470,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "enjoy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1472,
@@ -108189,13 +108393,16 @@
    ],
    "purr_cozy": {
     "index": 1474,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "envelope.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1476,
@@ -108320,13 +108527,16 @@
    ],
    "purr_cozy": {
     "index": 1476,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.5,
     "audio": "eraser.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1478,
@@ -108387,13 +108597,16 @@
    ],
    "purr_cozy": {
     "index": 1477,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "error.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1479,
@@ -108655,13 +108868,16 @@
    ],
    "purr_cozy": {
     "index": 1481,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "excellent.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1483,
@@ -108795,13 +109011,16 @@
    ],
    "purr_cozy": {
     "index": 1483,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "excited.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1485,
@@ -108921,13 +109140,16 @@
    ],
    "purr_cozy": {
     "index": 1485,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "exciting.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1487,
@@ -109004,13 +109226,16 @@
    ],
    "purr_cozy": {
     "index": 1486,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "excuse.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1488,
@@ -109082,13 +109307,16 @@
    ],
    "purr_cozy": {
     "index": 1487,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "exercise.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1489,
@@ -109219,13 +109447,16 @@
    ],
    "purr_cozy": {
     "index": 1489,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "expect.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1491,
@@ -109283,13 +109514,16 @@
    ],
    "purr_cozy": {
     "index": 1490,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "expensive.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1492,
@@ -109363,13 +109597,16 @@
    ],
    "purr_cozy": {
     "index": 1491,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "experience.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1493,
@@ -109508,13 +109745,16 @@
    ],
    "purr_cozy": {
     "index": 1493,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "explain.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1495,
@@ -109823,13 +110063,16 @@
    ],
    "purr_cozy": {
     "index": 1497,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "fail.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1499,
@@ -110049,13 +110292,16 @@
    ],
    "purr_cozy": {
     "index": 1500,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "famous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1502,
@@ -110289,15 +110535,18 @@
    ],
    "purr_cozy": {
     "index": 1503,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "favorite.mp3",
     "old_word": null,
     "accept": [
      "favourite"
-    ]
+    ],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1505,
@@ -110736,13 +110985,16 @@
    ],
    "purr_cozy": {
     "index": 1509,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "festival.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1511,
@@ -110801,13 +111053,16 @@
    ],
    "purr_cozy": {
     "index": 1510,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "fever.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1512,
@@ -111397,13 +111652,16 @@
    ],
    "purr_cozy": {
     "index": 1518,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "fisherman.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1520,
@@ -111572,13 +111830,16 @@
    ],
    "purr_cozy": {
     "index": 1520,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "fix.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1522,
@@ -112592,13 +112853,16 @@
    ],
    "purr_cozy": {
     "index": 1533,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "fool.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1535,
@@ -112791,13 +113055,16 @@
    ],
    "purr_cozy": {
     "index": 1536,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "foreigner.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1538,
@@ -113262,13 +113529,16 @@
    ],
    "purr_cozy": {
     "index": 1542,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "fox.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1544,
@@ -113612,13 +113882,16 @@
    ],
    "purr_cozy": {
     "index": 1547,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "friendly.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1549,
@@ -113675,13 +113948,16 @@
    ],
    "purr_cozy": {
     "index": 1548,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "fries.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1550,
@@ -114050,13 +114326,16 @@
    ],
    "purr_cozy": {
     "index": 1553,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "future.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1555,
@@ -114277,13 +114556,16 @@
    ],
    "purr_cozy": {
     "index": 1556,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "garbage.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1558,
@@ -114419,13 +114701,16 @@
    ],
    "purr_cozy": {
     "index": 1558,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "gate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1560,
@@ -114910,13 +115195,16 @@
    ],
    "purr_cozy": {
     "index": 1565,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "giant.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1567,
@@ -115043,13 +115331,16 @@
    ],
    "purr_cozy": {
     "index": 1567,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "glove.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1569,
@@ -115180,13 +115471,16 @@
    ],
    "purr_cozy": {
     "index": 1569,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "glue.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1571,
@@ -115321,13 +115615,16 @@
    ],
    "purr_cozy": {
     "index": 1571,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "goat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1573,
@@ -115679,13 +115976,16 @@
    ],
    "purr_cozy": {
     "index": 1576,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "grade.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1578,
@@ -115743,13 +116043,16 @@
    ],
    "purr_cozy": {
     "index": 1577,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "grape.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1579,
@@ -116217,13 +116520,16 @@
    ],
    "purr_cozy": {
     "index": 1584,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "guava.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1586,
@@ -116280,13 +116586,16 @@
    ],
    "purr_cozy": {
     "index": 1585,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "guitar.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1587,
@@ -116357,13 +116666,16 @@
    ],
    "purr_cozy": {
     "index": 1586,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "guy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1588,
@@ -116431,13 +116743,16 @@
    ],
    "purr_cozy": {
     "index": 1587,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "habit.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1589,
@@ -116560,13 +116875,16 @@
    ],
    "purr_cozy": {
     "index": 1589,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "hamburger.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1591,
@@ -116857,13 +117175,16 @@
    ],
    "purr_cozy": {
     "index": 1593,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "handsome.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1595,
@@ -116938,13 +117259,16 @@
    ],
    "purr_cozy": {
     "index": 1594,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "hang.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1596,
@@ -117198,13 +117522,16 @@
    ],
    "purr_cozy": {
     "index": 1598,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "healthy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1600,
@@ -117332,13 +117659,16 @@
    ],
    "purr_cozy": {
     "index": 1600,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "height.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1602,
@@ -117397,13 +117727,16 @@
    ],
    "purr_cozy": {
     "index": 1601,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "helpful.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1603,
@@ -117461,13 +117794,16 @@
    ],
    "purr_cozy": {
     "index": 1602,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "hen.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1604,
@@ -117729,13 +118065,16 @@
    ],
    "purr_cozy": {
     "index": 1606,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "hide.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1608,
@@ -118151,13 +118490,16 @@
    ],
    "purr_cozy": {
     "index": 1612,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "hobby.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1614,
@@ -118342,13 +118684,16 @@
    ],
    "purr_cozy": {
     "index": 1615,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "honest.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1617,
@@ -118430,13 +118775,16 @@
    ],
    "purr_cozy": {
     "index": 1616,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "honey.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1618,
@@ -118576,13 +118924,16 @@
    ],
    "purr_cozy": {
     "index": 1618,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "hospital.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1620,
@@ -118703,13 +119054,16 @@
    ],
    "purr_cozy": {
     "index": 1620,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "hotel.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1622,
@@ -118774,13 +119128,16 @@
    ],
    "purr_cozy": {
     "index": 1621,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "however.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1623,
@@ -119252,13 +119609,16 @@
    ],
    "purr_cozy": {
     "index": 1627,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "hunt.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1629,
@@ -119399,13 +119759,16 @@
    ],
    "purr_cozy": {
     "index": 1629,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "hurry.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1631,
@@ -120659,13 +121022,16 @@
    ],
    "purr_cozy": {
     "index": 1647,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "insect.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1649,
@@ -121102,13 +121468,16 @@
    ],
    "purr_cozy": {
     "index": 1653,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "interview.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1655,
@@ -121390,13 +121759,16 @@
    ],
    "purr_cozy": {
     "index": 1657,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "invite_n.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1659,
@@ -121464,13 +121836,16 @@
    ],
    "purr_cozy": {
     "index": 1658,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "island.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1660,
@@ -121528,13 +121903,16 @@
    ],
    "purr_cozy": {
     "index": 1659,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "item.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1661,
@@ -121605,13 +121983,16 @@
    ],
    "purr_cozy": {
     "index": 1660,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "jacket.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1662,
@@ -121840,13 +122221,16 @@
    ],
    "purr_cozy": {
     "index": 1663,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "jeans.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1665,
@@ -121987,13 +122371,16 @@
    ],
    "purr_cozy": {
     "index": 1665,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "jog.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1667,
@@ -122630,13 +123017,16 @@
    ],
    "purr_cozy": {
     "index": 1674,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "knock.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1676,
@@ -122698,13 +123088,16 @@
    ],
    "purr_cozy": {
     "index": 1675,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "knowledge.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1677,
@@ -123012,13 +123405,16 @@
    ],
    "purr_cozy": {
     "index": 1680,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "language.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1682,
@@ -123221,13 +123617,16 @@
    ],
    "purr_cozy": {
     "index": 1683,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "lawyer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1685,
@@ -123409,13 +123808,16 @@
    ],
    "purr_cozy": {
     "index": 1686,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "lemon.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1688,
@@ -123540,13 +123942,16 @@
    ],
    "purr_cozy": {
     "index": 1688,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "lend.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1690,
@@ -123799,13 +124204,16 @@
    ],
    "purr_cozy": {
     "index": 1692,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "library.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1694,
@@ -124859,13 +125267,16 @@
    ],
    "purr_cozy": {
     "index": 1706,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "lonely.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1708,
@@ -124926,13 +125337,16 @@
    ],
    "purr_cozy": {
     "index": 1707,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "lose.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1709,
@@ -125123,13 +125537,16 @@
    ],
    "purr_cozy": {
     "index": 1710,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "lovely.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1712,
@@ -125475,13 +125892,16 @@
    ],
    "purr_cozy": {
     "index": 1715,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "magic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1717,
@@ -125616,13 +126036,16 @@
    ],
    "purr_cozy": {
     "index": 1717,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "main.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1719,
@@ -126096,13 +126519,16 @@
    ],
    "purr_cozy": {
     "index": 1724,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "mark.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1726,
@@ -126244,13 +126670,16 @@
    ],
    "purr_cozy": {
     "index": 1726,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "mask.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1728,
@@ -126782,13 +127211,16 @@
    ],
    "purr_cozy": {
     "index": 1733,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "meal.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1735,
@@ -127128,13 +127560,16 @@
    ],
    "purr_cozy": {
     "index": 1738,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "medicine.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1740,
@@ -127320,13 +127755,16 @@
    ],
    "purr_cozy": {
     "index": 1741,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "member.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1743,
@@ -127451,13 +127889,16 @@
    ],
    "purr_cozy": {
     "index": 1743,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "menu.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1745,
@@ -127833,13 +128274,16 @@
    ],
    "purr_cozy": {
     "index": 1748,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "metro.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1750,
@@ -128047,13 +128491,16 @@
    ],
    "purr_cozy": {
     "index": 1751,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "million.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1753,
@@ -128545,13 +128992,16 @@
    ],
    "purr_cozy": {
     "index": 1757,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "modern.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1759,
@@ -128880,13 +129330,16 @@
    ],
    "purr_cozy": {
     "index": 1762,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "motorcycle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1764,
@@ -129207,13 +129660,16 @@
    ],
    "purr_cozy": {
     "index": 1767,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "museum.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1769,
@@ -129355,13 +129811,16 @@
    ],
    "purr_cozy": {
     "index": 1769,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "nail.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1771,
@@ -129640,13 +130099,16 @@
    ],
    "purr_cozy": {
     "index": 1773,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "national.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1775,
@@ -130364,15 +130826,18 @@
    ],
    "purr_cozy": {
     "index": 1783,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "neighbor.mp3",
     "old_word": null,
     "accept": [
      "neighbour"
-    ]
+    ],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1785,
@@ -130836,13 +131301,16 @@
    ],
    "purr_cozy": {
     "index": 1789,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "nobody.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1791,
@@ -131062,13 +131530,16 @@
    ],
    "purr_cozy": {
     "index": 1792,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "noodle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1794,
@@ -131197,13 +131668,16 @@
    ],
    "purr_cozy": {
     "index": 1794,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "notebook.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1796,
@@ -132820,13 +133294,16 @@
    ],
    "purr_cozy": {
     "index": 1817,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "pack.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1819,
@@ -132910,13 +133387,16 @@
    ],
    "purr_cozy": {
     "index": 1818,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "package.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1820,
@@ -133474,13 +133954,16 @@
    ],
    "purr_cozy": {
     "index": 1826,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "papaya.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1828,
@@ -133927,13 +134410,16 @@
    ],
    "purr_cozy": {
     "index": 1832,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "paste.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1834,
@@ -134470,13 +134956,16 @@
    ],
    "purr_cozy": {
     "index": 1839,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "peach.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1841,
@@ -134608,13 +135097,16 @@
    ],
    "purr_cozy": {
     "index": 1841,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "pear.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1843,
@@ -135198,14 +135690,16 @@
    ],
    "purr_cozy": {
     "index": 1849,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "photo.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -135497,13 +135991,16 @@
    ],
    "purr_cozy": {
     "index": 1853,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "pick.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1855,
@@ -135576,13 +136073,16 @@
    ],
    "purr_cozy": {
     "index": 1854,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "picnic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1856,
@@ -135903,13 +136403,16 @@
    ],
    "purr_cozy": {
     "index": 1858,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "pin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1860,
@@ -136126,13 +136629,16 @@
    ],
    "purr_cozy": {
     "index": 1861,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.5,
     "audio": "pink.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1863,
@@ -136210,13 +136716,16 @@
    ],
    "purr_cozy": {
     "index": 1862,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "pipe.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1864,
@@ -136354,13 +136863,16 @@
    ],
    "purr_cozy": {
     "index": 1864,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "pizza.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1866,
@@ -136511,13 +137023,16 @@
    ],
    "purr_cozy": {
     "index": 1866,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "planet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1868,
@@ -136591,13 +137106,16 @@
    ],
    "purr_cozy": {
     "index": 1867,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "plate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1869,
@@ -136863,13 +137381,16 @@
    ],
    "purr_cozy": {
     "index": 1871,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "pleasure.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1873,
@@ -137294,13 +137815,16 @@
    ],
    "purr_cozy": {
     "index": 1877,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "polite.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1879,
@@ -137359,13 +137883,16 @@
    ],
    "purr_cozy": {
     "index": 1878,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "popular.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1880,
@@ -137484,13 +138011,16 @@
    ],
    "purr_cozy": {
     "index": 1880,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "pork.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1882,
@@ -137926,13 +138456,16 @@
    ],
    "purr_cozy": {
     "index": 1886,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "postcard.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1888,
@@ -138009,13 +138542,16 @@
    ],
    "purr_cozy": {
     "index": 1887,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "pot.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1889,
@@ -138154,13 +138690,16 @@
    ],
    "purr_cozy": {
     "index": 1889,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "pound.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1891,
@@ -138366,13 +138905,16 @@
    ],
    "purr_cozy": {
     "index": 1892,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "pray.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1894,
@@ -138592,14 +139134,16 @@
    ],
    "purr_cozy": {
     "index": 1895,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "present_adj.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -139466,13 +140010,16 @@
    ],
    "purr_cozy": {
     "index": 1907,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "prize.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1909,
@@ -140195,13 +140742,16 @@
    ],
    "purr_cozy": {
     "index": 1917,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "proud.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1919,
@@ -140477,13 +141027,16 @@
    ],
    "purr_cozy": {
     "index": 1921,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "pumpkin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1923,
@@ -140801,13 +141354,16 @@
    ],
    "purr_cozy": {
     "index": 1926,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "puppy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1928,
@@ -141180,13 +141736,16 @@
    ],
    "purr_cozy": {
     "index": 1931,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "quarter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1933,
@@ -141330,14 +141889,16 @@
    ],
    "purr_cozy": {
     "index": 1933,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "quiz.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -141409,13 +141970,16 @@
    ],
    "purr_cozy": {
     "index": 1934,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.5,
     "audio": "rabbit.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1936,
@@ -141602,13 +142166,16 @@
    ],
    "purr_cozy": {
     "index": 1937,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "rainy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1939,
@@ -142316,13 +142883,16 @@
    ],
    "purr_cozy": {
     "index": 1947,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "refrigerator.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1949,
@@ -142985,13 +143555,16 @@
    ],
    "purr_cozy": {
     "index": 1956,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "repeat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1958,
@@ -143132,13 +143705,16 @@
    ],
    "purr_cozy": {
     "index": 1958,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "reporter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1960,
@@ -143529,13 +144105,16 @@
    ],
    "purr_cozy": {
     "index": 1964,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "restaurant.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1966,
@@ -143593,13 +144172,16 @@
    ],
    "purr_cozy": {
     "index": 1965,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "restroom.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1967,
@@ -143972,14 +144554,16 @@
    ],
    "purr_cozy": {
     "index": 1970,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "rock.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -144311,13 +144895,16 @@
    ],
    "purr_cozy": {
     "index": 1975,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.5,
     "audio": "ruler.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1977,
@@ -144671,13 +145258,16 @@
    ],
    "purr_cozy": {
     "index": 1980,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "salad.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1982,
@@ -144897,14 +145487,16 @@
    ],
    "purr_cozy": {
     "index": 1983,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "sandwich.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -145114,13 +145706,16 @@
    ],
    "purr_cozy": {
     "index": 1986,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "scared.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1988,
@@ -145178,13 +145773,16 @@
    ],
    "purr_cozy": {
     "index": 1987,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "science.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1989,
@@ -145365,13 +145963,16 @@
    ],
    "purr_cozy": {
     "index": 1990,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "scooter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1992,
@@ -145530,13 +146131,16 @@
    ],
    "purr_cozy": {
     "index": 1992,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "screen.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1994,
@@ -145822,13 +146426,16 @@
    ],
    "purr_cozy": {
     "index": 1996,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "secretary.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 1998,
@@ -146271,13 +146878,16 @@
    ],
    "purr_cozy": {
     "index": 2002,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "serious.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2004,
@@ -146557,13 +147167,16 @@
    ],
    "purr_cozy": {
     "index": 2006,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "share.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2008,
@@ -146940,13 +147553,16 @@
    ],
    "purr_cozy": {
     "index": 2011,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "shopkeeper.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2013,
@@ -147006,13 +147622,16 @@
    ],
    "purr_cozy": {
     "index": 2012,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "shorts.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2014,
@@ -147172,13 +147791,16 @@
    ],
    "purr_cozy": {
     "index": 2014,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "shower.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2016,
@@ -147312,13 +147934,16 @@
    ],
    "purr_cozy": {
     "index": 2016,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "sidewalk.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2018,
@@ -147390,14 +148015,16 @@
    ],
    "purr_cozy": {
     "index": 2017,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "sign.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -148250,13 +148877,16 @@
    ],
    "purr_cozy": {
     "index": 2029,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "skirt.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2031,
@@ -148457,13 +149087,16 @@
    ],
    "purr_cozy": {
     "index": 2032,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "slide.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2034,
@@ -148539,13 +149172,16 @@
    ],
    "purr_cozy": {
     "index": 2033,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "slim.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2035,
@@ -148840,13 +149476,16 @@
    ],
    "purr_cozy": {
     "index": 2037,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "snack.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2039,
@@ -148982,13 +149621,16 @@
    ],
    "purr_cozy": {
     "index": 2039,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "snowy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2041,
@@ -149043,13 +149685,16 @@
    ],
    "purr_cozy": {
     "index": 2040,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "soccer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2042,
@@ -149333,13 +149978,16 @@
    ],
    "purr_cozy": {
     "index": 2044,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "socks.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2046,
@@ -149412,13 +150060,16 @@
    ],
    "purr_cozy": {
     "index": 2045,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "soldier.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2047,
@@ -149678,13 +150329,16 @@
    ],
    "purr_cozy": {
     "index": 2049,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "somewhere.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2051,
@@ -150290,13 +150944,16 @@
    ],
    "purr_cozy": {
     "index": 2058,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "spider.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2060,
@@ -150682,13 +151339,16 @@
    ],
    "purr_cozy": {
     "index": 2063,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "spring.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2065,
@@ -150778,13 +151438,16 @@
    ],
    "purr_cozy": {
     "index": 2064,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "square.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2066,
@@ -151008,13 +151671,16 @@
    ],
    "purr_cozy": {
     "index": 2067,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "stamp.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2069,
@@ -151149,13 +151815,16 @@
    ],
    "purr_cozy": {
     "index": 2069,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "steak.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2071,
@@ -151561,13 +152230,16 @@
    ],
    "purr_cozy": {
     "index": 2074,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "stomach.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2076,
@@ -151866,13 +152538,16 @@
    ],
    "purr_cozy": {
     "index": 2078,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "straight.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2080,
@@ -151932,13 +152607,16 @@
    ],
    "purr_cozy": {
     "index": 2079,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "stranger.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2081,
@@ -152073,13 +152751,16 @@
    ],
    "purr_cozy": {
     "index": 2081,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "strawberry.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2083,
@@ -152554,13 +153235,16 @@
    ],
    "purr_cozy": {
     "index": 2087,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "string.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2089,
@@ -152730,13 +153414,16 @@
    ],
    "purr_cozy": {
     "index": 2089,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "subject.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2091,
@@ -153069,13 +153756,16 @@
    ],
    "purr_cozy": {
     "index": 2094,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "successful.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2096,
@@ -153294,13 +153984,16 @@
    ],
    "purr_cozy": {
     "index": 2097,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "sunny.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2099,
@@ -153357,13 +154050,16 @@
    ],
    "purr_cozy": {
     "index": 2098,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "supermarket.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2100,
@@ -153909,13 +154605,16 @@
    ],
    "purr_cozy": {
     "index": 2105,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "sweater.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2107,
@@ -154143,13 +154842,16 @@
    ],
    "purr_cozy": {
     "index": 2108,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "swing.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2110,
@@ -154615,14 +155317,16 @@
    ],
    "purr_cozy": {
     "index": 2115,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "tape.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -154920,13 +155624,16 @@
    ],
    "purr_cozy": {
     "index": 2119,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "team.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2121,
@@ -155256,13 +155963,16 @@
    ],
    "purr_cozy": {
     "index": 2124,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "teenager.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2126,
@@ -155396,13 +156106,16 @@
    ],
    "purr_cozy": {
     "index": 2126,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "telephone.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2128,
@@ -155461,13 +156174,16 @@
    ],
    "purr_cozy": {
     "index": 2127,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "television.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2129,
@@ -155525,13 +156241,16 @@
    ],
    "purr_cozy": {
     "index": 2128,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "temple.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2130,
@@ -155588,13 +156307,16 @@
    ],
    "purr_cozy": {
     "index": 2129,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.8,
     "audio": "tennis.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2131,
@@ -155811,13 +156533,16 @@
    ],
    "purr_cozy": {
     "index": 2132,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "terrible.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2134,
@@ -156076,13 +156801,16 @@
    ],
    "purr_cozy": {
     "index": 2136,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "test.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2138,
@@ -156204,15 +156932,18 @@
    ],
    "purr_cozy": {
     "index": 2138,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "theater.mp3",
     "old_word": null,
     "accept": [
      "theatre"
-    ]
+    ],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2140,
@@ -156354,13 +157085,16 @@
    ],
    "purr_cozy": {
     "index": 2140,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "thick.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2142,
@@ -156517,13 +157251,16 @@
    ],
    "purr_cozy": {
     "index": 2142,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "thin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2144,
@@ -156583,13 +157320,16 @@
    ],
    "purr_cozy": {
     "index": 2143,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "thirsty.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2145,
@@ -156656,13 +157396,16 @@
    ],
    "purr_cozy": {
     "index": 2144,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "throat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2146,
@@ -156739,13 +157482,16 @@
    ],
    "purr_cozy": {
     "index": 2145,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "through.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2147,
@@ -157049,13 +157795,16 @@
    ],
    "purr_cozy": {
     "index": 2149,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "tip.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2151,
@@ -157112,13 +157861,16 @@
    ],
    "purr_cozy": {
     "index": 2150,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "tired.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2152,
@@ -157271,13 +158023,16 @@
    ],
    "purr_cozy": {
     "index": 2152,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "toast.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2154,
@@ -157351,13 +158106,16 @@
    ],
    "purr_cozy": {
     "index": 2153,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "toe.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2155,
@@ -157552,13 +158310,16 @@
    ],
    "purr_cozy": {
     "index": 2156,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "tomato.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2158,
@@ -157709,13 +158470,16 @@
    ],
    "purr_cozy": {
     "index": 2158,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "tooth.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2160,
@@ -157898,13 +158662,16 @@
    ],
    "purr_cozy": {
     "index": 2161,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "topic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2163,
@@ -158057,13 +158824,16 @@
    ],
    "purr_cozy": {
     "index": 2163,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "towel.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2165,
@@ -158507,13 +159277,16 @@
    ],
    "purr_cozy": {
     "index": 2169,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "traffic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2171,
@@ -158831,13 +159604,16 @@
    ],
    "purr_cozy": {
     "index": 2173,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "treat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2175,
@@ -159122,13 +159898,16 @@
    ],
    "purr_cozy": {
     "index": 2177,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "trick.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2179,
@@ -159270,13 +160049,16 @@
    ],
    "purr_cozy": {
     "index": 2179,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "truck.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2181,
@@ -159800,13 +160582,16 @@
    ],
    "purr_cozy": {
     "index": 2186,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "turtle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2188,
@@ -159933,13 +160718,16 @@
    ],
    "purr_cozy": {
     "index": 2188,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "type.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2190,
@@ -159996,13 +160784,16 @@
    ],
    "purr_cozy": {
     "index": 2189,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "typhoon.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2191,
@@ -160071,13 +160862,16 @@
    ],
    "purr_cozy": {
     "index": 2190,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "ugly.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2192,
@@ -160154,13 +160948,16 @@
    ],
    "purr_cozy": {
     "index": 2191,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "umbrella.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2193,
@@ -160365,13 +161162,16 @@
    ],
    "purr_cozy": {
     "index": 2194,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "uniform.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2196,
@@ -160750,13 +161550,16 @@
    ],
    "purr_cozy": {
     "index": 2200,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "vacation.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2202,
@@ -161042,13 +161845,16 @@
    ],
    "purr_cozy": {
     "index": 2204,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "video.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2206,
@@ -161178,13 +161984,16 @@
    ],
    "purr_cozy": {
     "index": 2206,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "violin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2208,
@@ -161245,13 +162054,16 @@
    ],
    "purr_cozy": {
     "index": 2207,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "visitor.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2209,
@@ -161645,13 +162457,16 @@
    ],
    "purr_cozy": {
     "index": 2213,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "waiter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2215,
@@ -161708,13 +162523,16 @@
    ],
    "purr_cozy": {
     "index": 2214,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "waitress.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2216,
@@ -161786,13 +162604,16 @@
    ],
    "purr_cozy": {
     "index": 2215,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "wake.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2217,
@@ -161849,13 +162670,16 @@
    ],
    "purr_cozy": {
     "index": 2216,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "wallet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2218,
@@ -161979,13 +162803,16 @@
    ],
    "purr_cozy": {
     "index": 2218,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "watermelon.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2220,
@@ -162055,13 +162882,16 @@
    ],
    "purr_cozy": {
     "index": 2219,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "wave.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2221,
@@ -162487,13 +163317,16 @@
    ],
    "purr_cozy": {
     "index": 2225,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "wet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2227,
@@ -163348,13 +164181,16 @@
    ],
    "purr_cozy": {
     "index": 2237,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 0.6,
     "audio": "windy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2239,
@@ -163663,13 +164499,16 @@
    ],
    "purr_cozy": {
     "index": 2241,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "wise.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2243,
@@ -163826,13 +164665,16 @@
    ],
    "purr_cozy": {
     "index": 2243,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "without.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2245,
@@ -164047,13 +164889,16 @@
    ],
    "purr_cozy": {
     "index": 2246,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "wonderful.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2248,
@@ -164237,13 +165082,16 @@
    ],
    "purr_cozy": {
     "index": 2249,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.4,
     "audio": "workbook.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2251,
@@ -164454,13 +165302,16 @@
    ],
    "purr_cozy": {
     "index": 2252,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.0,
     "audio": "yard.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2254,
@@ -164583,13 +165434,16 @@
    ],
    "purr_cozy": {
     "index": 2254,
-    "level": 2,
+    "level": 1,
     "adaptive_tier": 1.2,
     "audio": "zebra.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 2
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2256,
@@ -164783,13 +165637,16 @@
    ],
    "purr_cozy": {
     "index": 2257,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "accident.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2259,
@@ -165261,13 +166118,16 @@
    ],
    "purr_cozy": {
     "index": 2264,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "activity.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2266,
@@ -165518,13 +166378,16 @@
    ],
    "purr_cozy": {
     "index": 2268,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "admire.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2270,
@@ -165930,13 +166793,16 @@
    ],
    "purr_cozy": {
     "index": 2274,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "advertisement.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2276,
@@ -165997,13 +166863,16 @@
    ],
    "purr_cozy": {
     "index": 2275,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "advice.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2277,
@@ -166069,13 +166938,16 @@
    ],
    "purr_cozy": {
     "index": 2276,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "advise.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2278,
@@ -166273,13 +167145,16 @@
    ],
    "purr_cozy": {
     "index": 2279,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "affect.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2281,
@@ -166523,13 +167398,16 @@
    ],
    "purr_cozy": {
     "index": 2283,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "air-conditioner.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2285,
@@ -166905,13 +167783,16 @@
    ],
    "purr_cozy": {
     "index": 2289,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "angel.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2291,
@@ -166985,13 +167866,16 @@
    ],
    "purr_cozy": {
     "index": 2290,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "angle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2292,
@@ -167404,13 +168288,16 @@
    ],
    "purr_cozy": {
     "index": 2296,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "appreciate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2298,
@@ -168674,13 +169561,16 @@
    ],
    "purr_cozy": {
     "index": 2315,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "available.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2317,
@@ -169634,13 +170524,16 @@
    ],
    "purr_cozy": {
     "index": 2329,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 0.8,
     "audio": "badminton.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2331,
@@ -170647,13 +171540,16 @@
    ],
    "purr_cozy": {
     "index": 2343,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "behave.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2345,
@@ -171256,13 +172152,16 @@
    ],
    "purr_cozy": {
     "index": 2352,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "blame.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2354,
@@ -171344,13 +172243,16 @@
    ],
    "purr_cozy": {
     "index": 2353,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "blanket.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2355,
@@ -171480,13 +172382,16 @@
    ],
    "purr_cozy": {
     "index": 2355,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "bless.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2357,
@@ -171604,13 +172509,16 @@
    ],
    "purr_cozy": {
     "index": 2357,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "blouse.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2359,
@@ -171898,13 +172806,16 @@
    ],
    "purr_cozy": {
     "index": 2361,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "bored.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2363,
@@ -172923,13 +173834,16 @@
    ],
    "purr_cozy": {
     "index": 2376,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "bucket.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2378,
@@ -173227,13 +174141,16 @@
    ],
    "purr_cozy": {
     "index": 2380,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "buffet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2382,
@@ -174032,13 +174949,16 @@
    ],
    "purr_cozy": {
     "index": 2392,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "campus.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2394,
@@ -174935,13 +175855,16 @@
    ],
    "purr_cozy": {
     "index": 2405,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.0,
     "audio": "celebrate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2407,
@@ -174998,15 +175921,18 @@
    ],
    "purr_cozy": {
     "index": 2406,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "centimeter.mp3",
     "old_word": null,
     "accept": [
      "centimetre"
-    ]
+    ],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2408,
@@ -175513,13 +176439,16 @@
    ],
    "purr_cozy": {
     "index": 2413,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "channel.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2415,
@@ -175880,13 +176809,16 @@
    ],
    "purr_cozy": {
     "index": 2418,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "cheer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2420,
@@ -176004,13 +176936,16 @@
    ],
    "purr_cozy": {
     "index": 2420,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.0,
     "audio": "cheese.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2422,
@@ -176278,13 +177213,16 @@
    ],
    "purr_cozy": {
     "index": 2424,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "childhood.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2426,
@@ -176565,13 +177503,16 @@
    ],
    "purr_cozy": {
     "index": 2428,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "china.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2430,
@@ -177061,13 +178002,16 @@
    ],
    "purr_cozy": {
     "index": 2435,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "classical.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2437,
@@ -177750,13 +178694,16 @@
    ],
    "purr_cozy": {
     "index": 2445,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "college.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2447,
@@ -178172,13 +179119,16 @@
    ],
    "purr_cozy": {
     "index": 2451,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "command.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2453,
@@ -178724,13 +179674,16 @@
    ],
    "purr_cozy": {
     "index": 2459,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "concern.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2461,
@@ -179200,13 +180153,16 @@
    ],
    "purr_cozy": {
     "index": 2466,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "confident.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2468,
@@ -179269,13 +180225,16 @@
    ],
    "purr_cozy": {
     "index": 2467,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "confuse.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2469,
@@ -179812,13 +180771,16 @@
    ],
    "purr_cozy": {
     "index": 2475,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "contract_n.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2477,
@@ -179893,14 +180855,16 @@
    ],
    "purr_cozy": {
     "index": 2476,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.0,
     "audio": "couch.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -181374,13 +182338,16 @@
    ],
    "purr_cozy": {
     "index": 2497,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "current.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2499,
@@ -182357,13 +183324,16 @@
    ],
    "purr_cozy": {
     "index": 2511,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "define.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2513,
@@ -183309,13 +184279,16 @@
    ],
    "purr_cozy": {
     "index": 2525,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "diet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2527,
@@ -183371,13 +184344,16 @@
    ],
    "purr_cozy": {
     "index": 2526,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "diligent.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2528,
@@ -186336,13 +187312,16 @@
    ],
    "purr_cozy": {
     "index": 2569,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "electric.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2571,
@@ -186716,13 +187695,16 @@
    ],
    "purr_cozy": {
     "index": 2575,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "emphasize.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2577,
@@ -186794,13 +187776,16 @@
    ],
    "purr_cozy": {
     "index": 2576,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "employ.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2578,
@@ -187089,13 +188074,16 @@
    ],
    "purr_cozy": {
     "index": 2580,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "empty.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2582,
@@ -187217,13 +188205,16 @@
    ],
    "purr_cozy": {
     "index": 2582,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "energetic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2584,
@@ -187426,13 +188417,16 @@
    ],
    "purr_cozy": {
     "index": 2585,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "engine.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2587,
@@ -187506,13 +188500,16 @@
    ],
    "purr_cozy": {
     "index": 2586,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "engineer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2588,
@@ -187772,13 +188769,16 @@
    ],
    "purr_cozy": {
     "index": 2590,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "envy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2592,
@@ -187999,13 +188999,16 @@
    ],
    "purr_cozy": {
     "index": 2593,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "evil.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2595,
@@ -188356,13 +189359,16 @@
    ],
    "purr_cozy": {
     "index": 2598,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "exit.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2600,
@@ -189659,13 +190665,16 @@
    ],
    "purr_cozy": {
     "index": 2616,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "fancy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2618,
@@ -189722,13 +190731,16 @@
    ],
    "purr_cozy": {
     "index": 2617,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "fantastic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2619,
@@ -189940,13 +190952,16 @@
    ],
    "purr_cozy": {
     "index": 2620,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "fashionable.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2622,
@@ -190143,13 +191158,16 @@
    ],
    "purr_cozy": {
     "index": 2623,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "faucet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2625,
@@ -190450,13 +191468,16 @@
    ],
    "purr_cozy": {
     "index": 2627,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "file.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2629,
@@ -191870,13 +192891,16 @@
    ],
    "purr_cozy": {
     "index": 2647,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "friendship.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2649,
@@ -192023,13 +193047,16 @@
    ],
    "purr_cozy": {
     "index": 2649,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "fry.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2651,
@@ -192234,13 +193261,16 @@
    ],
    "purr_cozy": {
     "index": 2652,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "furniture.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2654,
@@ -192781,13 +193811,16 @@
    ],
    "purr_cozy": {
     "index": 2660,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "gesture.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2662,
@@ -193671,13 +194704,16 @@
    ],
    "purr_cozy": {
     "index": 2672,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "gram.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2674,
@@ -194283,13 +195319,16 @@
    ],
    "purr_cozy": {
     "index": 2681,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "gym.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2683,
@@ -194411,13 +195450,16 @@
    ],
    "purr_cozy": {
     "index": 2683,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "hairdresser.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2685,
@@ -195902,13 +196944,16 @@
    ],
    "purr_cozy": {
     "index": 2704,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "hike.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2706,
@@ -196521,13 +197566,16 @@
    ],
    "purr_cozy": {
     "index": 2713,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "honesty.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2715,
@@ -196747,13 +197795,16 @@
    ],
    "purr_cozy": {
     "index": 2716,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "horrible.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2718,
@@ -197026,13 +198077,16 @@
    ],
    "purr_cozy": {
     "index": 2720,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "hug.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2722,
@@ -197150,13 +198204,16 @@
    ],
    "purr_cozy": {
     "index": 2722,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "humorous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2724,
@@ -199191,13 +200248,16 @@
    ],
    "purr_cozy": {
     "index": 2752,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "interrupt.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2754,
@@ -199754,13 +200814,16 @@
    ],
    "purr_cozy": {
     "index": 2760,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "jealous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2762,
@@ -200518,13 +201581,16 @@
    ],
    "purr_cozy": {
     "index": 2771,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "kangaroo.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2773,
@@ -200771,13 +201837,16 @@
    ],
    "purr_cozy": {
     "index": 2775,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "kilogram.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2777,
@@ -200838,15 +201907,18 @@
    ],
    "purr_cozy": {
     "index": 2776,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "kilometer.mp3",
     "old_word": null,
     "accept": [
      "kilometre"
-    ]
+    ],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2778,
@@ -201555,13 +202627,16 @@
    ],
    "purr_cozy": {
     "index": 2786,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "latter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2788,
@@ -204155,13 +205230,16 @@
    ],
    "purr_cozy": {
     "index": 2824,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "major.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2826,
@@ -204280,13 +205358,16 @@
    ],
    "purr_cozy": {
     "index": 2826,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "mall.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2828,
@@ -204545,13 +205626,16 @@
    ],
    "purr_cozy": {
     "index": 2830,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "manager.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2832,
@@ -204841,13 +205925,16 @@
    ],
    "purr_cozy": {
     "index": 2834,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 0.8,
     "audio": "March.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2836,
@@ -204906,13 +205993,16 @@
    ],
    "purr_cozy": {
     "index": 2835,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "marker.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2837,
@@ -204969,13 +206059,16 @@
    ],
    "purr_cozy": {
     "index": 2836,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "marvelous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2838,
@@ -205032,13 +206125,16 @@
    ],
    "purr_cozy": {
     "index": 2837,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.0,
     "audio": "math.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2839,
@@ -205755,13 +206851,16 @@
    ],
    "purr_cozy": {
     "index": 2848,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "medium.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2850,
@@ -206529,13 +207628,16 @@
    ],
    "purr_cozy": {
     "index": 2859,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "microwave.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2861,
@@ -207038,13 +208140,16 @@
    ],
    "purr_cozy": {
     "index": 2866,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "minor.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2868,
@@ -208007,13 +209112,16 @@
    ],
    "purr_cozy": {
     "index": 2880,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "mop.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2882,
@@ -209199,13 +210307,16 @@
    ],
    "purr_cozy": {
     "index": 2897,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "nervous.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2899,
@@ -211480,13 +212591,16 @@
    ],
    "purr_cozy": {
     "index": 2930,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "pale.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2932,
@@ -212344,13 +213458,16 @@
    ],
    "purr_cozy": {
     "index": 2942,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "pause.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2944,
@@ -214790,13 +215907,16 @@
    ],
    "purr_cozy": {
     "index": 2976,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "pollute.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2978,
@@ -214967,13 +216087,16 @@
    ],
    "purr_cozy": {
     "index": 2978,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "pop.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2980,
@@ -215727,13 +216850,16 @@
    ],
    "purr_cozy": {
     "index": 2989,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "powder.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2991,
@@ -215921,13 +217047,16 @@
    ],
    "purr_cozy": {
     "index": 2992,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "precious.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2994,
@@ -216067,13 +217196,16 @@
    ],
    "purr_cozy": {
     "index": 2994,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "pressure.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 2996,
@@ -216334,13 +217466,16 @@
    ],
    "purr_cozy": {
     "index": 2998,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "priest.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3000,
@@ -216409,13 +217544,16 @@
    ],
    "purr_cozy": {
     "index": 2999,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "primary.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3001,
@@ -216793,16 +217931,18 @@
    ],
    "purr_cozy": {
     "index": 3004,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "program.mp3",
     "old_word": null,
     "accept": [
      "programme"
-    ]
+    ],
+    "level_ceec": 3
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -218972,13 +220112,16 @@
    ],
    "purr_cozy": {
     "index": 3035,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "recover.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3037,
@@ -219191,13 +220334,16 @@
    ],
    "purr_cozy": {
     "index": 3038,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "regret.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3040,
@@ -219882,13 +221028,16 @@
    ],
    "purr_cozy": {
     "index": 3048,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "remind.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3050,
@@ -220183,13 +221332,16 @@
    ],
    "purr_cozy": {
     "index": 3052,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "rent.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3054,
@@ -220265,13 +221417,16 @@
    ],
    "purr_cozy": {
     "index": 3053,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "repair.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3055,
@@ -221863,13 +223018,16 @@
    ],
    "purr_cozy": {
     "index": 3075,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "rob.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3077,
@@ -223072,13 +224230,16 @@
    ],
    "purr_cozy": {
     "index": 3092,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "saucer.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3094,
@@ -223542,13 +224703,16 @@
    ],
    "purr_cozy": {
     "index": 3099,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "scarf.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3101,
@@ -224516,13 +225680,16 @@
    ],
    "purr_cozy": {
     "index": 3112,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "secondary.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3114,
@@ -224649,13 +225816,16 @@
    ],
    "purr_cozy": {
     "index": 3114,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "seek.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3116,
@@ -224786,13 +225956,16 @@
    ],
    "purr_cozy": {
     "index": 3116,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "seldom.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3118,
@@ -226578,13 +227751,16 @@
    ],
    "purr_cozy": {
     "index": 3141,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "sincere.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3143,
@@ -226797,13 +227973,16 @@
    ],
    "purr_cozy": {
     "index": 3144,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "skate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3146,
@@ -226873,13 +228052,16 @@
    ],
    "purr_cozy": {
     "index": 3145,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "ski.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3147,
@@ -227243,13 +228425,16 @@
    ],
    "purr_cozy": {
     "index": 3150,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "slice.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3152,
@@ -227975,13 +229160,16 @@
    ],
    "purr_cozy": {
     "index": 3160,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "sore.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3162,
@@ -228188,13 +229376,16 @@
    ],
    "purr_cozy": {
     "index": 3163,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "spaghetti.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3165,
@@ -230819,13 +232010,16 @@
    ],
    "purr_cozy": {
     "index": 3198,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "stormy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3200,
@@ -231395,13 +232589,16 @@
    ],
    "purr_cozy": {
     "index": 3206,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "style.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3208,
@@ -231799,13 +232996,16 @@
    ],
    "purr_cozy": {
     "index": 3212,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "suggest.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3214,
@@ -233285,13 +234485,16 @@
    ],
    "purr_cozy": {
     "index": 3232,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "system.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3234,
@@ -234155,13 +235358,16 @@
    ],
    "purr_cozy": {
     "index": 3244,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "temperature.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3246,
@@ -235155,13 +236361,16 @@
    ],
    "purr_cozy": {
     "index": 3258,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "tidy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3260,
@@ -235992,13 +237201,16 @@
    ],
    "purr_cozy": {
     "index": 3270,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "trace.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3272,
@@ -236293,14 +237505,16 @@
    ],
    "purr_cozy": {
     "index": 3274,
-    "level": 3,
-    "adaptive_tier": 1.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "trash.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
    "quality_flags": [
-    "meaning_fixed"
+    "meaning_fixed",
+    "level_regrouped"
    ]
   },
   {
@@ -237055,13 +238269,16 @@
    ],
    "purr_cozy": {
     "index": 3285,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "tub.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3287,
@@ -238177,13 +239394,16 @@
    ],
    "purr_cozy": {
     "index": 3301,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "universe.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3303,
@@ -238456,13 +239676,16 @@
    ],
    "purr_cozy": {
     "index": 3305,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.5,
     "audio": "valuable.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3307,
@@ -239067,13 +240290,16 @@
    ],
    "purr_cozy": {
     "index": 3314,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "vest.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3316,
@@ -241594,13 +242820,16 @@
    ],
    "purr_cozy": {
     "index": 3350,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "wrist.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3352,
@@ -241831,13 +243060,16 @@
    ],
    "purr_cozy": {
     "index": 3353,
-    "level": 3,
+    "level": 2,
     "adaptive_tier": 1.8,
     "audio": "yell.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 3
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3355,
@@ -242164,17 +243396,19 @@
    ],
    "purr_cozy": {
     "index": 3358,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "a.m.mp3",
     "old_word": "a.m. / am / A.M. / AM",
     "accept": [
      "am",
      "AM"
-    ]
+    ],
+    "level_ceec": 4
    },
    "quality_flags": [
-    "headword_normalized"
+    "headword_normalized",
+    "level_regrouped"
    ]
   },
   {
@@ -245741,13 +246975,16 @@
    ],
    "purr_cozy": {
     "index": 3412,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "apologize.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3414,
@@ -247445,13 +248682,16 @@
    ],
    "purr_cozy": {
     "index": 3438,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "assume.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3440,
@@ -248500,13 +249740,16 @@
    ],
    "purr_cozy": {
     "index": 3455,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "backpack.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3457,
@@ -249295,13 +250538,16 @@
    ],
    "purr_cozy": {
     "index": 3467,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "biology.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3469,
@@ -252278,13 +253524,16 @@
    ],
    "purr_cozy": {
     "index": 3510,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "chemistry.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3512,
@@ -253977,13 +255226,16 @@
    ],
    "purr_cozy": {
     "index": 3535,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "comic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3537,
@@ -254180,13 +255432,16 @@
    ],
    "purr_cozy": {
     "index": 3538,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "comment.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3540,
@@ -260688,13 +261943,16 @@
    ],
    "purr_cozy": {
     "index": 3634,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "curve.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3636,
@@ -261214,13 +262472,16 @@
    ],
    "purr_cozy": {
     "index": 3641,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "decrease.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3643,
@@ -263775,13 +265036,16 @@
    ],
    "purr_cozy": {
     "index": 3680,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "diplomat.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3682,
@@ -265409,13 +266673,16 @@
    ],
    "purr_cozy": {
     "index": 3704,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "download.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3706,
@@ -267306,16 +268573,18 @@
    ],
    "purr_cozy": {
     "index": 3732,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "e-mail.mp3",
     "old_word": null,
     "accept": [
      "email"
-    ]
+    ],
+    "level_ceec": 4
    },
    "quality_flags": [
-    "phonetic_added"
+    "phonetic_added",
+    "level_regrouped"
    ]
   },
   {
@@ -267379,13 +268648,16 @@
    ],
    "purr_cozy": {
     "index": 3733,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "embarrass.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3735,
@@ -269643,13 +270915,16 @@
    ],
    "purr_cozy": {
     "index": 3767,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "eve.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3769,
@@ -275073,13 +276348,16 @@
    ],
    "purr_cozy": {
     "index": 3847,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "genius.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3849,
@@ -276985,13 +278263,16 @@
    ],
    "purr_cozy": {
     "index": 3875,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "ground.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3877,
@@ -278366,13 +279647,16 @@
    ],
    "purr_cozy": {
     "index": 3896,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "helicopter.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3898,
@@ -279214,13 +280498,16 @@
    ],
    "purr_cozy": {
     "index": 3908,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "host.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3910,
@@ -279416,13 +280703,16 @@
    ],
    "purr_cozy": {
     "index": 3911,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "housewife.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3913,
@@ -279480,13 +280770,16 @@
    ],
    "purr_cozy": {
     "index": 3912,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "housework.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3914,
@@ -281841,13 +283134,16 @@
    ],
    "purr_cozy": {
     "index": 3948,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "information.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3950,
@@ -282471,13 +283767,16 @@
    ],
    "purr_cozy": {
     "index": 3957,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "inspire.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3959,
@@ -283087,13 +284386,16 @@
    ],
    "purr_cozy": {
     "index": 3966,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "intelligent.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3968,
@@ -283840,13 +285142,16 @@
    ],
    "purr_cozy": {
     "index": 3977,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "Internet.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 3979,
@@ -286902,13 +288207,16 @@
    ],
    "purr_cozy": {
     "index": 4021,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "locker.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4023,
@@ -288283,13 +289591,16 @@
    ],
    "purr_cozy": {
     "index": 4042,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "maximum.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4044,
@@ -288355,13 +289666,16 @@
    ],
    "purr_cozy": {
     "index": 4043,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "mechanic.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4045,
@@ -293134,13 +294448,16 @@
    ],
    "purr_cozy": {
     "index": 4116,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "operation.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4118,
@@ -294286,13 +295603,16 @@
    ],
    "purr_cozy": {
     "index": 4133,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "p.m.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4135,
@@ -296555,13 +297875,16 @@
    ],
    "purr_cozy": {
     "index": 4167,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "physics.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4169,
@@ -297382,13 +298705,16 @@
    ],
    "purr_cozy": {
     "index": 4179,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "pollution.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4181,
@@ -298936,13 +300262,16 @@
    ],
    "purr_cozy": {
     "index": 4202,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "production.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4204,
@@ -299199,13 +300528,16 @@
    ],
    "purr_cozy": {
     "index": 4206,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "professor.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4208,
@@ -301597,13 +302929,16 @@
    ],
    "purr_cozy": {
     "index": 4241,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "recycle.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4243,
@@ -302638,13 +303973,16 @@
    ],
    "purr_cozy": {
     "index": 4256,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "relative.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4258,
@@ -304725,13 +306063,16 @@
    ],
    "purr_cozy": {
     "index": 4286,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "revise.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4288,
@@ -305447,13 +306788,16 @@
    ],
    "purr_cozy": {
     "index": 4296,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "ruin.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4298,
@@ -305722,13 +307066,16 @@
    ],
    "purr_cozy": {
     "index": 4300,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "salesman.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4302,
@@ -306100,13 +307447,16 @@
    ],
    "purr_cozy": {
     "index": 4306,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "scenery.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4308,
@@ -309777,13 +311127,16 @@
    ],
    "purr_cozy": {
     "index": 4358,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "stingy.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4360,
@@ -310350,13 +311703,16 @@
    ],
    "purr_cozy": {
     "index": 4366,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.2,
     "audio": "surf.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4368,
@@ -313729,13 +315085,16 @@
    ],
    "purr_cozy": {
     "index": 4417,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "underpass.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4419,
@@ -313794,13 +315153,16 @@
    ],
    "purr_cozy": {
     "index": 4418,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "unique.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4420,
@@ -313930,13 +315292,16 @@
    ],
    "purr_cozy": {
     "index": 4420,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "university.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4422,
@@ -314003,13 +315368,16 @@
    ],
    "purr_cozy": {
     "index": 4421,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "upload.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4423,
@@ -314608,13 +315976,16 @@
    ],
    "purr_cozy": {
     "index": 4430,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 1,
+    "adaptive_tier": 0.8,
     "audio": "very.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4432,
@@ -314742,13 +316113,16 @@
    ],
    "purr_cozy": {
     "index": 4432,
-    "level": 4,
-    "adaptive_tier": 2.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "vinegar.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 4
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4434,
@@ -327210,15 +328584,18 @@
    ],
    "purr_cozy": {
     "index": 4618,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 1,
+    "adaptive_tier": 1.4,
     "audio": "cellphone.mp3",
     "old_word": null,
     "accept": [
      "cell phone"
-    ]
+    ],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4620,
@@ -328694,13 +330071,16 @@
    ],
    "purr_cozy": {
     "index": 4641,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "chubby.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4643,
@@ -332711,13 +334091,16 @@
    ],
    "purr_cozy": {
     "index": 4700,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "considerate.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4702,
@@ -338841,13 +340224,16 @@
    ],
    "purr_cozy": {
     "index": 4791,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "dresser.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 4793,
@@ -354573,13 +355959,16 @@
    ],
    "purr_cozy": {
     "index": 5017,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.5,
     "audio": "journalist.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 5019,
@@ -382153,13 +383542,16 @@
    ],
    "purr_cozy": {
     "index": 5414,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "sneakers.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 5416,
@@ -393078,13 +394470,16 @@
    ],
    "purr_cozy": {
     "index": 5566,
-    "level": 5,
-    "adaptive_tier": 3.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "underline.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 5
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 5568,
@@ -402377,13 +403772,16 @@
    ],
    "purr_cozy": {
     "index": 5703,
-    "level": 6,
-    "adaptive_tier": 4.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "ambulance.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 6
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 5705,
@@ -441269,15 +442667,18 @@
    ],
    "purr_cozy": {
     "index": 6291,
-    "level": 6,
-    "adaptive_tier": 4.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "liter.mp3",
     "old_word": null,
     "accept": [
      "litre"
-    ]
+    ],
+    "level_ceec": 6
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 6293,
@@ -464592,13 +465993,16 @@
    ],
    "purr_cozy": {
     "index": 6636,
-    "level": 6,
-    "adaptive_tier": 4.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "sneaky.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 6
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 6638,
@@ -467560,13 +468964,16 @@
    ],
    "purr_cozy": {
     "index": 6679,
-    "level": 6,
-    "adaptive_tier": 4.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "stationery.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 6
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 6681,
@@ -476986,13 +478393,16 @@
    ],
    "purr_cozy": {
     "index": 6821,
-    "level": 6,
-    "adaptive_tier": 4.5,
+    "level": 2,
+    "adaptive_tier": 1.8,
     "audio": "vendor.mp3",
     "old_word": null,
-    "accept": []
+    "accept": [],
+    "level_ceec": 6
    },
-   "quality_flags": []
+   "quality_flags": [
+    "level_regrouped"
+   ]
   },
   {
    "id": 6823,

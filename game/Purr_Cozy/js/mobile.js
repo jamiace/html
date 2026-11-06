@@ -287,9 +287,11 @@ UI.w_more = function () {
   Room.hit = function (x, y, opts = {}) {
     const r = hit(x, y, opts); if (!Mobile.on || !Mobile.touch) return r;
     if (r && r.kind !== 'item') return r;
-    if (!opts.itemsOnly) for (const [dx, dy] of RING) { const q = hit(x + dx, y + dy, opts); if (q && q.kind === 'actor') return q; }
+    // a finger on solid furniture means that furniture, even with a pet right beside it (0.92.47);
+    // only a tap on the floor, a rug or the wall looks around for a pet or a thing nearby
     const weak = (q) => !q || q.kind !== 'item' || ['rug', 'wall'].includes(ITEMS[q.it.k].layer) || ITEMS[q.it.k].window;
     if (!weak(r)) return r;
+    if (!opts.itemsOnly) for (const [dx, dy] of RING) { const q = hit(x + dx, y + dy, opts); if (q && q.kind === 'actor') return q; }
     for (const [dx, dy] of RING) { const q = hit(x + dx, y + dy, opts); if (q && !weak(q)) return q; }
     return r;
   };
