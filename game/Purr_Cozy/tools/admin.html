@@ -854,7 +854,8 @@ Object.assign(Admin,{
   try{const reg={};(await F.getDocs(F.collection(db,'players'))).forEach(d=>reg[d.id]=d.data());this.reg=reg;
    const out=[];let last=null;
    for(;;){const q=last?F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.startAfter(last),F.limit(100)):F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.limit(100));
-    const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();let S=null;try{S=JSON.parse(x.data)}catch(e){}out.push({uid:d.id,doc:x,sum:this.sumOf(S,x),reg:reg[d.id]||null})});
+    const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();if(x.device==='claude-sim')return;   // the simulation's own state document, not a player
+    let S=null;try{S=JSON.parse(x.data)}catch(e){}out.push({uid:d.id,doc:x,sum:this.sumOf(S,x),reg:reg[d.id]||null})});
     note.textContent=`讀取中… ${out.length}`;if(snap.size<100)break;last=snap.docs[snap.docs.length-1]}
    for(const uid in reg)if(!out.some(p=>p.uid===uid))out.push({uid,doc:null,sum:null,reg:reg[uid]});
    this.players=out;window.TEST_UIDS=new Set(out.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).map(p=>p.uid));
@@ -919,7 +920,7 @@ Object.assign(Admin,{
   q('[data-close]',()=>{box.classList.add('hidden');this.cur=null});q('[data-save]',()=>this.saveEdits());q('[data-bk]',()=>this.loadBackups());q('[data-json]',()=>this.saveJson());
   q('[data-dl]',()=>{const c=this.cur,b=new Blob([JSON.stringify(c.S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`purrcozy-save-${c.uid.slice(0,8)}.json`;a.click();this.log('player.export',c.uid,'')})},
  // write a changed state for the current player: backup → transaction (rev must not have moved) → audit log
- async writeState(S2,note,act){const c=this.cur,{F,db}=await firebase(),ref=F.doc(db,'saves',c.uid);
+ async writeState(S2,note,act){const c=this.cur;if(((c.reg&&c.reg.test)||(c.S&&c.S.flags&&c.S.flags.tester))&&!confirm('這是自動模擬用的測試帳號。模擬期間改它的存檔會讓測試數據失真，確定還是要改？'))throw Error('已取消');const {F,db}=await firebase(),ref=F.doc(db,'saves',c.uid);
   S2.admin={at:Date.now(),by:this.me.email,note:String(note||'').slice(0,120)};
   const data=JSON.stringify(S2);if(data.length>880000)throw Error('存檔太大（超過 880 KB）');
   await F.addDoc(F.collection(db,'saves',c.uid,'backups'),{v:1,at:Date.now(),reason:'後台修改前（'+this.me.email+'）',device:'admin',savedAt:c.doc.savedAt||0,lvl:c.doc.lvl||1,coins:c.doc.coins||0,data:c.doc.data,updated:F.serverTimestamp()});
