@@ -9,7 +9,11 @@
    - Sessions are queued in localStorage and uploaded in batches (finish, every 30 s, next launch), so nothing is
      lost offline and there is only one write per session.
    - Players can turn it off in Settings ("Share anonymous learning data"); the queue is then discarded.
-   Field reference: docs/學習紀錄與分析-設定教學.md (section "資料欄位"). */
+   Field reference: docs/學習紀錄與分析-設定教學.md (section "資料欄位").
+   0.92.45 adds, inside ans / rev / typo items only (no new top-level field, so firestore.rules need no change):
+     gr = the word's estimated school grade 1-12 · ge = 1 when gap is estimated from the due day (older records), 0 when exact
+     h (spelling hint) = 0 none · 1 first letter (the usual spelling question) · 2 masked letters (story labels); before this
+     version the usual first-letter hint was logged as 0 too. */
 const LearnLog = {
  V: 1, KEY: 'purr-cozy.learnlog.q', MAX_QUEUE: 300, BATCH: 20, APP: 'purr-learnlog',
  cur: null, typo: null, busy: false, db: null, F: null, lid: '', failed: 0, off: false,
@@ -18,6 +22,7 @@ const LearnLog = {
  id() { const a = new Uint8Array(10); crypto.getRandomValues(a); return Date.now().toString(36) + '-' + [...a].map(x => x.toString(36).padStart(2, '0')).join('').slice(0, 14); },
  acct() { try { return typeof Cloud !== 'undefined' && Cloud.mode === 'firebase' && Cloud.user ? String(Cloud.user.uid || '') : ''; } catch (e) { return ''; } },
  level(i) { return VOCAB[i] ? VOCAB[i].t : 0; },
+ grade(i) { return VOCAB[i] && VOCAB[i].g ? VOCAB[i].g : 0; },
  word(i) { return VOCAB[i] ? VOCAB[i].w : ''; },
 
  // ---------- sessions ----------
@@ -61,8 +66,15 @@ const LearnLog = {
     for (const r of part) b.set(this.F.doc(this.db, 'learnlog', this.lid, 'lsess', r.id), Object.assign({}, r, { lid: this.lid, acct: r.acct || acct, at: this.F.serverTimestamp() }));
     try { await b.commit(); this.failed = 0; }
     catch (e) {
-     // permission-denied = the batch can never be written (e.g. already uploaded): drop it so the queue keeps moving
-     if (e && e.code === 'permission-denied') console.warn('[learnlog] dropped', part.length, e.message); else throw e;
+     if (!e || e.code !== 'permission-denied') throw e;
+     // One refused document (usually one that was already uploaded: the rules allow create, never update) used to
+     // throw away all twenty sessions of the batch. Write them one by one and drop only the ones that are refused.
+     let dropped = 0;
+     for (const r of part) {
+      try { await this.F.setDoc(this.F.doc(this.db, 'learnlog', this.lid, 'lsess', r.id), Object.assign({}, r, { lid: this.lid, acct: r.acct || acct, at: this.F.serverTimestamp() })); }
+      catch (e2) { if (e2 && e2.code === 'permission-denied') dropped++; else throw e2; }
+     }
+     if (dropped) console.warn('[learnlog] dropped', dropped, 'of', part.length);
     }
     const ids = new Set(part.map(r => r.id)); this.store(this.queue().filter(r => !ids.has(r.id)));
    }
@@ -94,7 +106,7 @@ const LearnLog = {
  Learn.review = function (knew) {
   const c = live(), s = this.sess, i = s && s.step === 'review' ? s.words[s.ri] : null, ms = c ? Math.round(now() - c.card) : 0;
   const r = review(knew);
-  if (c && i != null) { c.rec.rev.push({ w: L.word(i), l: L.level(i), k: knew ? 1 : 0, ms: Math.min(ms, 600000) }); c.card = now(); }
+  if (c && i != null) { c.rec.rev.push({ w: L.word(i), l: L.level(i), gr: L.grade(i), k: knew ? 1 : 0, ms: Math.min(ms, 600000) }); c.card = now(); }
   return r;
  };
  const more = Learn.more.bind(Learn); Learn.more = function () { const r = more(); if (L.cur) L.cur.card = now(); return r; };
@@ -111,14 +123,17 @@ const LearnLog = {
   if (!c || !s || s.step !== 'quiz' || s.ans) return answer(val);
   const q = s.qs[s.qi], i = q.i, rec = this.rec(i), typed = q.type === 'spell' || q.type === 'listenspell';
   let p = null; try { p = Adaptive.probability(i, q.type, q); } catch (e) { }
-  const box0 = rec ? rec[0] : 0, seenBefore = rec && (rec[3] + rec[4]) > 0, gap = seenBefore ? this.dayNum() - (rec[1] - SRS_INT[rec[0]]) : -1;
+  // gap = days since this word was last answered. Records from 0.92.45 keep that day (index 5); older ones only allow an
+  // estimate from the due day, which is wrong after a miss (due is always tomorrow then), so it is marked ge:1.
+  const box0 = rec ? rec[0] : 0, seenBefore = rec && (rec[3] + rec[4]) > 0, exact = !!rec && rec[5] != null;
+  const gap = seenBefore ? this.dayNum() - (exact ? rec[5] : rec[1] - SRS_INT[rec[0]]) : -1;
   const ms = c.shown ? Math.round(now() - c.shown) : 0, replays = c.replays || 0, idx = s.qi;
   const r = answer(val);
   if (s.ans) {
    const after = this.rec(i), ok = !!s.ans.ok;
-   const given = ok ? '' : typed ? String(val || '').trim().toLowerCase().slice(0, 40) : (VOCAB[val] ? VOCAB[val].w : String(val ?? '').slice(0, 40));
-   c.rec.ans.push({ t: Date.now() - c.rec.t0, w: L.word(i), l: L.level(i), q: q.type, ok: ok ? 1 : 0, ms: Math.min(ms, 600000), g: given,
-    b0: box0, b1: after ? after[0] : 0, gap, p: p == null ? -1 : Math.round(p * 1000) / 1000, h: q.noHint ? 0 : q.hint ? 1 : 0, r: Math.max(0, replays - 1), i: idx,
+   const given = ok ? '' : typed ? Learn.norm(val).slice(0, 40) : (VOCAB[val] ? VOCAB[val].w : String(val ?? '').slice(0, 40));
+   c.rec.ans.push({ t: Date.now() - c.rec.t0, w: L.word(i), l: L.level(i), gr: L.grade(i), ge: seenBefore && !exact ? 1 : 0, q: q.type, ok: ok ? 1 : 0, ms: Math.min(ms, 600000), g: given,
+    b0: box0, b1: after ? after[0] : 0, gap, p: p == null ? -1 : Math.round(p * 1000) / 1000, h: !typed || q.noHint || q.type === 'listenspell' ? 0 : q.hint ? 2 : 1, r: Math.max(0, replays - 1), i: idx,
     re: s.redoFrom != null && idx >= s.redoFrom ? 1 : 0 });
   }
   return r;
@@ -134,7 +149,7 @@ const LearnLog = {
  if (typeof CatsTypo !== 'undefined') {
   const T = CatsTypo, tlive = () => { const t = L.typo; if (!t) return null; if (t.s !== T.session) { L.typo = null; L.close(t.rec, t.s && t.s.done ? 'result' : 'left'); return null; } return t; };
   // the first question is shown inside start(), before the session is known here
-  const item = t => { const v = T.current(); t.item = { w: v ? v.w : '', l: v ? v.t : 0, ok: 0, att: 0, ms: 0, rv: 0, cat: 0, g: [] }; t.shown = now(); };
+  const item = t => { const v = T.current(); t.item = { w: v ? v.w : '', l: v ? v.t : 0, gr: v && v.g ? v.g : 0, ok: 0, att: 0, ms: 0, rv: 0, cat: 0, g: [] }; t.shown = now(); };
   const begin = name => { const fn = T[name].bind(T); T[name] = function () { const before = this.session, r = fn(...arguments); if (this.session && this.session !== before) { const t = L.typo; if (t) { L.typo = null; L.close(t.rec, 'restart'); } L.typo = { s: this.session, rec: L.open('typo', this.session.mode || 'free') }; item(L.typo); } return r; }; };
   begin('start'); begin('openDaily');
   const next = T.nextQuestion.bind(T);
@@ -142,7 +157,7 @@ const LearnLog = {
   const flushItem = (t, ok, revealed) => { const it = t.item; if (!it) return; it.ok = ok ? 1 : 0; it.rv = revealed ? 1 : 0; it.ms = Math.min(Math.round(now() - t.shown), 600000); t.rec.typo.push(it); t.item = null; };
   const submit = T.submit.bind(T);
   T.submit = function () {
-   const t = tlive(), s = this.session, wasOpen = s && this.active && !s.answered, value = String(this.value || '').trim().toLowerCase(), cat = (this.catFlags || []).some(Boolean);
+   const t = tlive(), s = this.session, wasOpen = s && this.active && !s.answered, value = Learn.norm(this.value), cat = (this.catFlags || []).some(Boolean);
    const r = submit();
    if (t && t.item && wasOpen) { t.item.att++; if (cat) t.item.cat = 1; if (s.answered) flushItem(t, true, false); else if (t.item.g.length < 3) t.item.g.push(value.slice(0, 40)); }
    return r;

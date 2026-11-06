@@ -9,9 +9,10 @@
        * a plot for the week (2-3 per merchant): how it starts, what gets a name on Friday
      so the same merchant six weeks later tells it differently, with words you have not
      seen in their stories before
-   - every chapter is 5 questions: 2-3 from the scene, the rest from your own review words
-     (the 70-85 % mix from feel.js applies); a wrong answer never fails a chapter, missed
-     words come back once at the end
+   - every chapter is 5 questions: 2-3 from the scene, the rest from your own review words;
+     progression.js tops it up to 7 harder questions (similar-word options, every third one an
+     unhinted spelling). A chapter counts only with 70 % right; missed words do not come back
+     in the same attempt (the chapter can simply be tried again)
    - Friday you name something with one of three English words; finishing the week gives
      that merchant's keepsake, which shows the names you gave it
    ============================================================ */
@@ -158,7 +159,7 @@ const Story = {
   M(mk) { return STORY_M[mk || Merchant.id()]; },
   pick(a) { return a[Math.floor(Math.random() * a.length)]; },
   fill(s, mk, extra = {}) { const n = this.M(mk).nouns; return I18n.named(s,Object.assign({},n,extra)); },
-  zh(v) { return v.z.split(/[；;，,]/)[0].replace(/（.*?）|\(.*?\)/g, '').trim(); },
+  zh(v) { return Learn.qz(v).split(/[；;，,]/)[0].replace(/（.*?）|\(.*?\)/g, '').trim(); },
   // this week's story, put together the first time it is opened this week
   week() {
     const St = this.S, wk = weekKey(), mk = Merchant.id();

@@ -13,7 +13,7 @@ const Adaptive = {
       for (const [w, r] of Object.entries(Learn.P)) {
         const i = VIDX[w]; if (i == null || !r || r[3] < 1) continue;
         const k = Math.min(4, r[3]) / (1 + (r[4] || 0));
-        sum += VOCAB[i].t * k; weight += k;
+        sum += (VOCAB[i].d ?? VOCAB[i].t) * k; weight += k;
       }
       const tier = weight ? this.clamp(sum / weight, 1, 6) : Math.min(...Learn.levelsOn());
       const ability = .75 * tier + Math.log(this.target / (1 - this.target));
@@ -24,7 +24,7 @@ const Adaptive = {
   },
   difficulty(v, type, q = {}) {
     const skill = this.skill(type), typed = skill === 'spell' || skill === 'listenspell';
-    let d = .75 * v.t;
+    let d = .75 * (v.d ?? v.t);   // v.d: finer than the CEEC level (Level 1 holds both "cat" and "according to")
     if (typed) d += this.clamp((v.w.replace(/[^a-z]/ig, '').length - 5) * .075, -.15, .9);
     if (skill === 'listen' || skill === 'listenspell') d += .18;
     if (typed && !q.noHint && skill !== 'listenspell') d -= q.hint ? .28 : .12;

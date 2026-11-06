@@ -39,7 +39,7 @@ const Challenge = {
     UI.refresh('tasks'); Game.save(); saveSoon();
   },
   left(t) { return (t.words || []).filter(w => !(t.got || []).includes(w) && VIDX[w] != null); },
-  spellable(v) { return v.w.length <= 11 && /^[A-Za-z][A-Za-z'-]*$/.test(v.w); },
+  spellable(v) { return Learn.spellable(v); },
   pickWords(k, tier, n) {
     Learn.ensureDaily();
     // words you have met: everything already studied, plus today's 20 words (a new player studies those today)

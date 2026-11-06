@@ -15,9 +15,11 @@ const LevelGate = {
    const ids=Adaptive.pick(this.questions,null,i=>({type:Challenge.spellable(VOCAB[i])?'spell':'zh2en',noHint:true}));if(ids.length<this.questions)for(const v of shuffle(VOCAB.slice())){if(!ids.includes(v.i))ids.push(v.i);if(ids.length===this.questions)break;}
    Learn.start('levelgate',{kind,pid,target:g.target,token,questions:this.hardQs(ids),strict:true});
  },
- hardOptions(v,field){const first=v.z.split('；')[0],pos=v.p.split('/')[0],value=v[field];const used=new Set([value]);let pool=VOCAB.filter(o=>o.i!==v.i&&o.p.split('/')[0]===pos&&o[field]!==value&&o.z.split('；')[0]!==first&&o.w.toLowerCase()!==v.w.toLowerCase());
+ hardOptions(v,field){const text=o=>field==='w'?Learn.norm(o.w):Learn.qz(o),pos=v.ps[0];let pool=VOCAB.filter(o=>o.ps.includes(pos)&&!Learn.clash(v,o,field));
    const similarity=o=>(o.t===v.t?8:0)+Math.max(0,5-Math.abs(o.w.length-v.w.length))+(o.w[0]===v.w[0]?3:0);
-   pool.sort((a,b)=>similarity(b)-similarity(a));pool=shuffle(pool.slice(0,35));const out=[v.i];for(const o of pool){if(!used.has(o[field])){out.push(o.i);used.add(o[field])}if(out.length===4)break;}if(out.length<4)for(const o of shuffle(VOCAB.slice())){if(!used.has(o[field])&&o.i!==v.i){out.push(o.i);used.add(o[field])}if(out.length===4)break;}return shuffle(out);
+   pool.sort((a,b)=>similarity(b)-similarity(a));pool=shuffle(pool.slice(0,35));const out=[v],used=new Set([text(v)]);
+   const add=o=>{if(out.length<4&&!used.has(text(o))&&!out.some(x=>Learn.clash(x,o,field))){out.push(o);used.add(text(o))}};
+   for(const o of pool)add(o);if(out.length<4)for(const o of shuffle(VOCAB.filter(o=>!Learn.clash(v,o,field))))add(o);return shuffle(out).map(o=>o.i);
  },
  hardQs(ids){return ids.map((i,k)=>{const v=VOCAB[i];let type=['en2zh','zh2en','spell','listen','zh2en','spell','en2zh','zh2en'][k%8];if(type==='listen'&&!Learn.canSpeak())type='zh2en';if(type==='spell'&&!Challenge.spellable(v))type='zh2en';return{i,type,noHint:type==='spell',opts:type==='spell'?null:this.hardOptions(v,type==='zh2en'?'w':'z')}})},
  finish(s,R,n){if(s._gateResult)return s._gateResult;const o=s.opts,p=this.subject(o.kind,o.pid),g=p&&this.gate(o.kind,o.pid,o.target);let msg=I18n.s("u_70d578fbbb09");

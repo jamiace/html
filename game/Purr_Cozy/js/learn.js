@@ -5,7 +5,7 @@
 const SRS_INT = [0, 1, 2, 4, 7, 15]; // days until the next review for box 0..5
 const Learn = {
   sess: null,
-  get P() { return Game.S.vocab; },   // { word: [box, dueDay, seen, right, wrong] }
+  get P() { return Game.S.vocab; },   // { word: [box, dueDay, seen, right, wrong, lastAnsweredDay] } (index 5 since 0.92.45; older records lack it)
   get L() { return Game.S.learn; },
   newState() { return { streak: 0, best: 0, lastDone: '', dailyDay: '', dailyWords: [], dailyDone: false, reviewed: 0, dailyScore: '', pDay: '', pCoins: 0, levels: [], v: 2 }; },
   dayNum() { const d = gameDate(); return Math.floor((d.getTime() - d.getTimezoneOffset() * 60000) / 86400000); },
@@ -15,8 +15,23 @@ const Learn = {
   box(i) { const r = this.rec(i); return r ? r[0] : 0; },
   levelsOn() { const l = this.L.levels; return l && l.length ? l : VLEVELS; },
   toggleLevel(t) { const cur = this.levelsOn().slice(), k = cur.indexOf(t); if (k >= 0) { if (cur.length > 1) cur.splice(k, 1); } else cur.push(t); cur.sort((a, b) => a - b); this.L.levels = cur.length === VLEVELS.length ? [] : cur; Game.save(); UI.refresh('learn'); },
+  migrate(S) { this.migrate500(S); this.migrateRenamed(S); },
+  // 0.92.45: a few headwords were cleaned up ("O.K. / OK" -> "OK"); move every trace of the old key. Idempotent.
+  migrateRenamed(S) {
+    if (typeof VOCAB_RENAMED === 'undefined') return;
+    const ren = w => VOCAB_RENAMED[w] || w, list = a => Array.isArray(a) ? [...new Set(a.map(ren))] : a;
+    const V = S.vocab || {};
+    for (const [o, n] of Object.entries(VOCAB_RENAMED)) {
+      if (!V[o]) continue;
+      const a = V[o], b = V[n]; if (!b || a[0] > b[0] || (a[0] === b[0] && a[1] > b[1])) V[n] = a; delete V[o];
+    }
+    const L = S.learn || {}; L.dailyWords = list(L.dailyWords || []);
+    const ad = L.adaptive && L.adaptive.words; if (ad) for (const k of Object.keys(ad)) { const [w, sk] = k.split('|'); if (VOCAB_RENAMED[w]) { const nk = VOCAB_RENAMED[w] + '|' + sk; if (!ad[nk]) ad[nk] = ad[k]; delete ad[k]; } }
+    const D = S.life && S.life.daily; if (D && D.tasks) for (const t of D.tasks) { if (t.words) t.words = list(t.words); if (t.got) t.got = list(t.got); }
+    const St = S.story; if (St) { for (const k in St.used || {}) St.used[k] = list(St.used[k]); for (const c of St.ch || []) c.words = list(c.words || []); if (St.names) St.names = list(St.names); if (St.name) St.name = ren(St.name); }
+  },
   // old saves keyed progress by the index of the built-in 500-word list
-  migrate(S) {
+  migrate500(S) {
     const L = S.learn, OLD = OLD_WORDS_500;
     const old = Object.keys(S.vocab || {}).some(k => /^\d+$/.test(k)) || (L.dailyWords || []).some(x => typeof x === 'number'); if (!old) return;
     const P = {}; for (const k in S.vocab || {}) { const w = /^\d+$/.test(k) ? OLD[+k] : k; if (w != null && VIDX[w] != null) P[w] = S.vocab[k]; }
@@ -34,6 +49,43 @@ const Learn = {
   streakNow() { const L = this.L; return L.lastDone && L.lastDone >= this.yesterday() ? L.streak : 0; },
   pick(n, exclude) {
     return Adaptive.pick(n, exclude);
+  },
+  // ---------- word helpers shared by every quiz ----------
+  norm(s) { return String(s ?? '').normalize('NFKC').replace(/[\u2018\u2019\u02bc`´]/g, "'").replace(/[\u2010-\u2015]/g, '-').replace(/\s+/g, ' ').trim().toLowerCase(); },
+  // a typed answer is right when it is the headword or one of its listed spelling variants (colour, okay, cafe ...)
+  isAnswer(v, val) { const t = this.norm(val); return !!t && [v.w, ...(v.a || [])].some(x => this.norm(x) === t); },
+  spellable(v) { return !!v && v.w.length <= 11 && /^[A-Za-z][A-Za-z'-]*$/.test(v.w); },
+  // the meaning as a quiz shows it: notes in English ("(=photo)", "April縮寫", "she的所有格") would give the answer away
+  qz(v) {
+    const z = v.z || '', key = I18n.lang + '|' + v.i, c = this._qz || (this._qz = new Map()); if (c.has(key)) return c.get(key);
+    let t = z.replace(/[（(][^（）()]*[A-Za-z][^（）()]*[）)]/g, '')
+      .replace(/=\s*[A-Za-z][A-Za-z .\/'’-]*/g, '')
+      .replace(/[A-Za-z][A-Za-z .\/'’-]*(?:縮寫|缩写|の略|略語|的所有格|的受格|的所有代名詞|的所有代名词|的過去式|的过去式|的複數|的复数)[，,、]?/g, '')
+      .replace(/\[[^\]]*\]/g, '');
+    const w = v.w.toLowerCase().replace(/[^a-z]/g, '');
+    if (w.length > 1) t = t.replace(/[A-Za-z][A-Za-z .'-]*/g, m => m.toLowerCase().replace(/[^a-z]/g, '').includes(w) ? '' : m);
+    if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(t)) t = t.replace(/[A-Za-z]{3,}(?:[ .'-]+[A-Za-z]+)*/g, '');   // leftover English notes ("ante meridiem")
+    t = [...new Set(t.split(/([；;])/).filter((x, k) => k % 2 === 0).map(x => x.trim()).filter(Boolean))].join('；');
+    t = t.replace(/\s*([；;，,、])\s*/g, '$1').replace(/([；;，,、])+/g, '$1').replace(/^[；;，,、／/\s]+|[；;，,、／/\s]+$/g, '').replace(/（\s*）|\(\s*\)/g, '').trim();
+    if (!/[^\sA-Za-z0-9.,;:'"()=-]/.test(t)) t = z;   // nothing but English left: keep the original
+    c.set(key, t); return t;
+  },
+  // single senses, for telling whether two words would both be right answers
+  senses(v) { const key = I18n.lang + '|' + v.i, c = this._sn || (this._sn = new Map()); if (!c.has(key)) c.set(key, this.qz(v).split(/[；;，,、]/).map(x => x.replace(/（.*?）|\(.*?\)|[.…]+/g, '').trim()).filter(Boolean)); return c.get(key); },
+  // a distractor must not also be a right answer: no shared sense, no same spelling, no same displayed text
+  clash(v, o, field) {
+    if (o.i === v.i || this.norm(o.w) === this.norm(v.w) || (v.a || []).some(a => this.norm(a) === this.norm(o.w))) return true;
+    if (field === 'z' && this.qz(o) === this.qz(v)) return true;
+    const mine = this.senses(v); return this.senses(o).some(x => mine.includes(x));
+  },
+  // one place that moves a word through the boxes: every right answer climbs one box, a wrong answer drops one
+  // and brings the word back tomorrow. Index 5 keeps the day it was last answered (used by the learning log).
+  grade(i, ok) {
+    const today = this.dayNum(), r = this.recMake(i, [0, today, 1, 0, 0, today]), before = r[0];
+    if (ok) { r[3]++; r[0] = Math.min(5, r[0] + 1); r[1] = today + SRS_INT[r[0]]; }
+    else { r[4]++; r[0] = Math.max(1, r[0] - 1); r[1] = today + 1; }
+    r[5] = today;
+    return { before, after: r[0] };
   },
   ensureDaily() {
     const L = this.L, day = Life.today(); if (L.dailyDay && L.dailyDay >= day && L.dailyWords.length) return;   // >=: keeps a day started before the 06:00 rollover existed
@@ -65,7 +117,7 @@ const Learn = {
     if (kind === 'daily') { words = this.dailyIdx(); nq = 10; }
     else if (kind === 'redo') { words = shuffle(this.dailyIdx()).slice(0, 10); nq = 8; kind = 'practice'; }
     else if (kind === 'need') { words = this.pick(5); nq = 5; }
-    else if (kind === 'train' || kind === 'help') { words = Adaptive.pick(4); nq = 4; }
+    else if (kind === 'train' || kind === 'help') { words = kind === 'train' && Feel.trainEasy(opts.pid) ? Feel.easyWords(4) : Adaptive.pick(4); nq = 4; }
     else if (kind === 'levelgate') { words = opts.questions.map(q => q.i); nq = words.length; opts.preset = opts.questions; }
     else if (kind === 'story') { const pk = Story.pack(opts.ch); if (!pk) return; words = pk.ids; nq = pk.qs.length; opts.preset = pk.qs; opts.strict = true; }
     else if (kind === 'team') { words = Feel.teamWords(opts); nq = words.length; if (!nq) return UI.openTasks('team'); }
@@ -109,32 +161,36 @@ const Learn = {
       [i] = Adaptive.select(remaining, 1, type, {mix:false});
       remaining.splice(remaining.indexOf(i), 1);
       const v = VOCAB[i];
-      if (type === 'spell' && (v.w.length > 11 || !/^[A-Za-z][A-Za-z'-]*$/.test(v.w))) type = 'zh2en';
+      if (type === 'spell' && !this.spellable(v)) type = 'zh2en';
       return { i, type, opts: type === 'spell' ? null : this.options(v, type === 'zh2en' ? 'w' : 'z') };
     });
   },
+  // three wrong options of the same part of speech and level; none of them may also be right,
+  // and no two options may read the same (the old version only compared the first sense and the raw POS string)
   options(v, field) {
-    const first = v.z.split('；')[0], pos = v.p.split('/')[0];
-    let c = VOCAB.filter(x => x.t === v.t && x.i !== v.i && x.p.split('/')[0] === pos && x[field] !== v[field] && x.z.split('；')[0] !== first && x.w.toLowerCase() !== v.w.toLowerCase());
-    if (c.length < 6) c = VOCAB.filter(x => x.i !== v.i && x.p.split('/')[0] === pos && x[field] !== v[field] && x.z.split('；')[0] !== first);
-    const pick = shuffle(c.slice()).slice(0, 3);
-    while (pick.length < 3) { const x = VOCAB[Math.floor(Math.random() * VOCAB.length)]; if (x.i !== v.i && !pick.includes(x)) pick.push(x); }
+    const pos = v.ps[0], text = o => field === 'w' ? this.norm(o.w) : this.qz(o);
+    const ok = o => !this.clash(v, o, field);
+    let c = VOCAB.filter(o => o.t === v.t && o.ps.includes(pos) && ok(o));
+    if (c.length < 6) c = VOCAB.filter(o => o.ps.includes(pos) && ok(o));
+    if (c.length < 3) c = VOCAB.filter(ok);
+    const pick = [], seen = new Set([text(v)]);
+    for (const o of shuffle(c.slice())) { const t = text(o); if (seen.has(t) || pick.some(p => this.clash(p, o, field))) continue; seen.add(t); pick.push(o); if (pick.length === 3) break; }
     return shuffle([v, ...pick]).map(x => x.i);
   },
   answer(val) {
     const s = this.sess; if (!s || s.step !== 'quiz' || s.ans) return;
     const q = s.qs[s.qi], v = VOCAB[q.i];
     const typed = q.type === 'spell' || q.type === 'listenspell';
-    const ok = typed ? String(val || '').trim().toLowerCase() === v.w.toLowerCase() : val === q.i;
+    const ok = typed ? this.isAnswer(v, val) : val === q.i;
     if(typed && document.activeElement?.id==='spell-in')document.activeElement.blur();
     s.ans = { ok, val };
-    const r = this.recMake(q.i, [0, 0, 1, 0, 0]), today = this.dayNum();
     Adaptive.note(s, q.i, q.type, ok, q);
     Feel.note(s, ok);
-    if (ok) { const before = r[0]; r[0] = Math.min(5, r[0] + 1); r[1] = today + SRS_INT[r[0]]; r[3]++; s.right++; if (before === 0) s.newly++; if (r[0] === 5 && before < 5) s.mastered++; Life.track('quizRight', 1);
+    const g = this.grade(q.i, ok);
+    if (ok) { s.right++; if (g.before === 0) s.newly++; if (g.after === 5 && g.before < 5) s.mastered++; Life.track('quizRight', 1);
       if (typed || q.type === 'listen') Life.track('engRight', 1);
       if (s.kind === 'chal') Challenge.got(s.task, v.w); }
-    else { r[0] = Math.max(1, r[0] - 1); r[1] = today + 1; r[4]++; s.wrong.push(q.i); }
+    else { s.wrong.push(q.i); }
     if (ok) s.ans.lucky = Feel.luck(s, q);
     if (q.type !== 'listen' || !ok) this.speak(v.w);
     UI.refresh('study'); Game.save();
@@ -283,10 +339,10 @@ Object.assign(UI, {
       if (q.type === 'listen' && s.spoke !== 'q' + s.qi) { s.spoke = 'q' + s.qi; setTimeout(() => Learn.speak(v.w), 200); }
       let prompt, sub;
       if (q.type === 'en2zh') { prompt = h('div', { class: 'qword' }, v.w, h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(v.w) }, ico('i_speaker', 22))); sub = I18n.s("u_6d4c94ada1df", [v.ph ? v.ph + ' · ' : '', v.p]); }
-      else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: v.z }); sub = I18n.s("u_12c496f4a564", [v.p]); }
+      else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: Learn.qz(v) }); sub = I18n.s("u_12c496f4a564", [v.p]); }
       else if (q.type === 'listen') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_2895e8416b32"); }
       else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_1fb5519fb68c"); }
-      else { prompt = h('div', { class: 'qzh', text: v.z }); sub = q.noHint ? I18n.s("u_e0bc10bbdefb", [v.p]) : I18n.s("u_a23b5e2f5b3e", [v.p, v.w.length]); }
+      else { prompt = h('div', { class: 'qzh', text: Learn.qz(v) }); sub = q.noHint ? I18n.s("u_e0bc10bbdefb", [v.p]) : I18n.s("u_a23b5e2f5b3e", [v.p, v.w.length]); }
       const redo = s.redoFrom != null && s.qi >= s.redoFrom;
       const ctx = q.ctx ? h('p', { class: 'qctx', text: q.ctx }) : null;
       const parts = [h('div', { class: 'shead' }, h('b', { text: kindName }), h('span', { class: 'num hint', text: redo ? I18n.s("u_ac75ea2713f3", [s.qi - s.redoFrom + 1, s.qs.length - s.redoFrom]) : I18n.s("u_a8ce1fb26c0f", [s.qi + 1, s.redoFrom != null ? s.redoFrom : s.qs.length, s.right]) })), bar(s.qi, s.qs.length), h('div', { class: 'qbox' }, ctx, prompt, h('p', { class: 'hint', text: sub }))];
@@ -308,7 +364,7 @@ Object.assign(UI, {
         if (!A) setTimeout(() => { const el = document.getElementById('spell-in'); if (el && document.activeElement !== el) { el.focus({preventScroll:true}); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) { } } }, 30);
       } else {
         parts.push(h('div', { class: 'qopts' }, ...q.opts.map((oi, k) => {
-          const o = VOCAB[oi], txt = q.type === 'zh2en' ? o.w : o.z;
+          const o = VOCAB[oi], txt = q.type === 'zh2en' ? o.w : Learn.qz(o);
           let cls = 'qopt'; if (A) { if (oi === q.i) cls += ' right'; else if (A.val === oi) cls += ' wrong'; }
           return h('button', { class: cls, disabled: !!A, onclick: () => Learn.answer(oi) }, h('em', { class: 'num', text: String(k + 1) }), h('span', { text: txt }));
         })));

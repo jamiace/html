@@ -72,6 +72,7 @@ html,body{overflow-x:hidden}main,section{min-width:0}
    <label>從 <input type="date" id="f-from"></label><label>到 <input type="date" id="f-to"></label>
    <label>入口 <select id="f-kind"><option value="">全部</option></select></label>
    <label>程度 <select id="f-level"><option value="">全部</option></select></label>
+   <label>年級帶 <select id="f-grade"><option value="">全部</option><option value="e">國小</option><option value="j">國中</option><option value="s1">高一</option><option value="s2">高二</option><option value="s3">高三</option></select></label>
    <label>版本 <select id="f-app"><option value="">全部</option></select></label>
    <label>玩家 <select id="f-who"><option value="">全部（不含測試）</option><option value="real">只看真實玩家</option><option value="sim">只看模擬學生</option><option value="test">只看測試資料</option></select></label>
    <label>單字最少作答數 <input type="number" id="f-min" value="20" min="1" style="width:70px"></label>
@@ -82,17 +83,20 @@ html,body{overflow-x:hidden}main,section{min-width:0}
 
  <section id="s-overview"><h2>1. 總覽</h2><p class="why">有多少人在學、學了多少、答對率和作答時間。</p><div class="kpis" id="kpis"></div><div class="chart" style="margin-top:12px"><canvas id="c-daily"></canvas></div></section>
 
- <section id="s-words"><h2>2. 單字實測難度</h2><p class="why">每個字真正的答對率和作答時間。「程度可能標錯」= 答對率和同程度平均差很多（標 L2 但難得像 L5，或反過來）。點表頭可以排序。</p>
+ <section id="s-words"><h2>2. 單字實測難度</h2><p class="why">每個字真正的答對率和作答時間。「程度可能標錯」= 答對率和「同程度、同題型」的平均差很多（標 L2 但難得像 L5，或反過來）。拼字題本來就比選擇題難，所以比較時會照每個字實際被考的題型組合算期望值，不會因為某個字剛好常被考拼字就被誤判。點表頭可以排序。</p>
   <div class="row" style="margin-bottom:8px"><input type="text" id="w-search" placeholder="搜尋單字"><label><input type="checkbox" id="w-flag"> 只看可能標錯的</label><button id="w-csv">下載 CSV</button></div>
   <div class="tbl"><table id="t-words"></table></div></section>
 
- <section id="s-matrix"><h2>3. 程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div></section>
+ <section id="s-matrix"><h2>3. 程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div><h3>年級帶 × 題型</h3><p class="why">0.92.45 起每題會記錄單字的建議年級（gr）。舊資料沒有這個欄位，不會出現在這張表。</p><div class="tbl"><table id="t-grade"></table></div></section>
 
- <section id="s-confuse"><h2>4. 易混淆字與拼錯</h2><p class="why">選擇題最常被選成哪個錯誤答案，以及拼字最常見的錯法。可以拿來改干擾選項、做「易混淆字」專題。</p><div class="grid2"><div><h3>選擇題：答案 → 被誤選的字</h3><div class="tbl"><table id="t-pairs"></table></div></div><div><h3>拼字：常見錯誤類型</h3><div class="chart"><canvas id="c-spell"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-spell"></table></div></div></div></section>
+ <section id="s-confuse"><h2>4. 易混淆字與拼錯</h2><p class="why">選擇題最常被選成哪個錯誤答案，以及拼字最常見的錯法。可以拿來改干擾選項、做「易混淆字」專題。</p><div class="grid2"><div><h3>選擇題：答案 → 被誤選的字</h3><p class="why" id="pairs-note"></p><div class="tbl"><table id="t-pairs"></table></div><h3 style="margin-top:12px">最常被誤選的字（不論題目）</h3><div class="tbl"><table id="t-lure"></table></div></div><div><h3>拼字：常見錯誤類型</h3><div class="chart"><canvas id="c-spell"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-spell"></table></div></div></div></section>
 
- <section id="s-forget"><h2>5. 遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section>
+ <section id="s-forget"><h2>5. 遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。0.92.45 以前的紀錄只能用「到期日」反推上次作答日，答錯過的字會被算成間隔太長；有精確間隔的資料時，這張圖只用精確資料（作答紀錄 ge=0）。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section>
 
- <section id="s-calib"><h2>6. 自適應模型校正</h2><p class="why">遊戲出題前會預測「答對機率」。把預測值分組，和實際答對率比較：點越貼近對角線越準。偏離代表模型需要用資料重新校正。</p><div class="grid2"><div class="chart"><canvas id="c-calib"></canvas></div><div id="calib-text"></div></div></section>
+ <section id="s-calib"><h2>6. 自適應模型校正</h2><p class="why">遊戲出題前會預測每一題的「答對機率」（作答紀錄的 p）。這裡檢查兩件事：<b>預測準不準</b>（校正），以及<b>出題有沒有對準 85% 的目標</b>（只算由自適應系統挑字的入口）。四種技能的預測方式不同（選擇題有 25% 猜中機率，拼字沒有），所以分開看；分組用「等人數」分 10 組，因為預測值大多擠在 80–90%，等寬分組會只剩一兩個點。</p>
+  <div class="grid2"><div class="chart" style="height:300px"><canvas id="c-calib"></canvas></div><div id="calib-text"></div></div>
+  <h3>依技能</h3><div class="tbl"><table id="t-calib-skill"></table></div>
+  <h3>依入口</h3><p class="why">升級考、故事用的是刻意加難的干擾選項或無提示拼字，模型沒有把這點算進去，所以這兩個入口的預測通常偏高；它們也不參與 85% 目標的檢查。</p><div class="tbl"><table id="t-calib-kind"></table></div></section>
 
  <section id="s-kinds"><h2>7. 哪個入口學得最好</h2><p class="why">每個學習入口的答題量、答對率、完成率，以及「下次再遇到同一個字時答對率」（記得住的程度）。</p><div class="tbl"><table id="t-kinds"></table></div></section>
 
@@ -102,7 +106,7 @@ html,body{overflow-x:hidden}main,section{min-width:0}
 
  <section id="s-typo"><h2>10. 貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section>
 
- <section id="s-help"><h2>11. 提示與重聽</h2><p class="why">拼字題有沒有提示、聽力題重聽次數，和答對率的關係。</p><div class="tbl"><table id="t-help"></table></div></section>
+ <section id="s-help"><h2>11. 提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section>
 
  <section id="s-ai"><h2>12. AI 分析報告</h2>
   <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
@@ -130,13 +134,26 @@ const KIND={daily:'每日複習',practice:'自由練習',need:'房間泡泡',tra
 const QT={en2zh:'看英選中',zh2en:'看中選英',listen:'聽音選義',spell:'拼字',listenspell:'聽寫'};
 const $=id=>document.getElementById(id),fmt=(x,d=0)=>x==null||isNaN(x)?'–':Number(x).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d}),pct=x=>x==null||isNaN(x)?'–':(x*100).toFixed(1)+'%';
 const dayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-const median=a=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const median=a=>{if(!a||!a.length)return null;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
 const status=t=>$('status').textContent=t;
+// local calendar day number (the player's day changes at local midnight, not at UTC midnight)
+const dayNo=t=>{const d=new Date(t);return Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)};
+const dayNoKey=n=>new Date(n*864e5).toISOString().slice(0,10);
+const GB={e:[1,6],j:[7,9],s1:[10,10],s2:[11,11],s3:[12,12]},GBN={e:'國小',j:'國中',s1:'高一',s2:'高二',s3:'高三'};
+const GRADE_NAME=g=>g<=6?'小'+['一','二','三','四','五','六'][g-1]:g<=9?'國'+['一','二','三'][g-7]:'高'+['一','二','三'][g-10];
+const bandOf=g=>{for(const k in GB)if(g>=GB[k][0]&&g<=GB[k][1])return k;return ''};
 
-function load(list,label){
+// word metadata from the game (../i18n/vocab.json): estimated grade for records that predate the gr field,
+// and the 0.92.45 headword renames so old and new records of the same word are counted together
+const RENAMED={'O.K. / OK':'OK','Thur. / Thurs.':'Thur.','Tue. / Tues.':'Tue.','Wed. / Weds.':'Wed.','afterward(s)':'afterward','a.m. / am / A.M. / AM':'a.m.','AIDS / acquired immune deficiency syndrome':'AIDS','AI / artificial intelligence':'AI'};
+const VMETA={};let vmetaReady=null;
+function loadVocabMeta(){return vmetaReady||(vmetaReady=fetch('../i18n/vocab.json').then(r=>r.ok?r.json():null).then(j=>{for(const e of (j&&j.entries)||[])if(!VMETA[e.word])VMETA[e.word]={t:e.level,g:e.grade||0};return Object.keys(VMETA).length}).catch(()=>0))}
+function normalizeRecords(list){for(const r of list){for(const a of [...(r.ans||[]),...(r.rev||[]),...(r.typo||[])]){if(RENAMED[a.w])a.w=RENAMED[a.w];if(typeof a.g==='string'&&RENAMED[a.g])a.g=RENAMED[a.g];if(a.gr==null&&VMETA[a.w])a.gr=VMETA[a.w].g}}}
+async function load(list,label){
+ await loadVocabMeta();normalizeRecords(list);
  S.raw=list.filter(r=>r&&r.v===1&&Array.isArray(r.ans));
  status(`${label}：${S.raw.length} 個回合`);$('btn-save').disabled=!S.raw.length;$('dash').classList.remove('hidden');
- const ts=S.raw.map(r=>r.t0).filter(Boolean);if(ts.length){$('f-from').value=dayKey(Math.min(...ts));$('f-to').value=dayKey(Math.max(...ts))}
+ let lo=Infinity,hi=-Infinity;for(const r of S.raw)if(r.t0){if(r.t0<lo)lo=r.t0;if(r.t0>hi)hi=r.t0}if(hi>0){$('f-from').value=dayKey(lo);$('f-to').value=dayKey(hi)}
  fillSelect('f-kind',[...new Set(S.raw.map(r=>r.kind))].sort(),k=>KIND[k]||k);
  fillSelect('f-level',[1,2,3,4,5,6],l=>'L'+l);
  fillSelect('f-app',[...new Set(S.raw.map(r=>r.app).filter(Boolean))].sort(),x=>x);
@@ -184,7 +201,7 @@ function demo(){
      const pred=Math.min(.98,Math.max(.05,p+(r()-.5)*.15+(p>.7?.06:-.04))),ok=r()<p;t+=2000+Math.floor(r()*9000);
      const typed=qt==='spell'||qt==='listenspell';const g=ok?'':typed?(w.w.length>4?w.w.slice(0,2)+w.w.slice(3):w.w+'e'):(pairs[w.w]||words[Math.floor(r()*words.length)].w);
      if(kind==='typo'){rec.typo.push({w:w.w,l:w.l,ok:ok?1:0,att:ok?1+(r()<.3?1:0):2,ms:4000+Math.floor(r()*12000),rv:ok?0:(r()<.6?1:0),cat:r()<.25?1:0,g:ok?[]:[g]})}
-     else rec.ans.push({t,w:w.w,l:w.l,q:qt,ok:ok?1:0,ms:Math.floor(1200+r()*6000+(ok?0:2500)+(typed?3000:0)),g,b0:m.box,b1:ok?Math.min(5,m.box+1):Math.max(1,m.box-1),gap,p:Math.round(pred*1000)/1000,h:typed&&r()<.5?1:0,r:qt.startsWith('listen')?Math.floor(r()*3):0,i:q,re:0});
+     else rec.ans.push({t,w:w.w,l:w.l,gr:Math.min(12,5+w.l),ge:d<30?1:0,q:qt,ok:ok?1:0,ms:Math.floor(1200+r()*6000+(ok?0:2500)+(typed?3000:0)),g,b0:m.box,b1:ok?Math.min(5,m.box+1):Math.max(1,m.box-1),gap,p:Math.round(pred*1000)/1000,h:typed&&r()<.5?1:0,r:qt.startsWith('listen')?Math.floor(r()*3):0,i:q,re:0});
      m.box=ok?Math.min(5,m.box+1):Math.max(1,m.box-1);m.last=d}
     rec.done=quit===len;rec.stop=rec.done?'result':(r()<.5?'quiz@'+quit+'/'+len:'review@'+quit+'/10');rec.t1=t0+t+5000;rec.dur=rec.t1-t0;
     rec.n=rec.ans.length||rec.typo.length;rec.right=rec.ans.filter(a=>a.ok).length+rec.typo.filter(a=>a.ok&&!a.rv).length;out.push(rec)}}}
@@ -195,10 +212,10 @@ function demo(){
 const whoOf=r=>/^test-/.test(r.dev||'')?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
 function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
 function filtered(){
- const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0;
+ const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
  const sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&who(r));
  const ans=[],rev=[],typo=[];
- for(const r of sess){for(const a of r.ans)if(!lvl||a.l===lvl)ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if(!lvl||a.l===lvl)rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if(!lvl||a.l===lvl)typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
+ for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
  return {sess,ans,rev,typo}}
 
 function chart(id,cfg){if(S.charts[id])S.charts[id].destroy();const css=getComputedStyle(document.documentElement);Chart.defaults.color=css.getPropertyValue('--ink2').trim();Chart.defaults.borderColor=css.getPropertyValue('--line').trim();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:false},cfg.options||{});S.charts[id]=new Chart($(id),cfg)}
@@ -218,26 +235,34 @@ function analyse(){
  const learners=new Set(sess.map(r=>r.lid)),acc=ans.length?ans.filter(a=>a.ok).length/ans.length:null,done=sess.filter(r=>r.done).length;
  const days=new Map();for(const r of sess){const k=dayKey(r.t0);const d=days.get(k)||{u:new Set(),n:0,ok:0};d.u.add(r.lid);days.set(k,d)}for(const a of ans){const d=days.get(dayKey(a.at));if(d){d.n++;d.ok+=a.ok}}
  const dk=[...days.keys()].sort();
- const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:median(ans.map(a=>a.ms))/1000,completionRate:sess.length?done/sess.length:null,medianSessionMin:median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000,avgDailyActive:dk.length?[...days.values()].reduce((s,d)=>s+d.u.size,0)/dk.length:null};
+ const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:ans.length?median(ans.map(a=>a.ms))/1000:null,completionRate:sess.length?done/sess.length:null,medianSessionMin:sess.some(r=>r.dur>0)?median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000:null,avgDailyActive:dk.length?[...days.values()].reduce((s,d)=>s+d.u.size,0)/dk.length:null};
  summary.overview=ov;
  $('kpis').innerHTML=[['學習人數',fmt(ov.learners)],['回合數',fmt(ov.sessions)],['作答題數',fmt(ov.answers)],['整體答對率',pct(ov.accuracy)],['每題作答時間（中位數）',fmt(ov.medianSecPerAnswer,1)+' 秒'],['回合完成率',pct(ov.completionRate)],['每回合時間（中位數）',fmt(ov.medianSessionMin,1)+' 分'],['平均每日學習人數',fmt(ov.avgDailyActive,1)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
  chart('c-daily',{type:'bar',data:{labels:dk,datasets:[{type:'line',label:'學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566f55'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
  summary.daily=dk.slice(-30).map(k=>({day:k,learners:days.get(k).u.size,answers:days.get(k).n,accuracy:days.get(k).n?+(days.get(k).ok/days.get(k).n).toFixed(3):null}));
 
  /* 2 words */
- const W=new Map();for(const a of ans){const w=W.get(a.w)||{w:a.w,l:a.l,n:0,ok:0,ms:[],q:{}};w.n++;w.ok+=a.ok;w.ms.push(a.ms);const q=w.q[a.q]||(w.q[a.q]={n:0,ok:0});q.n++;q.ok+=a.ok;W.set(a.w,w)}
+ // accuracy of every level x question type: the yardstick for "is this word harder than its level?"
+ const LT={};for(const a of ans){const k=a.l+'|'+a.q,x=LT[k]||(LT[k]={n:0,ok:0});x.n++;x.ok+=a.ok}
+ const ltAcc=(l,q)=>{const x=LT[l+'|'+q];return x&&x.n?x.ok/x.n:null};
+ const W=new Map();for(const a of ans){const w=W.get(a.w)||{w:a.w,l:a.l,gr:a.gr||0,n:0,ok:0,ms:[],q:{}};w.n++;w.ok+=a.ok;w.ms.push(a.ms);const q=w.q[a.q]||(w.q[a.q]={n:0,ok:0});q.n++;q.ok+=a.ok;W.set(a.w,w)}
  const lvAcc={};for(const w of W.values()){const L=lvAcc[w.l]||(lvAcc[w.l]={n:0,ok:0});L.n+=w.n;L.ok+=w.ok}
  const lvlMean={};for(const l in lvAcc)lvlMean[l]=lvAcc[l].ok/lvAcc[l].n;
  const means=Object.keys(lvlMean).map(Number).sort();const nearest=acc=>means.reduce((b,l)=>Math.abs(lvlMean[l]-acc)<Math.abs(lvlMean[b]-acc)?l:b,means[0]);
- const wl=[...W.values()].filter(w=>w.n>=minN).map(w=>{const a=w.ok/w.n,se=Math.sqrt(lvlMean[w.l]*(1-lvlMean[w.l])/w.n),z=(a-lvlMean[w.l])/(se||1),like=nearest(a);return Object.assign(w,{acc:a,z,like,flag:Math.abs(z)>2.5&&like!==w.l,med:median(w.ms)/1000})});
- const wordRows=()=>{const q=$('w-search').value.trim().toLowerCase(),only=$('w-flag').checked;return wl.filter(w=>(!q||w.w.toLowerCase().includes(q))&&(!only||w.flag)).map(w=>[w.w,'L'+w.l,w.n,P(w.acc),{v:w.med,h:fmt(w.med,1)+' 秒'},...['en2zh','zh2en','listen','spell','listenspell'].map(k=>w.q[k]&&w.q[k].n>=3?P(w.q[k].ok/w.q[k].n):{v:-1,h:'–'}),{v:w.flag?(w.like>w.l?2:1):0,h:w.flag?`<span class="tag ${w.like>w.l?'hard':'easy'}">像 L${w.like}</span>`:'',n:false}])};
- const drawWords=()=>table('t-words',['單字','標示程度','作答數','答對率','時間','看英選中','看中選英','聽音選義','拼字','聽寫','程度可能標錯'],wordRows().sort((a,b)=>a[3].v-b[3].v));
+ // expected accuracy for this word = the same level's accuracy on the same question types, weighted by how often
+ // this word met each type; "looks like level X" compares against every level with that same mix
+ const expectFor=(w,l)=>{let e=0,n=0,v=0;for(const q in w.q){const p=ltAcc(l,q);if(p==null)continue;const k=w.q[q].n;e+=p*k;v+=p*(1-p)*k;n+=k}return n?{e:e/n,v:v/(n*n),n}:null};
+ const wl=[...W.values()].filter(w=>w.n>=minN).map(w=>{const a=w.ok/w.n,ex=expectFor(w,w.l)||{e:lvlMean[w.l],v:lvlMean[w.l]*(1-lvlMean[w.l])/w.n},z=(a-ex.e)/(Math.sqrt(ex.v)||1);
+  let like=w.l,best=Infinity;for(const l of means){const x=expectFor(w,l);if(x&&Math.abs(x.e-a)<best){best=Math.abs(x.e-a);like=l}}
+  return Object.assign(w,{acc:a,exp:ex.e,z,like,flag:Math.abs(z)>2.5&&like!==w.l,med:median(w.ms)/1000})});
+ const wordRows=()=>{const q=$('w-search').value.trim().toLowerCase(),only=$('w-flag').checked;return wl.filter(w=>(!q||w.w.toLowerCase().includes(q))&&(!only||w.flag)).map(w=>[w.w,'L'+w.l,{v:w.gr||0,h:w.gr?GRADE_NAME(w.gr):'–'},w.n,P(w.acc),P(w.exp),{v:w.med,h:fmt(w.med,1)+' 秒'},...['en2zh','zh2en','listen','spell','listenspell'].map(k=>w.q[k]&&w.q[k].n>=3?P(w.q[k].ok/w.q[k].n):{v:-1,h:'–'}),{v:w.flag?(w.like>w.l?2:1):0,h:w.flag?`<span class="tag ${w.like>w.l?'hard':'easy'}">像 L${w.like}</span>`:'',n:false}])};
+ const drawWords=()=>table('t-words',['單字','標示程度','建議年級','作答數','答對率','同程度同題型期望','時間','看英選中','看中選英','聽音選義','拼字','聽寫','程度可能標錯'],wordRows().sort((a,b)=>a[4].v-b[4].v));
  drawWords();$('w-search').oninput=drawWords;$('w-flag').onchange=drawWords;
- $('w-csv').onclick=()=>{const rows=[['word','level','n','accuracy','median_sec','looks_like_level','flag'],...wl.map(w=>[w.w,w.l,w.n,w.acc.toFixed(3),w.med.toFixed(2),w.like,w.flag?1:0])];const b=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='word-difficulty.csv';a.click()};
+ $('w-csv').onclick=()=>{const rows=[['word','level','n','accuracy','expected','median_sec','looks_like_level','flag'],...wl.map(w=>[w.w,w.l,w.n,w.acc.toFixed(3),w.exp.toFixed(3),w.med.toFixed(2),w.like,w.flag?1:0])];const b=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='word-difficulty.csv';a.click()};
  summary.levelAccuracy=Object.fromEntries(Object.entries(lvlMean).map(([l,v])=>['L'+l,+v.toFixed(3)]));
  summary.hardestWords=[...wl].sort((a,b)=>a.acc-b.acc).slice(0,25).map(w=>({word:w.w,level:w.l,n:w.n,accuracy:+w.acc.toFixed(3)}));
  summary.easiestWords=[...wl].sort((a,b)=>b.acc-a.acc).slice(0,10).map(w=>({word:w.w,level:w.l,n:w.n,accuracy:+w.acc.toFixed(3)}));
- summary.levelMismatch=wl.filter(w=>w.flag).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z)).slice(0,25).map(w=>({word:w.w,labeled:'L'+w.l,behavesLike:'L'+w.like,n:w.n,accuracy:+w.acc.toFixed(3)}));
+ summary.levelMismatch=wl.filter(w=>w.flag).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z)).slice(0,25).map(w=>({word:w.w,labeled:'L'+w.l,behavesLike:'L'+w.like,n:w.n,accuracy:+w.acc.toFixed(3),expectedForLabel:+w.exp.toFixed(3)}));
  summary.wordsWithEnoughData=wl.length;
 
  /* 3 matrix */
@@ -245,13 +270,26 @@ function analyse(){
  const qts=Object.keys(QT),lvls=[1,2,3,4,5,6].filter(l=>qts.some(q=>M[l+'|'+q]));
  table('t-matrix',['程度',...qts.map(q=>QT[q])],lvls.map(l=>['L'+l,...qts.map(q=>{const m=M[l+'|'+q];return m?{v:m.ok/m.n,h:pct(m.ok/m.n)+` <span class="muted">(${m.n})</span>`}:{v:-1,h:'–'}})]));
  chart('c-level',{type:'line',data:{labels:lvls.map(l=>'L'+l),datasets:qts.map((q,k)=>({label:QT[q],data:lvls.map(l=>{const m=M[l+'|'+q];return m?+(m.ok/m.n*100).toFixed(1):null}),borderColor:['#8c5aa8','#d9566f','#3f8a4f','#b86a12','#3a7bd5'][k]}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}}}}});
+ const GM={};for(const a of ans){const b=bandOf(a.gr||0);if(!b)continue;const k=b+'|'+a.q,m=GM[k]||(GM[k]={n:0,ok:0});m.n++;m.ok+=a.ok}
+ const bands=Object.keys(GB).filter(b=>qts.some(q=>GM[b+'|'+q]));
+ table('t-grade',['年級帶',...qts.map(q=>QT[q])],bands.map(b=>[GBN[b],...qts.map(q=>{const m=GM[b+'|'+q];return m?{v:m.ok/m.n,h:pct(m.ok/m.n)+` <span class="muted">(${m.n})</span>`}:{v:-1,h:'–'}})]));
+ summary.gradeBandByType=Object.fromEntries(bands.map(b=>[GBN[b],Object.fromEntries(qts.filter(q=>GM[b+'|'+q]).map(q=>[q,{n:GM[b+'|'+q].n,accuracy:+(GM[b+'|'+q].ok/GM[b+'|'+q].n).toFixed(3)}]))]));
  summary.levelByType=Object.fromEntries(lvls.map(l=>['L'+l,Object.fromEntries(qts.filter(q=>M[l+'|'+q]).map(q=>[q,{n:M[l+'|'+q].n,accuracy:+(M[l+'|'+q].ok/M[l+'|'+q].n).toFixed(3)}]))]));
 
  /* 4 confusions */
  const pair=new Map();for(const a of ans)if(!a.ok&&a.g&&(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen')){const k=a.w+'→'+a.g;pair.set(k,(pair.get(k)||0)+1)}
  const pairTot={};for(const a of ans)if(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen')pairTot[a.w]=(pairTot[a.w]||0)+1;
- const pairs=[...pair.entries()].map(([k,n])=>{const[w,g]=k.split('→');return{w,g,n,share:n/(pairTot[w]||1)}}).filter(p=>p.n>=3).sort((a,b)=>b.n-a.n);
+ // The game draws new random distractors every time, so the same answer -> wrong-word pair rarely repeats.
+ // The old fixed cut-off (3 or more) left this table empty on real data; the cut-off now follows the data size.
+ const wrongPicks=[...pair.values()].reduce((s,n)=>s+n,0),minPair=wrongPicks>=20000?3:wrongPicks>=3000?2:1;
+ const pairs=[...pair.entries()].map(([k,n])=>{const[w,g]=k.split('→');return{w,g,n,share:n/(pairTot[w]||1)}}).filter(p=>p.n>=minPair).sort((a,b)=>b.n-a.n||b.share-a.share);
+ $('pairs-note').textContent=wrongPicks?`共 ${fmt(wrongPicks)} 次選錯；列出出現 ${minPair} 次以上的組合。干擾選項每次隨機抽，同一組合重複出現代表學生真的把這兩個字搞混。`:'還沒有選擇題答錯的紀錄。';
  table('t-pairs',['正確答案','被誤選成','次數','佔該字作答'],pairs.slice(0,200).map(p=>[p.w,p.g,p.n,P(p.share)]));
+ const lure=new Map(),shown=new Map();for(const a of ans)if(!a.ok&&a.g&&(a.q==='en2zh'||a.q==='zh2en'||a.q==='listen'))lure.set(a.g,(lure.get(a.g)||0)+1);
+ const byLure=new Map();for(const [k,c] of pair){const i=k.indexOf('→'),w=k.slice(0,i),g=k.slice(i+1);(byLure.get(g)||byLure.set(g,[]).get(g)).push([w,c])}
+ const lures=[...lure.entries()].map(([g,n])=>({g,n,ans:(byLure.get(g)||[]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]+'×'+x[1]).join('、')})).sort((a,b)=>b.n-a.n);
+ table('t-lure',['被誤選的字','次數','常被誤認為哪些字的答案'],lures.slice(0,100).map(x=>[x.g,x.n,x.ans]));
+ summary.topLures=lures.slice(0,15).map(x=>({word:x.g,chosenWrongly:x.n}));
  summary.topConfusions=pairs.slice(0,25).map(p=>({answer:p.w,chosen:p.g,count:p.n,shareOfAttempts:+p.share.toFixed(3)}));
  const spellWrong=[...ans.filter(a=>!a.ok&&(a.q==='spell'||a.q==='listenspell')&&a.g).map(a=>({w:a.w,g:a.g})),...typo.flatMap(t=>(t.g||[]).map(g=>({w:t.w,g})))];
  const cat=c=>{const{w,g}=c,W=w.toLowerCase();if(!g)return'空白';if(g===W)return'正確';if(Math.abs(g.length-W.length)>=3)return'差很多';
@@ -266,19 +304,49 @@ function analyse(){
 
  /* 5 forgetting */
  const B=[[1,1],[2,2],[3,4],[5,7],[8,15],[16,30],[31,9999]],bl=b=>b[1]>999?'31天以上':b[0]===b[1]?b[0]+'天':b[0]+'–'+b[1]+'天',SRS=[0,1,2,4,7,15];
- const F={};for(const a of ans){if(a.gap==null||a.gap<1||a.b0<1)continue;const bi=B.findIndex(b=>a.gap>=b[0]&&a.gap<=b[1]);const k=a.b0+'|'+bi;const f=F[k]||(F[k]={n:0,ok:0});f.n++;f.ok+=a.ok}
+ const exactOnly=ans.some(a=>a.ge===0&&a.gap>=1);const F={};for(const a of ans){if(a.gap==null||a.gap<1||a.b0<1)continue;if(exactOnly&&a.ge!==0)continue;const bi=B.findIndex(b=>a.gap>=b[0]&&a.gap<=b[1]);const k=a.b0+'|'+bi;const f=F[k]||(F[k]={n:0,ok:0});f.n++;f.ok+=a.ok}
  const boxes=[1,2,3,4,5];
  chart('c-forget',{type:'line',data:{labels:B.map(bl),datasets:boxes.map((b,k)=>({label:'盒'+b+'（間隔 '+SRS[b]+' 天）',data:B.map((_,bi)=>{const f=F[b+'|'+bi];return f&&f.n>=10?+(f.ok/f.n*100).toFixed(1):null}),borderColor:['#d9566f','#b86a12','#3f8a4f','#3a7bd5','#8c5aa8'][k],spanGaps:true}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}},x:{title:{display:true,text:'距離上次作答'}}}}});
  table('t-forget',['熟練盒','目前間隔',...B.map(bl)],boxes.map(b=>['盒'+b,SRS[b]+' 天',...B.map((_,bi)=>{const f=F[b+'|'+bi];return f?{v:f.ok/f.n,h:pct(f.ok/f.n)+` <span class="muted">(${f.n})</span>`}:{v:-1,h:'–'}})]));
- summary.forgettingCurve={currentIntervalsDays:{box1:1,box2:2,box3:4,box4:7,box5:15},accuracyByBoxAndGap:Object.fromEntries(boxes.map(b=>['box'+b,Object.fromEntries(B.map((x,bi)=>[bl(x),F[b+'|'+bi]?{n:F[b+'|'+bi].n,accuracy:+(F[b+'|'+bi].ok/F[b+'|'+bi].n).toFixed(3)}:null]).filter(x=>x[1]))]))};
+ summary.forgettingCurve={gapSource:exactOnly?'exact (0.92.45+)':'estimated from due day (older logs; inflated after wrong answers)',currentIntervalsDays:{box1:1,box2:2,box3:4,box4:7,box5:15},accuracyByBoxAndGap:Object.fromEntries(boxes.map(b=>['box'+b,Object.fromEntries(B.map((x,bi)=>[bl(x),F[b+'|'+bi]?{n:F[b+'|'+bi].n,accuracy:+(F[b+'|'+bi].ok/F[b+'|'+bi].n).toFixed(3)}:null]).filter(x=>x[1]))]))};
 
  /* 6 calibration */
- const cal=Array.from({length:10},()=>({n:0,ok:0,p:0}));let brier=0,bn=0;for(const a of ans){if(a.p==null||a.p<0)continue;const k=Math.min(9,Math.floor(a.p*10));cal[k].n++;cal[k].ok+=a.ok;cal[k].p+=a.p;brier+=(a.p-a.ok)**2;bn++}
- const cp=cal.map((c,k)=>c.n>=10?{x:+(c.p/c.n*100).toFixed(1),y:+(c.ok/c.n*100).toFixed(1),n:c.n}:null).filter(Boolean);
- chart('c-calib',{type:'scatter',data:{datasets:[{label:'實際 vs 預測',data:cp,backgroundColor:'#8c5aa8',pointRadius:cp.map(p=>Math.max(3,Math.min(12,Math.sqrt(p.n)/3)))},{type:'line',label:'完全準確',data:[{x:0,y:0},{x:100,y:100}],borderColor:'#999',borderDash:[4,4],pointRadius:0}]},options:{scales:{x:{min:0,max:100,title:{display:true,text:'預測答對率 %'}},y:{min:0,max:100,title:{display:true,text:'實際答對率 %'}}}}});
- const meanP=bn?ans.filter(a=>a.p>=0).reduce((s,a)=>s+a.p,0)/bn:null,meanA=bn?ans.filter(a=>a.p>=0).reduce((s,a)=>s+a.ok,0)/bn:null;
- $('calib-text').innerHTML=bn?`<p>有預測值的作答：<b>${fmt(bn)}</b> 題</p><p>平均預測答對率 <b>${pct(meanP)}</b>，實際 <b>${pct(meanA)}</b>（${meanP>meanA?'模型偏樂觀，題目實際比它以為的難':'模型偏保守，題目實際比它以為的簡單'}）</p><p>Brier 分數 <b>${(brier/bn).toFixed(3)}</b>（越小越好；0.25 等於亂猜，0.15 以下算不錯）</p><p class="muted">遊戲目標是讓每題答對率約 85%。實際答對率長期離 85% 很遠，代表出題難度沒有對準。</p>`:'<p class="muted">還沒有預測值資料。</p>';
- summary.modelCalibration={answersWithPrediction:bn,meanPredicted:meanP&&+meanP.toFixed(3),meanActual:meanA&&+meanA.toFixed(3),brier:bn?+(brier/bn).toFixed(3):null,targetAccuracy:.85,bins:cp.map(p=>({predictedPct:p.x,actualPct:p.y,n:p.n}))};
+ // Fixes against the earlier version: (1) answers without a prediction were half-counted (null>=0 is true in JS),
+ // (2) the four skills were pooled although choice questions have a 25% guessing floor and spelling has none,
+ // (3) equal-width bins collapsed into one or two points because predictions cluster near 85%,
+ // (4) the Brier score was judged against fixed numbers ("0.25 = guessing") instead of the base rate,
+ // (5) the 85% target was checked on every answer, including level checks and story chapters that are deliberately hard.
+ const SK=q=>q==='listenspell'?'listenspell':q==='spell'?'spell':q==='listen'?'listen':'meaning';
+ const SKN={meaning:'看字選義（看英選中／看中選英）',listen:'聽音選義',spell:'拼字',listenspell:'聽寫'};
+ const PA=ans.filter(a=>typeof a.p==='number'&&a.p>=0&&a.p<=1);
+ const lg=x=>{x=Math.min(1-1e-6,Math.max(1e-6,x));return Math.log(x/(1-x))};
+ const calStats=list=>{const n=list.length;if(!n)return null;let sp=0,sy=0,br=0,ll=0;for(const a of list){sp+=a.p;sy+=a.ok;br+=(a.p-a.ok)**2;const q=Math.min(1-1e-6,Math.max(1e-6,a.p));ll-=a.ok?Math.log(q):Math.log(1-q)}
+  const mp=sp/n,my=sy/n,base=my*(1-my),bs=br/n;
+  // calibration slope / intercept: logistic regression of the outcome on logit(p) (Newton's method)
+  let b0=0,b1=1;if(n>=30&&my>0&&my<1)for(let it=0;it<25;it++){let g0=0,g1=0,h00=0,h01=0,h11=0;for(const a of list){const x=lg(a.p),m=1/(1+Math.exp(-(b0+b1*x))),w=m*(1-m);g0+=a.ok-m;g1+=(a.ok-m)*x;h00+=w;h01+=w*x;h11+=w*x*x}const det=h00*h11-h01*h01;if(Math.abs(det)<1e-9)break;const d0=(h11*g0-h01*g1)/det,d1=(h00*g1-h01*g0)/det;b0+=d0;b1+=d1;if(Math.abs(d0)+Math.abs(d1)<1e-6)break}
+  const srt=[...list].sort((a,b)=>a.p-b.p),bins=[],k=Math.min(10,Math.max(1,Math.floor(n/30)));let ece=0;
+  for(let i=0;i<k;i++){const part=srt.slice(Math.floor(i*n/k),Math.floor((i+1)*n/k));if(!part.length)continue;const px=part.reduce((s,a)=>s+a.p,0)/part.length,py=part.reduce((s,a)=>s+a.ok,0)/part.length;bins.push({x:px,y:py,n:part.length});ece+=part.length/n*Math.abs(px-py)}
+  return{n,meanP:mp,actual:my,gap:my-mp,brier:bs,baseBrier:base,bss:base>0?1-bs/base:null,logloss:ll/n,slope:n>=30?b1:null,intercept:n>=30?b0:null,ece,bins}};
+ const all=calStats(PA),bySkill={};for(const k in SKN){const c=calStats(PA.filter(a=>SK(a.q)===k));if(c)bySkill[k]=c}
+ const COL={meaning:'#8c5aa8',listen:'#3f8a4f',spell:'#d9566f',listenspell:'#b86a12'};
+ chart('c-calib',{type:'scatter',data:{datasets:[...Object.entries(bySkill).map(([k,c])=>({label:SKN[k],data:c.bins.map(b=>({x:+(b.x*100).toFixed(1),y:+(b.y*100).toFixed(1),n:b.n})),backgroundColor:COL[k],borderColor:COL[k],showLine:true,pointRadius:c.bins.map(b=>Math.max(3,Math.min(10,Math.sqrt(b.n)/4)))})),{type:'line',label:'完全準確',data:[{x:0,y:0},{x:100,y:100}],borderColor:'#999',borderDash:[4,4],pointRadius:0}]},options:{scales:{x:{min:0,max:100,title:{display:true,text:'預測答對率 %（每組人數相同）'}},y:{min:0,max:100,title:{display:true,text:'實際答對率 %'}}}}});
+ const f3=x=>x==null?'–':x.toFixed(3),sgn=x=>(x>0?'+':'')+(x*100).toFixed(1)+' 個百分點';
+ const verdict=c=>{if(!c||c.n<30)return'資料不足';const v=[];if(Math.abs(c.gap)>=.03)v.push(c.gap<0?'整體高估（實際比預測低 '+sgn(c.gap).replace('+','')+'）':'整體低估（實際比預測高 '+sgn(c.gap)+'）');
+  if(c.slope!=null){if(c.slope<.8)v.push('預測太極端：說很有把握時常答錯、說沒把握時常答對');else if(c.slope>1.25)v.push('預測太保守：高低之間拉得不夠開')}
+  if(c.bss!=null&&c.bss<=0)v.push('沒有比「每題都猜平均答對率」更準');return v.length?v.join('；'):'校正良好'};
+ table('t-calib-skill',['技能','題數','平均預測','實際','差距','Brier','基準 Brier','技巧分數 BSS','校正斜率','ECE','判讀'],Object.entries(bySkill).map(([k,c])=>[SKN[k],c.n,P(c.meanP),P(c.actual),{v:c.gap,h:sgn(c.gap)},+c.brier.toFixed(3),+c.baseBrier.toFixed(3),{v:c.bss??-9,h:f3(c.bss)},{v:c.slope??0,h:c.slope==null?'–':c.slope.toFixed(2)},{v:c.ece,h:pct(c.ece)},{v:0,h:verdict(c),n:false}]));
+ const KINDCAL={};for(const a of PA)(KINDCAL[a.kind]||(KINDCAL[a.kind]=[])).push(a);
+ table('t-calib-kind',['入口','題數','平均預測','實際','差距'],Object.entries(KINDCAL).map(([k,l])=>{const mp=l.reduce((s,a)=>s+a.p,0)/l.length,my=l.reduce((s,a)=>s+a.ok,0)/l.length;return[KIND[k]||k,l.length,P(mp),P(my),{v:my-mp,h:sgn(my-mp)}]}).sort((a,b)=>b[1]-a[1]));
+ // the 85% target only applies where the adaptive picker chose the word and the question type
+ const ADAPTIVE=new Set(['daily','practice','need','train','help','team','chal']),TA=ans.filter(a=>ADAPTIVE.has(a.kind)&&!a.re),taAcc=TA.length?TA.reduce((s,a)=>s+a.ok,0)/TA.length:null;
+ const taBy={};for(const a of TA){const k=SK(a.q),x=taBy[k]||(taBy[k]={n:0,ok:0});x.n++;x.ok+=a.ok}
+ $('calib-text').innerHTML=all?`<p>有預測值的作答 <b>${fmt(all.n)}</b> 題：平均預測 <b>${pct(all.meanP)}</b>，實際 <b>${pct(all.actual)}</b>（${sgn(all.gap)}）。</p>
+  <p>Brier <b>${all.brier.toFixed(3)}</b>，只猜平均答對率的基準是 <b>${all.baseBrier.toFixed(3)}</b>，技巧分數 BSS <b>${f3(all.bss)}</b>（大於 0 才代表模型有分辨力；越接近 1 越好）。Brier 本身不能直接和 0.25 或 0.15 比：答對率 85% 時，什麼都不會的模型也有 0.13。</p>
+  <p>校正斜率 <b>${all.slope==null?'–':all.slope.toFixed(2)}</b>（1 最理想；小於 1 代表預測太極端，大於 1 代表太保守），平均校正誤差 ECE <b>${pct(all.ece)}</b>。</p>
+  <p><b>出題目標</b>：自適應入口（每日、練習、泡泡、訓練、幫朋友、團隊、挑戰；不含答錯重練）實際答對率 <b>${pct(taAcc)}</b>，目標約 85%。${Object.entries(taBy).map(([k,x])=>SKN[k]+' '+pct(x.ok/x.n)).join('、')}</p>
+  <p class="muted">判讀：${verdict(all)}。技能間差很多時，以下表為準。</p>`:'<p class="muted">還沒有預測值資料。</p>';
+ const pack=c=>c&&{n:c.n,meanPredicted:+c.meanP.toFixed(3),actual:+c.actual.toFixed(3),gap:+c.gap.toFixed(3),brier:+c.brier.toFixed(3),baseRateBrier:+c.baseBrier.toFixed(3),brierSkill:c.bss==null?null:+c.bss.toFixed(3),logLoss:+c.logloss.toFixed(3),calibrationSlope:c.slope==null?null:+c.slope.toFixed(2),calibrationIntercept:c.intercept==null?null:+c.intercept.toFixed(2),ece:+c.ece.toFixed(3),bins:c.bins.map(b=>({predicted:+b.x.toFixed(3),actual:+b.y.toFixed(3),n:b.n}))};
+ summary.modelCalibration={overall:pack(all),bySkill:Object.fromEntries(Object.entries(bySkill).map(([k,c])=>[k,pack(c)])),byEntry:Object.fromEntries(Object.entries(KINDCAL).map(([k,l])=>[k,{n:l.length,meanPredicted:+(l.reduce((s,a)=>s+a.p,0)/l.length).toFixed(3),actual:+(l.reduce((s,a)=>s+a.ok,0)/l.length).toFixed(3)}])),target:{value:.85,adaptiveEntriesAccuracy:taAcc==null?null:+taAcc.toFixed(3),n:TA.length,bySkill:Object.fromEntries(Object.entries(taBy).map(([k,x])=>[k,+(x.ok/x.n).toFixed(3)]))},notes:'p 含選擇題 25% 猜中下限；升級考與故事的干擾選項較難，模型未建模，不納入目標檢查'};
 
  /* 7 kinds */
  const K={};for(const r of sess){const k=K[r.kind]||(K[r.kind]={s:0,d:0,n:0,ok:0,ms:[],next:0,nextOk:0,dur:[]});k.s++;if(r.done)k.d++;if(r.dur>0)k.dur.push(r.dur)}
@@ -299,11 +367,12 @@ function analyse(){
  summary.dropOff={unfinishedSessions:undone.length,share:sess.length?+(undone.length/sess.length).toFixed(3):null,topStops:dl.slice(0,12).map(([k,n])=>({where:k,sessions:n})),byEntry:Object.fromEntries(Object.entries(dk2).map(([k,v])=>[k,+(v.u/v.s).toFixed(3)]))};
 
  /* 9 retention */
- const allSess=S.raw.filter(who),first=new Map(),active=new Map();for(const r of allSess){const d=Math.floor(new Date(dayKey(r.t0)+'T00:00').getTime()/864e5);if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
- const lastDay=Math.max(...[...active.values()].flatMap(s=>[...s]),0),coh={};
+ const allSess=S.raw.filter(who),first=new Map(),active=new Map();let lastDay=0;for(const r of allSess){const d=dayNo(r.t0);if(d>lastDay)lastDay=d;if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
+ const coh={};
  // back = active on any day in [from, to] after the first day; counted only when that window has fully passed
  const W3=[['d1',1,1],['w2',7,13],['w5',28,34]];
- for(const [lid,d0] of first){if(!learners.has(lid))continue;const start=new Date(d0*864e5);const wk=dayKey(d0*864e5-start.getDay()*864e5);const c=coh[wk]||(coh[wk]={n:0});c.n++;const set=active.get(lid);
+ // cohort week starts on Sunday of the local calendar (dayNo 0 = 1970-01-01, a Thursday)
+ for(const [lid,d0] of first){if(!learners.has(lid))continue;const wk=dayNoKey(d0-((d0+4)%7));const c=coh[wk]||(coh[wk]={n:0});c.n++;const set=active.get(lid);
   for(const [k,from,to] of W3){if(d0+to>lastDay)continue;c['e'+k]=(c['e'+k]||0)+1;let back=false;for(let x=d0+from;x<=d0+to;x++)if(set.has(x))back=true;if(back)c[k]=(c[k]||0)+1}}
  const cr=Object.entries(coh).sort();
  table('t-retain',['第一次學習那週','人數','隔天回來','第 2 週有回來','第 5 週有回來'],cr.map(([w,c])=>[w,c.n,...W3.map(([k])=>c['e'+k]?P((c[k]||0)/c['e'+k]):{v:-1,h:'還沒到'})]));
@@ -323,13 +392,14 @@ function analyse(){
 
  /* 11 hints / replays */
  const hp=[];const grp=(label,list)=>{if(list.length)hp.push([label,list.length,P(list.filter(a=>a.ok).length/list.length),{v:median(list.map(a=>a.ms))/1000,h:fmt(median(list.map(a=>a.ms))/1000,1)+' 秒'}])};
- const sp=ans.filter(a=>a.q==='spell');grp('拼字：有提示',sp.filter(a=>a.h===1));grp('拼字：沒提示',sp.filter(a=>a.h!==1));
+ const sp=ans.filter(a=>a.q==='spell'),spNew=sp.filter(a=>a.ge!=null),spOld=sp.filter(a=>a.ge==null);
+ grp('拼字：無提示',spNew.filter(a=>!a.h));grp('拼字：首字母提示',spNew.filter(a=>a.h===1));grp('拼字：遮字提示（故事標籤）',spNew.filter(a=>a.h===2));grp('拼字：0.92.45 以前（無法區分提示）',spOld);
  const ls=ans.filter(a=>a.q==='listen'||a.q==='listenspell');grp('聽力：沒重聽',ls.filter(a=>!a.r));grp('聽力：重聽 1 次',ls.filter(a=>a.r===1));grp('聽力：重聽 2 次以上',ls.filter(a=>a.r>=2));
  grp('回合前半（第 1–4 題）',ans.filter(a=>a.i<4));grp('回合後半（第 5 題以後）',ans.filter(a=>a.i>=4));
  table('t-help',['情況','題數','答對率','作答時間'],hp);
  summary.hintsAndFatigue=hp.map(r=>({case:r[0],n:r[1],accuracy:+(r[2].v||0).toFixed(3)}));
  const pop={real:0,sim:0,test:0};for(const r of sess)pop[whoOf(r)]++;
- summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣高中 6 級單字 L1–L6），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
+ summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,vocabulary:'0.92.45 起：國小～高中 6,924 字（大考 L1–6 ＋ 108 課綱國中小 2000 字，含 60 個新字），每題記錄建議年級 gr；舊紀錄的年級由 i18n/vocab.json 補上，改名詞條已合併',populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣大考中心 L1–L6，加上 108 課綱國中小 2000 字；0.92.45 起每題另有建議年級 g），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
  S.summary=summary;
 }
 
