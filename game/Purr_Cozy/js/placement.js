@@ -36,7 +36,7 @@ const Placement = {
   label(g) { return I18n.t('pl.g' + Math.max(1, Math.min(12, g))); },
   band(g) { return I18n.t(g <= 6 ? 'pl.bandE' : g <= 9 ? 'pl.bandJ' : 'pl.bandS'); },
   range(t, se) { const lo = this.gnum(t - se), hi = this.gnum(t + se); return lo === hi ? this.label(lo) : I18n.t('pl.range', [this.label(lo), this.label(hi)]); },
-  publicLabel() { const g = this.S(); return this.done() && this.show() ? this.label(this.gnum(g.theta)) : ''; },
+  publicLabel() { const g = this.S(); return this.done() && this.show() ? 'G' + this.gnum(g.theta) : ''; },   // language-neutral; readers show it with gradeTag()
   gradeToD(t) {
     const P = [[1, .3], [2, .4], [4, .6], [6, .8], [7, 1], [9, 1.4], [10, 1.8], [11, 3.5], [12, 5.5], [13, 6]];
     if (t <= P[0][0]) return P[0][1]; for (let i = 1; i < P.length; i++) if (t <= P[i][0]) { const [x0, y0] = P[i - 1], [x1, y1] = P[i]; return y0 + (y1 - y0) * (t - x0) / (x1 - x0); } return P[P.length - 1][1];
@@ -279,7 +279,7 @@ const Placement = {
   if (typeof Social !== 'undefined') {
     const card = Social.card.bind(Social); Social.card = function () { const c = card(); c.grade = Placement.publicLabel(); return c; };
     const wcard = UI.w_card.bind(UI);
-    UI.w_card = function () { const out = wcard(), C = Social.cardSt, c = C && C.c; if (c && c.grade && out[0] && out[0].querySelector) { const nm = out[0].querySelector('.cardname'); if (nm) nm.append(h('span', { class: 'ptag pl-tag', 'data-i18n-skip': true, text: c.grade })); } return out; };
+    UI.w_card = function () { const out = wcard(), C = Social.cardSt, c = C && C.c; if (c && c.grade && out[0] && out[0].querySelector) { const nm = out[0].querySelector('.cardname'), tag = UI.gradeTag ? UI.gradeTag(c.grade) : null; if (nm && tag) nm.append(tag); } return out; };
   }
   // developer reset of vocabulary progress also clears the placement
   if (typeof Dev !== 'undefined' && Dev.resetPart) { const rp = Dev.resetPart.bind(Dev); Dev.resetPart = function (part) { if (part === 'vocab' && Game.S) delete Game.S.grade; return rp(part); }; }
@@ -294,7 +294,7 @@ const Placement = {
 .pl-stats{grid-template-columns:repeat(4,1fr)}.pl-chart{width:100%;height:auto;display:block;background:var(--paper-2);margin:4px 0 8px}
 .pl-grid{stroke:var(--line);stroke-width:1}.pl-ylab,.pl-xlab{font-size:10px;fill:var(--ink-2)}.pl-band-area{fill:var(--primary);opacity:.25}.pl-line{fill:none;stroke:var(--ink);stroke-width:2}.pl-dot{fill:var(--rose)}
 .pl-learnrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--paper-2);margin:0 0 8px}
-.ptag.pl-tag{background:var(--chip-on)}` }));
+.ptag.pl-tag{background:var(--chip-on);margin-left:6px;font-size:11px;vertical-align:middle;white-space:nowrap}.bname .pl-tag,.frname .pl-tag{font-weight:400}` }));
   // first visit
   const poll = setInterval(() => { if (!Game.S || !UI.el || !UI.el.lvl) return; if (document.body.classList.contains('mini')) return; clearInterval(poll); setTimeout(() => Placement.tryIntro(), 1500); }, 1000);
 })();

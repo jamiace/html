@@ -331,7 +331,7 @@ const Social = {
     this.loading.board = tab; UI.refresh('friends');
     try {
       const def = this.BOARDS.find(b => b[0] === tab), field = def[2] || `w.${wk}`;
-      const rows = (await this.db().top('board', field, SOCIAL.boardTop)).map(r => ({ id: r.id, name: clipName(r.name) || I18n.s("u_1b5a5abc14d1"), ava: r.ava || null, lvl: r.lvl || 1, lv: r.lv || 0, coins: r.coins || 0, tm: r.tm || 0, week: (r.w || {})[wk] || 0, at: r.at || 0 }));
+      const rows = (await this.db().top('board', field, SOCIAL.boardTop)).map(r => ({ id: r.id, name: clipName(r.name) || I18n.s("u_1b5a5abc14d1"), ava: r.ava || null, lvl: r.lvl || 1, lv: r.lv || 0, grade: typeof r.grade === 'string' ? r.grade.slice(0, 12) : '', coins: r.coins || 0, tm: r.tm || 0, week: (r.w || {})[wk] || 0, at: r.at || 0 }));
       const val = (r) => tab === 'lvl' ? r.lv : tab === 'coins' ? r.coins : tab === 'week' ? r.week : r.tm;
       // ties: same value -> who got there first (older update) -> account id
       rows.sort((a, b) => val(b) - val(a) || (a.at || 0) - (b.at || 0) || (a.id < b.id ? -1 : 1));
@@ -400,6 +400,8 @@ Object.assign(UI, {
       room, (c.pets || []).length ? h('div', { class: 'sub', text: I18n.s("u_406e3dc6ef01", [c.pets.length]) }) : null, pets, btns,
       rel !== 'ok' && rel !== 'me' ? h('p', { class: 'hint', text: I18n.s("u_50422446ec83") }) : null];
   },
+  // English grade tag (程度測驗) next to a name; empty when the player hides it. Stored as 'G1'..'G12' and shown in the reader's language.
+  gradeTag(v) { if (!v || typeof v !== 'string') return null; const m = /^G(\d{1,2})$/.exec(v), t = m && typeof Placement !== 'undefined' ? Placement.label(+m[1]) : v; return h('span', { class: 'ptag pl-tag', 'data-i18n-skip': true, text: t }); },
   w_friends() {
     const Z = Social.Z, tab = this.frTab, un = Social.unread();
     const tabs = h('div', { class: 'tabs' }, ...[['friends', I18n.s("u_b9b1480dd6ec")], ['board', I18n.s("u_1ee95aa94712")], ['guest', un ? I18n.s("u_6e270720127f", [un]) : I18n.s("u_93a9e22cb641")]].map(([k, l]) => h('button', { class: 'tab' + (tab === k ? ' on' : ''), onclick: () => this.openFriends(k) }, l)));
@@ -407,7 +409,7 @@ Object.assign(UI, {
     const out = [tabs]; if (Social.err) out.push(h('p', { class: 'hint warn', text: Social.err }));
     if (tab === 'friends') {
       const left = SOCIAL.helpsPerDay - Social.helpsToday(), prog = (Z.total || 0) % SOCIAL.ticketEvery, tk = Rewards.W.tickets || 0;
-      out.push(h('div', { class: 'frme' }, this.avaPic(Game.S.avatar, 44), h('div', { class: 'grow' }, h('div', {}, h('b', { text: Social.myName() }), ' ', h('button', { class: 'chip sm', onclick: () => this.openCard(Social.uid) }, I18n.s("u_487e926379fe"))), h('div', { class: 'hint', text: I18n.s("u_0acfeb766c07") })),
+      out.push(h('div', { class: 'frme' }, this.avaPic(Game.S.avatar, 44), h('div', { class: 'grow' }, h('div', {}, h('b', { text: Social.myName() }, this.gradeTag(typeof Placement !== 'undefined' ? Placement.publicLabel() : '')), ' ', h('button', { class: 'chip sm', onclick: () => this.openCard(Social.uid) }, I18n.s("u_487e926379fe"))), h('div', { class: 'hint', text: I18n.s("u_0acfeb766c07") })),
         h('div', { class: 'frcode num', text: Z.code || '……' }), h('button', { class: 'chip sm', disabled: !Z.code, onclick: () => { try { navigator.clipboard.writeText(Z.code); UI.toast(I18n.s("u_460208770622"), 'i_people', 2); } catch (e) { } } }, I18n.s("u_bb6dad578c81"))));
       const inp = h('input', { id: 'fr-code', type: 'text', maxlength: '8', placeholder: I18n.s("u_363ea9fb40d8"), autocomplete: 'off', onkeydown: e => { if (e.key === 'Enter') Social.findCode(e.target.value); } });
       out.push(h('div', { class: 'row' }, h('div', { class: 'inset grow' }, inp), h('button', { class: 'chip primary', onclick: () => Social.findCode(inp.value) }, ico('i_people', 18), I18n.s("u_e62523053be4"))));
@@ -419,7 +421,7 @@ Object.assign(UI, {
       if (Social.loading.friends && !Social.friends.length) out.push(h('p', { class: 'hint', text: I18n.s("u_f92612d11856") }));
       else if (!oks.length) out.push(h('p', { class: 'hint', text: I18n.s("u_8f448ea6e65f") }));
       out.push(h('div', { class: 'scroll frlist' }, ...oks.map(f => { const p = Social.cards[f.id] || {};
-        return h('div', { class: 'frrow' }, this.avaPic(p.ava, 32), h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: p.name || f.name }), h('span', { class: 'hint', text: p.lvl ? I18n.s("u_936dd9cc315f", [p.lvl, (p.pets || []).length]) : '' }), p.status ? h('span', { class: 'hint frst', 'data-i18n-skip':true, text: p.status }) : null),
+        return h('div', { class: 'frrow' }, this.avaPic(p.ava, 32), h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: p.name || f.name }, this.gradeTag(p.grade)), h('span', { class: 'hint', text: p.lvl ? I18n.s("u_936dd9cc315f", [p.lvl, (p.pets || []).length]) : '' }), p.status ? h('span', { class: 'hint frst', 'data-i18n-skip':true, text: p.status }) : null),
           h('button', { class: 'chip sm primary', onclick: () => Social.visit(f.id) }, I18n.s("u_a55baf30c49a")), h('button', { class: 'chip sm', 'aria-label': I18n.s("u_cfdd3c6dcb89"), onclick: () => Social.remove(f.id, true) }, ico('i_trash', 14))); }),
         ...outs.map(f => h('div', { class: 'frrow' }, h('button', { class: 'frname grow', onclick: () => this.openCard(f.id) }, h('b', { text: f.name }), h('span', { class: 'hint', text: I18n.s("u_38410dba2678") })), h('button', { class: 'chip sm', onclick: () => Social.remove(f.id) }, I18n.s("u_2cd0f3be8738"))))));
       out.push(h('div', { class: 'row' }, h('button', { class: 'chip sm', onclick: () => Social.loadFriends(true) }, ico('i_reset', 14), I18n.s("u_5f451c71b46a"))));
@@ -431,7 +433,7 @@ Object.assign(UI, {
       const val = (r) => bt === 'lvl' ? `Lv ${r.lvl}` : bt === 'coins' ? r.coins.toLocaleString() + I18n.s("u_35074813fa04") : bt === 'week' ? fmtMins(r.week) : fmtMins(r.tm);
       out.push(h('p', { class: 'hint', text: I18n.s("u_ed8e3424d562", [SOCIAL.boardTop, bt === 'coins' ? I18n.s("u_cc6d0acb7553") : '', new Date(B.at).toLocaleTimeString(I18n.lang, { hour: '2-digit', minute: '2-digit', hour12: false })]) }));
       out.push(h('div', { class: 'scroll' }, h('ol', { class: 'board' }, ...B.list.map((r, i) => h('li', { class: r.id === Social.uid ? 'me' : '' },
-        h('button', { class: 'brow', onclick: () => this.openCard(r.id) }, h('span', { class: 'brank num', text: String(i + 1) }), this.avaPic(r.ava, 32), h('span', { class: 'bname grow', text: r.name }), h('span', { class: 'bval num', text: val(r) })))))));
+        h('button', { class: 'brow', onclick: () => this.openCard(r.id) }, h('span', { class: 'brank num', text: String(i + 1) }), this.avaPic(r.ava, 32), h('span', { class: 'bname grow' }, h('span', { text: r.name }), this.gradeTag(r.grade)), h('span', { class: 'bval num', text: val(r) })))))));
       if (!B.list.some(r => r.id === Social.uid)) out.push(h('p', { class: 'hint', text: I18n.s("u_36c2aff9765f") }));
       out.push(h('div', { class: 'row' }, h('button', { class: 'chip sm', disabled: Date.now() - B.at < 60000, onclick: () => Social.loadBoard(bt, true) }, ico('i_reset', 14), I18n.s("u_358a13c304aa"))));
     } else {
