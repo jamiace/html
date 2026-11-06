@@ -1,0 +1,1653 @@
+{
+ "created": "2026-11-07",
+ "note": "30 test accounts for the two-week playtest (docs/試玩計畫-30位測試帳號.md)",
+ "slots": {
+  "morning": "07:00",
+  "noon": "12:30",
+  "after": "16:30",
+  "evening": "19:30",
+  "night": "22:30",
+  "late": "00:30"
+ },
+ "testers": [
+  {
+   "id": "sim01",
+   "nick": "樂樂",
+   "age": 6,
+   "stage": "小一",
+   "english": 1.0,
+   "theta": -2.8,
+   "declared": 1,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0.6,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.6,
+   "daysPerWeek": 4,
+   "minutes": [
+    6,
+    12
+   ],
+   "likes": {
+    "daily": 0.2,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 1,
+    "mini": 0.6,
+    "music": 0.3,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "拼字",
+    "長的說明文字"
+   ],
+   "personality": "好奇、坐不住，常亂點",
+   "habit": "家長晚飯後陪玩 10 分鐘；最愛點貓、丟毛球；看不懂字就亂選",
+   "levels": [
+    1
+   ],
+   "decay": 0.93,
+   "startDay": 0,
+   "speed": 1.75,
+   "typing": 0.4,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim02",
+   "nick": "安安",
+   "age": 7,
+   "stage": "小一",
+   "english": 1.5,
+   "theta": -2.6,
+   "declared": 1,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0.1,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.2,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 2.6,
+   "daysPerWeek": 3,
+   "minutes": [
+    8,
+    20
+   ],
+   "likes": {
+    "daily": 0.2,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.5,
+    "mini": 0.1,
+    "music": 1,
+    "decor": 0.6,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "計時壓力",
+    "輸了的音效"
+   ],
+   "personality": "安靜、喜歡畫畫",
+   "habit": "週末早上邊畫畫邊開音樂，彈房間裡的鋼琴家具",
+   "levels": [
+    1
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.72,
+   "typing": 0.42,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim03",
+   "nick": "小宇",
+   "age": 8,
+   "stage": "小二",
+   "english": 2.0,
+   "theta": -2.4,
+   "declared": 2,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.55,
+    "evening": 0.25,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 5,
+   "minutes": [
+    8,
+    15
+   ],
+   "likes": {
+    "daily": 0.3,
+    "practice": 0.1,
+    "typo": 0.2,
+    "grade": 0.1,
+    "cat": 0.4,
+    "mini": 1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "閱讀很多字",
+    "等待"
+   ],
+   "personality": "好勝、急性子",
+   "habit": "放學在安親班用媽媽手機玩彈珠台、丟沙包，分數不好就重玩",
+   "levels": [
+    1
+   ],
+   "decay": 0.9,
+   "startDay": 0,
+   "speed": 1.7,
+   "typing": 0.45,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim04",
+   "nick": "芯芯",
+   "age": 8,
+   "stage": "小二",
+   "english": 3.0,
+   "theta": -2.0,
+   "declared": 3,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.3,
+    "evening": 0.5,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    10,
+    20
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.1,
+    "typo": 0.5,
+    "grade": 0.9,
+    "cat": 0.3,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.4
+   },
+   "dislikes": [
+    "答錯",
+    "被打斷"
+   ],
+   "personality": "認真、喜歡貼紙和獎狀",
+   "habit": "有上美語補習班，每天把每日單字和程度小測做完，會把獎狀掛在牆上",
+   "levels": [
+    1
+   ],
+   "decay": 0.97,
+   "startDay": 0,
+   "speed": 1.7,
+   "typing": 0.5,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim05",
+   "nick": "皓皓",
+   "age": 9,
+   "stage": "小三",
+   "english": 2.5,
+   "theta": -2.2,
+   "declared": 3,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.5,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.2,
+   "daysPerWeek": 5,
+   "minutes": [
+    6,
+    15
+   ],
+   "likes": {
+    "daily": 0.2,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 1,
+    "mini": 0.3,
+    "music": 0.1,
+    "decor": 0.4,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "任務清單",
+    "英文測驗"
+   ],
+   "personality": "溫柔、會替貓取名字",
+   "habit": "只想養貓：餵食、梳毛、買貓家具，任務幾乎不看",
+   "levels": [
+    1
+   ],
+   "decay": 0.92,
+   "startDay": 0,
+   "speed": 1.67,
+   "typing": 0.47,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim06",
+   "nick": "語晴",
+   "age": 9,
+   "stage": "小三",
+   "english": 4.0,
+   "theta": -1.6,
+   "declared": 3,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.45,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.8,
+   "daysPerWeek": 4,
+   "minutes": [
+    15,
+    30
+   ],
+   "likes": {
+    "daily": 0.4,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.5,
+    "mini": 0.1,
+    "music": 0.4,
+    "decor": 1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "房間被貓弄亂",
+    "金幣不夠"
+   ],
+   "personality": "有美感、會花很久挑家具",
+   "habit": "每次都進佈置模式重排房間，會反覆收起、翻轉、拖曳小物",
+   "levels": [
+    1
+   ],
+   "decay": 0.95,
+   "startDay": 1,
+   "speed": 1.67,
+   "typing": 0.55,
+   "honesty": 0.7,
+   "distract": 0.08
+  },
+  {
+   "id": "sim07",
+   "nick": "子恩",
+   "age": 10,
+   "stage": "小四",
+   "english": 3.0,
+   "theta": -2.0,
+   "declared": 4,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.1,
+    "evening": 0,
+    "night": 0.45,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 5,
+   "minutes": [
+    10,
+    25
+   ],
+   "likes": {
+    "daily": 0.15,
+    "practice": 0.1,
+    "typo": 0.3,
+    "grade": 0.1,
+    "cat": 0.3,
+    "mini": 1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.3,
+    "story": 0.1
+   },
+   "dislikes": [
+    "被要求學習",
+    "廣告式提示"
+   ],
+   "personality": "調皮、愛熬夜偷玩",
+   "habit": "晚上九點半後躲在被子裡用手機玩小遊戲，很少做單字",
+   "levels": [
+    1
+   ],
+   "decay": 0.9,
+   "startDay": 0,
+   "speed": 1.65,
+   "typing": 0.5,
+   "honesty": 0.85,
+   "distract": 0.08
+  },
+  {
+   "id": "sim08",
+   "nick": "品妤",
+   "age": 10,
+   "stage": "小四",
+   "english": 5.0,
+   "theta": -1.2,
+   "declared": 4,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.35,
+    "evening": 0.45,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    12,
+    20
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.1,
+    "typo": 0.9,
+    "grade": 0.7,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.3
+   },
+   "dislikes": [
+    "音樂",
+    "貓咪搗蛋"
+   ],
+   "personality": "自律、在意連續天數",
+   "habit": "用家裡電腦，固定做每日單字＋Meow Typo，會把音樂關掉",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.98,
+   "startDay": 0,
+   "speed": 1.65,
+   "typing": 0.6,
+   "honesty": 0.85,
+   "distract": 0.08
+  },
+  {
+   "id": "sim09",
+   "nick": "柏翰",
+   "age": 11,
+   "stage": "小五",
+   "english": 4.0,
+   "theta": -1.6,
+   "declared": 5,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.3,
+    "evening": 0.4,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.3,
+   "daysPerWeek": 5,
+   "minutes": [
+    8,
+    18
+   ],
+   "likes": {
+    "daily": 0.5,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.3,
+    "mini": 0.5,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "輸給同學",
+    "等好友回應"
+   ],
+   "personality": "愛比較、喜歡團體",
+   "habit": "常看排行榜、拜訪好友房間幫忙、參加團隊任務",
+   "levels": [
+    1
+   ],
+   "decay": 0.94,
+   "startDay": 0,
+   "speed": 1.62,
+   "typing": 0.55,
+   "honesty": 0.85,
+   "distract": 0.08
+  },
+  {
+   "id": "sim10",
+   "nick": "安琪",
+   "age": 11,
+   "stage": "小五",
+   "english": 6.0,
+   "theta": -0.8,
+   "declared": 5,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.4,
+    "night": 0.2,
+    "late": 0
+   },
+   "weekend": 1.4,
+   "daysPerWeek": 5,
+   "minutes": [
+    20,
+    45
+   ],
+   "likes": {
+    "daily": 0.3,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.4,
+    "mini": 0.1,
+    "music": 1,
+    "decor": 0.7,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "測驗打斷音樂",
+    "歌詞擋到畫面"
+   ],
+   "personality": "浪漫、愛聽日文歌",
+   "habit": "開著歌詞聽音樂，一邊慢慢佈置房間，很少點測驗",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.96,
+   "startDay": 1,
+   "speed": 1.62,
+   "typing": 0.65,
+   "honesty": 0.85,
+   "distract": 0.08
+  },
+  {
+   "id": "sim11",
+   "nick": "承恩",
+   "age": 12,
+   "stage": "小六",
+   "english": 5.0,
+   "theta": -1.2,
+   "declared": 6,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.4,
+    "evening": 0.6,
+    "night": 0.3,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 7,
+   "minutes": [
+    20,
+    40
+   ],
+   "likes": {
+    "daily": 0.6,
+    "practice": 0.1,
+    "typo": 0.4,
+    "grade": 0.4,
+    "cat": 0.6,
+    "mini": 0.8,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "重複的內容"
+   ],
+   "personality": "三分鐘熱度",
+   "habit": "前三天每天玩很久什麼都試，第四天後興趣大減，第二週幾乎不來",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.6,
+   "startDay": 0,
+   "speed": 1.6,
+   "typing": 0.6,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim12",
+   "nick": "筠筠",
+   "age": 12,
+   "stage": "小六",
+   "english": 7.5,
+   "theta": -0.2,
+   "declared": 6,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.3,
+    "evening": 0.5,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    12,
+    25
+   ],
+   "likes": {
+    "daily": 0.9,
+    "practice": 0.1,
+    "typo": 0.6,
+    "grade": 1,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.8
+   },
+   "dislikes": [
+    "題目太簡單"
+   ],
+   "personality": "資優、好奇",
+   "habit": "每天做程度小測看自己有沒有進步，會把商人故事讀完",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.97,
+   "startDay": 0,
+   "speed": 1.6,
+   "typing": 0.72,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim13",
+   "nick": "冠宇",
+   "age": 13,
+   "stage": "國一",
+   "english": 5.5,
+   "theta": -1.0,
+   "declared": 7,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0,
+    "night": 0.5,
+    "late": 0.2
+   },
+   "weekend": 1.5,
+   "daysPerWeek": 5,
+   "minutes": [
+    20,
+    50
+   ],
+   "likes": {
+    "daily": 0.1,
+    "practice": 0.1,
+    "typo": 0.2,
+    "grade": 0.1,
+    "cat": 0.1,
+    "mini": 1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.4,
+    "story": 0.1
+   },
+   "dislikes": [
+    "學習任務",
+    "被提醒讀書"
+   ],
+   "personality": "電玩咖",
+   "habit": "只玩彈珠台、自動販賣機、迷宮，刷高分；英文只在任務獎勵很多時才做",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.93,
+   "startDay": 0,
+   "speed": 1.57,
+   "typing": 0.62,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim14",
+   "nick": "詩晴",
+   "age": 13,
+   "stage": "國一",
+   "english": 7.0,
+   "theta": -0.4,
+   "declared": 7,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0.2,
+    "after": 0.2,
+    "evening": 0.4,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.2,
+   "daysPerWeek": 6,
+   "minutes": [
+    8,
+    20
+   ],
+   "likes": {
+    "daily": 0.4,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.4,
+    "focus": 0.1,
+    "social": 0.6,
+    "story": 0.1
+   },
+   "dislikes": [
+    "寵物生病"
+   ],
+   "personality": "愛分享、愛拍照",
+   "habit": "幫貓拍照、拜訪好友、交換禮物；每日單字隨便做做",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.57,
+   "typing": 0.7,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim15",
+   "nick": "宥翔",
+   "age": 14,
+   "stage": "國二",
+   "english": 6.5,
+   "theta": -0.6,
+   "declared": 8,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0.1,
+    "after": 0,
+    "evening": 0,
+    "night": 0.7,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    4,
+    10
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.4,
+    "cat": 0.2,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "長時間的活動"
+   ],
+   "personality": "疲倦的補習生",
+   "habit": "補習到 22 點，回家只花 5 分鐘把每日任務做完就關掉",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.93,
+   "startDay": 0,
+   "speed": 1.55,
+   "typing": 0.68,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim16",
+   "nick": "子晴",
+   "age": 14,
+   "stage": "國二",
+   "english": 9.0,
+   "theta": 0.4,
+   "declared": 8,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.4,
+    "evening": 0.6,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    25,
+    60
+   ],
+   "likes": {
+    "daily": 0.6,
+    "practice": 0.1,
+    "typo": 0.3,
+    "grade": 0.1,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.8,
+    "decor": 0.1,
+    "focus": 1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "畫面一直跳通知"
+   ],
+   "personality": "專注型學生",
+   "habit": "讀書時開番茄鐘＋音樂，休息時做一次每日單字",
+   "levels": [
+    1,
+    2,
+    3
+   ],
+   "decay": 0.97,
+   "startDay": 0,
+   "speed": 1.55,
+   "typing": 0.8,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim17",
+   "nick": "品睿",
+   "age": 15,
+   "stage": "國三",
+   "english": 8.0,
+   "theta": 0.0,
+   "declared": 9,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.5,
+    "night": 0.4,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    20,
+    40
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.9,
+    "typo": 0.8,
+    "grade": 0.5,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "遊戲化的干擾"
+   ],
+   "personality": "會考衝刺、偏執刷題",
+   "habit": "只勾 L1、L2 一直刷自由練習和 Meow Typo 困難模式",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.96,
+   "startDay": 0,
+   "speed": 1.52,
+   "typing": 0.75,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim18",
+   "nick": "欣妍",
+   "age": 15,
+   "stage": "國三",
+   "english": 10.0,
+   "theta": 0.8,
+   "declared": 9,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0.5,
+    "night": 0.5,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    40,
+    120
+   ],
+   "likes": {
+    "daily": 0.1,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.2,
+    "mini": 0.1,
+    "music": 1,
+    "decor": 0.3,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "任何彈出視窗"
+   ],
+   "personality": "需要背景音樂才能讀書",
+   "habit": "開著遊戲聽 lofi，幾乎不點畫面（測試閒置與音樂時間）",
+   "levels": [
+    1,
+    2,
+    3
+   ],
+   "decay": 0.97,
+   "startDay": 0,
+   "speed": 1.52,
+   "typing": 0.85,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim19",
+   "nick": "家瑋",
+   "age": 16,
+   "stage": "高一",
+   "english": 9.0,
+   "theta": 0.4,
+   "declared": 10,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0.2,
+    "after": 0,
+    "evening": 0.3,
+    "night": 0.3,
+    "late": 0
+   },
+   "weekend": 3.0,
+   "daysPerWeek": 2,
+   "minutes": [
+    20,
+    45
+   ],
+   "likes": {
+    "daily": 0.3,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.4,
+    "mini": 0.8,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.5,
+    "story": 0.1
+   },
+   "dislikes": [
+    "平日被打擾"
+   ],
+   "personality": "隨性、週末型",
+   "habit": "平日幾乎不上，週末一次玩很久，扭蛋、小遊戲、看排行榜",
+   "levels": [
+    1,
+    2,
+    3
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.5,
+   "typing": 0.8,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim20",
+   "nick": "雨萱",
+   "age": 16,
+   "stage": "高一",
+   "english": 11.0,
+   "theta": 1.2,
+   "declared": 10,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.2,
+    "evening": 0.4,
+    "night": 0.4,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    15,
+    30
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.6,
+    "typo": 0.1,
+    "grade": 0.6,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.8
+   },
+   "dislikes": [
+    "小遊戲",
+    "貓叫聲"
+   ],
+   "personality": "學測導向、效率派",
+   "habit": "勾 L3–L6，做每日單字和故事，討厭不相關的玩法",
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "decay": 0.96,
+   "startDay": 0,
+   "speed": 1.5,
+   "typing": 0.9,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim21",
+   "nick": "俊傑",
+   "age": 17,
+   "stage": "高二",
+   "english": 10.0,
+   "theta": 0.8,
+   "declared": 11,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0.3,
+    "after": 0,
+    "evening": 0.3,
+    "night": 0.3,
+    "late": 0
+   },
+   "weekend": 1.2,
+   "daysPerWeek": 5,
+   "minutes": [
+    10,
+    25
+   ],
+   "likes": {
+    "daily": 0.5,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.1,
+    "mini": 0.5,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "獨自玩"
+   ],
+   "personality": "團體王",
+   "habit": "組隊任務、邀請好友，排行榜第一名才甘心",
+   "levels": [
+    2,
+    3,
+    4
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.47,
+   "typing": 0.85,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim22",
+   "nick": "采妮",
+   "age": 17,
+   "stage": "高二",
+   "english": 6.0,
+   "theta": -0.8,
+   "declared": 11,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0.3,
+    "evening": 0.3,
+    "night": 0.3,
+    "late": 0
+   },
+   "weekend": 1.3,
+   "daysPerWeek": 5,
+   "minutes": [
+    10,
+    25
+   ],
+   "likes": {
+    "daily": 0.1,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 1,
+    "mini": 0.1,
+    "music": 0.4,
+    "decor": 0.8,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "英文測驗",
+    "自己的程度被看到"
+   ],
+   "personality": "英文自信低",
+   "habit": "只養貓和佈置，會把名片的程度顯示關掉，幾乎不做測驗",
+   "levels": [
+    1,
+    2
+   ],
+   "decay": 0.94,
+   "startDay": 0,
+   "speed": 1.47,
+   "typing": 0.65,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim23",
+   "nick": "博文",
+   "age": 18,
+   "stage": "高三",
+   "english": 12.0,
+   "theta": 1.6,
+   "declared": 12,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0,
+    "night": 0.4,
+    "late": 0.5
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    15,
+    40
+   ],
+   "likes": {
+    "daily": 0.8,
+    "practice": 0.7,
+    "typo": 0.1,
+    "grade": 0.3,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.9,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "動畫太多"
+   ],
+   "personality": "夜貓衝刺型",
+   "habit": "凌晨讀書開番茄鐘，順便刷高難度單字",
+   "levels": [
+    4,
+    5,
+    6
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.45,
+   "typing": 0.95,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim24",
+   "nick": "曉薇",
+   "age": 18,
+   "stage": "高三",
+   "english": 11.5,
+   "theta": 1.4,
+   "declared": 12,
+   "lang": "ja",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0.4,
+    "night": 0.4,
+    "late": 0
+   },
+   "weekend": 1.2,
+   "daysPerWeek": 5,
+   "minutes": [
+    20,
+    40
+   ],
+   "likes": {
+    "daily": 0.5,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.4,
+    "mini": 0.1,
+    "music": 1,
+    "decor": 0.3,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "翻譯不自然"
+   ],
+   "personality": "哈日、用日文介面",
+   "habit": "介面設成日文，邊聽歌邊做每日單字（測試日文介面）",
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "decay": 0.96,
+   "startDay": 0,
+   "speed": 1.45,
+   "typing": 0.93,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim25",
+   "nick": "阿哲",
+   "age": 20,
+   "stage": "大學生",
+   "english": 11.0,
+   "theta": 1.2,
+   "declared": 0,
+   "lang": "zh-CN",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0,
+    "noon": 0.4,
+    "after": 0,
+    "evening": 0,
+    "night": 0.4,
+    "late": 0.3
+   },
+   "weekend": 1.1,
+   "daysPerWeek": 4,
+   "minutes": [
+    5,
+    20
+   ],
+   "likes": {
+    "daily": 0.2,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.5,
+    "mini": 0.5,
+    "music": 0.1,
+    "decor": 0.8,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "每日強迫任務"
+   ],
+   "personality": "收集控、陸生交換生",
+   "habit": "用簡體中文介面，收集家具與成就，偶爾做單字",
+   "levels": [
+    2,
+    3,
+    4
+   ],
+   "decay": 0.93,
+   "startDay": 0,
+   "speed": 1.4,
+   "typing": 0.9,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim26",
+   "nick": "Mia",
+   "age": 28,
+   "stage": "上班族",
+   "english": 10.0,
+   "theta": 0.8,
+   "declared": 0,
+   "lang": "zh-TW",
+   "device": "phone",
+   "phone": true,
+   "slots": {
+    "morning": 0.6,
+    "noon": 0.5,
+    "after": 0,
+    "evening": 0.2,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 0.6,
+   "daysPerWeek": 5,
+   "minutes": [
+    3,
+    8
+   ],
+   "likes": {
+    "daily": 1,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.4,
+    "decor": 0.1,
+    "focus": 0.5,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "花太多時間的活動"
+   ],
+   "personality": "通勤族、碎片時間",
+   "habit": "早上捷運上 5 分鐘做每日單字，午休偶爾開番茄鐘",
+   "levels": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.2,
+   "typing": 0.85,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim27",
+   "nick": "志明",
+   "age": 35,
+   "stage": "上班族",
+   "english": 7.0,
+   "theta": -0.4,
+   "declared": 0,
+   "lang": "zh-TW",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0.4,
+    "night": 0.5,
+    "late": 0
+   },
+   "weekend": 0.8,
+   "daysPerWeek": 5,
+   "minutes": [
+    15,
+    30
+   ],
+   "likes": {
+    "daily": 0.9,
+    "practice": 0.6,
+    "typo": 0.4,
+    "grade": 1,
+    "cat": 0.1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "幼稚的用語"
+   ],
+   "personality": "想重新學英文的中年人",
+   "habit": "認真做程度測驗想知道自己幾年級，晚上固定練習",
+   "levels": [
+    1,
+    2,
+    3
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.02,
+   "typing": 0.7,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim28",
+   "nick": "淑芬",
+   "age": 40,
+   "stage": "家長",
+   "english": 6.0,
+   "theta": -0.8,
+   "declared": 0,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0.5,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.5,
+   "daysPerWeek": 4,
+   "minutes": [
+    8,
+    15
+   ],
+   "likes": {
+    "daily": 0.3,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 1,
+    "mini": 0.1,
+    "music": 0.1,
+    "decor": 0.3,
+    "focus": 0.1,
+    "social": 0.3,
+    "story": 0.1
+   },
+   "dislikes": [
+    "複雜的介面"
+   ],
+   "personality": "陪小孩的媽媽",
+   "habit": "和 sim01 樂樂共用平板的時段後面玩一下，主要看貓",
+   "levels": [
+    1
+   ],
+   "decay": 0.94,
+   "startDay": 0,
+   "speed": 0.9,
+   "typing": 0.65,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim29",
+   "nick": "王伯伯",
+   "age": 65,
+   "stage": "退休",
+   "english": 4.0,
+   "theta": -1.6,
+   "declared": 0,
+   "lang": "zh-TW",
+   "device": "tablet",
+   "phone": false,
+   "slots": {
+    "morning": 0.7,
+    "noon": 0.2,
+    "after": 0,
+    "evening": 0,
+    "night": 0,
+    "late": 0
+   },
+   "weekend": 1.0,
+   "daysPerWeek": 6,
+   "minutes": [
+    10,
+    25
+   ],
+   "likes": {
+    "daily": 0.4,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.5,
+    "mini": 0.1,
+    "music": 0.9,
+    "decor": 0.5,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "字太小",
+    "手指點不準"
+   ],
+   "personality": "動作慢、很有耐心",
+   "habit": "早上九點聽老歌、彈鋼琴家具，點擊常點偏（測試點擊範圍）",
+   "levels": [
+    1
+   ],
+   "decay": 0.97,
+   "startDay": 0,
+   "speed": 2.2,
+   "typing": 0.55,
+   "honesty": 0.85,
+   "distract": 0.04
+  },
+  {
+   "id": "sim30",
+   "nick": "Rina",
+   "age": 31,
+   "stage": "設計師",
+   "english": 11.5,
+   "theta": 1.4,
+   "declared": 0,
+   "lang": "ja",
+   "device": "desktop",
+   "phone": false,
+   "slots": {
+    "morning": 0,
+    "noon": 0,
+    "after": 0,
+    "evening": 0,
+    "night": 0.3,
+    "late": 0.6
+   },
+   "weekend": 1.3,
+   "daysPerWeek": 4,
+   "minutes": [
+    20,
+    60
+   ],
+   "likes": {
+    "daily": 0.1,
+    "practice": 0.1,
+    "typo": 0.1,
+    "grade": 0.1,
+    "cat": 0.5,
+    "mini": 0.2,
+    "music": 0.7,
+    "decor": 1,
+    "focus": 0.1,
+    "social": 0.1,
+    "story": 0.1
+   },
+   "dislikes": [
+    "擋住房間的介面"
+   ],
+   "personality": "夜貓、對畫面很挑剔",
+   "habit": "凌晨用日文介面精修房間、拍照；會特別注意介面有沒有擋到房間",
+   "levels": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "decay": 0.95,
+   "startDay": 0,
+   "speed": 1.12,
+   "typing": 0.93,
+   "honesty": 0.85,
+   "distract": 0.04
+  }
+ ]
+}

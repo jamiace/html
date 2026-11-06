@@ -52,3 +52,53 @@ test('0.92.46 fields: profile/board grade, learnlog pl',async()=>{
  await assertSucceeds(setDoc(doc(anon,'learnlog/anon1/lsess/s10'),rec({id:'s10'})));
  await assertFails(setDoc(doc(anon,'learnlog/anon1/lsess/s11'),rec({id:'s11',pl:'bad'})));
 });
+test('0.5.01 player accounts: saves, backups, players registry',async()=>{
+ await env.withSecurityRulesDisabled(async c=>{const d=c.firestore();
+  await setDoc(doc(d,'staff/ana2@gmail.com'),{role:'analyst',active:true,name:'',note:'',createdBy:'boss@gmail.com',createdAt:new Date(),updatedBy:'boss@gmail.com',updatedAt:new Date()});
+  await setDoc(doc(d,'saves/kid1'),{v:1,schema:3,rev:4,savedAt:1,device:'d',lvl:2,coins:10,email:'kid1@x.com',dev:false,sync:{},data:'{"v":1}',updated:new Date()});
+  await setDoc(doc(d,'saves/kid2'),{v:1,schema:3,rev:1,savedAt:1,device:'d',lvl:2,coins:10,email:'',dev:true,sync:{},data:'{"v":1}',updated:new Date()});});
+ const save=(rev,over={})=>({v:1,schema:3,rev,savedAt:2,device:'admin',lvl:3,coins:500,email:'kid1@x.com',dev:false,sync:{admin:'mgr@gmail.com'},data:'{"v":1,"coins":500}',updated:serverTimestamp(),...over});
+ const m=as('mgr@gmail.com'),a=as('ana2@gmail.com'),kid=env.authenticatedContext('kid1').firestore(),other=env.authenticatedContext('kid9').firestore();
+ // read
+ await assertSucceeds(getDoc(doc(m,'saves/kid1')));await assertSucceeds(getDocs(collection(m,'saves')));await assertSucceeds(getDoc(doc(as('boss@gmail.com'),'saves/kid1')));
+ await assertFails(getDoc(doc(a,'saves/kid1')));await assertFails(getDocs(collection(a,'saves')));await assertFails(getDoc(doc(other,'saves/kid1')));await assertFails(getDocs(collection(kid,'saves')));
+ // write: rev +1 and stamped with the manager's own email
+ await assertFails(setDoc(doc(m,'saves/kid1'),save(4)));await assertFails(setDoc(doc(m,'saves/kid1'),save(5,{sync:{}})));await assertFails(setDoc(doc(m,'saves/kid1'),save(5,{sync:{admin:'boss@gmail.com'}})));
+ await assertFails(setDoc(doc(a,'saves/kid1'),save(5,{sync:{admin:'ana2@gmail.com'}})));
+ await assertSucceeds(setDoc(doc(m,'saves/kid1'),save(5)));
+ await assertFails(setDoc(doc(m,'saves/kid2'),save(2,{dev:false})));await assertSucceeds(setDoc(doc(m,'saves/kid2'),save(2,{dev:true})));
+ await assertFails(deleteDoc(doc(m,'saves/kid1')));
+ // the player keeps writing normally afterwards
+ await assertSucceeds(setDoc(doc(kid,'saves/kid1'),save(6,{sync:{}})));
+ // backups
+ const bk={v:1,at:1,reason:'admin',device:'admin',savedAt:1,lvl:1,coins:1,data:'{}',updated:serverTimestamp()};
+ await assertSucceeds(addDoc(collection(m,'saves/kid1/backups'),bk));await assertSucceeds(getDocs(collection(m,'saves/kid1/backups')));
+ await assertFails(addDoc(collection(a,'saves/kid1/backups'),bk));await assertFails(getDocs(collection(a,'saves/kid1/backups')));
+ // players registry
+ const pl=(by,over={})=>({email:'t01@purrcozy.test',name:'測試01',test:true,group:'claude',note:'',seed:{name:'測試01',coins:100},disabled:false,createdBy:by,createdAt:serverTimestamp(),updatedBy:by,updatedAt:serverTimestamp(),...over});
+ await assertSucceeds(setDoc(doc(m,'players/t01'),pl('mgr@gmail.com')));
+ await assertFails(setDoc(doc(m,'players/t02'),pl('boss@gmail.com')));
+ await assertFails(setDoc(doc(a,'players/t03'),pl('ana2@gmail.com')));
+ await assertFails(setDoc(doc(m,'players/t04'),{...pl('mgr@gmail.com'),password:'x'}));
+ await assertSucceeds(updateDoc(doc(as('boss@gmail.com'),'players/t01'),{note:'ok',updatedBy:'boss@gmail.com',updatedAt:serverTimestamp()}));
+ await assertFails(updateDoc(doc(m,'players/t01'),{createdBy:'x',updatedBy:'mgr@gmail.com',updatedAt:serverTimestamp()}));
+ await assertSucceeds(getDoc(doc(env.authenticatedContext('t01').firestore(),'players/t01')));
+ await assertFails(getDoc(doc(env.authenticatedContext('t05').firestore(),'players/t01')));
+ await assertFails(getDocs(collection(a,'players')));await assertSucceeds(getDocs(collection(m,'players')));
+ await assertSucceeds(deleteDoc(doc(m,'players/t01')));
+});
+test('0.92.48 daily behaviour summaries (bday)',async()=>{
+ const u=env.authenticatedContext('anon7').firestore();
+ const day=(over={})=>({v:1,d:'2026-11-07',lid:'anon7',acct:'',dev:'abc',app:'0.92.48',tester:false,min:12.5,sess:2,h:{'20':10,'21':2.5},win:{learn:2},wt:{learn:6.25},mini:{pinball:1},fp:{},mus:8,songs:3,pet:{ball:2},furn:{sofa:1},edit:0,focus:0,soc:{},first:'20:05',last:'21:10',at:serverTimestamp(),...over});
+ await assertSucceeds(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day()));
+ await assertSucceeds(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({min:20,sess:3})));
+ await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-08'),day()));
+ await assertFails(setDoc(doc(u,'learnlog/anon7/bday/bad'),day({d:'bad'})));
+ await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({extra:1})));
+ await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({min:5000})));
+ await assertFails(setDoc(doc(env.authenticatedContext('anon8').firestore(),'learnlog/anon7/bday/2026-11-07'),day()));
+ const big={};for(let i=0;i<50;i++)big['w'+i]=1;await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({win:big})));
+ const cgq=db=>getDocs(query(collectionGroup(db,'bday'),limit(10)));
+ await assertSucceeds(cgq(as('ana2@gmail.com')));await assertFails(cgq(as('ana@gmail.com')));await assertFails(cgq(as('nobody@gmail.com')));await assertFails(cgq(u));
+ await assertFails(deleteDoc(doc(as('ana2@gmail.com'),'learnlog/anon7/bday/2026-11-07')));await assertSucceeds(deleteDoc(doc(as('mgr@gmail.com'),'learnlog/anon7/bday/2026-11-07')));
+});

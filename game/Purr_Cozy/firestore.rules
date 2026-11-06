@@ -7,22 +7,40 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // 後台（0.5.01）：管理者以上可以查看、列出所有存檔，也可以修改（rev 一樣要 +1，sync.admin 必須是自己的 Email，
+    // 遊戲看到比自己新的管理者修改會直接採用雲端版本）；修改前先寫一份備份。刪除仍然只有本人。
     match /saves/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
+      allow get: if isOwner(userId) || isManager();
+      allow list: if isManager();
       allow create: if isOwner(userId) && validSave(request.resource.data)
         && request.resource.data.rev == 1;
       allow update: if isOwner(userId) && validSave(request.resource.data)
         && request.resource.data.rev == resource.data.get('rev', 0) + 1
         && (resource.data.get('dev', false) == false || request.resource.data.dev == true);
+      allow update: if isManager() && validSave(request.resource.data)
+        && request.resource.data.rev == resource.data.get('rev', 0) + 1
+        && (resource.data.get('dev', false) == false || request.resource.data.dev == true)
+        && request.resource.data.sync.get('admin', '') == myEmail();
       allow delete: if isOwner(userId);
 
       match /backups/{backupId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && validBackup(request.resource.data);
+        allow get, list: if isOwner(userId) || isManager();
+        allow create: if (isOwner(userId) || isManager()) && validBackup(request.resource.data);
         allow update: if false;
         allow delete: if isOwner(userId);
       }
+    }
+
+    // 玩家帳號登記（後台建立的帳號、測試帳號）：管理者以上管理；玩家本人可以讀自己那一份
+    // （第一次登入遊戲時，遊戲用 seed 設定名字、金幣等初始內容）。密碼不會存在這裡。
+    match /players/{userId} {
+      allow get: if isOwner(userId) || isManager();
+      allow list: if isManager();
+      allow create: if isManager() && validPlayer(request.resource.data)
+        && request.resource.data.createdBy == myEmail() && request.resource.data.createdAt == request.time;
+      allow update: if isManager() && validPlayer(request.resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isManager();
     }
 
     // ---------- 名片、好友、拜訪、排行榜 ----------
@@ -150,6 +168,16 @@ service cloud.firestore {
       allow read: if isAnalyst();
     }
 
+    // 0.92.48 使用行為：每人每天一份摘要 learnlog/{logId}/bday/{YYYY-MM-DD}（同一個匿名帳號寫入，一天只有幾次覆寫）
+    match /learnlog/{logId}/bday/{day} {
+      allow create, update: if isOwner(logId) && validDay(request.resource.data, logId, day);
+      allow get, list: if isOwner(logId) || isAnalyst();
+      allow delete: if isOwner(logId) || isManager();
+    }
+    match /{path=**}/bday/{day} {
+      allow read: if isAnalyst();
+    }
+
     // ---------- 後台帳號與權限 ----------
     // admins/{gmail}：最高管理者。只能在 Firebase 主控台新增或刪除（主控台不受規則限制），網頁不能改。
     // staff/{gmail}：在後台新增的帳號，角色 analyst（分析者）或 manager（管理者）。
@@ -227,6 +255,31 @@ service cloud.firestore {
     }
     function staffKeepsOrigin() {
       return request.resource.data.createdBy == resource.data.createdBy && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function validPlayer(d) {
+      return d.keys().hasOnly(['email', 'name', 'test', 'group', 'note', 'seed', 'disabled', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'])
+        && shortText(d.email, 320) && shortText(d.name, 40) && d.test is bool
+        && shortText(d.get('group', ''), 40) && shortText(d.get('note', ''), 200)
+        && (!('seed' in d) || (d.seed is map && d.seed.size() <= 12))
+        && d.get('disabled', false) is bool
+        && shortText(d.createdBy, 320) && d.updatedBy == myEmail() && d.updatedAt == request.time;
+    }
+
+    function smallMap(m, n) {
+      return m is map && m.size() <= n;
+    }
+    function validDay(d, logId, day) {
+      return d.keys().hasOnly(['v', 'd', 'lid', 'acct', 'dev', 'app', 'tester', 'min', 'sess', 'h', 'win', 'wt', 'mini', 'fp', 'mus', 'songs',
+                               'pet', 'furn', 'edit', 'focus', 'soc', 'first', 'last', 'at'])
+        && d.v == 1 && d.lid == logId && d.d == day && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && shortText(d.acct, 128) && shortText(d.dev, 40) && shortText(d.app, 16) && d.tester is bool
+        && d.min is number && d.min <= 1440 && d.sess is int && d.sess <= 500
+        && smallMap(d.h, 24) && smallMap(d.win, 41) && smallMap(d.wt, 41) && smallMap(d.mini, 41) && smallMap(d.fp, 41)
+        && smallMap(d.pet, 41) && smallMap(d.furn, 41) && smallMap(d.soc, 41)
+        && d.mus is number && d.songs is int && d.edit is number && d.focus is number
+        && shortText(d.first, 5) && shortText(d.last, 5)
+        && d.at == request.time;
     }
 
     function validLearnLog(d, logId, sessionId) {

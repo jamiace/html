@@ -259,6 +259,8 @@ function progressKey(S) {
     (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, [(S.homeCare?.messes||[]).map(m=>[m.id,m.x,m.y,m.pet,m.at]),S.homeCare?.cleanedMesses||{}], S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
     (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => [m.text,m.w,m.h,m.pin]), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
 }
+// 0.92.48: { at, by, note } written into the save by the back office (tools/admin.html)
+function adminNewer(rs, L) { const a = rs && rs.admin && rs.admin.at || 0, b = L && L.admin && L.admin.at || 0; return a > b; }
 function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
 // real progress made on this device since its stamp (no stamp: an older version's save, treated as unknown)
 function workSince(S) { return !S.pv || S.pv.fp !== progressKey(S); }
@@ -421,6 +423,7 @@ const Cloud = {
   },
   // which copy holds the newer progress: decided by the progress stamp, never by the clock
   lineage(L, rs) {
+    if (adminNewer(rs, L)) return 'cloud';   // 0.92.48: changed in the back office since this device last saw it
     const remoteRev = this.rev || 0, meta = syncMeta(this.uid());
     const lr = L.pv ? L.pv.rev : meta ? meta.rev : -1;
     const worked = L.pv ? workSince(L) : meta ? saveSignature(L) !== meta.sig : true;
@@ -455,7 +458,7 @@ const Cloud = {
     // 2. nothing worth keeping on this device: take the cloud save, or start a new cloud save if there is none
     if (isFreshSave(L)) {
       if (rs) return this.apply(rs, I18n.s("u_47b967cba2df"));
-      try { await this.commit(Game.newState(), { mode: 'new', from: 'none' }); UI.toast(I18n.s("u_df41bc198524"), 'i_cloud'); } catch (e) { this.set('error', cloudErr(e)); }
+      try { await this.commit(await this.seeded(Game.newState()), { mode: 'new', from: 'none' }); UI.toast(I18n.s("u_df41bc198524"), 'i_cloud'); } catch (e) { this.set('error', cloudErr(e)); }
       return;
     }
     // 3. this device holds another account's progress (session ended without signing out): keep it as a backup, never mix accounts
@@ -475,6 +478,20 @@ const Cloud = {
     this.set('choose'); UI.openWin('cloudpick');
   },
   devBlocked() { return false; },   // developer-mode saves are never blocked
+  // 0.92.48: an account created in the back office (players/{uid}) can carry a starting name, coins, level and grade
+  async seeded(S) {
+    let p = null; try { if (this.fb && this.fb.store && this.user) p = await this.fb.store.get('players/' + this.user.uid); } catch (e) { }
+    if (!p) return S;
+    const seed = p.seed || {}, num = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(+v) || 0));
+    if (p.test) S.flags = Object.assign({}, S.flags, { tester: true, testGroup: p.group || '' });
+    if (seed.name && S.avatar) S.avatar.name = String(seed.name).slice(0, 20);
+    if (seed.coins != null) S.coins = num(seed.coins, 0, 1e7);
+    if (seed.lvl != null) { S.lvl = num(seed.lvl, 1, 99); S.xp = 0; }
+    if (seed.declared != null) S.grade = Object.assign({ v: 1, theta: null, se: null, n: 0, declared: 0, first: '', last: '', hist: [], recent: [], anchor: null, asked: 0, cert: false }, S.grade, { declared: num(seed.declared, 0, 12) });
+    if (Array.isArray(seed.levels) && S.learn) S.learn.levels = seed.levels.filter(x => x >= 1 && x <= 6);
+    S.seeded = { at: Date.now(), from: 'players' };
+    return S;
+  },
   async writeRemote(S) {
     const rev = (this.rev || 0) + 1, pv = makeStamp(S, rev), data = JSON.stringify(Object.assign({}, S, { pv }));
     if (data.length > 880000) throw { code: 'too-big' };
@@ -523,6 +540,8 @@ const Cloud = {
     this.rev = e.rev;
     if (!e.remote) return this.set('error', I18n.s("u_84016a252383"));
     if ((e.remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
+    // 0.92.48: the back office changed this save while the game was open: keep this device's copy as a backup and take the cloud version
+    if (adminNewer(e.remote, Game.S)) { try { await Backups.put(JSON.parse(JSON.stringify(Game.S)), I18n.t('adm.backupLocal'), 'device'); } catch (err) { } this.apply(e.remote, I18n.t('adm.applied')); return; }
     const L = JSON.parse(JSON.stringify(Game.S));
     // what both copies grew from: the stamp in this device's save (same cloud version as the base the cloud copy came from)
     const common = L.pv && L.pv.base && L.pv.rev <= e.rev ? L.pv.base : this.common;
@@ -537,6 +556,7 @@ const Cloud = {
     }
   },
   apply(rs, msg) {
+    if (!msg && adminNewer(rs, Game.S)) msg = I18n.t('adm.applied');
     rs = JSON.parse(JSON.stringify(rs)); rs.owner = this.uid(); this.status = 'synced'; if (Game.S && Game.S.seenIntro) rs.seenIntro = true;
     rs.pv = makeStamp(rs, this.rev || 0);   // this progress is exactly the cloud version just read
     Game.replaceState(rs); this.lastSync = Date.now(); this.set('synced');
@@ -747,8 +767,11 @@ Cloud.selfTest = async function () {
     try { const d = await this.fb.get(uid); add(I18n.s("u_b8eb8eb708d3", [uid.slice(0, 6)]), true, d ? I18n.s("u_be92ab3fa1e1", [d.schema || 1, d.rev || 0, Math.round((d.data || '').length / 1024)]) : I18n.s("u_b4f74d8df740")); }
     catch (e) { add(I18n.s("u_5190fa6625b0"), false, cloudErr(e)); }
     if (this.fb.probe) {
-      await expectDenied(I18n.s("u_8e5af561bbfc"), () => this.fb.probe.getOther());
-      await expectDenied(I18n.s("u_c5a46ba66c29"), () => this.fb.probe.listAll());
+      // back-office managers may read every save (0.5.01): for them those two reads are expected to work
+      let staff = false; try { const em = (this.user.email || '').toLowerCase(); if (em && this.user.emailVerified) { const a = await this.fb.store.get('admins/' + em).catch(() => null), s = a ? null : await this.fb.store.get('staff/' + em).catch(() => null); staff = !!a || !!(s && s.active && s.role === 'manager'); } } catch (e) { }
+      if (staff) add(I18n.s("u_8e5af561bbfc"), true, I18n.t('adm.staffRead'), true);
+      else { await expectDenied(I18n.s("u_8e5af561bbfc"), () => this.fb.probe.getOther());
+      await expectDenied(I18n.s("u_c5a46ba66c29"), () => this.fb.probe.listAll()); }
       const okBad = await expectDenied(I18n.s("u_b54327f92aa3"), async () => { const id = await this.fb.probe.badWrite(uid); try { await this.fb.probe.delBackup(uid, id); } catch (e) { } });
       try { await this.fb.backups(uid); add(I18n.s("u_2b44ed37b8c0"), true, ''); } catch (e) { add(I18n.s("u_2b44ed37b8c0"), false, cloudErr(e)); }
     }

@@ -83,6 +83,11 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .card{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card);cursor:pointer}.card:hover{border-color:var(--acc)}.card b{display:block}
 @media (max-width:860px){.layout{grid-template-columns:1fr}aside{position:fixed;z-index:20;left:0;top:0;width:240px;transform:translateX(-100%);transition:transform .2s}body.navopen aside{transform:none;box-shadow:0 0 40px #0004}#btn-menu{display:inline-block}main{padding:12px}.topbar{padding:10px 12px}#subtabs{padding:8px 12px 0;overflow-x:auto;flex-wrap:nowrap}}
+
+.heat td,.heat th{padding:3px 4px;min-width:22px}.heat th{font-weight:400;color:var(--ink2);font-size:11px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}.grid2 h3{font-size:14px;margin:0 0 6px}
+#pl-detail .kpis{margin-top:6px}#pl-detail textarea{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+.form input[type=text],.form input[type=number],.form select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -113,6 +118,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
    <label>程度 <select id="f-level"><option value="">全部</option></select></label>
    <label>年級帶 <select id="f-grade"><option value="">全部</option><option value="e">國小</option><option value="j">國中</option><option value="s1">高一</option><option value="s2">高二</option><option value="s3">高三</option></select></label>
    <label>版本 <select id="f-app"><option value="">全部</option></select></label>
+   <label>帳號 <select id="f-acct"><option value="">全部帳號</option></select></label>
    <label>玩家 <select id="f-who"><option value="">全部（不含測試）</option><option value="real">只看真實玩家</option><option value="sim">只看模擬學生</option><option value="test">只看測試資料</option></select></label>
    <label>單字最少作答數 <input type="number" id="f-min" value="20" min="1" style="width:70px"></label>
    <button id="btn-apply" class="primary">套用</button>
@@ -178,6 +184,23 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 <div class="sub" data-sub="s-retain"><section id="s-retain"><h2>留存與習慣</h2><p class="why">第一次學習後，隔天、第 2 週（第 7–13 天）、第 5 週（第 28–34 天）還回來學習的比例（依第一次學習的週分組），以及一週中什麼時段最多人學。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section></div>
 <div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><p class="why" id="typo-note" style="margin-top:8px"></p><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
 <div class="sub" data-sub="s-help"><section id="s-help"><h2>提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section></div></div>
+   <div class="page hidden" data-page="behavior">
+    <section><h2>使用行為</h2><p class="why">每位玩家每天一份摘要（遊戲在背景累計，一天只上傳幾次）：什麼時段上線、時間花在哪裡、玩了哪些小遊戲、怎麼照顧寵物、聽多久音樂、佈置多久。可以看全體，也可以單獨看一位玩家（會同時顯示全體做比較）。</p>
+     <div class="row" style="margin-bottom:8px"><label>從 <input type="date" id="bh-from"></label><label>到 <input type="date" id="bh-to"></label>
+      <label>對象 <select id="bh-who"><option value="">全部（不含測試）</option><option value="test">只看測試帳號</option><option value="sim">只看模擬學生</option><option value="all">全部（含測試）</option></select></label>
+      <label>玩家 <select id="bh-user"><option value="">全部玩家（綜合）</option></select></label>
+      <button id="bh-reload" class="primary">從 Firestore 讀取</button><button id="bh-demo">示範資料</button><button id="bh-csv">下載玩家表（CSV）</button></div>
+     <p class="muted" id="bh-note">尚未載入</p><p class="note" id="bh-sel-note"></p><div class="kpis" id="bh-kpis"></div></section>
+    <section><h2>每天</h2><div class="chart" style="height:260px"><canvas id="c-bh-daily"></canvas></div></section>
+    <section><h2>時間花在哪裡</h2><p class="why">以「視窗開著的時間」計算；佈置包含在房間裡拖曳家具的時間。選了單一玩家時，灰色是全體。</p><div class="chart" style="height:280px"><canvas id="c-bh-share"></canvas></div></section>
+    <section><h2>上線時段（分鐘，星期 × 小時）</h2><div class="tbl" style="max-height:none"><table id="bh-heat" class="heat"></table></div></section>
+    <section><h2>玩法細節</h2><div class="grid2">
+     <div><h3>小遊戲（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-mini"></canvas></div></div>
+     <div><h3>寵物互動（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-pet"></canvas></div></div>
+     <div><h3>點家具（類別與活動）</h3><div class="chart" style="height:240px"><canvas id="c-bh-furn"></canvas></div></div>
+     <div><h3>打開的視窗（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-win"></canvas></div></div></div></section>
+    <section><h2>每位玩家</h2><p class="why">「風格」依時間分配自動判斷。按「單獨看」切換到那位玩家，再按一次回到全體。</p><div class="tbl" style="max-height:640px"><table id="t-bh-users"></table></div></section>
+   </div>
    <div class="page hidden" data-page="ai"><section id="s-ai"><h2>AI 分析報告</h2>
   <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
   <div class="row">
@@ -198,6 +221,30 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
     <section><h2>資料來源</h2><p class="why" id="data-status">尚未載入資料</p>
      <div class="row"><button id="btn-fs" class="primary">從 Firestore 重新讀取</button><input id="file" type="file" accept=".json" hidden><button id="btn-file">開啟 JSON 檔</button><button id="btn-demo">用示範資料看看</button><button id="btn-save" disabled>下載目前資料（JSON）</button></div>
      <p class="why" style="margin-top:12px">下載的 JSON 含所有匿名學習紀錄，可以用「開啟 JSON 檔」離線分析。下載與讀取都會記在「操作紀錄」。</p></section>
+   </div>
+   <div class="page hidden" data-page="players">
+    <section><h2>玩家列表</h2><p class="why">列出所有有雲端存檔的帳號，以及在後台建立、還沒登入過的帳號。每位玩家算 1 次讀取（300 位玩家約 300 次），不會自動重複讀。</p>
+     <div class="row" style="margin-bottom:8px"><button id="pl-reload" class="primary">讀取玩家</button><input type="text" id="pl-q" placeholder="搜尋名稱、Email、UID、群組">
+      <select id="pl-kind"><option value="">全部</option><option value="real">只看真實玩家</option><option value="test">只看測試帳號</option><option value="none">尚未登入遊戲</option><option value="admin">後台改過的</option><option value="dev">用過開發者模式</option></select>
+      <span class="muted" id="pl-count"></span><span class="muted" id="pl-note"></span></div>
+     <div class="tbl" style="max-height:520px"><table id="t-players"></table></div></section>
+    <section id="pl-detail" class="hidden"></section>
+    <section><h2>建立玩家帳號</h2><p class="why">建立 Email／密碼登入的遊戲帳號（Firebase 要先開啟「電子郵件/密碼」登入）。可以先設定第一次登入時的名稱、金幣、等級、自填年級與出題程度。密碼不會存到資料庫，只會在這裡顯示一次。</p>
+     <div class="form"><label>Email<input type="email" id="pc-email" autocomplete="off" placeholder="student01@example.com"></label><label>密碼<input type="text" id="pc-pw" autocomplete="off" placeholder="留空自動產生"></label><div class="row"><button id="pc-gen">產生密碼</button></div>
+      <label>名稱<input type="text" id="pc-name" maxlength="20"></label><label>群組<input type="text" id="pc-group" maxlength="40" placeholder="例如：三年二班"></label><label>備註<input type="text" id="pc-note" maxlength="200"></label>
+      <label>初始金幣<input type="number" id="pc-coins" min="0" placeholder="不設定"></label><label>初始等級<input type="number" id="pc-lvl" min="1" max="99" placeholder="不設定"></label>
+      <label>自填年級<select id="pc-declared"><option value="0">不設定</option><option value="1">小一</option><option value="2">小二</option><option value="3">小三</option><option value="4">小四</option><option value="5">小五</option><option value="6">小六</option><option value="7">國一</option><option value="8">國二</option><option value="9">國三</option><option value="10">高一</option><option value="11">高二</option><option value="12">高三</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pc-test"> 測試帳號</label></div>
+     <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="6"> L6</label></div>
+     <div class="row" style="margin-top:10px"><button id="pc-go" class="primary">建立帳號</button></div><p id="pc-msg" class="muted"></p></section>
+    <section><h2>批次建立測試帳號</h2><p class="why">一次建立多個測試帳號（預設 30 個，對應 <code>tools/sim/testers.json</code> 的 sim01～sim30）。建立完會自動下載 <code>accounts.json</code>：放到專案的 <code>.sim/accounts.json</code>（不要 commit），模擬程式用 <code>--testers --login</code> 就會登入這些帳號。測試帳號的學習紀錄與行為紀錄，分析頁預設排除。</p>
+     <div class="form"><label>數量<input type="number" id="pt-n" min="1" max="50" value="30"></label><label>起始編號<input type="number" id="pt-start" min="1" value="1"></label>
+      <label>Email 前綴<input type="text" id="pt-prefix" value="claude-test"></label><label>Email 網域<input type="text" id="pt-domain" value="purrcozy.test"></label>
+      <label>群組<input type="text" id="pt-group" value="claude"></label><label>名稱前綴<input type="text" id="pt-name" value="測試"></label>
+      <label>初始金幣<input type="number" id="pt-coins" min="0" placeholder="不設定"></label><label>初始等級<input type="number" id="pt-lvl" min="1" max="99" placeholder="不設定"></label>
+      <label>自填年級<select id="pt-declared"><option value="0">不設定</option></select></label></div>
+     <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="6"> L6</label></div>
+     <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
    </div>
    <div class="page hidden" data-page="accounts">
     <section><h2>帳號列表</h2><p class="why" id="acct-count"></p><div class="row" style="margin-bottom:8px"><button id="btn-acct-reload">重新整理</button><span class="muted" id="acct-note"></span></div><div class="tbl" style="max-height:none"><table id="t-staff"></table></div></section>
@@ -271,7 +318,7 @@ let fb=null;
 async function firebase(){
  if(fb)return fb;const cfg=window.NOOK_FIREBASE;if(!cfg||!cfg.apiKey)throw Error('讀不到 ../js/firebase-config.js：請把這個檔案放在遊戲的 tools 資料夾，從網站上開啟。');
  const base='https://www.gstatic.com/firebasejs/10.12.2/';const [A,U,F]=await Promise.all(['firebase-app.js','firebase-auth.js','firebase-firestore.js'].map(f=>import(base+f)));
- const app=A.initializeApp(cfg,'admin'),auth=U.getAuth(app);fb={A,U,F,app,auth,db:F.getFirestore(app)};return fb}
+ const app=A.initializeApp(cfg,'admin'),auth=U.getAuth(app);fb={A,U,F,app,auth,db:F.getFirestore(app)};if(window.ADMIN_EMU){U.connectAuthEmulator(auth,ADMIN_EMU.auth,{disableWarnings:true});F.connectFirestoreEmulator(fb.db,ADMIN_EMU.host,ADMIN_EMU.port)}return fb}
 $('btn-file').onclick=()=>$('file').click();
 $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());load(Array.isArray(j)?j:j.sessions||[],f.name)}catch(err){status('JSON 讀取失敗：'+err.message)}};
 $('btn-save').onclick=()=>{Admin.log('export','',S.raw.length+' 個回合');const b=new Blob([JSON.stringify({exported:new Date().toISOString(),sessions:S.raw})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='purr-learnlog-'+dayKey(Date.now())+'.json';a.click()};
@@ -313,11 +360,11 @@ function demo(){
 
 /* ---------- analysis ---------- */
 // simulated students have a device id starting with sim (tools/sim), test runs with test-
-const whoOf=r=>/^test-/.test(r.dev||'')?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
+const whoOf=r=>/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct))?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
 function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
 function filtered(){
  const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
- const sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&who(r));
+ const acct=$('f-acct')?$('f-acct').value:'',sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&(acct?r.acct===acct:who(r)));
  const ans=[],rev=[],typo=[];
  for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
  return {sess,ans,rev,typo}}
@@ -646,14 +693,16 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.0';
-const CHANGELOG=[['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.01';
+const CHANGELOG=[['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
  {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-grade', '程度測驗'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
+ {id:'behavior',n:'使用行為',i:'☷',lv:0},
  {id:'ai',n:'AI 報告',i:'✦',lv:0},
  {id:'data',n:'資料與匯出',i:'⇅',lv:0},
+ {id:'players',n:'玩家帳號',i:'♟',lv:2,group:'管理'},
  {id:'accounts',n:'帳號與權限',i:'☺',lv:2,group:'管理'},
  {id:'audit',n:'操作紀錄',i:'≡',lv:2,group:'管理'},
  {id:'me',n:'我的帳號',i:'⚙',lv:0,group:'管理'}];
@@ -674,6 +723,7 @@ const Admin={
   $('filterbar').classList.toggle('hidden',!(id==='dashboard'||id==='analysis'||id==='ai')||!S.raw.length);
   document.body.classList.remove('navopen');this.renderNav();
   requestAnimationFrame(()=>Object.values(S.charts).forEach(c=>{try{c.resize()}catch(e){}}));
+  if(id==='players'&&!this.players.length)this.loadPlayers();if(id==='behavior'){if(!B.loaded&&!this.me.offline)this.loadBehavior();else this.renderBehavior()}
   if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
  // ---------- auth ----------
  // In-app browsers (LINE, Facebook, Instagram ...) cannot open the Google sign-in window, and on iPhone the Google
@@ -720,7 +770,7 @@ const Admin={
   let role=null;if(u.emailVerified&&mail){try{if((await F.getDoc(F.doc(db,'admins',mail))).exists())role='super'}catch(e){}
    if(!role)try{const d=await F.getDoc(F.doc(db,'staff',mail));if(d.exists()&&d.data().active===true&&ROLES[d.data().role])role=d.data().role;else if(d.exists())this.disabled=true}catch(e){}}
   if(!role){$('login-msg').innerHTML=`<b>${esc(mail)}</b> 沒有後台權限${this.disabled?'（帳號已停用）':''}。請最高管理者或管理者在「帳號與權限」幫你新增。`;await U.signOut(auth);return}
-  this.me={email:mail,role,lv:ROLES[role].lv,offline:false};this.enter();this.log('login','',((u.providerData[0]||{}).providerId||'')+(this.inApp()?' '+this.inApp():''));this.loadFirestore()},
+  this.me={email:mail,role,lv:ROLES[role].lv,offline:false};this.enter();if(ROLES[role].lv>=2)setTimeout(()=>this.loadPlayers(),1500);this.log('login','',((u.providerData[0]||{}).providerId||'')+(this.inApp()?' '+this.inApp():''));this.loadFirestore()},
  offline(){this.me={email:'',role:null,lv:0,offline:true};this.enter();status('離線模式：可以開啟 JSON 檔或用示範資料。帳號管理需要登入。')},
  enter(){$('login').classList.add('hidden');$('app').classList.remove('hidden');
   $('me-badge').innerHTML=this.me.offline?'<span class="role r0">離線模式</span>':`<span class="mono">${esc(this.me.email)}</span> <span class="role r${this.me.lv}">${ROLES[this.me.role].n}</span>`;
@@ -730,7 +780,8 @@ const Admin={
  async loadFirestore(){if(this.me.offline)return;const {F,db}=await firebase();try{status('讀取紀錄中…');const out=[];let last=null;
   for(;;){const q=last?F.query(F.collectionGroup(db,'lsess'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'lsess'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();if(x.at&&x.at.toMillis)x.at=x.at.toMillis();out.push(x)});status(`讀取紀錄中… ${out.length}`);if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
   await load(out,'Firestore');this.log('load','learnlog',out.length+' 個回合')}catch(e){console.error(e);status(e.code==='permission-denied'?'讀取被拒：你的帳號沒有讀取學習紀錄的權限，或 firestore.rules 尚未發布最新版。':'讀取失敗：'+(e.message||e))}},
- dataLoaded(label){$('empty-dash').classList.add('hidden');if(this.page==='data'&&S.raw.length)setTimeout(()=>this.go('dashboard'),0);$('filterbar').classList.toggle('hidden',!(this.page==='dashboard'||this.page==='analysis'||this.page==='ai'));$('data-status').textContent=`${label}：${fmt(S.raw.length)} 個回合，${fmt(S.raw.reduce((n,r)=>n+(r.ans||[]).length,0))} 題作答`;},
+ fillAcct(){const sel=$('f-acct');if(!sel)return;const cur=sel.value,acc=[...new Set(S.raw.map(r=>r.acct).filter(Boolean))];sel.replaceChildren(new Option(`全部帳號（${acc.length} 個登入過的帳號）`,''),...acc.map(a=>new Option(this.nameOf(a)+(window.TEST_UIDS&&TEST_UIDS.has(a)?'（測試）':''),a)));sel.value=acc.includes(cur)?cur:''},
+ dataLoaded(label){this.fillAcct();$('empty-dash').classList.add('hidden');if(this.page==='data'&&S.raw.length)setTimeout(()=>this.go('dashboard'),0);$('filterbar').classList.toggle('hidden',!(this.page==='dashboard'||this.page==='analysis'||this.page==='ai'));$('data-status').textContent=`${label}：${fmt(S.raw.length)} 個回合，${fmt(S.raw.reduce((n,r)=>n+(r.ans||[]).length,0))} 題作答`;},
  // ---------- audit log ----------
  async log(act,target,detail){if(this.me.offline)return;try{const {F,db}=await firebase();await F.addDoc(F.collection(db,'adminlog'),{by:this.me.email,role:this.me.role,act:String(act).slice(0,40),target:String(target||'').slice(0,120),detail:String(detail||'').slice(0,400),at:F.serverTimestamp()})}catch(e){console.warn('[adminlog]',e.code||e)}},
  ACT:{login:'登入',load:'讀取學習紀錄',export:'下載資料',ai:'產生 AI 報告','staff.add':'新增帳號','staff.role':'變更角色','staff.on':'啟用帳號','staff.off':'停用帳號','staff.edit':'修改資料','staff.del':'刪除帳號'},
@@ -786,6 +837,238 @@ window.addEventListener('hashchange',()=>{if($('app').classList.contains('hidden
 // stay signed in across reloads
 (async()=>{try{if(!window.NOOK_FIREBASE||!window.NOOK_FIREBASE.apiKey){$('btn-g').disabled=true;$('login-msg').textContent='讀不到 ../js/firebase-config.js：請從網站開啟此頁。目前只能用離線模式。';return}
  const {U,auth}=await firebase();try{await U.getRedirectResult(auth)}catch(e){$('login-msg').textContent='轉址登入失敗：'+(e.code||e.message)}U.onAuthStateChanged(auth,u=>{if(u&&Admin.me.offline&&$('app').classList.contains('hidden'))Admin.afterLogin()})}catch(e){}})();
+
+
+/* ================= 0.5.01 玩家帳號：列表、查看、修改、備份還原、建立帳號、批次建立測試帳號 ================= */
+const ANALYTICS=()=>S;   // the learning-log store of the analysis pages (the save being edited is also called S below)
+const GRADE_LABEL=['小一','小二','小三','小四','小五','小六','國一','國二','國三','高一','高二','高三'];
+const gradeName=t=>t==null?'–':GRADE_LABEL[Math.max(1,Math.min(12,Math.round(t)))-1];
+Object.assign(Admin,{
+ players:[],reg:{},cur:null,
+ // what a save looks like at a glance
+ sumOf(S,doc){S=S||{};const V=S.vocab||{},keys=Object.keys(V),G=S.grade||{},L=S.learn||{},Z=S.zoo||{},f=S.flags||{};
+  return {name:(S.avatar&&S.avatar.name)||'',lvl:S.lvl||doc&&doc.lvl||1,xp:Math.round(S.xp||0),coins:S.coins!=null?S.coins:(doc&&doc.coins)||0,grade:G.theta!=null?G.theta:null,se:G.se,tests:(G.hist||[]).length,declared:G.declared||0,
+   seen:keys.length,mastered:keys.filter(k=>Array.isArray(V[k])&&V[k][0]>=5).length,streak:L.streak||0,best:L.best||0,levels:(L.levels&&L.levels.length?L.levels:[1,2,3,4,5,6]),
+   pets:(Z.pets||[]).length,items:(S.items||[]).length,tester:!!f.tester,dev:!!f.dev,admin:S.admin||null,showGrade:!(S.settings&&S.settings.showGrade===false)}},
+ async loadPlayers(){if(!this.can(2))return;const {F,db}=await firebase(),note=$('pl-note');note.textContent='讀取中…（每位玩家算 1 次讀取）';
+  try{const reg={};(await F.getDocs(F.collection(db,'players'))).forEach(d=>reg[d.id]=d.data());this.reg=reg;
+   const out=[];let last=null;
+   for(;;){const q=last?F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.startAfter(last),F.limit(100)):F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.limit(100));
+    const snap=await F.getDocs(q);snap.forEach(d=>{const x=d.data();let S=null;try{S=JSON.parse(x.data)}catch(e){}out.push({uid:d.id,doc:x,sum:this.sumOf(S,x),reg:reg[d.id]||null})});
+    note.textContent=`讀取中… ${out.length}`;if(snap.size<100)break;last=snap.docs[snap.docs.length-1]}
+   for(const uid in reg)if(!out.some(p=>p.uid===uid))out.push({uid,doc:null,sum:null,reg:reg[uid]});
+   this.players=out;window.TEST_UIDS=new Set(out.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).map(p=>p.uid));
+   note.textContent='';this.renderPlayers()}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請確認 firestore.rules 已發布 0.5.01 版，而且你是管理者以上。':'讀取失敗：'+(e.code||e.message)}},
+ renderPlayers(){const q=$('pl-q').value.trim().toLowerCase(),kind=$('pl-kind').value,ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
+  const list=this.players.filter(p=>{const s=p.sum,test=(p.reg&&p.reg.test)||(s&&s.tester);
+   if(kind==='real'&&test)return false;if(kind==='test'&&!test)return false;if(kind==='none'&&p.doc)return false;if(kind==='admin'&&!(s&&s.admin))return false;if(kind==='dev'&&!(s&&s.dev))return false;
+   return !q||[p.uid,p.doc&&p.doc.email,p.reg&&p.reg.email,s&&s.name,p.reg&&p.reg.name,p.reg&&p.reg.group].join(' ').toLowerCase().includes(q)});
+  const tag=(t,c='')=>`<span class="tag ${c}">${t}</span>`;
+  table('t-players',['名稱','Email','等級','金幣','英文程度','單字（看過／精熟）','連續','最後存檔','標記',''],list.map(p=>{const s=p.sum,r=p.reg,test=(r&&r.test)||(s&&s.tester);
+   return [{v:(s&&s.name)||(r&&r.name)||'',h:esc((s&&s.name)||(r&&r.name)||'（未命名）')+`<br><span class="muted mono" style="font-size:11px">${esc(p.uid.slice(0,10))}…</span>`,n:false},
+    {v:(p.doc&&p.doc.email)||(r&&r.email)||'',h:`<span class="mono">${esc((p.doc&&p.doc.email)||(r&&r.email)||'–')}</span>`,n:false},
+    s?s.lvl:{v:-1,h:'–'},s?s.coins:{v:-1,h:'–'},{v:s&&s.grade!=null?s.grade:-1,h:s&&s.grade!=null?gradeName(s.grade):'–'},
+    {v:s?s.seen:-1,h:s?`${fmt(s.seen)}／${fmt(s.mastered)}`:'–'},s?s.streak:{v:-1,h:'–'},
+    {v:p.doc?p.doc.savedAt||0:0,h:p.doc?ts(p.doc.savedAt):'<span class="muted">尚未登入遊戲</span>',n:false},
+    {v:0,h:[test?tag('測試','easy'):'',s&&s.dev?tag('開發者'):'',s&&s.admin?tag('後台改過'):'',r&&r.group?tag(esc(r.group)):''].join(' '),n:false},
+    {v:0,h:`<button data-open="${esc(p.uid)}">查看</button>`,n:false}]}));
+  const n=this.players.length,tn=this.players.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).length;
+  $('pl-count').textContent=`共 ${n} 個帳號（測試 ${tn}、尚未登入 ${this.players.filter(p=>!p.doc).length}），目前顯示 ${list.length} 個`},
+ async openPlayer(uid){const {F,db}=await firebase(),box=$('pl-detail');box.classList.remove('hidden');box.innerHTML='<p class="muted">讀取中…</p>';
+  try{const d=await F.getDoc(F.doc(db,'saves',uid));const doc=d.exists()?d.data():null;let S=null;if(doc)try{S=JSON.parse(doc.data)}catch(e){}
+   this.cur={uid,doc,S,reg:this.reg[uid]||null};this.renderPlayer();this.log('player.view',uid,(doc&&doc.email)||'');box.scrollIntoView({block:'start',behavior:'smooth'})}
+  catch(e){box.innerHTML=`<p class="muted">讀取失敗：${esc(e.code||e.message)}</p>`}},
+ renderPlayer(tab){const c=this.cur;if(!c)return;tab=tab||this.ptab||'sum';this.ptab=tab;const box=$('pl-detail'),S=c.S,doc=c.doc,r=c.reg,s=S?this.sumOf(S,doc):null,ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
+  const tabs=[['sum','概覽'],['edit','修改'],['backups','備份與還原'],['json','原始資料']].map(([k,n])=>`<button class="subtab${tab===k?' on':''}" data-ptab="${k}">${n}</button>`).join('');
+  let html=`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc((s&&s.name)||(r&&r.name)||'（未命名）')} <span class="muted mono" style="font-size:13px">${esc((doc&&doc.email)||(r&&r.email)||'')}</span></h2><button data-close>關閉</button></div>
+   <p class="muted mono" style="font-size:12px">UID ${esc(c.uid)}${doc?`　rev ${doc.rev}　最後存檔 ${ts(doc.savedAt)}　裝置 ${esc(doc.device||'')}`:''}</p><div style="display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 12px">${tabs}</div>`;
+  if(!S){html+=`<p class="note">這個帳號還沒有進過遊戲（沒有雲端存檔）。${r&&r.seed?'第一次登入時會套用初始設定：'+esc(JSON.stringify(r.seed)):''}</p>`;box.innerHTML=html;return this.bindPlayer()}
+  if(tab==='sum'){const lg=(S.learn&&S.learn.levels&&S.learn.levels.length?S.learn.levels:[1,2,3,4,5,6]).map(x=>'L'+x).join(' ');
+   const k=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+   html+=`<div class="kpis">${k('Lv '+s.lvl,'等級（XP '+fmt(s.xp)+'）')}${k(fmt(s.coins),'金幣')}${k(s.grade!=null?gradeName(s.grade):'–','英文程度'+(s.grade!=null?`（θ ${s.grade.toFixed(2)}，測 ${s.tests} 次）`:''))}${k(fmt(s.seen),'看過的單字')}${k(fmt(s.mastered),'精熟的單字')}${k(s.streak,'連續天數（最佳 '+s.best+'）')}${k(s.pets,'寵物')}${k(s.items,'房間家具')}</div>
+    <p class="why" style="margin-top:10px">出題程度：${lg}　名片顯示程度：${s.showGrade?'開':'關'}　自填年級：${s.declared?GRADE_LABEL[s.declared-1]:'未填'}　${s.tester?'<span class="tag easy">測試帳號</span>':''} ${s.dev?'<span class="tag">用過開發者模式</span>':''}</p>
+    ${s.admin?`<p class="note">後台最後修改：${ts(s.admin.at)}，${esc(s.admin.by||'')}${s.admin.note?'：'+esc(s.admin.note):''}</p>`:''}
+`;
+   const raw=ANALYTICS().raw||[];const mine=raw.filter(x=>x.acct===c.uid);
+   if(mine.length){const ans=mine.flatMap(x=>x.ans||[]),ok=ans.filter(a=>a.ok).length;html+=`<p class="why">已載入的學習紀錄中：${mine.length} 個回合、${fmt(ans.length)} 題、答對率 ${ans.length?Math.round(ok/ans.length*100)+'%':'–'}、最後一次 ${ts(Math.max(...mine.map(x=>x.t0||0)))}</p>`}
+   else html+=`<p class="why">${raw.length?'已載入的學習紀錄裡沒有這位玩家（玩家沒登入時的紀錄不會連到帳號）。':'先到「資料與匯出」讀取學習紀錄，這裡會顯示這位玩家的回合數與答對率。'}</p>`}
+  if(tab==='edit'){const opt=(v,l,sel)=>`<option value="${v}"${sel?' selected':''}>${l}</option>`;
+   html+=`<p class="why">修改會先把目前的雲端存檔備份一份，再寫入新版本。玩家下次開遊戲（或正在玩、下一次自動存檔時）會直接採用後台的版本，並看到「管理者更新了你的存檔」。</p>
+    <div class="form">
+     <label>名稱<input type="text" id="pe-name" maxlength="20" value="${esc(s.name)}"></label>
+     <label>等級<input type="number" id="pe-lvl" min="1" max="99" value="${s.lvl}"></label>
+     <label>經驗值（目前等級內）<input type="number" id="pe-xp" min="0" value="${s.xp}"></label>
+     <label>金幣<input type="number" id="pe-coins" min="0" value="${s.coins}"></label>
+     <label>連續天數<input type="number" id="pe-streak" min="0" value="${s.streak}"></label>
+     <label>英文程度<select id="pe-grade">${opt('','不變',true)}${opt('reset','重設（下次會再做搬家日）')}${GRADE_LABEL.map((g,i)=>opt(i+1,'設為 '+g)).join('')}</select></label>
+     <label>自填年級<select id="pe-declared">${opt(0,'未填',!s.declared)}${GRADE_LABEL.map((g,i)=>opt(i+1,g,s.declared===i+1)).join('')}</select></label>
+     <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pe-show"${s.showGrade?' checked':''}> 名片顯示英文程度</label>
+     <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pe-test"${s.tester?' checked':''}> 測試帳號（學習紀錄不列入分析）</label>
+    </div>
+    <p style="margin:12px 0 4px">出題程度</p><div class="row">${[1,2,3,4,5,6].map(x=>`<label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="pe-lv" value="${x}"${s.levels.includes(x)?' checked':''}> L${x}</label>`).join('')}</div>
+    <div class="form" style="margin-top:12px"><label>修改原因（會給玩家看，也記在操作紀錄）<input type="text" id="pe-note" maxlength="120" placeholder="例如：補發活動獎勵"></label><div class="row"><button class="primary" data-save>儲存修改</button></div></div>
+    <p class="muted" id="pe-msg"></p>`}
+  if(tab==='backups')html+=`<p class="why">玩家自己的雲端備份，以及每次後台修改前留下的備份（最新 20 份）。還原會先備份目前版本。</p><div class="row" style="margin-bottom:8px"><button data-bk>讀取備份</button><span class="muted" id="pb-msg"></span></div><div class="tbl" style="max-height:none"><table id="t-pbk"></table></div>`;
+  if(tab==='json'){const sup=this.me.role==='super';html+=`<p class="why">${sup?'最高管理者可以直接修改 JSON（請小心，會先備份）。':'只有最高管理者可以直接修改 JSON。'}存檔大小 ${fmt(Math.round(doc.data.length/1024))} KB。</p>
+    <textarea id="pj-text" spellcheck="false" style="width:100%;min-height:380px;font:12px/1.4 ui-monospace,monospace" ${sup?'':'readonly'}>${esc(JSON.stringify(S,null,1))}</textarea>
+    ${sup?'<div class="form" style="margin-top:8px"><label>修改原因<input type="text" id="pj-note" maxlength="120"></label><div class="row"><button class="primary" data-json>儲存 JSON</button><button data-dl>下載 JSON</button></div></div>':'<div class="row" style="margin-top:8px"><button data-dl>下載 JSON</button></div>'}<p class="muted" id="pj-msg"></p>`}
+  box.innerHTML=html;this.bindPlayer()},
+ bindPlayer(){const box=$('pl-detail');
+  box.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>this.renderPlayer(b.dataset.ptab));
+  const q=(sel,fn)=>{const b=box.querySelector(sel);if(b)b.onclick=fn};
+  q('[data-close]',()=>{box.classList.add('hidden');this.cur=null});q('[data-save]',()=>this.saveEdits());q('[data-bk]',()=>this.loadBackups());q('[data-json]',()=>this.saveJson());
+  q('[data-dl]',()=>{const c=this.cur,b=new Blob([JSON.stringify(c.S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`purrcozy-save-${c.uid.slice(0,8)}.json`;a.click();this.log('player.export',c.uid,'')})},
+ // write a changed state for the current player: backup → transaction (rev must not have moved) → audit log
+ async writeState(S2,note,act){const c=this.cur,{F,db}=await firebase(),ref=F.doc(db,'saves',c.uid);
+  S2.admin={at:Date.now(),by:this.me.email,note:String(note||'').slice(0,120)};
+  const data=JSON.stringify(S2);if(data.length>880000)throw Error('存檔太大（超過 880 KB）');
+  await F.addDoc(F.collection(db,'saves',c.uid,'backups'),{v:1,at:Date.now(),reason:'後台修改前（'+this.me.email+'）',device:'admin',savedAt:c.doc.savedAt||0,lvl:c.doc.lvl||1,coins:c.doc.coins||0,data:c.doc.data,updated:F.serverTimestamp()});
+  await F.runTransaction(db,async t=>{const cur=await t.get(ref);if(!cur.exists())throw Error('雲端存檔不見了');const d=cur.data();
+   if((d.rev||0)!==(c.doc.rev||0))throw Object.assign(Error('玩家剛剛存過檔（雲端版本已經變了）。請重新開啟這位玩家再改一次。'),{code:'moved'});
+   t.set(ref,{v:1,schema:d.schema||1,rev:(d.rev||0)+1,savedAt:Date.now(),device:'admin',lvl:S2.lvl||1,coins:Math.max(0,Math.round(S2.coins||0)),email:d.email||'',dev:!!d.dev||!!(S2.flags&&S2.flags.dev),sync:Object.assign({},d.sync||{},{admin:this.me.email,at:Date.now()}),data,updated:F.serverTimestamp()})});
+  await this.log(act,c.uid,((c.doc&&c.doc.email)||'')+(note?'：'+note:''));
+  const fresh=await F.getDoc(ref);c.doc=fresh.data();c.S=JSON.parse(c.doc.data);const p=this.players.find(x=>x.uid===c.uid);if(p){p.doc=c.doc;p.sum=this.sumOf(c.S,c.doc)}this.renderPlayers()},
+ async saveEdits(){const c=this.cur,msg=$('pe-msg'),S2=JSON.parse(JSON.stringify(c.S)),num=(id,lo,hi)=>Math.max(lo,Math.min(hi,Math.round(+$(id).value)||0));const changes=[];
+  const name=$('pe-name').value.trim().slice(0,20);if(name!==((S2.avatar&&S2.avatar.name)||'')){S2.avatar=Object.assign({},S2.avatar,{name});changes.push('名稱')}
+  const lvl=num('pe-lvl',1,99),xp=num('pe-xp',0,1e8),coins=num('pe-coins',0,1e8),streak=num('pe-streak',0,10000);
+  if(lvl!==(S2.lvl||1)){S2.lvl=lvl;changes.push('等級 '+lvl)}if(xp!==Math.round(S2.xp||0)){S2.xp=xp;changes.push('經驗值')}if(coins!==(S2.coins||0)){changes.push(`金幣 ${S2.coins||0}→${coins}`);S2.coins=coins}
+  S2.learn=S2.learn||{};if(streak!==(S2.learn.streak||0)){S2.learn.streak=streak;S2.learn.best=Math.max(S2.learn.best||0,streak);changes.push('連續天數 '+streak)}
+  const lv=[...document.querySelectorAll('.pe-lv:checked')].map(x=>+x.value);if(!lv.length)return msg.textContent='出題程度至少要勾一個。';const lvv=lv.length===6?[]:lv;
+  if(JSON.stringify(lvv)!==JSON.stringify(S2.learn.levels||[])){S2.learn.levels=lvv;changes.push('出題程度 '+lv.map(x=>'L'+x).join(''))}
+  const g=$('pe-grade').value,decl=+$('pe-declared').value;
+  if(g==='reset'){delete S2.grade;changes.push('重設英文程度')}
+  else if(g){const n=+g,day=new Date(Date.now()-6*3600e3+8*3600e3).toISOString().slice(0,10),G=S2.grade=Object.assign({v:1,theta:null,se:null,n:0,declared:0,first:'',last:'',hist:[],recent:[],anchor:null,asked:0,cert:false},S2.grade);
+   G.theta=n;G.se=.6;G.anchor=null;if(!G.first)G.first=day;G.hist=(G.hist||[]).filter(x=>x.d!==day).concat([{d:day,t:n,se:.6,n:0,r:0}]).slice(-120);changes.push('英文程度設為 '+GRADE_LABEL[n-1])}
+  if(S2.grade&&decl!==(S2.grade.declared||0)){S2.grade.declared=decl;changes.push('自填年級')}
+  else if(!S2.grade&&decl){S2.grade={v:1,theta:null,se:null,n:0,declared:decl,first:'',last:'',hist:[],recent:[],anchor:null,asked:0,cert:false};changes.push('自填年級')}
+  const show=$('pe-show').checked;S2.settings=S2.settings||{};if(show!==(S2.settings.showGrade!==false)){S2.settings.showGrade=show;changes.push('名片顯示程度'+(show?'開':'關'))}
+  const test=$('pe-test').checked;if(test!==!!(S2.flags&&S2.flags.tester)){S2.flags=Object.assign({},S2.flags,{tester:test});changes.push(test?'標記測試帳號':'取消測試標記')}
+  if(!changes.length)return msg.textContent='沒有任何修改。';
+  const note=$('pe-note').value.trim();if(!confirm(`確定修改 ${(c.doc&&c.doc.email)||c.uid}？\n\n${changes.join('\n')}`))return;
+  msg.textContent='儲存中…';try{await this.writeState(S2,note||changes.join('、'),'player.edit');this.renderPlayer('sum');}catch(e){msg.textContent=(e.code==='permission-denied'?'沒有權限：請確認 firestore.rules 已發布 0.5.01 版。':'失敗：')+(e.message||e.code)}},
+ async saveJson(){const c=this.cur,msg=$('pj-msg');let S2;try{S2=JSON.parse($('pj-text').value)}catch(e){return msg.textContent='JSON 格式錯誤：'+e.message}
+  if(!S2||S2.v!==1)return msg.textContent='這不是呼嚕小窩的存檔（缺少 v: 1）。';if(!confirm('確定用這份 JSON 取代玩家的雲端存檔？（會先備份）'))return;
+  msg.textContent='儲存中…';try{await this.writeState(S2,$('pj-note').value.trim()||'直接修改 JSON','player.json');msg.textContent='已儲存';}catch(e){msg.textContent='失敗：'+(e.message||e.code)}},
+ async loadBackups(){const c=this.cur,{F,db}=await firebase(),msg=$('pb-msg');msg.textContent='讀取中…';
+  try{const snap=await F.getDocs(F.query(F.collection(db,'saves',c.uid,'backups'),F.orderBy('at','desc'),F.limit(20)));const rows=[];snap.forEach(d=>rows.push(Object.assign({id:d.id},d.data())));this.bks=rows;msg.textContent=rows.length?'':'沒有備份';
+   table('t-pbk',['時間','原因','裝置','等級','金幣','大小',''],rows.map(b=>[{v:b.at||0,h:b.at?new Date(b.at).toLocaleString('zh-TW',{hour12:false}):'–',n:false},b.reason||'',b.device||'',b.lvl||0,b.coins||0,{v:(b.data||'').length,h:fmt(Math.round((b.data||'').length/1024))+' KB'},{v:0,h:`<button data-restore="${esc(b.id)}">還原這份</button>`,n:false}]))}
+  catch(e){msg.textContent='讀取失敗：'+(e.code||e.message)}},
+ async restoreBackup(id){const b=(this.bks||[]).find(x=>x.id===id);if(!b)return;let S2;try{S2=JSON.parse(b.data)}catch(e){return alert('這份備份讀不出來')}
+  const when=b.at?new Date(b.at).toLocaleString('zh-TW',{hour12:false}):'';if(!confirm(`把玩家的存檔還原成 ${when} 的版本（Lv ${b.lvl}、金幣 ${b.coins}）？目前版本會先備份。`))return;
+  try{await this.writeState(S2,'還原 '+when+' 的備份','player.restore');alert('已還原');this.renderPlayer('sum')}catch(e){alert('失敗：'+(e.message||e.code))}},
+ // ---------- creating accounts (a second Firebase instance, so the back-office login stays as it is) ----------
+ async creator(){if(this._cr)return this._cr;const {A,U}=await firebase();const app=A.initializeApp(window.NOOK_FIREBASE,'creator');const auth=U.initializeAuth(app,{persistence:U.inMemoryPersistence});
+  if(window.ADMIN_EMU)U.connectAuthEmulator(auth,window.ADMIN_EMU.auth,{disableWarnings:true});return this._cr={U,auth}},
+ pw(n=10){const a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint32Array(n));return [...r].map(x=>a[x%a.length]).join('')},
+ async createOne(o){const {U,auth}=await this.creator(),{F,db}=await firebase();
+  const cred=await U.createUserWithEmailAndPassword(auth,o.email,o.password);const uid=cred.user.uid;await U.signOut(auth);
+  const seed={};if(o.name)seed.name=o.name;if(o.coins!=null&&o.coins!=='')seed.coins=+o.coins;if(o.lvl)seed.lvl=+o.lvl;if(o.declared)seed.declared=+o.declared;if(o.levels&&o.levels.length&&o.levels.length<6)seed.levels=o.levels;
+  await F.setDoc(F.doc(db,'players',uid),{email:o.email,name:o.name||'',test:!!o.test,group:o.group||'',note:o.note||'',seed,disabled:false,createdBy:this.me.email,createdAt:F.serverTimestamp(),updatedBy:this.me.email,updatedAt:F.serverTimestamp()});
+  return uid},
+ authErr(e){const c=e&&e.code||'';return c==='auth/email-already-in-use'?'這個 Email 已經有帳號':c==='auth/operation-not-allowed'?'Firebase 尚未開啟「電子郵件/密碼」登入（主控台 → Authentication → 登入方式）':c==='auth/invalid-email'?'Email 格式不正確':c==='auth/weak-password'?'密碼至少 6 碼':c==='auth/too-many-requests'?'建立太快被暫時擋下，請過幾分鐘再試':c==='permission-denied'?'帳號已建立，但寫入玩家登記被拒：請發布 0.5.01 的 firestore.rules':(c||e.message||String(e))},
+ seedFrom(prefix){const v=id=>$(prefix+id).value;return {coins:v('coins'),lvl:v('lvl'),declared:+v('declared')||0,levels:[...document.querySelectorAll(`.${prefix}lv:checked`)].map(x=>+x.value)}},
+ async createSingle(){const msg=$('pc-msg'),email=$('pc-email').value.trim().toLowerCase();let pw=$('pc-pw').value;if(!pw){pw=this.pw();$('pc-pw').value=pw}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return msg.textContent='Email 格式不正確。';if(pw.length<6)return msg.textContent='密碼至少 6 碼。';
+  msg.textContent='建立中…';try{const o=Object.assign({email,password:pw,name:$('pc-name').value.trim().slice(0,20),test:$('pc-test').checked,group:$('pc-group').value.trim(),note:$('pc-note').value.trim()},this.seedFrom('pc-'));
+   const uid=await this.createOne(o);await this.log('player.create',uid,email+(o.test?'（測試）':''));
+   msg.innerHTML=`已建立 <b class="mono">${esc(email)}</b>　密碼 <b class="mono">${esc(pw)}</b>　UID <span class="mono">${esc(uid)}</span><br><span class="muted">密碼只顯示這一次，請自己記下來。</span>`;this.loadPlayers()}
+  catch(e){msg.textContent='失敗：'+this.authErr(e)}},
+ async createBatch(){const msg=$('pt-msg'),n=Math.max(1,Math.min(50,+$('pt-n').value||30)),start=Math.max(1,+$('pt-start').value||1),prefix=$('pt-prefix').value.trim().toLowerCase()||'claude-test',domain=$('pt-domain').value.trim().toLowerCase()||'purrcozy.test',group=$('pt-group').value.trim()||'claude',name=$('pt-name').value.trim()||'測試';
+  if(!/^[a-z0-9._+-]+$/.test(prefix)||!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain))return msg.textContent='前綴或網域格式不正確。';
+  if(!confirm(`建立 ${n} 個測試帳號：${prefix}${String(start).padStart(2,'0')}@${domain} ～ ${prefix}${String(start+n-1).padStart(2,'0')}@${domain}？`))return;
+  const seed=this.seedFrom('pt-'),out=[],fail=[];$('pt-go').disabled=true;
+  for(let i=0;i<n;i++){const k=String(start+i).padStart(2,'0'),email=`${prefix}${k}@${domain}`,pw=this.pw();msg.textContent=`建立中… ${i+1}/${n}　${email}`;
+   try{const uid=await this.createOne(Object.assign({email,password:pw,name:`${name}${k}`,test:true,group,note:'批次建立的測試帳號'},seed));out.push({id:'sim'+k,email,password:pw,uid,name:`${name}${k}`})}
+   catch(e){fail.push(`${email}：${this.authErr(e)}`);if(e&&e.code==='auth/operation-not-allowed')break}
+   await new Promise(r=>setTimeout(r,350))}
+  $('pt-go').disabled=false;await this.log('player.batch',group,`建立 ${out.length} 個，失敗 ${fail.length} 個（${prefix}@${domain}）`);
+  this.lastBatch=out;msg.innerHTML=`完成：建立 ${out.length} 個${fail.length?`，失敗 ${fail.length} 個：<br>${fail.map(esc).join('<br>')}`:''}${out.length?'<br><b>密碼只在這裡出現一次</b>，請馬上下載。':''}`;
+  $('pt-dl').classList.toggle('hidden',!out.length);$('pt-csv').classList.toggle('hidden',!out.length);if(out.length)this.downloadBatch('json');this.loadPlayers()},
+ downloadBatch(kind){const out=this.lastBatch||[];if(!out.length)return;const blob=kind==='json'?new Blob([JSON.stringify({created:new Date().toISOString(),base:location.href.replace(/tools\/admin\.html.*$/,''),accounts:out},null,1)],{type:'application/json'})
+  :new Blob(['﻿id,email,password,uid,name\n'+out.map(o=>[o.id,o.email,o.password,o.uid,o.name].join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=kind==='json'?'accounts.json':'test-accounts.csv';a.click()},
+ async delReg(uid){if(!confirm('只刪除後台的登記（測試標記、初始設定）。Firebase 的登入帳號和雲端存檔不會刪除，要刪請到 Firebase 主控台 → Authentication。確定？'))return;const {F,db}=await firebase();
+  try{await F.deleteDoc(F.doc(db,'players',uid));await this.log('player.unreg',uid,'');this.loadPlayers()}catch(e){alert('失敗：'+(e.code||e.message))}},
+});
+Object.assign(Admin.ACT,{'player.view':'查看玩家','player.edit':'修改玩家存檔','player.json':'直接修改存檔 JSON','player.restore':'還原玩家備份','player.export':'下載玩家存檔','player.create':'建立玩家帳號','player.batch':'批次建立測試帳號','player.unreg':'刪除玩家登記'});
+$('pl-reload').onclick=()=>Admin.loadPlayers();$('pl-q').oninput=()=>Admin.renderPlayers();$('pl-kind').onchange=()=>Admin.renderPlayers();
+$('t-players').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)Admin.openPlayer(b.dataset.open)});
+$('pl-detail').addEventListener('click',e=>{const b=e.target.closest('[data-restore]');if(b)Admin.restoreBackup(b.dataset.restore)});
+$('pt-declared').append(...GRADE_LABEL.map((g,i)=>new Option(g,i+1)));
+$('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
+for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.unreg'].map(k=>new Option(Admin.ACT[k],k)));
+
+
+/* ================= 0.5.01 使用行為：每人每天一份摘要（learnlog/{logId}/bday/{date}） ================= */
+const BGROUP={learn:['learn','study','catstypo','placement','story','words','typodesk','need','tasks'],mini:['cozygame','furnplay','gacha','prize','merchant'],pet:['pet','paw'],decor:['shop','storage','avatar','themeask','rug'],
+ music:['music'],social:['friends','visit','card','team','account','gift'],focus:['timer','todo','memo']};
+const BNAME={learn:'學習',mini:'小遊戲',pet:'寵物',decor:'佈置與商店',music:'音樂',social:'好友與社交',focus:'專注與待辦',other:'其他'};
+const BCOL={learn:'#8c5aa8',mini:'#d9566f',pet:'#b86a12',decor:'#3f8a4f',music:'#3a7bd5',social:'#c27ba0',focus:'#6b7a8f',other:'#aaa'};
+const groupOf=w=>{for(const g in BGROUP)if(BGROUP[g].includes(w))return g;return 'other'};
+const B={raw:[],sel:'',loaded:false};
+Object.assign(Admin,{
+ keyOf(d){return d.acct||('anon:'+d.lid)},
+ nameOf(k){if(k.startsWith('anon:'))return '未登入 '+k.slice(5,11);const p=(this.players||[]).find(x=>x.uid===k);return p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||k.slice(0,8)):(B.names&&B.names[k])||('帳號 '+k.slice(0,8))},
+ async loadBehavior(){if(this.me.offline)return;const {F,db}=await firebase(),note=$('bh-note');note.textContent='讀取中…';
+  try{const out=[];let last=null;for(;;){const q=last?F.query(F.collectionGroup(db,'bday'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'bday'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>out.push(d.data()));note.textContent=`讀取中… ${out.length}`;if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
+   this.setBehavior(out,'Firestore');this.log('load','bday',out.length+' 天份')}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.01 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
+ setBehavior(rows,label){B.raw=rows;B.loaded=true;const days=[...new Set(rows.map(r=>r.d))].sort();if(days.length&&!$('bh-from').value){$('bh-from').value=days[Math.max(0,days.length-14)];$('bh-to').value=days[days.length-1]}
+  $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要、${new Set(rows.map(r=>this.keyOf(r))).size} 位玩家`;this.renderBehavior()},
+ bhRows(user){const from=$('bh-from').value,to=$('bh-to').value,w=$('bh-who').value;
+  return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&(()=>{const t=r.tester||/^test-/.test(r.dev||''),s=/^sim\d/.test(r.dev||'');return w==='all'?true:w==='test'?t:w==='sim'?s:!t})())},
+ // one player (or everyone) → totals
+ bhSum(rows){const t={min:0,mus:0,edit:0,focus:0,sess:0,songs:0,days:0,users:new Set(),g:{},h:Array(24).fill(0),dow:Array.from({length:7},()=>Array(24).fill(0)),mini:{},pet:{},furn:{},fp:{},win:{},soc:{},byDay:{}};
+  for(const r of rows){t.min+=r.min||0;t.mus+=r.mus||0;t.edit+=r.edit||0;t.focus+=r.focus||0;t.sess+=r.sess||0;t.songs+=r.songs||0;t.users.add(this.keyOf(r));
+   const day=t.byDay[r.d]||(t.byDay[r.d]={users:new Set(),min:0});day.users.add(this.keyOf(r));day.min+=r.min||0;
+   for(const [w,m] of Object.entries(r.wt||{})){const g=groupOf(w);t.g[g]=(t.g[g]||0)+m}
+   t.g.decor=(t.g.decor||0)+(r.edit||0);
+   const dw=(new Date(r.d+'T12:00').getDay()+6)%7;for(const [hh,m] of Object.entries(r.h||{})){t.h[+hh]+=m;t.dow[dw][+hh]+=m}
+   for(const k of ['mini','pet','furn','fp','win','soc'])for(const [a,n] of Object.entries(r[k]||{}))t[k][a]=(t[k][a]||0)+n}
+  t.days=rows.length;return t},
+ styleOf(t){const g=Object.assign({},t.g);g.music=Math.max(g.music||0,(t.mus||0)*.5);g.focus=Math.max(g.focus||0,t.focus||0);const e=Object.entries(g).filter(([k])=>k!=='other').sort((a,b)=>b[1]-a[1]);
+  const tot=e.reduce((s,x)=>s+x[1],0);if(!tot)return '–';const [k,v]=e[0];return BNAME[k]+(v/tot>.5?'型':'為主')},
+ renderBehavior(){if(!B.loaded)return;const all=this.bhRows(''),users=[...new Set(all.map(r=>this.keyOf(r)))];
+  const sel=$('bh-user'),cur=B.sel&&users.includes(B.sel)?B.sel:'';B.sel=cur;
+  sel.replaceChildren(new Option('全部玩家（綜合）',''),...users.map(u=>new Option(this.nameOf(u),u)));sel.value=cur;
+  const rows=cur?all.filter(r=>this.keyOf(r)===cur):all,T=this.bhSum(rows),A=this.bhSum(all),nU=cur?1:T.users.size||1,days=Object.keys(T.byDay).sort();
+  const kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`,m1=x=>fmt(Math.round(x));
+  $('bh-kpis').innerHTML=(cur?kpi(esc(this.nameOf(cur)),'玩家',esc(this.styleOf(T))):kpi(fmt(T.users.size),'活躍玩家'))+kpi(fmt(rows.length),cur?'上線天數':'人‧天')+kpi(m1(T.min/Math.max(1,rows.length)),'平均每天分鐘')+kpi(m1(T.min),'總活躍分鐘')+kpi(fmt(T.sess),'開啟次數')+kpi(m1(T.mus),'音樂分鐘',`${fmt(T.songs)} 首`)+kpi(fmt(Object.values(T.mini).reduce((a,b)=>a+b,0)),'小遊戲次數')+kpi(m1(T.focus),'專注計時分鐘');
+  // daily
+  chart('c-bh-daily',{type:'bar',data:{labels:days,datasets:cur?[{type:'bar',label:'這位玩家的分鐘',data:days.map(d=>Math.round(T.byDay[d].min)),backgroundColor:'#8c5aa8'},{type:'line',label:'全體平均分鐘',data:days.map(d=>A.byDay[d]?Math.round(A.byDay[d].min/A.byDay[d].users.size):null),borderColor:'#aaa',borderDash:[5,4],pointRadius:0}]
+   :[{type:'bar',label:'活躍玩家',data:days.map(d=>T.byDay[d].users.size),backgroundColor:'#c9b3d9',yAxisID:'y1'},{type:'line',label:'平均每人分鐘',data:days.map(d=>Math.round(T.byDay[d].min/T.byDay[d].users.size)),borderColor:'#8c5aa8',yAxisID:'y'}]},
+   options:{scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘'}},...(cur?{}:{y1:{position:'right',beginAtZero:true,grid:{display:false},title:{display:true,text:'人'}}})}}});
+  // time share, this player vs everyone
+  const gs=Object.keys(BNAME),share=t=>{const tot=gs.reduce((s,g)=>s+(t.g[g]||0),0)||1;return gs.map(g=>Math.round((t.g[g]||0)/tot*1000)/10)};
+  chart('c-bh-share',{type:'bar',data:{labels:gs.map(g=>BNAME[g]),datasets:[{label:cur?'這位玩家 %':'全體 %',data:share(T),backgroundColor:gs.map(g=>BCOL[g])},...(cur?[{label:'全體 %',data:share(A),backgroundColor:'#ddd'}]:[])]},options:{indexAxis:'y',scales:{x:{beginAtZero:true,title:{display:true,text:'視窗開著的時間占比（%）'}}}}});
+  // hour × weekday
+  const mx=Math.max(1,...T.dow.flat()),wd=['一','二','三','四','五','六','日'];
+  $('bh-heat').innerHTML='<tr><th></th>'+Array.from({length:24},(_,i)=>`<th class="n">${i}</th>`).join('')+'</tr>'+T.dow.map((row,i)=>`<tr><th>週${wd[i]}</th>${row.map(v=>`<td title="${Math.round(v)} 分鐘" style="background:rgba(140,90,168,${(v/mx*.9).toFixed(2)});color:${v/mx>.5?'#fff':'inherit'};text-align:center;font-size:11px">${v>=1?Math.round(v):''}</td>`).join('')}</tr>`).join('');
+  const bar=(id,obj,label,col,n=12)=>{const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);chart(id,{type:'bar',data:{labels:e.map(x=>x[0]),datasets:[{label,data:e.map(x=>Math.round(x[1]*10)/10),backgroundColor:col}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})};
+  bar('c-bh-mini',T.mini,'次數','#d9566f');bar('c-bh-pet',T.pet,'次數','#b86a12');bar('c-bh-furn',Object.assign({},T.furn,Object.fromEntries(Object.entries(T.fp).map(([k,v])=>['活動:'+k,v]))),'次數','#3f8a4f');bar('c-bh-win',T.win,'開啟次數','#3a7bd5',15);
+  // per player
+  const per=users.map(u=>{const rs=all.filter(r=>this.keyOf(r)===u),t=this.bhSum(rs),hrs=t.h.map((v,i)=>[i,v]).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,2).map(x=>x[0]+'時');
+   const top=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join('、');const last=rs.map(r=>r.d).sort().pop();
+   return {u,name:this.nameOf(u),style:this.styleOf(t),days:rs.length,min:t.min,avg:t.min/Math.max(1,rs.length),hrs:hrs.join('、'),win:top(t.win),mini:top(t.mini),mus:t.mus,last,test:rs.some(r=>r.tester||/^test-/.test(r.dev||''))}});
+  B.per=per;
+  table('t-bh-users',['玩家','風格','上線天數','總分鐘','平均每天','常上線時段','最常開的視窗','最愛的小遊戲','音樂分鐘','最後上線',''],per.map(p=>[{v:p.name,h:esc(p.name)+(p.test?' <span class="tag easy">測試</span>':''),n:false},p.style,p.days,Math.round(p.min),Math.round(p.avg),p.hrs,p.win,p.mini||'–',Math.round(p.mus),p.last||'',{v:0,h:`<button data-bhu="${esc(p.u)}">${p.u===cur?'看全部':'單獨看'}</button>`,n:false}]).sort((a,b)=>b[3]-a[3]));
+  $('bh-sel-note').textContent=cur?`目前只看「${this.nameOf(cur)}」；灰色是全體做比較。`:'目前是所有玩家的綜合結果；在下表按「單獨看」切換到一位玩家。'},
+ bhCsv(){const per=B.per||[];const csv='﻿玩家,風格,上線天數,總分鐘,平均每天,常上線時段,最常開的視窗,最愛的小遊戲,音樂分鐘,最後上線,測試\n'+per.map(p=>[p.name,p.style,p.days,Math.round(p.min),Math.round(p.avg),p.hrs,p.win,p.mini,Math.round(p.mus),p.last,p.test?1:0].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='behavior-players.csv';a.click();this.log('export','bday','behavior-players.csv')},
+ // demo: 30 kinds of players, two weeks
+ bhDemo(){let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;const out=[],T0=Date.now()-13*864e5;
+  const kinds=[['學習',{learn:.7,pet:.1,music:.1,other:.1},[17,20]],['小遊戲',{mini:.6,pet:.15,learn:.15,social:.1},[21,22]],['養貓',{pet:.6,decor:.2,learn:.1,music:.1},[19,20]],['音樂',{music:.7,decor:.2,learn:.1},[22,23]],['佈置',{decor:.6,pet:.2,music:.2},[0,1]],['專注',{focus:.6,music:.3,learn:.1},[14,15]]];
+  B.names={};const W={learn:'learn',mini:'cozygame',pet:'pet',music:'music',decor:'shop',social:'friends',focus:'timer',other:'settings'};
+  for(let u=0;u<30;u++){const [kn,mix,hrs]=kinds[u%6],acct='demo'+String(u+1).padStart(2,'0'),act=.35+r()*.6,len=5+r()*35;B.names[acct]=`示範${u+1}（${kn}）`;
+   for(let d=0;d<14;d++){if(r()>act*(u%11===10&&d>3?.2:1))continue;const day=new Date(T0+d*864e5).toISOString().slice(0,10),min=Math.round(len*(.5+r())*4)/4,h={},wt={},win={},mini={},pet={},furn={};
+    const hh=hrs[Math.floor(r()*2)]%24;h[hh]=min*.7;h[(hh+1)%24]=min*.3;for(const [g,p] of Object.entries(mix)){wt[W[g]]=Math.round(min*p*(.7+r()*.6)*4)/4;win[W[g]]=1+Math.floor(r()*3)}
+    if(mix.mini){mini[['pinball','toss','maze','vending'][Math.floor(r()*4)]]=1+Math.floor(r()*5)}if(mix.pet){pet.food=1+Math.floor(r()*3);pet.ball=Math.floor(r()*4);pet.played=Math.floor(r()*3)}furn[['sofa','plant','desk','pet'][Math.floor(r()*4)]]=1+Math.floor(r()*4);
+    out.push({v:1,d:day,lid:'L'+acct,acct,dev:(u>=24?'test-':'')+'demo',app:'0.92.48',tester:u>=24,min,sess:1+Math.floor(r()*2),h,win,wt,mini,fp:{},mus:mix.music?min*mix.music*1.4:min*.1,songs:mix.music?3+Math.floor(r()*8):0,pet,furn,edit:mix.decor?min*mix.decor*.5:0,focus:mix.focus?min*mix.focus:0,soc:{},first:`${String(hh).padStart(2,'0')}:05`,last:`${String((hh+1)%24).padStart(2,'0')}:20`})}}
+  $('bh-from').value='';this.setBehavior(out,'示範資料')},
+});
+$('bh-reload').onclick=()=>Admin.loadBehavior();$('bh-demo').onclick=()=>Admin.bhDemo();$('bh-csv').onclick=()=>Admin.bhCsv();
+for(const id of ['bh-from','bh-to','bh-who'])$(id).onchange=()=>Admin.renderBehavior();
+$('bh-user').onchange=e=>{B.sel=e.target.value;Admin.renderBehavior()};
+$('t-bh-users').addEventListener('click',e=>{const b=e.target.closest('[data-bhu]');if(b){B.sel=B.sel===b.dataset.bhu?'':b.dataset.bhu;Admin.renderBehavior();$('bh-kpis').scrollIntoView({block:'start',behavior:'smooth'})}});
 
 </script>
 </body>

@@ -32,7 +32,7 @@ const LearnLog = {
  open(kind, sub) {
   return { v: this.V, id: this.id(), kind: String(kind || '').slice(0, 16), sub: String(sub ?? '').slice(0, 40), t0: Date.now(), t1: 0, dur: 0,
    done: false, stop: '', n: 0, right: 0, coins: 0, xp: 0, streak: 0, lv: Learn.levelsOn().join(''),
-   app: (window.PURR_BUILD && PURR_BUILD.version) || '', lang: (typeof I18n !== 'undefined' && I18n.lang) || '', dev: typeof DEVICE_ID === 'string' ? DEVICE_ID.slice(0, 24) : '',
+   app: (window.PURR_BUILD && PURR_BUILD.version) || '', lang: (typeof I18n !== 'undefined' && I18n.lang) || '', dev: (Game.S && Game.S.flags && Game.S.flags.tester ? 'test-' : '') + (typeof DEVICE_ID === 'string' ? DEVICE_ID.slice(0, 24) : ''),   // test accounts (0.92.48) are left out of the analysis by default
    ans: [], rev: [], typo: [] };
  },
  close(rec, how) {
