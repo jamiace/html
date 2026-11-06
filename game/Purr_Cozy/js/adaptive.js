@@ -95,7 +95,7 @@ const Adaptive = {
   prepare(s) {
     if (!s?.qs || s.ans || s.adaptiveAt === s.qi || s.qi >= s.qs.length) return;
     s.adaptiveAt = s.qi;
-    if (s.kind === 'story' || (s.redoFrom != null && s.qi >= s.redoFrom)) return;
+    if (s.kind === 'story' || s.kind === 'grade' || (s.redoFrom != null && s.qi >= s.redoFrom)) return;   // grade placement picks its own next question
     const tail = s.qs.slice(s.qi), byId = new Map(tail.map(q => [q.i, q]));
     const [i] = this.select(tail.map(q => q.i), 1, i => byId.get(i), { mix: false });
     const at = s.qs.findIndex((q, k) => k >= s.qi && q.i === i);

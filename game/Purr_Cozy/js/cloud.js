@@ -217,6 +217,8 @@ function mergeSaves(a, b, common, cloudBase) {
   M.flags = Object.assign({}, o.flags, M.flags); if ((o.flags || {}).dev || (base.flags || {}).dev) M.flags.dev = true;
   if(o.playProgress){const A=M.playProgress||{},B=o.playProgress;const newest=(B.day||'')>(A.day||'')?B:A;M.playProgress=Object.assign({},newest,{total:Math.max(A.total||0,B.total||0)});if(A.day===B.day){M.playProgress.today=Math.max(A.today||0,B.today||0);M.playProgress.helpClaimed=!!(A.helpClaimed||B.helpClaimed);if(A.helpCredit||B.helpCredit)M.playProgress.helpCredit=[A.helpCredit,B.helpCredit].find(c=>c&&c.day===M.playProgress.day)||null;}}
   if(a.homeCare||b.homeCare)M.homeCare=mergeHomeCare(a.homeCare||{},b.homeCare||{});
+  // grade placement: the device that measured most recently wins
+  if (o.grade && (!M.grade || (o.grade.last || '') > (M.grade.last || ''))) M.grade = JSON.parse(JSON.stringify(o.grade));
   M.savedAt = Date.now();
   return M;
 }

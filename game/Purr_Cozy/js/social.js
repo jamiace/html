@@ -110,7 +110,7 @@ const Social = {
     await this.db().set('profiles/' + this.uid, c);
     // leaderboard row; a developer save is listed only with the developer switch on (its old row is removed otherwise)
     if (this.dev() && !this.devListed()) { if (!Z.boardGone) { await this.db().del('board/' + this.uid).catch(() => { }); Z.boardGone = true; } }
-    else { await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' }); Z.boardGone = false; }
+    else { await this.db().set('board/' + this.uid, { name: c.name, ava: c.ava, grade: c.grade || '', lvl: S.lvl, lv: S.lvl * 1e7 + Math.max(0, Math.floor(S.xp)), coins: this.earned(), tm: c.tm, w: { [c.wk]: c.wm }, at: '__now__' }); Z.boardGone = false; }
     Z.pubAt = now; this.cards[this.uid]=Object.assign({},c,{id:this.uid,got:now,roomD:JSON.parse(c.room||'null')});if(this.cardSt?.uid===this.uid){this.cardSt.c=this.cards[this.uid];UI.refresh('card');}Game.save();return true;
     } finally {this.publishBusy=false;if(this.publishAgain){this.publishAgain=false;this.publish(true).catch(e=>{this.err=cloudErr(e)});}}
   },

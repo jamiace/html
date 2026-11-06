@@ -137,6 +137,7 @@ service cloud.firestore {
 
     // ---------- 學習紀錄（0.92.42）----------
     // 遊戲用「匿名帳號」寫入：每個回合一份 learnlog/{logId}/lsess/{sessionId}，只能新增、不能修改。
+    // 0.92.46：程度測驗的回合多一個 pl（摘要，map）；名片 profiles 與排行榜 board 多一個 grade（玩家可關閉）。
     // 後台（tools/admin.html）：分析者以上可以讀全部紀錄；刪除只限管理者以上（例如玩家要求刪除資料時）。
     match /learnlog/{logId}/lsess/{sessionId} {
       allow create: if isOwner(logId) && validLearnLog(request.resource.data, logId, sessionId);
@@ -230,8 +231,9 @@ service cloud.firestore {
 
     function validLearnLog(d, logId, sessionId) {
       return d.keys().hasOnly(['v', 'id', 'lid', 'acct', 'dev', 'app', 'lang', 'kind', 'sub', 't0', 't1', 'dur', 'done', 'stop',
-                               'n', 'right', 'coins', 'xp', 'streak', 'lv', 'ans', 'rev', 'typo', 'at'])
+                               'n', 'right', 'coins', 'xp', 'streak', 'lv', 'ans', 'rev', 'typo', 'pl', 'at'])
         && d.v == 1 && d.id == sessionId && d.lid == logId
+        && (!('pl' in d) || (d.pl is map && d.pl.size() <= 12))
         && d.kind is string && d.kind.size() <= 16
         && d.sub is string && d.sub.size() <= 40
         && d.t0 is int && d.t1 is int && d.dur is int
@@ -258,8 +260,9 @@ service cloud.firestore {
     }
 
     function validProfile(d) {
-      return d.keys().hasOnly(['name', 'code', 'status', 'ava', 'lvl', 'pets', 'wk', 'wm', 'tm', 'room', 'dev', 'at'])
+      return d.keys().hasOnly(['name', 'code', 'status', 'ava', 'lvl', 'pets', 'wk', 'wm', 'tm', 'room', 'dev', 'grade', 'at'])
         && shortText(d.name, 40) && d.name.size() >= 1
+        && (!('grade' in d) || shortText(d.grade, 12))
         && shortText(d.code, 8) && shortText(d.status, 60) && shortText(d.wk, 16)
         && d.ava is map && d.pets is list && d.pets.size() <= 10
         && d.lvl is int && d.wm is int && d.tm is int && d.dev is bool
@@ -268,8 +271,9 @@ service cloud.firestore {
     }
 
     function validBoard(d) {
-      return d.keys().hasOnly(['name', 'ava', 'lvl', 'lv', 'coins', 'tm', 'w', 'dev', 'at'])
+      return d.keys().hasOnly(['name', 'ava', 'lvl', 'lv', 'coins', 'tm', 'w', 'dev', 'grade', 'at'])
         && d.get('dev', false) is bool
+        && (!('grade' in d) || shortText(d.grade, 12))
         && shortText(d.name, 40) && d.ava is map
         && d.lvl is int && d.lv is int && d.coins is int && d.coins >= 0 && d.tm is int
         && d.w is map && d.w.size() <= 1

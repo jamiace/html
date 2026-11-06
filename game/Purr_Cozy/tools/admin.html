@@ -88,14 +88,21 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 <body>
 <div id="login">
  <div class="logincard">
-  <h1>呼嚕小窩・後台</h1><p class="muted">學習分析與帳號管理</p>
-  <div class="row"><button id="btn-g" class="primary">用 Google 登入</button><button id="btn-off">離線模式</button></div>
+  <h1>呼嚕小窩・後台</h1><p class="muted">學習分析與帳號管理 <span id="ver-login"></span></p>
+  <div id="login-inapp" class="note hidden" style="text-align:left"></div>
+  <div class="row"><button id="btn-g" class="primary">用 Google 登入</button><button id="btn-email-show">用 Email 登入</button><button id="btn-off">離線模式</button></div>
   <div id="login-msg"></div>
+  <div id="login-email" class="hidden" style="text-align:left;margin-top:8px">
+   <div class="form"><label>Email<input type="email" id="le-mail" autocomplete="username" placeholder="name@example.com"></label><label>密碼<input type="password" id="le-pw" autocomplete="current-password" placeholder="至少 6 碼"></label></div>
+   <div class="row" style="margin-top:8px"><button id="le-in" class="primary">登入</button><button id="le-up">第一次使用：註冊</button><button id="le-reset">忘記密碼</button></div>
+   <p class="muted" style="font-size:12px">Email 帳號要先驗證信箱才有權限（註冊後會寄驗證信）。如果這個 Email 已經用 Google 登入過，請改用 Google 登入。</p>
+  </div>
+  <div id="login-verify" class="note hidden" style="text-align:left"></div>
   <p class="muted" style="font-size:12px;margin-top:16px">最高管理者在 Firebase 主控台的 <code>admins</code> 集合設定；其他帳號由管理者在後台「帳號與權限」新增。離線模式可以開啟 JSON 檔或示範資料，不讀取 Firestore。</p>
  </div>
 </div>
 <div id="app" class="layout hidden">
- <aside><div class="brand">呼嚕小窩・後台<small>Purr Cozy Admin</small></div><nav id="nav"></nav></aside>
+ <aside><div class="brand">呼嚕小窩・後台<small>Purr Cozy Admin <span id="ver"></span></small></div><nav id="nav"></nav></aside>
  <div class="mainwrap">
   <div class="topbar"><button id="btn-menu" aria-label="選單">☰</button><h1 id="crumb">儀表板</h1><span id="status">尚未載入資料</span><span id="me-badge"></span><button id="btn-logout">登出</button></div>
   <div id="subtabs" class="hidden"></div>
@@ -147,10 +154,29 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
   <h3>依入口</h3><p class="why">升級考、故事用的是刻意加難的干擾選項或無提示拼字，模型沒有把這點算進去，所以預測通常偏高；它們也不參與 85% 目標的檢查。</p><div class="tbl"><table id="t-calib-kind"></table></div>
   <h3>整體修正公式</h3><div id="calib-fix" class="note"></div>
  </section></div>
+<div class="sub" data-sub="s-grade"><section id="s-grade"><h2>英文程度測驗（搬家日・每日小測）</h2>
+  <p class="why">0.92.46 起，每位玩家第一次進遊戲會做「搬家日」程度測驗，之後每天一次 8 題的小測。每次回合記錄估計的年級 θ（1＝小一 … 12＝高三）與標準誤 se。這裡看：玩家分布、自填年級和實測是否一致、每日完成率、成長，以及題目難度（單字的年級 g）是否標得準。</p>
+  <div class="kpis" id="grade-kpis"></div>
+  <div class="grid2" style="margin-top:12px">
+   <div><h3>玩家程度分布（每人最新一次）</h3><div class="chart chart-lg"><canvas id="c-grade-dist"></canvas></div></div>
+   <div><h3>自填年級 vs 實測</h3><p class="why">「±1」＝實測和自填差距在一個年級以內。差很多的不一定是錯，可能是程度真的超前或落後。</p><div class="tbl"><table id="t-grade-decl"></table></div></div>
+  </div>
+  <h3 style="margin-top:16px">每週趨勢與成長</h3>
+  <p class="why">左：每週所有玩家「截至該週最新估計」的平均。右：第一次和最近一次相隔 7 天以上的玩家，程度變化的分布（正＝進步）。</p>
+  <div class="grid2"><div class="chart chart-lg"><canvas id="c-grade-trend"></canvas></div><div class="chart chart-lg"><canvas id="c-grade-growth"></canvas></div></div>
+  <h3 style="margin-top:16px">每日完成率</h3><p class="why">當天有來玩（任何學習回合）的玩家中，完成當天小測的比例。</p><div class="chart"><canvas id="c-grade-daily"></canvas></div>
+  <h3 style="margin-top:16px">題目難度是否標得準（item fit）</h3>
+  <p class="why">橫軸＝題目難度減玩家程度（b − θ，單位：年級；題型差距已加進 b）。實線＝實際答對率，虛線＝模型預測。兩條線貼近代表單字的年級 g 標得合理；實線整體在虛線下方代表單字其實比標的年級難。</p>
+  <div class="chart chart-lg"><canvas id="c-grade-fit"></canvas></div>
+  <h3 style="margin-top:16px">單字年級修正建議</h3>
+  <p class="why">只用程度測驗的作答。每個字的「實際答對率」和「模型預測」相差太多時，給出建議的年級調整 Δg（正＝這個字比標的年級難，應調高）。至少 12 次作答才計算；點「下載 CSV」可以直接套回 tools/vocab.json 的 grade_num。</p>
+  <div class="row" style="margin-bottom:8px"><label><input type="checkbox" id="gw-flag"> 只看 |Δg| ≥ 1 的字</label><button id="gw-csv">下載 CSV</button><span class="muted" id="gw-note"></span></div>
+  <div class="tbl"><table id="t-grade-words"></table></div>
+ </section></div>
 <div class="sub" data-sub="s-kinds"><section id="s-kinds"><h2>哪個入口學得最好</h2><p class="why">每個學習入口的答題量、答對率、完成率，以及「下次再遇到同一個字時答對率」（記得住的程度）。</p><div class="tbl"><table id="t-kinds"></table></div></section></div>
 <div class="sub" data-sub="s-drop"><section id="s-drop"><h2>在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題）。集中在某一步就代表那裡太難、太長或卡住。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div></section></div>
 <div class="sub" data-sub="s-retain"><section id="s-retain"><h2>留存與習慣</h2><p class="why">第一次學習後，隔天、第 2 週（第 7–13 天）、第 5 週（第 28–34 天）還回來學習的比例（依第一次學習的週分組），以及一週中什麼時段最多人學。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section></div>
-<div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
+<div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><p class="why" id="typo-note" style="margin-top:8px"></p><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
 <div class="sub" data-sub="s-help"><section id="s-help"><h2>提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section></div></div>
    <div class="page hidden" data-page="ai"><section id="s-ai"><h2>AI 分析報告</h2>
   <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
@@ -200,6 +226,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
    </div>
    <div class="page hidden" data-page="me">
     <section><h2>我的帳號</h2><p id="me-info"></p></section>
+    <section><h2>版本</h2><p class="why">後台 v<span id="ver-me"></span></p><div class="tbl" style="max-height:none"><table id="t-changelog"></table></div></section>
     <section><h2>設定說明</h2><p class="why">最高管理者：Firebase 主控台 → Firestore Database → 資料 → <code>admins</code> 集合，新增文件，文件 ID 填 Gmail（全部小寫），加一個任意欄位。其他帳號請在「帳號與權限」新增。詳細步驟見 <code>docs/學習紀錄與分析-設定教學.md</code>。</p></section>
    </div>
   </main>
@@ -275,7 +302,13 @@ function demo(){
      else rec.ans.push({t,w:w.w,l:w.l,gr:Math.min(12,5+w.l),ge:d<30?1:0,q:qt,ok:ok?1:0,ms:Math.floor(1200+r()*6000+(ok?0:2500)+(typed?3000:0)),g,b0:m.box,b1:ok?Math.min(5,m.box+1):Math.max(1,m.box-1),gap,p:Math.round(pred*1000)/1000,h:typed&&r()<.5?1:0,r:qt.startsWith('listen')?Math.floor(r()*3):0,i:q,re:0});
      m.box=ok?Math.min(5,m.box+1):Math.max(1,m.box-1);m.last=d}
     rec.done=quit===len;rec.stop=rec.done?'result':(r()<.5?'quiz@'+quit+'/'+len:'review@'+quit+'/10');rec.t1=t0+t+5000;rec.dur=rec.t1-t0;
-    rec.n=rec.ans.length||rec.typo.length;rec.right=rec.ans.filter(a=>a.ok).length+rec.typo.filter(a=>a.ok&&!a.rv).length;out.push(rec)}}}
+    rec.n=rec.ans.length||rec.typo.length;rec.right=rec.ans.filter(a=>a.ok).length+rec.typo.filter(a=>a.ok&&!a.rv).length;out.push(rec)}}
+  // grade placement: a first session, then a daily probe on about 60 % of active days; the learner grows ~0.05 grade/day
+  if(u%3!==0){let theta=2+r()*6,est=theta+(r()-.5),decl=r()<.8?Math.max(1,Math.min(12,Math.round(theta+(r()-.5)*2))):0,prev=-1;const gwords=words.filter(w=>w.l<=3);
+   for(let d=0;d<days;d++){const first=prev<0;if(!first&&r()>.6)continue;theta+=.05;est=est*.7+(theta+(r()-.5)*.8)*.3;const n=first?10:8,t0=T0+(60-days+d)*864e5+(9+Math.floor(r()*10))*36e5,rec={v:1,id:lid+'-g'+d,lid,acct:'',dev:'',app:'0.92.46',lang:'zh-TW',kind:'grade',sub:first?'first':'daily',t0,t1:t0+n*9000,dur:n*9000,done:true,stop:'result',n,right:0,coins:first?60:10,xp:first?40:10,streak:0,lv:'1',ans:[],rev:[],typo:[]};
+    for(let q=0;q<n;q++){const w=gwords[Math.floor(r()*gwords.length)],type=['en2zh','zh2en','spell'][q%3],off={en2zh:0,zh2en:.4,spell:.7}[type],g=type==='spell'?0:.25,gr=1+Math.min(11,Math.floor(w.d*4+(r()-.5)*2+est)),b=gr+off,p=g+(1-g)/(1+Math.exp(-1.1*(est-b))),ptrue=g+(1-g)/(1+Math.exp(-1.1*(theta-b-(w.w.length>7?.6:0)))),ok=r()<ptrue;if(ok)rec.right++;
+     rec.ans.push({t:q*9000,w:w.w,l:w.l,gr,ge:0,q:type,ok:ok?1:0,ms:4000+Math.floor(r()*5000),g:'',b0:0,b1:1,gap:-1,p:Math.round(p*1000)/1000,h:type==='spell'?1:0,r:0,i:q,re:0})}
+    rec.pl={m:first?'first':'daily',t:+est.toFixed(2),se:first?.7:.5,n,r:rec.right,g:Math.max(1,Math.min(12,Math.round(est))),d:decl,p:prev,mu:first?(decl||4):prev,sd:first?3:.8};prev=+est.toFixed(2);out.push(rec)}}}
  return out}
 
 /* ---------- analysis ---------- */
@@ -505,8 +538,11 @@ function analyse(){
  /* 10 typo */
  const tn=typo.length,first1=typo.filter(t=>t.ok&&!t.rv&&t.att<=1).length,rv=typo.filter(t=>t.rv).length,catN=typo.filter(t=>t.cat),catOk=catN.filter(t=>t.ok&&!t.rv).length,noCat=typo.filter(t=>!t.cat),noCatOk=noCat.filter(t=>t.ok&&!t.rv).length;
  $('typo-kpis').innerHTML=[['拼過的字',fmt(tn)],['一次就拼對',pct(tn?first1/tn:null)],['平均嘗試次數',fmt(tn?typo.reduce((s,t)=>s+t.att,0)/tn:null,2)],['直接看答案',pct(tn?rv/tn:null)],['小貓搗蛋時拼對',pct(catN.length?catOk/catN.length:null)],['沒搗蛋時拼對',pct(noCat.length?noCatOk/noCat.length:null)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
- const TW=new Map();for(const t of typo){const x=TW.get(t.w)||{w:t.w,l:t.l,n:0,ok:0,rv:0,att:0};x.n++;x.ok+=t.ok&&!t.rv?1:0;x.rv+=t.rv;x.att+=t.att;TW.set(t.w,x)}
- table('t-typo',['單字','程度','次數','拼對率','看答案率','平均嘗試'],[...TW.values()].filter(x=>x.n>=3).sort((a,b)=>a.ok/a.n-b.ok/b.n).map(x=>[x.w,'L'+x.l,x.n,P(x.ok/x.n),P(x.rv/x.n),+(x.att/x.n).toFixed(2)]));
+ const TW=new Map();for(const t of typo){const x=TW.get(t.w)||{w:t.w,l:t.l,gr:t.gr||0,n:0,ok:0,rv:0,att:0,g:[]};x.n++;x.ok+=t.ok&&!t.rv?1:0;x.rv+=t.rv;x.att+=t.att;for(const g of t.g||[])if(g&&!x.g.includes(g)&&x.g.length<6)x.g.push(g);TW.set(t.w,x)}
+ // the word list used to need 3 attempts per word, which left it empty on small real data sets; the cut-off now follows the data size
+ const typoSess=sess.filter(r=>r.kind==='typo').length,minT=tn>=3000?3:tn>=600?2:1;
+ $('typo-note').textContent=tn?`${fmt(typoSess)} 個 Meow Typo 回合、${fmt(tn)} 次拼字，列出拼過 ${minT} 次以上的字（依拼對率由低到高）。`:'還沒有 Meow Typo 的紀錄：玩家要在每日任務選「Meow Typo」或在家具上開啟自由練習，資料才會進來。';
+ table('t-typo',['單字','程度','年級','次數','拼對率','看答案率','平均嘗試','常見錯拼'],[...TW.values()].filter(x=>x.n>=minT).sort((a,b)=>a.ok/a.n-b.ok/b.n).map(x=>[x.w,'L'+x.l,{v:x.gr||0,h:x.gr?GRADE_NAME(x.gr):'–'},x.n,P(x.ok/x.n),P(x.rv/x.n),+(x.att/x.n).toFixed(2),{v:0,h:esc(x.g.slice(0,3).join('、')),n:false}]));
  summary.meowTypo={words:tn,firstTryCorrect:tn?+(first1/tn).toFixed(3):null,revealRate:tn?+(rv/tn).toFixed(3):null,withCatInterference:catN.length?+(catOk/catN.length).toFixed(3):null,withoutCat:noCat.length?+(noCatOk/noCat.length).toFixed(3):null};
 
  /* 11 hints / replays */
@@ -517,6 +553,44 @@ function analyse(){
  grp('回合前半（第 1–4 題）',ans.filter(a=>a.i<4));grp('回合後半（第 5 題以後）',ans.filter(a=>a.i>=4));
  table('t-help',['情況','題數','答對率','作答時間'],hp);
  summary.hintsAndFatigue=hp.map(r=>({case:r[0],n:r[1],accuracy:+(r[2].v||0).toFixed(3)}));
+ /* 13 placement (kind 'grade', session field pl) */
+ const PL_A=1.1,PL_OFF={en2zh:0,zh2en:.4,spell:.7},PL_G={en2zh:.25,zh2en:.25,spell:0};
+ const GS=sess.filter(r=>r.kind==='grade'&&r.pl&&typeof r.pl.t==='number').sort((a,b)=>a.t0-b.t0);
+ const byP={};for(const r of GS)(byP[r.lid]||(byP[r.lid]=[])).push(r);
+ const pls=Object.keys(byP),latest=pls.map(k=>byP[k][byP[k].length-1]),firsts=pls.map(k=>byP[k][0]);
+ const med=a=>median(a),gOf=t=>Math.max(1,Math.min(12,Math.round(t)));
+ const declared=latest.filter(r=>r.pl.d>0),agree=declared.filter(r=>Math.abs(gOf(r.pl.t)-r.pl.d)<=1).length;
+ // daily completion: players active on a day vs players with a grade session that day (days after their first placement)
+ const actD={},gradeD={};for(const r of sess){const k=dayKey(r.t0);(actD[k]||(actD[k]=new Set())).add(r.lid);if(r.kind==='grade')(gradeD[k]||(gradeD[k]=new Set())).add(r.lid)}
+ const firstDay={};for(const k of pls)firstDay[k]=dayKey(byP[k][0].t0);
+ const dkeys=Object.keys(actD).sort().slice(-30),comp=dkeys.map(k=>{const el=[...actD[k]].filter(l=>firstDay[l]&&firstDay[l]<k);return{k,n:el.length,ok:el.filter(l=>gradeD[k]&&gradeD[k].has(l)).length}}).filter(x=>x.n>0);
+ const compAll=comp.reduce((s,x)=>s+x.ok,0)/Math.max(1,comp.reduce((s,x)=>s+x.n,0));
+ const grown=pls.map(k=>({first:byP[k][0],last:byP[k][byP[k].length-1]})).filter(x=>x.last.t0-x.first.t0>=7*864e5).map(x=>x.last.pl.t-x.first.pl.t);
+ $('grade-kpis').innerHTML=GS.length?[['有程度資料的玩家',fmt(pls.length)],['搬家日（首測）',fmt(GS.filter(r=>r.pl.m==='first').length)],['每日小測回合',fmt(GS.filter(r=>r.pl.m==='daily').length)],['每人平均測驗次數',fmt(GS.length/pls.length,1)],['程度中位數',latest.length?GRADE_NAME(gOf(med(latest.map(r=>r.pl.t)))):'–'],['自填 vs 實測 ±1 內',declared.length?pct(agree/declared.length)+` <small>(${declared.length})</small>`:'–'],['每日小測完成率',comp.length?pct(compAll):'–'],['7 天以上的成長（平均）',grown.length?(grown.reduce((a,b)=>a+b,0)/grown.length>=0?'+':'')+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2)+` <small>年級 (${grown.length} 人)</small>`:'–']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join(''):'<p class="muted">還沒有程度測驗的紀錄（需要 0.92.46 以上的遊戲版本）。</p>';
+ const G12=Array.from({length:12},(_,i)=>i+1),g12l=G12.map(g=>GRADE_NAME(g));
+ chart('c-grade-dist',{type:'bar',data:{labels:g12l,datasets:[{label:'實測（最新）',data:G12.map(g=>latest.filter(r=>gOf(r.pl.t)===g).length),backgroundColor:'#8c5aa8'},{label:'自填年級',data:G12.map(g=>latest.filter(r=>r.pl.d===g).length),backgroundColor:'#d9566f88'}]},options:{scales:{y:{title:{display:true,text:'人數'}}}}});
+ const DEC={};for(const r of latest){const k=r.pl.d>0?r.pl.d:0;(DEC[k]||(DEC[k]=[])).push(r.pl.t)}
+ table('t-grade-decl',['自填','人數','實測平均','實測中位','±1 內'],Object.keys(DEC).map(Number).sort((a,b)=>a-b).map(k=>{const L=DEC[k];return[k?GRADE_NAME(k):'沒填',L.length,{v:L.reduce((a,b)=>a+b,0)/L.length,h:GRADE_NAME(gOf(L.reduce((a,b)=>a+b,0)/L.length))+' ('+(L.reduce((a,b)=>a+b,0)/L.length).toFixed(1)+')'},{v:med(L),h:med(L).toFixed(1)},k?P(L.filter(t=>Math.abs(gOf(t)-k)<=1).length/L.length):{v:-1,h:'–'}]}));
+ // weekly mean of each player's latest estimate up to that week
+ const wkSet=[...new Set(GS.map(r=>{const d=dayNo(r.t0);return dayNoKey(d-((d+4)%7))}))].sort();
+ const wkMean=wkSet.map(w=>{const vals=[];for(const k of pls){let last=null;for(const r of byP[k]){const d=dayNo(r.t0),wk=dayNoKey(d-((d+4)%7));if(wk<=w)last=r.pl.t}if(last!=null)vals.push(last)}return{w,n:vals.length,m:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}});
+ chart('c-grade-trend',{type:'line',data:{labels:wkMean.map(x=>x.w),datasets:[{label:'平均程度（年級）',data:wkMean.map(x=>x.m==null?null:+x.m.toFixed(2)),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{label:'有資料的玩家數',data:wkMean.map(x=>x.n),borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',yAxisID:'y2'}]},options:{scales:{y:{title:{display:true,text:'年級'},grace:'10%'},y2:{position:'right',grid:{display:false},title:{display:true,text:'人'}}}}});
+ const GB2=[[-9,-1.5,'≤ −1.5'],[-1.5,-.5,'−1.5～−0.5'],[-.5,.5,'−0.5～+0.5'],[.5,1.5,'+0.5～+1.5'],[1.5,9,'≥ +1.5']];
+ chart('c-grade-growth',{type:'bar',data:{labels:GB2.map(b=>b[2]),datasets:[{label:'玩家數',data:GB2.map(([lo,hi])=>grown.filter(x=>x>=lo&&x<hi).length),backgroundColor:GB2.map(([lo])=>lo>=.5?'#3f8a4f':lo<-.5?'#d9566f':'#b86a12')}]},options:{plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'程度變化（年級）'}},y:{title:{display:true,text:'人數'}}}}});
+ chart('c-grade-daily',{type:'bar',data:{labels:comp.map(x=>x.k),datasets:[{type:'line',label:'完成率 %',data:comp.map(x=>+(x.ok/x.n*100).toFixed(1)),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8',yAxisID:'y'},{label:'當天有來的玩家',data:comp.map(x=>x.n),backgroundColor:'#d9566f55',yAxisID:'y2'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'人'}}}}});
+ // item fit: accuracy by (b − θ), per type, against the model
+ const FIT={},WD={};for(const r of GS){for(const a of r.ans||[]){if(!a.gr||typeof a.p!=='number'||a.p<0)continue;const type=a.q in PL_OFF?a.q:'en2zh',b=a.gr+PL_OFF[type],x=Math.max(-5,Math.min(5,Math.round(b-r.pl.t))),k=type+'|'+x,f=FIT[k]||(FIT[k]={n:0,ok:0,p:0});f.n++;f.ok+=a.ok;f.p+=a.p;
+  const w=WD[a.w]||(WD[a.w]={w:a.w,g:a.gr,l:a.l,n:0,ok:0,p:0,th:0,gs:0});w.n++;w.ok+=a.ok;w.p+=a.p;w.th+=r.pl.t;w.gs+=PL_G[type]}}
+ const XS=Array.from({length:11},(_,i)=>i-5),FC={en2zh:'#8c5aa8',zh2en:'#3f8a4f',spell:'#d9566f'},FN={en2zh:'看英選中',zh2en:'看中選英',spell:'拼字'};
+ chart('c-grade-fit',{type:'line',data:{labels:XS.map(x=>(x>0?'+':'')+x),datasets:Object.keys(FN).flatMap(t=>[{label:FN[t]+'：實際',data:XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?+(f.ok/f.n*100).toFixed(1):null}),borderColor:FC[t],backgroundColor:FC[t],spanGaps:true},{label:FN[t]+'：模型',data:XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?+(f.p/f.n*100).toFixed(1):null}),borderColor:FC[t],borderDash:[5,4],pointRadius:0,spanGaps:true}])},options:{scales:{x:{title:{display:true,text:'題目難度 − 玩家程度（年級）'}},y:{min:0,max:100,title:{display:true,text:'答對率 %'}}}}});
+ const lgt=x=>Math.log(x/(1-x)),cl=x=>Math.min(.98,Math.max(.02,x));
+ const gw=Object.values(WD).filter(w=>w.n>=12).map(w=>{const g=w.gs/w.n,acc=w.ok/w.n,pm=w.p/w.n,a2=cl((acc-g)/(1-g)),p2=cl((pm-g)/(1-g));return Object.assign(w,{acc,pm,th:w.th/w.n,dg:+((lgt(p2)-lgt(a2))/PL_A).toFixed(2)})}).sort((a,b)=>Math.abs(b.dg)-Math.abs(a.dg));
+ const gwRows=()=>gw.filter(w=>!$('gw-flag').checked||Math.abs(w.dg)>=1).map(w=>[w.w,{v:w.g,h:GRADE_NAME(w.g)},'L'+w.l,w.n,P(w.acc),P(w.pm),{v:w.th,h:w.th.toFixed(1)},{v:w.dg,h:`<b>${(w.dg>0?'+':'')+w.dg.toFixed(1)}</b>`},{v:w.g+w.dg,h:GRADE_NAME(Math.max(1,Math.min(12,Math.round(w.g+w.dg))))}]);
+ const drawGw=()=>table('t-grade-words',['單字','標示年級','程度','作答數','實際答對率','模型預測','答題者平均程度','建議 Δg','建議年級'],gwRows());drawGw();$('gw-flag').onchange=drawGw;
+ $('gw-note').textContent=gw.length?`${gw.length} 個字有足夠資料；其中 ${gw.filter(w=>Math.abs(w.dg)>=1).length} 個建議調整一個年級以上。`:'還沒有足夠的程度測驗作答（每個字至少 12 次）。';
+ $('gw-csv').onclick=()=>{const rows=[['word','grade_num','level','n','accuracy','predicted','mean_theta','suggested_delta_g','suggested_grade'],...gw.map(w=>[w.w,w.g,w.l,w.n,w.acc.toFixed(3),w.pm.toFixed(3),w.th.toFixed(2),w.dg,Math.max(1,Math.min(12,Math.round(w.g+w.dg)))])];const b=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='grade-adjust.csv';a.click()};
+ summary.placement=GS.length?{players:pls.length,firstPlacements:GS.filter(r=>r.pl.m==='first').length,dailyProbes:GS.filter(r=>r.pl.m==='daily').length,medianGrade:latest.length?+med(latest.map(r=>r.pl.t)).toFixed(2):null,distribution:Object.fromEntries(G12.map(g=>[GRADE_NAME(g),latest.filter(r=>gOf(r.pl.t)===g).length])),declaredAgreementWithin1:declared.length?+(agree/declared.length).toFixed(3):null,declaredN:declared.length,dailyCompletion:comp.length?+compAll.toFixed(3):null,growth7d:grown.length?{n:grown.length,mean:+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2),median:+med(grown).toFixed(2),improved:grown.filter(x=>x>=.5).length,declined:grown.filter(x=>x<=-.5).length}:null,itemFit:Object.fromEntries(Object.keys(FN).map(t=>[t,XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?{x,n:f.n,actual:+(f.ok/f.n).toFixed(3),model:+(f.p/f.n).toFixed(3)}:null}).filter(Boolean)])),wordsToAdjust:gw.filter(w=>Math.abs(w.dg)>=1).slice(0,30).map(w=>({word:w.w,grade:w.g,n:w.n,accuracy:+w.acc.toFixed(3),predicted:+w.pm.toFixed(3),suggestedDeltaG:w.dg}))}:null;
+
  const pop={real:0,sim:0,test:0};for(const r of sess)pop[whoOf(r)]++;
  summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,vocabulary:'0.92.45 起：國小～高中 6,924 字（大考 L1–6 ＋ 108 課綱國中小 2000 字，含 60 個新字），每題記錄建議年級 gr；舊紀錄的年級由 i18n/vocab.json 補上，改名詞條已合併',populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣大考中心 L1–L6，加上 108 課綱國中小 2000 字；0.92.45 起每題另有建議年級 g），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
  S.summary=summary;
@@ -572,10 +646,12 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
+const ADMIN_VERSION='0.5.0';
+const CHANGELOG=[['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
- {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
+ {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-grade', '程度測驗'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
  {id:'ai',n:'AI 報告',i:'✦',lv:0},
  {id:'data',n:'資料與匯出',i:'⇅',lv:0},
  {id:'accounts',n:'帳號與權限',i:'☺',lv:2,group:'管理'},
@@ -600,14 +676,51 @@ const Admin={
   requestAnimationFrame(()=>Object.values(S.charts).forEach(c=>{try{c.resize()}catch(e){}}));
   if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
  // ---------- auth ----------
- async login(){try{$('login-msg').textContent='登入中…';const {U,F,auth,db}=await firebase();if(!auth.currentUser)await U.signInWithPopup(auth,new U.GoogleAuthProvider());await this.afterLogin()}
+ // In-app browsers (LINE, Facebook, Instagram ...) cannot open the Google sign-in window, and on iPhone the Google
+ // helper page on firebaseapp.com may lose its state when this page is on another domain (storage partitioning).
+ // Order of attempts: in-app browser → send to the system browser; popup; popup blocked → redirect only when this page is
+ // served from the Firebase domain (same site, so the redirect keeps its state); otherwise offer Email sign-in.
+ inApp(){const ua=navigator.userAgent||'';return /\bLine\//i.test(ua)?'LINE':/FBAN|FBAV|FB_IAB/i.test(ua)?'Facebook':/Instagram/i.test(ua)?'Instagram':/MicroMessenger/i.test(ua)?'WeChat':/musical_ly|TikTok|Bytedance/i.test(ua)?'TikTok':/Twitter|X11;.*Android.*wv/i.test(ua)&&/Twitter/i.test(ua)?'X':''},
+ sameSiteAuth(){const ad=String((window.NOOK_FIREBASE||{}).authDomain||'');return !!ad&&(location.hostname===ad||/\.(firebaseapp\.com|web\.app)$/i.test(location.hostname))},
+ externalUrl(){const u=new URL(location.href);if(this.inApp()==='LINE')u.searchParams.set('openExternalBrowser','1');return u.href},
+ showInApp(){const app=this.inApp(),box=$('login-inapp');box.classList.remove('hidden');
+  box.innerHTML=`<b>你正在 ${esc(app)} 的內建瀏覽器裡</b>，Google 登入視窗在這裡打不開。請改用手機的 Safari／Chrome 開啟這個網址：<br><code class="mono">${esc(location.href.split('?')[0])}</code><div class="row" style="margin-top:8px"><button id="btn-ext" class="primary">用外部瀏覽器開啟</button><button id="btn-copy">複製網址</button></div><p class="muted" style="font-size:12px;margin:6px 0 0">${app==='LINE'?'LINE 會直接跳到系統瀏覽器。':'或點右上角「⋯」→「以瀏覽器開啟」。'}也可以在下方改用 Email 登入。</p>`;
+  $('btn-ext').onclick=()=>{location.href=this.externalUrl()};$('btn-copy').onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split('?')[0]);$('btn-copy').textContent='已複製'}catch(e){prompt('複製這個網址',location.href.split('?')[0])}};$('login-email').classList.remove('hidden')},
+ provider(U){const p=new U.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});return p},
+ async login(){
+  if(this.inApp()){this.showInApp();return}
+  try{$('login-msg').textContent='登入中…';const {U,auth}=await firebase();
+   if(!auth.currentUser){try{await U.signInWithPopup(auth,this.provider(U))}
+    catch(e){const code=e&&e.code||'';
+     if(/popup-blocked|operation-not-supported|web-storage-unsupported|cancelled-popup-request/.test(code)){
+      if(this.sameSiteAuth()){$('login-msg').textContent='改用轉址方式登入…';await U.signInWithRedirect(auth,this.provider(U));return}
+      $('login-msg').innerHTML='這個瀏覽器打不開 Google 登入視窗。請改用 <b>Email 登入</b>（下方），或用 Safari／Chrome 開啟這個網址。';$('login-email').classList.remove('hidden');return}
+     if(/popup-closed-by-user/.test(code)){$('login-msg').textContent='登入視窗被關閉了，請再試一次。';return}
+     throw e}}
+   await this.afterLogin()}
   catch(e){console.error(e);$('login-msg').textContent='登入失敗：'+(e.code||e.message)}},
+ // ----- Email + password (for browsers without a usable Google window); the rules insist on a verified address -----
+ async emailAuth(kind){const mail=$('le-mail').value.trim().toLowerCase(),pw=$('le-pw').value,msg=$('login-msg');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail))return msg.textContent='請輸入正確的 Email。';
+  try{const {U,auth}=await firebase();
+   if(kind==='reset'){await U.sendPasswordResetEmail(auth,mail);msg.textContent='已寄出重設密碼的信到 '+mail;return}
+   if(pw.length<6)return msg.textContent='密碼至少 6 碼。';msg.textContent='處理中…';
+   if(kind==='up')await U.createUserWithEmailAndPassword(auth,mail,pw);else await U.signInWithEmailAndPassword(auth,mail,pw);
+   await this.afterLogin()}
+  catch(e){const c=e&&e.code||'';msg.textContent=c==='auth/email-already-in-use'?'這個 Email 已經註冊過：請直接「登入」；如果是用 Google 註冊的，請改用 Google 登入。':c==='auth/wrong-password'||c==='auth/invalid-credential'?'密碼錯誤，或這個 Email 是用 Google 登入的。':c==='auth/user-not-found'?'還沒有這個帳號，請按「第一次使用：註冊」。':c==='auth/operation-not-allowed'?'Firebase 尚未開啟 Email 登入（主控台 → Authentication → 登入方式）。':'失敗：'+(c||e.message)}},
+ async showVerify(u){const {U,auth}=await firebase(),box=$('login-verify');box.classList.remove('hidden');
+  box.innerHTML=`<b>${esc(u.email)}</b> 還沒驗證信箱。<span id="lv-msg"></span><div class="row" style="margin-top:8px"><button id="lv-send">寄驗證信</button><button id="lv-done" class="primary">我已驗證，繼續</button><button id="lv-out">登出</button></div>`;
+  $('lv-send').onclick=async()=>{try{await U.sendEmailVerification(u);$('lv-msg').textContent='已寄出，請到信箱點連結。'}catch(e){$('lv-msg').textContent='寄信失敗：'+(e.code||e.message)}};
+  $('lv-done').onclick=async()=>{try{await u.reload();await u.getIdToken(true);if(auth.currentUser.emailVerified){box.classList.add('hidden');await this.afterLogin()}else $('lv-msg').textContent='還沒驗證成功，請先點信裡的連結。'}catch(e){$('lv-msg').textContent=e.code||e.message}};
+  $('lv-out').onclick=()=>this.logout();
+  if(!u._sent){u._sent=true;try{await U.sendEmailVerification(u);$('lv-msg').textContent='已寄出驗證信。'}catch(e){}}},
  async afterLogin(){if(this.entering)return;this.entering=true;try{await this._afterLogin()}finally{this.entering=false}},
- async _afterLogin(){const {F,U,auth,db}=await firebase(),u=auth.currentUser;if(!u||!this.me.offline&&this.me.email)return;const mail=(u.email||'').toLowerCase();
+ async _afterLogin(){const {F,U,auth,db}=await firebase(),u=auth.currentUser;if(!u||!this.me.offline&&this.me.email)return;const mail=(u.email||'').toLowerCase();this.disabled=false;
+  if(mail&&!u.emailVerified){await this.showVerify(u);return}
   let role=null;if(u.emailVerified&&mail){try{if((await F.getDoc(F.doc(db,'admins',mail))).exists())role='super'}catch(e){}
    if(!role)try{const d=await F.getDoc(F.doc(db,'staff',mail));if(d.exists()&&d.data().active===true&&ROLES[d.data().role])role=d.data().role;else if(d.exists())this.disabled=true}catch(e){}}
-  if(!role){$('login-msg').innerHTML=`<b>${esc(mail)}</b> 沒有後台權限${this.disabled?'（帳號已停用）':''}${u.emailVerified?'':'（Email 未驗證）'}。請最高管理者或管理者在「帳號與權限」幫你新增。`;await U.signOut(auth);return}
-  this.me={email:mail,role,lv:ROLES[role].lv,offline:false};this.enter();this.log('login','','');this.loadFirestore()},
+  if(!role){$('login-msg').innerHTML=`<b>${esc(mail)}</b> 沒有後台權限${this.disabled?'（帳號已停用）':''}。請最高管理者或管理者在「帳號與權限」幫你新增。`;await U.signOut(auth);return}
+  this.me={email:mail,role,lv:ROLES[role].lv,offline:false};this.enter();this.log('login','',((u.providerData[0]||{}).providerId||'')+(this.inApp()?' '+this.inApp():''));this.loadFirestore()},
  offline(){this.me={email:'',role:null,lv:0,offline:true};this.enter();status('離線模式：可以開啟 JSON 檔或用示範資料。帳號管理需要登入。')},
  enter(){$('login').classList.add('hidden');$('app').classList.remove('hidden');
   $('me-badge').innerHTML=this.me.offline?'<span class="role r0">離線模式</span>':`<span class="mono">${esc(this.me.email)}</span> <span class="role r${this.me.lv}">${ROLES[this.me.role].n}</span>`;
@@ -661,7 +774,10 @@ const Admin={
  renderMe(){const r=this.me.role;$('me-info').innerHTML=this.me.offline?'目前是離線模式（沒有登入）。可以開啟 JSON 檔或示範資料；帳號管理和讀取 Firestore 需要登入。':`登入帳號：<b class="mono">${esc(this.me.email)}</b><br>角色：<span class="role r${this.me.lv}">${ROLES[r].n}</span>　${ROLES[r].d}`}
 };
 if(window.innerWidth<860)$('filter-d').open=false;
-$('btn-g').onclick=()=>Admin.login();$('btn-off').onclick=()=>Admin.offline();$('btn-logout').onclick=()=>Admin.me.offline?location.reload():Admin.logout();
+$('ver').textContent='v'+ADMIN_VERSION;$('ver-me').textContent='v'+ADMIN_VERSION;table('t-changelog',['版本','日期','內容'],CHANGELOG.map(r=>[r[0],r[1],{v:0,h:esc(r[2]),n:false}]));$('ver-login').textContent='v'+ADMIN_VERSION;document.title+=' v'+ADMIN_VERSION;
+$('btn-g').onclick=()=>Admin.login();$('btn-off').onclick=()=>Admin.offline();$('btn-email-show').onclick=()=>$('login-email').classList.toggle('hidden');
+$('le-in').onclick=()=>Admin.emailAuth('in');$('le-up').onclick=()=>Admin.emailAuth('up');$('le-reset').onclick=()=>Admin.emailAuth('reset');$('le-pw').addEventListener('keydown',e=>{if(e.key==='Enter')Admin.emailAuth('in')});
+if(Admin.inApp())Admin.showInApp();$('btn-logout').onclick=()=>Admin.me.offline?location.reload():Admin.logout();
 $('btn-fs').onclick=()=>Admin.loadFirestore();$('btn-menu').onclick=()=>document.body.classList.toggle('navopen');
 $('f-submit').onclick=()=>Admin.submitStaff();$('f-cancel').onclick=()=>Admin.resetForm();$('btn-acct-reload').onclick=()=>Admin.loadStaff();
 $('audit-q').oninput=()=>Admin.loadAudit();$('audit-act').onchange=()=>Admin.loadAudit();$('btn-audit-reload').onclick=()=>Admin.loadAudit();
@@ -669,7 +785,7 @@ $('audit-act').append(...Object.entries(Admin.ACT).map(([k,v])=>new Option(v,k))
 window.addEventListener('hashchange',()=>{if($('app').classList.contains('hidden'))return;const h=location.hash.slice(1).split('/');if(h[0]!==Admin.page||(h[1]&&h[1]!==Admin.sub))Admin.go(h[0],h[1])});
 // stay signed in across reloads
 (async()=>{try{if(!window.NOOK_FIREBASE||!window.NOOK_FIREBASE.apiKey){$('btn-g').disabled=true;$('login-msg').textContent='讀不到 ../js/firebase-config.js：請從網站開啟此頁。目前只能用離線模式。';return}
- const {U,auth}=await firebase();U.onAuthStateChanged(auth,u=>{if(u&&Admin.me.offline&&$('app').classList.contains('hidden'))Admin.afterLogin()})}catch(e){}})();
+ const {U,auth}=await firebase();try{await U.getRedirectResult(auth)}catch(e){$('login-msg').textContent='轉址登入失敗：'+(e.code||e.message)}U.onAuthStateChanged(auth,u=>{if(u&&Admin.me.offline&&$('app').classList.contains('hidden'))Admin.afterLogin()})}catch(e){}})();
 
 </script>
 </body>

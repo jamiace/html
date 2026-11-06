@@ -39,3 +39,16 @@ test('audit',async()=>{const l={by:'mgr@gmail.com',role:'manager',act:'login',ta
  await assertFails(addDoc(collection(as('nobody@gmail.com'),'adminlog'),{...l,by:'nobody@gmail.com'}));
  await assertFails(getDocs(collection(as('ana@gmail.com'),'adminlog')));await assertSucceeds(getDocs(collection(as('mgr@gmail.com'),'adminlog')));});
 test.after(()=>env.cleanup());
+test('0.92.46 fields: profile/board grade, learnlog pl',async()=>{
+ const p=(over={})=>({name:'a',code:'ABCDEF',status:'',ava:{},lvl:1,pets:[],wk:'w2026-11-02',wm:0,tm:0,room:'{}',dev:false,at:serverTimestamp(),...over});
+ const u=env.authenticatedContext('alice').firestore();
+ await assertSucceeds(setDoc(doc(u,'profiles/alice'),p({grade:'小三'})));await assertSucceeds(setDoc(doc(u,'profiles/alice'),p()));
+ await assertFails(setDoc(doc(u,'profiles/alice'),p({grade:'x'.repeat(13)})));await assertFails(setDoc(doc(u,'profiles/alice'),p({grade:3})));
+ const b=(over={})=>({name:'a',ava:{},lvl:1,lv:1,coins:0,tm:0,w:{},dev:false,at:serverTimestamp(),...over});
+ await assertSucceeds(setDoc(doc(u,'board/alice'),b({grade:'國一'})));await assertFails(setDoc(doc(u,'board/alice'),b({grade:5})));
+ const anon=env.authenticatedContext('anon1').firestore();
+ const rec=(over={})=>({v:1,id:'s9',lid:'anon1',acct:'',dev:'',app:'0.92.46',lang:'zh-TW',kind:'grade',sub:'first',t0:1,t1:2,dur:1,done:true,stop:'result',n:10,right:7,coins:60,xp:40,streak:0,lv:'1',ans:[],rev:[],typo:[],at:serverTimestamp(),...over});
+ await assertSucceeds(setDoc(doc(anon,'learnlog/anon1/lsess/s9'),rec({pl:{m:'first',t:3.2,se:.7,n:10,r:7,g:3,d:3,p:-1,mu:3,sd:3}})));
+ await assertSucceeds(setDoc(doc(anon,'learnlog/anon1/lsess/s10'),rec({id:'s10'})));
+ await assertFails(setDoc(doc(anon,'learnlog/anon1/lsess/s11'),rec({id:'s11',pl:'bad'})));
+});

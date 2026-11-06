@@ -13,7 +13,10 @@
    0.92.45 adds, inside ans / rev / typo items only (no new top-level field, so firestore.rules need no change):
      gr = the word's estimated school grade 1-12 · ge = 1 when gap is estimated from the due day (older records), 0 when exact
      h (spelling hint) = 0 none · 1 first letter (the usual spelling question) · 2 masked letters (story labels); before this
-     version the usual first-letter hint was logged as 0 too. */
+     version the usual first-letter hint was logged as 0 too.
+   0.92.46 adds kind 'grade' (sub 'first' | 'daily'): the grade placement. Its session carries pl = {m mode, t theta, se, n, r right,
+     g grade 1-12, d declared grade (0 = none), p previous theta (-1 = none), mu / sd prior}; each answer's p is the placement model's
+     prediction and gr the word's grade, so the backend can check item fit. */
 const LearnLog = {
  V: 1, KEY: 'purr-cozy.learnlog.q', MAX_QUEUE: 300, BATCH: 20, APP: 'purr-learnlog',
  cur: null, typo: null, busy: false, db: null, F: null, lid: '', failed: 0, off: false,
@@ -95,7 +98,7 @@ const LearnLog = {
   const before = this.sess; const r = start(kind, opts);
   if (this.sess && this.sess !== before) {
    L.closeLearn('restart');
-   const o = opts || {}, sub = o.k || o.ch || o.trick || (o.item != null ? 'item' : '') || '';
+   const o = opts || {}, sub = o.k || o.ch || o.trick || o.mode || (o.item != null ? 'item' : '') || '';
    L.cur = { s: this.sess, rec: L.open(this.sess.kind, sub), card: now() };
   }
   return r;
@@ -122,7 +125,7 @@ const LearnLog = {
   const c = live(), s = this.sess;
   if (!c || !s || s.step !== 'quiz' || s.ans) return answer(val);
   const q = s.qs[s.qi], i = q.i, rec = this.rec(i), typed = q.type === 'spell' || q.type === 'listenspell';
-  let p = null; try { p = Adaptive.probability(i, q.type, q); } catch (e) { }
+  let p = null; try { p = s.kind === 'grade' && q.pp != null ? q.pp : Adaptive.probability(i, q.type, q); } catch (e) { }   // placement questions carry the placement model's prediction
   // gap = days since this word was last answered. Records from 0.92.45 keep that day (index 5); older ones only allow an
   // estimate from the due day, which is wrong after a miss (due is always tomorrow then), so it is marked ge:1.
   const box0 = rec ? rec[0] : 0, seenBefore = rec && (rec[3] + rec[4]) > 0, exact = !!rec && rec[5] != null;
@@ -141,7 +144,7 @@ const LearnLog = {
  const finish = Learn.finish.bind(Learn);
  Learn.finish = function () {
   const c = live(), s = this.sess, r = finish();
-  if (c && s && s.result) { const rec = c.rec; rec.done = true; rec.n = s.qs.length; rec.right = s.right; rec.coins = s.result.coins || 0; rec.xp = s.result.xp || 0; L.cur = null; L.close(rec, 'result'); }
+  if (c && s && s.result) { const rec = c.rec; rec.done = true; rec.n = s.qs.length; rec.right = s.right; rec.coins = s.result.coins || 0; rec.xp = s.result.xp || 0; if (s.pl) rec.pl = s.pl; L.cur = null; L.close(rec, 'result'); }
   return r;
  };
 
