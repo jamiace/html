@@ -336,12 +336,13 @@ Object.assign(UI, {
     }
     if (s.step === 'quiz') {
       const q = s.qs[s.qi], v = VOCAB[q.i], A = s.ans;
-      if (q.type === 'listen' && s.spoke !== 'q' + s.qi) { s.spoke = 'q' + s.qi; setTimeout(() => Learn.speak(v.w), 200); }
+      // listening questions say the word once by themselves (0.92.49: 聽寫 too)
+      if ((q.type === 'listen' || q.type === 'listenspell') && !A && s.spoke !== 'q' + s.qi) { s.spoke = 'q' + s.qi; setTimeout(() => Learn.speak(v.w), 200); }
       let prompt, sub;
       if (q.type === 'en2zh') { prompt = h('div', { class: 'qword' }, v.w, h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(v.w) }, ico('i_speaker', 22))); sub = I18n.s("u_6d4c94ada1df", [v.ph ? v.ph + ' · ' : '', v.p]); }
       else if (q.type === 'zh2en') { prompt = h('div', { class: 'qzh', text: Learn.qz(v) }); sub = I18n.s("u_12c496f4a564", [v.p]); }
       else if (q.type === 'listen') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_2895e8416b32"); }
-      else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => Learn.speak(v.w) }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_1fb5519fb68c"); }
+      else if (q.type === 'listenspell') { prompt = h('button', { class: 'chip big primary', onclick: () => { Learn.speak(v.w); const el = document.getElementById('spell-in'); if (el && !el.disabled) el.focus({ preventScroll: true }); } }, ico('i_speaker', 24), I18n.s("u_95ea7762946e")); sub = I18n.s("u_1fb5519fb68c"); }
       else { prompt = h('div', { class: 'qzh', text: Learn.qz(v) }); sub = q.noHint ? I18n.s("u_e0bc10bbdefb", [v.p]) : I18n.s("u_a23b5e2f5b3e", [v.p, v.w.length]); }
       const redo = s.redoFrom != null && s.qi >= s.redoFrom;
       const ctx = q.ctx ? h('p', { class: 'qctx', text: q.ctx }) : null;
@@ -431,6 +432,19 @@ Learn.choiceKey=function(e){
  e.preventDefault();e.stopImmediatePropagation();this.answer(q.opts[n-1]);
 };
 window.addEventListener('keydown',e=>Learn.choiceKey(e),true);
+// 0.92.49 spelling: whatever has the focus (the speaker button, the window), letters typed go straight into the answer box
+window.addEventListener('keydown',e=>{
+ if(e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+ const w=UI.wins?.study,s=Learn.sess;if(!w||w.el.hidden||!s||s.step!=='quiz'||s.ans)return;
+ const q=s.qs?.[s.qi];if(!q||!['spell','listenspell'].includes(q.type))return;
+ const el=document.getElementById('spell-in'),t=e.target;if(!el||el.disabled||t===el)return;
+ if(t&&(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)))return;
+ const other=Object.values(UI.wins).some(v=>v!==w&&!v.el.hidden&&(Number(v.el.style.zIndex)||0)>(Number(w.el.style.zIndex)||0));if(other)return;
+ const put=fn=>{e.preventDefault();e.stopImmediatePropagation();el.focus({preventScroll:true});const a=el.selectionStart??el.value.length,b=el.selectionEnd??a,r=fn(el.value,a,b);el.value=r[0];try{el.setSelectionRange(r[1],r[1])}catch(x){}el.dispatchEvent(new Event('input',{bubbles:true}))};
+ if(e.key.length===1&&/[a-zA-Z' -]/.test(e.key))put((v,a,b)=>[v.slice(0,a)+e.key.toLowerCase()+v.slice(b),a+1]);
+ else if(e.key==='Backspace')put((v,a,b)=>a!==b?[v.slice(0,a)+v.slice(b),a]:[v.slice(0,Math.max(0,a-1))+v.slice(a),Math.max(0,a-1)]);
+ else if(e.key==='Enter'&&!(t&&t.tagName==='BUTTON')){e.preventDefault();e.stopImmediatePropagation();SpellKeys.submit(el)}
+},true);
 document.addEventListener('keydown', e => {
   const w = UI.wins && UI.wins.study; if (!w || w.el.hidden || !Learn.sess) return;
   const tag = (e.target && e.target.tagName) || ''; const s = Learn.sess;

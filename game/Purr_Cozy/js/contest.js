@@ -3,8 +3,8 @@
 
    程度挑戰賽
    - Optional, once a week (the game week: Monday 06:00 → next Monday 06:00). Sign up, then climb L1 → L6.
-   - Every Level is 15 questions from that Level only: 看英選中 4, 看中選英 4, 拼字 3 (no hints), 聽音選義 2, 聽寫 2.
-     On a device without speech the listening questions become 看英選中 / 拼字, and the window says so.
+   - Every Level is 15 questions from that Level only: 看英選中 4, 看中選英 5, 拼字 3 (no hints), 聽音選義 3 (no 聽寫).
+     On a device without speech the listening questions become 看英選中, and the window says so.
    - The words are not just random: the Level's words are sorted by difficulty and cut into 15 bands, one word from each
      band, so every player gets the same spread from easy to hard (fair for a ranking) and the questions get harder
      towards the end. Words this player already had in the contest this week are avoided while there are others.
@@ -23,7 +23,8 @@
    ============================================================ */
 const CONTEST = {
   N: 15, PASS: 11, TOP: 50, LV: 6, BOARD_MS: 10 * 60e3,
-  MIX: [['en2zh', 4], ['zh2en', 4], ['spell', 3], ['listen', 2], ['listenspell', 2]],
+  // 0.92.49: no 聽寫 — hearing a word and spelling it fails too often on similar sounds and unclear speech
+  MIX: [['en2zh', 4], ['zh2en', 5], ['spell', 3], ['listen', 3]],
   // tier colours: 青銅 bronze, 白銀 silver, 黃金 gold, 鉑金 platinum (silver blue), 鑽石 diamond (bright blue), 星耀 star (violet)
   TIER: [null, ['#b9773e', '#f1c08e', '#6f4220'], ['#8f9aa5', '#e6ecf1', '#56616b'], ['#d39b12', '#ffe28a', '#7c5a00'], ['#6f8fbf', '#dbe7f7', '#34507a'], ['#2b8fe8', '#bfe6ff', '#164f8f'], ['#8c4ad8', '#f0d6ff', '#4b1f80']],
   // first pass of a Level each week
@@ -66,7 +67,7 @@ const Contest = {
     const pool = VOCAB.filter(v => v.t === l), fresh = pool.filter(v => !used.has(v.w));
     const src = (fresh.length >= this.N * 3 ? fresh : pool).slice().sort((a, b) => (a.d || 0) - (b.d || 0) || (a.g || 0) - (b.g || 0));
     const types = shuffle(CONTEST.MIX.flatMap(([t, n]) => Array(n).fill(t))).map(t => speak ? t : t === 'listen' ? 'en2zh' : t === 'listenspell' ? 'spell' : t);
-    const typed = t => t === 'spell' || t === 'listenspell', okSpell = v => Learn.spellable(v) && v.w.length >= 3;
+    const typed = t => t === 'spell', okSpell = v => Learn.spellable(v) && v.w.length >= 3;
     const qs = [], taken = new Set(), band = src.length / this.N;
     for (let k = 0; k < this.N; k++) {
       const lo = Math.floor(k * band), hi = Math.max(lo + 1, Math.floor((k + 1) * band)), t = types[k];
@@ -195,14 +196,14 @@ const CtArt = {
   },
   badge(l, small) {
     if (!l) return h('span', { class: 'lc-badge none', text: ct('noBadge') });
-    const [c, g, d] = CONTEST.TIER[l]; return h('span', { class: 'lc-badge' + (small ? ' sm' : ''), style: `--c:${c};--g:${g};--d:${d}`, text: l >= 6 ? ct('badgeTop') : ct('badge', [l]) });
+    const [c, g, d] = CONTEST.TIER[l]; return h('span', { class: 'lc-badge' + (small ? ' sm' : ''), style: `--c:${c};--g:${g};--d:${d}` }, l >= 6 ? h('img', { class: 'lc-bcrown', src: 'assets/contest/crown.png', alt: '' }) : null, l >= 6 ? ct('badgeTop') : ct('badge', [l]));
   },
   html(s) { const d = h('div'); d.innerHTML = s; return d.firstElementChild; },
   // the climb: L6 (summit) on top, L1 at the bottom; the path is lit up to where you are
   ladder(Z) {
     const R = Z.run, T = Z.top, passed = Math.max(R ? R.passed : 0, 0), bestL = T ? T.l : 0, cur = R && !R.over ? R.l : 0;
     const failL = R && R.over && R.passed < 6 ? R.passed + 1 : 0, wrap = h('div', { class: 'lc-ladder' });
-    const summit = h('div', { class: 'lc-summit' + (bestL >= 6 ? ' lit' : '') }, this.html(`<svg width="64" height="40" viewBox="0 0 64 40" aria-hidden="true"><path d="M6 34 L14 10 L26 24 L32 4 L38 24 L50 10 L58 34 Z" fill="${bestL >= 6 ? '#ffd34d' : '#ddd5e4'}" stroke="${bestL >= 6 ? '#a07800' : '#b3aabd'}" stroke-width="3" stroke-linejoin="round"/></svg>`), h('b', { text: bestL >= 6 ? ct('summitDone') : ct('summit') }));
+    const summit = h('div', { class: 'lc-summit' + (bestL >= 6 ? ' lit' : '') }, h('img', { class: 'lc-crown', src: 'assets/contest/crown.png', alt: '', draggable: 'false' }), h('b', { text: bestL >= 6 ? ct('summitDone') : ct('summit') }));
     wrap.append(summit);
     for (let l = 6; l >= 1; l--) {
       const st = l <= passed ? 'done' : l === cur ? 'now' : l === failL ? 'fail' : l <= bestL ? 'best' : 'lock';
@@ -340,9 +341,9 @@ Object.assign(UI, {
       const r = s.result, Z = Contest.Z, l = r.lvl, [c, g, d] = CONTEST.TIER[l], top = r.pass && l >= 6, nextL = l + 1;
       const rewards = r.coins || r.items.length ? h('div', { class: 'rw big' }, r.coins ? h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + r.coins })) : null, r.xp ? h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + r.xp })) : null, ...r.items.map(([k, n]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + n })))) : null;
       if (r.pass) {
-        const stage = CtArt.html(`<div class="lc-stage" style="--c:${c};--g:${g};--d:${d}"><div class="lc-rays"></div>
+        const stage = CtArt.html(`<div class="lc-stage${top ? ' top' : ''}" style="--c:${c};--g:${g};--d:${d}"><div class="lc-rays"></div>
           <div class="lc-shards">${Array.from({ length: 8 }, (_, k) => `<i style="--a:${k * 45 + 20}deg"></i>`).join('')}</div>
-          <div class="lc-old">${CtArt.crest(l, 'now', 92)}</div><div class="lc-new">${CtArt.crest(l, 'done', 110, 'pop')}</div>${top ? '' : `<div class="lc-next-peek">${CtArt.crest(nextL, 'lock', 46)}<span>▲</span></div>`}</div>`);
+          <div class="lc-old">${CtArt.crest(l, 'now', 92)}</div><div class="lc-new">${CtArt.crest(l, 'done', 110, 'pop')}</div>${top ? '<img class="lc-crown-top" src="assets/contest/crown.png" alt="">' : `<div class="lc-next-peek">${CtArt.crest(nextL, 'lock', 46)}<span>▲</span></div>`}</div>`);
         return h('div', { class: 'lc-break pass' }, stage,
           h('h2', { class: 'lc-big', text: top ? ct('topDone') : ct('broke', [l]) }),
           h('p', { class: 'lc-score num', text: ct('score', [r.right, r.n, Contest.pct(Contest.acc(r.right, r.n))]) }),
@@ -435,16 +436,18 @@ Object.assign(UI, {
 (function () {
   const css = `
 .lc-head{display:flex;gap:10px;align-items:center;margin:4px 0 8px}.lc-best{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.lc-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(180deg,var(--g),var(--c) 60%,var(--d));box-shadow:0 0 0 2px var(--d) inset,0 1px 3px rgba(0,0,0,.25);text-shadow:0 1px 0 var(--d);white-space:nowrap}
-.lc-badge.sm{font-size:11px;padding:2px 8px}.lc-badge.none{background:var(--chip,#eee);color:var(--ink2,#777);box-shadow:none;text-shadow:none}
+.lc-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(180deg,var(--c),var(--d));box-shadow:0 0 0 1.5px var(--g) inset,0 1px 3px rgba(0,0,0,.3);text-shadow:0 1px 0 var(--d),0 0 2px var(--d),0 0 1px var(--d);white-space:nowrap}
+.lc-badge.sm{font-size:11px;padding:2px 8px}.lc-badge.none{background:var(--chip,#eee);color:var(--ink-2);box-shadow:none;text-shadow:none}
 .lc-body{position:relative;display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
 .lc-ladder{position:relative;display:flex;flex-direction:column;gap:6px;padding:6px 2px}
-.lc-summit{display:flex;align-items:center;gap:8px;justify-content:center;padding:4px 0;color:var(--ink2,#777)}.lc-summit.lit{color:#a07800;filter:drop-shadow(0 0 8px #ffd34d)}
-.lc-step{position:relative;display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:14px;background:var(--card,#fff);border:2px solid transparent}
+.lc-summit{display:flex;align-items:center;gap:8px;justify-content:center;padding:4px 0;color:var(--ink-2)}.lc-summit.lit{color:#a07800}
+.lc-crown{width:58px;height:auto;filter:grayscale(1) brightness(1.15);opacity:.4}.lc-summit.lit .lc-crown{filter:drop-shadow(0 0 10px #ffd34d);opacity:1;animation:ctBob 2s ease-in-out infinite}
+.lc-stage.top{margin-top:46px}.lc-crown-top{position:absolute;top:-48px;left:50%;width:84px;margin-left:-42px;filter:drop-shadow(0 0 10px #ffd34d);animation:ctPop .6s 1.1s cubic-bezier(.2,1.6,.4,1) both}.lc-bcrown{width:16px;height:auto;margin-right:2px}.lc-badge.sm .lc-bcrown{width:13px}
+.lc-step{position:relative;display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:14px;background:var(--chip);color:var(--ink);border:2px solid transparent}
 .lc-step.lock{opacity:.6;filter:grayscale(.5)}.lc-step.done,.lc-step.best{border-color:var(--c);background:linear-gradient(90deg,color-mix(in srgb,var(--g) 35%,transparent),transparent 70%)}
 .lc-step.now{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent),0 6px 18px color-mix(in srgb,var(--c) 30%,transparent);animation:ctGlow 2.2s ease-in-out infinite}
 .lc-step.fail{border-color:#d9566f55}
-.lc-rail{position:absolute;left:41px;top:-8px;width:6px;height:10px;border-radius:3px;background:#ddd5e4}.lc-rail.lit{background:linear-gradient(var(--g),var(--c))}
+.lc-rail{position:absolute;left:41px;top:-8px;width:6px;height:10px;border-radius:3px;background:var(--line)}.lc-rail.lit{background:linear-gradient(var(--g),var(--c))}
 .lc-step:first-of-type .lc-rail{display:none}
 .lc-name{display:flex;gap:6px;align-items:center}.lc-here{font-size:11px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px}
 .lc-rw{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;font-size:12px;max-width:120px}.lc-rw.got{opacity:.55}.lc-gotmark{font-size:11px;color:#3f8a4f;font-weight:800}
@@ -453,9 +456,9 @@ Object.assign(UI, {
 .lc-crest.now img{filter:drop-shadow(0 0 calc(var(--s) * .12) var(--g,#fff))}.lc-crest.fail img{filter:grayscale(.65) brightness(.9)}.lc-crest.lock img{filter:grayscale(1) brightness(1.15) contrast(.75);opacity:.45}
 .lc-lock{position:absolute;right:2%;bottom:4%;width:30%;height:auto}.lc-check{position:absolute;right:-2%;bottom:0;width:34%;height:auto}
 .lc-prog{position:relative;display:grid;grid-template-columns:repeat(15,1fr);gap:2px;margin-top:4px;height:9px}
-.lc-prog i{border-radius:3px;background:#e6e0ec}.lc-prog i.ok{background:#3f8a4f}.lc-prog i.no{background:#d9566f}.lc-prog i.cur{background:var(--c,#8c5aa8);animation:ctBlink 1s steps(2) infinite}
-.lc-need{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;background:#4a3a52;border-radius:2px}
-.lc-need::after{content:'11';position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:#4a3a52}
+.lc-prog i{border-radius:3px;background:var(--line)}.lc-prog i.ok{background:#3f8a4f}.lc-prog i.no{background:#d9566f}.lc-prog i.cur{background:var(--c,#8c5aa8);animation:ctBlink 1s steps(2) infinite}
+.lc-need{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;background:var(--ink);border-radius:2px}
+.lc-need::after{content:'11';position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:var(--ink)}
 .lc-cta{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 2px}.lc-go{font-size:17px;padding:12px 22px;box-shadow:0 6px 0 rgba(0,0,0,.12)}
 .lc-strip{display:flex;gap:10px;align-items:center;padding:8px 10px;margin-bottom:8px;border-radius:12px;border:2px solid var(--c);background:linear-gradient(90deg,color-mix(in srgb,var(--g) 40%,transparent),transparent)}
 .lc-strip-t{display:flex;justify-content:space-between;gap:8px}.lc-strip-s{margin-top:2px}
@@ -466,15 +469,15 @@ Object.assign(UI, {
 .lc-new{position:absolute;animation:ctPop .7s .55s cubic-bezier(.2,1.6,.4,1) both}
 .lc-shards i{position:absolute;left:50%;top:50%;width:16px;height:20px;margin:-10px -8px;background:linear-gradient(var(--g),var(--c));clip-path:polygon(50% 0,100% 60%,30% 100%,0 40%);transform:rotate(var(--a)) translateY(0);opacity:0;animation:ctShard .9s .45s ease-out forwards}
 .lc-next-peek{position:absolute;right:-6px;top:-4px;display:flex;flex-direction:column;align-items:center;font-weight:900;color:var(--c);animation:ctFadeIn .5s 1.2s both,ctBob 1.6s 1.7s ease-in-out infinite}
-.lc-big{margin:4px 0 0;font-size:28px;letter-spacing:.04em;background:linear-gradient(180deg,#4a3a52,#8c5aa8);-webkit-background-clip:text;background-clip:text;color:transparent;animation:ctFadeIn .4s .9s both}
-.lc-break.pass .lc-big{background:linear-gradient(180deg,#b07a00,#e8a400 50%,#8c5a00);-webkit-background-clip:text;background-clip:text}
+.lc-big{margin:4px 0 0;font-size:28px;letter-spacing:.04em;color:var(--ink);animation:ctFadeIn .4s .9s both}
+.lc-break.pass .lc-big{background:linear-gradient(180deg,#b07a00,#e8a400 50%,#8c5a00);-webkit-background-clip:text;background-clip:text;color:transparent}
 .lc-score{font-size:15px;font-weight:700;margin:0}.lc-actions{margin-top:6px;gap:8px}.lc-keep{display:flex;gap:8px;align-items:center;justify-content:center}
-.lc-rankcard{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(90deg,#fff3c4,transparent);border:2px solid #e8b400}
+.lc-rankcard{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(90deg,var(--hl),transparent);color:var(--ink);border:2px solid #e8b400}
 .lc-board li{list-style:none}.lc-brow{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:10px}.lc-brow.me{background:color-mix(in srgb,#8c5aa8 14%,transparent);outline:2px solid #8c5aa8}
 .lc-brow.top1 .brank{color:#c08d00}.lc-brow.top2 .brank{color:#7d8790}.lc-brow.top3 .brank{color:#a8693a}.lc-brow .brank{min-width:26px;text-align:center;font-weight:900}
 .lc-mine{margin-top:8px;border-top:1px dashed var(--line,#ddd);padding-top:6px}
 .lc-rankrw.top1{border-color:#e8b400}.lc-rankno{min-width:62px;font-weight:900;font-size:15px}.lc-hist{display:flex;gap:10px;align-items:center;padding:3px 0}
-.lc-mini{display:flex;gap:4px;margin:6px 0}.lc-entry{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:8px 10px;margin:4px 0 8px;border-radius:12px;border:2px solid #d39b12;background:linear-gradient(90deg,#fff3c4,transparent 80%);cursor:pointer}
+.lc-mini{display:flex;gap:4px;margin:6px 0}.lc-entry{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:8px 10px;margin:4px 0 8px;border-radius:12px;border:2px solid #d39b12;background:linear-gradient(90deg,var(--hl),var(--paper) 80%);color:var(--ink);font:inherit;cursor:pointer}
 .lc-entry .grow{display:flex;flex-direction:column}
 @keyframes ctGlow{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 22%,transparent),0 8px 22px color-mix(in srgb,var(--c) 40%,transparent)}}
 @keyframes ctBob{50%{transform:translateY(-4px)}}@keyframes ctBlink{50%{opacity:.35}}@keyframes ctSpin{to{transform:rotate(360deg)}}@keyframes ctFadeIn{from{opacity:0;transform:scale(.9)}}
