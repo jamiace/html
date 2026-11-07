@@ -87,8 +87,14 @@ const Contest = {
     Game.save(); this.push(); UI.refresh('contest'); UI.refresh('tasks');
   },
   // start or continue the current Level in the quiz window
+  // 0.92.50: no 聽寫 anywhere in the contest. A Level started before the update still has 聽寫 questions saved in it:
+  // the ones not answered yet become 聽音選義 (same word, four Chinese meanings to choose from)
+  fixRun(R) {
+    if (!R || !R.qs) return;
+    for (let k = R.qi; k < R.qs.length; k++) { const q = R.qs[k]; if (q && q.type === 'listenspell') { const v = VOCAB[q.i]; R.qs[k] = { i: q.i, type: 'listen', noHint: false, opts: Learn.options(v, 'z') }; } }
+  },
   play() {
-    const R = this.Z.run; if (!R || R.over) return;
+    const R = this.Z.run; if (!R || R.over) return; this.fixRun(R);
     if (!R.qs) { R.qs = this.makeLevel(R.l); R.qi = 0; R.right = 0; R.wrong = 0; Game.save(); }
     // the Level was already decided when the quiz was closed: show its result
     if (R.qi >= this.N || this.lost(R)) { const res = this.endLevel(); if (!res) return; res.coins = res.coins ? Game.reward(res.coins, res.xp, 'quiz') : 0; Learn.sess = { kind: 'contest', opts: { level: res.lvl }, step: 'result', result: Object.assign({ msg: '' }, res), wrong: [], qs: [], qi: 0, right: res.right }; return UI.openWin('study'); }
