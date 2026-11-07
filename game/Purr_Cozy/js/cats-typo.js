@@ -30,7 +30,9 @@ const CatsTypo={
   if(slot===3){const lv=VOCAB[fit].t,up=Learn.levelsOn().filter(l=>l>lv)[0];if(up){const harder=sample.filter(i=>VOCAB[i].t===up);if(harder.length)return best(harder,.5)}}
   return fit},
  fitQuestion(){const s=this.session,used=new Set(s.words.slice(0,s.at).map(v=>v.i)),q={noHint:s.task?.tier==='h'};
-  const pool=s.mode==='daily'?s.words.slice(s.at).map(v=>v.i):Adaptive.pool().filter(i=>!used.has(i)&&/^[a-z]+(?:[ '-][a-z]+)*$/i.test(VOCAB[i].w)&&VOCAB[i].w.length<=22);
+  let pool=s.mode==='daily'?s.words.slice(s.at).map(v=>v.i):Adaptive.pool().filter(i=>!used.has(i)&&/^[a-z]+(?:[ '-][a-z]+)*$/i.test(VOCAB[i].w)&&VOCAB[i].w.length<=22);
+  // 0.92.51 先教再考: practice spells words the player has already met (once there are enough of them)
+  if(s.mode!=='daily'){const met=pool.filter(i=>Learn.P[VOCAB[i].w]);if(met.length>=15)pool=met}
   const [id]=s.mode==='daily'?Adaptive.select(pool,1,'spell',{mix:false,q}):[this.practicePick(pool,q)];if(id==null)return;
   if(s.mode==='daily'){const at=s.words.findIndex((v,k)=>k>=s.at&&v.i===id);[s.words[s.at],s.words[at]]=[s.words[at],s.words[s.at]]}else s.words[s.at]=VOCAB[id];
  },
