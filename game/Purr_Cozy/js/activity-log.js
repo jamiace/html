@@ -19,7 +19,7 @@ const ActLog = {
   KEY: 'purr-cozy.actlog', V: 2, FLUSH_MS: 15 * 60e3, HIDE_MS: 2 * 60e3, ACTIVE_MS: 120e3, MAPMAX: 40,
   D: null, dirty: false, lastAct: 0, lastTick: Date.now(), sentAt: 0, busy: false, wasHidden: 0, fg: 'room', oldRules: false,
   // which activity a window belongs to (the back office shows these groups)
-  GROUP: { learn: 'learn', study: 'learn', words: 'learn', catstypo: 'learn', typodesk: 'learn', placement: 'learn', contest: 'learn', story: 'learn', swap: 'learn',
+  GROUP: { learn: 'learn', study: 'learn', words: 'learn', catstypo: 'learn', typodesk: 'learn', placement: 'learn', contest: 'learn', lorebook: 'learn', story: 'learn', swap: 'learn',
     cozygame: 'mini', furnplay: 'furn', device: 'furn', pet: 'pet', storage: 'decor', themeask: 'decor', shop: 'shop', merchant: 'shop', gacha: 'shop', prize: 'shop', gift: 'social',
     friends: 'social', visit: 'social', card: 'social', cowork: 'focus', timer: 'focus', todo: 'focus', memo: 'focus', tasks: 'tasks', need: 'tasks',
     music: 'music', avatar: 'avatar', settings: 'settings', account: 'settings', cloudpick: 'settings', more: 'settings', dev: 'settings' },
