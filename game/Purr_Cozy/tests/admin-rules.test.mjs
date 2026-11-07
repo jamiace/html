@@ -1,7 +1,7 @@
 // 後台帳號與權限的安全規則測試（admins / staff / adminlog / learnlog）。npm run test:rules 會一起執行。
 import {initializeTestEnvironment,assertSucceeds,assertFails} from '@firebase/rules-unit-testing';
 import {readFileSync} from 'fs';
-import {doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,collectionGroup,query,limit,serverTimestamp} from 'firebase/firestore';
+import {doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,addDoc,collectionGroup,query,limit,orderBy,serverTimestamp} from 'firebase/firestore';
 import test from 'node:test';
 const env=await initializeTestEnvironment({projectId:'demo-admin-rules',firestore:{rules:readFileSync(new URL('../firestore.rules', import.meta.url),'utf8'),host:'127.0.0.1',port:8080}});
 const as=(email,verified=true,uid=email)=>env.authenticatedContext(uid,{email,email_verified:verified}).firestore();
@@ -92,6 +92,7 @@ test('0.92.48 daily behaviour summaries (bday)',async()=>{
  const day=(over={})=>({v:1,d:'2026-11-07',lid:'anon7',acct:'',dev:'abc',app:'0.92.48',tester:false,min:12.5,sess:2,h:{'20':10,'21':2.5},win:{learn:2},wt:{learn:6.25},mini:{pinball:1},fp:{},mus:8,songs:3,pet:{ball:2},furn:{sofa:1},edit:0,focus:0,soc:{},first:'20:05',last:'21:10',at:serverTimestamp(),...over});
  await assertSucceeds(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day()));
  await assertSucceeds(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({min:20,sess:3})));
+ await assertSucceeds(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({v:2,vis:35.5,wt:{learn:6,room:4,pet:2}})));await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({v:3})));await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({vis:2000})));
  await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-08'),day()));
  await assertFails(setDoc(doc(u,'learnlog/anon7/bday/bad'),day({d:'bad'})));
  await assertFails(setDoc(doc(u,'learnlog/anon7/bday/2026-11-07'),day({extra:1})));
@@ -101,4 +102,23 @@ test('0.92.48 daily behaviour summaries (bday)',async()=>{
  const cgq=db=>getDocs(query(collectionGroup(db,'bday'),limit(10)));
  await assertSucceeds(cgq(as('ana2@gmail.com')));await assertFails(cgq(as('ana@gmail.com')));await assertFails(cgq(as('nobody@gmail.com')));await assertFails(cgq(u));
  await assertFails(deleteDoc(doc(as('ana2@gmail.com'),'learnlog/anon7/bday/2026-11-07')));await assertSucceeds(deleteDoc(doc(as('mgr@gmail.com'),'learnlog/anon7/bday/2026-11-07')));
+});
+test('0.92.49 weekly level contest (contest/{week}/rows|test/{uid})',async()=>{
+ const k1=env.authenticatedContext('kid1').firestore(),k2=env.authenticatedContext('kid2').firestore();
+ const row=(over={})=>({name:'小美',ava:{},grade:'G5',l:3,a:867,n:45,s:3867,tries:1,at:serverTimestamp(),...over});
+ await assertSucceeds(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row()));
+ await assertSucceeds(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row({l:6,a:1000,s:7000,tries:2})));
+ await assertSucceeds(setDoc(doc(k1,'contest/w2026-11-02/test/kid1'),row()));
+ await assertFails(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row({s:9999})));          // score must match
+ await assertFails(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row({l:7,s:7867})));
+ await assertFails(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row({a:1200,s:4200})));
+ await assertFails(setDoc(doc(k1,'contest/w2026-11-02/rows/kid1'),row({extra:1})));
+ await assertFails(setDoc(doc(k1,'contest/w2026-11-02/other/kid1'),row()));
+ await assertFails(setDoc(doc(k1,'contest/badweek/rows/kid1'),row()));
+ await assertFails(setDoc(doc(k2,'contest/w2026-11-02/rows/kid1'),row()));                 // only your own row
+ await assertSucceeds(getDocs(query(collection(k2,'contest/w2026-11-02/rows'),orderBy('s','desc'),limit(50))));
+ await assertFails(getDocs(query(collection(k2,'contest/w2026-11-02/rows'),orderBy('s','desc'),limit(51))));
+ await assertFails(getDocs(query(collection(env.unauthenticatedContext().firestore(),'contest/w2026-11-02/rows'),limit(10))));
+ await assertSucceeds(getDocs(collection(as('mgr@gmail.com'),'contest/w2026-11-02/rows')));await assertSucceeds(getDocs(collection(as('ana2@gmail.com'),'contest/w2026-11-02/test')));
+ await assertFails(deleteDoc(doc(k2,'contest/w2026-11-02/rows/kid1')));await assertSucceeds(deleteDoc(doc(as('mgr@gmail.com'),'contest/w2026-11-02/rows/kid1')));
 });

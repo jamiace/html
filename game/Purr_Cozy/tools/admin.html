@@ -79,6 +79,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 .ops{display:flex;gap:4px}
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end}.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink2)}
 .form input[type=email]{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.chart[data-empty]:not([data-empty=""])::after{content:attr(data-empty);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:13px}.chart{position:relative}
 #filterbar{margin-bottom:16px}#filterbar summary{cursor:pointer}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .card{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--card);cursor:pointer}.card:hover{border-color:var(--acc)}.card b{display:block}
@@ -113,7 +114,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
   <div id="subtabs" class="hidden"></div>
   <main id="dash">
    <section id="filterbar" class="hidden"><details id="filter-d" open><summary><b>篩選</b> <span class="muted" style="font-size:13px">（日期、入口、程度、年級帶、版本、玩家）</span></summary><div style="margin-top:10px">  <div class="row">
-   <label>從 <input type="date" id="f-from"></label><label>到 <input type="date" id="f-to"></label>
+   <label>期間 <select id="f-span"></select></label><button id="f-prev" title="往前一段">◀</button><label>從 <input type="date" id="f-from"></label><label>到 <input type="date" id="f-to"></label><button id="f-next" title="往後一段">▶</button><span class="muted" id="f-range-note"></span>
    <label>入口 <select id="f-kind"><option value="">全部</option></select></label>
    <label>程度 <select id="f-level"><option value="">全部</option></select></label>
    <label>年級帶 <select id="f-grade"><option value="">全部</option><option value="e">國小</option><option value="j">國中</option><option value="s1">高一</option><option value="s2">高二</option><option value="s3">高三</option></select></label>
@@ -132,9 +133,9 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
    <div class="page hidden" data-page="analysis"><div class="sub" data-sub="s-words"><section id="s-words"><h2>單字實測難度</h2><p class="why">每個字真正的答對率和作答時間。「程度可能標錯」= 答對率和「同程度、同題型」的平均差很多（標 L2 但難得像 L5，或反過來）。拼字題本來就比選擇題難，所以比較時會照每個字實際被考的題型組合算期望值，不會因為某個字剛好常被考拼字就被誤判。點表頭可以排序。</p>
   <div class="row" style="margin-bottom:8px"><input type="text" id="w-search" placeholder="搜尋單字"><label><input type="checkbox" id="w-flag"> 只看可能標錯的</label><button id="w-csv">下載 CSV</button></div>
   <div class="tbl"><table id="t-words"></table></div></section></div>
-<div class="sub" data-sub="s-matrix"><section id="s-matrix"><h2>程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div><h3>年級帶 × 題型</h3><p class="why">0.92.45 起每題會記錄單字的建議年級（gr）。舊資料沒有這個欄位，不會出現在這張表。</p><div class="tbl"><table id="t-grade"></table></div></section></div>
+<div class="sub" data-sub="s-matrix"><section id="s-matrix"><h2>程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><p class="note hidden" id="matrix-need"></p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div><h3>年級帶 × 題型</h3><p class="why">0.92.45 起每題會記錄單字的建議年級（gr）。舊資料沒有這個欄位，不會出現在這張表。</p><div class="tbl"><table id="t-grade"></table></div></section></div>
 <div class="sub" data-sub="s-confuse"><section id="s-confuse"><h2>易混淆字與拼錯</h2><p class="why">選擇題最常被選成哪個錯誤答案，以及拼字最常見的錯法。可以拿來改干擾選項、做「易混淆字」專題。</p><div class="grid2"><div><h3>選擇題：答案 → 被誤選的字</h3><p class="why" id="pairs-note"></p><div class="tbl"><table id="t-pairs"></table></div><h3 style="margin-top:12px">最常被誤選的字（不論題目）</h3><div class="tbl"><table id="t-lure"></table></div></div><div><h3>拼字：常見錯誤類型</h3><div class="chart"><canvas id="c-spell"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-spell"></table></div></div></div></section></div>
-<div class="sub" data-sub="s-forget"><section id="s-forget"><h2>遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。0.92.45 以前的紀錄只能用「到期日」反推上次作答日，答錯過的字會被算成間隔太長；有精確間隔的資料時，這張圖只用精確資料（作答紀錄 ge=0）。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section></div>
+<div class="sub" data-sub="s-forget"><section id="s-forget"><h2>遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。0.92.45 以前的紀錄只能用「到期日」反推上次作答日，答錯過的字會被算成間隔太長；有精確間隔的資料時，這張圖只用精確資料（作答紀錄 ge=0）。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><p class="note hidden" id="forget-need"></p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section></div>
 <div class="sub" data-sub="s-calib"><section id="s-calib"><h2>自適應模型校正</h2>
   <p class="why">遊戲出題前會預測每題的「答對機率」p。這一節回答三個問題：<b>① 預測準不準</b>（說 80% 的題，實際是不是約 80% 答對）、<b>② 偏在哪裡</b>（哪種技能、哪個程度、哪個預測區間）、<b>③ 要怎麼調</b>（給出可以直接套用的修正量）。四種技能分開看，因為選擇題有 25% 猜中下限、拼字沒有。</p>
   <div class="row calib-ctl"><label>分組數 <select id="cal-bins"><option value="10">10 組</option><option value="15" selected>15 組</option><option value="20">20 組</option></select></label>
@@ -173,7 +174,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
   <h3 style="margin-top:16px">每日完成率</h3><p class="why">當天有來玩（任何學習回合）的玩家中，完成當天小測的比例。</p><div class="chart"><canvas id="c-grade-daily"></canvas></div>
   <h3 style="margin-top:16px">題目難度是否標得準（item fit）</h3>
   <p class="why">橫軸＝題目難度減玩家程度（b − θ，單位：年級；題型差距已加進 b）。實線＝實際答對率，虛線＝模型預測。兩條線貼近代表單字的年級 g 標得合理；實線整體在虛線下方代表單字其實比標的年級難。</p>
-  <div class="chart chart-lg"><canvas id="c-grade-fit"></canvas></div>
+  <p class="note hidden" id="fit-need"></p><div class="chart chart-lg"><canvas id="c-grade-fit"></canvas></div>
   <h3 style="margin-top:16px">單字年級修正建議</h3>
   <p class="why">只用程度測驗的作答。每個字的「實際答對率」和「模型預測」相差太多時，給出建議的年級調整 Δg（正＝這個字比標的年級難，應調高）。至少 12 次作答才計算；點「下載 CSV」可以直接套回 tools/vocab.json 的 grade_num。</p>
   <div class="row" style="margin-bottom:8px"><label><input type="checkbox" id="gw-flag"> 只看 |Δg| ≥ 1 的字</label><button id="gw-csv">下載 CSV</button><span class="muted" id="gw-note"></span></div>
@@ -185,21 +186,32 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 <div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><p class="why" id="typo-note" style="margin-top:8px"></p><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
 <div class="sub" data-sub="s-help"><section id="s-help"><h2>提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section></div></div>
    <div class="page hidden" data-page="behavior">
-    <section><h2>使用行為</h2><p class="why">每位玩家每天一份摘要（遊戲在背景累計，一天只上傳幾次）：什麼時段上線、時間花在哪裡、玩了哪些小遊戲、怎麼照顧寵物、聽多久音樂、佈置多久。可以看全體，也可以單獨看一位玩家（會同時顯示全體做比較）。</p>
-     <div class="row" style="margin-bottom:8px"><label>從 <input type="date" id="bh-from"></label><label>到 <input type="date" id="bh-to"></label>
-      <label>對象 <select id="bh-who"><option value="">全部（不含測試）</option><option value="test">只看測試帳號</option><option value="sim">只看模擬學生</option><option value="all">全部（含測試）</option></select></label>
+    <section><h2>使用行為</h2><p class="why">每位玩家每天一份摘要（遊戲在背景累計，一天只上傳幾次）。人數一律分成「不重複玩家」（同一個人只算一次）和「人次」（一個人來一天算一次）。可以看全體，也可以單獨看一位玩家（會同時顯示全體做比較）。</p>
+     <div class="row" style="margin-bottom:8px"><label>期間 <select id="bh-span"></select></label><button id="bh-prev" title="往前一段">◀</button><label>從 <input type="date" id="bh-from"></label><label>到 <input type="date" id="bh-to"></label><button id="bh-next" title="往後一段">▶</button><span class="muted" id="bh-range-note"></span></div>
+     <div class="row" style="margin-bottom:8px"><label>對象 <select id="bh-who"><option value="">真實玩家（不含測試、模擬）</option><option value="test">只看測試帳號</option><option value="sim">只看模擬學生</option><option value="all">全部</option></select></label>
       <label>玩家 <select id="bh-user"><option value="">全部玩家（綜合）</option></select></label>
       <button id="bh-reload" class="primary">從 Firestore 讀取</button><button id="bh-demo">示範資料</button><button id="bh-csv">下載玩家表（CSV）</button></div>
      <p class="muted" id="bh-note">尚未載入</p><p class="note" id="bh-sel-note"></p><div class="kpis" id="bh-kpis"></div></section>
-    <section><h2>每天</h2><div class="chart" style="height:260px"><canvas id="c-bh-daily"></canvas></div></section>
-    <section><h2>時間花在哪裡</h2><p class="why">以「視窗開著的時間」計算；佈置包含在房間裡拖曳家具的時間。選了單一玩家時，灰色是全體。</p><div class="chart" style="height:280px"><canvas id="c-bh-share"></canvas></div></section>
-    <section><h2>上線時段（分鐘，星期 × 小時）</h2><div class="tbl" style="max-height:none"><table id="bh-heat" class="heat"></table></div></section>
-    <section><h2>玩法細節</h2><div class="grid2">
-     <div><h3>小遊戲（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-mini"></canvas></div></div>
-     <div><h3>寵物互動（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-pet"></canvas></div></div>
-     <div><h3>點家具（類別與活動）</h3><div class="chart" style="height:240px"><canvas id="c-bh-furn"></canvas></div></div>
-     <div><h3>打開的視窗（次數）</h3><div class="chart" style="height:240px"><canvas id="c-bh-win"></canvas></div></div></div></section>
-    <section><h2>每位玩家</h2><p class="why">「風格」依時間分配自動判斷。按「單獨看」切換到那位玩家，再按一次回到全體。</p><div class="tbl" style="max-height:640px"><table id="t-bh-users"></table></div></section>
+    <section><h2>每天有多少人、玩多久</h2><p class="why">期間超過 92 天時改成每週一根（週日起算），一年就是 52 根。「在線」＝遊戲畫面開著的時間。</p><div class="chart" style="height:260px"><canvas id="c-bh-daily"></canvas></div></section>
+    <section><h2>玩的時候在做什麼</h2><p class="why">只算玩家正在操作的時間，而且每一分鐘只算一件事：正在用的那個視窗（最後點的或剛打開的），沒有視窗就是在房間裡。開著放在旁邊沒在用的視窗不算。括號內是做過這件事的人數。選了單一玩家時，灰色是全體。</p><p class="muted" id="bh-share-note"></p><div class="chart" style="height:320px"><canvas id="c-bh-share"></canvas></div></section>
+    <section><h2>背景陪伴：音樂與番茄鐘</h2><p class="why">音樂算的是<b>真的在播放</b>的分鐘（遊戲放在背景也算），不是音樂視窗開著的時間；番茄鐘算的是計時中的分鐘。所以音樂可以比在線時間還長（例如把遊戲縮到背景聽歌）。</p><div class="chart" style="height:240px"><canvas id="c-bh-bg"></canvas></div></section>
+    <section><h2>上線時段（星期 × 小時）</h2><div class="row" style="margin-bottom:8px"><label>格子顯示 <select id="bh-heat-mode"><option value="people">不重複人數</option><option value="min">在線分鐘</option></select></label><span class="muted">滑鼠移到格子上可以看到人數和分鐘</span></div><div class="tbl" style="max-height:none"><table id="bh-heat" class="heat"></table></div></section>
+    <section><h2>玩法細節</h2><p class="why">名稱和遊戲裡一樣；長條是次數，括號內是人數。小遊戲每開一局算一次。</p><div class="grid2">
+     <div><h3>小遊戲（開局次數）</h3><div class="chart" style="height:260px"><canvas id="c-bh-mini"></canvas></div></div>
+     <div><h3>家具小時光（次數）</h3><div class="chart" style="height:260px"><canvas id="c-bh-fp"></canvas></div></div>
+     <div><h3>照顧寵物（真的有做到的次數）</h3><div class="chart" style="height:260px"><canvas id="c-bh-pet"></canvas></div></div>
+     <div><h3>點家具（依商店分類）</h3><div class="chart" style="height:260px"><canvas id="c-bh-furn"></canvas></div></div>
+     <div><h3>打開的視窗（次數）</h3><div class="chart" style="height:260px"><canvas id="c-bh-win"></canvas></div></div>
+     <div><h3>好友互動（次數）</h3><div class="chart" style="height:260px"><canvas id="c-bh-soc"></canvas></div></div></div></section>
+    <section><h2>每位玩家</h2><p class="why">「主要在做」看主動操作時間（不含發呆看房間的時間，除非大部分都在看房間）；「來的節奏」看期間內上線天數和每次待多久；「陪伴」是音樂播放占在線一半以上、或番茄鐘占三成以上。按「單獨看」切換到那位玩家，再按一次回到全體。</p><div class="tbl" style="max-height:640px"><table id="t-bh-users"></table></div></section>
+   </div>
+   <div class="page hidden" data-page="contest">
+    <section><h2>程度挑戰賽</h2><p class="why">遊戲 0.92.49 起的每週活動：玩家自由報名，從 L1 一路突破到 L6，每階 15 題、答對 11 題突破。每人每週一列成績（最好的一次），真實玩家和測試帳號分開存。這裡讀的是整週全部的成績（玩家在遊戲裡只看得到前 50 名和自己）。每讀一次＝這週的參加人數次讀取。</p>
+     <div class="row" style="margin-bottom:8px"><label>週 <select id="ct-wk"></select></label><label>對象 <select id="ct-board"><option value="rows">真實玩家</option><option value="test">測試帳號</option></select></label>
+      <button id="ct-load" class="primary">從 Firestore 讀取</button><button id="ct-demo">示範資料</button><button id="ct-csv">下載 CSV</button></div>
+     <p class="muted" id="ct-note">尚未載入</p><div class="kpis" id="ct-kpis"></div></section>
+    <section><h2>突破到哪一階</h2><p class="why">左：每位玩家本週最好成績的分布。右：突破到某一階以上的人占參加者的比例；哪一階掉最多，代表那一階對大家最難（或 15 題裡的難字太多）。題目逐題的答對率在「學習分析」，入口選「程度挑戰賽」。</p><div class="grid2"><div class="chart"><canvas id="c-ct-dist"></canvas></div><div class="chart"><canvas id="c-ct-reach"></canvas></div></div></section>
+    <section><h2>排行</h2><p class="why">排序和遊戲一樣：突破的階數 → 答對率（只算突破的那幾階）→ 先到的人在前面。</p><p class="note" id="ct-rank-note"></p><div class="tbl" style="max-height:640px"><table id="t-ct"></table></div></section>
    </div>
    <div class="page hidden" data-page="ai"><section id="s-ai"><h2>AI 分析報告</h2>
   <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
@@ -282,7 +294,7 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 <script>
 /* ---------- data ---------- */
 const S={raw:[],sess:[],ans:[],rev:[],typo:[],charts:{},summary:null,report:''};
-const KIND={daily:'每日複習',practice:'自由練習',need:'房間泡泡',train:'寵物訓練',help:'幫朋友',story:'故事',team:'團隊',chal:'挑戰',levelgate:'升級考',typo:'貓咪打字',redo:'重練'};
+const KIND={daily:'每日複習',practice:'自由練習',need:'房間泡泡',train:'寵物訓練',help:'幫朋友',story:'故事',team:'團隊',chal:'挑戰',levelgate:'升級考',contest:'程度挑戰賽',grade:'程度測驗',typo:'貓咪打字',redo:'重練'};
 const QT={en2zh:'看英選中',zh2en:'看中選英',listen:'聽音選義',spell:'拼字',listenspell:'聽寫'};
 const $=id=>document.getElementById(id),fmt=(x,d=0)=>x==null||isNaN(x)?'–':Number(x).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d}),pct=x=>x==null||isNaN(x)?'–':(x*100).toFixed(1)+'%';
 const dayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -305,7 +317,11 @@ async function load(list,label){
  await loadVocabMeta();normalizeRecords(list);
  S.raw=list.filter(r=>r&&r.v===1&&Array.isArray(r.ans));
  status(`${label}：${S.raw.length} 個回合`);$('btn-save').disabled=!S.raw.length;$('dash').classList.remove('hidden');Admin.dataLoaded(label);
- let lo=Infinity,hi=-Infinity;for(const r of S.raw)if(r.t0){if(r.t0<lo)lo=r.t0;if(r.t0>hi)hi=r.t0}if(hi>0){$('f-from').value=dayKey(lo);$('f-to').value=dayKey(hi)}
+ // one person = one signed-in account; a device that never signed in counts as one person. A device used by exactly one
+ // account is that account even on days it played signed out; a shared device without sign-in stays one "person".
+ const accOf=new Map();for(const r of S.raw)if(r.acct){(accOf.get(r.lid)||accOf.set(r.lid,new Set()).get(r.lid)).add(r.acct)}
+ for(const r of S.raw){const a=accOf.get(r.lid);r.pk=r.acct||(a&&a.size===1?[...a][0]:'anon:'+r.lid)}
+ S.range=S.range||rangeCtl('f',()=>analyse(),()=>spanOf(S.raw.map(r=>r.t0&&dayKey(r.t0))));S.range.reset();
  fillSelect('f-kind',[...new Set(S.raw.map(r=>r.kind))].sort(),k=>KIND[k]||k);
  fillSelect('f-level',[1,2,3,4,5,6],l=>'L'+l);
  fillSelect('f-app',[...new Set(S.raw.map(r=>r.app).filter(Boolean))].sort(),x=>x);
@@ -369,7 +385,45 @@ function filtered(){
  for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
  return {sess,ans,rev,typo}}
 
-function chart(id,cfg){if(S.charts[id])S.charts[id].destroy();const css=getComputedStyle(document.documentElement);Chart.defaults.color=css.getPropertyValue('--ink2').trim();Chart.defaults.borderColor=css.getPropertyValue('--line').trim();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:false},cfg.options||{});S.charts[id]=new Chart($(id),cfg)}
+// axes that count people or things never show fractions (there is no such thing as half a player)
+const COUNT_AXIS=/^(人|人數|人次|玩家|玩家數|次|次數|題|題數|回合|天|天數|首)/;
+function intAxes(cfg){const sc=cfg.options&&cfg.options.scales;if(!sc)return;for(const ax of Object.values(sc)){const t=ax&&ax.title&&ax.title.text;if(t&&COUNT_AXIS.test(t)){ax.ticks=Object.assign({precision:0},ax.ticks||{});if(ax.beginAtZero==null&&ax.min==null)ax.beginAtZero=true}}}
+/* period picker (dashboard, analysis, behaviour): at least one week, at most one year.
+   A week is either the last 7 days or a calendar week that starts on Sunday; ◀ ▶ move one period. */
+const SPANS=[['7','過去 7 天'],['wk','一週（週日起）'],['30','過去 30 天'],['mo','一個月（1 日起）'],['90','過去 90 天'],['365','過去一年'],['custom','自訂（7 天～1 年）']];
+const WD_ZH=['日','一','二','三','四','五','六'];
+function rangeCtl(p,onChange,dataDays,def='30'){
+ const span=$(p+'-span'),from=$(p+'-from'),to=$(p+'-to'),note=$(p+'-range-note');
+ span.replaceChildren(...SPANS.map(([v,t])=>new Option(t,v)));span.value=def;
+ const D=k=>new Date(k+'T00:00'),K=d=>dayKey(d.getTime()),add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},today=()=>{const t=new Date();t.setHours(0,0,0,0);return t};
+ let anchor=today();
+ const len=()=>Math.round((D(to.value)-D(from.value))/864e5)+1;
+ const show=()=>{const a=D(from.value),b=D(to.value),f=d=>(d.getMonth()+1)+'/'+d.getDate()+'（'+WD_ZH[d.getDay()]+'）';note.textContent=`${f(a)} – ${f(b)}，共 ${len()} 天`+(b>today()?'（還沒過完）':'');$(p+'-next').disabled=b>=today()};
+ const set=(a,b)=>{from.value=K(a);to.value=K(b);show()};
+ const compute=()=>{const v=span.value,a=anchor;
+  if(v==='wk'){const s0=add(a,-a.getDay());set(s0,add(s0,6))}
+  else if(v==='mo')set(new Date(a.getFullYear(),a.getMonth(),1),new Date(a.getFullYear(),a.getMonth()+1,0));
+  else if(v!=='custom')set(add(a,-(+v-1)),a)};
+ const clamp=()=>{let a=D(from.value),b=D(to.value);if(isNaN(a)||isNaN(b))return;if(b<a)[a,b]=[b,a];const n=Math.round((b-a)/864e5)+1;if(n<7)a=add(b,-6);if(n>366)a=add(b,-365);span.value='custom';anchor=b;set(a,b)};
+ const step=dir=>{const v=span.value;if(v==='mo')anchor=new Date(anchor.getFullYear(),anchor.getMonth()+dir,1);else if(v==='wk')anchor=add(anchor,7*dir);else if(v==='custom'){const n=len();set(add(D(from.value),n*dir),add(D(to.value),n*dir));anchor=D(to.value);return onChange()}else anchor=add(anchor,+v*dir);
+  if(anchor>today())anchor=today();compute();onChange()};
+ // a new kind of period starts again from today (or from the last day with data)
+ span.onchange=()=>{if(span.value!=='custom'){ctl.reset();onChange()}};
+ from.onchange=to.onchange=()=>{clamp();onChange()};
+ $(p+'-prev').onclick=()=>step(-1);$(p+'-next').onclick=()=>step(1);
+ const ctl={
+  // start from today; when the data stops earlier (an old JSON file, demo data) start from its last day instead
+  reset(){const dd=dataDays();anchor=today();if(dd&&dd[1]&&D(dd[1])<add(anchor,-6))anchor=D(dd[1]);if(span.value==='custom')span.value=def;compute()},
+  days:len,
+  // long periods are drawn per week (weeks start on Sunday) so a year is 52 bars, not 365
+  bucket(k){if(len()<=92)return k;const d=D(k);return K(add(d,-d.getDay()))},
+  weekly:()=>len()>92};
+ return ctl;
+}
+// explains an empty or partly empty chart: why, how much data it needs, and how much there is now
+const need=(id,html)=>{const e=$(id);if(!e)return;e.innerHTML=html||'';e.classList.toggle('hidden',!html)};
+const spanOf=keys=>{let lo=null,hi=null;for(const k of keys){if(!k)continue;if(lo==null||k<lo)lo=k;if(hi==null||k>hi)hi=k}return lo?[lo,hi]:null};
+function chart(id,cfg){intAxes(cfg);if(S.charts[id])S.charts[id].destroy();const css=getComputedStyle(document.documentElement);Chart.defaults.color=css.getPropertyValue('--ink2').trim();Chart.defaults.borderColor=css.getPropertyValue('--line').trim();cfg.options=Object.assign({responsive:true,maintainAspectRatio:false,animation:false},cfg.options||{});S.charts[id]=new Chart($(id),cfg)}
 // vertical 95% error bars for scatter datasets: each point may carry lo / hi in y units
 const ErrorBars={id:'errorBars',afterDatasetsDraw(c){const{ctx,scales:{x,y}}=c;c.data.datasets.forEach((ds,i)=>{if(!ds.errorBars||!c.isDatasetVisible(i))return;ctx.save();ctx.strokeStyle=ds.borderColor||'#888';ctx.lineWidth=1.5;
  for(const p of ds.data){if(p.lo==null)continue;const px=x.getPixelForValue(p.x),a=y.getPixelForValue(p.lo),b=y.getPixelForValue(p.hi);ctx.beginPath();ctx.moveTo(px,a);ctx.lineTo(px,b);ctx.moveTo(px-4,a);ctx.lineTo(px+4,a);ctx.moveTo(px-4,b);ctx.lineTo(px+4,b);ctx.stroke()}ctx.restore()})}};
@@ -393,14 +447,15 @@ const P=v=>({v,h:pct(v)});
 function analyse(){
  const {sess,ans,rev,typo}=filtered(),minN=+$('f-min').value||20,summary={};
  /* 1 overview */
- const learners=new Set(sess.map(r=>r.lid)),acc=ans.length?ans.filter(a=>a.ok).length/ans.length:null,done=sess.filter(r=>r.done).length;
- const days=new Map();for(const r of sess){const k=dayKey(r.t0);const d=days.get(k)||{u:new Set(),n:0,ok:0};d.u.add(r.lid);days.set(k,d)}for(const a of ans){const d=days.get(dayKey(a.at));if(d){d.n++;d.ok+=a.ok}}
+ const learners=new Set(sess.map(r=>r.pk)),acc=ans.length?ans.filter(a=>a.ok).length/ans.length:null,done=sess.filter(r=>r.done).length;
+ const days=new Map(),bk=t=>S.range?S.range.bucket(dayKey(t)):dayKey(t),pd=new Set();for(const r of sess){const k=bk(r.t0);const d=days.get(k)||{u:new Set(),pd:new Set(),n:0,ok:0};d.u.add(r.pk);d.pd.add(r.pk+'|'+dayKey(r.t0));pd.add(r.pk+'|'+dayKey(r.t0));days.set(k,d)}for(const a of ans){const d=days.get(bk(a.at));if(d){d.n++;d.ok+=a.ok}}
+ const wkly=S.range&&S.range.weekly(),nDays=S.range?S.range.days():Math.max(1,days.size);
  const dk=[...days.keys()].sort();
- const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:ans.length?median(ans.map(a=>a.ms))/1000:null,completionRate:sess.length?done/sess.length:null,medianSessionMin:sess.some(r=>r.dur>0)?median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000:null,avgDailyActive:dk.length?[...days.values()].reduce((s,d)=>s+d.u.size,0)/dk.length:null};
+ const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:ans.length?median(ans.map(a=>a.ms))/1000:null,completionRate:sess.length?done/sess.length:null,medianSessionMin:sess.some(r=>r.dur>0)?median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000:null,personDays:pd.size,avgDailyActive:pd.size/nDays};
  summary.overview=ov;
- $('kpis').innerHTML=[['學習人數',fmt(ov.learners)],['回合數',fmt(ov.sessions)],['作答題數',fmt(ov.answers)],['整體答對率',pct(ov.accuracy)],['每題作答時間（中位數）',fmt(ov.medianSecPerAnswer,1)+' 秒'],['回合完成率',pct(ov.completionRate)],['每回合時間（中位數）',fmt(ov.medianSessionMin,1)+' 分'],['平均每日學習人數',fmt(ov.avgDailyActive,1)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
- chart('c-daily',{type:'bar',data:{labels:dk,datasets:[{type:'line',label:'學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566f55'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
- summary.daily=dk.slice(-30).map(k=>({day:k,learners:days.get(k).u.size,answers:days.get(k).n,accuracy:days.get(k).n?+(days.get(k).ok/days.get(k).n).toFixed(3):null}));
+ $('kpis').innerHTML=[['學習人數（不重複）',fmt(ov.learners)],['學習人次（人‧天）',fmt(ov.personDays)],['平均每天學習人數',fmt(Math.round(ov.avgDailyActive))],['回合數',fmt(ov.sessions)],['作答題數',fmt(ov.answers)],['整體答對率',pct(ov.accuracy)],['每題作答時間（中位數）',fmt(ov.medianSecPerAnswer,1)+' 秒'],['回合完成率',pct(ov.completionRate)],['每回合時間（中位數）',fmt(ov.medianSessionMin,1)+' 分']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
+ chart('c-daily',{type:'bar',data:{labels:dk.map(k=>wkly?k.slice(5)+' 週':k.slice(5)),datasets:[{type:'line',label:wkly?'每週不重複人數':'當天學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},...(wkly?[{type:'line',label:'每週人次（人‧天）',data:dk.map(k=>days.get(k).pd.size),yAxisID:'y',borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',borderDash:[5,4]}]:[]),{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566f55'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
+ summary.daily=dk.slice(-30).map(k=>({[wkly?'weekFromSunday':'day']:k,uniqueLearners:days.get(k).u.size,personDays:days.get(k).pd.size,answers:days.get(k).n,accuracy:days.get(k).n?+(days.get(k).ok/days.get(k).n).toFixed(3):null}));
 
  /* 2 words */
  // accuracy of every level x question type: the yardstick for "is this word harder than its level?"
@@ -429,6 +484,8 @@ function analyse(){
  /* 3 matrix */
  const M={};for(const a of ans){const k=a.l+'|'+a.q;const m=M[k]||(M[k]={n:0,ok:0});m.n++;m.ok+=a.ok}
  const qts=Object.keys(QT),lvls=[1,2,3,4,5,6].filter(l=>qts.some(q=>M[l+'|'+q]));
+ const nLS=ans.filter(a=>a.q==='listenspell').length;
+ need('matrix-need',nLS?'':'「聽寫」欄是空的，不是資料遺失：聽寫題只出現在學習的「聽力挑戰」選<b>困難</b>時（一般難度只出聽音選義），這段期間沒有人玩過困難的聽力挑戰。要看到這欄，需要有玩家去玩它，或把期間拉長。');
  table('t-matrix',['程度',...qts.map(q=>QT[q])],lvls.map(l=>['L'+l,...qts.map(q=>{const m=M[l+'|'+q];return m?{v:m.ok/m.n,h:pct(m.ok/m.n)+` <span class="muted">(${m.n})</span>`}:{v:-1,h:'–'}})]));
  chart('c-level',{type:'line',data:{labels:lvls.map(l=>'L'+l),datasets:qts.map((q,k)=>({label:QT[q],data:lvls.map(l=>{const m=M[l+'|'+q];return m?+(m.ok/m.n*100).toFixed(1):null}),borderColor:['#8c5aa8','#d9566f','#3f8a4f','#b86a12','#3a7bd5'][k]}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}}}}});
  const GM={};for(const a of ans){const b=bandOf(a.gr||0);if(!b)continue;const k=b+'|'+a.q,m=GM[k]||(GM[k]={n:0,ok:0});m.n++;m.ok+=a.ok}
@@ -467,6 +524,9 @@ function analyse(){
  const B=[[1,1],[2,2],[3,4],[5,7],[8,15],[16,30],[31,9999]],bl=b=>b[1]>999?'31天以上':b[0]===b[1]?b[0]+'天':b[0]+'–'+b[1]+'天',SRS=[0,1,2,4,7,15];
  const exactOnly=ans.some(a=>a.ge===0&&a.gap>=1);const F={};for(const a of ans){if(a.gap==null||a.gap<1||a.b0<1)continue;if(exactOnly&&a.ge!==0)continue;const bi=B.findIndex(b=>a.gap>=b[0]&&a.gap<=b[1]);const k=a.b0+'|'+bi;const f=F[k]||(F[k]={n:0,ok:0});f.n++;f.ok+=a.ok}
  const boxes=[1,2,3,4,5];
+ {const re=ans.filter(a=>a.gap!=null&&a.gap>=1&&a.b0>=1),cells=Object.values(F),ok=cells.filter(f=>f.n>=10).length,people=new Set(re.map(a=>a.lid)).size;
+  need('forget-need',ok===0?`目前畫不出來，原因是資料還不夠，不是程式壞掉：這張圖要「同一個字隔天以後再遇到」的作答，而且每一格（熟練盒 × 間隔）至少要 10 題才畫，免得 2、3 題就畫出 0% 或 100% 誤導判斷。這段期間有 <b>${fmt(re.length)}</b> 題是隔天以後再遇到的字（${fmt(people)} 個裝置），分散在 ${fmt(cells.length)} 格，沒有一格到 10 題。玩家要連續學 1～2 週才會累積；把期間拉長到 90 天或一年會比較快看到。`
+   :cells.length>ok?`有 ${fmt(cells.length-ok)} 格還不到 10 題，圖上先不畫（表格裡仍列出題數，括號內是題數）。`:'')}
  chart('c-forget',{type:'line',data:{labels:B.map(bl),datasets:boxes.map((b,k)=>({label:'盒'+b+'（間隔 '+SRS[b]+' 天）',data:B.map((_,bi)=>{const f=F[b+'|'+bi];return f&&f.n>=10?+(f.ok/f.n*100).toFixed(1):null}),borderColor:['#d9566f','#b86a12','#3f8a4f','#3a7bd5','#8c5aa8'][k],spanGaps:true}))},options:{scales:{y:{min:0,max:100,title:{display:true,text:'答對率 %'}},x:{title:{display:true,text:'距離上次作答'}}}}});
  table('t-forget',['熟練盒','目前間隔',...B.map(bl)],boxes.map(b=>['盒'+b,SRS[b]+' 天',...B.map((_,bi)=>{const f=F[b+'|'+bi];return f?{v:f.ok/f.n,h:pct(f.ok/f.n)+` <span class="muted">(${f.n})</span>`}:{v:-1,h:'–'}})]));
  summary.forgettingCurve={gapSource:exactOnly?'exact (0.92.45+)':'estimated from due day (older logs; inflated after wrong answers)',currentIntervalsDays:{box1:1,box2:2,box3:4,box4:7,box5:15},accuracyByBoxAndGap:Object.fromEntries(boxes.map(b=>['box'+b,Object.fromEntries(B.map((x,bi)=>[bl(x),F[b+'|'+bi]?{n:F[b+'|'+bi].n,accuracy:+(F[b+'|'+bi].ok/F[b+'|'+bi].n).toFixed(3)}:null]).filter(x=>x[1]))]))};
@@ -566,7 +626,7 @@ function analyse(){
  summary.dropOff={unfinishedSessions:undone.length,share:sess.length?+(undone.length/sess.length).toFixed(3):null,topStops:dl.slice(0,12).map(([k,n])=>({where:k,sessions:n})),byEntry:Object.fromEntries(Object.entries(dk2).map(([k,v])=>[k,+(v.u/v.s).toFixed(3)]))};
 
  /* 9 retention */
- const allSess=S.raw.filter(who),first=new Map(),active=new Map();let lastDay=0;for(const r of allSess){const d=dayNo(r.t0);if(d>lastDay)lastDay=d;if(!first.has(r.lid)||d<first.get(r.lid))first.set(r.lid,d);(active.get(r.lid)||active.set(r.lid,new Set()).get(r.lid)).add(d)}
+ const allSess=S.raw.filter(who),first=new Map(),active=new Map();let lastDay=0;for(const r of allSess){const d=dayNo(r.t0);if(d>lastDay)lastDay=d;if(!first.has(r.pk)||d<first.get(r.pk))first.set(r.pk,d);(active.get(r.pk)||active.set(r.pk,new Set()).get(r.pk)).add(d)}
  const coh={};
  // back = active on any day in [from, to] after the first day; counted only when that window has fully passed
  const W3=[['d1',1,1],['w2',7,13],['w5',28,34]];
@@ -603,17 +663,17 @@ function analyse(){
  /* 13 placement (kind 'grade', session field pl) */
  const PL_A=1.1,PL_OFF={en2zh:0,zh2en:.4,spell:.7},PL_G={en2zh:.25,zh2en:.25,spell:0};
  const GS=sess.filter(r=>r.kind==='grade'&&r.pl&&typeof r.pl.t==='number').sort((a,b)=>a.t0-b.t0);
- const byP={};for(const r of GS)(byP[r.lid]||(byP[r.lid]=[])).push(r);
+ const byP={};for(const r of GS)(byP[r.pk]||(byP[r.pk]=[])).push(r);
  const pls=Object.keys(byP),latest=pls.map(k=>byP[k][byP[k].length-1]),firsts=pls.map(k=>byP[k][0]);
  const med=a=>median(a),gOf=t=>Math.max(1,Math.min(12,Math.round(t)));
  const declared=latest.filter(r=>r.pl.d>0),agree=declared.filter(r=>Math.abs(gOf(r.pl.t)-r.pl.d)<=1).length;
  // daily completion: players active on a day vs players with a grade session that day (days after their first placement)
- const actD={},gradeD={};for(const r of sess){const k=dayKey(r.t0);(actD[k]||(actD[k]=new Set())).add(r.lid);if(r.kind==='grade')(gradeD[k]||(gradeD[k]=new Set())).add(r.lid)}
+ const actD={},gradeD={};for(const r of sess){const k=dayKey(r.t0);(actD[k]||(actD[k]=new Set())).add(r.pk);if(r.kind==='grade')(gradeD[k]||(gradeD[k]=new Set())).add(r.pk)}
  const firstDay={};for(const k of pls)firstDay[k]=dayKey(byP[k][0].t0);
  const dkeys=Object.keys(actD).sort().slice(-30),comp=dkeys.map(k=>{const el=[...actD[k]].filter(l=>firstDay[l]&&firstDay[l]<k);return{k,n:el.length,ok:el.filter(l=>gradeD[k]&&gradeD[k].has(l)).length}}).filter(x=>x.n>0);
  const compAll=comp.reduce((s,x)=>s+x.ok,0)/Math.max(1,comp.reduce((s,x)=>s+x.n,0));
  const grown=pls.map(k=>({first:byP[k][0],last:byP[k][byP[k].length-1]})).filter(x=>x.last.t0-x.first.t0>=7*864e5).map(x=>x.last.pl.t-x.first.pl.t);
- $('grade-kpis').innerHTML=GS.length?[['有程度資料的玩家',fmt(pls.length)],['搬家日（首測）',fmt(GS.filter(r=>r.pl.m==='first').length)],['每日小測回合',fmt(GS.filter(r=>r.pl.m==='daily').length)],['每人平均測驗次數',fmt(GS.length/pls.length,1)],['程度中位數',latest.length?GRADE_NAME(gOf(med(latest.map(r=>r.pl.t)))):'–'],['自填 vs 實測 ±1 內',declared.length?pct(agree/declared.length)+` <small>(${declared.length})</small>`:'–'],['每日小測完成率',comp.length?pct(compAll):'–'],['7 天以上的成長（平均）',grown.length?(grown.reduce((a,b)=>a+b,0)/grown.length>=0?'+':'')+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2)+` <small>年級 (${grown.length} 人)</small>`:'–']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join(''):'<p class="muted">還沒有程度測驗的紀錄（需要 0.92.46 以上的遊戲版本）。</p>';
+ $('grade-kpis').innerHTML=GS.length?[['有程度資料的玩家',fmt(pls.length)],['搬家日（首測）',fmt(GS.filter(r=>r.pl.m==='first').length)],['每日小測回合',fmt(GS.filter(r=>r.pl.m==='daily').length)],['每人測驗次數（中位數）',fmt(Math.round(median(pls.map(k=>byP[k].length))))+' 次'],['程度中位數',latest.length?GRADE_NAME(gOf(med(latest.map(r=>r.pl.t)))):'–'],['自填 vs 實測 ±1 內',declared.length?pct(agree/declared.length)+` <small>(${declared.length})</small>`:'–'],['每日小測完成率',comp.length?pct(compAll):'–'],['7 天以上的成長（平均）',grown.length?(grown.reduce((a,b)=>a+b,0)/grown.length>=0?'+':'')+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2)+` <small>年級 (${grown.length} 人)</small>`:'–']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join(''):'<p class="muted">還沒有程度測驗的紀錄（需要 0.92.46 以上的遊戲版本）。</p>';
  const G12=Array.from({length:12},(_,i)=>i+1),g12l=G12.map(g=>GRADE_NAME(g));
  chart('c-grade-dist',{type:'bar',data:{labels:g12l,datasets:[{label:'實測（最新）',data:G12.map(g=>latest.filter(r=>gOf(r.pl.t)===g).length),backgroundColor:'#8c5aa8'},{label:'自填年級',data:G12.map(g=>latest.filter(r=>r.pl.d===g).length),backgroundColor:'#d9566f88'}]},options:{scales:{y:{title:{display:true,text:'人數'}}}}});
  const DEC={};for(const r of latest){const k=r.pl.d>0?r.pl.d:0;(DEC[k]||(DEC[k]=[])).push(r.pl.t)}
@@ -628,6 +688,9 @@ function analyse(){
  // item fit: accuracy by (b − θ), per type, against the model
  const FIT={},WD={};for(const r of GS){for(const a of r.ans||[]){if(!a.gr||typeof a.p!=='number'||a.p<0)continue;const type=a.q in PL_OFF?a.q:'en2zh',b=a.gr+PL_OFF[type],x=Math.max(-5,Math.min(5,Math.round(b-r.pl.t))),k=type+'|'+x,f=FIT[k]||(FIT[k]={n:0,ok:0,p:0});f.n++;f.ok+=a.ok;f.p+=a.p;
   const w=WD[a.w]||(WD[a.w]={w:a.w,g:a.gr,l:a.l,n:0,ok:0,p:0,th:0,gs:0});w.n++;w.ok+=a.ok;w.p+=a.p;w.th+=r.pl.t;w.gs+=PL_G[type]}}
+ {const cells=Object.values(FIT),ok=cells.filter(f=>f.n>=8).length,nA=cells.reduce((a,f)=>a+f.n,0);
+  need('fit-need',ok===0?`目前畫不出來，原因是資料還不夠：這張圖只用「搬家日」和「每日小測」的作答，每一個點（題型 × 難度差）至少要 8 題才畫。這段期間有 <b>${fmt(nA)}</b> 題程度測驗作答（${fmt(pls.length)} 位玩家），分散在 ${fmt(cells.length)} 個點。每位玩家每天只有 8 題小測，通常要 20 位以上玩家玩一週，或把期間拉長，才看得出來。`
+   :cells.length>ok?`有 ${fmt(cells.length-ok)} 個點還不到 8 題，先不畫。`:'')}
  const XS=Array.from({length:11},(_,i)=>i-5),FC={en2zh:'#8c5aa8',zh2en:'#3f8a4f',spell:'#d9566f'},FN={en2zh:'看英選中',zh2en:'看中選英',spell:'拼字'};
  chart('c-grade-fit',{type:'line',data:{labels:XS.map(x=>(x>0?'+':'')+x),datasets:Object.keys(FN).flatMap(t=>[{label:FN[t]+'：實際',data:XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?+(f.ok/f.n*100).toFixed(1):null}),borderColor:FC[t],backgroundColor:FC[t],spanGaps:true},{label:FN[t]+'：模型',data:XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?+(f.p/f.n*100).toFixed(1):null}),borderColor:FC[t],borderDash:[5,4],pointRadius:0,spanGaps:true}])},options:{scales:{x:{title:{display:true,text:'題目難度 − 玩家程度（年級）'}},y:{min:0,max:100,title:{display:true,text:'答對率 %'}}}}});
  const lgt=x=>Math.log(x/(1-x)),cl=x=>Math.min(.98,Math.max(.02,x));
@@ -693,13 +756,14 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.01';
-const CHANGELOG=[['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.02';
+const CHANGELOG=[['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
  {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-grade', '程度測驗'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
  {id:'behavior',n:'使用行為',i:'☷',lv:0},
+ {id:'contest',n:'程度挑戰賽',i:'♛',lv:0},
  {id:'ai',n:'AI 報告',i:'✦',lv:0},
  {id:'data',n:'資料與匯出',i:'⇅',lv:0},
  {id:'players',n:'玩家帳號',i:'♟',lv:2,group:'管理'},
@@ -724,7 +788,7 @@ const Admin={
   document.body.classList.remove('navopen');this.renderNav();
   requestAnimationFrame(()=>Object.values(S.charts).forEach(c=>{try{c.resize()}catch(e){}}));
   if(id==='players'&&!this.players.length)this.loadPlayers();if(id==='behavior'){if(!B.loaded&&!this.me.offline)this.loadBehavior();else this.renderBehavior()}
-  if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
+  if(id==='contest'){this.ctInit();if(!CTA.rows.length&&!this.me.offline)this.ctLoad()}if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
  // ---------- auth ----------
  // In-app browsers (LINE, Facebook, Instagram ...) cannot open the Google sign-in window, and on iPhone the Google
  // helper page on firebaseapp.com may lose its state when this page is on another domain (storage partitioning).
@@ -1000,76 +1064,150 @@ $('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').
 for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.unreg'].map(k=>new Option(Admin.ACT[k],k)));
 
 
-/* ================= 0.5.01 使用行為：每人每天一份摘要（learnlog/{logId}/bday/{date}） ================= */
-const BGROUP={learn:['learn','study','catstypo','placement','story','words','typodesk','need','tasks'],mini:['cozygame','furnplay','gacha','prize','merchant'],pet:['pet','paw'],decor:['shop','storage','avatar','themeask','rug'],
- music:['music'],social:['friends','visit','card','team','account','gift'],focus:['timer','todo','memo']};
-const BNAME={learn:'學習',mini:'小遊戲',pet:'寵物',decor:'佈置與商店',music:'音樂',social:'好友與社交',focus:'專注與待辦',other:'其他'};
-const BCOL={learn:'#8c5aa8',mini:'#d9566f',pet:'#b86a12',decor:'#3f8a4f',music:'#3a7bd5',social:'#c27ba0',focus:'#6b7a8f',other:'#aaa'};
-const groupOf=w=>{for(const g in BGROUP)if(BGROUP[g].includes(w))return g;return 'other'};
-const B={raw:[],sel:'',loaded:false};
+/* ================= 0.5.02 使用行為：每人每天一份摘要（learnlog/{logId}/bday/{date}） =================
+   Version 2 summaries (game 0.92.49+): vis = minutes on screen, min = minutes actively used, wt = active minutes by
+   what was on screen (one activity at a time), mus = minutes music was actually playing, focus = minutes the
+   focus timer ran. Version 1 (0.92.48) only had window-open time, so its time split and music are not used. */
+const BACT={learn:'學英文',mini:'小遊戲',furn:'家具小時光',pet:'照顧寵物',decor:'佈置房間',shop:'商店與扭蛋',social:'好友與拜訪',tasks:'任務',focus:'番茄鐘與待辦',music:'選歌（音樂視窗）',avatar:'換造型',settings:'設定',room:'看房間、和貓咪待著',other:'其他'};
+const BCOL={learn:'#8c5aa8',mini:'#d9566f',furn:'#c27ba0',pet:'#b86a12',decor:'#3f8a4f',shop:'#e0a030',social:'#5aa0a8',tasks:'#7a6a52',focus:'#6b7a8f',music:'#3a7bd5',avatar:'#a87ac2',settings:'#999',room:'#cdb89a',other:'#bbb'};
+// names as the game shows them (zh-TW)
+const BMINI={pinball:'彈珠台',toss:'投籃',maze:'傾斜迷宮',vending:'貓咪販賣機',memory:'翻牌配對',puzzle:'滑動拼圖',wire:'接水管通電',diff:'找不同',stars:'星星順序',parking:'貓咪停車場',weave:'刺繡',reaction:'反應力',fish:'釣魚',balance:'疊積木',instrument:'彈奏樂器',meowtypo:'Meow Typo',typing:'Meow Typo'};
+const BFP={memory:'小物配對',breath:'30 秒呼吸休息',journal:'看看與留下故事',plant:'照料植物',brew:'下午茶',study:'學習角',pet:'招呼貓咪',memo:'寫便條',inspiration:'每日小提問',sky:'星空小物',typing:'打字角',aquarium:'看魚缸',weather:'看天氣',photo:'拍房間照片',direct_storage:'打開收納',direct_avatar:'打開造型',direct_music:'打開音樂',instrument:'彈奏樂器'};
+const BPET={food:'餵飯',treat:'給零食',brush:'梳毛',bath:'洗澡',med:'餵藥',pat:'摸摸',wand:'逗貓棒',ball:'玩球',yarn:'玩毛線球',nip:'貓草',mouse:'玩老鼠玩具',feather:'玩羽毛',throw_ball:'丟球',throw_yarn:'丟毛線球',throw_nip:'丟貓草',throw_mouse:'丟老鼠玩具',played:'陪玩（舊版）'};
+const BFURN={theme:'主題套組',supply:'消耗道具',work:'桌椅與工作區',rest:'床鋪與休憩',storage:'收納與展示',media:'影音與電玩',lighting:'燈具',nature:'植物與水景',play:'趣味與桌遊',collect:'收藏與裝飾',cat:'貓咪用品',wall:'牆面裝飾',fabric:'地毯與布料',window:'窗戶',pet:'領養貓咪'};
+const BWIN={timer:'番茄鐘',todo:'待辦清單',memo:'便條紙',shop:'商店',storage:'收納箱',avatar:'造型',pet:'寵物',cowork:'一起專注',settings:'設定與紀錄',gift:'禮物',themeask:'套用主題',music:'音樂',tasks:'任務',need:'需求',merchant:'旅行商人',swap:'複習換道具',learn:'學習',study:'單字',words:'單字本',prize:'扭蛋結果',gacha:'扭蛋重複',account:'帳號與雲端存檔',cloudpick:'存檔移轉',friends:'好友',visit:'拜訪',card:'名片',story:'旅行商人的故事',more:'更多',dev:'開發者模式',catstypo:'Meow Typo',typodesk:'書桌時間',furnplay:'家具小時光',device:'設備',cozygame:'小小遊戲',placement:'英文程度',weekly:'每週任務',contest:'程度挑戰賽'};
+const BSOC={visit:'拜訪好友',help:'幫好友的忙'};
+// version-1 summaries recorded window-open time by window; map it as well as possible
+const V1G={learn:'learn',study:'learn',catstypo:'learn',placement:'learn',story:'learn',words:'learn',typodesk:'learn',need:'tasks',tasks:'tasks',cozygame:'mini',furnplay:'furn',gacha:'shop',prize:'shop',merchant:'shop',pet:'pet',paw:'pet',shop:'shop',storage:'decor',avatar:'avatar',themeask:'decor',music:'music',friends:'social',visit:'social',card:'social',gift:'social',timer:'focus',todo:'focus',memo:'focus',cowork:'focus'};
+const nm=(map,k)=>map[k]||k;
+const B={raw:[],sel:'',loaded:false,heat:'people'};
 Object.assign(Admin,{
- keyOf(d){return d.acct||('anon:'+d.lid)},
- nameOf(k){if(k.startsWith('anon:'))return '未登入 '+k.slice(5,11);const p=(this.players||[]).find(x=>x.uid===k);return p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||k.slice(0,8)):(B.names&&B.names[k])||('帳號 '+k.slice(0,8))},
+ keyOf(d){return d.pk||d.acct||('anon:'+d.lid)},
+ nameOf(k){if(k.startsWith('anon:'))return '未登入裝置 '+k.slice(5,11);const p=(this.players||[]).find(x=>x.uid===k);return p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||k.slice(0,8)):(B.names&&B.names[k])||('帳號 '+k.slice(0,8))},
  async loadBehavior(){if(this.me.offline)return;const {F,db}=await firebase(),note=$('bh-note');note.textContent='讀取中…';
   try{const out=[];let last=null;for(;;){const q=last?F.query(F.collectionGroup(db,'bday'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'bday'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>out.push(d.data()));note.textContent=`讀取中… ${out.length}`;if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
-   this.setBehavior(out,'Firestore');this.log('load','bday',out.length+' 天份')}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.01 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
- setBehavior(rows,label){B.raw=rows;B.loaded=true;const days=[...new Set(rows.map(r=>r.d))].sort();if(days.length&&!$('bh-from').value){$('bh-from').value=days[Math.max(0,days.length-14)];$('bh-to').value=days[days.length-1]}
-  $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要、${new Set(rows.map(r=>this.keyOf(r))).size} 位玩家`;this.renderBehavior()},
+   this.setBehavior(out,'Firestore');this.log('load','bday',out.length+' 天份')}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.02 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
+ setBehavior(rows,label){
+  // same person rule as the learning analysis: a device only ever used by one account belongs to that account
+  const accOf=new Map();for(const r of rows)if(r.acct)(accOf.get(r.lid)||accOf.set(r.lid,new Set()).get(r.lid)).add(r.acct);
+  for(const r of rows){const a=accOf.get(r.lid);r.pk=r.acct||(a&&a.size===1?[...a][0]:'anon:'+r.lid);r.v2=r.v>=2&&typeof r.vis==='number'}
+  B.raw=rows;B.loaded=true;B.range=B.range||rangeCtl('bh',()=>this.renderBehavior(),()=>spanOf(B.raw.map(r=>r.d)),'7');B.range.reset();
+  const v1=rows.filter(r=>!r.v2).length;
+  $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要（人‧天）、${fmt(new Set(rows.map(r=>this.keyOf(r))).size)} 位不重複玩家`+(v1?`；其中 ${fmt(v1)} 份是 0.92.48 的舊格式（只記錄視窗開著的時間，時間分配與音樂不採用）`:'');this.renderBehavior()},
  bhRows(user){const from=$('bh-from').value,to=$('bh-to').value,w=$('bh-who').value;
-  return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&(()=>{const t=r.tester||/^test-/.test(r.dev||''),s=/^sim\d/.test(r.dev||'');return w==='all'?true:w==='test'?t:w==='sim'?s:!t})())},
- // one player (or everyone) → totals
- bhSum(rows){const t={min:0,mus:0,edit:0,focus:0,sess:0,songs:0,days:0,users:new Set(),g:{},h:Array(24).fill(0),dow:Array.from({length:7},()=>Array(24).fill(0)),mini:{},pet:{},furn:{},fp:{},win:{},soc:{},byDay:{}};
-  for(const r of rows){t.min+=r.min||0;t.mus+=r.mus||0;t.edit+=r.edit||0;t.focus+=r.focus||0;t.sess+=r.sess||0;t.songs+=r.songs||0;t.users.add(this.keyOf(r));
-   const day=t.byDay[r.d]||(t.byDay[r.d]={users:new Set(),min:0});day.users.add(this.keyOf(r));day.min+=r.min||0;
-   for(const [w,m] of Object.entries(r.wt||{})){const g=groupOf(w);t.g[g]=(t.g[g]||0)+m}
-   t.g.decor=(t.g.decor||0)+(r.edit||0);
-   const dw=(new Date(r.d+'T12:00').getDay()+6)%7;for(const [hh,m] of Object.entries(r.h||{})){t.h[+hh]+=m;t.dow[dw][+hh]+=m}
-   for(const k of ['mini','pet','furn','fp','win','soc'])for(const [a,n] of Object.entries(r[k]||{}))t[k][a]=(t[k][a]||0)+n}
-  t.days=rows.length;return t},
- styleOf(t){const g=Object.assign({},t.g);g.music=Math.max(g.music||0,(t.mus||0)*.5);g.focus=Math.max(g.focus||0,t.focus||0);const e=Object.entries(g).filter(([k])=>k!=='other').sort((a,b)=>b[1]-a[1]);
-  const tot=e.reduce((s,x)=>s+x[1],0);if(!tot)return '–';const [k,v]=e[0];return BNAME[k]+(v/tot>.5?'型':'為主')},
+  return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&(()=>{const t=r.tester||/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct)),s=/^sim\d/.test(r.dev||'');return w==='all'?true:w==='test'?t:w==='sim'?s:!t&&!s})())},
+ // totals for one player or everyone; every count also keeps who did it, so charts can say "N 次（M 人）"
+ bhSum(rows){const t={vis:0,min:0,mus:0,focus:0,sess:0,songs:0,pd:rows.length,v2:0,users:new Set(),act:{},actU:{},musU:new Set(),focusU:new Set(),cells:Array.from({length:7},()=>Array.from({length:24},()=>({m:0,u:new Set()}))),byB:{},firstD:{},lastD:{}};
+  for(const k of ['mini','pet','furn','fp','win','soc'])t[k]={},t[k+'U']={};
+  for(const r of rows){const u=this.keyOf(r),vis=r.v2?r.vis:(r.min||0);t.users.add(u);t.sess+=r.sess||0;t.vis+=vis;t.min+=r.min||0;
+   if(!t.firstD[u]||r.d<t.firstD[u])t.firstD[u]=r.d;if(!t.lastD[u]||r.d>t.lastD[u])t.lastD[u]=r.d;
+   const bk=B.range?B.range.bucket(r.d):r.d,b=t.byB[bk]||(t.byB[bk]={u:new Set(),pd:0,vis:0});b.u.add(u);b.pd++;b.vis+=vis;
+   if(r.v2){t.v2++;t.mus+=r.mus||0;t.focus+=r.focus||0;t.songs+=r.songs||0;if((r.mus||0)>=1)t.musU.add(u);if((r.focus||0)>=1)t.focusU.add(u);
+    for(const [a,m] of Object.entries(r.wt||{})){t.act[a]=(t.act[a]||0)+m;if(m>=1)(t.actU[a]||(t.actU[a]=new Set())).add(u)}}
+   const dw=new Date(r.d+'T12:00').getDay();for(const [hh,m] of Object.entries(r.h||{})){const c=t.cells[dw][+hh];if(!c)continue;c.m+=m;if(m>=1)c.u.add(u)}
+   for(const k of ['mini','pet','furn','fp','win','soc'])for(const [a,n] of Object.entries(r[k]||{})){t[k][a]=(t[k][a]||0)+n;(t[k+'U'][a]||(t[k+'U'][a]=new Set())).add(u)}}
+  return t},
+ // a description a person would write: what they mostly do, how often and how long they come, what keeps them company
+ styleOf(t,periodDays){
+  const act=Object.entries(t.act).filter(([k])=>!['room','settings','other'].includes(k)).sort((a,b)=>b[1]-a[1]),tot=Object.values(t.act).reduce((a,b)=>a+b,0);
+  let what='–';
+  if(tot>=5){const room=(t.act.room||0)/tot;if(room>=.6||!act.length)what='看房間、陪貓';else{const [k,v]=act[0];what=v/tot>=.45?BACT[k].replace(/（.*）/,'')+'為主':act.slice(0,2).map(([k])=>BACT[k].replace(/（.*）/,'')).join('＋')}}
+  const days=t.pd,rate=days/Math.max(1,periodDays),perVisit=t.sess?t.vis/t.sess:0,visitsDay=days?t.sess/days:0;
+  const often=days<=1?'只來過 1 天':rate>=.7?'幾乎每天':rate>=.35?'常常來':rate>=.12?'偶爾來':'很少來';
+  const how=visitsDay>=3&&perVisit<12?'、一天開很多次、每次很短':perVisit>=60?'、一次待很久':perVisit<5&&t.sess?'、每次只看一下':'';
+  const company=[];if(t.v2&&t.vis>0){if(t.mus/t.vis>=.5)company.push('邊聽音樂');if(t.focus/t.vis>=.3)company.push('開著番茄鐘')}
+  return {what,rhythm:often+how,company:company.join('、')}},
  renderBehavior(){if(!B.loaded)return;const all=this.bhRows(''),users=[...new Set(all.map(r=>this.keyOf(r)))];
   const sel=$('bh-user'),cur=B.sel&&users.includes(B.sel)?B.sel:'';B.sel=cur;
-  sel.replaceChildren(new Option('全部玩家（綜合）',''),...users.map(u=>new Option(this.nameOf(u),u)));sel.value=cur;
-  const rows=cur?all.filter(r=>this.keyOf(r)===cur):all,T=this.bhSum(rows),A=this.bhSum(all),nU=cur?1:T.users.size||1,days=Object.keys(T.byDay).sort();
-  const kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`,m1=x=>fmt(Math.round(x));
-  $('bh-kpis').innerHTML=(cur?kpi(esc(this.nameOf(cur)),'玩家',esc(this.styleOf(T))):kpi(fmt(T.users.size),'活躍玩家'))+kpi(fmt(rows.length),cur?'上線天數':'人‧天')+kpi(m1(T.min/Math.max(1,rows.length)),'平均每天分鐘')+kpi(m1(T.min),'總活躍分鐘')+kpi(fmt(T.sess),'開啟次數')+kpi(m1(T.mus),'音樂分鐘',`${fmt(T.songs)} 首`)+kpi(fmt(Object.values(T.mini).reduce((a,b)=>a+b,0)),'小遊戲次數')+kpi(m1(T.focus),'專注計時分鐘');
-  // daily
-  chart('c-bh-daily',{type:'bar',data:{labels:days,datasets:cur?[{type:'bar',label:'這位玩家的分鐘',data:days.map(d=>Math.round(T.byDay[d].min)),backgroundColor:'#8c5aa8'},{type:'line',label:'全體平均分鐘',data:days.map(d=>A.byDay[d]?Math.round(A.byDay[d].min/A.byDay[d].users.size):null),borderColor:'#aaa',borderDash:[5,4],pointRadius:0}]
-   :[{type:'bar',label:'活躍玩家',data:days.map(d=>T.byDay[d].users.size),backgroundColor:'#c9b3d9',yAxisID:'y1'},{type:'line',label:'平均每人分鐘',data:days.map(d=>Math.round(T.byDay[d].min/T.byDay[d].users.size)),borderColor:'#8c5aa8',yAxisID:'y'}]},
-   options:{scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘'}},...(cur?{}:{y1:{position:'right',beginAtZero:true,grid:{display:false},title:{display:true,text:'人'}}})}}});
-  // time share, this player vs everyone
-  const gs=Object.keys(BNAME),share=t=>{const tot=gs.reduce((s,g)=>s+(t.g[g]||0),0)||1;return gs.map(g=>Math.round((t.g[g]||0)/tot*1000)/10)};
-  chart('c-bh-share',{type:'bar',data:{labels:gs.map(g=>BNAME[g]),datasets:[{label:cur?'這位玩家 %':'全體 %',data:share(T),backgroundColor:gs.map(g=>BCOL[g])},...(cur?[{label:'全體 %',data:share(A),backgroundColor:'#ddd'}]:[])]},options:{indexAxis:'y',scales:{x:{beginAtZero:true,title:{display:true,text:'視窗開著的時間占比（%）'}}}}});
-  // hour × weekday
-  const mx=Math.max(1,...T.dow.flat()),wd=['一','二','三','四','五','六','日'];
-  $('bh-heat').innerHTML='<tr><th></th>'+Array.from({length:24},(_,i)=>`<th class="n">${i}</th>`).join('')+'</tr>'+T.dow.map((row,i)=>`<tr><th>週${wd[i]}</th>${row.map(v=>`<td title="${Math.round(v)} 分鐘" style="background:rgba(140,90,168,${(v/mx*.9).toFixed(2)});color:${v/mx>.5?'#fff':'inherit'};text-align:center;font-size:11px">${v>=1?Math.round(v):''}</td>`).join('')}</tr>`).join('');
-  const bar=(id,obj,label,col,n=12)=>{const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);chart(id,{type:'bar',data:{labels:e.map(x=>x[0]),datasets:[{label,data:e.map(x=>Math.round(x[1]*10)/10),backgroundColor:col}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})};
-  bar('c-bh-mini',T.mini,'次數','#d9566f');bar('c-bh-pet',T.pet,'次數','#b86a12');bar('c-bh-furn',Object.assign({},T.furn,Object.fromEntries(Object.entries(T.fp).map(([k,v])=>['活動:'+k,v]))),'次數','#3f8a4f');bar('c-bh-win',T.win,'開啟次數','#3a7bd5',15);
-  // per player
-  const per=users.map(u=>{const rs=all.filter(r=>this.keyOf(r)===u),t=this.bhSum(rs),hrs=t.h.map((v,i)=>[i,v]).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,2).map(x=>x[0]+'時');
-   const top=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join('、');const last=rs.map(r=>r.d).sort().pop();
-   return {u,name:this.nameOf(u),style:this.styleOf(t),days:rs.length,min:t.min,avg:t.min/Math.max(1,rs.length),hrs:hrs.join('、'),win:top(t.win),mini:top(t.mini),mus:t.mus,last,test:rs.some(r=>r.tester||/^test-/.test(r.dev||''))}});
-  B.per=per;
-  table('t-bh-users',['玩家','風格','上線天數','總分鐘','平均每天','常上線時段','最常開的視窗','最愛的小遊戲','音樂分鐘','最後上線',''],per.map(p=>[{v:p.name,h:esc(p.name)+(p.test?' <span class="tag easy">測試</span>':''),n:false},p.style,p.days,Math.round(p.min),Math.round(p.avg),p.hrs,p.win,p.mini||'–',Math.round(p.mus),p.last||'',{v:0,h:`<button data-bhu="${esc(p.u)}">${p.u===cur?'看全部':'單獨看'}</button>`,n:false}]).sort((a,b)=>b[3]-a[3]));
-  $('bh-sel-note').textContent=cur?`目前只看「${this.nameOf(cur)}」；灰色是全體做比較。`:'目前是所有玩家的綜合結果；在下表按「單獨看」切換到一位玩家。'},
- bhCsv(){const per=B.per||[];const csv='﻿玩家,風格,上線天數,總分鐘,平均每天,常上線時段,最常開的視窗,最愛的小遊戲,音樂分鐘,最後上線,測試\n'+per.map(p=>[p.name,p.style,p.days,Math.round(p.min),Math.round(p.avg),p.hrs,p.win,p.mini,Math.round(p.mus),p.last,p.test?1:0].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+  sel.replaceChildren(new Option(`全部玩家（綜合，${users.length} 人）`,''),...users.map(u=>new Option(this.nameOf(u),u)));sel.value=cur;
+  const rows=cur?all.filter(r=>this.keyOf(r)===cur):all,T=this.bhSum(rows),A=this.bhSum(all),PD=B.range.days(),wk=B.range.weekly();
+  const kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`,n=x=>fmt(Math.round(x)),per=(x,d)=>d?n(x/d):'–',pc=(x,d)=>d?Math.round(x/d*100)+'%':'–';
+  const nU=T.users.size,st=cur?this.styleOf(T,PD):null;
+  $('bh-kpis').innerHTML=(cur?kpi(esc(this.nameOf(cur)),'玩家',esc(st.what+(st.company?'・'+st.company:'')))+kpi(n(T.pd)+' 天','期間內上線',`共 ${PD} 天・${esc(st.rhythm)}`)
+    :kpi(n(nU),'不重複玩家')+kpi(n(T.pd),'人次（人‧天）',`平均每天 ${n(T.pd/PD)} 人`))
+   +kpi(n(T.sess),'打開遊戲次數',`平均每次 ${per(T.vis,T.sess)} 分鐘`)
+   +kpi(per(T.vis,T.pd)+' 分','每人每天在線',`其中主動操作 ${pc(T.min,T.vis)}`)
+   +kpi(n(T.mus)+' 分','音樂播放',(cur?'':`${n(T.musU.size)} 人有聽・`)+`占在線 ${pc(T.mus,T.vis)}・${n(T.songs)} 首`)
+   +kpi(n(T.focus)+' 分','番茄鐘計時',cur?'':`${n(T.focusU.size)} 人用過`)
+   +kpi(n(Object.values(T.mini).reduce((a,b)=>a+b,0))+' 局','小遊戲',cur?'':`${n(new Set(Object.values(T.miniU).flatMap(s=>[...s])).size)} 人玩過`);
+  // per day (or per week for long periods): people and minutes
+  const bks=Object.keys(T.byB).sort(),lab=bks.map(k=>wk?k.slice(5)+' 週':k.slice(5)+'（'+WD_ZH[new Date(k+'T12:00').getDay()]+'）');
+  chart('c-bh-daily',{type:'bar',data:{labels:lab,datasets:cur?[{type:'bar',label:wk?'這週上線天數':'在線分鐘',data:bks.map(k=>wk?T.byB[k].pd:Math.round(T.byB[k].vis)),backgroundColor:'#8c5aa8',yAxisID:wk?'y1':'y'},...(wk?[{type:'line',label:'這週平均每天在線分鐘',data:bks.map(k=>Math.round(T.byB[k].vis/T.byB[k].pd)),borderColor:'#8c5aa8',yAxisID:'y'}]:[]),{type:'line',label:'全體：每人每天平均在線分鐘',data:bks.map(k=>A.byB[k]?Math.round(A.byB[k].vis/A.byB[k].pd):null),borderColor:'#aaa',borderDash:[5,4],pointRadius:0,yAxisID:'y'}]
+   :[{type:'bar',label:wk?'每週不重複玩家':'當天玩家',data:bks.map(k=>T.byB[k].u.size),backgroundColor:'#c9b3d9',yAxisID:'y1'},...(wk?[{type:'bar',label:'每週人次（人‧天）',data:bks.map(k=>T.byB[k].pd),backgroundColor:'#9fc2ea',yAxisID:'y1'}]:[]),{type:'line',label:'每人每天平均在線分鐘',data:bks.map(k=>Math.round(T.byB[k].vis/T.byB[k].pd)),borderColor:'#8c5aa8',yAxisID:'y'}]},
+   options:{scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘'}},y1:{position:'right',beginAtZero:true,grid:{display:false},title:{display:true,text:wk&&cur?'天':'人'}}}}});
+  // what is on screen while they play: each active minute counted once
+  const acts=Object.keys(BACT).filter(k=>(T.act[k]||0)+(A.act[k]||0)>0),share=t=>{const tot=Object.values(t.act).reduce((a,b)=>a+b,0)||1;return acts.map(k=>Math.round((t.act[k]||0)/tot*100))};
+  chart('c-bh-share',{type:'bar',data:{labels:acts.map(k=>BACT[k]+(cur?'':`（${(A.actU[k]||new Set()).size} 人）`)),datasets:[{label:cur?'這位玩家 %':'全體 %',data:share(T),backgroundColor:acts.map(k=>BCOL[k])},...(cur?[{label:'全體 %',data:share(A),backgroundColor:'#ddd'}]:[])]},options:{indexAxis:'y',plugins:{legend:{display:!!cur}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'主動操作時間的占比（%）'}}}}});
+  $('bh-share-note').textContent=T.v2?'':'這段期間只有 0.92.48 舊格式的資料，沒有可用的時間分配。';
+  // background company: per person-day minutes
+  const bg=t=>[t.vis,t.min,t.mus,t.focus].map(x=>t.v2?Math.round(x/Math.max(1,t.v2)):0);
+  chart('c-bh-bg',{type:'bar',data:{labels:['在線（畫面開著）','主動操作','音樂播放中','番茄鐘計時中'],datasets:[{label:cur?'這位玩家':'全體',data:bg(T),backgroundColor:['#c9b3d9','#8c5aa8','#3a7bd5','#6b7a8f']},...(cur?[{label:'全體',data:bg(A),backgroundColor:'#ddd'}]:[])]},options:{plugins:{legend:{display:!!cur}},scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘（每人每天平均）'}}}}});
+  // weekday × hour (Sunday first, like the week picker)
+  const people=B.heat==='people',val=c=>people?c.u.size:Math.round(c.m),mx=Math.max(1,...T.cells.flat().map(val));
+  $('bh-heat').innerHTML='<tr><th></th>'+Array.from({length:24},(_,i)=>`<th class="n">${i}</th>`).join('')+'</tr>'+T.cells.map((row,i)=>`<tr><th>週${WD_ZH[i]}</th>${row.map(c=>{const v=val(c);return `<td title="週${WD_ZH[i]} ${String(row.indexOf(c)).padStart(2,'0')}:00–59：${c.u.size} 人、共 ${Math.round(c.m)} 分鐘" style="background:rgba(140,90,168,${(v/mx*.9).toFixed(2)});color:${v/mx>.5?'#fff':'inherit'};text-align:center;font-size:11px">${v>=1?v:''}</td>`}).join('')}</tr>`).join('');
+  // details, in the game's own words: "次數（人數）"
+  const bar=(id,key,names,col,unit,max=12)=>{const e=Object.entries(T[key]).filter(x=>x[1]>=1).sort((a,b)=>b[1]-a[1]).slice(0,max);const cv=$(id);cv.parentElement.dataset.empty=e.length?'':'這段期間沒有紀錄';
+   chart(id,{type:'bar',data:{labels:e.map(([k])=>nm(names,k)+(cur?'':`（${T[key+'U'][k].size} 人）`)),datasets:[{label:unit,data:e.map(x=>Math.round(x[1])),backgroundColor:col}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:unit}}}}})};
+  bar('c-bh-mini','mini',BMINI,'#d9566f','次數');bar('c-bh-fp','fp',BFP,'#c27ba0','次數');bar('c-bh-pet','pet',BPET,'#b86a12','次數');bar('c-bh-furn','furn',BFURN,'#3f8a4f','次數');bar('c-bh-win','win',BWIN,'#3a7bd5','次數',15);bar('c-bh-soc','soc',BSOC,'#5aa0a8','次數');
+  // every player
+  const perU=users.map(u=>{const rs=all.filter(r=>this.keyOf(r)===u),t=this.bhSum(rs),from=$('bh-from').value,first=rs.map(r=>r.d).sort()[0],pd=Math.max(1,Math.round((new Date($('bh-to').value+'T00:00')-new Date((first>from?first:from)+'T00:00'))/864e5)+1);
+   const hrs=t.cells[0].map((_,h)=>[h,t.cells.reduce((s,row)=>s+row[h].m,0)]).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>=1).slice(0,2).map(x=>x[0]+' 點');
+   const top=(o,names)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>nm(names,x[0])).join('、');
+   return {u,name:this.nameOf(u),st:this.styleOf(t,Math.min(PD,pd)),days:t.pd,sess:t.sess,vis:t.vis,avg:t.vis/Math.max(1,t.pd),perVisit:t.sess?t.vis/t.sess:0,hrs:hrs.join('、'),mini:top(t.mini,BMINI),mus:t.mus,last:rs.map(r=>r.d).sort().pop(),test:rs.some(r=>r.tester||/^test-/.test(r.dev||''))}});
+  B.per=perU;
+  table('t-bh-users',['玩家','主要在做','來的節奏','陪伴','上線天數','打開次數','每天在線（分）','每次（分）','常上線時段','最常玩的小遊戲','音樂播放（分）','最後上線',''],perU.map(p=>[{v:p.name,h:esc(p.name)+(p.test?' <span class="tag easy">測試</span>':''),n:false},p.st.what,p.st.rhythm,p.st.company||'–',p.days,p.sess,Math.round(p.avg),Math.round(p.perVisit),p.hrs||'–',p.mini||'–',Math.round(p.mus),p.last||'',{v:0,h:`<button data-bhu="${esc(p.u)}">${p.u===cur?'看全部':'單獨看'}</button>`,n:false}]).sort((a,b)=>b[4]-a[4]||b[6]-a[6]));
+  $('bh-sel-note').textContent=cur?`目前只看「${this.nameOf(cur)}」；灰色是全體做比較。`:`目前是所有玩家的綜合結果（${nU} 位不重複玩家、${T.pd} 人次）；在下表按「單獨看」切換到一位玩家。`},
+ bhCsv(){const per=B.per||[];const csv='﻿玩家,主要在做,來的節奏,陪伴,上線天數,打開次數,每天在線分鐘,每次分鐘,常上線時段,最常玩的小遊戲,音樂播放分鐘,最後上線,測試\n'+per.map(p=>[p.name,p.st.what,p.st.rhythm,p.st.company,p.days,p.sess,Math.round(p.avg),Math.round(p.perVisit),p.hrs,p.mini,Math.round(p.mus),p.last,p.test?1:0].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='behavior-players.csv';a.click();this.log('export','bday','behavior-players.csv')},
- // demo: 30 kinds of players, two weeks
- bhDemo(){let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;const out=[],T0=Date.now()-13*864e5;
-  const kinds=[['學習',{learn:.7,pet:.1,music:.1,other:.1},[17,20]],['小遊戲',{mini:.6,pet:.15,learn:.15,social:.1},[21,22]],['養貓',{pet:.6,decor:.2,learn:.1,music:.1},[19,20]],['音樂',{music:.7,decor:.2,learn:.1},[22,23]],['佈置',{decor:.6,pet:.2,music:.2},[0,1]],['專注',{focus:.6,music:.3,learn:.1},[14,15]]];
-  B.names={};const W={learn:'learn',mini:'cozygame',pet:'pet',music:'music',decor:'shop',social:'friends',focus:'timer',other:'settings'};
-  for(let u=0;u<30;u++){const [kn,mix,hrs]=kinds[u%6],acct='demo'+String(u+1).padStart(2,'0'),act=.35+r()*.6,len=5+r()*35;B.names[acct]=`示範${u+1}（${kn}）`;
-   for(let d=0;d<14;d++){if(r()>act*(u%11===10&&d>3?.2:1))continue;const day=new Date(T0+d*864e5).toISOString().slice(0,10),min=Math.round(len*(.5+r())*4)/4,h={},wt={},win={},mini={},pet={},furn={};
-    const hh=hrs[Math.floor(r()*2)]%24;h[hh]=min*.7;h[(hh+1)%24]=min*.3;for(const [g,p] of Object.entries(mix)){wt[W[g]]=Math.round(min*p*(.7+r()*.6)*4)/4;win[W[g]]=1+Math.floor(r()*3)}
-    if(mix.mini){mini[['pinball','toss','maze','vending'][Math.floor(r()*4)]]=1+Math.floor(r()*5)}if(mix.pet){pet.food=1+Math.floor(r()*3);pet.ball=Math.floor(r()*4);pet.played=Math.floor(r()*3)}furn[['sofa','plant','desk','pet'][Math.floor(r()*4)]]=1+Math.floor(r()*4);
-    out.push({v:1,d:day,lid:'L'+acct,acct,dev:(u>=24?'test-':'')+'demo',app:'0.92.48',tester:u>=24,min,sess:1+Math.floor(r()*2),h,win,wt,mini,fp:{},mus:mix.music?min*mix.music*1.4:min*.1,songs:mix.music?3+Math.floor(r()*8):0,pet,furn,edit:mix.decor?min*mix.decor*.5:0,focus:mix.focus?min*mix.focus:0,soc:{},first:`${String(hh).padStart(2,'0')}:05`,last:`${String((hh+1)%24).padStart(2,'0')}:20`})}}
-  $('bh-from').value='';this.setBehavior(out,'示範資料')},
+ // demo: 24 made-up players with different habits over the last 8 weeks (version-2 summaries)
+ bhDemo(){let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;const out=[],today=new Date();today.setHours(12,0,0,0);
+  const kinds=[['認真學英文',{learn:.65,pet:.1,room:.15,tasks:.1},[19,20],.8,25,1,0],['小遊戲',{mini:.6,pet:.1,learn:.15,room:.15},[21,22],.6,35,2,0],['養貓',{pet:.45,decor:.15,room:.3,learn:.1},[18,19],.7,20,3,.2],
+   ['邊聽音樂',{room:.6,decor:.15,learn:.1,music:.15},[22,23],.5,90,1,.9],['佈置',{decor:.45,shop:.25,room:.2,pet:.1},[0,1],.35,50,1,.4],['番茄鐘讀書',{focus:.5,room:.3,learn:.2},[14,15],.6,120,1,.6]];
+  B.names={};const MINI=['pinball','fish','memory','toss','vending','puzzle'],FP=['breath','plant','brew','journal'];
+  for(let u=0;u<24;u++){const [kn,mix,hrs,act,len,visits,musR]=kinds[u%6],acct='demo'+String(u+1).padStart(2,'0'),stick=act*(.5+r()*.8),drop=u%7===6?20+Math.floor(r()*20):99;B.names[acct]=`示範${u+1}（${kn}）`;
+   for(let d=55;d>=0;d--){if(55-d>drop||r()>stick*(new Date(today-d*864e5).getDay()%6===0?1.2:1))continue;const day=dayKey(today-d*864e5),sess=Math.max(1,Math.round(visits*(.5+r()))),vis=Math.max(3,Math.round(len*(.4+r()*1.2))),min=Math.round(vis*(.55+r()*.35)),h={},wt={},win={},mini={},pet={},furn={},fp={};
+    const hh=hrs[Math.floor(r()*2)]%24;h[hh]=Math.round(vis*.7);h[(hh+1)%24]=vis-h[hh];for(const [g,p] of Object.entries(mix)){wt[g]=Math.round(min*p*(.7+r()*.6));win[{learn:'learn',mini:'cozygame',pet:'pet',decor:'storage',shop:'shop',music:'music',focus:'timer',tasks:'tasks'}[g]||'more']=1+Math.floor(r()*2)}
+    if(mix.mini)for(let i=0;i<1+r()*4;i++){const g=MINI[Math.floor(r()*MINI.length)];mini[g]=(mini[g]||0)+1}if(mix.pet){pet.food=1+Math.floor(r()*2);pet.pat=Math.floor(r()*6);pet.wand=Math.floor(r()*3);if(r()<.3)pet.bath=1}if(r()<.5)fp[FP[Math.floor(r()*FP.length)]]=1;furn[['rest','nature','media','cat'][Math.floor(r()*4)]]=1+Math.floor(r()*3);
+    out.push({v:2,d:day,lid:'L'+acct,acct,dev:(u>=20?'test-':'')+'demo',app:'0.92.49',tester:u>=20,vis,min,sess,h,win,wt,mini,fp,mus:Math.round(vis*musR*(.7+r()*.3)),songs:musR?Math.round(vis*musR/3.5):0,pet,furn,edit:Math.round((wt.decor||0)*.6),focus:mix.focus?Math.round(vis*mix.focus*1.5):0,soc:r()<.1?{visit:1}:{},first:`${String(hh).padStart(2,'0')}:05`,last:`${String((hh+1)%24).padStart(2,'0')}:20`})}}
+  this.setBehavior(out,'示範資料')},
 });
 $('bh-reload').onclick=()=>Admin.loadBehavior();$('bh-demo').onclick=()=>Admin.bhDemo();$('bh-csv').onclick=()=>Admin.bhCsv();
-for(const id of ['bh-from','bh-to','bh-who'])$(id).onchange=()=>Admin.renderBehavior();
+$('bh-who').onchange=()=>Admin.renderBehavior();
+$('bh-heat-mode').onchange=e=>{B.heat=e.target.value;Admin.renderBehavior()};
 $('bh-user').onchange=e=>{B.sel=e.target.value;Admin.renderBehavior()};
 $('t-bh-users').addEventListener('click',e=>{const b=e.target.closest('[data-bhu]');if(b){B.sel=B.sel===b.dataset.bhu?'':b.dataset.bhu;Admin.renderBehavior();$('bh-kpis').scrollIntoView({block:'start',behavior:'smooth'})}});
+
+
+/* ================= 0.5.02 程度挑戰賽：每週結果（contest/{週}/rows 真實玩家、contest/{週}/test 測試帳號） ================= */
+const CT_COL=['#bbb','#b9773e','#8f9aa5','#d39b12','#6f8fbf','#2b8fe8','#8c4ad8'];
+const CTA={rows:[],wk:'',board:'rows'};
+Object.assign(Admin,{
+ // game weeks start on Monday 06:00 (device time); the id is that Monday's date
+ ctWeeks(){const out=[],d=new Date(Date.now()-6*3600e3);d.setDate(d.getDate()-((d.getDay()+6)%7));for(let i=0;i<16;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push('w'+dayKey(x.getTime()))}return out},
+ ctInit(){const sel=$('ct-wk');if(sel.options.length)return;for(const w of this.ctWeeks()){const m=w.slice(1),[y,mo,da]=m.split('-').map(Number),e=new Date(y,mo-1,da+7);sel.append(new Option(`${mo}/${da}（一）06:00 – ${e.getMonth()+1}/${e.getDate()}（一）06:00${w===this.ctWeeks()[0]?'・本週':''}`,w))}},
+ async ctLoad(){if(this.me.offline){$('ct-note').textContent='離線模式不能讀取；可以按「示範資料」看看。';return}
+  const {F,db}=await firebase(),wk=$('ct-wk').value,board=$('ct-board').value;$('ct-note').textContent='讀取中…';
+  try{const snap=await F.getDocs(F.collection(db,'contest',wk,board));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(Object.assign({id:d.id},x,{at:x.at&&x.at.toMillis?x.at.toMillis():0}))});
+   this.ctSet(rows,wk,board,'Firestore');this.log('load','contest',`${wk} ${board} ${rows.length} 人`)}catch(e){$('ct-note').textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.02 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
+ ctSet(rows,wk,board,label){CTA.rows=rows.filter(r=>(r.s|0)>0||(r.n|0)>0).sort((a,b)=>b.s-a.s||(a.at||0)-(b.at||0)||(a.id<b.id?-1:1));CTA.wk=wk;CTA.board=board;
+  $('ct-note').textContent=`${label}：${wk.slice(1)} 這週・${board==='test'?'測試帳號':'真實玩家'}・${CTA.rows.length} 人有成績`;this.ctRender()},
+ ctRender(){const R=CTA.rows,n=R.length,kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+  const byL=[0,1,2,3,4,5,6].map(l=>R.filter(r=>r.l===l).length),reach=[1,2,3,4,5,6].map(l=>R.filter(r=>r.l>=l).length),tries=R.map(r=>r.tries||1).sort((a,b)=>a-b);
+  const medL=n?R.map(r=>r.l).sort((a,b)=>a-b)[Math.floor((n-1)/2)]:0;
+  $('ct-kpis').innerHTML=kpi(fmt(n),'參加人數','有寫入成績的玩家（不重複）')+kpi(fmt(reach[0]),'突破 L1 以上',n?Math.round(reach[0]/n*100)+'%':'')+kpi(fmt(byL[6]),'登頂（L6）',n?Math.round(byL[6]/n*100)+'%':'')+kpi(n?'L'+medL:'–','突破階數（中位數）')
+   +kpi(fmt(tries.reduce((a,b)=>a+b,0)),'報名人次',n?`每人中位數 ${tries[Math.floor((n-1)/2)]} 次`:'')+kpi(n?Math.round(R.filter(r=>r.l>0).reduce((a,r)=>a+r.a,0)/Math.max(1,reach[0])/10)+'%':'–','平均答對率','只算有突破的玩家');
+  chart('c-ct-dist',{type:'bar',data:{labels:['沒有突破','L1 青銅','L2 白銀','L3 黃金','L4 鉑金','L5 鑽石','L6 星耀（登頂）'],datasets:[{label:'人數',data:byL,backgroundColor:CT_COL}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'人數'}}}}});
+  chart('c-ct-reach',{type:'line',data:{labels:['L1','L2','L3','L4','L5','L6'],datasets:[{label:'突破到這一階以上的比例 %',data:reach.map(x=>n?Math.round(x/n*100):0),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}}}}});
+  const ago=t=>t?new Date(t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'';
+  table('t-ct',['名次','玩家','成績','答對率','突破各階的題數','報名次數','最後更新',''],R.map((r,i)=>[i<50?i+1:{v:i+1,h:`<span class="muted">${i+1}（榜外）</span>`},{v:r.name||'',h:esc(r.name||'(未命名)')+(window.TEST_UIDS&&TEST_UIDS.has(r.id)?' <span class="tag easy">測試</span>':''),n:false},{v:r.s,h:`<span class="tag" style="background:${CT_COL[r.l]};color:#fff">${r.l>=6?'L6 登頂':r.l?'通過 L'+r.l:'沒有突破'}</span>`,n:false},{v:r.a,h:(r.a/10).toFixed(1)+'%'},r.n|0,r.tries|0,ago(r.at),{v:0,h:`<button data-ctp="${esc(r.id)}">玩家帳號</button>`,n:false}]));
+  $('ct-rank-note').textContent=n>50?`玩家在遊戲裡只看得到前 50 名和自己；第 51 名以後沒有名次也沒有排行獎勵。`:'';},
+ ctCsv(){const csv='﻿名次,玩家,UID,突破階數,答對率,題數,報名次數\n'+CTA.rows.map((r,i)=>[i+1,r.name,r.id,r.l,(r.a/10).toFixed(1),r.n,r.tries].map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`contest-${CTA.wk}-${CTA.board}.csv`;a.click();this.log('export','contest',CTA.wk)},
+ ctDemo(){let seed=5;const r=()=>(seed=(seed*16807)%2147483647)/2147483647,rows=[];for(let i=0;i<64;i++){let l=0;while(l<6&&r()<.78-l*.07)l++;const a=l?Math.round(720+r()*280):Math.round(r()*700),n=l?l*15:5+Math.floor(r()*9);rows.push({id:'demo'+i,name:'示範玩家'+(i+1),l,a,n,s:l*1000+a,tries:1+Math.floor(r()*r()*4),at:Date.now()-Math.floor(r()*5*864e5)})}
+  this.ctSet(rows,this.ctWeeks()[0],'rows','示範資料')},
+});
+$('ct-load').onclick=()=>Admin.ctLoad();$('ct-demo').onclick=()=>Admin.ctDemo();$('ct-csv').onclick=()=>Admin.ctCsv();
+$('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if(b&&Admin.can(2)){Admin.go('players');setTimeout(()=>Admin.openPlayer&&Admin.openPlayer(b.dataset.ctp),600)}});
 
 </script>
 </body>

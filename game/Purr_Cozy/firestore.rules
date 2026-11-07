@@ -72,6 +72,17 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    // 0.92.49 程度挑戰賽（每週一 06:00 換週）：contest/{週}/rows/{uid} 是真實玩家、contest/{週}/test/{uid} 是測試帳號，
+    // 分開存，測試帳號不會出現在真實玩家的排行榜上。每人只寫自己的一列（每通過或結束一個 Level 寫一次），
+    // 一次最多讀 50 筆（前 50 名）；後台可以讀全部。s = 通過的 Level × 1000 + 答對率（千分比），用來排序。
+    match /contest/{week}/{board}/{userId} {
+      allow get: if signedIn() && board in ['rows', 'test'];
+      allow list: if (signedIn() && board in ['rows', 'test'] && request.query.limit <= 50) || isManager() || isAnalyst();
+      allow create, update: if isOwner(userId) && board in ['rows', 'test'] && week.matches('w[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && validContest(request.resource.data);
+      allow delete: if isOwner(userId) || isManager();
+    }
+
     // 好友名單：兩邊各存一份。s = out（我送出邀請）、in（對方邀請我）、ok（好友）
     match /users/{userId}/friends/{friendId} {
       allow get, list: if isOwner(userId);
@@ -168,7 +179,8 @@ service cloud.firestore {
       allow read: if isAnalyst();
     }
 
-    // 0.92.48 使用行為：每人每天一份摘要 learnlog/{logId}/bday/{YYYY-MM-DD}（同一個匿名帳號寫入，一天只有幾次覆寫）
+    // 0.92.48 使用行為：每人每天一份摘要（0.92.49：v 2，多 vis 在線分鐘；wt 改成「主動操作時間屬於哪一種活動」）
+    // learnlog/{logId}/bday/{YYYY-MM-DD}（同一個匿名帳號寫入，一天只有幾次覆寫）
     match /learnlog/{logId}/bday/{day} {
       allow create, update: if isOwner(logId) && validDay(request.resource.data, logId, day);
       allow get, list: if isOwner(logId) || isAnalyst();
@@ -270,9 +282,10 @@ service cloud.firestore {
       return m is map && m.size() <= n;
     }
     function validDay(d, logId, day) {
-      return d.keys().hasOnly(['v', 'd', 'lid', 'acct', 'dev', 'app', 'tester', 'min', 'sess', 'h', 'win', 'wt', 'mini', 'fp', 'mus', 'songs',
+      return d.keys().hasOnly(['v', 'd', 'lid', 'acct', 'dev', 'app', 'tester', 'min', 'vis', 'sess', 'h', 'win', 'wt', 'mini', 'fp', 'mus', 'songs',
                                'pet', 'furn', 'edit', 'focus', 'soc', 'first', 'last', 'at'])
-        && d.v == 1 && d.lid == logId && d.d == day && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.v in [1, 2] && d.lid == logId
+        && (!('vis' in d) || (d.vis is number && d.vis <= 1440)) && d.d == day && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
         && shortText(d.acct, 128) && shortText(d.dev, 40) && shortText(d.app, 16) && d.tester is bool
         && d.min is number && d.min <= 1440 && d.sess is int && d.sess <= 500
         && smallMap(d.h, 24) && smallMap(d.win, 41) && smallMap(d.wt, 41) && smallMap(d.mini, 41) && smallMap(d.fp, 41)
@@ -333,6 +346,13 @@ service cloud.firestore {
         && d.at == request.time;
     }
 
+    function validContest(d) {
+      return d.keys().hasOnly(['name', 'ava', 'grade', 'l', 'a', 'n', 's', 'tries', 'at'])
+        && shortText(d.name, 40) && d.ava is map && (!('grade' in d) || shortText(d.grade, 12))
+        && d.l is int && d.l >= 0 && d.l <= 6 && d.a is int && d.a >= 0 && d.a <= 1000
+        && d.n is int && d.n >= 0 && d.n <= 2000 && d.tries is int && d.tries >= 0 && d.tries <= 500
+        && d.s == d.l * 1000 + d.a && d.at == request.time;
+    }
     function validFriend(d) {
       return d.keys().hasOnly(['s', 'name', 'at'])
         && d.s in ['out', 'in', 'ok'] && shortText(d.name, 40)

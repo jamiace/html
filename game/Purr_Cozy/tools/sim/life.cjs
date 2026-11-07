@@ -110,9 +110,12 @@ function endDay(p, st, day, played, sats) {
 
 // ---------- inside a session: what to do next ----------
 const ALIAS = { piano: 'music', photo: 'cat', gacha: 'mini', collect: 'shop' };
-const DWELL = { look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
-const LEARN = ['daily', 'practice', 'typo', 'grade', 'story'];
-function prefsOf(p) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; w[a] = (w[a] || 0) + v; } w.look = w.look || .15; return w; }
+const DWELL = { contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
+const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'contest'];
+// 0.92.49 程度挑戰賽: nobody is told to join. People who already like tests (程度小測, practice, spelling) are drawn to it,
+// people who dislike quizzes mostly ignore it, pure cat / music players almost never open it.
+function contestPull(p) { const P = p.play.prefs; if (P.contest != null) return P.contest; let x = .6 * (P.grade || 0) + .3 * (P.practice || 0) + .2 * (P.typo || 0) + .1 * (P.daily || 0) + .15 * (p.triggers.grade || 0); if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) x *= .2; if (p.play.dislikes.includes('too_easy')) x *= 1.3; return +x.toFixed(3); }
+function prefsOf(p) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; w[a] = (w[a] || 0) + v; } w.look = w.look || .15; const c = contestPull(p); if (c > .02) w.contest = c; return w; }
 function nextActivity(p, st, ses, today) {
  const w = prefsOf(p), T = p.triggers, cand = [];
  for (const [a, v] of Object.entries(w)) {
@@ -123,6 +126,7 @@ function nextActivity(p, st, ses, today) {
   if (a === 'tasks' && today.claimable) x *= 3;
   if (a === 'grade' && today.grade) x *= .05; if (a === 'daily' && today.daily) x *= .15;
   if (a === 'music' && ses.music) x *= .1;
+  if (a === 'contest' && today.ct) { const C = today.ct; if (C.mid) x *= 2.5; else if (C.over) x *= C.best >= 6 ? .03 : .3 * (1 - .6 * (p.play.frustration || .5)); }
   cand.push([a, x]);
  }
  const goal = p.play.goal; if (goal && !today[goal] && !ses.count[goal]) return goal;
@@ -253,7 +257,7 @@ async function runSession(S, p, s) {
   if (p.play.dislikes.includes('music')) await ev(() => { if (typeof Music !== 'undefined' && Music.playing) Music.toggle(); });
   while (Date.now() < endAt) {
    if (chance(p.play.interrupt * .1)) { ses.cut = true; break; }
-   const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)) }));
+   const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)), ct: (() => { try { const Z = Contest.Z, R = Z.run; return { on: Z.on, over: !!(R && R.over), mid: !!(R && !R.over && R.qs && R.qi > 0), best: Z.top ? Z.top.l : 0 }; } catch (e) { return null; } })() }));
    Object.assign(today, st2);
    const a = nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
@@ -279,17 +283,20 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (LEARN.includes(a)) {
    if (a === 'typo') return await typoRound(page, p, st, ses, until, wait);
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
-   const ok = await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess; }, kind);
+   const ok = a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess; }, kind);
    if (!ok) return;
    if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) ses.frustration += .5;
    let wrongRun = 0;
    for (let guard = 0; guard < 300; guard++) {
     const q = await ev(() => { const s = Learn.sess; if (!s) return null; if (s.step === 'review' || s.step === 'pause') { const i = s.words[s.ri]; return { step: s.step, w: VOCAB[i].w, g: VOCAB[i].g }; } if (s.step === 'quiz') { if (s.ans) return { step: 'wait' }; const q = s.qs[s.qi]; return { step: 'quiz', i: q.i, w: VOCAB[q.i].w, g: VOCAB[q.i].g, type: q.type, opts: q.opts }; } return { step: s.step }; });
-    if (!q) break; if (q.step === 'result') { await wait(lognormal(3500 * p.play.pace, .4)); await ev(() => UI.closeWin('study')); break; }
+    if (!q) break; if (q.step === 'result') { await wait(lognormal(3500 * p.play.pace, .4));
+     // a breakthrough pulls most people on to the next Level while they still have time
+     if (a === 'contest') { const go = await ev(() => { const s = Learn.sess, R = Contest.Z.run; return !!(s && s.result && s.result.pass && R && !R.over); }); if (go && chance(Date.now() < until ? .85 : .35)) { ses.ctUp = (ses.ctUp || 0) + 1; await ev(() => Contest.play()); continue; } }
+     await ev(() => UI.closeWin('study')); break; }
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
     if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); await ev(() => Learn.more()); continue; } break; }
     if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), know || chance(.2)); learnWord(p, st, q.w, true); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade') break;
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade') { if (a === 'contest') { ses.ctPause = true; await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
     if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);
@@ -304,7 +311,7 @@ async function act(page, p, st, ses, a, dwell, wait) {
   }
   if (a === 'music') { await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); ses.music = true; await wait((until - Date.now()) * FAST); return; }
   if (a === 'focus') { await ev(() => { if (!Game.T().running) Game.start(); }); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); return; }
-  if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { try { for (const t of Life.L.daily.tasks) if (t.prog >= t.need && !t.claimed && Life.claim) Life.claim(t); } catch (e) { } UI.closeWin('tasks'); }); return; }
+  if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) Life.claimTask(i); }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) Life.claimBonus(); } catch (e) { } try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) Weekly.claim(k); } } catch (e) { } UI.closeWin('tasks'); }); return; }
   if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); } }); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
   if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5)); await ev(() => UI.closeWin('shop')); return; }
   if (a === 'look') { await wait(lognormal(25000 * p.play.pace, .5)); return; }
