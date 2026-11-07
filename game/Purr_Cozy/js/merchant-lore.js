@@ -42,7 +42,8 @@ const Lore = {
   openCard(mk, th, i) { this.view = { mk, th, i, step: 'card', qi: 0, ans: null, right: 0, readOnly: true, book: true }; UI.closeWin('lorebook'); UI.openWin('story'); },
   C() { const v = this.view; return v && this.D()[v.mk][v.th].ch[v.i]; },
   mark(v, lvl) { const k = this.id(v.mk, v.th, v.i), L = this.S, was = L.read[k] || 0; if (lvl > was) { L.read[k] = lvl; Game.save(); } return was; },
-  toWords() { const v = this.view; v.step = 'words'; if (!v.readOnly) { const was = this.mark(v, 1); if (!was) Game.reward(0, 5, 'raw'); } this.teach(); UI.refresh('story'); },
+  // reading a card always counts, also a chapter finished before 0.92.52 or a card opened from the notebook
+  toWords() { const v = this.view; v.step = 'words'; const was = this.mark(v, 1); if (!was) Game.reward(0, 5, 'raw'); this.teach(); UI.refresh('story'); },
   // the four words become "seen" words of the game (so later quizzes treat them as taught)
   teach() { const c = this.C(), day = Learn.dayNum(); for (const [w] of c.w) { const i = VIDX[w]; if (i == null) continue; const r = Learn.recMake(i, [0, day, 0, 0, 0]); r[2] = (r[2] || 0) + 1; } Game.save(); },
   toQuiz() { const v = this.view; v.step = 'quiz'; v.qi = 0; v.ans = null; v.right = 0; v.opts = this.C().q.map(() => shuffle(this.C().w.map(x => x[0]))); UI.refresh('story'); },
@@ -55,7 +56,7 @@ const Lore = {
     const v = this.view; if (!v || !v.ans) return; v.qi++; v.ans = null;
     if (v.qi >= this.C().q.length) {
       v.step = 'done';
-      if (!v.readOnly && v.right >= this.C().q.length) { const was = this.mark(v, 2); if (was < 2) Game.reward(5, 5, 'quiz'); }
+      if (v.right >= this.C().q.length) { const was = this.mark(v, 2); if (was < 2) { Game.reward(5, 5, 'quiz'); v.newStamp = true; } }
       this.checkMs();
     }
     UI.refresh('story');
@@ -113,12 +114,13 @@ Object.assign(UI, {
           h('button', { class: 'chip sm primary', onclick: () => Lore.nextQ() }, v.qi + 1 >= c.q.length ? lt('finish') : lt('next'))));
       } else out.push(h('p', { class: 'hint center', text: lt('noRisk') }));
     } else {
-      const all = v.right >= c.q.length, next = W.ch[v.i + 1];
+      const all = v.right >= c.q.length, next = W.ch[v.i + 1], stamped = Lore.read(v.mk, v.th, v.i) >= 2;
       out.push(h('div', { class: 'lore-done' }, h('div', { class: 'lore-stamp' + (all ? ' on' : ''), text: all ? c.e : '📖' }),
-        h('b', { text: all ? lt('stamped') : lt('kept') }), h('p', { class: 'hint', text: lt('bookCount', [Lore.count(), Lore.stamps()]) }),
+        h('b', { text: all ? lt('stamped') : stamped ? lt('keptStamp') : lt('kept') }), !all && !stamped ? h('p', { class: 'hint', text: lt('tryStamp') }) : null, h('p', { class: 'hint', text: lt('bookCount', [Lore.count(), Lore.stamps()]) }),
         next && !v.readOnly ? h('p', { class: 'lore-tease', text: lt('tomorrow', [M.n, next.t]) }) : null,
         !next && !v.readOnly ? h('p', { class: 'lore-tease', text: lt('weekMore', [W.more]) }) : null));
       const acts = [];
+      if (!all && !stamped) acts.push(h('button', { class: 'chip', onclick: () => Lore.toQuiz() }, ico('i_reset', 18), lt('retryQuiz')));
       if (v.readOnly) acts.push(h('button', { class: 'chip big primary', onclick: () => { Lore.close(); if (v.book) { UI.closeWin('story'); Lore.openBook(v.mk); } } }, v.book ? lt('backBook') : lt('backStory')));
       else acts.push(h('button', { class: 'chip big primary', onclick: () => { const i = v.i; Lore.view = null; Story.start(i); } }, ico('i_learn', 20), lt('toHelp')));
       out.push(h('div', { class: 'row center wrap story-act' }, ...acts));
@@ -172,8 +174,11 @@ UI.w_lorebook = function () {
         const go = h('button', { class: 'chip big primary', disabled: St4, onclick: () => Lore.start(i) }, h('span', { text: w.W.ch[i].e + ' ' }), lt('listenTo', [MERCHANTS[w.mk].n]));
         if (help) { help.replaceWith(go); if (readIt && !St4) act.insertBefore(h('button', { class: 'chip', onclick: () => Story.start(i) }, ico('i_learn', 18), lt('straightHelp')), go.nextSibling); }
       } else if (St.ch.every(c => c.done)) {
+        const unread = w.W.ch.filter((_, k) => !Lore.read(w.mk, w.th, k)).length, say = out[0] && out[0].querySelector('.story-say');
+        const tag = out[0] && out[0].querySelector('.mname .ptag'); if (tag) tag.textContent = w.W.title;
+        if (say) { say.querySelectorAll('p').forEach(p => p.remove()); say.append(h('p', { text: lt('weekDoneSay', [w.W.title]) }), h('p', { text: unread ? lt('weekUnread', [unread]) : lt('weekAllRead') })); }
         const nextT = Lore.D()[w.mk][(Lore.S.next[w.mk] || 0) % Lore.D()[w.mk].length].title;
-        out.splice(2, 0, h('div', { class: 'lore-week' }, h('b', { text: lt('weekLearned') }), h('div', { class: 'lore-week-cards' }, ...w.W.ch.map((c, k) => h('button', { class: 'lore-slot' + (Lore.read(w.mk, w.th, k) >= 2 ? ' stamp' : ''), onclick: () => Lore.start(k, true) }, h('span', { text: c.e }), h('small', { text: c.t })))),
+        out.splice(2, 0, h('div', { class: 'lore-week' }, h('b', { text: lt('weekLearned') }), h('div', { class: 'lore-week-cards' }, ...w.W.ch.map((c, k) => h('button', { class: 'lore-slot' + (Lore.read(w.mk, w.th, k) >= 2 ? ' stamp' : Lore.read(w.mk, w.th, k) ? '' : ' unread'), onclick: () => Lore.start(k, true) }, h('span', { text: c.e }), h('small', { text: Lore.read(w.mk, w.th, k) ? c.t : lt('unreadCard') })))),
           w.W.more ? h('p', { class: 'lore-more hint', text: lt('moreHead') + w.W.more }) : null, h('p', { class: 'lore-tease', text: lt('nextTheme', [MERCHANTS[w.mk].n, nextT]) })));
       }
     }
@@ -234,7 +239,7 @@ UI.w_lorebook = function () {
 .lore-banner{display:flex;gap:10px;align-items:center;padding:8px 10px;margin:6px 0;border-radius:12px;background:var(--chip);color:var(--ink)}.lore-banner>span{font-size:26px}
 .lore-week{padding:10px;border-radius:12px;background:var(--paper-2);color:var(--ink);margin:6px 0}.lore-week-cards{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
 .lore-slot{display:flex;flex-direction:column;align-items:center;width:88px;padding:6px 4px;border-radius:10px;border:2px solid var(--line);background:var(--chip);color:var(--ink);font:inherit;cursor:pointer}
-.lore-slot span{font-size:22px}.lore-slot small{font-size:11px;line-height:1.3;text-align:center;color:var(--ink-2)}.lore-slot.stamp{border-color:#d9566f}.lore-slot.empty{justify-content:center;color:var(--ink-2);cursor:default;min-height:58px;font-size:18px;opacity:.6}
+.lore-slot span{font-size:22px}.lore-slot small{font-size:11px;line-height:1.3;text-align:center;color:var(--ink-2)}.lore-slot.stamp{border-color:#d9566f}.lore-slot.unread{border-style:dashed;border-color:var(--honey)}.lore-slot.unread small{color:var(--honey);font-weight:800}.lore-slot.empty{justify-content:center;color:var(--ink-2);cursor:default;min-height:58px;font-size:18px;opacity:.6}
 .lore-bookhead{display:flex;gap:10px;align-items:center;margin:6px 0;flex-wrap:wrap}.lore-bookhead>.grow{flex:1 1 200px;min-width:180px}.lore-ms{display:flex;gap:4px;flex-wrap:wrap}.lore-ms .done{opacity:.6}
 .lore-themes{display:flex;flex-direction:column;gap:8px}.lore-theme{padding:8px 10px;border-radius:12px;background:var(--paper-2);color:var(--ink)}.lore-theme.locked{opacity:.8}
 .lore-theme-t{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}.lore-slots{display:flex;gap:6px;flex-wrap:wrap}.lore-more{margin:6px 0 0}
