@@ -13,6 +13,10 @@ on:
       window:
         description: '本次模擬分鐘數（留空自動計算）'
         required: false
+      smoke:
+        description: '只做煙霧測試（開瀏覽器載入網站，不跑模擬、不動任何狀態）'
+        type: boolean
+        default: false
 
 concurrency:
   group: purrcozy-sim
@@ -48,8 +52,29 @@ jobs:
           npm install playwright@1.48.2
           npx playwright install --with-deps chromium
 
+      - name: 煙霧測試：用 Chromium 開遊戲頁
+        if: github.event.inputs.smoke == 'true'
+        run: |
+          node -e '
+          const { chromium } = require("playwright");
+          (async () => {
+            const b = await chromium.launch(), p = await b.newPage({ locale: "zh-TW", timezoneId: "Asia/Taipei" });
+            const errs = []; p.on("pageerror", e => errs.push(e.message));
+            const r = await p.goto("https://jamiace.github.io/html/game/Purr_Cozy/", { waitUntil: "load", timeout: 60000 });
+            await p.waitForTimeout(8000);
+            console.log("HTTP", r && r.status(), "title:", await p.title(), "pageErrors:", errs.length, errs.slice(0, 3));
+            await p.screenshot({ path: "smoke.png" }); await b.close();
+            if (!r || r.status() >= 400) process.exit(1);
+          })().catch(e => { console.error(e); process.exit(1); });'
+
+      - uses: actions/upload-artifact@v4
+        if: github.event.inputs.smoke == 'true'
+        with:
+          name: smoke-screenshot
+          path: smoke.png
+
       - name: 下載控制帳號雲端備份裡的 cloud.cjs
-        if: steps.win.outputs.skip == '0'
+        if: steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
         run: |
           node -e '
           const K="AIzaSyCZDorIT08dX1oqF4RZ8pTqDStl0pwWR_Q",H={"Content-Type":"application/json",Referer:"https://jamiace.github.io/"};
@@ -59,12 +84,12 @@ jobs:
           require("fs").writeFileSync("cloud.cjs",d.fields.data.stringValue);console.log("cloud.cjs ok")})()'
 
       - name: 執行模擬
-        if: steps.win.outputs.skip == '0'
+        if: steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
         # --work 放在 workspace 底下，life.cjs 才找得到這裡裝的 playwright
         run: node cloud.cjs run --work "$GITHUB_WORKSPACE/w" --window ${{ steps.win.outputs.w }} 2>&1 | tee run.log
 
       - name: 檢查結果
-        if: always() && steps.win.outputs.skip == '0'
+        if: always() && steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
         run: |
           tail -5 run.log || true
           grep -qE '\[cloud\] 完成|這次跳過|不在模擬期間' run.log || { echo "::error::模擬沒有正常完成，看上面的 log"; exit 1; }
