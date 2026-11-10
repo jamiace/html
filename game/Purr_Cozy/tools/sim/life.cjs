@@ -238,22 +238,52 @@ function ensurePlan(S) {
  saveState(S); return S.today;
 }
 let browser = null, cache = new Map(), RUN_END = 0;
+const FIXED = /[?&](crc|checksum|boot)=|\/build-packs\/[0-9a-f]{8}\.bin/, HC = path.join(DIR, 'httpcache'), inflight = new Map();
+async function fixedFile(r) {
+ const url = r.request().url(), key = require('crypto').createHash('sha1').update(url).digest('hex'), f = path.join(HC, key);
+ try {
+  let hit = cache.get(key);
+  if (!hit && fs.existsSync(f + '.json')) { hit = { status: 200, headers: JSON.parse(fs.readFileSync(f + '.json', 'utf8')), body: fs.readFileSync(f) }; cache.set(key, hit); }
+  if (!hit) {
+   if (!inflight.has(key)) inflight.set(key, (async () => {
+    const res = await r.fetch(), body = await res.body();
+    if (res.status() !== 200) return { status: res.status(), headers: res.headers(), body, temp: true };
+    const headers = Object.fromEntries(Object.entries(res.headers()).filter(([k]) => !/^(content-encoding|content-length|transfer-encoding|connection|date|age|set-cookie)$/i.test(k)));
+    fs.mkdirSync(HC, { recursive: true }); fs.writeFileSync(f, body); fs.writeFileSync(f + '.json', JSON.stringify(headers));
+    const v = { status: 200, headers, body }; if (body.length < 5e6) cache.set(key, v); return v;
+   })().finally(() => setTimeout(() => inflight.delete(key), 0)));
+   hit = await inflight.get(key);
+  }
+  return r.fulfill({ status: hit.status, headers: hit.headers, body: hit.body });
+ } catch (e) { return r.continue().catch(() => { }); }
+}
 // Opening the game in a fresh browser checks ~7,000 asset files (about 4–6 minutes of CPU on a small machine), so several
 // can load at once but not unlimited: --load-conc (default 3) at a time, each allowed --load-timeout minutes (default 30).
 // The session's own play time is counted from when the room is on screen, so a slow load never shortens the visit.
 const LOAD_CONC = Math.max(1, +arg('load-conc', 3)), LOAD_MS = Math.max(1, +arg('load-timeout', 30)) * 60e3; let loading = 0; const loadQ = [];
 async function loadSlot() { if (loading < LOAD_CONC) { loading++; return; } await new Promise(r => loadQ.push(r)); loading++; }
 function loadDone() { loading--; const r = loadQ.shift(); if (r) r(); }
+// silent: no sound from music, games or read-aloud words (the computer running this is someone's work machine)
+const BROWSER_ARGS = ['--mute-audio', '--autoplay-policy=user-gesture-required'];
 let browserP = null;   // sessions that start together share one launch (a race here used to leave extra browsers running, so `once` never exited)
-async function launch() { if (!browserP) { const { chromium } = require('playwright'); browserP = chromium.launch(); } return browser = await browserP; }
+async function launch() { if (!browserP) { const { chromium } = require('playwright'); browserP = chromium.launch({ args: BROWSER_ARGS }); } return browser = await browserP; }
 async function runSession(S, p, s) {
  const st = S.people[p.id], date = S.today.date, today = st.daily[date] || (st.daily[date] = { daily: false, grade: false });
  const share = p.shareDevice && p.id > p.shareDevice ? p.shareDevice : p.id, storeFile = path.join(DIR, 'browser', share + '.json');
  const vp = p.device === 'phone' ? { width: 390, height: 844, isMobile: true, hasTouch: true } : p.device === 'tablet' ? { width: 820, height: 1180, isMobile: true, hasTouch: true } : { width: 1366, height: 860 };
- const b = await launch(), ctx = await b.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: p.lang === 'ja' ? 'ja-JP' : 'zh-TW', timezoneId: 'Asia/Taipei', storageState: !arg('no-store') && fs.existsSync(storeFile) ? storeFile : undefined });
+ const copts = { viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: p.lang === 'ja' ? 'ja-JP' : 'zh-TW', timezoneId: 'Asia/Taipei' };
+ // --profiles: every person keeps a real browser profile (like their own phone/tablet/PC), so the game's asset cache survives
+ // between visits and only the very first visit has the slow first load. Used when running on one always-on computer.
+ const ctx = arg('profiles') ? await require('playwright').chromium.launchPersistentContext(path.join(DIR, 'profiles', share), Object.assign({ args: BROWSER_ARGS }, copts))
+  : await (await launch()).newContext(Object.assign({ storageState: !arg('no-store') && fs.existsSync(storeFile) ? storeFile : undefined }, copts));
+ await ctx.addInitScript(() => { try { if (window.speechSynthesis) { speechSynthesis.speak = () => { }; } } catch (e) { } });   // read-aloud uses the OS voice, which --mute-audio does not cover
  await ctx.addInitScript(([dev, lang]) => { try { if (!localStorage.getItem('pocketnook.device')) localStorage.setItem('pocketnook.device', dev); localStorage.setItem('purr-cozy.language', lang); } catch (e) { } }, [st.device || ('test-' + share), p.lang || 'zh-TW']);
  if (arg('no-upload')) await ctx.route(/firestore\.googleapis\.com|identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com/, r => r.abort());   // testing: nothing reaches Firebase, so no test data appears in the admin
- if (!arg('direct')) await ctx.route(u => u.href.startsWith(BASE) && !/version\.json/.test(u.href), async r => { const url = r.request().url(), hit = cache.get(url); if (hit) return r.fulfill(hit); try { const res = await r.fetch(); const body = await res.body(); if (res.status() === 200 && body.length < 30e6) cache.set(url, { status: 200, headers: res.headers(), body }); return r.fulfill({ response: res, body }); } catch (e) { return r.abort(); } });
+ // Game files with a version in the URL (?crc= / ?checksum= / ?boot=) never change, so every file is downloaded from the site
+ // only ONCE for all 30 people (kept on disk under the state folder, identical requests share one download). The site
+ // (GitHub Pages) answers HTTP 429 when one IP asks for too much; without this each new person re-downloaded ~7,000 files.
+ // Everything else (index.html, version.json, Firebase) goes to the network as usual, so game updates are picked up.
+ if (!arg('direct')) await ctx.route(u => u.href.startsWith(BASE) && FIXED.test(u.href), r => fixedFile(r));
  const page = await ctx.newPage(), errors = [], netBad = []; page.on('pageerror', e => errors.push(e.message.slice(0, 200)));
  // for diagnosing a load that never finishes: failed requests and HTTP errors while the game opens
  page.on('requestfailed', r => { if (netBad.length < 40) netBad.push('fail ' + r.url().replace(BASE, '').slice(0, 80) + ' ' + ((r.failure() || {}).errorText || '')); });
@@ -305,7 +335,7 @@ async function runSession(S, p, s) {
   await fixId();
   if (p.age >= 13 || chance(.4)) { await ev(() => { dispatchEvent(new Event('pagehide')); Game.save(); }); for (let i = 0; i < 10; i++) { const q = await ev(() => typeof LearnLog !== 'undefined' ? LearnLog.queue().length : 0); if (!q) break; await ev(() => LearnLog.flush()); await new Promise(r => setTimeout(r, 1500)); } }
   s.grade = await ev(() => typeof Placement !== 'undefined' && Placement.done() ? +Placement.S().theta.toFixed(2) : null);
-  if (!arg('no-store')) await ctx.storageState({ path: storeFile, indexedDB: true });
+  if (!arg('no-store') && !arg('profiles')) await ctx.storageState({ path: storeFile, indexedDB: true });
  } catch (e) { s.error = String(e && e.message || e).slice(0, 900); }
  finally { s.pageErrors = errors.slice(0, 5); await ctx.close().catch(() => { }); }
  s.real = +((Date.now() - t0) * FAST / 60000).toFixed(1); Object.assign(s, { merchant: ses.merchant, storyCh: ses.storyCh, loreQ: ses.loreQ, loreRight: ses.loreRight, bought: ses.bought, weekly: ses.weekly }); s.acts = [...new Set(ses.acts)]; s.ans = ses.ans; s.right = ses.right; s.cut = ses.cut; s.frustration = ses.frustration; s.sat = +satisfaction(p, ses).toFixed(2);
@@ -419,17 +449,20 @@ async function typoRound(page, p, st, ses, until, wait) {
 }
 function misspell(word) { const w = String(word).toLowerCase(); if (w.length < 3) return w + 'e'; const i = 1 + Math.floor(rnd() * (w.length - 2)); return chance(.5) ? w.slice(0, i) + w.slice(i + 1) : w.replace(/[aeiou]/, v => 'aeiou'.replace(v, '')[Math.floor(rnd() * 4)]); }
 
+const END = arg('end') ? Date.parse(String(arg('end'))) : 0;   // e.g. --end 2026-11-24T00:00:00+08:00
 async function runLoop(once) {
  if (once) RUN_END = Date.now() + (+arg('window', 30) + 3) * 60e3;
  let S = loadState();
  if (!S || arg('start')) { const start = String(arg('start', arg('start-if-new', tw(Date.now()).date))); S = { start, days: DAYS, people: Object.fromEntries(PEOPLE.map(p => [p.id, newState(p)])), today: null }; saveState(S); console.log(`[life] 新的兩週：從 ${start} 開始`); }
  const CONC = +arg('concurrency', 6), win = +arg('window', 30) * 60e3, running = new Set();
  for (;;) {
+  if (END && Date.now() >= END) { console.log('[life] 模擬已到結束時間 ' + arg('end') + '，不再開始新的場次'); break; }
   const T = ensurePlan(S); if (!T) { console.log('[life] 不在模擬期間（' + S.start + ' 起 ' + S.days + ' 天）'); break; }
   const now = Date.now(), due = [];
   for (const p of PEOPLE) for (const s of (T.plans[p.id] || { sessions: [] }).sessions) {
    if (s.status !== 'planned') continue;
    if (!arg('test-now') && s.t < now - 45 * 60e3) { s.status = 'missed'; logLine(T.date, { type: 'missed', id: p.id, sid: s.id }); continue; }   // the computer was off
+   if (END && s.t >= END) continue;
    if (s.t <= now || (once && s.t <= now + win) || arg('test-now')) due.push([p, s]);   // --test-now: play today's sessions right away (testing)
   }
   for (const [p, s] of due) {
@@ -471,7 +504,7 @@ function summary() { const date = String(arg('date', tw(Date.now() - 6 * 3600e3)
  console.log(JSON.stringify({ date, sessions: ses.length, people: Object.keys(by).length, minutes: Math.round(ses.reduce((a, x) => a + (x.real || 0), 0)), errors: ses.filter(x => x.error).map(x => ({ id: x.id, error: x.error })), missed: L.filter(x => x.type === 'missed').length, by }, null, 1)); }
 if (CMD === 'pack') pack(); else if (CMD === 'unpack') unpack(); else if (CMD === 'summary') summary(); else
 if (CMD === 'preview') preview();
-else if (CMD === 'run') runLoop(false);
+else if (CMD === 'run') runLoop(false).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });
 else if (CMD === 'once') runLoop(true).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });   // never hang the hourly run
 else if (CMD === 'status') status();
 else console.log('用法：node tools/sim/life.cjs preview | run | once | status');

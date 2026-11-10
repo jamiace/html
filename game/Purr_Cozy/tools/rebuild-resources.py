@@ -59,6 +59,28 @@ def check_git_case(paths):
  lines=['Letter case differs between this folder and Git (GitHub Pages would answer 404):']
  for old,new in bad:lines+=['  Git:    '+old,'  Folder: '+new,'  Fix:    git mv -f "'+old+'" "'+old+'.tmp"  then  git mv -f "'+old+'.tmp" "'+new+'"']
  raise ValueError('\n'.join(lines)+'\nRun the Fix lines inside this game folder, then run Update-Game.cmd again.')
+# Packs: the game used to download every file separately (~7,000 requests on a first visit), which GitHub Pages answers
+# with HTTP 429 when many players share one IP (a school, or the test simulation). Files are now grouped into PACK_COUNT
+# packs by a hash of their path, so a first visit is a few dozen requests, and an update only changes the packs that hold
+# changed files. A pack is the files' canonical bytes back to back; each file in the manifest gets its pack and offset
+# ("pk" = [pack index, offset]). Packs are named by their own CRC32, so an unchanged pack keeps its name across builds.
+# The loader still verifies every file's CRC32 and falls back to single-file downloads if a pack is missing or damaged.
+PACK_COUNT=32
+def build_packs(files,blobs):
+ groups=[[] for _ in range(PACK_COUNT)]
+ for i,f in enumerate(files):groups[zlib.crc32(f['path'].encode('utf-8'))%PACK_COUNT].append(i)
+ folder=ROOT/'build-packs';folder.mkdir(exist_ok=True);packs=[];keep=set()
+ for g in groups:
+  if not g:continue
+  data=bytearray();n=len(packs)
+  for i in g:files[i]['pk']=[n,len(data)];data+=blobs[files[i]['path']]
+  name=crc(bytes(data))+'.bin';path=folder/name;keep.add(name)
+  if not path.exists() or path.read_bytes()!=data:atomic(path,bytes(data))
+  packs.append({'path':'build-packs/'+name,'bytes':len(data)})
+ for old in folder.glob('*.bin'):
+  if old.name not in keep:old.unlink()
+ print('PACKS:',len(packs),'packs,',round(sum(p['bytes'] for p in packs)/1e6,1),'MB (build-packs/)')
+ return packs
 def main():
  build=version()
  if not isinstance(build,dict) or not isinstance(build.get('version'),str):raise ValueError('version.json must contain a version string.')
@@ -67,27 +89,29 @@ def main():
  if missing:raise ValueError('Incomplete update. Extract ALL ZIP subfolders. Missing: '+', '.join(missing))
  sync_music()
  if not re.search(r'schema\s*:\s*4', (ROOT/'js/asset-cache.js').read_text(encoding='utf-8-sig')):raise ValueError('Old js/asset-cache.js detected. Extract the complete update ZIP before rebuilding.')
- files=[]
+ files=[];blobs={}
  for p in sorted(ROOT.rglob('*')):
   if not p.is_file():continue
   rel=p.relative_to(ROOT).as_posix()
   if p.suffix.lower() in AUDIO or any(part.startswith('.') for part in p.relative_to(ROOT).parts):continue
-  if rel in {'version.json','resources.json','resources.bin','music/playlist.json','js/hd-furniture.js'} or rel.startswith(('tools/','godot/','docs/','build-manifests/','assets/png/hd/','Claude outputs/')) or p.suffix.lower() not in SUPPORTED:continue
+  if rel in {'version.json','resources.json','resources.bin','music/playlist.json','js/hd-furniture.js'} or rel.startswith(('tools/','godot/','docs/','build-manifests/','build-packs/','assets/png/hd/','Claude outputs/')) or p.suffix.lower() not in SUPPORTED:continue
   b=p.read_bytes();text=p.suffix.lower() in TEXT
   if text:b=b.replace(b'\r\n',b'\n')
   if p.suffix.lower() in {'.json','.webmanifest'}:
    try:json.loads(b.decode('utf-8-sig'))
    except (ValueError,UnicodeError) as e:raise ValueError('Invalid JSON: '+rel+' : '+str(e))
+  blobs[rel]=b
   files.append({'path':rel,'text':text,'bytes':len(b),'crc32':crc(b),'mime':'application/javascript' if p.suffix=='.js' else mimetypes.guess_type(p.name)[0] or 'application/octet-stream'})
  check_git_case([f['path'] for f in files]+[p.relative_to(ROOT).as_posix() for p in (ROOT/'music').rglob('*') if p.is_file() and p.suffix.lower() in AUDIO])
- m=json.dumps({'schema':4,'files':files},ensure_ascii=False,separators=(',',':')).encode('utf-8');checksum=crc(m)
+ packs=build_packs(files,blobs)
+ m=json.dumps({'schema':4,'files':files,'packs':packs},ensure_ascii=False,separators=(',',':')).encode('utf-8');checksum=crc(m)
  folder=ROOT/'build-manifests';folder.mkdir(exist_ok=True);manifest=folder/(checksum+'.json')
  if manifest.exists() and manifest.read_bytes()!=m:raise ValueError('CRC32 manifest name collision. Existing manifest was not changed.')
  atomic(manifest,m);atomic(ROOT/'resources.json',m)
  build['resources']={'manifest':'build-manifests/'+checksum+'.json','checksum':checksum}
  atomic(ROOT/'version.json',(json.dumps(build,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
  print('READY:',len(files),'files; CRC32:',checksum)
- print('Commit all changed files including build-manifests/, resources.json and version.json together. Push ONCE.')
+ print('Commit all changed files including build-manifests/, build-packs/, resources.json and version.json together. Push ONCE.')
  print('Audio files are excluded. No Git commit or push is performed by this tool.')
 if __name__=='__main__':
  try:main()
