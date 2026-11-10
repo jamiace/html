@@ -8,8 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="../js/firebase-config.js"></script>
 <style>
-:root{--bg:#f6f2ee;--card:#fffdf9;--ink:#2f2433;--ink2:#6b5a6e;--line:#e6dcd2;--acc:#8c5aa8;--acc2:#d9566f;--good:#3f8a4f;--warn:#b86a12;--chip:#f1e7f6;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-@media (prefers-color-scheme:dark){:root{--bg:#1b1724;--card:#262033;--ink:#f1e9f3;--ink2:#b9a8bd;--line:#3d3449;--acc:#c49ae0;--acc2:#ef8fa1;--good:#7cc58a;--warn:#f0b35a;--chip:#33294a}}
+:root{--bg:#f6f2ee;--card:#fffdf9;--ink:#2f2433;--ink2:#6b5a6e;--line:#e6dcd2;--acc:#8c5aa8;--acc2:#d9566f;--good:#3f8a4f;--warn:#b86a12;--chip:#f1e7f6;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--blue:#2f6fc8;--on-acc:#ffffff}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1724;--card:#262033;--ink:#f1e9f3;--ink2:#b9a8bd;--line:#3d3449;--acc:#c49ae0;--acc2:#ef8fa1;--good:#7cc58a;--warn:#f0b35a;--chip:#33294a;--blue:#8fb5ea;--on-acc:#1b1724}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -20,7 +20,7 @@ section h2{font-size:17px;margin:0 0 4px}
 .why{color:var(--ink2);font-size:13px;margin:0 0 12px}
 button,select,input{font:inherit;color:inherit}
 button{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
-button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+button.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
 button:disabled{opacity:.5;cursor:default}
 select,input[type=text],input[type=password],input[type=date],input[type=number]{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -65,7 +65,7 @@ aside{background:var(--card);border-right:1px solid var(--line);position:sticky;
 .navgroup{font-size:12px;color:var(--ink2);padding:14px 10px 4px;letter-spacing:.05em}
 .navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:8px 10px}
 .navbtn i{font-style:normal;width:18px;text-align:center;color:var(--ink2)}.navbtn:hover{background:var(--chip)}
-.navbtn.on{background:var(--acc);color:#fff}.navbtn.on i{color:#fff}
+.navbtn.on{background:var(--acc);color:var(--on-acc)}.navbtn.on i{color:var(--on-acc)}
 .mainwrap{min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .topbar h1{font-size:17px;margin:0;flex:1 1 auto}#btn-menu{display:none}
@@ -98,13 +98,13 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 .cd-track{position:relative;height:30px}.cd-track::before{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:var(--line)}
 .cd-track .cd-grid{position:absolute;top:4px;bottom:4px;width:1px;background:var(--line)}
 .cd-bar{position:absolute;top:calc(50% - 4px);height:8px;border-radius:4px;background:#bbb}
-.cd-bar.o{background:var(--acc2)}.cd-bar.u{background:#3a7bd5}.cd-bar.ok{background:var(--good)}
+.cd-bar.o{background:var(--acc2)}.cd-bar.u{background:var(--blue)}.cd-bar.ok{background:var(--good)}
 i.cd-p,i.cd-a{position:absolute;top:calc(50% - 8px);width:16px;height:16px;margin-left:-8px;border-radius:50%;box-sizing:border-box}
 i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(--ink)}
 .cd-key{display:inline-flex;align-items:center;gap:6px;margin-right:14px}.cd-key i{position:relative!important;top:0!important;margin:0!important}
 .cd-axis{position:relative;height:18px;margin-left:144px;margin-right:244px;font-size:11px;color:var(--ink2)}.cd-axis span{position:absolute;transform:translateX(-50%)}
-.cd-txt{font-size:13px;line-height:1.5}.cd-o{color:var(--acc2)}.cd-u{color:#3a7bd5}.cd-ok{color:var(--good)}.cd-q{color:var(--ink2)}
-#cal-tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.cd-txt{font-size:13px;line-height:1.5}.cd-o{color:var(--acc2)}.cd-u{color:var(--blue)}.cd-ok{color:var(--good)}.cd-q{color:var(--ink2)}
+#cal-tabs button.on{background:var(--acc);color:var(--on-acc);border-color:var(--acc)}
 #cal-actions ul{margin:4px 0;padding-left:20px}#cal-actions li{margin:4px 0}
 .cal-adv{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.cal-adv summary{cursor:pointer;font-weight:600;padding:4px 0}
 @media (max-width:760px){.cd-row{grid-template-columns:90px 1fr}.cd-txt{grid-column:1/-1}.cd-axis{margin-left:104px;margin-right:4px}}
@@ -489,7 +489,7 @@ function analyse(){
  const ov={learners:learners.size,sessions:sess.length,answers:ans.length,reviews:rev.length,typoWords:typo.length,accuracy:acc,medianSecPerAnswer:ans.length?median(ans.map(a=>a.ms))/1000:null,completionRate:sess.length?done/sess.length:null,medianSessionMin:sess.some(r=>r.dur>0)?median(sess.filter(r=>r.dur>0).map(r=>r.dur))/60000:null,personDays:pd.size,avgDailyActive:pd.size/nDays};
  summary.overview=ov;
  $('kpis').innerHTML=[['學習人數（不重複）',fmt(ov.learners)],['學習人次（人‧天）',fmt(ov.personDays)],['平均每天學習人數',fmt(Math.round(ov.avgDailyActive))],['回合數',fmt(ov.sessions)],['作答題數',fmt(ov.answers)],['整體答對率',pct(ov.accuracy)],['每題作答時間（中位數）',fmt(ov.medianSecPerAnswer,1)+' 秒'],['回合完成率',pct(ov.completionRate)],['每回合時間（中位數）',fmt(ov.medianSessionMin,1)+' 分']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
- chart('c-daily',{type:'bar',data:{labels:dk.map(k=>wkly?k.slice(5)+' 週':k.slice(5)),datasets:[{type:'line',label:wkly?'每週不重複人數':'當天學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},...(wkly?[{type:'line',label:'每週人次（人‧天）',data:dk.map(k=>days.get(k).pd.size),yAxisID:'y',borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',borderDash:[5,4]}]:[]),{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566f55'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
+ chart('c-daily',{type:'bar',data:{labels:dk.map(k=>wkly?k.slice(5)+' 週':k.slice(5)),datasets:[{type:'line',label:wkly?'每週不重複人數':'當天學習人數',data:dk.map(k=>days.get(k).u.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},...(wkly?[{type:'line',label:'每週人次（人‧天）',data:dk.map(k=>days.get(k).pd.size),yAxisID:'y',borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',borderDash:[5,4]}]:[]),{type:'bar',label:'作答題數',data:dk.map(k=>days.get(k).n),yAxisID:'y2',backgroundColor:'#d9566fcc'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題'}}}}});
  summary.daily=dk.slice(-30).map(k=>({[wkly?'weekFromSunday':'day']:k,uniqueLearners:days.get(k).u.size,personDays:days.get(k).pd.size,answers:days.get(k).n,accuracy:days.get(k).n?+(days.get(k).ok/days.get(k).n).toFixed(3):null}));
 
  /* 2 words */
@@ -626,14 +626,15 @@ function analyse(){
     <div class="cd-txt">遊戲猜 ${pct(c.meanP)}，實際 ${pct(c.actual)}<br><b class="${J.cls}">${J.t}</b></div></div>`}).join('')+`<div class="cd-axis">${grid.map(t=>`<span style="left:${X(t)}%">${Math.round(t*100)}%</span>`).join('')}</div>`:'<p class="muted">還沒有資料。</p>'}
  // ---- groups by predicted chance, one skill at a time (tabs)
  const calTabs=[['all','全部題型'],...Object.keys(bySkill).map(k=>[k,SKN[k]])];if(!calTabs.some(t=>t[0]===Admin.calSkill))Admin.calSkill='all';
+ const themeCol=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim(),INK=themeCol('--ink')||'#2f2433',GOOD=themeCol('--good')||'#3f8a4f';
  const drawGroups=()=>{const key=Admin.calSkill,c=key==='all'?all:bySkill[key];
   $('cal-tabs').innerHTML=calTabs.map(([k,n])=>`<button data-calk="${k}" class="${k===key?'on':''}">${n}</button>`).join('');
   $('cal-tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{Admin.calSkill=b.dataset.calk;drawGroups()});
   if(!c)return;const B=c.bins,colr=b=>Math.abs(b.y-b.x)<.03?'#7cc58a':b.y<b.x?'#ef8fa1':'#8fb5ea';
   chart('c-calib',{type:'bar',data:{labels:B.map(b=>[`${Math.round(b.pmin*100)}–${Math.round(b.pmax*100)}%`,`${fmt(b.n)} 題`]),
-   datasets:[{type:'line',label:'遊戲猜的答對率',data:B.map(b=>+(b.x*100).toFixed(1)),showLine:false,pointStyle:'rectRot',pointRadius:7,pointHoverRadius:9,borderColor:'#2f2433',backgroundColor:'#2f2433',yAxisID:'y'},
+   datasets:[{type:'line',label:'遊戲猜的答對率',data:B.map(b=>+(b.x*100).toFixed(1)),showLine:false,pointStyle:'rectRot',pointRadius:7,pointHoverRadius:9,borderColor:INK,backgroundColor:INK,yAxisID:'y'},
     {type:'bar',label:'實際答對率',data:B.map(b=>+(b.y*100).toFixed(1)),backgroundColor:B.map(colr),borderRadius:4,yAxisID:'y'}]},
-   options:{interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{generateLabels:ch=>[{text:'實際答對率（綠＝準、紅＝比猜的差、藍＝比猜的好）',fillStyle:'#7cc58a',strokeStyle:'#7cc58a',lineWidth:0},{text:'◆ 遊戲猜的答對率',fillStyle:'#2f2433',strokeStyle:'#2f2433',lineWidth:0,pointStyle:'rectRot'}]}},
+   options:{interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{generateLabels:ch=>{const fc=themeCol('--ink2')||Chart.defaults.color;return[{text:'實際答對率（綠＝準、紅＝比猜的差、藍＝比猜的好）',fillStyle:'#7cc58a',strokeStyle:'#7cc58a',lineWidth:0,fontColor:fc},{text:'◆ 遊戲猜的答對率',fillStyle:INK,strokeStyle:INK,lineWidth:0,pointStyle:'rectRot',fontColor:fc}]}}},
     tooltip:{callbacks:{title:t=>`遊戲猜 ${t[0].label.split(',')[0]} 的這組（${fmt(B[t[0].dataIndex].n)} 題）`,label:t=>{const b=B[t.dataIndex];return t.dataset.type==='line'?`遊戲猜：${(b.x*100).toFixed(1)}%`:`實際：${(b.y*100).toFixed(1)}%（95% 區間 ${(b.lo*100).toFixed(0)}–${(b.hi*100).toFixed(0)}%）`},
      footer:t=>{const b=B[t[0].dataIndex],d=(b.y-b.x)*100;return Math.abs(d)<3?'猜得準':d<0?`比遊戲猜的差 ${(-d).toFixed(1)} 點`:`比遊戲猜的好 ${d.toFixed(1)} 點`}}}},
     scales:{x:{title:{display:true,text:'遊戲猜的答對率（由低到高分組）'}},y:{min:0,max:100,title:{display:true,text:'答對率'},ticks:{callback:v=>v+'%'}}}}})};
@@ -641,7 +642,7 @@ function analyse(){
  // ---- weekly: two lines only
  const WK={};for(const a of PA){const d=dayNo(a.at),k=dayNoKey(d-((d+4)%7)),w=WK[k]||(WK[k]={n:0,p:0,y:0});w.n++;w.p+=a.p;w.y+=a.ok}
  const wks=Object.keys(WK).sort();
- chart('c-calib-trend',{type:'line',data:{labels:wks.map(k=>k.slice(5).replace('-','/')+' 那週'),datasets:[{label:'遊戲猜的答對率',data:wks.map(k=>+(WK[k].p/WK[k].n*100).toFixed(1)),borderColor:'#2f2433',backgroundColor:'#2f2433',borderDash:[6,4]},{label:'實際答對率',data:wks.map(k=>+(WK[k].y/WK[k].n*100).toFixed(1)),borderColor:'#3f8a4f',backgroundColor:'#3f8a4f'}]},
+ chart('c-calib-trend',{type:'line',data:{labels:wks.map(k=>k.slice(5).replace('-','/')+' 那週'),datasets:[{label:'遊戲猜的答對率',data:wks.map(k=>+(WK[k].p/WK[k].n*100).toFixed(1)),borderColor:INK,backgroundColor:INK,borderDash:[6,4],borderWidth:2.5},{label:'實際答對率',data:wks.map(k=>+(WK[k].y/WK[k].n*100).toFixed(1)),borderColor:GOOD,backgroundColor:GOOD,borderWidth:2.5}]},
   options:{interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{footer:t=>{const w=WK[wks[t[0].dataIndex]];return `${fmt(w.n)} 題，差 ${((w.y-w.p)/w.n*100).toFixed(1)} 點`}}}},scales:{y:(()=>{const v=wks.flatMap(k=>[WK[k].p/WK[k].n*100,WK[k].y/WK[k].n*100]);return{min:Math.max(0,Math.floor(Math.min(...v,100)-5)),max:Math.min(100,Math.ceil(Math.max(...v,0)+5)),title:{display:true,text:'答對率'},ticks:{callback:v=>v+'%'}}})()}}});
  // ---- gap chart (zoomed y)
  const gapPts=Object.entries(bySkill).flatMap(([k,c])=>c.bins.map(b=>[b.lo-b.x,b.hi-b.x]));const gl=Math.min(-.06,...gapPts.map(g=>g[0])),gh=Math.max(.06,...gapPts.map(g=>g[1]));
@@ -758,7 +759,7 @@ function analyse(){
  const grown=pls.map(k=>({first:byP[k][0],last:byP[k][byP[k].length-1]})).filter(x=>x.last.t0-x.first.t0>=7*864e5).map(x=>x.last.pl.t-x.first.pl.t);
  $('grade-kpis').innerHTML=GS.length?[['有程度資料的玩家',fmt(pls.length)],['搬家日（首測）',fmt(GS.filter(r=>r.pl.m==='first').length)],['每日小測回合',fmt(GS.filter(r=>r.pl.m==='daily').length)],['每人測驗次數（中位數）',fmt(Math.round(median(pls.map(k=>byP[k].length))))+' 次'],['程度中位數',latest.length?GRADE_NAME(gOf(med(latest.map(r=>r.pl.t)))):'–'],['自填 vs 實測 ±1 內',declared.length?pct(agree/declared.length)+` <small>(${declared.length})</small>`:'–'],['每日小測完成率',comp.length?pct(compAll):'–'],['7 天以上的成長（平均）',grown.length?(grown.reduce((a,b)=>a+b,0)/grown.length>=0?'+':'')+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2)+` <small>年級 (${grown.length} 人)</small>`:'–']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join(''):'<p class="muted">還沒有程度測驗的紀錄（需要 0.92.46 以上的遊戲版本）。</p>';
  const G12=Array.from({length:12},(_,i)=>i+1),g12l=G12.map(g=>GRADE_NAME(g));
- chart('c-grade-dist',{type:'bar',data:{labels:g12l,datasets:[{label:'實測（最新）',data:G12.map(g=>latest.filter(r=>gOf(r.pl.t)===g).length),backgroundColor:'#8c5aa8'},{label:'自填年級',data:G12.map(g=>latest.filter(r=>r.pl.d===g).length),backgroundColor:'#d9566f88'}]},options:{scales:{y:{title:{display:true,text:'人數'}}}}});
+ chart('c-grade-dist',{type:'bar',data:{labels:g12l,datasets:[{label:'實測（最新）',data:G12.map(g=>latest.filter(r=>gOf(r.pl.t)===g).length),backgroundColor:'#8c5aa8'},{label:'自填年級',data:G12.map(g=>latest.filter(r=>r.pl.d===g).length),backgroundColor:'#d9566fcc'}]},options:{scales:{y:{title:{display:true,text:'人數'}}}}});
  const DEC={};for(const r of latest){const k=r.pl.d>0?r.pl.d:0;(DEC[k]||(DEC[k]=[])).push(r.pl.t)}
  table('t-grade-decl',['自填','人數','實測平均','實測中位','±1 內'],Object.keys(DEC).map(Number).sort((a,b)=>a-b).map(k=>{const L=DEC[k];return[k?GRADE_NAME(k):'沒填',L.length,{v:L.reduce((a,b)=>a+b,0)/L.length,h:GRADE_NAME(gOf(L.reduce((a,b)=>a+b,0)/L.length))+' ('+(L.reduce((a,b)=>a+b,0)/L.length).toFixed(1)+')'},{v:med(L),h:med(L).toFixed(1)},k?P(L.filter(t=>Math.abs(gOf(t)-k)<=1).length/L.length):{v:-1,h:'–'}]}));
  // weekly mean of each player's latest estimate up to that week
@@ -767,7 +768,7 @@ function analyse(){
  chart('c-grade-trend',{type:'line',data:{labels:wkMean.map(x=>x.w),datasets:[{label:'平均程度（年級）',data:wkMean.map(x=>x.m==null?null:+x.m.toFixed(2)),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{label:'有資料的玩家數',data:wkMean.map(x=>x.n),borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',yAxisID:'y2'}]},options:{scales:{y:{title:{display:true,text:'年級'},grace:'10%'},y2:{position:'right',grid:{display:false},title:{display:true,text:'人'}}}}});
  const GB2=[[-9,-1.5,'≤ −1.5'],[-1.5,-.5,'−1.5～−0.5'],[-.5,.5,'−0.5～+0.5'],[.5,1.5,'+0.5～+1.5'],[1.5,9,'≥ +1.5']];
  chart('c-grade-growth',{type:'bar',data:{labels:GB2.map(b=>b[2]),datasets:[{label:'玩家數',data:GB2.map(([lo,hi])=>grown.filter(x=>x>=lo&&x<hi).length),backgroundColor:GB2.map(([lo])=>lo>=.5?'#3f8a4f':lo<-.5?'#d9566f':'#b86a12')}]},options:{plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'程度變化（年級）'}},y:{title:{display:true,text:'人數'}}}}});
- chart('c-grade-daily',{type:'bar',data:{labels:comp.map(x=>x.k),datasets:[{type:'line',label:'完成率 %',data:comp.map(x=>+(x.ok/x.n*100).toFixed(1)),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8',yAxisID:'y'},{label:'當天有來的玩家',data:comp.map(x=>x.n),backgroundColor:'#d9566f55',yAxisID:'y2'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'人'}}}}});
+ chart('c-grade-daily',{type:'bar',data:{labels:comp.map(x=>x.k),datasets:[{type:'line',label:'完成率 %',data:comp.map(x=>+(x.ok/x.n*100).toFixed(1)),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8',yAxisID:'y'},{label:'當天有來的玩家',data:comp.map(x=>x.n),backgroundColor:'#d9566fcc',yAxisID:'y2'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'人'}}}}});
  // item fit: accuracy by (b − θ), per type, against the model
  const FIT={},WD={};for(const r of GS){for(const a of r.ans||[]){if(!a.gr||typeof a.p!=='number'||a.p<0)continue;const type=a.q in PL_OFF?a.q:'en2zh',b=a.gr+PL_OFF[type],x=Math.max(-5,Math.min(5,Math.round(b-r.pl.t))),k=type+'|'+x,f=FIT[k]||(FIT[k]={n:0,ok:0,p:0});f.n++;f.ok+=a.ok;f.p+=a.p;
   const w=WD[a.w]||(WD[a.w]={w:a.w,g:a.gr,l:a.l,n:0,ok:0,p:0,th:0,gs:0});w.n++;w.ok+=a.ok;w.p+=a.p;w.th+=r.pl.t;w.gs+=PL_G[type]}}
@@ -840,7 +841,7 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
 const ADMIN_VERSION='0.5.03';
-const CHANGELOG=[['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const CHANGELOG=[['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
@@ -1174,7 +1175,7 @@ for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.vi
    what was on screen (one activity at a time), mus = minutes music was actually playing, focus = minutes the
    focus timer ran. Version 1 (0.92.48) only had window-open time, so its time split and music are not used. */
 const BACT={learn:'學英文',mini:'小遊戲',furn:'家具小時光',pet:'照顧寵物',decor:'佈置房間',shop:'商店與扭蛋',social:'好友與拜訪',tasks:'任務',focus:'番茄鐘與待辦',music:'選歌（音樂視窗）',avatar:'換造型',settings:'設定',room:'看房間、和貓咪待著',other:'其他'};
-const BCOL={learn:'#8c5aa8',mini:'#d9566f',furn:'#c27ba0',pet:'#b86a12',decor:'#3f8a4f',shop:'#e0a030',social:'#5aa0a8',tasks:'#7a6a52',focus:'#6b7a8f',music:'#3a7bd5',avatar:'#a87ac2',settings:'#999',room:'#cdb89a',other:'#bbb'};
+const BCOL={learn:'#8c5aa8',mini:'#d9566f',furn:'#c27ba0',pet:'#b86a12',decor:'#3f8a4f',shop:'#e0a030',social:'#5aa0a8',tasks:'#7a6a52',focus:'#6b7a8f',music:'#3a7bd5',avatar:'#a87ac2',settings:'#999',room:'#a68560',other:'#bbb'};
 // names as the game shows them (zh-TW)
 const BMINI={pinball:'彈珠台',toss:'投籃',maze:'傾斜迷宮',vending:'貓咪販賣機',memory:'翻牌配對',puzzle:'滑動拼圖',wire:'接水管通電',diff:'找不同',stars:'星星順序',parking:'貓咪停車場',weave:'刺繡',reaction:'反應力',fish:'釣魚',balance:'疊積木',instrument:'彈奏樂器',meowtypo:'Meow Typo',typing:'Meow Typo'};
 const BFP={memory:'小物配對',breath:'30 秒呼吸休息',journal:'看看與留下故事',plant:'照料植物',brew:'下午茶',study:'學習角',pet:'招呼貓咪',memo:'寫便條',inspiration:'每日小提問',sky:'星空小物',typing:'打字角',aquarium:'看魚缸',weather:'看天氣',photo:'拍房間照片',direct_storage:'打開收納',direct_avatar:'打開造型',direct_music:'打開音樂',instrument:'彈奏樂器'};
@@ -1240,7 +1241,7 @@ Object.assign(Admin,{
   // lines (minutes) are drawn over the bars (people) and every value carries its unit, so nothing is hidden or misread
   const onTop=ds=>ds.map(d=>d.type==='line'?Object.assign({order:0,borderWidth:3,pointRadius:d.pointRadius===0?0:4,pointHoverRadius:6,pointBackgroundColor:d.borderColor,spanGaps:true},d):Object.assign({order:1},d));
   chart('c-bh-daily',{type:'bar',data:{labels:lab,datasets:onTop(cur?[{type:'bar',label:wk?'這週上線天數':'在線分鐘',data:bks.map(k=>wk?T.byB[k].pd:Math.round(T.byB[k].vis)),backgroundColor:'#8c5aa8',yAxisID:wk?'y1':'y'},...(wk?[{type:'line',label:'這週平均每天在線分鐘',data:bks.map(k=>Math.round(T.byB[k].vis/T.byB[k].pd)),borderColor:'#8c5aa8',yAxisID:'y'}]:[]),{type:'line',label:'全體：每人每天平均在線分鐘',data:bks.map(k=>A.byB[k]?Math.round(A.byB[k].vis/A.byB[k].pd):null),borderColor:'#aaa',borderDash:[5,4],pointRadius:0,yAxisID:'y'}]
-   :[{type:'bar',label:wk?'每週不重複玩家':'當天玩家',data:bks.map(k=>T.byB[k].u.size),backgroundColor:'#c9b3d9',yAxisID:'y1'},...(wk?[{type:'bar',label:'每週人次（人‧天）',data:bks.map(k=>T.byB[k].pd),backgroundColor:'#9fc2ea',yAxisID:'y1'}]:[]),{type:'line',label:'每人每天平均在線',data:bks.map(k=>Math.round(T.byB[k].vis/T.byB[k].pd)),borderColor:'#8c5aa8',yAxisID:'y'}])},
+   :[{type:'bar',label:wk?'每週不重複玩家':'當天玩家',data:bks.map(k=>T.byB[k].u.size),backgroundColor:'#9b7bbd',yAxisID:'y1'},...(wk?[{type:'bar',label:'每週人次（人‧天）',data:bks.map(k=>T.byB[k].pd),backgroundColor:'#9fc2ea',yAxisID:'y1'}]:[]),{type:'line',label:'每人每天平均在線',data:bks.map(k=>Math.round(T.byB[k].vis/T.byB[k].pd)),borderColor:'#8c5aa8',yAxisID:'y'}])},
    options:{interaction:{mode:'index',intersect:false},
     plugins:{tooltip:{callbacks:{label:c=>{const v=c.parsed.y;if(v==null)return null;const unit=c.dataset.yAxisID==='y1'?(wk&&cur?' 天':' 人'):' 分鐘';return `${c.dataset.label}：${fmt(v)}${unit}`}}},
      legend:{labels:{generateLabels:ch=>Chart.defaults.plugins.legend.labels.generateLabels(ch).map(l=>{const d=ch.data.datasets[l.datasetIndex];l.text+=d.yAxisID==='y1'?(wk&&cur?'（天，右軸）':'（人，右軸）'):'（分鐘，左軸）';return l})}}},
@@ -1251,10 +1252,10 @@ Object.assign(Admin,{
   $('bh-share-note').textContent=T.v2?'':'這段期間只有 0.92.48 舊格式的資料，沒有可用的時間分配。';
   // background company: per person-day minutes
   const bg=t=>[t.vis,t.min,t.mus,t.focus].map(x=>t.v2?Math.round(x/Math.max(1,t.v2)):0);
-  chart('c-bh-bg',{type:'bar',data:{labels:['在線（畫面開著）','主動操作','音樂播放中','番茄鐘計時中'],datasets:[{label:cur?'這位玩家':'全體',data:bg(T),backgroundColor:['#c9b3d9','#8c5aa8','#3a7bd5','#6b7a8f']},...(cur?[{label:'全體',data:bg(A),backgroundColor:'#ddd'}]:[])]},options:{plugins:{legend:{display:!!cur}},scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘（每人每天平均）'}}}}});
+  chart('c-bh-bg',{type:'bar',data:{labels:['在線（畫面開著）','主動操作','音樂播放中','番茄鐘計時中'],datasets:[{label:cur?'這位玩家':'全體',data:bg(T),backgroundColor:['#9b7bbd','#8c5aa8','#3a7bd5','#6b7a8f']},...(cur?[{label:'全體',data:bg(A),backgroundColor:'#ddd'}]:[])]},options:{plugins:{legend:{display:!!cur}},scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘（每人每天平均）'}}}}});
   // weekday × hour (Sunday first, like the week picker)
   const people=B.heat==='people',val=c=>people?c.u.size:Math.round(c.m),mx=Math.max(1,...T.cells.flat().map(val));
-  $('bh-heat').innerHTML='<tr><th></th>'+Array.from({length:24},(_,i)=>`<th class="n">${i}</th>`).join('')+'</tr>'+T.cells.map((row,i)=>`<tr><th>週${WD_ZH[i]}</th>${row.map(c=>{const v=val(c);return `<td title="週${WD_ZH[i]} ${String(row.indexOf(c)).padStart(2,'0')}:00–59：${c.u.size} 人、共 ${Math.round(c.m)} 分鐘" style="background:rgba(140,90,168,${(v/mx*.9).toFixed(2)});color:${v/mx>.5?'#fff':'inherit'};text-align:center;font-size:11px">${v>=1?v:''}</td>`}).join('')}</tr>`).join('');
+  $('bh-heat').innerHTML='<tr><th></th>'+Array.from({length:24},(_,i)=>`<th class="n">${i}</th>`).join('')+'</tr>'+T.cells.map((row,i)=>`<tr><th>週${WD_ZH[i]}</th>${row.map(c=>{const v=val(c);return `<td title="週${WD_ZH[i]} ${String(row.indexOf(c)).padStart(2,'0')}:00–59：${c.u.size} 人、共 ${Math.round(c.m)} 分鐘" style="background:rgba(140,90,168,${(v/mx*.9).toFixed(2)});color:${v/mx>.8?'#fff':'var(--ink)'};text-align:center;font-size:11px">${v>=1?v:''}</td>`}).join('')}</tr>`).join('');
   // details, in the game's own words: "次數（人數）"
   const bar=(id,key,names,col,unit,max=12)=>{const e=Object.entries(T[key]).filter(x=>x[1]>=1).sort((a,b)=>b[1]-a[1]).slice(0,max);const cv=$(id);cv.parentElement.dataset.empty=e.length?'':'這段期間沒有紀錄';
    chart(id,{type:'bar',data:{labels:e.map(([k])=>nm(names,k)+(cur?'':`（${T[key+'U'][k].size} 人）`)),datasets:[{label:unit,data:e.map(x=>Math.round(x[1])),backgroundColor:col}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:unit}}}}})};
