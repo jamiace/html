@@ -1,26 +1,24 @@
 # PurrCozy（呼嚕小窩）30 位測試帳號生活模擬：每小時跑一次
 # 放到 repo 的 .github/workflows/purrcozy-sim.yml
-# 需要先在 repo → Settings → Secrets and variables → Actions 建立：
-#   SIM_EMAIL     = claude-test00@purrcozy.test
-#   SIM_PASSWORD  = 控制帳號密碼
+# Secrets：SIM_EMAIL、SIM_PASSWORD
 name: PurrCozy sim
 
 on:
   schedule:
-    - cron: '7 * * * *'     # 每小時第 7 分（UTC），避開整點排隊
+    - cron: '7 * * * *'     # 每小時第 7 分（UTC）
   workflow_dispatch:
     inputs:
-      window:
-        description: '本次模擬分鐘數（留空自動計算）'
-        required: false
-      smoke:
-        description: '只做煙霧測試（開瀏覽器載入網站，不跑模擬、不動任何狀態）'
+      now:
+        description: '今天還沒玩的場次全部立刻開始（不等排定時間）'
         type: boolean
         default: false
+      window:
+        description: '本次模擬分鐘數（留空自動計算，最多 50）'
+        required: false
 
 concurrency:
   group: purrcozy-sim
-  cancel-in-progress: false   # 上一次還在跑就排隊，不砍掉
+  cancel-in-progress: false
 
 jobs:
   run:
@@ -52,29 +50,8 @@ jobs:
           npm install playwright@1.48.2
           npx playwright install --with-deps chromium
 
-      - name: 煙霧測試：用 Chromium 開遊戲頁
-        if: github.event.inputs.smoke == 'true'
-        run: |
-          node -e '
-          const { chromium } = require("playwright");
-          (async () => {
-            const b = await chromium.launch(), p = await b.newPage({ locale: "zh-TW", timezoneId: "Asia/Taipei" });
-            const errs = []; p.on("pageerror", e => errs.push(e.message));
-            const r = await p.goto("https://jamiace.github.io/html/game/Purr_Cozy/", { waitUntil: "load", timeout: 60000 });
-            await p.waitForTimeout(8000);
-            console.log("HTTP", r && r.status(), "title:", await p.title(), "pageErrors:", errs.length, errs.slice(0, 3));
-            await p.screenshot({ path: "smoke.png" }); await b.close();
-            if (!r || r.status() >= 400) process.exit(1);
-          })().catch(e => { console.error(e); process.exit(1); });'
-
-      - uses: actions/upload-artifact@v4
-        if: github.event.inputs.smoke == 'true'
-        with:
-          name: smoke-screenshot
-          path: smoke.png
-
       - name: 下載控制帳號雲端備份裡的 cloud.cjs
-        if: steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
+        if: steps.win.outputs.skip == '0'
         run: |
           node -e '
           const K="AIzaSyCZDorIT08dX1oqF4RZ8pTqDStl0pwWR_Q",H={"Content-Type":"application/json",Referer:"https://jamiace.github.io/"};
@@ -83,13 +60,21 @@ jobs:
           const d=await (await fetch("https://firestore.googleapis.com/v1/projects/pocket-nook/databases/(default)/documents/saves/"+a.localId+"/backups/code-cloud",{headers:{...H,Authorization:"Bearer "+a.idToken}})).json();
           require("fs").writeFileSync("cloud.cjs",d.fields.data.stringValue);console.log("cloud.cjs ok")})()'
 
+      - name: 立刻開始模式（只改這台機器上的副本，雲端備份不動）
+        if: steps.win.outputs.skip == '0' && github.event.inputs.now == 'true'
+        run: |
+          sed -i "s/'--start-if-new', S.start/'--test-now', '1', '--start-if-new', S.start/" cloud.cjs
+          grep -q "'--test-now', '1'" cloud.cjs || { echo "::error::cloud.cjs 格式變了，無法開啟立刻開始模式"; exit 1; }
+          echo "已開啟 --test-now：今天還沒玩的場次會立刻開始"
+
       - name: 執行模擬
-        if: steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
-        # --work 放在 workspace 底下，life.cjs 才找得到這裡裝的 playwright
-        run: node cloud.cjs run --work "$GITHUB_WORKSPACE/w" --window ${{ steps.win.outputs.w }} 2>&1 | tee run.log
+        if: steps.win.outputs.skip == '0'
+        run: |
+          C=4; [ "${{ github.event.inputs.now }}" = "true" ] && C=6
+          node cloud.cjs run --work "$GITHUB_WORKSPACE/w" --window ${{ steps.win.outputs.w }} --concurrency $C 2>&1 | tee run.log
 
       - name: 檢查結果
-        if: always() && steps.win.outputs.skip == '0' && github.event.inputs.smoke != 'true'
+        if: always() && steps.win.outputs.skip == '0'
         run: |
           tail -5 run.log || true
           grep -qE '\[cloud\] 完成|這次跳過|不在模擬期間' run.log || { echo "::error::模擬沒有正常完成，看上面的 log"; exit 1; }
