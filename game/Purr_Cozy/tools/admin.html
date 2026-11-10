@@ -89,6 +89,25 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}.grid2 h3{font-size:14px;margin:0 0 6px}
 #pl-detail .kpis{margin-top:6px}#pl-detail textarea{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
 .form input[type=text],.form input[type=number],.form select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--ink)}
+.cal-verdict{border-radius:12px;padding:14px 16px;margin:10px 0;background:var(--chip);font-size:15px;line-height:1.75}
+.cal-verdict.good{border-left:6px solid var(--good)}.cal-verdict.warn{border-left:6px solid var(--warn)}.cal-verdict.bad{border-left:6px solid var(--acc2)}
+.cal-verdict .big{font-size:19px;font-weight:700;display:block;margin-bottom:2px}
+.kpi.warn b{color:var(--warn)}
+.cal-dumb{display:grid;gap:4px}.cd-row{display:grid;grid-template-columns:130px 1fr 230px;gap:14px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line)}
+.cd-row.all{font-weight:600}.cd-name small{display:block;color:var(--ink2);font-weight:400;font-size:12px}
+.cd-track{position:relative;height:30px}.cd-track::before{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:var(--line)}
+.cd-track .cd-grid{position:absolute;top:4px;bottom:4px;width:1px;background:var(--line)}
+.cd-bar{position:absolute;top:calc(50% - 4px);height:8px;border-radius:4px;background:#bbb}
+.cd-bar.o{background:var(--acc2)}.cd-bar.u{background:#3a7bd5}.cd-bar.ok{background:var(--good)}
+i.cd-p,i.cd-a{position:absolute;top:calc(50% - 8px);width:16px;height:16px;margin-left:-8px;border-radius:50%;box-sizing:border-box}
+i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(--ink)}
+.cd-key{display:inline-flex;align-items:center;gap:6px;margin-right:14px}.cd-key i{position:relative!important;top:0!important;margin:0!important}
+.cd-axis{position:relative;height:18px;margin-left:144px;margin-right:244px;font-size:11px;color:var(--ink2)}.cd-axis span{position:absolute;transform:translateX(-50%)}
+.cd-txt{font-size:13px;line-height:1.5}.cd-o{color:var(--acc2)}.cd-u{color:#3a7bd5}.cd-ok{color:var(--good)}.cd-q{color:var(--ink2)}
+#cal-tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#cal-actions ul{margin:4px 0;padding-left:20px}#cal-actions li{margin:4px 0}
+.cal-adv{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.cal-adv summary{cursor:pointer;font-weight:600;padding:4px 0}
+@media (max-width:760px){.cd-row{grid-template-columns:90px 1fr}.cd-txt{grid-column:1/-1}.cd-axis{margin-left:104px;margin-right:4px}}
 </style>
 </head>
 <body>
@@ -136,30 +155,42 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
 <div class="sub" data-sub="s-matrix"><section id="s-matrix"><h2>程度 × 題型</h2><p class="why">每個程度在不同題型的答對率。拼字、聽寫通常比選擇題難，差太多代表某種題型的難度設計需要調整。</p><p class="note hidden" id="matrix-need"></p><div class="grid2"><div class="tbl"><table id="t-matrix"></table></div><div class="chart"><canvas id="c-level"></canvas></div></div><h3>年級帶 × 題型</h3><p class="why">0.92.45 起每題會記錄單字的建議年級（gr）。舊資料沒有這個欄位，不會出現在這張表。</p><div class="tbl"><table id="t-grade"></table></div></section></div>
 <div class="sub" data-sub="s-confuse"><section id="s-confuse"><h2>易混淆字與拼錯</h2><p class="why">選擇題最常被選成哪個錯誤答案，以及拼字最常見的錯法。可以拿來改干擾選項、做「易混淆字」專題。</p><div class="grid2"><div><h3>選擇題：答案 → 被誤選的字</h3><p class="why" id="pairs-note"></p><div class="tbl"><table id="t-pairs"></table></div><h3 style="margin-top:12px">最常被誤選的字（不論題目）</h3><div class="tbl"><table id="t-lure"></table></div></div><div><h3>拼字：常見錯誤類型</h3><div class="chart"><canvas id="c-spell"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-spell"></table></div></div></div></section></div>
 <div class="sub" data-sub="s-forget"><section id="s-forget"><h2>遺忘曲線（複習間隔對不對）</h2><p class="why">同一個字隔了幾天再出現時的答對率，依當時的熟練盒分開畫。0.92.45 以前的紀錄只能用「到期日」反推上次作答日，答錯過的字會被算成間隔太長；有精確間隔的資料時，這張圖只用精確資料（作答紀錄 ge=0）。遊戲現在的間隔是 盒1→1天、盒2→2天、盒3→4天、盒4→7天、盒5→15天。理想狀況是到期時答對率約 80–90%：太高代表間隔可以拉長，太低代表要縮短。</p><p class="note hidden" id="forget-need"></p><div class="chart" style="height:300px"><canvas id="c-forget"></canvas></div><div class="tbl" style="margin-top:8px"><table id="t-forget"></table></div></section></div>
-<div class="sub" data-sub="s-calib"><section id="s-calib"><h2>自適應模型校正</h2>
-  <p class="why">遊戲出題前會預測每題的「答對機率」p。這一節回答三個問題：<b>① 預測準不準</b>（說 80% 的題，實際是不是約 80% 答對）、<b>② 偏在哪裡</b>（哪種技能、哪個程度、哪個預測區間）、<b>③ 要怎麼調</b>（給出可以直接套用的修正量）。四種技能分開看，因為選擇題有 25% 猜中下限、拼字沒有。</p>
-  <div class="row calib-ctl"><label>分組數 <select id="cal-bins"><option value="10">10 組</option><option value="15" selected>15 組</option><option value="20">20 組</option></select></label>
-   <label>資料 <select id="cal-scope"><option value="all">全部有預測值的作答</option><option value="adaptive">只看自適應入口（不含升級考、故事、重練）</option></select></label>
-   <span class="muted">每組人數相同；點圖例可以隱藏某條線。</span></div>
+<div class="sub" data-sub="s-calib"><section id="s-calib"><h2>模型校正：遊戲猜得準不準？</h2>
+  <p class="why">遊戲每出一題，都會先猜「這位玩家有幾 % 會答對」，再依這個猜測決定出哪一題。這一頁把猜測和實際作答結果放在一起比：猜得準，出的題才會不難也不易。</p>
+  <div class="row calib-ctl"><label>資料 <select id="cal-scope"><option value="all">全部作答</option><option value="adaptive">只看平常練習（不含升級考、故事、重練）</option></select></label>
+   <label>分組 <select id="cal-bins"><option value="10">10 組</option><option value="15" selected>15 組</option><option value="20">20 組</option></select></label></div>
+  <div id="cal-verdict" class="cal-verdict"></div>
   <div class="kpis" id="calib-kpis" style="margin-top:10px"></div>
-  <h3 style="margin-top:16px">偏差圖：實際答對率 − 預測答對率</h3>
-  <p class="why">0 線＝預測完全準確。點在 0 線下方＝模型高估（以為會答對，其實沒那麼容易）；上方＝低估。直線段是 95% 信賴區間：<b>區間完全沒碰到 0 線</b>，就代表這個偏差不是運氣造成的。灰色帶是 ±5 個百分點的可接受範圍。縱軸會自動放大到資料的範圍，所以幾個百分點的差距也看得清楚。</p>
-  <div class="chart chart-xl"><canvas id="c-calib-gap"></canvas></div>
-  <div class="grid2" style="margin-top:16px">
-   <div><h3>校正曲線（放大到資料範圍）</h3><p class="why">斜虛線是完美校正。橫軸、縱軸都只顯示有資料的區間，不再壓縮在 0–100%。</p><div class="chart chart-lg"><canvas id="c-calib"></canvas></div></div>
-   <div><h3>預測值分布</h3><p class="why">每個預測區間有多少題。自適應出題會讓預測擠在目標 85% 附近；分布太窄代表模型很少出「有挑戰」的題。</p><div class="chart chart-lg"><canvas id="c-calib-hist"></canvas></div></div>
-  </div>
-  <h3 style="margin-top:16px">每週趨勢：平均預測 vs 實際</h3>
-  <p class="why">兩條線之間的距離就是那一週的整體偏差。改版（例如 0.92.45 改了難度 d）前後如果距離變小，代表修正有效。</p>
+  <h3 style="margin-top:18px">各題型：遊戲猜的 vs 實際</h3>
+  <p class="why"><span class="cd-key"><i class="cd-p"></i>遊戲猜的答對率</span><span class="cd-key"><i class="cd-a"></i>實際答對率</span>　● 在 ○ 左邊＝實際答得比較差，遊戲<b class="cd-o">太樂觀</b>；在右邊＝遊戲<b class="cd-u">太悲觀</b>。</p>
+  <div id="cal-dumb" class="cal-dumb"></div>
+  <h3 style="margin-top:18px">依「遊戲猜的答對率」分組</h3>
+  <p class="why">把題目照遊戲猜的答對率由低到高分成幾組。柱子＝這組的實際答對率，<b>◆</b>＝遊戲對這組猜的答對率。柱子頂端碰到 ◆＝猜得準；柱子比 ◆ 矮＝這組比遊戲以為的難。每組下方是題數，題數少的組參考就好。</p>
+  <div class="row" id="cal-tabs" style="margin-bottom:6px"></div>
+  <div class="chart chart-lg"><canvas id="c-calib"></canvas></div>
+  <h3 style="margin-top:18px">每週變化</h3>
+  <p class="why">兩條線越靠近越好。改版（例如調整單字難度）之後兩條線靠近了，就代表修正有效。</p>
   <div class="chart chart-lg"><canvas id="c-calib-trend"></canvas></div>
-  <div id="calib-text" class="note" style="margin-top:12px"></div>
-  <h3>依技能</h3><div class="tbl"><table id="t-calib-skill"></table></div>
-  <h3>依單字程度：建議的難度修正</h3>
-  <p class="why">把「預測和實際的落差」換算回遊戲的難度刻度（每個字的 d，Level 刻度；模型的難度項是 0.75 × d）。<b>建議 Δd 為正＝這個程度的字比模型以為的難，d 應該加大</b>。已扣除選擇題的猜中下限；每格至少 150 題才計算。</p>
-  <div class="tbl"><table id="t-calib-level"></table></div>
-  <h3>依年級帶</h3><div class="tbl"><table id="t-calib-grade"></table></div>
-  <h3>依入口</h3><p class="why">升級考、故事用的是刻意加難的干擾選項或無提示拼字，模型沒有把這點算進去，所以預測通常偏高；它們也不參與 85% 目標的檢查。</p><div class="tbl"><table id="t-calib-kind"></table></div>
-  <h3>整體修正公式</h3><div id="calib-fix" class="note"></div>
+  <h3 style="margin-top:18px">建議怎麼調</h3>
+  <div id="cal-actions" class="note"></div>
+  <h3>各程度的字</h3>
+  <p class="why">每個程度（L1–L6）的字，遊戲猜的和實際差多少。只有題數夠多（150 題以上）而且差距確定不是運氣，才會給調整建議。</p>
+  <div class="tbl"><table id="t-calib-level-s"></table></div>
+  <details class="cal-adv"><summary>進階數據：統計指標、偏差細節、各年級帶、各入口、修正公式（調整模型時才需要）</summary>
+   <div class="kpis" id="calib-kpis-adv" style="margin-top:10px"></div>
+   <div id="calib-text" class="note" style="margin-top:12px"></div>
+   <p class="why"><b>名詞</b>：偏差＝實際 − 預測（百分點，負＝高估）；95% 區間沒碰到 0 才算「確定」；Brier 越小越好，要和「只猜平均」的基準比；BSS＞0 才比只猜平均準；校正斜率理想是 1（&lt;1 預測太極端、&gt;1 太保守）；ECE＝各組實際與預測差距的加權平均；HL χ² 的 p&lt;0.05 代表各組有系統性偏差。</p>
+   <h4>偏差圖：實際 − 預測（各技能、各組）</h4><p class="why">0 線＝完全準確，直線段是 95% 信賴區間，灰色帶是 ±5 個百分點。</p>
+   <div class="chart chart-xl"><canvas id="c-calib-gap"></canvas></div>
+   <h4>預測值分布</h4><p class="why">每個預測區間有多少題。自適應出題會讓預測集中在目標附近。</p>
+   <div class="chart chart-lg"><canvas id="c-calib-hist"></canvas></div>
+   <h4>依技能</h4><div class="tbl"><table id="t-calib-skill"></table></div>
+   <h4>依單字程度（含各技能偏差）</h4><p class="why">建議 Δd 換算到遊戲的難度刻度（每個字的 d；模型的難度項是 0.75 × d），<b>正值＝這個程度的字比模型以為的難，d 應該加大</b>。已扣除選擇題的猜中下限。</p>
+   <div class="tbl"><table id="t-calib-level"></table></div>
+   <h4>依年級帶</h4><div class="tbl"><table id="t-calib-grade"></table></div>
+   <h4>依入口</h4><p class="why">升級考、故事用的是刻意加難的干擾選項或無提示拼字，模型沒有把這點算進去，所以預測通常偏高；它們也不參與 85% 目標的檢查。</p><div class="tbl"><table id="t-calib-kind"></table></div>
+   <h4>整體修正公式</h4><div id="calib-fix" class="note"></div>
+  </details>
  </section></div>
 <div class="sub" data-sub="s-grade"><section id="s-grade"><h2>英文程度測驗（搬家日・每日小測）</h2>
   <p class="why">0.92.46 起，每位玩家第一次進遊戲會做「搬家日」程度測驗，之後每天一次 8 題的小測。每次回合記錄估計的年級 θ（1＝小一 … 12＝高三）與標準誤 se。這裡看：玩家分布、自填年級和實測是否一致、每日完成率、成長，以及題目難度（單字的年級 g）是否標得準。</p>
@@ -553,17 +584,65 @@ function analyse(){
  const all=calStats(PA),bySkill={};for(const k in SKN){const c=calStats(PA.filter(a=>SK(a.q)===k));if(c)bySkill[k]=c}
  const pp=x=>(x>0?'+':'')+(x*100).toFixed(1),pts=x=>pp(x)+' 個百分點',f2=x=>x==null?'–':x.toFixed(2),f3=x=>x==null?'–':x.toFixed(3);
  const sigTxt=c=>c.gapLo>0||c.gapHi<0?'顯著':'不顯著';
- // ---- KPI tiles
+ // ---- KPI tiles (plain) + the technical ones for the advanced section
  const TA=ans.filter(a=>ADAPTIVE.has(a.kind)&&!a.re),taAcc=TA.length?TA.reduce((s,a)=>s+a.ok,0)/TA.length:null;
  const kpi=(v,l,sub,cls='')=>`<div class="kpi ${cls}"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
- $('calib-kpis').innerHTML=all?[
-  kpi(fmt(all.n),'有預測值的作答',scope==='adaptive'?'只含自適應入口':'全部入口'),
-  kpi(pct(all.meanP),'平均預測答對率'),kpi(pct(all.actual),'實際答對率'),
-  kpi(pp(all.gap)+' 點','整體偏差（百分點）',`95% 信賴區間 ${pp(all.gapLo)} ～ ${pp(all.gapHi)}（${sigTxt(all)}）`,Math.abs(all.gap)>=.03&&sigTxt(all)==='顯著'?'bad':'good'),
+ // "sure" = enough answers and the 95% interval of the gap does not include 0
+ const sure=c=>!!c&&c.n>=100&&(c.gapLo>0||c.gapHi<0);
+ const judge=c=>{if(!c)return{t:'沒有資料',cls:'cd-q',k:'na'};const g=c.gap*100,a=Math.abs(g);
+  if(a<2)return{t:'猜得準',cls:'cd-ok',k:'ok'};if(!sure(c))return{t:`差 ${a.toFixed(1)} 點，但題數還不夠確定`,cls:'cd-q',k:'q'};
+  return{t:`${g<0?'太樂觀':'太悲觀'}：差 ${a.toFixed(1)} 個百分點${a>=5?'（明顯）':''}`,cls:g<0?'cd-o':'cd-u',k:g<0?'o':'u',big:a>=5}};
+ const tgt=taAcc==null?null:taAcc<.8?{t:'偏難',cls:'bad'}:taAcc>.9?{t:'偏簡單',cls:'warn'}:{t:'剛好',cls:'good'};
+ const worst=Object.entries(bySkill).filter(([,c])=>sure(c)&&Math.abs(c.gap)>=.02).sort((a,b)=>Math.abs(b[1].gap)-Math.abs(a[1].gap))[0];
+ const ends=c=>{if(!c)return'';const hiB=c.bins.filter(b=>b.x>=.7),loB=c.bins.filter(b=>b.x<.4),gp=L=>{const n=L.reduce((t,b)=>t+b.n,0);return n>=100?L.reduce((t,b)=>t+(b.y-b.x)*b.n,0)/n:null},h=gp(hiB),l=gp(loB),out=[];
+  if(h!=null&&h<=-.03)out.push(`遊戲很有把握（猜 70% 以上）的題，實際平均少 ${(-h*100).toFixed(1)} 點`);if(h!=null&&h>=.03)out.push(`遊戲很有把握的題，實際還多 ${(h*100).toFixed(1)} 點`);
+  if(l!=null&&l>=.03)out.push(`遊戲沒把握（猜 40% 以下）的題，實際平均多 ${(l*100).toFixed(1)} 點`);if(l!=null&&l<=-.03)out.push(`遊戲沒把握的題，實際還少 ${(-l*100).toFixed(1)} 點`);return out.join('；')};
+ const endTxt=ends(all);
+ if(!all){$('cal-verdict').className='cal-verdict';$('cal-verdict').innerHTML='還沒有可以比對的作答（需要遊戲 0.92.40 以後、有記錄預測值的作答）。';$('calib-kpis').innerHTML=''}
+ else{const J=judge(all),g=all.gap*100;
+  $('cal-verdict').className='cal-verdict '+(J.k==='ok'&&!endTxt?'good':J.big?'bad':'warn');
+  $('cal-verdict').innerHTML=`<span class="big">${J.k==='ok'&&endTxt?'平均猜得準，但高低兩端有偏差':J.k==='ok'?'遊戲猜得很準':J.k==='q'?'看起來有一點偏，但資料還不夠確定':g<0?'遊戲把題目想得太簡單了':'遊戲把題目想得太難了'}</span>`+
+   `遊戲猜這些題平均有 <b>${pct(all.meanP)}</b> 會答對，實際答對 <b>${pct(all.actual)}</b>（${fmt(all.n)} 題）。`+
+   (J.k==='ok'?'平均差距不到 2 個百分點。':J.k==='q'?`差 ${Math.abs(g).toFixed(1)} 個百分點，可能只是運氣，再多累積一些作答再看。`:`平均差 ${Math.abs(g).toFixed(1)} 個百分點${worst?`，最不準的是「${SKN[worst[0]]}」`:''}。`)+
+   (endTxt?`<br>不過${endTxt}——見下方分組圖。`:'')+(taAcc!=null?`<br>平常練習（每日單字、自由練習、任務等）的目標是答對約 85%，實際是 <b>${pct(taAcc)}</b>：題目出得<b>${tgt.t}</b>。`:'');
+  $('calib-kpis').innerHTML=[
+   kpi(pct(all.meanP),'遊戲猜的答對率',`${fmt(all.n)} 題的平均`),
+   kpi(pct(all.actual),'實際答對率','',J.k==='ok'?'good':J.big?'bad':''),
+   kpi(taAcc==null?'–':pct(taAcc),'平常練習的答對率',tgt?'目標約 85%，'+tgt.t:'目標約 85%',tgt?tgt.cls:''),
+   kpi(worst?SKN[worst[0]]:'都很準','最不準的題型',worst?`${worst[1].gap<0?'太樂觀':'太悲觀'} ${Math.abs(worst[1].gap*100).toFixed(1)} 點`:'各題型差距都不到 2 點或還不確定',worst?'bad':'good')].join('')}
+ $('calib-kpis-adv').innerHTML=all?[
+  kpi(pp(all.gap)+' 點','整體偏差（百分點）',`95% 區間 ${pp(all.gapLo)} ～ ${pp(all.gapHi)}（${sigTxt(all)}）`,Math.abs(all.gap)>=.03&&sigTxt(all)==='顯著'?'bad':'good'),
   kpi(f2(all.slope),'校正斜率','理想 1；<1 太極端、>1 太保守',all.slope!=null&&(all.slope<.8||all.slope>1.25)?'bad':'good'),
   kpi(pct(all.ece),'平均校正誤差 ECE','各組 |實際−預測| 的加權平均',all.ece>.05?'bad':'good'),
-  kpi(f3(all.bss),'技巧分數 BSS','>0 才比「猜平均」準',all.bss!=null&&all.bss<=0?'bad':''),
-  kpi(pct(taAcc),'自適應入口實際答對率','目標約 85%',taAcc!=null&&Math.abs(taAcc-.85)>.05?'bad':'good')].join(''):'<p class="muted">還沒有預測值資料。</p>';
+  kpi(f3(all.bss),'技巧分數 BSS','>0 才比「猜平均」準',all.bss!=null&&all.bss<=0?'bad':'')].join(''):'';
+ // ---- each skill: one line from "predicted" (○) to "actual" (●)
+ {const rows=[['all','全部題型',all],...Object.entries(bySkill).map(([k,c])=>[k,SKN[k],c])].filter(r=>r[2]);
+  const vals=rows.flatMap(r=>[r[2].meanP,r[2].actual]),lo=Math.max(0,Math.floor(Math.min(...vals,1)*10)/10-.05),hi=Math.min(1,Math.ceil(Math.max(...vals,0)*10)/10+.05),X=v=>((v-lo)/(hi-lo)*100).toFixed(2);
+  const grid=[];for(let t=Math.ceil(lo*10)/10;t<=hi+1e-9;t+=.1)grid.push(+t.toFixed(1));
+  $('cal-dumb').innerHTML=rows.length?rows.map(([k,name,c])=>{const J=judge(c),a=Math.min(c.meanP,c.actual),b=Math.max(c.meanP,c.actual);
+   return `<div class="cd-row${k==='all'?' all':''}"><div class="cd-name">${name}<small>${fmt(c.n)} 題</small></div>
+    <div class="cd-track">${grid.map(t=>`<i class="cd-grid" style="left:${X(t)}%"></i>`).join('')}<i class="cd-bar ${J.k==='ok'?'ok':J.k==='o'?'o':J.k==='u'?'u':''}" style="left:${X(a)}%;width:${(X(b)-X(a)).toFixed(2)}%"></i>
+     <i class="cd-p" style="left:${X(c.meanP)}%" title="遊戲猜 ${pct(c.meanP)}"></i><i class="cd-a" style="left:${X(c.actual)}%" title="實際 ${pct(c.actual)}"></i></div>
+    <div class="cd-txt">遊戲猜 ${pct(c.meanP)}，實際 ${pct(c.actual)}<br><b class="${J.cls}">${J.t}</b></div></div>`}).join('')+`<div class="cd-axis">${grid.map(t=>`<span style="left:${X(t)}%">${Math.round(t*100)}%</span>`).join('')}</div>`:'<p class="muted">還沒有資料。</p>'}
+ // ---- groups by predicted chance, one skill at a time (tabs)
+ const calTabs=[['all','全部題型'],...Object.keys(bySkill).map(k=>[k,SKN[k]])];if(!calTabs.some(t=>t[0]===Admin.calSkill))Admin.calSkill='all';
+ const drawGroups=()=>{const key=Admin.calSkill,c=key==='all'?all:bySkill[key];
+  $('cal-tabs').innerHTML=calTabs.map(([k,n])=>`<button data-calk="${k}" class="${k===key?'on':''}">${n}</button>`).join('');
+  $('cal-tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{Admin.calSkill=b.dataset.calk;drawGroups()});
+  if(!c)return;const B=c.bins,colr=b=>Math.abs(b.y-b.x)<.03?'#7cc58a':b.y<b.x?'#ef8fa1':'#8fb5ea';
+  chart('c-calib',{type:'bar',data:{labels:B.map(b=>[`${Math.round(b.pmin*100)}–${Math.round(b.pmax*100)}%`,`${fmt(b.n)} 題`]),
+   datasets:[{type:'line',label:'遊戲猜的答對率',data:B.map(b=>+(b.x*100).toFixed(1)),showLine:false,pointStyle:'rectRot',pointRadius:7,pointHoverRadius:9,borderColor:'#2f2433',backgroundColor:'#2f2433',yAxisID:'y'},
+    {type:'bar',label:'實際答對率',data:B.map(b=>+(b.y*100).toFixed(1)),backgroundColor:B.map(colr),borderRadius:4,yAxisID:'y'}]},
+   options:{interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{generateLabels:ch=>[{text:'實際答對率（綠＝準、紅＝比猜的差、藍＝比猜的好）',fillStyle:'#7cc58a',strokeStyle:'#7cc58a',lineWidth:0},{text:'◆ 遊戲猜的答對率',fillStyle:'#2f2433',strokeStyle:'#2f2433',lineWidth:0,pointStyle:'rectRot'}]}},
+    tooltip:{callbacks:{title:t=>`遊戲猜 ${t[0].label.split(',')[0]} 的這組（${fmt(B[t[0].dataIndex].n)} 題）`,label:t=>{const b=B[t.dataIndex];return t.dataset.type==='line'?`遊戲猜：${(b.x*100).toFixed(1)}%`:`實際：${(b.y*100).toFixed(1)}%（95% 區間 ${(b.lo*100).toFixed(0)}–${(b.hi*100).toFixed(0)}%）`},
+     footer:t=>{const b=B[t[0].dataIndex],d=(b.y-b.x)*100;return Math.abs(d)<3?'猜得準':d<0?`比遊戲猜的差 ${(-d).toFixed(1)} 點`:`比遊戲猜的好 ${d.toFixed(1)} 點`}}}},
+    scales:{x:{title:{display:true,text:'遊戲猜的答對率（由低到高分組）'}},y:{min:0,max:100,title:{display:true,text:'答對率'},ticks:{callback:v=>v+'%'}}}}})};
+ drawGroups();
+ // ---- weekly: two lines only
+ const WK={};for(const a of PA){const d=dayNo(a.at),k=dayNoKey(d-((d+4)%7)),w=WK[k]||(WK[k]={n:0,p:0,y:0});w.n++;w.p+=a.p;w.y+=a.ok}
+ const wks=Object.keys(WK).sort();
+ chart('c-calib-trend',{type:'line',data:{labels:wks.map(k=>k.slice(5).replace('-','/')+' 那週'),datasets:[{label:'遊戲猜的答對率',data:wks.map(k=>+(WK[k].p/WK[k].n*100).toFixed(1)),borderColor:'#2f2433',backgroundColor:'#2f2433',borderDash:[6,4]},{label:'實際答對率',data:wks.map(k=>+(WK[k].y/WK[k].n*100).toFixed(1)),borderColor:'#3f8a4f',backgroundColor:'#3f8a4f'}]},
+  options:{interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{footer:t=>{const w=WK[wks[t[0].dataIndex]];return `${fmt(w.n)} 題，差 ${((w.y-w.p)/w.n*100).toFixed(1)} 點`}}}},scales:{y:(()=>{const v=wks.flatMap(k=>[WK[k].p/WK[k].n*100,WK[k].y/WK[k].n*100]);return{min:Math.max(0,Math.floor(Math.min(...v,100)-5)),max:Math.min(100,Math.ceil(Math.max(...v,0)+5)),title:{display:true,text:'答對率'},ticks:{callback:v=>v+'%'}}})()}}});
  // ---- gap chart (zoomed y)
  const gapPts=Object.entries(bySkill).flatMap(([k,c])=>c.bins.map(b=>[b.lo-b.x,b.hi-b.x]));const gl=Math.min(-.06,...gapPts.map(g=>g[0])),gh=Math.max(.06,...gapPts.map(g=>g[1]));
  const xs=Object.values(bySkill).flatMap(c=>c.bins.map(b=>b.x)),xl=xs.length?Math.max(0,Math.floor((Math.min(...xs)-.03)*20)/20):0,xh=xs.length?Math.min(1,Math.ceil((Math.max(...xs)+.03)*20)/20):1;
@@ -572,20 +651,10 @@ function analyse(){
    data:c.bins.map(b=>({x:+(b.x*100).toFixed(2),y:+((b.y-b.x)*100).toFixed(2),lo:+((b.lo-b.x)*100).toFixed(2),hi:+((b.hi-b.x)*100).toFixed(2),px:b.x,py:b.y,lo0:b.lo,hi0:b.hi,n:b.n,pmin:b.pmin,pmax:b.pmax}))})),
    {type:'line',label:'0（完全準確）',data:[{x:xl*100,y:0},{x:xh*100,y:0}],borderColor:'#999',borderWidth:1.5,pointRadius:0}]},
   options:{plugins:{tooltip:tip},scales:{x:{type:'linear',min:xl*100,max:xh*100,title:{display:true,text:'預測答對率 %（每組的平均）'}},y:{min:Math.floor(gl*100)-1,max:Math.ceil(gh*100)+1,title:{display:true,text:'實際 − 預測（百分點）'},ticks:{callback:v=>(v>0?'+':'')+v}}}}});
- // ---- reliability curve, zoomed
- const ys=Object.values(bySkill).flatMap(c=>c.bins.flatMap(b=>[b.lo,b.hi])),yl=ys.length?Math.max(0,Math.floor((Math.min(xl,...ys))*20)/20):0,yh=ys.length?Math.min(1,Math.ceil((Math.max(xh,...ys))*20)/20):1;
- chart('c-calib',{type:'scatter',plugins:[ErrorBars],data:{datasets:[...Object.entries(bySkill).map(([k,c])=>({label:SKN[k],errorBars:true,showLine:true,borderColor:COL[k],backgroundColor:COL[k],pointRadius:3,
-   data:c.bins.map(b=>({x:+(b.x*100).toFixed(2),y:+(b.y*100).toFixed(2),lo:+(b.lo*100).toFixed(2),hi:+(b.hi*100).toFixed(2),px:b.x,py:b.y,lo0:b.lo,hi0:b.hi,n:b.n,pmin:b.pmin,pmax:b.pmax}))})),
-   {type:'line',label:'完美校正',data:[{x:Math.min(xl,yl)*100,y:Math.min(xl,yl)*100},{x:Math.max(xh,yh)*100,y:Math.max(xh,yh)*100}],borderColor:'#999',borderDash:[5,5],pointRadius:0}]},
-  options:{plugins:{tooltip:tip},scales:{x:{min:Math.min(xl,yl)*100,max:Math.max(xh,yh)*100,title:{display:true,text:'預測答對率 %'}},y:{min:Math.min(xl,yl)*100,max:Math.max(xh,yh)*100,title:{display:true,text:'實際答對率 %'}}}}});
  // ---- histogram of predictions, stacked by skill
  const HB=20,hist={};for(const a of PA){const k=SK(a.q),i=Math.min(HB-1,Math.floor(a.p*HB));(hist[k]||(hist[k]=Array(HB).fill(0)))[i]++}
  chart('c-calib-hist',{type:'bar',data:{labels:Array.from({length:HB},(_,i)=>(i*100/HB)+'–'+((i+1)*100/HB)),datasets:Object.keys(hist).map(k=>({label:SKN[k],data:hist[k],backgroundColor:COL[k]}))},options:{scales:{x:{stacked:true,title:{display:true,text:'預測答對率 %'}},y:{stacked:true,title:{display:true,text:'題數'}}}}});
- // ---- weekly trend
- const WK={};for(const a of PA){const d=dayNo(a.at),k=dayNoKey(d-((d+4)%7)),w=WK[k]||(WK[k]={n:0,p:0,y:0});w.n++;w.p+=a.p;w.y+=a.ok}
- const wks=Object.keys(WK).sort();
- chart('c-calib-trend',{type:'bar',data:{labels:wks,datasets:[{type:'line',label:'平均預測',data:wks.map(k=>+(WK[k].p/WK[k].n*100).toFixed(1)),borderColor:'#3a7bd5',backgroundColor:'#3a7bd5',yAxisID:'y'},{type:'line',label:'實際答對率',data:wks.map(k=>+(WK[k].y/WK[k].n*100).toFixed(1)),borderColor:'#d9566f',backgroundColor:'#d9566f',yAxisID:'y'},{type:'bar',label:'題數',data:wks.map(k=>WK[k].n),backgroundColor:'#8c5aa833',yAxisID:'y2'}]},
-  options:{scales:{y:{title:{display:true,text:'答對率 %'},grace:'5%'},y2:{position:'right',grid:{display:false},title:{display:true,text:'題數'}}}}});
+
  // ---- tables
  const verdict=c=>{if(!c||c.n<30)return'資料不足';const v=[];if(sigTxt(c)==='顯著'&&Math.abs(c.gap)>=.02)v.push(c.gap<0?'整體高估 '+pts(-c.gap).replace('+',''):'整體低估 '+pts(c.gap));
   if(c.slope!=null){if(c.slope<.8)v.push('預測太極端');else if(c.slope>1.25)v.push('預測太保守')}if(c.hlP!=null&&c.hlP<.05)v.push('各區間有系統性偏差（HL p='+c.hlP.toFixed(3)+'）');if(c.bss!=null&&c.bss<=0)v.push('沒有比猜平均準');return v.length?v.join('；'):'校正良好'};
@@ -597,13 +666,23 @@ function analyse(){
   table(id,[label,'題數','平均預測','實際','偏差（95% 區間）','斜率','各技能偏差','建議 Δd'],order(Object.keys(G)).map(k=>{const L=G[k],c=calStats(L,10),sk=Object.keys(SKN).map(s=>{const x=L.filter(a=>SK(a.q)===s);if(x.length<30)return'';const g=x.reduce((t,a)=>t+a.ok-a.p,0)/x.length;return SKN[s]+' '+pp(g)}).filter(Boolean).join('　'),d=L.length>=150?corr(L):null;
    return[k,c.n,P(c.meanP),P(c.actual),ciCell(c),{v:c.slope??0,h:f2(c.slope)},{v:0,h:sk||'–',n:false},{v:d??0,h:d==null?'資料不足':`<b>${(d>0?'+':'')+d.toFixed(2)}</b>`}]}));return G};
  const LV=grpTable('t-calib-level',a=>a.l?'L'+a.l:null,'程度',ks=>ks.sort());
+ const lvRows=Object.keys(LV).sort().map(k=>{const L=LV[k],c=calStats(L,10),J=judge(c),d=L.length>=150&&sure(c)&&Math.abs(c.gap)>=.02?corr(L):null;return{k,c,J,d}});
+ table('t-calib-level-s',['程度','題數','遊戲猜的','實際','結論','建議'],lvRows.map(({k,c,J,d})=>[k,c.n,P(c.meanP),P(c.actual),{v:c.gap,h:`<b class="${J.cls}">${J.t}</b>`,n:false},
+  {v:d??0,h:d==null?(J.k==='ok'?'不用調':'先不調'):`${k} 的字${d>0?'比遊戲以為的難':'比遊戲以為的簡單'}，難度 d ${d>0?'加':'減'} ${Math.abs(d).toFixed(2)}`,n:false}]));
+ {const acts=[];
+  if(tgt&&tgt.t!=='剛好')acts.push(`<b>平常練習${tgt.t}</b>：目標答對約 85%，實際 ${pct(taAcc)}。${taAcc<.85?'出題可以再簡單一點（或先修正下面「太樂觀」的部分，出題自然會變簡單）。':'可以出難一點的題。'}`);
+  for(const [k,c] of Object.entries(bySkill)){const J=judge(c);if(J.k==='o'||J.k==='u')acts.push(`<b>${SKN[k]}</b>：遊戲${J.k==='o'?'太樂觀':'太悲觀'}，實際比猜的${J.k==='o'?'差':'好'} ${Math.abs(c.gap*100).toFixed(1)} 點。`);
+   if(c.slope!=null&&c.n>=300&&c.slope<.8)acts.push(`<b>${SKN[k]}</b>：猜得太極端（很有把握的題其實沒那麼穩、沒把握的題其實沒那麼難），模型對這種題的信心要調低一點（校正斜率 ${f2(c.slope)}，見下方進階數據）。`);
+   else if(c.slope!=null&&c.n>=300&&c.slope>1.25)acts.push(`<b>${SKN[k]}</b>：猜得太保守（猜的都擠在中間），模型可以更有把握一點（校正斜率 ${f2(c.slope)}）。`)}
+  for(const r of lvRows)if(r.d!=null)acts.push(`<b>${r.k} 的字</b>：${r.d>0?'比遊戲以為的難':'比遊戲以為的簡單'}（實際 ${pct(r.c.actual)}，遊戲猜 ${pct(r.c.meanP)}）→ 這個程度單字的難度 d ${r.d>0?'加':'減'} <b>${Math.abs(r.d).toFixed(2)}</b>。`);
+  $('cal-actions').innerHTML=all?(acts.length?'<ul>'+acts.map(x=>'<li>'+x+'</li>').join('')+'</ul><span class="muted">要改哪個檔案、怎麼改，見最下方「進階數據 → 整體修正公式」。</span>':'目前不需要調整：各題型、各程度的差距都在 2 個百分點內，或還不能確定。'):'還沒有資料。'}
  grpTable('t-calib-grade',a=>a.gr?(GBN[bandOf(a.gr)]||null):null,'年級帶',ks=>Object.values(GBN).filter(x=>ks.includes(x)));
  const KINDCAL={};for(const a of ans.filter(a=>typeof a.p==='number'&&a.p>=0&&a.p<=1))(KINDCAL[a.kind]||(KINDCAL[a.kind]=[])).push(a);
  table('t-calib-kind',['入口','題數','平均預測','實際','偏差（95% 區間）','Brier','參與 85% 目標'],Object.entries(KINDCAL).map(([k,l])=>{const c=calStats(l,10);return[KIND[k]||k,c.n,P(c.meanP),P(c.actual),ciCell(c),+c.brier.toFixed(3),ADAPTIVE.has(k)?'是':'否']}).sort((a,b)=>b[1]-a[1]));
  // ---- text + fix formula
  const taBy={};for(const a of TA){const k=SK(a.q),x=taBy[k]||(taBy[k]={n:0,ok:0});x.n++;x.ok+=a.ok}
- const worst=Object.entries(bySkill).filter(([,c])=>sigTxt(c)==='顯著').sort((a,b)=>Math.abs(b[1].gap)-Math.abs(a[1].gap))[0];
- $('calib-text').innerHTML=all?`<b>判讀</b>：${verdict(all)}。${worst?`偏差最大的是<b>${SKN[worst[0]]}</b>（${pts(worst[1].gap)}）。`:''}
+ const worstSig=Object.entries(bySkill).filter(([,c])=>sigTxt(c)==='顯著').sort((a,b)=>Math.abs(b[1].gap)-Math.abs(a[1].gap))[0];
+ $('calib-text').innerHTML=all?`<b>判讀</b>：${verdict(all)}。${worstSig?`偏差最大的是<b>${SKN[worstSig[0]]}</b>（${pts(worstSig[1].gap)}）。`:''}
   Brier ${all.brier.toFixed(3)}，只猜平均答對率的基準是 ${all.baseBrier.toFixed(3)}（答對率 85% 時，什麼都不會的模型也只有 0.13，所以 Brier 要和基準比，不能和固定數字比）。
   自適應入口的實際答對率 ${pct(taAcc)}（目標 85%）：${Object.entries(taBy).map(([k,x])=>SKN[k]+' '+pct(x.ok/x.n)).join('、')}。`:'';
  $('calib-fix').innerHTML=all&&all.slope!=null?`用整體校正斜率與截距修正預測：<code>p′ = 1 / (1 + e^−(${f2(all.intercept)} + ${f2(all.slope)} × logit p))</code>。各技能：${Object.entries(bySkill).filter(([,c])=>c.slope!=null).map(([k,c])=>`${SKN[k]} 截距 ${f2(c.intercept)}、斜率 ${f2(c.slope)}`).join('；')}。<br>
@@ -760,8 +839,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.02';
-const CHANGELOG=[['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.03';
+const CHANGELOG=[['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
