@@ -238,20 +238,39 @@ function ensurePlan(S) {
  saveState(S); return S.today;
 }
 let browser = null, cache = new Map(), RUN_END = 0;
-async function launch() { if (!browser) { const { chromium } = require('playwright'); browser = await chromium.launch(); } return browser; }
+// Opening the game in a fresh browser checks ~7,000 asset files (about 4–6 minutes of CPU on a small machine), so several
+// can load at once but not unlimited: --load-conc (default 3) at a time, each allowed --load-timeout minutes (default 30).
+// The session's own play time is counted from when the room is on screen, so a slow load never shortens the visit.
+const LOAD_CONC = Math.max(1, +arg('load-conc', 3)), LOAD_MS = Math.max(1, +arg('load-timeout', 30)) * 60e3; let loading = 0; const loadQ = [];
+async function loadSlot() { if (loading < LOAD_CONC) { loading++; return; } await new Promise(r => loadQ.push(r)); loading++; }
+function loadDone() { loading--; const r = loadQ.shift(); if (r) r(); }
+let browserP = null;   // sessions that start together share one launch (a race here used to leave extra browsers running, so `once` never exited)
+async function launch() { if (!browserP) { const { chromium } = require('playwright'); browserP = chromium.launch(); } return browser = await browserP; }
 async function runSession(S, p, s) {
  const st = S.people[p.id], date = S.today.date, today = st.daily[date] || (st.daily[date] = { daily: false, grade: false });
  const share = p.shareDevice && p.id > p.shareDevice ? p.shareDevice : p.id, storeFile = path.join(DIR, 'browser', share + '.json');
  const vp = p.device === 'phone' ? { width: 390, height: 844, isMobile: true, hasTouch: true } : p.device === 'tablet' ? { width: 820, height: 1180, isMobile: true, hasTouch: true } : { width: 1366, height: 860 };
  const b = await launch(), ctx = await b.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: p.lang === 'ja' ? 'ja-JP' : 'zh-TW', timezoneId: 'Asia/Taipei', storageState: !arg('no-store') && fs.existsSync(storeFile) ? storeFile : undefined });
  await ctx.addInitScript(([dev, lang]) => { try { if (!localStorage.getItem('pocketnook.device')) localStorage.setItem('pocketnook.device', dev); localStorage.setItem('purr-cozy.language', lang); } catch (e) { } }, [st.device || ('test-' + share), p.lang || 'zh-TW']);
+ if (arg('no-upload')) await ctx.route(/firestore\.googleapis\.com|identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com/, r => r.abort());   // testing: nothing reaches Firebase, so no test data appears in the admin
  if (!arg('direct')) await ctx.route(u => u.href.startsWith(BASE) && !/version\.json/.test(u.href), async r => { const url = r.request().url(), hit = cache.get(url); if (hit) return r.fulfill(hit); try { const res = await r.fetch(); const body = await res.body(); if (res.status() === 200 && body.length < 30e6) cache.set(url, { status: 200, headers: res.headers(), body }); return r.fulfill({ response: res, body }); } catch (e) { return r.abort(); } });
- const page = await ctx.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message.slice(0, 200)));
+ const page = await ctx.newPage(), errors = [], netBad = []; page.on('pageerror', e => errors.push(e.message.slice(0, 200)));
+ // for diagnosing a load that never finishes: failed requests and HTTP errors while the game opens
+ page.on('requestfailed', r => { if (netBad.length < 40) netBad.push('fail ' + r.url().replace(BASE, '').slice(0, 80) + ' ' + ((r.failure() || {}).errorText || '')); });
+ page.on('response', r => { if (r.status() >= 400 && netBad.length < 40) netBad.push(r.status() + ' ' + r.url().replace(BASE, '').slice(0, 80)); });
  const ev = (fn, a) => page.evaluate(fn, a), wait = ms => new Promise(r => setTimeout(r, Math.max(0, ms / FAST)));
  const ses = { elapsed: 0, count: {}, mins: {}, ans: 0, right: 0, frustration: 0, rewards: 0, music: false, cut: false, goalDone: false, acts: [] }; let t0 = Date.now(), endAt = Infinity;
  try {
-  await page.goto(BASE + 'index.html', { timeout: 180000 });
-  await page.waitForFunction(() => !document.getElementById('loading') && typeof Learn !== 'undefined' && Game.S, null, { timeout: 600000, polling: 1000 });
+  const q0 = Date.now(); await loadSlot(); s.queued = +((Date.now() - q0) / 60000).toFixed(1);
+  try { await page.goto(BASE + 'index.html', { timeout: 180000 });
+   await page.waitForFunction(() => !document.getElementById('loading') && typeof Learn !== 'undefined' && Game.S, null, { timeout: LOAD_MS, polling: 2000 });
+  } catch (e) {
+   // say where it stopped: the loading screen's own text (progress or error), page errors, failed / 4xx-5xx requests
+   const screen = await page.evaluate(() => { const el = document.getElementById('loading'); return { text: el ? el.innerText.replace(/\s+/g, ' ').trim().slice(0, 200) : '(沒有載入畫面)', learn: typeof Learn !== 'undefined', game: typeof Game !== 'undefined' && !!Game.S, stats: window.PurrAssets ? PurrAssets.stats : null, ready: document.readyState }; }).catch(x => ({ text: '(讀不到頁面：' + String(x.message || x).slice(0, 80) + ')' }));
+   const diag = `載入逾時 ${Math.round((Date.now() - q0) / 60000)} 分｜畫面：${screen.text}｜Learn ${!!screen.learn} Game ${!!screen.game} ${screen.ready || ''}｜素材 ${screen.stats ? JSON.stringify(screen.stats) : '–'}｜頁面錯誤 ${errors.length}：${errors.slice(0, 3).join(' / ')}｜網路問題 ${netBad.length}：${netBad.slice(0, 6).join(' / ')}`;
+   console.log('[life] ' + p.id + ' ' + diag);
+   throw new Error(diag);
+  } finally { loadDone(); }
   const coins0 = await ev(() => Game.S.coins);
   // sign in (the shared tablet switches accounts here)
   const acc = ACCOUNTS[p.id];
@@ -287,7 +306,7 @@ async function runSession(S, p, s) {
   if (p.age >= 13 || chance(.4)) { await ev(() => { dispatchEvent(new Event('pagehide')); Game.save(); }); for (let i = 0; i < 10; i++) { const q = await ev(() => typeof LearnLog !== 'undefined' ? LearnLog.queue().length : 0); if (!q) break; await ev(() => LearnLog.flush()); await new Promise(r => setTimeout(r, 1500)); } }
   s.grade = await ev(() => typeof Placement !== 'undefined' && Placement.done() ? +Placement.S().theta.toFixed(2) : null);
   if (!arg('no-store')) await ctx.storageState({ path: storeFile, indexedDB: true });
- } catch (e) { s.error = String(e && e.message || e).slice(0, 300); }
+ } catch (e) { s.error = String(e && e.message || e).slice(0, 900); }
  finally { s.pageErrors = errors.slice(0, 5); await ctx.close().catch(() => { }); }
  s.real = +((Date.now() - t0) * FAST / 60000).toFixed(1); Object.assign(s, { merchant: ses.merchant, storyCh: ses.storyCh, loreQ: ses.loreQ, loreRight: ses.loreRight, bought: ses.bought, weekly: ses.weekly }); s.acts = [...new Set(ses.acts)]; s.ans = ses.ans; s.right = ses.right; s.cut = ses.cut; s.frustration = ses.frustration; s.sat = +satisfaction(p, ses).toFixed(2);
  st.sessions++; st.minutes += s.real; if (s.grade != null) st.grade = s.grade;
@@ -422,7 +441,7 @@ async function runLoop(once) {
     await runSession(S, p, s); s.status = 'done';
     if (s.carry >= 1) { const m = tw(RUN_END).min; T.plans[p.id].sessions.push({ id: s.id + 'c', start: m, len: s.carry, cont: true, status: 'planned', t: RUN_END }); }
     saveState(S);
-    logLine(T.date, { type: 'session', id: p.id, sid: s.id, start: hm(s.start), planned: s.len, real: s.real, load: s.load, carry: s.carry || 0, cont: !!s.cont, acts: s.acts, ans: s.ans, right: s.right, merchant: s.merchant, story: s.storyCh, lore: s.loreQ ? [s.loreRight || 0, s.loreQ] : undefined, bought: s.bought, weekly: s.weekly, cut: s.cut, sat: s.sat, grade: s.grade, login: s.login, error: s.error, pageErrors: s.pageErrors });
+    logLine(T.date, { type: 'session', id: p.id, sid: s.id, start: hm(s.start), planned: s.len, real: s.real, load: s.load, queued: s.queued, carry: s.carry || 0, cont: !!s.cont, acts: s.acts, ans: s.ans, right: s.right, merchant: s.merchant, story: s.storyCh, lore: s.loreQ ? [s.loreRight || 0, s.loreQ] : undefined, bought: s.bought, weekly: s.weekly, cut: s.cut, sat: s.sat, grade: s.grade, login: s.login, error: s.error, pageErrors: s.pageErrors });
     console.log(`[life] ${p.id} 結束：${s.real} 分鐘、${s.acts.join('/')}、答 ${s.ans} 對 ${s.right}${s.error ? '、錯誤 ' + s.error : ''}`);
    })().finally(() => running.delete(job));
   }
@@ -453,7 +472,7 @@ function summary() { const date = String(arg('date', tw(Date.now() - 6 * 3600e3)
 if (CMD === 'pack') pack(); else if (CMD === 'unpack') unpack(); else if (CMD === 'summary') summary(); else
 if (CMD === 'preview') preview();
 else if (CMD === 'run') runLoop(false);
-else if (CMD === 'once') runLoop(true);
+else if (CMD === 'once') runLoop(true).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });   // never hang the hourly run
 else if (CMD === 'status') status();
 else console.log('用法：node tools/sim/life.cjs preview | run | once | status');
 module.exports = { planDay, endDay, newState, PEOPLE };
