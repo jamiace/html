@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* ============================================================
    呼嚕小窩：兩週生活模擬的雲端執行器（排程每小時呼叫一次，不需要任何人的電腦）
-   - 狀態、程式碼、帳號都放在 Firestore 的一個「控制帳號」底下（claude-sim00@purrcozy.test）：
+   - 狀態、程式碼、帳號都放在 Firestore 的一個「控制帳號」底下（claude-test00@purrcozy.test，後台「批次建立測試帳號」會一起建立）：
        saves/{控制帳號}                 = 模擬狀態（data 是 JSON 字串，rev 每次 +1）
        saves/{控制帳號}/backups/code-*  = life.cjs、people.json、cloud.cjs
        saves/{控制帳號}/backups/accounts = 30 個測試帳號的登入資料
@@ -10,7 +10,7 @@
    - node cloud.cjs run      下載程式與狀態 → 執行接下來一小時的場次 → 上傳狀態與紀錄（另一個執行中就直接結束）
    - node cloud.cjs setup --controller <帳密.json> --accounts <accounts.json> --start <YYYY-MM-DD>   第一次設定（上傳程式碼與帳號）
    - node cloud.cjs report [--date …]  印出某天或全部的統計
-   帳密：環境變數 SIM_EMAIL / SIM_PASSWORD，或 --controller 檔案。
+   帳密（依序找）：環境變數 SIM_EMAIL / SIM_PASSWORD → --controller 檔案 → --accounts（或 .sim/accounts.json）裡的 controller 欄位。
    ============================================================ */
 const fs = require('fs'), path = require('path'), { spawn } = require('child_process');
 const KEY = 'AIzaSyCZDorIT08dX1oqF4RZ8pTqDStl0pwWR_Q', PROJECT = 'pocket-nook', REF = 'https://jamiace.github.io/';
@@ -28,8 +28,10 @@ const dec = v => 'stringValue' in v ? v.stringValue : 'integerValue' in v ? +v.i
 const fields = doc => Object.fromEntries(Object.entries(doc.fields || {}).map(([k, v]) => [k, dec(v)]));
 let TOK = '', UID = '', EMAIL = '';
 async function signIn() {
- let e = process.env.SIM_EMAIL, p = process.env.SIM_PASSWORD; if (arg('controller')) { const c = JSON.parse(fs.readFileSync(arg('controller'), 'utf8')); e = c.email; p = c.password; }
- if (!e || !p) throw new Error('需要控制帳號（SIM_EMAIL / SIM_PASSWORD）');
+ let e = process.env.SIM_EMAIL, p = process.env.SIM_PASSWORD; const fromFile = f => { const j = JSON.parse(fs.readFileSync(f, 'utf8')); return j.controller || j; };
+ if (!e && arg('controller')) ({ email: e, password: p } = fromFile(arg('controller')));
+ if (!e) { const f = arg('accounts', path.join(__dirname, '..', '..', '.sim', 'accounts.json')); if (fs.existsSync(f)) { const c = JSON.parse(fs.readFileSync(f, 'utf8')).controller; if (c) ({ email: e, password: p } = c); } }
+ if (!e || !p) throw new Error('需要控制帳號（SIM_EMAIL / SIM_PASSWORD，或 accounts.json 的 controller；後台 → 批次建立測試帳號 → 只建立模擬控制帳號）');
  const r = await http(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${KEY}`, { email: e, password: p, returnSecureToken: true }); TOK = r.idToken; UID = r.localId; EMAIL = e;
 }
 const save = {

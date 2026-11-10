@@ -249,14 +249,15 @@ button.danger{border-color:var(--acc2);color:var(--acc2)}
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pc-test"> 測試帳號</label></div>
      <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="6"> L6</label></div>
      <div class="row" style="margin-top:10px"><button id="pc-go" class="primary">建立帳號</button></div><p id="pc-msg" class="muted"></p></section>
-    <section><h2>批次建立測試帳號</h2><p class="why">一次建立多個測試帳號（預設 30 個，對應 <code>tools/sim/testers.json</code> 的 sim01～sim30）。建立完會自動下載 <code>accounts.json</code>：放到專案的 <code>.sim/accounts.json</code>（不要 commit），模擬程式用 <code>--testers --login</code> 就會登入這些帳號。測試帳號的學習紀錄與行為紀錄，分析頁預設排除。</p>
+    <section><h2>批次建立測試帳號</h2><p class="why">一次建立多個測試帳號（預設 30 個：<code>claude-test01</code>～<code>claude-test30</code>，對應 <code>tools/sim/people.json</code> 的 sim01～sim30）。勾選「模擬控制帳號」時會另外建立 <code>claude-test00</code>：它不進遊戲，只給雲端排程（<code>tools/sim/cloud.cjs</code>）存放模擬狀態與紀錄。建立完會自動下載 <code>accounts.json</code>（含控制帳號）：放到專案的 <code>.sim/accounts.json</code>（不要 commit），<code>life.cjs --login</code> 與 <code>cloud.cjs setup --accounts</code> 都讀這個檔。測試帳號的學習紀錄與行為紀錄，分析頁預設排除。</p>
      <div class="form"><label>數量<input type="number" id="pt-n" min="1" max="50" value="30"></label><label>起始編號<input type="number" id="pt-start" min="1" value="1"></label>
       <label>Email 前綴<input type="text" id="pt-prefix" value="claude-test"></label><label>Email 網域<input type="text" id="pt-domain" value="purrcozy.test"></label>
       <label>群組<input type="text" id="pt-group" value="claude"></label><label>名稱前綴<input type="text" id="pt-name" value="測試"></label>
       <label>初始金幣<input type="number" id="pt-coins" min="0" placeholder="不設定"></label><label>初始等級<input type="number" id="pt-lvl" min="1" max="99" placeholder="不設定"></label>
-      <label>自填年級<select id="pt-declared"><option value="0">不設定</option></select></label></div>
+      <label>自填年級<select id="pt-declared"><option value="0">不設定</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pt-ctl" checked> 同時建立模擬控制帳號（編號 00）</label></div>
      <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="6"> L6</label></div>
-     <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
+     <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-ctl-only">只建立模擬控制帳號（00）</button><button id="pt-names">套用模擬人物暱稱</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
    </div>
    <div class="page hidden" data-page="accounts">
     <section><h2>帳號列表</h2><p class="why" id="acct-count"></p><div class="row" style="margin-bottom:8px"><button id="btn-acct-reload">重新整理</button><span class="muted" id="acct-note"></span></div><div class="tbl" style="max-height:none"><table id="t-staff"></table></div></section>
@@ -1038,10 +1039,32 @@ Object.assign(Admin,{
    const uid=await this.createOne(o);await this.log('player.create',uid,email+(o.test?'（測試）':''));
    msg.innerHTML=`已建立 <b class="mono">${esc(email)}</b>　密碼 <b class="mono">${esc(pw)}</b>　UID <span class="mono">${esc(uid)}</span><br><span class="muted">密碼只顯示這一次，請自己記下來。</span>`;this.loadPlayers()}
   catch(e){msg.textContent='失敗：'+this.authErr(e)}},
+ async createController(prefix,domain,group){const email=`${prefix}00@${domain}`,password=this.pw();
+  const uid=await this.createOne({email,password,name:'模擬控制',test:true,group,note:'模擬控制帳號：只給雲端排程存放模擬狀態，不進遊戲'});
+  await this.log('player.create',uid,email+'（模擬控制帳號）');return {email,password,uid}},
+ async createControllerOnly(){const msg=$('pt-msg'),prefix=$('pt-prefix').value.trim().toLowerCase()||'claude-test',domain=$('pt-domain').value.trim().toLowerCase()||'purrcozy.test',group=$('pt-group').value.trim()||'claude';
+  if(!/^[a-z0-9._+-]+$/.test(prefix)||!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain))return msg.textContent='前綴或網域格式不正確。';
+  if(!confirm(`建立模擬控制帳號 ${prefix}00@${domain}？`))return;
+  try{const c=await this.createController(prefix,domain,group);this.lastController=c;
+   msg.innerHTML=`已建立控制帳號 <b class="mono">${esc(c.email)}</b>　密碼 <b class="mono">${esc(c.password)}</b><br><span class="muted">已下載 controller.json；把 <code>controller</code> 欄位併入 <code>.sim/accounts.json</code>，或直接把這組帳密給雲端排程。密碼只顯示這一次。</span>`;
+   const blob=new Blob([JSON.stringify({created:new Date().toISOString(),controller:c},null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='controller.json';a.click();this.loadPlayers()}
+  catch(e){msg.textContent='失敗：'+this.authErr(e)}},
+ // test accounts NN get the nickname of simNN in tools/sim/people.json (registry name + the name the game seeds on first login)
+ async applySimNames(){const msg=$('pt-msg'),prefix=$('pt-prefix').value.trim().toLowerCase()||'claude-test',domain=$('pt-domain').value.trim().toLowerCase()||'purrcozy.test';
+  let P;try{P=(await (await fetch('sim/people.json',{cache:'no-store'})).json()).people}catch(e){return msg.textContent='讀不到 tools/sim/people.json（請從網站上開啟後台）。'}
+  const nick=Object.fromEntries(P.map(p=>[p.id.replace(/^sim/,''),p.nick])),{F,db}=await firebase();
+  msg.textContent='讀取玩家登記…';const reg={};(await F.getDocs(F.collection(db,'players'))).forEach(d=>reg[d.id]=d.data());
+  const esc2=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),re=new RegExp('^'+esc2(prefix)+'(\\d{2})@'+esc2(domain)+'$'),todo=[];
+  for(const [uid,r] of Object.entries(reg)){const m=re.exec(r.email||'');if(!m||!r.test)continue;const nm=m[1]==='00'?'模擬控制':nick[m[1]];if(nm&&(r.name!==nm||!r.seed||r.seed.name!==nm))todo.push([uid,r,nm])}
+  if(!todo.length)return msg.textContent='沒有需要改名的測試帳號。';
+  if(!confirm(`把 ${todo.length} 個測試帳號改成 people.json 的暱稱？\n`+todo.slice(0,8).map(([,r,nm])=>`${r.email} → ${nm}`).join('\n')+(todo.length>8?'\n…':'')))return;
+  let n=0;const fail=[];for(const [uid,r,nm] of todo){try{await F.updateDoc(F.doc(db,'players',uid),{name:nm,seed:Object.assign({},r.seed||{},{name:nm}),updatedBy:this.me.email,updatedAt:F.serverTimestamp()});n++}catch(e){fail.push(r.email+'：'+(e.code||e.message))}msg.textContent=`改名中… ${n}/${todo.length}`}
+  await this.log('player.rename',prefix,`套用模擬暱稱 ${n} 個`);msg.innerHTML=`已改名 ${n} 個${fail.length?`，失敗 ${fail.length} 個：<br>${fail.map(esc).join('<br>')}`:''}<br><span class="muted">已經進過遊戲的帳號，存檔裡的名字由模擬程式在下一次上線時改成同一個暱稱。</span>`;this.loadPlayers()},
  async createBatch(){const msg=$('pt-msg'),n=Math.max(1,Math.min(50,+$('pt-n').value||30)),start=Math.max(1,+$('pt-start').value||1),prefix=$('pt-prefix').value.trim().toLowerCase()||'claude-test',domain=$('pt-domain').value.trim().toLowerCase()||'purrcozy.test',group=$('pt-group').value.trim()||'claude',name=$('pt-name').value.trim()||'測試';
   if(!/^[a-z0-9._+-]+$/.test(prefix)||!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain))return msg.textContent='前綴或網域格式不正確。';
   if(!confirm(`建立 ${n} 個測試帳號：${prefix}${String(start).padStart(2,'0')}@${domain} ～ ${prefix}${String(start+n-1).padStart(2,'0')}@${domain}？`))return;
-  const seed=this.seedFrom('pt-'),out=[],fail=[];$('pt-go').disabled=true;
+  const seed=this.seedFrom('pt-'),out=[],fail=[];$('pt-go').disabled=true;this.lastController=null;
+  if($('pt-ctl').checked){msg.textContent=`建立中… 控制帳號 ${prefix}00@${domain}`;try{this.lastController=await this.createController(prefix,domain,group)}catch(e){fail.push(`${prefix}00@${domain}（控制帳號）：${this.authErr(e)}`)}}
   for(let i=0;i<n;i++){const k=String(start+i).padStart(2,'0'),email=`${prefix}${k}@${domain}`,pw=this.pw();msg.textContent=`建立中… ${i+1}/${n}　${email}`;
    try{const uid=await this.createOne(Object.assign({email,password:pw,name:`${name}${k}`,test:true,group,note:'批次建立的測試帳號'},seed));out.push({id:'sim'+k,email,password:pw,uid,name:`${name}${k}`})}
    catch(e){fail.push(`${email}：${this.authErr(e)}`);if(e&&e.code==='auth/operation-not-allowed')break}
@@ -1049,19 +1072,19 @@ Object.assign(Admin,{
   $('pt-go').disabled=false;await this.log('player.batch',group,`建立 ${out.length} 個，失敗 ${fail.length} 個（${prefix}@${domain}）`);
   this.lastBatch=out;msg.innerHTML=`完成：建立 ${out.length} 個${fail.length?`，失敗 ${fail.length} 個：<br>${fail.map(esc).join('<br>')}`:''}${out.length?'<br><b>密碼只在這裡出現一次</b>，請馬上下載。':''}`;
   $('pt-dl').classList.toggle('hidden',!out.length);$('pt-csv').classList.toggle('hidden',!out.length);if(out.length)this.downloadBatch('json');this.loadPlayers()},
- downloadBatch(kind){const out=this.lastBatch||[];if(!out.length)return;const blob=kind==='json'?new Blob([JSON.stringify({created:new Date().toISOString(),base:location.href.replace(/tools\/admin\.html.*$/,''),accounts:out},null,1)],{type:'application/json'})
+ downloadBatch(kind){const out=this.lastBatch||[];if(!out.length)return;const blob=kind==='json'?new Blob([JSON.stringify({created:new Date().toISOString(),base:location.href.replace(/tools\/admin\.html.*$/,''),accounts:out,...(this.lastController?{controller:this.lastController}:{})},null,1)],{type:'application/json'})
   :new Blob(['﻿id,email,password,uid,name\n'+out.map(o=>[o.id,o.email,o.password,o.uid,o.name].join(',')).join('\n')],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=kind==='json'?'accounts.json':'test-accounts.csv';a.click()},
  async delReg(uid){if(!confirm('只刪除後台的登記（測試標記、初始設定）。Firebase 的登入帳號和雲端存檔不會刪除，要刪請到 Firebase 主控台 → Authentication。確定？'))return;const {F,db}=await firebase();
   try{await F.deleteDoc(F.doc(db,'players',uid));await this.log('player.unreg',uid,'');this.loadPlayers()}catch(e){alert('失敗：'+(e.code||e.message))}},
 });
-Object.assign(Admin.ACT,{'player.view':'查看玩家','player.edit':'修改玩家存檔','player.json':'直接修改存檔 JSON','player.restore':'還原玩家備份','player.export':'下載玩家存檔','player.create':'建立玩家帳號','player.batch':'批次建立測試帳號','player.unreg':'刪除玩家登記'});
+Object.assign(Admin.ACT,{'player.view':'查看玩家','player.edit':'修改玩家存檔','player.json':'直接修改存檔 JSON','player.restore':'還原玩家備份','player.export':'下載玩家存檔','player.create':'建立玩家帳號','player.batch':'批次建立測試帳號','player.rename':'套用模擬暱稱','player.unreg':'刪除玩家登記'});
 $('pl-reload').onclick=()=>Admin.loadPlayers();$('pl-q').oninput=()=>Admin.renderPlayers();$('pl-kind').onchange=()=>Admin.renderPlayers();
 $('t-players').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)Admin.openPlayer(b.dataset.open)});
 $('pl-detail').addEventListener('click',e=>{const b=e.target.closest('[data-restore]');if(b)Admin.restoreBackup(b.dataset.restore)});
 $('pt-declared').append(...GRADE_LABEL.map((g,i)=>new Option(g,i+1)));
-$('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
-for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.unreg'].map(k=>new Option(Admin.ACT[k],k)));
+$('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-ctl-only').onclick=()=>Admin.createControllerOnly();$('pt-names').onclick=()=>Admin.applySimNames();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
+for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.rename','player.unreg'].map(k=>new Option(Admin.ACT[k],k)));
 
 
 /* ================= 0.5.02 使用行為：每人每天一份摘要（learnlog/{logId}/bday/{date}） =================
