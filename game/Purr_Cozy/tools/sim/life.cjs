@@ -259,8 +259,11 @@ async function runSession(S, p, s) {
    if (who !== acc.email) { await page.waitForFunction(() => typeof Cloud !== 'undefined' && Cloud.fb, null, { timeout: 60000 }).catch(() => { });
     s.login = await ev(async a => { try { if (Cloud.user) await Cloud.fb.signOut(); await Cloud.fb.signIn(a.email, a.password); return 'ok'; } catch (e) { return (e && e.code) || String(e); } }, acc);
     await page.waitForFunction(e => Cloud.user && Cloud.user.email === e && ['synced', 'saving'].includes(Cloud.status), acc.email, { timeout: 90000 }).catch(() => { s.login += '（同步逾時）'; }); } }
-  await ev(([d, nick]) => { const g = typeof Placement !== 'undefined' && Placement.S(); if (g && !g.declared && d) g.declared = d; if (Game.S.avatar && (!Game.S.avatar.name || /^測試\d+$/.test(Game.S.avatar.name) || Game.S.avatar.name === (window.NAME_DEFAULT || ''))) Game.S.avatar.name = nick;
-   Game.S.flags = Object.assign({}, Game.S.flags, { tester: true, testGroup: 'claude-sim' }); Game.save(); }, [p.declared || 0, p.nick]);   // test account: its logs are left out of the analysis
+  // name + test flags. The game applies the account's registry seed (name 測試NN, group) a moment after the first sync,
+  // which can overwrite what is set here, so it is set again a few seconds later and once more before leaving.
+  const fixId = () => ev(([d, nick]) => { const g = typeof Placement !== 'undefined' && Placement.S(); if (g && !g.declared && d) g.declared = d; if (Game.S.avatar && (!Game.S.avatar.name || /^測試\d+$/.test(Game.S.avatar.name) || Game.S.avatar.name === (window.NAME_DEFAULT || ''))) Game.S.avatar.name = nick;
+   const f = Game.S.flags || {}; if (f.tester && f.testGroup === 'claude-sim' && Game.S.avatar && Game.S.avatar.name === nick) return; Game.S.flags = Object.assign({}, f, { tester: true, testGroup: 'claude-sim' }); Game.save(); if (typeof UI !== 'undefined' && UI.refresh) try { UI.refresh('profile'); } catch (e) { } }, [p.declared || 0, p.nick]).catch(() => { });
+  await fixId(); await new Promise(r => setTimeout(r, 6000)); await fixId();   // test account: its logs are left out of the analysis
   s.load = +((Date.now() - t0) / 1000).toFixed(0); t0 = Date.now(); endAt = t0 + s.len * 60000 / FAST;
   if (RUN_END && endAt > RUN_END) { s.carry = +((endAt - RUN_END) * FAST / 60000).toFixed(1); endAt = RUN_END; }   // the rest continues in the next hourly run   // the visit starts once the room is on screen
   await wait(lognormal(3000 * p.play.pace, .4));
@@ -280,6 +283,7 @@ async function runSession(S, p, s) {
   }
   ses.rewards = Math.max(0, (await ev(() => Game.S.coins)) - coins0);
   // leaving: children often just close; adults wait for the save
+  await fixId();
   if (p.age >= 13 || chance(.4)) { await ev(() => { dispatchEvent(new Event('pagehide')); Game.save(); }); for (let i = 0; i < 10; i++) { const q = await ev(() => typeof LearnLog !== 'undefined' ? LearnLog.queue().length : 0); if (!q) break; await ev(() => LearnLog.flush()); await new Promise(r => setTimeout(r, 1500)); } }
   s.grade = await ev(() => typeof Placement !== 'undefined' && Placement.done() ? +Placement.S().theta.toFixed(2) : null);
   if (!arg('no-store')) await ctx.storageState({ path: storeFile, indexedDB: true });

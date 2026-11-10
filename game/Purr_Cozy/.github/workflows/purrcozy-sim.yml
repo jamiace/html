@@ -1,0 +1,70 @@
+# PurrCozy（呼嚕小窩）30 位測試帳號生活模擬：每小時跑一次
+# 放到 repo 的 .github/workflows/purrcozy-sim.yml
+# 需要先在 repo → Settings → Secrets and variables → Actions 建立：
+#   SIM_EMAIL     = claude-test00@purrcozy.test
+#   SIM_PASSWORD  = 控制帳號密碼
+name: PurrCozy sim
+
+on:
+  schedule:
+    - cron: '7 * * * *'     # 每小時第 7 分（UTC），避開整點排隊
+  workflow_dispatch:
+    inputs:
+      window:
+        description: '本次模擬分鐘數（留空自動計算）'
+        required: false
+
+concurrency:
+  group: purrcozy-sim
+  cancel-in-progress: false   # 上一次還在跑就排隊，不砍掉
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    env:
+      SIM_EMAIL: ${{ secrets.SIM_EMAIL }}
+      SIM_PASSWORD: ${{ secrets.SIM_PASSWORD }}
+      SIM_END: '2026-11-24T00:00:00+08:00'
+    steps:
+      - name: 計算模擬時間窗
+        id: win
+        run: |
+          left=$(( ( $(date -d "$SIM_END" +%s) - $(date +%s) ) / 60 ))
+          w=$(( left - 5 )); [ $w -gt 50 ] && w=50
+          [ -n "${{ github.event.inputs.window }}" ] && w=${{ github.event.inputs.window }}
+          echo "台北時間 $(TZ=Asia/Taipei date '+%F %R')，剩 $left 分鐘，W=$w"
+          if [ $w -lt 5 ]; then echo "skip=1" >> $GITHUB_OUTPUT; else echo "skip=0" >> $GITHUB_OUTPUT; echo "w=$w" >> $GITHUB_OUTPUT; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.win.outputs.skip == '0'
+        with:
+          node-version: '20'
+
+      - name: 安裝 Playwright + Chromium
+        if: steps.win.outputs.skip == '0'
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.48.2
+          npx playwright install --with-deps chromium
+
+      - name: 下載控制帳號雲端備份裡的 cloud.cjs
+        if: steps.win.outputs.skip == '0'
+        run: |
+          node -e '
+          const K="AIzaSyCZDorIT08dX1oqF4RZ8pTqDStl0pwWR_Q",H={"Content-Type":"application/json",Referer:"https://jamiace.github.io/"};
+          (async()=>{const a=await (await fetch("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="+K,{method:"POST",headers:H,body:JSON.stringify({email:process.env.SIM_EMAIL,password:process.env.SIM_PASSWORD,returnSecureToken:true})})).json();
+          if(!a.idToken){console.error("LOGIN_FAIL",JSON.stringify(a.error));process.exit(2)}
+          const d=await (await fetch("https://firestore.googleapis.com/v1/projects/pocket-nook/databases/(default)/documents/saves/"+a.localId+"/backups/code-cloud",{headers:{...H,Authorization:"Bearer "+a.idToken}})).json();
+          require("fs").writeFileSync("cloud.cjs",d.fields.data.stringValue);console.log("cloud.cjs ok")})()'
+
+      - name: 執行模擬
+        if: steps.win.outputs.skip == '0'
+        # --work 放在 workspace 底下，life.cjs 才找得到這裡裝的 playwright
+        run: node cloud.cjs run --work "$GITHUB_WORKSPACE/w" --window ${{ steps.win.outputs.w }} 2>&1 | tee run.log
+
+      - name: 檢查結果
+        if: always() && steps.win.outputs.skip == '0'
+        run: |
+          tail -5 run.log || true
+          grep -qE '\[cloud\] 完成|這次跳過|不在模擬期間' run.log || { echo "::error::模擬沒有正常完成，看上面的 log"; exit 1; }
