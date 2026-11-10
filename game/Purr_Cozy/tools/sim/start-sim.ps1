@@ -31,17 +31,19 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 Say ("Node.js " + (node --version))
 
 # 2. Playwright + Chromium（裝在 %LOCALAPPDATA%\PurrCozySim，不放進專案資料夾）
-$Pkg = Join-Path $Home2 'node_modules\playwright'
-if (-not (Test-Path $Pkg)) {
-  Say '第一次執行：安裝 Playwright…'
-  Push-Location $Home2
-  if (-not (Test-Path 'package.json')) { '{"name":"purrcozy-sim","private":true}' | Set-Content -Path 'package.json' -Encoding ASCII }
-  npm install playwright@1.48.2 --no-fund --no-audit | Out-Host
-  Pop-Location
-}
+# Playwright 1.63 (the version the simulator was tested with). 1.48 cannot unpack its browser on a new Node.js
+# (it hangs right after 'Downloading Chromium ... 100%'). npm skips the download when it is already installed.
+Say '安裝／更新 Playwright…'
+Push-Location $Home2
+if (-not (Test-Path 'package.json')) { '{"name":"purrcozy-sim","private":true}' | Set-Content -Path 'package.json' -Encoding ASCII }
+npm install playwright@1.63.0 --no-fund --no-audit --loglevel=error | Out-Host
+Pop-Location
+$Host.UI.RawUI.WindowTitle = 'PurrCozy 模擬（關掉這個視窗就會停止）'
 $env:NODE_PATH = Join-Path $Home2 'node_modules'
-Say '確認 Chromium…'
+Say ('Playwright ' + (& node -e "console.log(require('playwright/package.json').version)") + '，確認 Chromium（第一次會下載約 150MB 並解壓縮，需要幾分鐘）…')
 & node (Join-Path $Home2 'node_modules\playwright\cli.js') install chromium | Out-Host
+$Host.UI.RawUI.WindowTitle = 'PurrCozy 模擬（關掉這個視窗就會停止）'   # npm renames the window while it runs
+Say 'Chromium 已就緒。（不要用滑鼠點這個視窗裡面：Windows 會暫停視窗裡的程式，按 Enter 或 Esc 可恢復）'
 
 # 3. 不讓電腦睡眠（只在這個視窗開著時有效），並降低優先權
 Add-Type -Namespace PurrSim -Name Power -MemberDefinition '[DllImport("kernel32.dll")] public static extern uint SetThreadExecutionState(uint f);'

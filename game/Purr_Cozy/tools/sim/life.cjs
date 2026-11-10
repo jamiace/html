@@ -135,7 +135,7 @@ function nextActivity(p, st, ses, today) {
   if (a === 'tasks' && today.claimable) x *= 3;
   if (a === 'tasks' && today.weekly) x *= 1.5;
   if (a === 'merchant' && today.mNew != null) { if (today.mNew) x *= 1 + 2 * (T.merchant || 0) + (p.play.prefs.story || 0); else if (today.story) x *= 1.6; else x *= .3; }
-  if (a === 'merchant' && (ses.count.merchant || 0) >= 1 && !today.story) x *= .2;
+  if (a === 'merchant' && (ses.count.merchant || 0) >= 1) x *= today.story ? .35 : .08;
   if (a === 'grade' && today.grade) x *= .05; if (a === 'daily' && today.daily) x *= .15;
   if (a === 'music' && ses.music) x *= .1;
   if (a === 'contest' && today.ct) { const C = today.ct; if (C.mid) x *= 2.5; else if (C.over) x *= C.best >= 6 ? .03 : .3 * (1 - .6 * (p.play.frustration || .5)); }
@@ -238,6 +238,19 @@ function ensurePlan(S) {
  saveState(S); return S.today;
 }
 let browser = null, cache = new Map(), RUN_END = 0;
+// ---- what everyone is doing, readable: shown in the window and written to one file per day (all people together) ----
+//   .sim/行為紀錄/2026-11-10.txt   e.g. "20:31:05  芯芯（sim04）答題 apple（小三・英翻中）✓"
+// Opening a window and closing it again without doing anything is not written.
+const TXT = path.resolve(String(arg('textlog', path.join(ROOT, '.sim', '行為紀錄'))));
+const GL = ['小一', '小二', '小三', '小四', '小五', '小六', '國一', '國二', '國三', '高一', '高二', '高三'], gname = g => g == null || isNaN(g) ? '' : GL[Math.max(1, Math.min(12, Math.round(g))) - 1];
+const QT = { en2zh: '英翻中', zh2en: '中翻英', listen: '聽音選字', spell: '拼字', listenspell: '聽音拼字', cloze: '填空', img: '看圖選字' };
+const MINI_BOTS = true;    // canvas minigames are played with a modelled result (see miniRound)
+const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字' };
+const DEVN = { phone: '手機', tablet: '平板', pc: '電腦', desktop: '電腦' };
+function say(p, msg) {
+ const d = new Date(Date.now() + 8 * 3600e3).toISOString(), line = `${d.slice(11, 19)}  ${p.nick}（${p.id}）${msg}`;
+ console.log(line); try { fs.mkdirSync(TXT, { recursive: true }); fs.appendFileSync(path.join(TXT, d.slice(0, 10) + '.txt'), line + '\r\n', 'utf8'); } catch (e) { }
+}
 const FIXED = /[?&](crc|checksum|boot)=|\/build-packs\/[0-9a-f]{8}\.bin/, HC = path.join(DIR, 'httpcache'), inflight = new Map();
 async function fixedFile(r) {
  const url = r.request().url(), key = require('crypto').createHash('sha1').update(url).digest('hex'), f = path.join(HC, key);
@@ -276,7 +289,11 @@ async function runSession(S, p, s) {
  // between visits and only the very first visit has the slow first load. Used when running on one always-on computer.
  const ctx = arg('profiles') ? await require('playwright').chromium.launchPersistentContext(path.join(DIR, 'profiles', share), Object.assign({ args: BROWSER_ARGS }, copts))
   : await (await launch()).newContext(Object.assign({ storageState: !arg('no-store') && fs.existsSync(storeFile) ? storeFile : undefined }, copts));
- await ctx.addInitScript(() => { try { if (window.speechSynthesis) { speechSynthesis.speak = () => { }; } } catch (e) { } });   // read-aloud uses the OS voice, which --mute-audio does not cover
+ await ctx.addInitScript(() => { try { if (window.speechSynthesis) { speechSynthesis.speak = () => { }; } } catch (e) { } });
+ await ctx.addInitScript(() => { window.__simMini = []; const iv = setInterval(() => { try { if (typeof MiniTable === 'undefined' || MiniTable.__sim) return; const end = MiniTable.end.bind(MiniTable);
+  MiniTable.end = function (s, result) { try { if (!s.over) { const g = s.g || {}, nums = {}; for (const k in g) if (typeof g[k] === 'number' && isFinite(g[k])) nums[k] = Math.round(g[k] * 100) / 100; const it = typeof Cozy !== 'undefined' && Cozy.item ? Cozy.item(s.uid) : null;
+   window.__simMini.push({ mode: s.mode, item: it ? it.k : '', name: it && ITEMS[it.k] ? (ITEMS[it.k].n || ITEMS[it.k].name || it.k) : '', variant: s.variant, won: !!s.won, lines: ((result && result.lines) || []).map(String), nums, at: Date.now() }); } } catch (e) { } return end(s, result); };
+  MiniTable.__sim = 1; clearInterval(iv); } catch (e) { } }, 500); });   // read-aloud uses the OS voice, which --mute-audio does not cover
  await ctx.addInitScript(([dev, lang]) => { try { if (!localStorage.getItem('pocketnook.device')) localStorage.setItem('pocketnook.device', dev); localStorage.setItem('purr-cozy.language', lang); } catch (e) { } }, [st.device || ('test-' + share), p.lang || 'zh-TW']);
  if (arg('no-upload')) await ctx.route(/firestore\.googleapis\.com|identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com/, r => r.abort());   // testing: nothing reaches Firebase, so no test data appears in the admin
  // Game files with a version in the URL (?crc= / ?checksum= / ?boot=) never change, so every file is downloaded from the site
@@ -284,12 +301,14 @@ async function runSession(S, p, s) {
  // (GitHub Pages) answers HTTP 429 when one IP asks for too much; without this each new person re-downloaded ~7,000 files.
  // Everything else (index.html, version.json, Firebase) goes to the network as usual, so game updates are picked up.
  if (!arg('direct')) await ctx.route(u => u.href.startsWith(BASE) && FIXED.test(u.href), r => fixedFile(r));
- const page = await ctx.newPage(), errors = [], netBad = []; page.on('pageerror', e => errors.push(e.message.slice(0, 200)));
+ const page = await ctx.newPage(), errors = [], netBad = []; let live = null;   // live = ses.say once the session has started
+ page.on('pageerror', e => { errors.push(e.message.slice(0, 200)); if (live && errors.length <= 10) live('⚠ 遊戲錯誤：' + e.message.slice(0, 200)); });
  // for diagnosing a load that never finishes: failed requests and HTTP errors while the game opens
  page.on('requestfailed', r => { if (netBad.length < 40) netBad.push('fail ' + r.url().replace(BASE, '').slice(0, 80) + ' ' + ((r.failure() || {}).errorText || '')); });
- page.on('response', r => { if (r.status() >= 400 && netBad.length < 40) netBad.push(r.status() + ' ' + r.url().replace(BASE, '').slice(0, 80)); });
+ page.on('response', r => { if (r.status() >= 400 && netBad.length < 40) { netBad.push(r.status() + ' ' + r.url().replace(BASE, '').slice(0, 80)); if (live && netBad.length <= 10) live(`⚠ 檔案抓不到（HTTP ${r.status()}）：${r.url().replace(BASE, '').slice(0, 100)}`); } });
  const ev = (fn, a) => page.evaluate(fn, a), wait = ms => new Promise(r => setTimeout(r, Math.max(0, ms / FAST)));
  const ses = { elapsed: 0, count: {}, mins: {}, ans: 0, right: 0, frustration: 0, rewards: 0, music: false, cut: false, goalDone: false, acts: [] }; let t0 = Date.now(), endAt = Infinity;
+ ses.say = m => say(p, m); live = ses.say; ses.say(`上線（${DEVN[p.device] || p.device || ''}，打算玩 ${s.len} 分鐘${s.cont ? '，接續上一段' : ''}）`);
  try {
   const q0 = Date.now(); await loadSlot(); s.queued = +((Date.now() - q0) / 60000).toFixed(1);
   try { await page.goto(BASE + 'index.html', { timeout: 180000 });
@@ -298,7 +317,7 @@ async function runSession(S, p, s) {
    // say where it stopped: the loading screen's own text (progress or error), page errors, failed / 4xx-5xx requests
    const screen = await page.evaluate(() => { const el = document.getElementById('loading'); return { text: el ? el.innerText.replace(/\s+/g, ' ').trim().slice(0, 200) : '(沒有載入畫面)', learn: typeof Learn !== 'undefined', game: typeof Game !== 'undefined' && !!Game.S, stats: window.PurrAssets ? PurrAssets.stats : null, ready: document.readyState }; }).catch(x => ({ text: '(讀不到頁面：' + String(x.message || x).slice(0, 80) + ')' }));
    const diag = `載入逾時 ${Math.round((Date.now() - q0) / 60000)} 分｜畫面：${screen.text}｜Learn ${!!screen.learn} Game ${!!screen.game} ${screen.ready || ''}｜素材 ${screen.stats ? JSON.stringify(screen.stats) : '–'}｜頁面錯誤 ${errors.length}：${errors.slice(0, 3).join(' / ')}｜網路問題 ${netBad.length}：${netBad.slice(0, 6).join(' / ')}`;
-   console.log('[life] ' + p.id + ' ' + diag);
+   ses.say('⚠ ' + diag);
    throw new Error(diag);
   } finally { loadDone(); }
   const coins0 = await ev(() => Game.S.coins);
@@ -307,36 +326,41 @@ async function runSession(S, p, s) {
   if (acc) { const who = await ev(() => typeof Cloud !== 'undefined' && Cloud.user ? Cloud.user.email : '');
    if (who !== acc.email) { await page.waitForFunction(() => typeof Cloud !== 'undefined' && Cloud.fb, null, { timeout: 60000 }).catch(() => { });
     s.login = await ev(async a => { try { if (Cloud.user) await Cloud.fb.signOut(); await Cloud.fb.signIn(a.email, a.password); return 'ok'; } catch (e) { return (e && e.code) || String(e); } }, acc);
-    await page.waitForFunction(e => Cloud.user && Cloud.user.email === e && ['synced', 'saving'].includes(Cloud.status), acc.email, { timeout: 90000 }).catch(() => { s.login += '（同步逾時）'; }); } }
+    await page.waitForFunction(e => Cloud.user && Cloud.user.email === e && ['synced', 'saving'].includes(Cloud.status), acc.email, { timeout: 90000 }).catch(() => { s.login += '（同步逾時）'; }); }
+   ses.say(s.login == null ? '已經是登入狀態' : s.login === 'ok' ? '登入帳號' : '登入失敗：' + s.login); }
   // name + test flags. The game applies the account's registry seed (name 測試NN, group) a moment after the first sync,
   // which can overwrite what is set here, so it is set again a few seconds later and once more before leaving.
   const fixId = () => ev(([d, nick]) => { const g = typeof Placement !== 'undefined' && Placement.S(); if (g && !g.declared && d) g.declared = d; if (Game.S.avatar && (!Game.S.avatar.name || /^測試\d+$/.test(Game.S.avatar.name) || Game.S.avatar.name === (window.NAME_DEFAULT || ''))) Game.S.avatar.name = nick;
    const f = Game.S.flags || {}; if (f.tester && f.testGroup === 'claude-sim' && Game.S.avatar && Game.S.avatar.name === nick) return; Game.S.flags = Object.assign({}, f, { tester: true, testGroup: 'claude-sim' }); Game.save(); if (typeof UI !== 'undefined' && UI.refresh) try { UI.refresh('profile'); } catch (e) { } }, [p.declared || 0, p.nick]).catch(() => { });
-  await fixId(); await new Promise(r => setTimeout(r, 6000)); await fixId();   // test account: its logs are left out of the analysis
+  await fixId(); await new Promise(r => setTimeout(r, 6000)); await fixId();
+  if (arg('test-give') && arg('no-upload')) await ev(list => { for (const m of list.split(',')) { const k = Object.keys(ITEMS).find(k => ITEMS[k].cozyGame === m || (m === 'vending' && /^cozy_vending_/.test(k))); if (k && !Game.S.items.some(i => i.k === k)) Game.S.items.push({ k, uid: 'test-' + m, x: 60 + 30 * Game.S.items.length % 200, y: 150 }); } }, String(arg('test-give')));   // testing only   // test account: its logs are left out of the analysis
   s.load = +((Date.now() - t0) / 1000).toFixed(0); t0 = Date.now(); endAt = t0 + s.len * 60000 / FAST;
+  ses.say(`進入房間（載入 ${s.load} 秒${s.queued ? `，先排隊 ${s.queued} 分鐘` : ''}）`);
   if (RUN_END && endAt > RUN_END) { s.carry = +((endAt - RUN_END) * FAST / 60000).toFixed(1); endAt = RUN_END; }   // the rest continues in the next hourly run   // the visit starts once the room is on screen
   await wait(lognormal(3000 * p.play.pace, .4));
   // first look: popups are closed or read
   await ev(() => { for (const w of Object.keys(UI.wins || {})) if (UI.wins[w] && !UI.wins[w].el.hidden && w !== 'placement') UI.closeWin(w); });
   if (p.play.dislikes.includes('music')) await ev(() => { if (typeof Music !== 'undefined' && Music.playing) Music.toggle(); });
   while (Date.now() < endAt) {
-   if (chance(p.play.interrupt * .1)) { ses.cut = true; break; }
+   if (chance(p.play.interrupt * .1)) { ses.cut = true; ses.say('被打斷，先離開'); break; }
    const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)) || (typeof Weekly !== 'undefined' && Weekly.readyN() > 0), weekly: typeof Weekly !== 'undefined' ? Weekly.readyN() : 0, mNew: typeof Merchant !== 'undefined' ? !Merchant.S.seen : null, story: typeof Story !== 'undefined' && Story.pending(), ct: (() => { try { const Z = Contest.Z, R = Z.run; return { on: Z.on, over: !!(R && R.over), mid: !!(R && !R.over && R.qs && R.qi > 0), best: Z.top ? Z.top.l : 0 }; } catch (e) { return null; } })() }));
    Object.assign(today, st2);
    const a = nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
    await act(page, p, st, ses, a, dwell, wait);
    const spent = (Date.now() - aStart) * FAST / 60000; ses.mins[a] = (ses.mins[a] || 0) + spent; ses.elapsed += spent;
-   if (p.play.goal && today[p.play.goal] !== undefined) { const done = await ev(g => g === 'daily' ? !!Game.S.learn.dailyDone : g === 'grade' ? (typeof Placement !== 'undefined' && Placement.todayDone()) : false, p.play.goal); if (done) { ses.goalDone = true; if (chance(.8)) break; } }
-   if (ses.frustration >= 2 && chance(p.play.frustration)) { ses.cut = true; break; }
+   if (p.play.goal && today[p.play.goal] !== undefined) { const done = await ev(g => g === 'daily' ? !!Game.S.learn.dailyDone : g === 'grade' ? (typeof Placement !== 'undefined' && Placement.todayDone()) : false, p.play.goal); if (done) { ses.goalDone = true; if (chance(.8)) { ses.say('今天想做的做完了，離開'); break; } } }
+   if (ses.frustration >= 2 && chance(p.play.frustration)) { ses.cut = true; ses.say('玩得不太開心，提早離開'); break; }
   }
   ses.rewards = Math.max(0, (await ev(() => Game.S.coins)) - coins0);
   // leaving: children often just close; adults wait for the save
   await fixId();
   if (p.age >= 13 || chance(.4)) { await ev(() => { dispatchEvent(new Event('pagehide')); Game.save(); }); for (let i = 0; i < 10; i++) { const q = await ev(() => typeof LearnLog !== 'undefined' ? LearnLog.queue().length : 0); if (!q) break; await ev(() => LearnLog.flush()); await new Promise(r => setTimeout(r, 1500)); } }
   s.grade = await ev(() => typeof Placement !== 'undefined' && Placement.done() ? +Placement.S().theta.toFixed(2) : null);
+  miniSummary(ses);
+  ses.say(`離線：玩了 ${((Date.now() - t0) * FAST / 60000).toFixed(1)} 分鐘、答 ${ses.ans} 題對 ${ses.right} 題、金幣 +${ses.rewards}${s.grade != null ? `、程度約 ${gname(s.grade)}` : ''}${s.carry ? `（還有 ${s.carry} 分鐘下一段接著玩）` : ''}`);
   if (!arg('no-store') && !arg('profiles')) await ctx.storageState({ path: storeFile, indexedDB: true });
- } catch (e) { s.error = String(e && e.message || e).slice(0, 900); }
+ } catch (e) { s.error = String(e && e.message || e).slice(0, 900); ses.say('出錯，這次結束：' + s.error.slice(0, 200)); }
  finally { s.pageErrors = errors.slice(0, 5); await ctx.close().catch(() => { }); }
  s.real = +((Date.now() - t0) * FAST / 60000).toFixed(1); Object.assign(s, { merchant: ses.merchant, storyCh: ses.storyCh, loreQ: ses.loreQ, loreRight: ses.loreRight, bought: ses.bought, weekly: ses.weekly }); s.acts = [...new Set(ses.acts)]; s.ans = ses.ans; s.right = ses.right; s.cut = ses.cut; s.frustration = ses.frustration; s.sat = +satisfaction(p, ses).toFixed(2);
  st.sessions++; st.minutes += s.real; if (s.grade != null) st.grade = s.grade;
@@ -351,47 +375,55 @@ async function act(page, p, st, ses, a, dwell, wait) {
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
    const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess; }, kind);
    if (!ok) return;
+   ses.say('開始「' + (ACTN[a] || a) + '」');
    if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) ses.frustration += .5;
    let wrongRun = 0;
    for (let guard = 0; guard < 300; guard++) {
     const q = await ev(() => { const s = Learn.sess; if (!s) return null; if (s.step === 'review' || s.step === 'pause') { const i = s.words[s.ri]; return { step: s.step, w: VOCAB[i].w, g: VOCAB[i].g }; } if (s.step === 'quiz') { if (s.ans) return { step: 'wait' }; const q = s.qs[s.qi]; return { step: 'quiz', i: q.i, w: VOCAB[q.i].w, g: VOCAB[q.i].g, type: q.type, opts: q.opts }; } return { step: s.step }; });
     if (!q) break; if (q.step === 'result') { await wait(lognormal(3500 * p.play.pace, .4));
      // a breakthrough pulls most people on to the next Level while they still have time
-     if (a === 'contest') { const go = await ev(() => { const s = Learn.sess, R = Contest.Z.run; return !!(s && s.result && s.result.pass && R && !R.over); }); if (go && chance(Date.now() < until ? .85 : .35)) { ses.ctUp = (ses.ctUp || 0) + 1; await ev(() => Contest.play()); continue; } }
+     if (a === 'contest') { const go = await ev(() => { const s = Learn.sess, R = Contest.Z.run; return !!(s && s.result && s.result.pass && R && !R.over); }); if (go && chance(Date.now() < until ? .85 : .35)) { ses.ctUp = (ses.ctUp || 0) + 1; ses.say('挑戰賽突破這一階，繼續下一階'); await ev(() => Contest.play()); continue; } }
+     const res = await ev(() => { const s = Learn.sess; return s ? { right: s.right, n: s.qs ? s.qs.length : 0, pass: !!(s.result && s.result.pass) } : null; }).catch(() => null);
+     ses.say('完成「' + (ACTN[a] || a) + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
      await ev(() => UI.closeWin('study')); break; }
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
-    if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); await ev(() => Learn.more()); continue; } break; }
-    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), know || chance(.2)); learnWord(p, st, q.w, true); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq') { if (a === 'contest') { ses.ctPause = true; await ev(() => UI.closeWin('study')); } break; }
+    if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
+    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); ses.say(`複習卡 ${q.w}（${gname(q.g)}）按「${pressed ? '記得' : '不熟'}」`); learnWord(p, st, q.w, true); continue; }
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
-    if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; break; } }
+    if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; ses.say(`看到拼字題 ${q.w} 不想寫，離開`); break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);
     await wait(lognormal((typed ? 3500 + 400 * q.w.length : 3000) * p.play.pace * (pr < .5 ? 1.6 : 1), .45));
     const val = typed ? (ok ? q.w : misspell(q.w)) : ok ? q.i : q.opts.filter(o => o !== q.i)[Math.floor(rnd() * 3)];
     const got = await ev(v => { Learn.answer(v); return Learn.sess && Learn.sess.ans ? !!Learn.sess.ans.ok : null; }, val);
-    if (got == null) continue; ses.ans++; if (got) { ses.right++; wrongRun = 0; } else if (++wrongRun >= 3 && chance(p.play.frustration)) { ses.frustration++; }
+    if (got == null) continue; ses.say(`答題 ${q.w}（${gname(q.g)}・${QT[q.type] || q.type}）${got ? '✓' : '✗'}`); ses.ans++; if (got) { ses.right++; wrongRun = 0; } else if (++wrongRun >= 3 && chance(p.play.frustration)) { ses.frustration++; }
     learnWord(p, st, q.w, got);
     if (got) await new Promise(r => setTimeout(r, 2500)); else { await wait(lognormal(2600 * p.play.pace, .4)); await ev(() => Learn.next()); }
    }
    return;
   }
-  if (a === 'music') { await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); ses.music = true; await wait((until - Date.now()) * FAST); return; }
-  if (a === 'focus') { await ev(() => { if (!Game.T().running) Game.start(); }); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); return; }
-  if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) Life.claimTask(i); }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) Life.claimBonus(); } catch (e) { } let n = 0; try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) { Weekly.claim(k); n++; } } } catch (e) { } UI.closeWin('tasks'); return n; }).then(n => { if (n) ses.weekly = (ses.weekly || 0) + n; }); return; }
-  if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); } }); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
+  if (a === 'mini') { const has = await ev(() => !!(Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!has || !MINI_BOTS) return await typoRound(page, p, st, ses, until, wait); return await miniRound(page, p, st, ses, until, wait); }
+  if (a === 'music') { const was = await ev(() => typeof Music !== 'undefined' && Music.playing); await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); if (!was) ses.say('開始聽音樂'); ses.music = true; await wait((until - Date.now()) * FAST); return; }
+  if (a === 'focus') { const f0 = Date.now(); await ev(() => { if (!Game.T().running) Game.start(); }); ses.say('開始番茄鐘'); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); ses.say(`暫停番茄鐘（專注 ${((Date.now() - f0) * FAST / 60000).toFixed(0)} 分鐘）`); return; }
+  if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { let dn = 0, bonus = false; try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) { Life.claimTask(i); dn++; } }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) { Life.claimBonus(); bonus = true; } } catch (e) { } window.__simTask = { dn, bonus }; let n = 0; try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) { Weekly.claim(k); n++; } } } catch (e) { } UI.closeWin('tasks'); return n; }).then(async n => { if (n) ses.weekly = (ses.weekly || 0) + n; const t = await ev(() => window.__simTask || {}).catch(() => ({})); const parts = [t.dn ? `每日任務 ${t.dn} 個` : '', t.bonus ? '每日全勤獎勵' : '', n ? `每週任務 ${n} 個` : ''].filter(Boolean); if (parts.length) ses.say('領取 ' + parts.join('、')); }); return; }
+  if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); const sb = await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); return true; } return false; }); if (sb) ses.say('看好友排行榜'); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
   if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5)); await ev(() => UI.closeWin('shop')); return; }
-  if (a === 'look') { await wait(lognormal(25000 * p.play.pace, .5)); return; }
+  if (a === 'look') { const l0 = Date.now(); await wait(lognormal(25000 * p.play.pace, .5)); ses.say(`看看房間、陪貓（${Math.max(1, Math.round((Date.now() - l0) * FAST / 1000))} 秒）`); return; }
   while (Date.now() < until) {
-   if (a === 'cat' || a === 'toys') await ev(k => { const pets = PetPlay.pets(); if (!pets.length) return; const x = pets[Math.floor(Math.random() * pets.length)], d = x.data; PetPlay.trayOpen = true;
-     if (k === 'cat' && d && d.hunger < 55 && PetPlay.owned('cat_can')) { PetPlay.pick('cat_can'); PetPlay.down(x.x, x.y - 7); }
-     else if (k === 'toys' && (Pets.Z.tools.ball || Pets.Z.tools.yarn || Life.L.bag.catnip)) { const t = Pets.Z.tools.ball && Math.random() < .5 ? 'ball' : Pets.Z.tools.yarn ? 'yarn' : Life.L.bag.catnip ? 'catnip' : 'ball'; PetPlay.pick(t); PetPlay.down(x.x + 22 - Math.random() * 44, Math.max(110, Math.min(160, x.y + 4))); }
-     else if (Pets.Z.tools.brush && Math.random() < .5) { PetPlay.pick('brush'); PetPlay.down(x.x, x.y - 7); }
-     else { PetPlay.drop(); Game.interact && Room.hit && (() => { const h = Room.hit(x.x, x.y - 6); if (h && h.kind === 'actor' && h.a.poke) h.a.poke(); })(); } }, a);
-   else if (a === 'mini') await ev(() => { const it = Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'); if (it) Game.interact(it); else UI.openWin('catstypo'); });
-   else if (a === 'decor') await ev(() => { if (!Room.edit) UI.setEdit(true); const items = Game.S.items.filter(i => ITEMS[i.k] && ITEMS[i.k].layer !== 'wall' && i.p == null), it = items[Math.floor(Math.random() * items.length)]; if (!it) return; Room.sel = it; it.x += Math.round(Math.random() * 16 - 8); Room.clampItem(it); if (Math.random() < .2) it.flip = !it.flip; Game.save(); UI.editToolbar(); });
+   let did = '';
+   if (!ses.tally || ses.tally.a !== a) ses.tally = { a, t0: Date.now(), n: {} };
+   if (a === 'cat' || a === 'toys') did = await ev(k => { const pets = PetPlay.pets(); if (!pets.length) return ''; const x = pets[Math.floor(Math.random() * pets.length)], d = x.data, nm = (d && (d.name || d.n)) || '貓咪'; PetPlay.trayOpen = true;
+     if (k === 'cat' && d && d.hunger < 55 && PetPlay.owned('cat_can')) { PetPlay.pick('cat_can'); PetPlay.down(x.x, x.y - 7); return `餵 ${nm} 吃貓罐頭`; }
+     else if (k === 'toys' && (Pets.Z.tools.ball || Pets.Z.tools.yarn || Life.L.bag.catnip)) { const t = Pets.Z.tools.ball && Math.random() < .5 ? 'ball' : Pets.Z.tools.yarn ? 'yarn' : Life.L.bag.catnip ? 'catnip' : 'ball'; PetPlay.pick(t); PetPlay.down(x.x + 22 - Math.random() * 44, Math.max(110, Math.min(160, x.y + 4))); return `丟${({ ball: '球', yarn: '毛線球', catnip: '貓草' })[t]}給 ${nm}`; }
+     else if (Pets.Z.tools.brush && Math.random() < .5) { PetPlay.pick('brush'); PetPlay.down(x.x, x.y - 7); return `幫 ${nm} 梳毛`; }
+     else { PetPlay.drop(); let ok = false; Game.interact && Room.hit && (() => { const h = Room.hit(x.x, x.y - 6); if (h && h.kind === 'actor' && h.a.poke) { h.a.poke(); ok = true; } })(); return ok ? `摸摸 ${nm}` : ''; } }, a);
+   else if (a === 'mini') did = await ev(() => { const it = Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'); if (it) { Game.interact(it); const I = ITEMS[it.k]; return '玩「' + (I.n || I.name || it.k) + '」'; } UI.openWin('catstypo'); return '玩「Meow Typo」'; });
+   else if (a === 'decor') await ev(() => { if (!Room.edit) UI.setEdit(true); const items = Game.S.items.filter(i => ITEMS[i.k] && ITEMS[i.k].layer !== 'wall' && i.p == null), it = items[Math.floor(Math.random() * items.length)]; if (!it) return ''; Room.sel = it; it.x += Math.round(Math.random() * 16 - 8); Room.clampItem(it); const fl = Math.random() < .2; if (fl) it.flip = !it.flip; Game.save(); UI.editToolbar(); const I = ITEMS[it.k]; return '佈置：' + (fl ? '翻轉並移動' : '移動') + '「' + (I.n || I.name || it.k) + '」'; });
+   if (did && (a === 'cat' || a === 'toys')) ses.tally.n[did] = (ses.tally.n[did] || 0) + 1; else if (did) ses.say(did);
    await wait(lognormal(a === 'mini' ? 30000 : a === 'decor' ? 9000 : 6000, .5) * p.play.pace);
    await ev(() => { for (const w of ['cozygame', 'furnplay', 'catstypo']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); });
   }
+  if ((a === 'cat' || a === 'toys') && ses.tally && Object.keys(ses.tally.n).length) { const n = ses.tally.n; ses.say(`和貓咪玩了 ${Math.max(1, Math.round((Date.now() - ses.tally.t0) * FAST / 1000))} 秒：` + Object.entries(n).map(([k, v]) => v > 1 ? `${k} ×${v}` : k).join('、')); ses.tally = null; }
   if (a === 'decor') await ev(() => { if (Room.edit) UI.setEdit(false); });
  } catch (e) { ses.error = String(e && e.message || e).slice(0, 160); }
 }
@@ -399,15 +431,15 @@ async function act(page, p, st, ses, a, dwell, wait) {
 async function merchantVisit(page, p, st, ses, until, wait) {
  const ev = (fn, x) => page.evaluate(fn, x), P = p.play.prefs, D = p.play.dislikes, reader = !D.some(d => ['reading', 'long_text'].includes(d));
  const info = await ev(() => { if (typeof Merchant === 'undefined') return null; const first = !Merchant.S.seen; Merchant.go(); const has = typeof Story !== 'undefined', St = has ? Story.week() : null, i = has ? Story.next() : -1;
-  return { first, id: Merchant.id(), i, needName: i === 4 && St && !St.name, names: (St && St.names) || [], lore: typeof Lore !== 'undefined' && Lore.on() }; });
- if (!info) return; ses.merchant = info.id; await wait(lognormal((info.first ? 9000 : 4000) * p.play.pace, .4));
+  return { first, id: Merchant.id(), mname: (MERCHANTS[Merchant.id()] || {}).n || Merchant.id(), i, needName: i === 4 && St && !St.name, names: (St && St.names) || [], lore: typeof Lore !== 'undefined' && Lore.on() }; });
+ if (!info) return; ses.merchant = info.id; if (info.first) ses.say(`第一次見到這週的旅行商人「${info.mname}」`);   // later visits are written only when something is done await wait(lognormal((info.first ? 9000 : 4000) * p.play.pace, .4));
  const storyLike = (P.story || 0) + .4 * (p.triggers.merchant || 0) + .15;
  if (info.i >= 0 && chance(Math.min(.95, storyLike * (reader ? 1 : .4) * (p.age < 8 ? .5 : 1)))) {
   ses.storyCh = info.i;
-  if (info.needName) { await ev(n => Story.choose(n), info.names[Math.floor(rnd() * info.names.length)]); await wait(lognormal(5000 * p.play.pace, .4)); }
+  if (info.needName) { const nm = info.names[Math.floor(rnd() * info.names.length)]; ses.say(`幫商人的故事取名「${nm}」`); await ev(n => Story.choose(n), nm); await wait(lognormal(5000 * p.play.pace, .4)); }
   let quiz = true;
   if (info.lore) {
-   await ev(i => { UI.closeWin('merchant'); Story.open(); Lore.start(i); }, info.i); ses.lore = (ses.lore || 0) + 1;
+   await ev(i => { UI.closeWin('merchant'); Story.open(); Lore.start(i); }, info.i); ses.lore = (ses.lore || 0) + 1; ses.say(`聽商人「${info.mname}」第 ${info.i + 1} 章的知識卡`);
    await wait(lognormal((reader ? 30000 : 9000) * p.play.pace * (p.age < 10 ? 1.4 : 1), .5));      // 你知道嗎？ + the English line
    await ev(() => Lore.toWords()); await wait(lognormal(14000 * p.play.pace, .5));                  // 今天的單字
    await ev(() => Lore.toQuiz());
@@ -415,7 +447,7 @@ async function merchantVisit(page, p, st, ses, until, wait) {
     const q = await ev(() => { const v = Lore.view; if (!v || v.step !== 'quiz') return null; const c = Lore.C(), a = c.q[v.qi][1]; return { a, opts: v.opts[v.qi], g: typeof VIDX !== 'undefined' && VIDX[a] != null ? VOCAB[VIDX[a]].g : 5 }; });
     if (!q) break; await wait(lognormal(7000 * p.play.pace * (p.age < 10 ? 1.5 : 1), .45));
     const ok = chance(Math.max(.5, answerChance(p, st, q.a, q.g, 'zh2en'))), val = ok ? q.a : q.opts.filter(o => o !== q.a)[Math.floor(rnd() * 3)] || q.a;
-    await ev(w => Lore.answer(w), val); ses.loreQ = (ses.loreQ || 0) + 1; if (ok) ses.loreRight = (ses.loreRight || 0) + 1; learnWord(p, st, q.a, ok);
+    await ev(w => Lore.answer(w), val); ses.say(`商人小問答 ${q.a} ${ok ? '✓' : '✗'}`); ses.loreQ = (ses.loreQ || 0) + 1; if (ok) ses.loreRight = (ses.loreRight || 0) + 1; learnWord(p, st, q.a, ok);
     await new Promise(r => setTimeout(r, 2500)); await ev(() => Lore.nextQ());
    }
    quiz = chance(reader ? .85 : .45);   // some read the card and leave the 5-question story quiz for later
@@ -428,14 +460,95 @@ async function merchantVisit(page, p, st, ses, until, wait) {
   await ev(() => Merchant.open()); await wait(lognormal(15000 * p.play.pace, .5));
   if (!D.includes('no_coins') || chance(.3)) if (chance(.1 + .35 * ((P.shop || 0) + (P.collect || 0) + (P.decor || 0) * .5))) {
    const got = await ev(() => { try { const ids = Merchant.goods().filter(id => Merchant.stockLeft(id) > 0 && (ITEMS[id] ? (ITEMS[id].price || 0) : 0) <= Game.S.coins); if (!ids.length) return ''; const id = ids[Math.floor(Math.random() * ids.length)]; const c0 = Game.S.coins; Merchant.buy(id); return Game.S.coins < c0 ? id : ''; } catch (e) { return ''; } });
-   if (got) ses.bought = (ses.bought || []).concat(got);
+   if (got) { ses.bought = (ses.bought || []).concat(got); const nm = await ev(id => (ITEMS[id] && (ITEMS[id].n || ITEMS[id].name)) || id, got).catch(() => got); ses.say(`向商人「${info.mname}」買了「${nm}」`); }
   }
   await ev(() => UI.closeWin('merchant'));
  } else await ev(() => UI.closeWin('merchant'));
 }
+// ---- canvas minigames (投籃、彈珠台、迷宮、販賣機、翻牌…): a round is really opened in the game and really ended through the
+// game's own result screen (best scores, win rewards and the behaviour log count it like a real round). What happens in between
+// is modelled from the person — skill from age, how much they like minigames and their pace — so scores look like real play:
+// a 7-year-old rarely clears the hardest maze, a teenager who loves minigames often does. Each round: one line; leaving: a total.
+const MG = {   // typical seconds per round, and how the result is described
+ toss: { sec: 55, zh: '投籃' }, pinball: { sec: 95, zh: '彈珠台' }, vending: { sec: 85, zh: '貓咪販賣機' }, maze: { sec: 70, zh: '鋼珠迷宮' },
+ memory: { sec: 65, zh: '翻牌配對' }, puzzle: { sec: 110, zh: '滑動拼圖' }, wire: { sec: 80, zh: '接水管通電' }, diff: { sec: 60, zh: '找不同' },
+ stars: { sec: 50, zh: '星星順序' }, parking: { sec: 85, zh: '貓咪停車場' }, weave: { sec: 120, zh: '刺繡' }, reaction: { sec: 35, zh: '反應力' },
+ fish: { sec: 60, zh: '釣魚' }, balance: { sec: 45, zh: '疊積木' },
+};
+function miniSkill(p) { const a = p.age, P = p.play.prefs, base = a < 8 ? .25 : a < 11 ? .4 : a < 26 ? .55 : a < 50 ? .45 : .3; return clamp(base + .2 * ((P.mini || 0) + (P.gacha || 0) * .5) + (rnd() - .5) * .3, .05, .95); }
+function binom(n, q) { let k = 0; for (let i = 0; i < n; i++) if (chance(q)) k++; return k; }
+async function miniRound(page, p, st, ses, until, wait) {
+ const ev = (fn, x) => page.evaluate(fn, x);
+ const info = await ev(() => { const its = Game.S.items.filter(i => ITEMS[i.k] && (ITEMS[i.k].cozyGame || (ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!its.length) return null;
+  const it = its[Math.floor(Math.random() * its.length)]; Game.interact(it); const s = typeof MiniTable !== 'undefined' ? MiniTable.session : null, I = ITEMS[it.k];
+  if (!s || s.uid !== it.uid) return { other: true, name: I.n || I.name || it.k };
+  const g = s.g || {}; return { mode: s.mode, name: I.n || I.name || it.k, variant: s.variant, goal: (g.R && g.R.goal) || (g.L && g.L.goal) || (g.P && g.P.goal) || (g.B && g.B.goal) || g.goal || null, base: g.B && g.B.base, pairs: g.cards ? g.cards.length / 2 : null, diffs: g.diffs ? g.diffs.length : null, min: g.min || null, stars: g.C && g.C.p ? g.C.p.length : null }; });
+ if (!info) return await typoRound(page, p, st, ses, until, wait);
+ if (info.other) { const t0 = Date.now(); await wait(lognormal(40000 * p.play.pace, .4)); await ev(() => { for (const w of ['cozygame', 'furnplay']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); }); ses.say(`玩「${info.name}」${Math.round((Date.now() - t0) * FAST / 1000)} 秒`); return; }
+ const M = MG[info.mode] || { sec: 60, zh: info.mode }, k = miniSkill(p), label = `${M.zh}「${info.name}」`;
+ ses.mini = ses.mini || {}; const agg = ses.mini[label] = ses.mini[label] || { mode: info.mode, rounds: 0, done: 0, wins: 0, sec: 0, a: 0, b: 0, score: 0 };
+ for (let round = 0; round < 8; round++) {
+  const sec = Math.max(12, lognormal(M.sec * p.play.pace * (1.35 - .6 * k), .3)), left = (until - Date.now()) * FAST / 1000 + 60;
+  if (round) await ev(() => { const s = MiniTable.session; if (s) MiniTable.reset(s); });
+  agg.rounds++;
+  if (sec > left && chance(.6)) { await wait(left * 1000); await ev(() => UI.closeWin('cozygame')); ses.say(`${label} 第 ${round + 1} 局沒玩完就關掉（${Math.round(left)} 秒）`); agg.sec += left; break; }
+  await wait(sec * 1000);
+  // the modelled outcome
+  const o = { mode: info.mode, sec: Math.round(sec) }; let line = '';
+  switch (info.mode) {
+   case 'toss': { o.shots = 5; o.makes = binom(5, .15 + .65 * k); let sc = 0, run = 0; for (let i = 0; i < o.makes; i++) { run++; sc += (info.base || 2) + (chance(.3 * k) ? 1 : 0) + (run > 1 ? 1 : 0); } o.score = sc; o.win = o.makes >= 3; line = `投 5 球進 ${o.makes} 球（${o.makes * 20}%），${o.score} 分`; agg.a += o.makes; agg.b += 5; agg.score += o.score; break; }
+   case 'pinball': { o.score = Math.round(lognormal((info.goal || 4000) * (.45 + .9 * k), .45) / 10) * 10; o.win = o.score >= (info.goal || 4000); line = `${o.score.toLocaleString()} 分（過關門檻 ${(info.goal || 4000).toLocaleString()}）`; agg.score += o.score; break; }
+   case 'vending': { const goal = info.goal || 7; o.served = Math.min(goal + 2, binom(goal + 2, .3 + .65 * k)); let sc = 0; for (let i = 0; i < o.served; i++) sc += 10 * (chance(.4) ? 2 : 1) + Math.round(5 + 15 * k * rnd()) + 2 * i; o.score = sc; o.win = o.served >= goal; line = `完成 ${o.served} 單（目標 ${goal}），${o.score} 分`; agg.a += o.served; agg.b += goal; agg.score += o.score; break; }
+   case 'maze': { o.falls = Math.max(0, Math.round(lognormal(1 + 4 * (1 - k), .6) - 1)); o.win = chance(.25 + .7 * k); o.time = Math.round(sec * 10) / 10; line = o.win ? `通關，${o.time} 秒、掉進洞 ${o.falls} 次` : `沒通關（掉進洞 ${o.falls} 次）`; break; }
+   case 'memory': { const n = info.pairs || 8; o.win = chance(.55 + .4 * k); o.matched = o.win ? n : Math.floor(n * (.4 + .4 * rnd())); o.flips = Math.round(n * 2 * (1.2 + 1.5 * (1 - k)) * (.85 + .3 * rnd())); line = o.win ? `全部配對，翻了 ${o.flips} 次` : `配對 ${o.matched}/${n} 時間到`; break; }
+   case 'puzzle': case 'wire': case 'parking': { o.win = chance(.35 + .6 * k); o.moves = Math.round(lognormal((info.mode === 'puzzle' ? 60 : info.mode === 'wire' ? 25 : 18) * (1.6 - .7 * k), .35)); line = o.win ? `完成，${o.moves} 步` : `放棄（走了 ${o.moves} 步）`; break; }
+   case 'diff': { const n = info.diffs || 5; o.win = chance(.4 + .55 * k); o.found = o.win ? n : Math.floor(n * (.3 + .5 * rnd())); line = o.win ? `全部找到` : `找到 ${o.found}/${n} 時間到`; break; }
+   case 'stars': { const n = info.stars || 8; o.win = chance(.3 + .6 * k); o.reach = o.win ? n : Math.floor(n * (.3 + .6 * rnd())); line = o.win ? `連完 ${n} 顆星` : `連到第 ${o.reach} 顆`; break; }
+   case 'weave': { o.win = chance(.5 + .45 * k); line = o.win ? `完成刺繡` : `沒繡完`; break; }
+   case 'reaction': { o.hits = Math.round(lognormal(12 + 18 * k, .25)); o.score = o.hits * 10 + Math.round(30 * k * rnd()) * 5; o.win = o.score >= (info.goal || 150); line = `打中 ${o.hits} 隻，${o.score} 分`; agg.score += o.score; break; }
+   case 'fish': { o.n = binom(8, .25 + .6 * k); o.kg = Math.round(o.n * (1.2 + 2 * rnd()) * 10) / 10; o.win = o.n >= (info.goal || 4); line = `釣到 ${o.n} 條、共 ${o.kg} 公斤`; agg.a += o.n; break; }
+   case 'balance': { o.score = Math.max(0, Math.round(lognormal(4 + 14 * k, .4))); o.win = o.score >= (info.goal || 10); line = `疊到 ${o.score} 層`; agg.score += o.score; break; }
+   default: { o.win = chance(.5); line = o.win ? '過關' : '沒過關'; }
+  }
+  const okEnd = await ev(o => { const s = MiniTable.session; if (!s || s.over) return false; const g = s.g || {}, T = (k, a) => MiniHost.t(k, a), tm = x => MiniHost.time(x); let r;
+   switch (o.mode) {
+    case 'toss': g.shot = o.shots; g.makes = o.makes; g.score = o.score; r = { field: 'tossBest', value: o.score, lines: [T('tossMakes', [o.makes]), T('scoreLine', [o.score])] }; break;
+    case 'pinball': g.score = o.score; r = { field: 'pinballBest', value: o.score, lines: [T('scoreLine', [o.score])] }; break;
+    case 'vending': g.served = o.served; g.score = o.score; r = { field: 'vendingBest', value: o.score, lines: [T('vendResult', [o.served]), T('scoreLine', [o.score])] }; break;
+    case 'maze': g.falls = o.falls; g.time = o.time; r = o.win ? { field: 'mazeBest', value: o.time, lower: true, lines: [T('mazeTime', [tm(o.time)]), T('mazeFalls', [o.falls])] } : { lines: [T('mazeFalls', [o.falls])] }; break;
+    case 'memory': g.flips = o.flips; g.matched = o.matched; r = o.win ? { field: 'memoryBest', value: o.flips, lower: true, lines: [T('memFlips', [o.flips]), T('timeLine', [tm(o.sec)])] } : { lines: [T('memPairs', [o.matched, (g.cards || []).length / 2 || o.matched])] }; break;
+    case 'puzzle': g.moves = o.moves; r = o.win ? { field: 'puzzleBest', value: o.moves, lower: true, lines: [T('puzMoves', [o.moves]), T('timeLine', [tm(o.sec)])] } : { lines: [T('puzMoves', [o.moves])] }; break;
+    case 'wire': g.moves = o.moves; r = o.win ? { field: 'wireBest', value: o.moves, lower: true, lines: [T('wireMoves', [o.moves]), T('timeLine', [tm(o.sec)])] } : { lines: [T('wireMoves', [o.moves])] }; break;
+    case 'parking': g.moves = o.moves; r = o.win ? { field: 'parkBest', value: o.moves, lower: true, lines: [T('parkMoves', [o.moves])] } : { lines: [T('parkMoves', [o.moves])] }; break;
+    case 'diff': r = o.win ? { field: 'diffBest', value: Math.max(1, 60 - o.sec), lines: [T('diffAll'), T('timeLine', [tm(o.sec)])] } : { lines: [T('diffFound', [o.found, (g.diffs || []).length || o.found])] }; break;
+    case 'stars': g.len = o.reach || 0; r = { field: 'starsBest', value: o.reach || 0, lines: [T('starsReached', [o.reach || 0])] }; break;
+    case 'weave': g.time = o.sec; r = o.win ? { field: 'weaveBest', value: o.sec, lower: true, lines: [T('weaveDone'), T('timeLine', [tm(o.sec)])] } : { lines: [] }; break;
+    case 'reaction': g.score = o.score; g.hits = o.hits; r = { field: 'whackBest', value: o.score, lines: [T('scoreLine', [o.score]), T('whackHits', [o.hits])] }; break;
+    case 'fish': r = { field: 'fishBest', value: o.kg, lines: [T('fishCount', [o.n]), T('fishWeight', [o.kg])] }; break;
+    case 'balance': g.score = o.score; r = { field: 'stackBest', value: o.score, lines: [T('stackHeight', [o.score])] }; break;
+    default: r = { lines: [] };
+   }
+   if (o.win) MiniTable.win(s); MiniTable.end(s, r); return true; }, o).catch(e => 'err:' + (e && e.message || e));
+  if (okEnd !== true) { ses.say(`⚠ ${label} 結算失敗：${okEnd}`); break; }
+  agg.done++; if (o.win) agg.wins++; agg.sec += o.sec; (agg.list = agg.list || []).push(o);
+  ses.say(`${label} 第 ${round + 1} 局：${line}${o.win ? '，過關' : ''}（${o.sec} 秒）`);
+  await wait(lognormal(3000 * p.play.pace, .4));
+  if (Date.now() > until || !chance(.35 + .4 * ((p.play.prefs.mini || 0) / 1.2) + (o.win ? .1 : -.1))) break;
+ }
+ await ev(() => { if (UI.wins.cozygame && !UI.wins.cozygame.el.hidden) UI.closeWin('cozygame'); });
+}
+function miniSummary(ses) {   // one line per game played this visit, when leaving
+ for (const [label, g] of Object.entries(ses.mini || {})) { if (!g.rounds) continue; const L = g.list || [], avgSec = g.done ? Math.round(g.sec / g.done) : 0, wins = L.filter(o => o.win);
+  let detail = '';
+  if (g.mode === 'toss') detail = `共投 ${g.b} 球進 ${g.a} 球，平均命中 ${g.b ? Math.round(g.a / g.b * 100) : 0}%`;
+  else if (g.mode === 'maze') detail = `通關 ${wins.length} 盤` + (wins.length ? `，平均 ${Math.round(wins.reduce((a, o) => a + o.time, 0) / wins.length)} 秒通關` : '') + `，掉進洞共 ${L.reduce((a, o) => a + (o.falls || 0), 0)} 次`;
+  else if (g.mode === 'vending') detail = `完成目標 ${wins.length} 局，共完成 ${g.a} 單，最高 ${Math.max(0, ...L.map(o => o.score || 0))} 分`;
+  else if (g.score) detail = `最高 ${Math.max(0, ...L.map(o => o.score || 0)).toLocaleString()}，平均 ${Math.round(g.score / Math.max(1, g.done)).toLocaleString()}`;
+  ses.say(`小遊戲總計｜${label}：玩 ${g.rounds} 局、玩完 ${g.done} 局、過關 ${g.wins} 局${detail ? '，' + detail : ''}${avgSec ? `，每局平均 ${avgSec} 秒` : ''}`); }
+}
 async function typoRound(page, p, st, ses, until, wait) {
  const ev = (fn, a) => page.evaluate(fn, a);
- const ok0 = await ev(() => { if (typeof CatsTypo === 'undefined') return false; UI.openWin('catstypo'); CatsTypo.start(); return !!CatsTypo.session; }); if (!ok0) return;
+ const ok0 = await ev(() => { if (typeof CatsTypo === 'undefined') return false; UI.openWin('catstypo'); CatsTypo.start(); return !!CatsTypo.session; }); if (!ok0) return; const tw0 = Date.now(), words = [];
  if (p.play.dislikes.includes('spell')) ses.frustration += .5;
  for (let guard = 0; guard < 40; guard++) {
   const cur = await ev(() => { const S = CatsTypo.session; if (!S) return null; if (S.done) return { done: true }; const v = CatsTypo.current(); return { w: v.w, g: v.g, answered: !!S.answered, at: S.at }; });
@@ -443,19 +556,22 @@ async function typoRound(page, p, st, ses, until, wait) {
   if (cur.answered) { await new Promise(r => setTimeout(r, 2500)); await ev(at => { if (CatsTypo.session && CatsTypo.session.at === at && CatsTypo.session.answered) CatsTypo.advance(); }, cur.at); continue; }
   let solved = false; for (let k = 0; k < 3 && !solved; k++) { const ok = chance(answerChance(p, st, cur.w, cur.g, 'spell') * (k ? .7 : 1)); await wait(lognormal((2500 + 500 * cur.w.length) * p.play.pace, .45));
    solved = await ev(t => { CatsTypo.active = true; CatsTypo.value = t; CatsTypo.submit(); return !!(CatsTypo.session && CatsTypo.session.answered); }, ok ? cur.w.toLowerCase() : misspell(cur.w)); if (!solved && chance(.3)) break; }
-  if (!solved) await ev(() => CatsTypo.reveal()); ses.ans++; if (solved) ses.right++; learnWord(p, st, cur.w, solved);
+  words.push(cur.w + (solved ? '✓' : '✗')); if (!solved) await ev(() => CatsTypo.reveal()); ses.ans++; if (solved) ses.right++; learnWord(p, st, cur.w, solved);
   if (Date.now() > until && chance(.5)) { await ev(() => UI.closeWin('catstypo')); break; }
  }
+ if (words.length) { const r = words.filter(w => w.endsWith('✓')).length; ses.say(`玩 Meow Typo 一局：${words.length} 個字打對 ${r} 個（${Math.round(r / words.length * 100)}%），${Math.round((Date.now() - tw0) * FAST / 1000)} 秒｜${words.join(' ')}`); }
 }
 function misspell(word) { const w = String(word).toLowerCase(); if (w.length < 3) return w + 'e'; const i = 1 + Math.floor(rnd() * (w.length - 2)); return chance(.5) ? w.slice(0, i) + w.slice(i + 1) : w.replace(/[aeiou]/, v => 'aeiou'.replace(v, '')[Math.floor(rnd() * 4)]); }
 
-const END = arg('end') ? Date.parse(String(arg('end'))) : 0;   // e.g. --end 2026-11-24T00:00:00+08:00
+const END = arg('end') ? Date.parse(String(arg('end'))) : 0;
+const SELF_MTIME = fs.statSync(__filename).mtimeMs; let RESTART = false;   // run mode: a newer life.cjs on disk is picked up between sessions   // e.g. --end 2026-11-24T00:00:00+08:00
 async function runLoop(once) {
  if (once) RUN_END = Date.now() + (+arg('window', 30) + 3) * 60e3;
  let S = loadState();
  if (!S || arg('start')) { const start = String(arg('start', arg('start-if-new', tw(Date.now()).date))); S = { start, days: DAYS, people: Object.fromEntries(PEOPLE.map(p => [p.id, newState(p)])), today: null }; saveState(S); console.log(`[life] 新的兩週：從 ${start} 開始`); }
  const CONC = +arg('concurrency', 6), win = +arg('window', 30) * 60e3, running = new Set();
  for (;;) {
+  if (!once && !running.size) { let m = SELF_MTIME; try { m = fs.statSync(__filename).mtimeMs; } catch (e) { } if (m !== SELF_MTIME) { console.log('[life] 模擬程式有新版本，現在沒人在線上，重新啟動套用（進度不會遺失）'); RESTART = true; break; } }
   if (END && Date.now() >= END) { console.log('[life] 模擬已到結束時間 ' + arg('end') + '，不再開始新的場次'); break; }
   const T = ensurePlan(S); if (!T) { console.log('[life] 不在模擬期間（' + S.start + ' 起 ' + S.days + ' 天）'); break; }
   const now = Date.now(), due = [];
@@ -504,7 +620,7 @@ function summary() { const date = String(arg('date', tw(Date.now() - 6 * 3600e3)
  console.log(JSON.stringify({ date, sessions: ses.length, people: Object.keys(by).length, minutes: Math.round(ses.reduce((a, x) => a + (x.real || 0), 0)), errors: ses.filter(x => x.error).map(x => ({ id: x.id, error: x.error })), missed: L.filter(x => x.type === 'missed').length, by }, null, 1)); }
 if (CMD === 'pack') pack(); else if (CMD === 'unpack') unpack(); else if (CMD === 'summary') summary(); else
 if (CMD === 'preview') preview();
-else if (CMD === 'run') runLoop(false).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });
+else if (CMD === 'run') runLoop(false).then(() => process.exit(RESTART ? 3 : 0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });
 else if (CMD === 'once') runLoop(true).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });   // never hang the hourly run
 else if (CMD === 'status') status();
 else console.log('用法：node tools/sim/life.cjs preview | run | once | status');
