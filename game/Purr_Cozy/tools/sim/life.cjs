@@ -305,7 +305,11 @@ async function runSession(S, p, s) {
  page.on('pageerror', e => { errors.push(e.message.slice(0, 200)); if (live && errors.length <= 10) live('⚠ 遊戲錯誤：' + e.message.slice(0, 200)); });
  // for diagnosing a load that never finishes: failed requests and HTTP errors while the game opens
  page.on('requestfailed', r => { if (netBad.length < 40) netBad.push('fail ' + r.url().replace(BASE, '').slice(0, 80) + ' ' + ((r.failure() || {}).errorText || '')); });
- page.on('response', r => { if (r.status() >= 400 && netBad.length < 40) { netBad.push(r.status() + ' ' + r.url().replace(BASE, '').slice(0, 80)); if (live && netBad.length <= 10) live(`⚠ 檔案抓不到（HTTP ${r.status()}）：${r.url().replace(BASE, '').slice(0, 100)}`); } });
+ const benign = u => /firestore\.googleapis\.com\/google\.firestore\.v1\.Firestore\/(Listen|Write)\/channel/.test(u);   // Firebase's live channel: a session ending with 400/404 is normal, the SDK reconnects
+ page.on('response', r => { const u = r.url(), st = r.status(); if (st < 400 || benign(u) || netBad.length >= 40) return; netBad.push(st + ' ' + u.replace(BASE, '').slice(0, 80));
+  if (live && netBad.length <= 10) live(u.startsWith(BASE) ? `⚠ 遊戲檔案抓不到（HTTP ${st}）：${u.replace(BASE, '').slice(0, 100)}` : `⚠ 外部服務回應錯誤（HTTP ${st}）：${u.replace(/\?.*$/, '').slice(0, 100)}`); });
+ // real Firebase problems show up in the console (permission denied, quota, failed writes)
+ page.on('console', m => { if (!live || !['error', 'warning'].includes(m.type())) return; const t = m.text(); if (/permission|PERMISSION_DENIED|quota|RESOURCE_EXHAUSTED|unauthenticated|FirebaseError|Failed to write|write.*fail/i.test(t)) live('⚠ 雲端錯誤：' + t.replace(/\s+/g, ' ').slice(0, 200)); });
  const ev = (fn, a) => page.evaluate(fn, a), wait = ms => new Promise(r => setTimeout(r, Math.max(0, ms / FAST)));
  const ses = { elapsed: 0, count: {}, mins: {}, ans: 0, right: 0, frustration: 0, rewards: 0, music: false, cut: false, goalDone: false, acts: [] }; let t0 = Date.now(), endAt = Infinity;
  ses.say = m => say(p, m); live = ses.say; ses.say(`上線（${DEVN[p.device] || p.device || ''}，打算玩 ${s.len} 分鐘${s.cont ? '，接續上一段' : ''}）`);
@@ -345,6 +349,8 @@ async function runSession(S, p, s) {
    if (chance(p.play.interrupt * .1)) { ses.cut = true; ses.say('被打斷，先離開'); break; }
    const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)) || (typeof Weekly !== 'undefined' && Weekly.readyN() > 0), weekly: typeof Weekly !== 'undefined' ? Weekly.readyN() : 0, mNew: typeof Merchant !== 'undefined' ? !Merchant.S.seen : null, story: typeof Story !== 'undefined' && Story.pending(), ct: (() => { try { const Z = Contest.Z, R = Z.run; return { on: Z.on, over: !!(R && R.over), mid: !!(R && !R.over && R.qs && R.qi > 0), best: Z.top ? Z.top.l : 0 }; } catch (e) { return null; } })() }));
    Object.assign(today, st2);
+   const cs = await ev(() => typeof Cloud !== 'undefined' ? { st: Cloud.status, err: Cloud.err || Cloud.error || '' } : null).catch(() => null);
+   if (cs && cs.st !== ses.cloudSt) { if (['error', 'offline', 'outdated', 'paused'].includes(cs.st)) ses.say(`⚠ 雲端存檔狀態：${cs.st}${cs.err ? '（' + String(cs.err).slice(0, 120) + '）' : ''}`); else if (['error', 'offline', 'outdated', 'paused'].includes(ses.cloudSt)) ses.say('雲端存檔恢復正常（' + cs.st + '）'); ses.cloudSt = cs.st; }
    const a = nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
    await act(page, p, st, ses, a, dwell, wait);
@@ -357,6 +363,7 @@ async function runSession(S, p, s) {
   await fixId();
   if (p.age >= 13 || chance(.4)) { await ev(() => { dispatchEvent(new Event('pagehide')); Game.save(); }); for (let i = 0; i < 10; i++) { const q = await ev(() => typeof LearnLog !== 'undefined' ? LearnLog.queue().length : 0); if (!q) break; await ev(() => LearnLog.flush()); await new Promise(r => setTimeout(r, 1500)); } }
   s.grade = await ev(() => typeof Placement !== 'undefined' && Placement.done() ? +Placement.S().theta.toFixed(2) : null);
+  if (acc) { let cst = ''; for (let i = 0; i < 10; i++) { cst = await ev(() => typeof Cloud !== 'undefined' ? Cloud.status : '').catch(() => ''); if (cst === 'synced') break; await new Promise(r => setTimeout(r, 1500)); } if (cst !== 'synced') ses.say(`⚠ 離開時雲端存檔沒有同步完成（狀態：${cst || '不明'}）`); s.cloud = cst; }
   miniSummary(ses);
   ses.say(`離線：玩了 ${((Date.now() - t0) * FAST / 60000).toFixed(1)} 分鐘、答 ${ses.ans} 題對 ${ses.right} 題、金幣 +${ses.rewards}${s.grade != null ? `、程度約 ${gname(s.grade)}` : ''}${s.carry ? `（還有 ${s.carry} 分鐘下一段接著玩）` : ''}`);
   if (!arg('no-store') && !arg('profiles')) await ctx.storageState({ path: storeFile, indexedDB: true });
