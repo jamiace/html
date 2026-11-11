@@ -329,7 +329,9 @@ const Cloud = {
     if (!u) { this.stopWatch(); this.paused = false; this.user = null; this.choice = null; UI.closeWin('cloudpick'); if (typeof Lights !== 'undefined') Lights.unpause(); return this.set('signedout'); }
     const prov = ((u.providerData || [])[0] || {}).providerId || 'password';
     this.user = { uid: u.uid, email: u.email || '', name: u.displayName || '', provider: prov };
-    this.set('loading', ''); this.explicitAuth = false;
+    const explicit = this.explicitAuth; this.set('loading', ''); this.explicitAuth = false;
+    // 0.93.8: the back office can ban an account or sign it out everywhere (ctrl/{uid})
+    if (await this.ctrlCheck(u.uid, explicit)) return;
     // the device opened last takes over: the other one is paused and first uploads what it has not saved yet
     await this.claimSession(true);
     let remote;
@@ -337,7 +339,7 @@ const Cloud = {
     this.rev = remote ? (remote.rev || 0) : 0;
     if (remote && (remote.schema || 1) > SAVE_SCHEMA) return this.tooNew();
     await this.reconcile(this.parse(remote));
-    this.watchSession();
+    this.watchSession(); this.watchCtrl();
   },
   // ---------- one device per account: the device opened last takes over, the others are paused ----------
   sessKey(uid) { return 'pocketnook.sess.' + uid; },
@@ -369,7 +371,52 @@ const Cloud = {
     const uid = this.user.uid;
     this.unwatch = this.fb.store.watch('sess/' + uid, doc => { if (doc && doc.sid && this.sid && doc.sid !== this.sid && this.user && this.user.uid === uid) this.pauseForOther(); });
   },
-  stopWatch() { if (this.unwatch) { try { this.unwatch(); } catch (e) { } this.unwatch = null; } },
+  stopWatch() { if (this.unwatch) { try { this.unwatch(); } catch (e) { } this.unwatch = null; } if (this.unwatchCtrl) { try { this.unwatchCtrl(); } catch (e) { } this.unwatchCtrl = null; } },
+  // ---------- 0.93.8 back office account control: ctrl/{uid} = { ban, until (0 = no end), reason, kick (ms) } ----------
+  ctrlBanned(c) { return !!(c && c.ban === true && (!c.until || c.until > Date.now())); },
+  kickSeen(uid, v) { const k = 'purr-cozy.kick.' + uid; try { if (v != null) localStorage.setItem(k, String(v)); return +localStorage.getItem(k) || 0; } catch (e) { return v || 0; } },
+  // before loading the account: banned → signed out with the reason; signed out from the back office while away → signed out once
+  async ctrlCheck(uid, explicit) {
+    if (!this.fb || !this.fb.store) return false;
+    let c = null; try { c = await this.fb.store.get('ctrl/' + uid); } catch (e) { return false; }   // rules not deployed yet: no check
+    if (this.ctrlBanned(c)) { await this.forceOut('ban', c); return true; }
+    const k = (c && c.kick) || 0;
+    if (k > this.kickSeen(uid)) { this.kickSeen(uid, k); if (!explicit) { await this.forceOut('kick', c); return true; } }
+    return false;
+  },
+  // while playing: one small read when the back office changes something
+  watchCtrl() {
+    if (this.unwatchCtrl || this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.fb.store.watch || !this.user) return;
+    const uid = this.user.uid;
+    this.unwatchCtrl = this.fb.store.watch('ctrl/' + uid, c => {
+      if (!this.user || this.user.uid !== uid) return;
+      if (this.ctrlBanned(c)) return this.forceOut('ban', c);
+      const k = (c && c.kick) || 0; if (k > this.kickSeen(uid)) { this.kickSeen(uid, k); this.forceOut('kick', c); }
+    });
+  },
+  ctrlText(kind, c) {
+    if (kind === 'kick') return I18n.t('ctrl.kicked');
+    const until = c && c.until ? new Date(c.until).toLocaleString(I18n.lang || undefined, { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+    return I18n.t(until ? 'ctrl.bannedUntil' : 'ctrl.banned', [until]) + (c && c.reason ? '\n' + I18n.t('ctrl.reason', [String(c.reason).slice(0, 200)]) : '');
+  },
+  // sign out without questions; a kicked account first uploads what it has not saved yet (a banned one cannot)
+  async forceOut(kind, c) {
+    if (this.forcing) return; this.forcing = true;
+    try {
+      const uid = this.user && this.user.uid;
+      if (kind === 'kick' && uid && Game.S.owner === uid && !this.paused) { try { Game.save(); await this.push(); } catch (e) { } }
+      this.stopWatch(); clearTimeout(this.timer); this.timer = null; this.pending = false;
+      if (uid) { try { localStorage.removeItem(this.sessKey(uid)); } catch (e) { } }
+      try { await this.fb.signOut(); } catch (e) { }
+      const wasOwner = uid && Game.S.owner === uid;
+      this.user = null; this.choice = null; this.sid = ''; this.paused = false;
+      if (wasOwner) Game.replaceState(Game.newState());
+      this.ctrlMsg = this.ctrlText(kind, c);
+      this.set('signedout', '');
+      UI.toast(this.ctrlMsg.split('\n')[0], 'i_cloud', 12);
+      UI.openWin('account');
+    } finally { this.forcing = false; }
+  },
   // false when another device has taken over since (this device is then paused)
   async checkSession(gap = SESSION_CHECK_MS) {
     if (this.mode !== 'firebase' || !this.fb || !this.fb.store || !this.user || this.paused) return !this.paused;
@@ -646,7 +693,7 @@ const Cloud = {
     f.email = email.trim(); f.msg = '';
     if (kind !== 'google' && !f.email) { f.msg = I18n.s("u_a3c575d5c84b"); return UI.refresh('account'); }
     if ((kind === 'in' || kind === 'up') && pw.length < 6) { f.msg = I18n.s("u_acd3482a8732"); return UI.refresh('account'); }
-    this.authBusy = true; this.err = ''; this.explicitAuth = kind !== 'reset'; UI.refresh('account');
+    this.authBusy = true; this.err = ''; this.ctrlMsg = ''; this.explicitAuth = kind !== 'reset'; UI.refresh('account');
     try {
       let result;
       if (kind === 'google') result = await this.fb.google();
@@ -721,6 +768,7 @@ UI.w_account = function () {
   if (c.status === 'error' && !c.fb) { out.push(status(I18n.s("u_042887d69946"), 'error'), h('p', { class: 'cl-msg', text: c.err }), h('button', { class: 'chip primary', onclick: () => c.init() }, I18n.s("u_4d71f06e3db3"))); return out; }
   if (c.fb && c.fb.persistence === 'session') out.push(h('p', { class: 'hint', text: I18n.s("u_7154b12b06fb") }));
   if (!c.user) {
+    if (c.ctrlMsg) out.push(h('p', { class: 'cl-msg cl-ctrl', text: c.ctrlMsg }));
     out.push(h('p', { class: 'hint', text: I18n.s("u_d792bbca3cce") }));
     out.push(h('button', { class: 'chip big primary cl-google', disabled: c.authBusy, onclick: () => c.auth('google') }, ico('i_key', 22), I18n.s("u_f2a23af75b5a")));
     out.push(h('div', { class: 'cl-or' }, h('span', { text: I18n.s("u_6bb07915b6aa") })));

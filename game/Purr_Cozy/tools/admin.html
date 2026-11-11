@@ -49,6 +49,14 @@ td:first-child,th:first-child{text-align:left}
 .note{background:var(--chip);border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0}
 #status{font-size:13px;color:var(--ink2)}
 .report{line-height:1.75}.report h1,.report h2,.report h3{margin:16px 0 6px}.report table{margin:8px 0}.report code{font-family:var(--mono);background:var(--chip);padding:0 4px;border-radius:4px}
+.op-head{font-size:16px;line-height:1.8;margin:6px 0 12px}
+.op-lights{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.op-light{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;align-items:center}
+.op-light i{width:12px;height:12px;border-radius:50%}.op-light span{font-size:13px;font-weight:700}.op-light small{grid-column:1/-1;color:var(--ink2);font-size:12px}
+.op-f{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 10px}.op-f.op-alert{border-color:var(--acc2)}
+.op-fh{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.op-t{color:#fff}
+.op-ev{margin:6px 0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.op-why{color:var(--ink2);font-size:13px;margin:4px 0}
+.op-next{margin:6px 0;padding-left:18px;font-size:14px}.op-next li{margin:3px 0}.op-next .tag{margin-right:6px}.op-f button{margin-top:6px}
 .hidden{display:none!important}
 .mono{font-family:var(--mono);font-size:12px}
 nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
@@ -151,6 +159,12 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
     <section id="empty-dash"><h2>還沒有資料</h2><p class="why">登入後會自動讀取 Firestore 的學習紀錄；離線模式請到「資料與匯出」開啟 JSON 檔或示範資料。</p><button class="primary" onclick="Admin.go('data')">前往資料與匯出</button></section>
     <section id="s-overview"><h2>總覽</h2><p class="why">有多少人在學、學了多少、答對率和作答時間。</p><div class="kpis" id="kpis"></div><div class="chart" style="margin-top:12px"><canvas id="c-daily"></canvas></div></section>
     <section><h2>快速前往</h2><div class="cards"><div class="card" onclick="Admin.go('analysis','s-calib')"><b>模型校正</b><span class="muted">預測準不準、偏在哪、建議怎麼調</span></div><div class="card" onclick="Admin.go('analysis','s-words')"><b>單字難度</b><span class="muted">每個字的實測答對率與程度是否標錯</span></div><div class="card" onclick="Admin.go('analysis','s-forget')"><b>遺忘曲線</b><span class="muted">複習間隔是否合適</span></div><div class="card" onclick="Admin.go('analysis','s-retain')"><b>留存</b><span class="muted">新玩家有沒有回來</span></div><div class="card" onclick="Admin.go('analysis','s-confuse')"><b>易混淆與拼錯</b><span class="muted">最常選錯、拼錯的字</span></div></div></section>
+   </div>
+   <div class="page hidden" data-page="oprep">
+    <section><h2>營運報告</h2><p class="why">每天或每週一份：先看這一天／這一週整體發生了什麼、哪裡要處理、接下來要觀察或調整什麼，細節再到各分頁看。報告用這個後台已經讀到的資料即時算出來（學習紀錄、使用行為、問題回報，每週報告另外讀該週的挑戰賽），不會另外存檔。</p>
+     <div class="row"><label>報告 <select id="op-mode"><option value="day">每日</option><option value="week">每週（週一起）</option></select></label><button id="op-prev" aria-label="上一期">◀</button><input type="date" id="op-day" aria-label="日期"><button id="op-next" aria-label="下一期">▶</button><label>對象 <select id="op-who"><option value="real">真實玩家</option><option value="sim">模擬學生</option><option value="all">全部（不含測試帳號）</option></select></label><button id="op-copy">複製成文字</button><button id="op-dl">下載文字檔</button><span class="muted" id="op-msg"></span></div>
+     <div id="op-src" class="row" style="margin-top:8px"></div></section>
+    <div id="op-out"></div>
    </div>
    <div class="page hidden" data-page="analysis"><div class="sub" data-sub="s-words"><section id="s-words"><h2>單字實測難度</h2><p class="why">每個字真正的答對率和作答時間。「程度可能標錯」= 答對率和「同程度、同題型」的平均差很多（標 L2 但難得像 L5，或反過來）。拼字題本來就比選擇題難，所以比較時會照每個字實際被考的題型組合算期望值，不會因為某個字剛好常被考拼字就被誤判。點表頭可以排序。</p>
   <div class="row" style="margin-bottom:8px"><input type="text" id="w-search" placeholder="搜尋單字"><label><input type="checkbox" id="w-flag"> 只看可能標錯的</label><button id="w-csv">下載 CSV</button></div>
@@ -287,7 +301,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
       <span class="muted" id="pl-count"></span><span class="muted" id="pl-note"></span></div>
      <div class="tbl" style="max-height:520px"><table id="t-players"></table></div></section>
     <section id="pl-detail" class="hidden"></section>
-    <section><h2>建立玩家帳號</h2><p class="why">建立 Email／密碼登入的遊戲帳號（Firebase 要先開啟「電子郵件/密碼」登入）。可以先設定第一次登入時的名稱、金幣、等級、自填年級與出題程度。密碼不會存到資料庫，只會在這裡顯示一次。</p>
+    <section class="pl-edit-only"><h2>建立玩家帳號</h2><p class="why">建立 Email／密碼登入的遊戲帳號（Firebase 要先開啟「電子郵件/密碼」登入）。可以先設定第一次登入時的名稱、金幣、等級、自填年級與出題程度。密碼不會存到資料庫，只會在這裡顯示一次。</p>
      <div class="form"><label>Email<input type="email" id="pc-email" autocomplete="off" placeholder="student01@example.com"></label><label>密碼<input type="text" id="pc-pw" autocomplete="off" placeholder="留空自動產生"></label><div class="row"><button id="pc-gen">產生密碼</button></div>
       <label>名稱<input type="text" id="pc-name" maxlength="20"></label><label>群組<input type="text" id="pc-group" maxlength="40" placeholder="例如：三年二班"></label><label>備註<input type="text" id="pc-note" maxlength="200"></label>
       <label>初始金幣<input type="number" id="pc-coins" min="0" placeholder="不設定"></label><label>初始等級<input type="number" id="pc-lvl" min="1" max="99" placeholder="不設定"></label>
@@ -295,7 +309,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pc-test"> 測試帳號</label></div>
      <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pc-lv" value="6"> L6</label></div>
      <div class="row" style="margin-top:10px"><button id="pc-go" class="primary">建立帳號</button></div><p id="pc-msg" class="muted"></p></section>
-    <section><h2>批次建立測試帳號</h2><p class="why">一次建立多個測試帳號（預設 30 個：<code>claude-test01</code>～<code>claude-test30</code>，對應 <code>tools/sim/people.json</code> 的 sim01～sim30）。勾選「模擬控制帳號」時會另外建立 <code>claude-test00</code>：它不進遊戲，只給雲端排程（<code>tools/sim/cloud.cjs</code>）存放模擬狀態與紀錄。建立完會自動下載 <code>accounts.json</code>（含控制帳號）：放到專案的 <code>.sim/accounts.json</code>（不要 commit），<code>life.cjs --login</code> 與 <code>cloud.cjs setup --accounts</code> 都讀這個檔。測試帳號的學習紀錄與行為紀錄，分析頁預設排除。</p>
+    <section class="pl-edit-only"><h2>批次建立測試帳號</h2><p class="why">一次建立多個測試帳號（預設 30 個：<code>claude-test01</code>～<code>claude-test30</code>，對應 <code>tools/sim/people.json</code> 的 sim01～sim30）。勾選「模擬控制帳號」時會另外建立 <code>claude-test00</code>：它不進遊戲，只給雲端排程（<code>tools/sim/cloud.cjs</code>）存放模擬狀態與紀錄。建立完會自動下載 <code>accounts.json</code>（含控制帳號）：放到專案的 <code>.sim/accounts.json</code>（不要 commit），<code>life.cjs --login</code> 與 <code>cloud.cjs setup --accounts</code> 都讀這個檔。測試帳號的學習紀錄與行為紀錄，分析頁預設排除。</p>
      <div class="form"><label>數量<input type="number" id="pt-n" min="1" max="50" value="30"></label><label>起始編號<input type="number" id="pt-start" min="1" value="1"></label>
       <label>Email 前綴<input type="text" id="pt-prefix" value="claude-test"></label><label>Email 網域<input type="text" id="pt-domain" value="purrcozy.test"></label>
       <label>群組<input type="text" id="pt-group" value="claude"></label><label>名稱前綴<input type="text" id="pt-name" value="測試"></label>
@@ -306,24 +320,21 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
      <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-ctl-only">只建立模擬控制帳號（00）</button><button id="pt-names">套用模擬人物暱稱</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
    </div>
    <div class="page hidden" data-page="accounts">
-    <section><h2>帳號列表</h2><p class="why" id="acct-count"></p><div class="row" style="margin-bottom:8px"><button id="btn-acct-reload">重新整理</button><span class="muted" id="acct-note"></span></div><div class="tbl" style="max-height:none"><table id="t-staff"></table></div></section>
-    <section><h2>新增或編輯帳號</h2><p class="why">對方用這個 Gmail 以 Google 登入後台，就會套用這裡設定的角色。停用的帳號保留紀錄但無法登入；刪除後可以再新增回來。</p>
+    <section id="acct-sec"><h2>後台帳號</h2><p class="why" id="acct-count"></p><div class="row" style="margin-bottom:8px"><button id="btn-acct-reload">重新整理</button><span class="muted" id="acct-note"></span></div><div class="tbl" style="max-height:none"><table id="t-staff"></table></div></section>
+    <section id="acct-form"><h2>新增或編輯後台帳號</h2><p class="why">對方用這個 Gmail 以 Google 登入後台，就會套用這裡指定的角色。停用的帳號保留紀錄但無法登入；刪除後可以再新增回來。不是最高管理者的人，只能指派權限不超過自己的角色。</p>
      <div class="form"><label>Gmail<input type="email" id="f-email" placeholder="someone@gmail.com" autocomplete="off"></label><label>名稱<input type="text" id="f-name" maxlength="40" placeholder="顯示用，可留空"></label>
-      <label>角色<select id="f-role"><option value="analyst">分析者</option><option value="manager">管理者（僅最高管理者可指定）</option></select></label><label>備註<input type="text" id="f-note" maxlength="200" placeholder="例如：教學團隊"></label>
+      <label>角色<select id="f-role"></select></label><label>備註<input type="text" id="f-note" maxlength="200" placeholder="例如：教學團隊"></label>
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="f-active" checked> 啟用</label>
       <div class="row"><button id="f-submit" class="primary">新增帳號</button><button id="f-cancel" class="hidden">取消</button></div></div>
      <p id="f-msg" class="muted"></p></section>
-    <section><h2>角色與權限</h2><div class="tbl" style="max-height:none"><table>
-     <tr><th>功能</th><th>分析者</th><th>管理者</th><th>最高管理者</th></tr>
-     <tr><td>儀表板、學習分析、AI 報告</td><td>✓</td><td>✓</td><td>✓</td></tr>
-     <tr><td>讀取與下載全部學習紀錄</td><td>✓</td><td>✓</td><td>✓</td></tr>
-     <tr><td>刪除玩家的學習紀錄（Firestore）</td><td>–</td><td>✓</td><td>✓</td></tr>
-     <tr><td>新增、停用、刪除「分析者」</td><td>–</td><td>✓</td><td>✓</td></tr>
-     <tr><td>新增、停用、刪除「管理者」</td><td>–</td><td>–</td><td>✓</td></tr>
-     <tr><td>查看操作紀錄</td><td>–</td><td>✓</td><td>✓</td></tr>
-     <tr><td>新增、移除最高管理者</td><td colspan="3">只能在 Firebase 主控台的 <code>admins</code> 集合操作</td></tr>
-     <tr><td>修改自己的權限</td><td colspan="3">任何人都不行（避免自己升級）</td></tr></table></div>
-     <p class="why" style="margin-top:8px">這些限制寫在 <code>firestore.rules</code>，由 Firebase 伺服器把關；後台畫面只是照著顯示，就算有人改了網頁程式也無法越權。</p></section>
+    <section id="roles-sec"><h2>角色與權限</h2><p class="why">每個後台帳號指定一個角色；角色決定每一頁可以「查詢」還是也能「修改」。內建的「管理者」「分析者」可以直接用，也可以新增自己的角色（例如「客服」只能看問題回報、封停玩家）。這些權限同時寫在 <code>firestore.rules</code>，由 Firebase 伺服器把關，就算有人改了網頁程式也無法越權。最高管理者只能在 Firebase 主控台的 <code>admins</code> 集合新增，擁有全部權限。</p>
+     <div class="row" style="margin-bottom:8px"><button id="role-new" class="primary">新增角色</button><span class="muted" id="role-note"></span></div>
+     <div class="tbl" style="max-height:none"><table id="t-roles"></table></div>
+     <div id="role-edit" class="hidden" style="margin-top:14px"><h3 id="role-edit-title" style="margin:0 0 8px">編輯角色</h3>
+      <div class="form"><label>代號（英文小寫、數字、- 或 _，建立後不能改）<input type="text" id="re-id" maxlength="32" placeholder="例如 support"></label><label>名稱<input type="text" id="re-name" maxlength="40" placeholder="例如 客服"></label><label style="flex:1 1 100%">說明<input type="text" id="re-desc" maxlength="200" placeholder="這個角色負責什麼"></label></div>
+      <div class="tbl" style="max-height:none;margin-top:10px"><table id="t-role-perms"></table></div>
+      <div class="row" style="margin-top:10px"><button id="re-save" class="primary">儲存角色</button><button id="re-cancel">取消</button><button id="re-reset" class="hidden">還原成內建預設</button><span class="muted" id="re-msg"></span></div></div>
+     <h3 style="margin:16px 0 6px">各角色權限一覽</h3><div class="tbl" style="max-height:none"><table id="t-role-matrix"></table></div></section>
    </div>
    <div class="page hidden" data-page="audit">
     <section><h2>操作紀錄</h2><p class="why">登入、讀取資料、下載、產生 AI 報告、帳號異動都會記錄，紀錄只能新增，任何人都不能修改或刪除。</p>
@@ -373,6 +384,7 @@ async function load(list,label){
  fillSelect('f-level',[1,2,3,4,5,6],l=>'L'+l);
  fillSelect('f-app',[...new Set(S.raw.map(r=>r.app).filter(Boolean))].sort(),x=>x);
  analyse();
+ OP.idxKey='';Admin.devKey='';Admin.guests={};if(Admin.page==='oprep')Admin.opRender();
 }
 function fillSelect(id,vals,label){const el=$(id),cur=el.value;el.replaceChildren(new Option('全部',''),...vals.map(v=>new Option(label(v),v)));el.value=cur}
 
@@ -423,7 +435,8 @@ function demo(){
 
 /* ---------- analysis ---------- */
 // simulated students have a device id starting with sim (tools/sim), test runs with test-
-const whoOf=r=>/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct))?'test':/^sim\d/.test(r.dev||'')?'sim':'real';
+// the simulated students are also test accounts; they count as 模擬學生 (checked first), other test accounts as 測試
+const whoOf=r=>/^sim\d/.test(r.dev||'')?'sim':/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct))?'test':'real';
 function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
 function filtered(){
  const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
@@ -855,11 +868,21 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.04';
-const CHANGELOG=[['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
-const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
+const ADMIN_VERSION='0.5.06';
+const CHANGELOG=[['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+// 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
+const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
+ ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
+ ['players','玩家帳號','查看名單與存檔','修改存檔、建立與刪除帳號'],['pctl','封停與踢下線','查看狀態','封停、解除封停、踢下線'],
+ ['accounts','後台帳號','查看','新增、修改、停用、刪除後台帳號'],['roles','角色與權限','查看','新增、修改、刪除角色'],['audit','操作紀錄','查看','']];
+const ALL_PERMS=PERM_PAGES.flatMap(([k,,v,e])=>[k+'.v',...(e?[k+'.e']:[])]);
+const BUILTIN_ROLES={
+ manager:{name:'管理者',desc:'內建角色：看全部分析、管理玩家帳號（含封停、踢下線）、管理權限不超過自己的後台帳號、查看操作紀錄。',p:['dashboard.v','oprep.v','analysis.v','behavior.v','contest.v','contest.e','reports.v','reports.e','ai.v','data.v','data.e','players.v','players.e','pctl.v','pctl.e','accounts.v','accounts.e','roles.v','audit.v']},
+ analyst:{name:'分析者',desc:'內建角色：看全部分析、下載資料、產生 AI 報告、處理問題回報。不能管理帳號。',p:['dashboard.v','oprep.v','analysis.v','behavior.v','contest.v','reports.v','reports.e','ai.v','data.v']}};
+const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
+ {id:'oprep',n:'營運報告',i:'☀',lv:0},
  {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-grade', '程度測驗'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
  {id:'behavior',n:'使用行為',i:'☷',lv:0},
  {id:'contest',n:'程度挑戰賽',i:'♛',lv:0},
@@ -873,11 +896,21 @@ const PAGES=[
 const Admin={
  me:{email:'',role:null,lv:0,offline:true},page:'dashboard',sub:'s-words',staff:[],admins:[],
  lv(){return this.me.lv},can(lv){return this.lv()>=lv},
+ // permissions of the signed-in account (offline: every analysis page, nothing to manage)
+ canV(k){return this.me.role==='super'||!!(this.me.perms&&this.me.perms.has(k+'.v'))},
+ canE(k){return this.me.role==='super'||!!(this.me.perms&&this.me.perms.has(k+'.e'))},
+ canPage(id){return id==='me'||(id==='accounts'?this.canV('accounts')||this.canV('roles'):this.canV(id))},
+ roleDef(id){return (this.roles||{})[id]||BUILTIN_ROLES[id]||null},
+ roleName(id){return id==='super'?'最高管理者':(this.roleDef(id)||{}).name||id||''},
+ permsOf(id){return id==='super'?ALL_PERMS:((this.roleDef(id)||{}).p||[])},
+ // not the top admin: only roles whose every permission I also have, and never my own role
+ assignable(id){if(this.me.role==='super')return true;if(!id||id===this.me.role)return false;const mine=this.me.perms||new Set();return this.permsOf(id).every(x=>mine.has(x))},
+ async loadRoles(){try{const {F,db}=await firebase(),snap=await F.getDocs(F.collection(db,'roles'));const R={};snap.forEach(d=>{const x=d.data();R[d.id]={name:x.name||d.id,desc:x.desc||'',p:Array.isArray(x.p)?x.p:[],custom:true,builtin:!!BUILTIN_ROLES[d.id],updatedBy:x.updatedBy||'',updatedAt:x.updatedAt}});this.roles=R}catch(e){console.warn('[roles]',e.code||e)}return this.roles||{}},
  // ---------- nav ----------
  renderNav(){const nav=$('nav');nav.replaceChildren();let group='';
-  for(const p of PAGES){if(p.lv&&!this.can(p.lv))continue;if((p.group||'')!==group){group=p.group||'';if(group){const g=document.createElement('div');g.className='navgroup';g.textContent=group;nav.append(g)}}
+  for(const p of PAGES){if(!this.canPage(p.id))continue;if((p.group||'')!==group){group=p.group||'';if(group){const g=document.createElement('div');g.className='navgroup';g.textContent=group;nav.append(g)}}
    const b=document.createElement('button');b.className='navbtn'+(this.page===p.id?' on':'');b.innerHTML=`<i>${p.i}</i><span>${p.n}</span>`;b.onclick=()=>this.go(p.id);nav.append(b)}},
- go(id,sub){const p=PAGES.find(x=>x.id===id);if(!p||(p.lv&&!this.can(p.lv)))id='dashboard';this.page=id;if(sub)this.sub=sub;
+ go(id,sub){const p=PAGES.find(x=>x.id===id);if(!p||!this.canPage(id))id=(PAGES.find(x=>this.canPage(x.id))||{id:'me'}).id;this.page=id;if(sub)this.sub=sub;
   try{location.hash=id+(id==='analysis'?'/'+this.sub:'')}catch(e){}
   document.querySelectorAll('.page').forEach(el=>el.classList.toggle('hidden',el.dataset.page!==id));
   const P=PAGES.find(x=>x.id===id);$('crumb').textContent=P.n+(id==='analysis'?' ／ '+P.subs.find(x=>x[0]===this.sub)[1]:'');
@@ -888,7 +921,7 @@ const Admin={
   document.body.classList.remove('navopen');this.renderNav();
   requestAnimationFrame(()=>Object.values(S.charts).forEach(c=>{try{c.resize()}catch(e){}}));
   if(id==='players'&&!this.players.length)this.loadPlayers();if(id==='behavior'){if(!B.loaded&&!this.me.offline)this.loadBehavior();else this.renderBehavior()}
-  if(id==='contest'){this.ctInit();if(!CTA.rows.length&&!this.me.offline)this.ctLoad()}if(id==='reports'&&!RPA.rows.length&&!this.me.offline)this.rpLoad();if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
+  if(id==='contest'){this.ctInit();if(!CTA.rows.length&&!this.me.offline)this.ctLoad()}if(id==='reports'&&!RPA.rows.length&&!this.me.offline)this.rpLoad();if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe();if(id==='oprep')this.opOpen()},
  // ---------- auth ----------
  // In-app browsers (LINE, Facebook, Instagram ...) cannot open the Google sign-in window, and on iPhone the Google
  // helper page on firebaseapp.com may lose its state when this page is on another domain (storage partitioning).
@@ -932,12 +965,13 @@ const Admin={
  async _afterLogin(){const {F,U,auth,db}=await firebase(),u=auth.currentUser;if(!u||!this.me.offline&&this.me.email)return;const mail=(u.email||'').toLowerCase();this.disabled=false;
   if(mail&&!u.emailVerified){await this.showVerify(u);return}
   let role=null;if(u.emailVerified&&mail){try{if((await F.getDoc(F.doc(db,'admins',mail))).exists())role='super'}catch(e){}
-   if(!role)try{const d=await F.getDoc(F.doc(db,'staff',mail));if(d.exists()&&d.data().active===true&&ROLES[d.data().role])role=d.data().role;else if(d.exists())this.disabled=true}catch(e){}}
-  if(!role){$('login-msg').innerHTML=`<b>${esc(mail)}</b> 沒有後台權限${this.disabled?'（帳號已停用）':''}。請最高管理者或管理者在「帳號與權限」幫你新增。`;await U.signOut(auth);return}
-  this.me={email:mail,role,lv:ROLES[role].lv,offline:false};this.enter();if(ROLES[role].lv>=2)setTimeout(()=>this.loadPlayers(),1500);this.log('login','',((u.providerData[0]||{}).providerId||'')+(this.inApp()?' '+this.inApp():''));this.loadFirestore()},
- offline(){this.me={email:'',role:null,lv:0,offline:true};this.enter();status('離線模式：可以開啟 JSON 檔或用示範資料。帳號管理需要登入。')},
+   if(!role)try{const d=await F.getDoc(F.doc(db,'staff',mail));if(d.exists()&&d.data().active===true)role=d.data().role;else if(d.exists())this.disabled=true}catch(e){}}
+  let perms=null;this.noRole=false;if(role==='super')perms=new Set(ALL_PERMS);else if(role){await this.loadRoles();const def=this.roleDef(role);perms=def?new Set(def.p):null;if(!perms||!perms.size){role=null;this.noRole=true}}
+  if(!role){$('login-msg').innerHTML=`<b>${esc(mail)}</b> 沒有後台權限${this.disabled?'（帳號已停用）':this.noRole?'（指派的角色已被刪除或沒有任何權限）':''}。請最高管理者或管理者在「帳號與權限」幫你新增。`;await U.signOut(auth);return}
+  this.me={email:mail,role,lv:role==='super'?3:role==='manager'?2:1,perms,offline:false};this.enter();if(this.canV('players'))setTimeout(()=>this.loadPlayers(),1500);this.log('login','',((u.providerData[0]||{}).providerId||'')+(this.inApp()?' '+this.inApp():''));if(['dashboard','oprep','analysis','ai','data'].some(k=>this.canV(k)))this.loadFirestore();else status('你的角色沒有讀取學習紀錄的權限。')},
+ offline(){this.me={email:'',role:null,lv:0,perms:new Set(['dashboard.v','oprep.v','analysis.v','behavior.v','contest.v','reports.v','reports.e','ai.v','data.v']),offline:true};this.enter();status('離線模式：可以開啟 JSON 檔或用示範資料。帳號管理需要登入。')},
  enter(){$('login').classList.add('hidden');$('app').classList.remove('hidden');
-  $('me-badge').innerHTML=this.me.offline?'<span class="role r0">離線模式</span>':`<span class="mono">${esc(this.me.email)}</span> <span class="role r${this.me.lv}">${ROLES[this.me.role].n}</span>`;
+  $('me-badge').innerHTML=this.me.offline?'<span class="role r0">離線模式</span>':`<span class="mono">${esc(this.me.email)}</span> <span class="role r${this.me.lv}">${esc(this.roleName(this.me.role))}</span>`;
   $('btn-fs').classList.toggle('hidden',this.me.offline);$('btn-logout').textContent=this.me.offline?'登入':'登出';
   const h=(location.hash||'').slice(1).split('/');this.go(h[0]||'dashboard',h[1]||undefined)},
  async logout(){if(!this.me.offline){try{const {U,auth}=await firebase();await U.signOut(auth)}catch(e){}}location.hash='';location.reload()},
@@ -948,32 +982,67 @@ const Admin={
  dataLoaded(label){this.fillAcct();$('empty-dash').classList.add('hidden');if(this.page==='data'&&S.raw.length)setTimeout(()=>this.go('dashboard'),0);$('filterbar').classList.toggle('hidden',!(this.page==='dashboard'||this.page==='analysis'||this.page==='ai'));$('data-status').textContent=`${label}：${fmt(S.raw.length)} 個回合，${fmt(S.raw.reduce((n,r)=>n+(r.ans||[]).length,0))} 題作答`;},
  // ---------- audit log ----------
  async log(act,target,detail){if(this.me.offline)return;try{const {F,db}=await firebase();await F.addDoc(F.collection(db,'adminlog'),{by:this.me.email,role:this.me.role,act:String(act).slice(0,40),target:String(target||'').slice(0,120),detail:String(detail||'').slice(0,400),at:F.serverTimestamp()})}catch(e){console.warn('[adminlog]',e.code||e)}},
- ACT:{login:'登入',load:'讀取學習紀錄',export:'下載資料',ai:'產生 AI 報告','staff.add':'新增帳號','staff.role':'變更角色','staff.on':'啟用帳號','staff.off':'停用帳號','staff.edit':'修改資料','staff.del':'刪除帳號'},
- async loadAudit(){const box=$('t-audit');if(!this.can(2)){return}try{const {F,db}=await firebase();const snap=await F.getDocs(F.query(F.collection(db,'adminlog'),F.orderBy('at','desc'),F.limit(300)));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(x)});
+ ACT:{'role.add':'新增角色','role.edit':'修改角色','role.del':'刪除角色','player.ban':'封停玩家','player.unban':'解除封停','player.kick':'踢下線',login:'登入',load:'讀取學習紀錄',export:'下載資料',ai:'產生 AI 報告','staff.add':'新增帳號','staff.role':'變更角色','staff.on':'啟用帳號','staff.off':'停用帳號','staff.edit':'修改資料','staff.del':'刪除帳號'},
+ async loadAudit(){const box=$('t-audit');if(!this.canV('audit')){return}try{const {F,db}=await firebase();const snap=await F.getDocs(F.query(F.collection(db,'adminlog'),F.orderBy('at','desc'),F.limit(300)));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(x)});
   const f=$('audit-q').value.trim().toLowerCase(),act=$('audit-act').value;
-  table('t-audit',['時間','帳號','角色','動作','對象','說明'],rows.filter(x=>(!act||x.act===act)&&(!f||[x.by,x.target,x.detail].join(' ').toLowerCase().includes(f))).map(x=>[{v:x.at&&x.at.toMillis?x.at.toMillis():0,h:x.at&&x.at.toDate?x.at.toDate().toLocaleString('zh-TW',{hour12:false}):'–',n:false},x.by,ROLES[x.role]?.n||x.role,this.ACT[x.act]||x.act,x.target||'',x.detail||'']));
+  table('t-audit',['時間','帳號','角色','動作','對象','說明'],rows.filter(x=>(!act||x.act===act)&&(!f||[x.by,x.target,x.detail].join(' ').toLowerCase().includes(f))).map(x=>[{v:x.at&&x.at.toMillis?x.at.toMillis():0,h:x.at&&x.at.toDate?x.at.toDate().toLocaleString('zh-TW',{hour12:false}):'–',n:false},x.by,this.roleName(x.role),this.ACT[x.act]||x.act,x.target||'',x.detail||'']));
   $('audit-note').textContent=`最近 ${rows.length} 筆（最多顯示 300 筆）`}catch(e){$('audit-note').textContent='讀取失敗：'+(e.code||e.message)}},
  // ---------- accounts ----------
- async loadStaff(){if(!this.can(2))return;const {F,db}=await firebase();$('acct-note').textContent='讀取中…';
+ async loadStaff(){if(!this.canV('accounts')&&!this.canV('roles'))return;const {F,db}=await firebase();$('acct-note').textContent='讀取中…';await this.loadRoles();this.renderRoles();
+  $('acct-sec').classList.toggle('hidden',!this.canV('accounts'));if(!this.canV('accounts')){$('acct-note').textContent='';$('acct-form').classList.add('hidden');return}
   try{const snap=await F.getDocs(F.collection(db,'staff'));this.staff=[];snap.forEach(d=>this.staff.push(Object.assign({email:d.id},d.data())));
    this.admins=[];if(this.me.role==='super'){const a=await F.getDocs(F.collection(db,'admins'));a.forEach(d=>this.admins.push(d.id))}
-   this.renderStaff();$('acct-note').textContent=''}catch(e){$('acct-note').textContent='讀取失敗：'+(e.code||e.message)}},
- canEdit(x){return x.email!==this.me.email&&(this.me.role==='super'||(this.me.role==='manager'&&x.role==='analyst'))},
+   this.renderStaff();this.renderRoles();$('acct-note').textContent=''}catch(e){$('acct-note').textContent='讀取失敗：'+(e.code||e.message)}},
+ canEdit(x){return x.email!==this.me.email&&this.canE('accounts')&&this.assignable(x.role)},
  renderStaff(){const t=$('t-staff');t.replaceChildren();const head=document.createElement('tr');for(const h of ['Gmail','名稱','角色','狀態','備註','建立者','最後更新','操作']){const th=document.createElement('th');th.textContent=h;head.append(th)}t.append(head);
   const ts=x=>x&&x.toDate?x.toDate().toLocaleString('zh-TW',{hour12:false}):'–';
   for(const e of this.admins){const tr=document.createElement('tr');tr.innerHTML=`<td class="mono">${esc(e)}</td><td></td><td><span class="role r3">最高管理者</span></td><td>啟用</td><td class="muted">在 Firebase 主控台設定</td><td></td><td></td><td class="muted">只能在主控台修改</td>`;t.append(tr)}
-  for(const x of this.staff.sort((a,b)=>(ROLES[b.role]?.lv||0)-(ROLES[a.role]?.lv||0)||a.email.localeCompare(b.email))){const tr=document.createElement('tr');const ed=this.canEdit(x);
-   tr.innerHTML=`<td class="mono">${esc(x.email)}${x.email===this.me.email?' <span class="tag">我</span>':''}</td><td>${esc(x.name||'')}</td><td><span class="role r${ROLES[x.role]?.lv||0}">${ROLES[x.role]?.n||esc(x.role)}</span></td><td>${x.active?'啟用':'<span class="tag hard">已停用</span>'}</td><td>${esc(x.note||'')}</td><td class="mono">${esc(x.createdBy||'')}</td><td>${ts(x.updatedAt)}<br><span class="muted mono">${esc(x.updatedBy||'')}</span></td><td class="ops"></td>`;
+  for(const x of this.staff.sort((a,b)=>this.roleName(a.role).localeCompare(this.roleName(b.role))||a.email.localeCompare(b.email))){const tr=document.createElement('tr');const ed=this.canEdit(x);
+   tr.innerHTML=`<td class="mono">${esc(x.email)}${x.email===this.me.email?' <span class="tag">我</span>':''}</td><td>${esc(x.name||'')}</td><td><span class="role r${x.role==='manager'?2:1}">${esc(this.roleName(x.role))}</span>${this.roleDef(x.role)?'':' <span class="tag hard">角色不存在</span>'}</td><td>${x.active?'啟用':'<span class="tag hard">已停用</span>'}</td><td>${esc(x.note||'')}</td><td class="mono">${esc(x.createdBy||'')}</td><td>${ts(x.updatedAt)}<br><span class="muted mono">${esc(x.updatedBy||'')}</span></td><td class="ops"></td>`;
    const ops=tr.querySelector('.ops');if(ed){const btn=(label,fn,cls='')=>{const b=document.createElement('button');b.textContent=label;if(cls)b.className=cls;b.onclick=fn;ops.append(b)};
     btn('編輯',()=>this.editStaff(x));btn(x.active?'停用':'啟用',()=>this.saveStaff(x.email,Object.assign({},x,{active:!x.active}),x.active?'staff.off':'staff.on'));btn('刪除',()=>this.delStaff(x),'danger')}else ops.innerHTML='<span class="muted">無權限</span>';t.append(tr)}
   if(!this.staff.length&&!this.admins.length){const tr=document.createElement('tr');tr.innerHTML='<td colspan="8" class="muted">還沒有任何帳號</td>';t.append(tr)}
-  $('f-role').querySelector('option[value=manager]').disabled=this.me.role!=='super';$('acct-count').textContent=`最高管理者 ${this.admins.length||'（僅最高管理者可見）'}・管理者 ${this.staff.filter(x=>x.role==='manager').length}・分析者 ${this.staff.filter(x=>x.role==='analyst').length}・已停用 ${this.staff.filter(x=>!x.active).length}`},
- editStaff(x){$('f-email').value=x.email;$('f-email').disabled=true;$('f-name').value=x.name||'';$('f-role').value=x.role;$('f-note').value=x.note||'';$('f-active').checked=!!x.active;$('f-submit').textContent='儲存修改';$('f-cancel').classList.remove('hidden');this.editing=x;$('f-email').scrollIntoView({block:'center'})},
- resetForm(){this.editing=null;for(const id of ['f-email','f-name','f-note'])$(id).value='';$('f-email').disabled=false;$('f-role').value='analyst';$('f-active').checked=true;$('f-submit').textContent='新增帳號';$('f-cancel').classList.add('hidden');$('f-msg').textContent=''},
+  this.fillRoleSelect();const byR={};for(const x of this.staff)byR[x.role]=(byR[x.role]||0)+1;
+  $('acct-count').textContent=`最高管理者 ${this.admins.length||'（僅最高管理者可見）'}・`+Object.entries(byR).map(([r,n])=>`${this.roleName(r)} ${n}`).join('・')+`・已停用 ${this.staff.filter(x=>!x.active).length}`;$('acct-form').classList.toggle('hidden',!this.canE('accounts'))},
+ renderRoles(){if(!$('t-roles'))return;const ids=[...new Set([...Object.keys(BUILTIN_ROLES),...Object.keys(this.roles||{})])],edit=this.canE('roles'),sup=this.me.role==='super';
+  const used={};for(const x of this.staff||[])used[x.role]=(used[x.role]||0)+1;
+  const t=$('t-roles');t.innerHTML='<thead><tr><th>角色</th><th>代號</th><th>說明</th><th class="n">權限數</th><th class="n">帳號數</th><th>操作</th></tr></thead>';const tb=document.createElement('tbody');t.append(tb);
+  for(const id of ids){const d=this.roleDef(id),bi=!!BUILTIN_ROLES[id],tr=document.createElement('tr');
+   const canEd=edit&&(sup||(!bi&&id!==this.me.role&&this.assignable(id)));
+   tr.innerHTML=`<td><b>${esc(d.name)}</b>${bi?' <span class="tag">內建</span>':''}${bi&&this.roles&&this.roles[id]?' <span class="tag">已調整</span>':''}${id===this.me.role?' <span class="tag">我的角色</span>':''}</td><td class="mono">${esc(id)}</td><td style="white-space:normal">${esc(d.desc||'')}</td><td class="n">${d.p.length}</td><td class="n">${this.staff?used[id]||0:'–'}</td><td class="ops"></td>`;
+   const ops=tr.querySelector('.ops');if(canEd){const b=document.createElement('button');b.textContent='編輯';b.onclick=()=>this.editRole(id);ops.append(b);
+    if(!bi){const x=document.createElement('button');x.textContent='刪除';x.className='danger';x.onclick=()=>this.delRole(id);ops.append(x)}}else ops.innerHTML=`<span class="muted">${!edit?'只能查看':bi?'只有最高管理者能改內建角色':id===this.me.role?'不能改自己的角色':'權限超過你'}</span>`;tb.append(tr)}
+  $('role-new').classList.toggle('hidden',!edit);
+  const m=$('t-role-matrix');m.innerHTML=`<thead><tr><th>頁面</th><th>最高管理者</th>${ids.map(id=>`<th>${esc(this.roleName(id))}</th>`).join('')}</tr></thead><tbody>${PERM_PAGES.map(([k,n])=>`<tr><td>${n}</td><td>修改</td>${ids.map(id=>{const p=this.permsOf(id);return `<td>${p.includes(k+'.e')?'<b>修改</b>':p.includes(k+'.v')?'查詢':'<span class="muted">–</span>'}</td>`}).join('')}</tr>`).join('')}</tbody>`},
+ editRole(id){const d=id?this.roleDef(id):{name:'',desc:'',p:[]},box=$('role-edit'),sup=this.me.role==='super',mine=this.me.perms||new Set();this.roleEditing=id||null;box.classList.remove('hidden');
+  $('role-edit-title').textContent=id?`編輯角色：${d.name}`:'新增角色';$('re-id').value=id||'';$('re-id').disabled=!!id;$('re-name').value=d.name||'';$('re-desc').value=d.desc||'';$('re-msg').textContent='';
+  $('re-reset').classList.toggle('hidden',!(sup&&id&&BUILTIN_ROLES[id]&&this.roles&&this.roles[id]));
+  const has=new Set(d.p),t=$('t-role-perms');t.innerHTML='<thead><tr><th>頁面</th><th>查詢</th><th>修改</th></tr></thead>';const tb=document.createElement('tbody');t.append(tb);
+  for(const [k,n,vl,el] of PERM_PAGES){const tr=document.createElement('tr'),okV=sup||mine.has(k+'.v'),okE=sup||mine.has(k+'.e');
+   tr.innerHTML=`<td><b>${n}</b></td><td><label style="display:flex;gap:6px;align-items:center;white-space:normal"><input type="checkbox" data-pk="${k}.v"${has.has(k+'.v')?' checked':''}${okV?'':' disabled'}> ${vl}</label></td><td>${el?`<label style="display:flex;gap:6px;align-items:center;white-space:normal"><input type="checkbox" data-pk="${k}.e"${has.has(k+'.e')?' checked':''}${okE?'':' disabled'}> ${el}</label>`:'<span class="muted">–</span>'}</td>`;tb.append(tr)}
+  // 修改 needs 查詢; turning 查詢 off also turns 修改 off
+  t.onchange=e=>{const c=e.target;if(!c.dataset.pk)return;const [k,a]=c.dataset.pk.split('.'),v=t.querySelector(`[data-pk="${k}.v"]`),ed=t.querySelector(`[data-pk="${k}.e"]`);if(a==='e'&&c.checked&&v)v.checked=true;if(a==='v'&&!c.checked&&ed)ed.checked=false};
+  if(!sup)$('re-msg').textContent='灰色的格子是你自己沒有的權限，不能給別人。';box.scrollIntoView({block:'start',behavior:'smooth'})},
+ async saveRole(){const id=(this.roleEditing||$('re-id').value.trim().toLowerCase()),msg=$('re-msg'),name=$('re-name').value.trim().slice(0,40);
+  if(!/^[a-z0-9_-]{1,32}$/.test(id))return msg.textContent='代號只能用英文小寫、數字、- 或 _（最多 32 個字）。';if(!name)return msg.textContent='請填名稱。';
+  if(!this.roleEditing&&this.roleDef(id))return msg.textContent='這個代號已經有角色了。';
+  const p=[...$('t-role-perms').querySelectorAll('[data-pk]:checked')].map(c=>c.dataset.pk);if(!p.length)return msg.textContent='至少勾選一項權限。';
+  if(!p.every(x=>this.me.role==='super'||this.me.perms.has(x)))return msg.textContent='不能給超過自己的權限。';
+  try{const {F,db}=await firebase();await F.setDoc(F.doc(db,'roles',id),{name,desc:$('re-desc').value.trim().slice(0,200),p,updatedBy:this.me.email,updatedAt:F.serverTimestamp()});
+   await this.log(this.roleEditing?'role.edit':'role.add',id,name+'：'+p.join(' '));$('role-edit').classList.add('hidden');await this.loadRoles();this.renderRoles();if(this.staff)this.renderStaff();$('role-note').textContent=`已儲存「${name}」。已經登入的人重新整理後台後套用。`}
+  catch(e){msg.textContent=e.code==='permission-denied'?'沒有權限：只能建立或修改權限不超過自己的角色（也不能改自己的角色）；或 firestore.rules 還沒發布最新版。':'失敗：'+(e.code||e.message)}},
+ async delRole(id,reset){const used=(this.staff||[]).filter(x=>x.role===id).length;
+  if(!confirm(reset?`把「${this.roleName(id)}」還原成內建預設權限？`:`確定要刪除角色「${this.roleName(id)}」？`+(used?`\n目前有 ${used} 個後台帳號是這個角色，刪除後他們就不能登入，直到改成別的角色。`:'')))return;
+  try{const {F,db}=await firebase();await F.deleteDoc(F.doc(db,'roles',id));await this.log('role.del',id,reset?'還原內建預設':'');$('role-edit').classList.add('hidden');await this.loadRoles();this.renderRoles();if(this.staff)this.renderStaff()}
+  catch(e){$('role-note').textContent='刪除失敗：'+(e.code==='permission-denied'?'沒有權限':(e.code||e.message))}},
+ fillRoleSelect(){const sel=$('f-role'),cur=sel.value,ids=[...new Set([...Object.keys(BUILTIN_ROLES),...Object.keys(this.roles||{})])];
+  sel.replaceChildren(...ids.map(id=>{const o=new Option(this.roleName(id)+(this.assignable(id)?'':'（權限超過你，不能指派）'),id);o.disabled=!this.assignable(id);return o}));sel.value=ids.includes(cur)&&this.assignable(cur)?cur:(ids.find(id=>this.assignable(id))||'')},
+ editStaff(x){$('f-email').value=x.email;$('f-email').disabled=true;$('f-name').value=x.name||'';this.fillRoleSelect();$('f-role').value=x.role;$('f-note').value=x.note||'';$('f-active').checked=!!x.active;$('f-submit').textContent='儲存修改';$('f-cancel').classList.remove('hidden');this.editing=x;$('f-email').scrollIntoView({block:'center'})},
+ resetForm(){this.editing=null;for(const id of ['f-email','f-name','f-note'])$(id).value='';$('f-email').disabled=false;this.fillRoleSelect();$('f-active').checked=true;$('f-submit').textContent='新增帳號';$('f-cancel').classList.add('hidden');$('f-msg').textContent=''},
  async submitStaff(){const email=$('f-email').value.trim().toLowerCase(),role=$('f-role').value,msg=$('f-msg');
   if(!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email))return msg.textContent='Gmail 格式不正確。';
   if(email===this.me.email)return msg.textContent='不能修改自己的權限。';
-  if(role==='manager'&&this.me.role!=='super')return msg.textContent='只有最高管理者可以新增或指定「管理者」。';
+  if(!role||!this.assignable(role))return msg.textContent='這個角色的權限超過你（或是你自己的角色），不能指派。';
   if(this.admins.includes(email))return msg.textContent='這個帳號已經是最高管理者（在 Firebase 主控台設定）。';
   const old=this.staff.find(x=>x.email===email);if(!this.editing&&old)return msg.textContent='這個帳號已經存在，請在列表按「編輯」。';
   const data={role,active:$('f-active').checked,name:$('f-name').value.trim().slice(0,40),note:$('f-note').value.trim().slice(0,200)};
@@ -982,11 +1051,13 @@ const Admin={
  async saveStaff(email,x,act,isNew){const {F,db}=await firebase(),msg=$('f-msg');
   const d={role:x.role,active:!!x.active,name:x.name||'',note:x.note||'',updatedBy:this.me.email,updatedAt:F.serverTimestamp()};
   try{if(isNew)await F.setDoc(F.doc(db,'staff',email),Object.assign(d,{createdBy:this.me.email,createdAt:F.serverTimestamp()}));else await F.updateDoc(F.doc(db,'staff',email),d);
-   await this.log(act,email,`${ROLES[x.role].n}・${x.active?'啟用':'停用'}${x.name?'・'+x.name:''}`);msg.textContent=(isNew?'已新增 ':'已更新 ')+email;this.resetForm();if(isNew)msg.textContent='已新增 '+email;await this.loadStaff()}
-  catch(e){msg.textContent=(e.code==='permission-denied'?'沒有權限：':'失敗：')+(e.code==='permission-denied'?(this.me.role==='manager'?'管理者只能管理「分析者」。':'請確認 firestore.rules 已發布最新版。'):(e.message||e))}},
+   await this.log(act,email,`${this.roleName(x.role)}・${x.active?'啟用':'停用'}${x.name?'・'+x.name:''}`);msg.textContent=(isNew?'已新增 ':'已更新 ')+email;this.resetForm();if(isNew)msg.textContent='已新增 '+email;await this.loadStaff()}
+  catch(e){msg.textContent=(e.code==='permission-denied'?'沒有權限：':'失敗：')+(e.code==='permission-denied'?'只能管理權限不超過自己的帳號；或 firestore.rules 還沒發布最新版。':(e.message||e))}},
  async delStaff(x){if(!confirm(`確定要刪除 ${x.email} 的後台權限？\n（之後可以再新增回來）`))return;const {F,db}=await firebase();
-  try{await F.deleteDoc(F.doc(db,'staff',x.email));await this.log('staff.del',x.email,ROLES[x.role]?.n||x.role);await this.loadStaff()}catch(e){$('f-msg').textContent='刪除失敗：'+(e.code||e.message)}},
- renderMe(){const r=this.me.role;$('me-info').innerHTML=this.me.offline?'目前是離線模式（沒有登入）。可以開啟 JSON 檔或示範資料；帳號管理和讀取 Firestore 需要登入。':`登入帳號：<b class="mono">${esc(this.me.email)}</b><br>角色：<span class="role r${this.me.lv}">${ROLES[r].n}</span>　${ROLES[r].d}`}
+  try{await F.deleteDoc(F.doc(db,'staff',x.email));await this.log('staff.del',x.email,this.roleName(x.role));await this.loadStaff()}catch(e){$('f-msg').textContent='刪除失敗：'+(e.code||e.message)}},
+ renderMe(){const r=this.me.role;if(this.me.offline){$('me-info').innerHTML='目前是離線模式（沒有登入）。可以開啟 JSON 檔或示範資料；帳號管理和讀取 Firestore 需要登入。';return}
+  const def=r==='super'?{desc:ROLES.super.d}:this.roleDef(r)||{};
+  $('me-info').innerHTML=`登入帳號：<b class="mono">${esc(this.me.email)}</b><br>角色：<span class="role r${this.me.lv}">${esc(this.roleName(r))}</span>　${esc(def.desc||'')}<br><span class="muted">可以使用：</span>${PERM_PAGES.filter(([k])=>this.canV(k)).map(([k,n])=>`${n}（${this.canE(k)?'查詢＋修改':'查詢'}）`).join('、')||'沒有'}`}
 };
 if(window.innerWidth<860)$('filter-d').open=false;
 $('ver').textContent='v'+ADMIN_VERSION;$('ver-me').textContent='v'+ADMIN_VERSION;table('t-changelog',['版本','日期','內容'],CHANGELOG.map(r=>[r[0],r[1],{v:0,h:esc(r[2]),n:false}]));$('ver-login').textContent='v'+ADMIN_VERSION;document.title+=' v'+ADMIN_VERSION;
@@ -994,7 +1065,8 @@ $('btn-g').onclick=()=>Admin.login();$('btn-off').onclick=()=>Admin.offline();$(
 $('le-in').onclick=()=>Admin.emailAuth('in');$('le-up').onclick=()=>Admin.emailAuth('up');$('le-reset').onclick=()=>Admin.emailAuth('reset');$('le-pw').addEventListener('keydown',e=>{if(e.key==='Enter')Admin.emailAuth('in')});
 if(Admin.inApp())Admin.showInApp();$('btn-logout').onclick=()=>Admin.me.offline?location.reload():Admin.logout();
 $('btn-fs').onclick=()=>Admin.loadFirestore();$('btn-menu').onclick=()=>document.body.classList.toggle('navopen');
-$('f-submit').onclick=()=>Admin.submitStaff();$('f-cancel').onclick=()=>Admin.resetForm();$('btn-acct-reload').onclick=()=>Admin.loadStaff();
+$('f-submit').onclick=()=>Admin.submitStaff();$('f-cancel').onclick=()=>Admin.resetForm();$('role-new').onclick=()=>Admin.editRole(null);$('re-cancel').onclick=()=>$('role-edit').classList.add('hidden');$('re-save').onclick=()=>Admin.saveRole();$('re-reset').onclick=()=>Admin.delRole(Admin.roleEditing,true);
+$('btn-acct-reload').onclick=()=>Admin.loadStaff();
 $('audit-q').oninput=()=>Admin.loadAudit();$('audit-act').onchange=()=>Admin.loadAudit();$('btn-audit-reload').onclick=()=>Admin.loadAudit();
 $('audit-act').append(...Object.entries(Admin.ACT).map(([k,v])=>new Option(v,k)));
 window.addEventListener('hashchange',()=>{if($('app').classList.contains('hidden'))return;const h=location.hash.slice(1).split('/');if(h[0]!==Admin.page||(h[1]&&h[1]!==Admin.sub))Admin.go(h[0],h[1])});
@@ -1014,7 +1086,7 @@ Object.assign(Admin,{
   return {name:(S.avatar&&S.avatar.name)||'',lvl:S.lvl||doc&&doc.lvl||1,xp:Math.round(S.xp||0),coins:S.coins!=null?S.coins:(doc&&doc.coins)||0,grade:G.theta!=null?G.theta:null,se:G.se,tests:(G.hist||[]).length,declared:G.declared||0,
    seen:keys.length,mastered:keys.filter(k=>Array.isArray(V[k])&&V[k][0]>=5).length,streak:L.streak||0,best:L.best||0,levels:(L.levels&&L.levels.length?L.levels:[1,2,3,4,5,6]),
    pets:(Z.pets||[]).length,items:(S.items||[]).length,tester:!!f.tester,dev:!!f.dev,admin:S.admin||null,showGrade:!(S.settings&&S.settings.showGrade===false)}},
- async loadPlayers(){if(!this.can(2))return;const {F,db}=await firebase(),note=$('pl-note');note.textContent='讀取中…（每位玩家算 1 次讀取）';
+ async loadPlayers(){if(!this.canV('players'))return;document.querySelectorAll('.pl-edit-only').forEach(x=>x.classList.toggle('hidden',!this.canE('players')));const {F,db}=await firebase(),note=$('pl-note');note.textContent='讀取中…（每位玩家算 1 次讀取）';
   try{const reg={};(await F.getDocs(F.collection(db,'players'))).forEach(d=>reg[d.id]=d.data());this.reg=reg;
    const out=[];let last=null;
    for(;;){const q=last?F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.startAfter(last),F.limit(100)):F.query(F.collection(db,'saves'),F.orderBy(F.documentId()),F.limit(100));
@@ -1022,6 +1094,7 @@ Object.assign(Admin,{
     let S=null;try{S=JSON.parse(x.data)}catch(e){}out.push({uid:d.id,doc:x,sum:this.sumOf(S,x),reg:reg[d.id]||null})});
     note.textContent=`讀取中… ${out.length}`;if(snap.size<100)break;last=snap.docs[snap.docs.length-1]}
    for(const uid in reg)if(!out.some(p=>p.uid===uid))out.push({uid,doc:null,sum:null,reg:reg[uid]});
+   this.ctrl={};if(this.canV('pctl'))try{(await F.getDocs(F.collection(db,'ctrl'))).forEach(d=>this.ctrl[d.id]=d.data())}catch(e){console.warn('[ctrl]',e.code||e)}
    this.players=out;window.TEST_UIDS=new Set(out.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).map(p=>p.uid));
    note.textContent='';this.renderPlayers()}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請確認 firestore.rules 已發布 0.5.01 版，而且你是管理者以上。':'讀取失敗：'+(e.code||e.message)}},
  renderPlayers(){const q=$('pl-q').value.trim().toLowerCase(),kind=$('pl-kind').value,ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
@@ -1035,7 +1108,7 @@ Object.assign(Admin,{
     s?s.lvl:{v:-1,h:'–'},s?s.coins:{v:-1,h:'–'},{v:s&&s.grade!=null?s.grade:-1,h:s&&s.grade!=null?gradeName(s.grade):'–'},
     {v:s?s.seen:-1,h:s?`${fmt(s.seen)}／${fmt(s.mastered)}`:'–'},s?s.streak:{v:-1,h:'–'},
     {v:p.doc?p.doc.savedAt||0:0,h:p.doc?ts(p.doc.savedAt):'<span class="muted">尚未登入遊戲</span>',n:false},
-    {v:0,h:[test?tag('測試','easy'):'',s&&s.dev?tag('開發者'):'',s&&s.admin?tag('後台改過'):'',r&&r.group?tag(esc(r.group)):''].join(' '),n:false},
+    {v:0,h:[this.banTag(p.uid),test?tag('測試','easy'):'',s&&s.dev?tag('開發者'):'',s&&s.admin?tag('後台改過'):'',r&&r.group?tag(esc(r.group)):''].join(' '),n:false},
     {v:0,h:`<button data-open="${esc(p.uid)}">查看</button>`,n:false}]}));
   const n=this.players.length,tn=this.players.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).length;
   $('pl-count').textContent=`共 ${n} 個帳號（測試 ${tn}、尚未登入 ${this.players.filter(p=>!p.doc).length}），目前顯示 ${list.length} 個`},
@@ -1044,9 +1117,11 @@ Object.assign(Admin,{
    this.cur={uid,doc,S,reg:this.reg[uid]||null};this.renderPlayer();this.log('player.view',uid,(doc&&doc.email)||'');box.scrollIntoView({block:'start',behavior:'smooth'})}
   catch(e){box.innerHTML=`<p class="muted">讀取失敗：${esc(e.code||e.message)}</p>`}},
  renderPlayer(tab){const c=this.cur;if(!c)return;tab=tab||this.ptab||'sum';this.ptab=tab;const box=$('pl-detail'),S=c.S,doc=c.doc,r=c.reg,s=S?this.sumOf(S,doc):null,ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
-  const tabs=[['sum','概覽'],['edit','修改'],['backups','備份與還原'],['json','原始資料']].map(([k,n])=>`<button class="subtab${tab===k?' on':''}" data-ptab="${k}">${n}</button>`).join('');
+  if(tab==='edit'&&!this.canE('players'))tab='sum';if(tab==='ctrl'&&!this.canV('pctl'))tab='sum';this.ptab=tab;
+  const tabs=[['sum','概覽'],...(this.canE('players')?[['edit','修改']]:[]),...(this.canV('pctl')?[['ctrl','封停與踢下線']]:[]),['backups','備份與還原'],['json','原始資料']].map(([k,n])=>`<button class="subtab${tab===k?' on':''}" data-ptab="${k}">${n}</button>`).join('');
   let html=`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc((s&&s.name)||(r&&r.name)||'（未命名）')} <span class="muted mono" style="font-size:13px">${esc((doc&&doc.email)||(r&&r.email)||'')}</span></h2><button data-close>關閉</button></div>
    <p class="muted mono" style="font-size:12px">UID ${esc(c.uid)}${doc?`　rev ${doc.rev}　最後存檔 ${ts(doc.savedAt)}　裝置 ${esc(doc.device||'')}`:''}</p><div style="display:flex;gap:4px;border-bottom:1px solid var(--line);margin:8px 0 12px">${tabs}</div>`;
+  if(tab==='ctrl'){html+=this.ctrlHtml(c.uid);box.innerHTML=html;return this.bindPlayer()}
   if(!S){html+=`<p class="note">這個帳號還沒有進過遊戲（沒有雲端存檔）。${r&&r.seed?'第一次登入時會套用初始設定：'+esc(JSON.stringify(r.seed)):''}</p>`;box.innerHTML=html;return this.bindPlayer()}
   if(tab==='sum'){const lg=(S.learn&&S.learn.levels&&S.learn.levels.length?S.learn.levels:[1,2,3,4,5,6]).map(x=>'L'+x).join(' ');
    const k=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
@@ -1081,7 +1156,8 @@ Object.assign(Admin,{
  bindPlayer(){const box=$('pl-detail');
   box.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>this.renderPlayer(b.dataset.ptab));
   const q=(sel,fn)=>{const b=box.querySelector(sel);if(b)b.onclick=fn};
-  q('[data-close]',()=>{box.classList.add('hidden');this.cur=null});q('[data-save]',()=>this.saveEdits());q('[data-bk]',()=>this.loadBackups());q('[data-json]',()=>this.saveJson());
+  q('[data-close]',()=>{box.classList.add('hidden');this.cur=null});q('[data-ban]',()=>this.ctrlSet('ban'));q('[data-unban]',()=>this.ctrlSet('unban'));q('[data-kick]',()=>this.ctrlSet('kick'));
+  const du=box.querySelector('#pk-dur');if(du)du.onchange=()=>{box.querySelector('#pk-date').classList.toggle('hidden',du.value!=='date')};q('[data-save]',()=>this.saveEdits());q('[data-bk]',()=>this.loadBackups());q('[data-json]',()=>this.saveJson());
   q('[data-dl]',()=>{const c=this.cur,b=new Blob([JSON.stringify(c.S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`purrcozy-save-${c.uid.slice(0,8)}.json`;a.click();this.log('player.export',c.uid,'')})},
  // write a changed state for the current player: backup → transaction (rev must not have moved) → audit log
  async writeState(S2,note,act){const c=this.cur;if(((c.reg&&c.reg.test)||(c.S&&c.S.flags&&c.S.flags.tester))&&!confirm('這是自動模擬用的測試帳號。模擬期間改它的存檔會讓測試數據失真，確定還是要改？'))throw Error('已取消');const {F,db}=await firebase(),ref=F.doc(db,'saves',c.uid);
@@ -1177,13 +1253,40 @@ Object.assign(Admin,{
  async delReg(uid){if(!confirm('只刪除後台的登記（測試標記、初始設定）。Firebase 的登入帳號和雲端存檔不會刪除，要刪請到 Firebase 主控台 → Authentication。確定？'))return;const {F,db}=await firebase();
   try{await F.deleteDoc(F.doc(db,'players',uid));await this.log('player.unreg',uid,'');this.loadPlayers()}catch(e){alert('失敗：'+(e.code||e.message))}},
 });
+Object.assign(Admin,{
+ // ---------- 0.5.06 帳號控制：封停、解除、踢下線（ctrl/{uid}） ----------
+ banned(c){return !!(c&&c.ban&&(!c.until||c.until>Date.now()))},
+ banTag(uid){const c=(this.ctrl||{})[uid];if(!this.banned(c))return '';return `<span class="tag hard">${c.until?'封停到 '+new Date(c.until).toLocaleDateString('zh-TW'):'封停中'}</span>`},
+ ctrlHtml(uid){const c=(this.ctrl||{})[uid]||null,b=this.banned(c),ed=this.canE('pctl'),ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
+  const act={ban:'封停',unban:'解除封停',kick:'踢下線'};
+  let h=`<p class="why">封停：玩家會立刻被登出（正在玩的人一秒內），之後不能用這個帳號登入，雲端存檔也寫不進去；到期自動解除，也可以提早解除。踢下線：所有裝置立刻登出一次（會先把還沒上傳的進度存好），玩家可以再登入。玩家的存檔不會被刪除。</p>
+   <div class="kpis"><div class="kpi ${b?'bad':'good'}"><b>${b?'封停中':'正常'}</b><span>${b?(c.until?'到 '+ts(c.until):'沒有期限'):'可以登入'}</span>${b&&c.reason?`<small>原因：${esc(c.reason)}</small>`:''}</div><div class="kpi"><b>${c&&c.kick?ts(c.kick):'–'}</b><span>最後一次踢下線</span></div></div>`;
+  if(ed){h+=`<div class="form" style="margin-top:12px"><label style="flex:1 1 100%">原因（玩家會看到，最多 200 字）<input type="text" id="pk-reason" maxlength="200" placeholder="例如：使用不雅暱稱，請改名後再申請解除" value="${b?esc(c.reason||''):''}"></label>
+    <label>封停多久<select id="pk-dur"><option value="1">1 天</option><option value="3">3 天</option><option value="7" selected>7 天</option><option value="30">30 天</option><option value="0">沒有期限</option><option value="date">到指定日期</option></select></label><label id="pk-date" class="hidden">到哪一天（含）<input type="date" id="pk-until"></label></div>
+    <div class="row" style="margin-top:10px">${b?'<button data-unban class="primary">解除封停</button><button data-ban>更新封停（原因、期限）</button>':'<button data-ban class="danger">封停</button>'}<button data-kick>踢下線</button><span class="muted" id="pk-msg"></span></div>`}
+  else h+='<p class="muted" style="margin-top:10px">你的角色只能查看，不能封停或踢下線。</p>';
+  const hist=(c&&c.hist)||[];if(hist.length)h+=`<h3 style="margin:16px 0 6px">紀錄</h3><div class="tbl" style="max-height:none"><table><thead><tr><th>時間</th><th>動作</th><th>操作者</th><th>內容</th></tr></thead><tbody>${hist.slice().reverse().map(x=>`<tr><td>${ts(x.t)}</td><td>${act[x.a]||esc(x.a)}</td><td class="mono">${esc(x.by||'')}</td><td style="white-space:normal">${x.a==='ban'?(x.u?'到 '+ts(x.u):'沒有期限')+(x.r?'；'+esc(x.r):''):esc(x.r||'')}</td></tr>`).join('')}</tbody></table></div>`;
+  return h},
+ async ctrlSet(kind){const c=this.cur;if(!c||!this.canE('pctl'))return;const uid=c.uid,msg=$('pk-msg'),old=(this.ctrl||{})[uid]||{ban:false,until:0,reason:'',kick:0,hist:[]},name=(c.S&&c.S.avatar&&c.S.avatar.name)||(c.reg&&c.reg.name)||uid;
+  const reason=($('pk-reason')?$('pk-reason').value:'').trim().slice(0,200),now=Date.now();let until=0;
+  if(kind==='ban'){const d=$('pk-dur').value;if(d==='date'){const v=$('pk-until').value;if(!v)return msg.textContent='請選日期。';until=new Date(v+'T23:59:59').getTime();if(until<=now)return msg.textContent='日期要在今天以後。'}else if(+d>0)until=now+(+d)*864e5;
+   if(!reason&&!confirm('沒有填原因，玩家只會看到「帳號已被停用」。確定要封停？'))return;if(!confirm(`確定要封停「${name}」${until?'到 '+new Date(until).toLocaleString('zh-TW',{hour12:false}):'（沒有期限）'}？\n玩家會立刻被登出。`))return}
+  if(kind==='kick'&&!confirm(`確定要把「${name}」的所有裝置登出？`))return;
+  if(kind==='unban'&&!confirm(`解除「${name}」的封停？`))return;
+  const d={ban:kind==='ban'?true:kind==='unban'?false:!!old.ban,until:kind==='ban'?until:kind==='unban'?0:(old.until||0),reason:kind==='ban'?reason:kind==='unban'?'':(old.reason||''),kick:kind==='kick'?now:(old.kick||0),
+   hist:[...(old.hist||[]),{a:kind,by:this.me.email,t:now,r:kind==='ban'?reason:reason||'',u:kind==='ban'?until:0}].slice(-20),by:this.me.email};
+  try{const {F,db}=await firebase();await F.setDoc(F.doc(db,'ctrl',uid),Object.assign({},d,{at:F.serverTimestamp()}));this.ctrl=this.ctrl||{};this.ctrl[uid]=Object.assign({},d,{at:now});
+   await this.log('player.'+kind,uid,name+(kind==='ban'?`・${until?'到 '+new Date(until).toLocaleDateString('zh-TW'):'沒有期限'}${reason?'・'+reason:''}`:reason?'・'+reason:''));
+   this.renderPlayer('ctrl');this.renderPlayers();const m=$('pk-msg');if(m)m.textContent=kind==='ban'?'已封停。':kind==='unban'?'已解除封停。':'已送出：玩家的裝置會立刻登出。'}
+  catch(e){msg.textContent=e.code==='permission-denied'?'沒有權限，或 firestore.rules 還沒發布 0.93.8 的版本。':'失敗：'+(e.code||e.message)}},
+});
 Object.assign(Admin.ACT,{'player.view':'查看玩家','player.edit':'修改玩家存檔','player.json':'直接修改存檔 JSON','player.restore':'還原玩家備份','player.export':'下載玩家存檔','player.create':'建立玩家帳號','player.batch':'批次建立測試帳號','player.rename':'套用模擬暱稱','player.unreg':'刪除玩家登記'});
 $('pl-reload').onclick=()=>Admin.loadPlayers();$('pl-q').oninput=()=>Admin.renderPlayers();$('pl-kind').onchange=()=>Admin.renderPlayers();
 $('t-players').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)Admin.openPlayer(b.dataset.open)});
 $('pl-detail').addEventListener('click',e=>{const b=e.target.closest('[data-restore]');if(b)Admin.restoreBackup(b.dataset.restore)});
 $('pt-declared').append(...GRADE_LABEL.map((g,i)=>new Option(g,i+1)));
 $('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-ctl-only').onclick=()=>Admin.createControllerOnly();$('pt-names').onclick=()=>Admin.applySimNames();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
-for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.rename','player.unreg'].map(k=>new Option(Admin.ACT[k],k)));
+for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.rename','player.unreg','player.ban','player.unban','player.kick','role.add','role.edit','role.del'].map(k=>new Option(Admin.ACT[k],k)));
 
 
 /* ================= 0.5.02 使用行為：每人每天一份摘要（learnlog/{logId}/bday/{date}） =================
@@ -1203,9 +1306,19 @@ const BSOC={visit:'拜訪好友',help:'幫好友的忙'};
 const V1G={learn:'learn',study:'learn',catstypo:'learn',placement:'learn',story:'learn',words:'learn',typodesk:'learn',need:'tasks',tasks:'tasks',cozygame:'mini',furnplay:'furn',gacha:'shop',prize:'shop',merchant:'shop',pet:'pet',paw:'pet',shop:'shop',storage:'decor',avatar:'avatar',themeask:'decor',music:'music',friends:'social',visit:'social',card:'social',gift:'social',timer:'focus',todo:'focus',memo:'focus',cowork:'focus'};
 const nm=(map,k)=>map[k]||k;
 const B={raw:[],sel:'',loaded:false,heat:'people'};
+// nicknames of the 30 simulated students (sim01 … sim30)
+const SIMN={};fetch('sim/people.json').then(r=>r.ok?r.json():null).then(j=>{for(const p of (j&&j.people)||[])if(p.id&&p.nick)SIMN[p.id]=p.nick}).catch(()=>{});
 Object.assign(Admin,{
  keyOf(d){return d.pk||d.acct||('anon:'+d.lid)},
- nameOf(k){if(k.startsWith('anon:'))return '未登入裝置 '+k.slice(5,11);const p=(this.players||[]).find(x=>x.uid===k);return p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||k.slice(0,8)):(B.names&&B.names[k])||('帳號 '+k.slice(0,8))},
+ // 0.5.06: names people can read. The 30 simulated students are 測試-暱稱 (tools/sim/people.json), other test accounts 測試-名稱,
+ // players who never signed in are 訪客 1, 訪客 2 … (numbered in the order they first appear)
+ nameOf(k){if(!k)return '';const sim=this.simName(k);if(sim)return sim;
+  if(k.startsWith('anon:')){const G=this.guests||(this.guests={});if(!G[k])G[k]=Object.keys(G).length+1;return '訪客 '+G[k]}
+  const p=(this.players||[]).find(x=>x.uid===k),nm=p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||''):(B.names&&B.names[k])||'';
+  const test=(window.TEST_UIDS&&TEST_UIDS.has(k))||(p&&((p.reg&&p.reg.test)||(p.sum&&p.sum.tester)));
+  if(!nm)return test?'測試帳號':'玩家（名字還沒讀取）';return test&&!/^測試/.test(nm)?'測試-'+nm:nm},
+ simName(k){const raw=S.raw.length+'|'+B.raw.length+'|'+((S.raw[0]&&S.raw[0].pk)||'');if(this.devKey!==raw){this.devKey=raw;const D=this.devOf={};for(const r of S.raw)if(r.dev&&r.pk&&!D[r.pk])D[r.pk]=r.dev;for(const r of B.raw)if(r.dev&&r.pk&&!D[r.pk])D[r.pk]=r.dev}
+  const m=/^(sim\d+)/.exec((this.devOf||{})[k]||'');return m&&SIMN[m[1]]?'測試-'+SIMN[m[1]]:''},
  async loadBehavior(){if(this.me.offline)return;const {F,db}=await firebase(),note=$('bh-note');note.textContent='讀取中…';
   try{const out=[];let last=null;for(;;){const q=last?F.query(F.collectionGroup(db,'bday'),F.startAfter(last),F.limit(1000)):F.query(F.collectionGroup(db,'bday'),F.limit(1000));const snap=await F.getDocs(q);snap.forEach(d=>out.push(d.data()));note.textContent=`讀取中… ${out.length}`;if(snap.size<1000)break;last=snap.docs[snap.docs.length-1]}
    this.setBehavior(out,'Firestore');this.log('load','bday',out.length+' 天份')}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.02 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
@@ -1353,7 +1466,7 @@ Object.assign(Admin,{
   const tb=document.createElement('tbody');for(const r of R){const tr=document.createElement('tr');tr.style.cursor='pointer';tr.onclick=()=>this.rpOpen(r.id);
    for(const c of [new Date(r.at||r.t||0).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}),RP_L['c.'+r.cat]||r.cat,this.rpSum(r)||'（沒寫字）',r.win||'',this.rpDev(r.dev)+'・'+(r.lang||''),r.ver||'',(RP_ST[r.status]||r.status)+(r.test?'・測試':'')]){const td=document.createElement('td');td.textContent=c;tr.append(td)}
    if(RPA.cur===r.id)tr.style.background='var(--hl,#fff3c4)';tb.append(tr)}t.append(tb);if(!R.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='沒有符合條件的回報';tr.append(td);tb.append(tr)}},
- rpOpen(id){const r=RPA.rows.find(x=>x.id===id);if(!r)return;RPA.cur=id;this.rpRender();const box=$('rp-d-body');box.replaceChildren();$('rp-detail').classList.remove('hidden');
+ rpOpen(id){const r=RPA.rows.find(x=>x.id===id);if(!r)return;$('rp-d-save').disabled=!this.canE('reports');RPA.cur=id;this.rpRender();const box=$('rp-d-body');box.replaceChildren();$('rp-detail').classList.remove('hidden');
   $('rp-d-title').textContent=`${RP_L['c.'+r.cat]||r.cat}・#${String(r.id).slice(-6).toUpperCase()}`;
   const dl=document.createElement('dl');dl.className='rp-dl';const add=(k,v)=>{if(v==null||v==='')return;const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;dl.append(dt,dd)};
   for(const [q,v] of Object.entries(r.ans||{}))add(RP_L['q.'+q]||q,this.rpVal(q,r.cat,v));
@@ -1363,7 +1476,7 @@ Object.assign(Admin,{
   if(r.by2)add('上次修改',`${r.by2}・${r.at2?new Date(r.at2).toLocaleString('zh-TW'):''}`);box.append(dl);
   const pics=document.createElement('div');pics.className='rp-pics';for(const [src,cap] of [[r.shot,'遊戲畫面（自動）'],[r.img,'玩家的截圖']])if(src&&/^data:image\/(jpeg|png|webp);base64,/.test(src)){const f=document.createElement('figure'),a=document.createElement('a'),im=document.createElement('img');im.src=src;im.alt=cap;a.href=src;a.target='_blank';a.rel='noopener';a.append(im);const fc=document.createElement('figcaption');fc.textContent=cap;f.append(a,fc);pics.append(f)}box.append(pics);
   $('rp-d-status').value=r.status||'new';$('rp-d-note').value=r.note||'';$('rp-d-msg').textContent=this.me.offline?'離線模式：改的狀態不會存到 Firestore。':'';$('rp-detail').scrollIntoView({behavior:'smooth',block:'start'})},
- async rpSave(){const r=RPA.rows.find(x=>x.id===RPA.cur);if(!r)return;const status=$('rp-d-status').value,note=$('rp-d-note').value.slice(0,1000);
+ async rpSave(){const r=RPA.rows.find(x=>x.id===RPA.cur);if(!r)return;if(!this.canE('reports')){$('rp-d-msg').textContent='你的角色只能查看問題回報，不能改狀態。';return}const status=$('rp-d-status').value,note=$('rp-d-note').value.slice(0,1000);
   if(this.me.offline||String(r.id).startsWith('demo-')){Object.assign(r,{status,note});this.rpRender();$('rp-d-msg').textContent='已改（只在這個畫面，沒有存到 Firestore）';return}
   const {F,db}=await firebase();$('rp-d-msg').textContent='儲存中…';
   try{await F.updateDoc(F.doc(db,'reports',r.id),{status,note,by2:this.me.email,at2:F.serverTimestamp()});Object.assign(r,{status,note,by2:this.me.email,at2:Date.now()});this.rpRender();$('rp-d-msg').textContent='已儲存';this.log('report',r.id,status)}
@@ -1377,7 +1490,279 @@ for(const c of RP_CATS){const o=document.createElement('option');o.value=c;o.tex
 $('rp-load').onclick=()=>Admin.rpLoad();$('rp-demo').onclick=()=>Admin.rpDemo();$('rp-csv').onclick=()=>Admin.rpCsv();$('rp-copy').onclick=()=>Admin.rpCopy();$('rp-d-save').onclick=()=>Admin.rpSave();
 for(const id of ['rp-status','rp-cat','rp-who'])$(id).onchange=()=>Admin.rpRender();$('rp-q').oninput=()=>Admin.rpRender();
 $('ct-load').onclick=()=>Admin.ctLoad();$('ct-demo').onclick=()=>Admin.ctDemo();$('ct-csv').onclick=()=>Admin.ctCsv();
-$('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if(b&&Admin.can(2)){Admin.go('players');setTimeout(()=>Admin.openPlayer&&Admin.openPlayer(b.dataset.ctp),600)}});
+$('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if(b&&Admin.canV('players')){Admin.go('players');setTimeout(()=>Admin.openPlayer&&Admin.openPlayer(b.dataset.ctp),600)}});
+
+/* ---------- 營運報告：每日／每週（0.5.05） ----------
+   Built from the data already in this page: learning sessions (always), daily behaviour summaries, problem reports and the
+   contest board (loaded on demand). Days and weeks follow the game: a day starts at 06:00, a week on Monday 06:00.
+   Every rule lives in OP_RULES so the report and the "判讀規則" list at the bottom can never disagree. */
+const OP={mode:'day',day:'',who:'real',ct:{},auto:false,idx:null,idxKey:'',last:null};
+const OP_H=6;
+// where an unfinished round stopped, in words
+const opStop=x=>{const m=/^([a-z]+)@(\d+)/.exec(x||'');if(m)return ({quiz:'測驗第 '+(+m[2]+1)+' 題',review:'複習第 '+(+m[2]+1)+' 張單字卡',teach:'看第 '+(+m[2]+1)+' 張新字卡',pause:'中場休息時'})[m[1]]||m[1]+' 第 '+(+m[2]+1)+' 步';return ({gone:'直接關掉遊戲',restart:'改去做別的學習',idle:'放著太久沒動',result:'結果畫面'})[x]||esc(x||'不明')};
+const gday=t=>dayKey(t-OP_H*36e5);
+const kAdd=(k,n)=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()+n);return dayKey(d.getTime())};
+const kWd=k=>new Date(k+'T12:00').getDay();
+const kMon=k=>kAdd(k,-((kWd(k)+6)%7));
+const kLabel=k=>{const d=new Date(k+'T12:00');return `${d.getMonth()+1}/${d.getDate()}（${WD_ZH[d.getDay()]}）`};
+const OP_EXAM=new Set(['grade','levelgate','contest']);   // tests measure, they do not aim at 85 %
+const OP_CHOICE=new Set(['en2zh','zh2en','listen']);
+const OP_LV={alert:{n:'要處理',c:'var(--acc2)',w:3},watch:{n:'要注意',c:'var(--warn)',w:2},good:{n:'做得好',c:'var(--good)',w:1},info:{n:'參考',c:'var(--blue)',w:0}};
+const OP_AREA={people:'參與',learn:'學習量',quality:'學習品質',exp:'體驗',keep:'留存'};
+
+// rule list: shown at the bottom of the report exactly as the engine uses it
+const OP_RULES=[
+ ['people','活躍人數變化','不重複學習人數和基準比：每日報告的基準是「近 4 週同一個星期幾」的平均，每週報告是前 4 週平均。基準至少 5 人才判斷。','少 30% 以上：要處理｜少 15–30%：要注意｜多 30% 以上：做得好'],
+ ['people','新玩家','本期第一次出現學習紀錄的人，以及他們有沒有完成程度測驗和第一次每日單字。','新玩家 ≥ 3 人且完成每日單字的不到一半：要注意'],
+ ['keep','新玩家有沒有回來','每日：前一天的新玩家今天有沒有回來。每週：上週的新玩家本週有沒有回來。至少 3 人才判斷。','回來不到 30%：要注意｜50% 以上：做得好'],
+ ['keep','老玩家沒有回來','每日：前一天還在學、連續天數 ≥ 5 天的人這一天沒來。每週：上週來了 3 天以上、本週一天都沒來的人。','占上期活躍的 25% 以上：要處理；其他列在「個別玩家」'],
+ ['keep','回流','隔了 7 天以上又回來學習的人。','有人回流：做得好（列出名字）'],
+ ['learn','每人學習量','每位活躍玩家作答題數的中位數，和基準比。','少 25% 以上：要注意'],
+ ['learn','每日單字完成','活躍玩家裡完成「今日單字」的比例。至少 5 位活躍玩家才判斷。','不到 40%：要注意｜70% 以上：做得好'],
+ ['quality','整體答對率','只算練習（不含程度測驗、升級考、挑戰賽這些考試）。遊戲目標約 85%，健康範圍 70–90%。每日至少 200 題、每週至少 500 題。','低於 65%：要處理｜65–70%：要注意｜高於 90%：要注意'],
+ ['quality','模型偏差','實際答對率 − 遊戲預測的答對率。正數＝實際比預測好（題目偏簡單），負數＝偏難。每日至少 300 題、每週至少 600 題。','差 5 個百分點以上：要注意｜8 個以上：要處理'],
+ ['quality','到期複習','隔了 1 天以上、熟練盒 ≥ 1 的字再次出現時的答對率。理想 80–92%。每日至少 80 題、每週至少 200 題。','低於 75%：要注意（間隔太長）｜高於 94%：參考（間隔可拉長）'],
+ ['quality','題型答對率變化','五種題型各自的答對率和基準比，每種至少 80 題。','差 8 個百分點以上：要注意'],
+ ['quality','難字','本期答對率比「同程度、同題型」的平均低 25 個百分點以上的字。每日至少 12 次、每週至少 20 次作答。','列出最多 6 個：要注意'],
+ ['quality','易混淆','選擇題的「答案 → 被選成的錯字」。每日至少 4 次、每週至少 6 次，且占這個字作答的 15% 以上。','列出：參考（可改干擾選項或做專題）'],
+ ['exp','回合完成率','每個入口有多少回合沒做完。每日單字至少 10 個回合才判斷；放棄點有 40% 以上集中在同一步也會列出。','每日單字完成率低於 70%：要注意｜集中在同一步：要注意'],
+ ['exp','作答時間','每題作答時間的中位數和基準比。','慢 30% 以上：要注意'],
+ ['exp','疑似亂按','選擇題 0.7 秒內作答的比例。至少 100 題。','8% 以上：要注意（列出最多的玩家）'],
+ ['exp','新版本','本期開始出現的版本，和舊版本比答對率、完成率、作答時間、問題回報。新版本至少 30 題才比較。','答對率低 5 點、完成率低 10 點、作答時間慢 30% 以上：要注意'],
+ ['exp','問題回報','本期新回報、同一個錯誤訊息、同一題被回報、超過 3 天還沒處理的回報。','卡住 ≥ 3 份或同一錯誤 ≥ 2 份：要處理｜同一題 ≥ 2 份、積壓：要注意'],
+ ['learn','使用行為','（載入使用行為後）主動時間裡「學英文」的比例、在線時間的變化、沒有行為摘要的玩家。','學英文低於 15%：要注意｜在線時間少 30%：要注意'],
+ ['people','課堂使用','平日 07:00–17:00 之間，50 分鐘內有 6 位以上玩家同時開始學習。','列出：參考'],
+ ['people','程度挑戰賽','（每週報告、載入挑戰賽後）參加人數占本週活躍玩家的比例、最多人卡住的那一階。','參加不到 15%：要注意'],
+];
+
+Object.assign(Admin,{
+ opWho(r){const k=whoOf(r);return OP.who==='all'?k!=='test':k===OP.who},
+ // per player: every game day with learning (whole history), so "new", "came back" and streaks are exact
+ opIndex(){const key=OP.who+'|'+S.raw.length;if(OP.idxKey===key)return OP.idx;
+  const days={},sess=S.raw.filter(r=>this.opWho(r)&&r.t0);for(const r of sess){r.gd=r.gd||gday(r.t0);(days[r.pk]||(days[r.pk]=new Set())).add(r.gd)}
+  const first={};for(const k in days)first[k]=[...days[k]].sort()[0];
+  const all=[...new Set(sess.map(r=>r.gd))].sort();
+  OP.idx={sess,days,first,lo:all[0]||'',hi:all[all.length-1]||''};OP.idxKey=key;return OP.idx},
+ // everything the rules need for one period [a, b] (game-day keys, inclusive)
+ opStats(a,b){const I=this.opIndex(),sess=I.sess.filter(r=>r.gd>=a&&r.gd<=b),st={a,b,sess,ppl:new Set(),pd:new Set(),ans:[],kind:{},q:{},ver:{},lang:{},words:{},pairs:{},drop:{},perP:{},streak:{}};
+  for(const r of sess){const p=r.pk;st.ppl.add(p);st.pd.add(p+'|'+r.gd);
+   const K=st.kind[r.kind]||(st.kind[r.kind]={s:0,done:0,n:0,ok:0,ppl:new Set(),donePpl:new Set()});K.s++;K.ppl.add(p);if(r.done){K.done++;K.donePpl.add(p)}else{const stp=String(r.stop||'gone').replace(/\/\d+$/,'');const D=st.drop[r.kind]||(st.drop[r.kind]={});D[stp]=(D[stp]||0)+1}
+   const V=st.ver[r.app||'?']||(st.ver[r.app||'?']={s:0,done:0,n:0,ok:0,ms:[],ppl:new Set(),first:''});V.s++;if(r.done)V.done++;V.ppl.add(p);
+   st.lang[r.lang||'?']=(st.lang[r.lang||'?']||0)+1;st.streak[p]=Math.max(st.streak[p]||0,r.streak||0);
+   const P=st.perP[p]||(st.perP[p]={n:0,ok:0,fast:0,ch:0,days:new Set(),kinds:new Set()});P.days.add(r.gd);P.kinds.add(r.kind);
+   for(const x of r.ans||[]){const a2=Object.assign({kind:r.kind,pk:p,app:r.app,gd:r.gd},x);st.ans.push(a2);K.n++;K.ok+=x.ok;V.n++;V.ok+=x.ok;if(x.ms>0)V.ms.push(x.ms);P.n++;P.ok+=x.ok;
+    if(OP_CHOICE.has(x.q)){P.ch++;if(x.ms>0&&x.ms<700)P.fast++}
+    if(!OP_EXAM.has(r.kind)){const Q=st.q[x.q]||(st.q[x.q]={n:0,ok:0});Q.n++;Q.ok+=x.ok}
+    const W=st.words[x.w]||(st.words[x.w]={n:0,ok:0,exp:0,l:x.l});W.n++;W.ok+=x.ok;
+    if(!x.ok&&x.g&&OP_CHOICE.has(x.q)){const k=x.w+'→'+x.g;st.pairs[k]=(st.pairs[k]||0)+1}}}
+  const prac=st.ans.filter(x=>!OP_EXAM.has(x.kind)),ok=prac.filter(x=>x.ok).length;
+  st.n=st.ans.length;st.pracN=prac.length;st.acc=prac.length?ok/prac.length:null;
+  const withP=prac.filter(x=>typeof x.p==='number'&&x.p>=0&&x.p<=1);st.biasN=withP.length;st.bias=withP.length?withP.reduce((s,x)=>s+x.ok-x.p,0)/withP.length:null;
+  const exact=prac.some(x=>x.ge===0&&x.gap>=1),due=prac.filter(x=>x.gap>=1&&x.b0>=1&&(!exact||x.ge===0));st.dueN=due.length;st.dueAcc=due.length?due.filter(x=>x.ok).length/due.length:null;
+  st.ms=median(st.ans.filter(x=>x.ms>0).map(x=>x.ms));
+  const ch=st.ans.filter(x=>OP_CHOICE.has(x.q)&&x.ms>0);st.chN=ch.length;st.fast=ch.length?ch.filter(x=>x.ms<700).length/ch.length:null;
+  st.perPN=median([...st.ppl].map(p=>(st.perP[p]||{n:0}).n));
+  const dk=st.kind.daily;st.dailyDone=dk?dk.donePpl.size:0;st.dailyRate=st.ppl.size?st.dailyDone/st.ppl.size:null;
+  st.newP=[...st.ppl].filter(p=>I.first[p]>=a&&I.first[p]<=b);
+  for(const v in st.ver){const vs=I.sess.filter(r=>(r.app||'?')===v);st.ver[v].first=vs.reduce((m,r)=>!m||r.gd<m?r.gd:m,'')}
+  return st},
+ // average of the same numbers over the baseline periods that have data
+ opBase(list,f){const v=list.map(f).filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((s,x)=>s+x,0)/v.length:null},
+ opPeriods(){const m=OP.mode,d=OP.day;if(m==='day'){const base=[7,14,21,28].map(n=>kAdd(d,-n));return {cur:[d,d],prev:[kAdd(d,-1),kAdd(d,-1)],base:base.map(k=>[k,k]),label:kLabel(d),prevLabel:'前一天',baseLabel:'近 4 週同星期平均'}}
+  const a=kMon(d),b=kAdd(a,6);return {cur:[a,b],prev:[kAdd(a,-7),kAdd(a,-1)],base:[1,2,3,4].map(n=>[kAdd(a,-7*n),kAdd(a,-7*n+6)]),label:`${kLabel(a)} – ${kLabel(b)}`,prevLabel:'上週',baseLabel:'前 4 週平均'}},
+
+ // ---------- page ----------
+ opOpen(){const I=this.opIndex();
+  if(!OP.day||!$('op-day').value){const today=gday(Date.now()),last=I.hi||today;let d=kAdd(today,-1);if(last<d)d=last;OP.day=d;$('op-day').value=d}
+  if(!OP.auto&&!this.me.offline){OP.auto=true;if(!B.loaded)this.loadBehavior().then(()=>this.opRender());if(!RPA.rows.length)this.rpLoad().then(()=>this.opRender())}
+  this.opRender()},
+ opStep(n){OP.day=kAdd(OP.day,OP.mode==='day'?n:7*n);$('op-day').value=OP.day;this.opRender()},
+ async opContest(wk){const board=OP.who==='real'?'rows':'test',key=wk+'|'+board;if(key in OP.ct)return OP.ct[key];
+  if(CTA.wk===wk&&CTA.board===board&&CTA.rows.length)return OP.ct[key]=CTA.rows;
+  if(this.me.offline)return null;OP.ct[key]=null;
+  try{const {F,db}=await firebase(),snap=await F.getDocs(F.collection(db,'contest',wk,board)),rows=[];snap.forEach(d=>{const x=d.data();if((x.s|0)>0||(x.n|0)>0)rows.push(Object.assign({id:d.id},x))});OP.ct[key]=rows;this.log('load','contest',`${wk} ${board} ${rows.length} 人（營運報告）`);this.opRender()}catch(e){OP.ct[key]=null}
+  return OP.ct[key]},
+
+ opRender(){if(this.page!=='oprep')return;const out=$('op-out');
+  if(!S.raw.length){out.innerHTML=`<section><h2>還沒有學習紀錄</h2><p class="why">登入後會自動讀取；離線模式請到「資料與匯出」開啟 JSON 檔或示範資料。</p></section>`;$('op-src').innerHTML='';return}
+  OP.mode=$('op-mode').value;OP.who=$('op-who').value;OP.day=$('op-day').value||OP.day;
+  const R=this.opBuild();OP.last=R;out.innerHTML=R.html;$('op-src').innerHTML=R.src;
+  if(R.chart)chart('c-op',R.chart);
+  out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const [p,s]=b.dataset.go.split('/');this.go(p,s)})},
+
+ // ---------- the report ----------
+ opBuild(){
+  const PR=this.opPeriods(),cur=this.opStats(...PR.cur),prev=this.opStats(...PR.prev),I=this.opIndex();
+  const base=PR.base.filter(([a])=>a>=I.lo).map(p=>this.opStats(...p));
+  const day=OP.mode==='day',F=[],nm=k=>esc(this.nameOf(k)),names=(arr,max=8)=>arr.slice(0,max).map(nm).join('、')+(arr.length>max?` 等 ${arr.length} 人`:'');
+  const P1=x=>x==null?'–':(x*100).toFixed(1)+'%',pt=d=>(d>0?'+':'')+(d*100).toFixed(1)+' 點',chg=(c,b)=>b?((c-b)/b*100>0?'+':'')+Math.round((c-b)/b*100)+'%':'';
+  const add=(lv,area,title,ev,why,next,go,w=0)=>F.push({lv,area,title,ev,why,next,go,w});
+  const today=gday(Date.now()),partial=day?OP.day>=today:PR.cur[1]>=today;
+  const minAns=day?200:500,minBias=day?300:600,minDue=day?80:200,minWord=day?12:20,minPair=day?4:6;
+  const bAvg=f=>this.opBase(base,f),baseOK=base.length>=2&&!partial;
+
+  /* --- participation --- */
+  const act=cur.ppl.size,actB=bAvg(s=>s.ppl.size);
+  if(baseOK&&actB>=5){const r=(act-actB)/actB;
+   if(r<=-.3)add('alert','people','學習人數明顯變少',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'人數一下子少很多，常見原因依序是：假日或考試週、新版本載入失敗或卡住、上課沒有使用。先排除產品問題，再看是不是外部因素。',[['觀察','到「問題回報」看有沒有「卡住、當掉」或載入相關回報'],['觀察','看「版本」段落：人數變少是不是只發生在新版本'],['觀察',day?'明天同一時段的人數有沒有回來':'下週人數有沒有回到基準']],'reports',act);
+   else if(r<=-.15)add('watch','people','學習人數比平常少',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'少一些不一定是問題，連續兩期都偏少才代表趨勢。',[['觀察',day?'接下來 3 天是否持續偏低':'下週是否持續偏低']],'dashboard',act);
+   else if(r>=.3)add('good','people','學習人數明顯變多',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'人多的時候最該確認的是新玩家有沒有順利上手（程度測驗、第一次每日單字）。',[['觀察','看下面「新玩家」和「課堂使用」，找出人變多的來源']],'dashboard',act)}
+  const np=cur.newP,npDaily=np.filter(p=>cur.kind.daily&&cur.kind.daily.donePpl.has(p)),npGrade=np.filter(p=>cur.kind.grade&&cur.kind.grade.ppl.has(p));
+  if(np.length>=3&&npDaily.length/np.length<.5)add('watch','people','新玩家沒有完成第一次每日單字',`新玩家 ${np.length} 人：完成程度測驗 ${npGrade.length} 人、完成每日單字 ${npDaily.length} 人`,'新手流程是「看房間 → 程度測驗 → 每日單字」。第一次每日單字沒做完，隔天回來的機率會低很多。',[['觀察','到「在哪裡放棄」把入口選「每日複習」，看新玩家停在哪一步'],['調整','如果多數人停在程度測驗之後，考慮讓「去學今天的 10 個字」的提示更明顯']],'analysis/s-drop',np.length);
+  else if(np.length)add('info','people',`新玩家 ${np.length} 人`,`完成程度測驗 ${npGrade.length} 人、完成每日單字 ${npDaily.length} 人：${names(np)}`,'新玩家的前三天最關鍵，下一期報告會自動追蹤他們有沒有回來。',[['觀察',day?'明天的報告看這些人有沒有回來':'下週的報告看這些人有沒有回來']],null,np.length);
+
+  /* --- retention --- */
+  const prevNew=prev.newP,back=prevNew.filter(p=>cur.ppl.has(p));
+  if(prevNew.length>=3){const r=back.length/prevNew.length;
+   if(r<.3&&!partial)add('watch','keep',`${day?'前一天':'上週'}的新玩家很少回來`,`${prevNew.length} 人裡回來 ${back.length} 人（${P1(r)}）`,'新玩家第一次體驗後沒有回來，通常是第一次太難、太長，或不知道明天要做什麼。',[['觀察','到「留存與習慣」看各週新玩家的隔天回來率是否也在下降'],['調整','檢查程度測驗結果和第一次每日單字的答對率，太低就把第一天的題目再放簡單']],'analysis/s-retain',prevNew.length);
+   else if(r>=.5)add('good','keep',`${day?'前一天':'上週'}的新玩家有一半以上回來`,`${prevNew.length} 人裡回來 ${back.length} 人（${P1(r)}）`,'新手體驗有效。可以記下這段期間做了什麼（課堂推廣、版本內容），之後重複使用。',[],null,back.length)}
+  else if(prevNew.length)add('info','keep',`${day?'前一天':'上週'}的新玩家回來 ${back.length}／${prevNew.length} 人`,names(back.length?back:prevNew),'人數太少，先記錄不判斷。',[],null,0);
+  let lost=[];
+  if(day){lost=[...prev.ppl].filter(p=>!cur.ppl.has(p)&&(prev.streak[p]||0)>=5)}
+  else{lost=[...prev.ppl].filter(p=>!cur.ppl.has(p)&&prev.perP[p]&&prev.perP[p].days.size>=3)}
+  if(lost.length&&!partial){const share=prev.ppl.size?lost.length/prev.ppl.size:0;
+   add(share>=.25&&lost.length>=3?'alert':'watch','keep',day?'連續天數斷掉的玩家':'上週常來、本週沒來的玩家',`${lost.length} 人：${names(lost)}`,day?'這些人前一天還在連續學習（5 天以上），這一天沒有來。一天沒來很正常，連續兩天沒來就值得關心。':'上週來了 3 天以上、本週一天都沒來。占上週活躍玩家的 '+P1(share)+'。',[['觀察',day?'明天這些人有沒有回來':'下週有沒有回來；如果是同一班的學生，可能是課程安排'],['調整','如果是固定流失，考慮連續天數斷掉時給一個「回來就補一天」的溫和機制']],null,lost.length)}
+  const returned=[...cur.ppl].filter(p=>{const ds=[...I.days[p]].filter(d=>d<PR.cur[0]).sort();return ds.length&&kAdd(ds[ds.length-1],7)<=PR.cur[0]});
+  if(returned.length)add('good','keep','有玩家隔了一週以上又回來',`${returned.length} 人：${names(returned)}`,'回流代表房間、寵物或商人還吸引著他們。可以看看他們回來後先做了什麼。',[],null,returned.length);
+
+  /* --- learning volume --- */
+  const perB=bAvg(s=>s.perPN);
+  if(baseOK&&perB>=5&&cur.perPN!=null&&(cur.perPN-perB)/perB<=-.25)add('watch','learn','每人學習量變少',`每人作答中位數 ${fmt(cur.perPN)} 題，${PR.baseLabel} ${fmt(perB,1)} 題（${chg(cur.perPN,perB)}）`,'人有來，但學得比較少。可能是被別的內容吸引（小遊戲、佈置），或每日單字做不完。',[['觀察','載入使用行為，看主動時間裡「學英文」的比例'],['觀察','看「入口」表，是哪個入口的量變少']],'behavior',act);
+  if(act>=5&&cur.dailyRate!=null){if(cur.dailyRate<.4)add('watch','learn','完成每日單字的人偏少',`活躍 ${act} 人，完成每日單字 ${cur.dailyDone} 人（${P1(cur.dailyRate)}）`,'每日單字是最主要的學習入口，也是連續天數的來源。完成比例低，代表很多人上線卻沒有學到核心內容。',[['觀察','到「在哪裡放棄」看每日複習停在哪一步'],['調整','考慮讓房間裡的提示（行事曆、泡泡）更早引導到每日單字']],'analysis/s-drop',act);
+   else if(cur.dailyRate>=.7)add('good','learn','大部分玩家都完成每日單字',`活躍 ${act} 人，完成 ${cur.dailyDone} 人（${P1(cur.dailyRate)}）`,'核心學習習慣穩定。',[],null,cur.dailyDone)}
+
+  /* --- quality --- */
+  if(cur.pracN>=minAns&&cur.acc!=null){const a=cur.acc;
+   if(a<.65)add('alert','quality','練習的答對率太低',`${P1(a)}（${fmt(cur.pracN)} 題，目標約 85%）`,'題目整體偏難，玩家容易挫折、放棄。先看是不是某個題型或某個程度拉低。',[['觀察','看下面「題型」表和「難字」'],['觀察','到「模型校正」看遊戲是否高估了玩家程度'],['調整','如果是新玩家拉低，檢查程度測驗是否把程度估太高']],'analysis/s-calib',cur.pracN);
+   else if(a<.7)add('watch','quality','練習的答對率偏低',`${P1(a)}（${fmt(cur.pracN)} 題，健康範圍 70–90%）`,'稍微偏難。連續偏低才需要調整。',[['觀察','看「題型」和「難字」是哪裡拉低']],'analysis/s-matrix',cur.pracN);
+   else if(a>.9)add('watch','quality','練習的答對率太高',`${P1(a)}（${fmt(cur.pracN)} 題，健康範圍 70–90%）`,'題目太簡單，玩家花時間卻學不到新東西。常見原因是程度勾太低，或一直在複習很熟的字。',[['觀察','到「英文程度測驗」看玩家勾選的程度是否低於實測'],['調整','提高新字比例，或建議玩家勾選更高的程度']],'analysis/s-grade',cur.pracN)}
+  if(cur.biasN>=minBias&&cur.bias!=null&&Math.abs(cur.bias)>=.05){const b=cur.bias;
+   add(Math.abs(b)>=.08?'alert':'watch','quality',b>0?'遊戲低估了玩家（題目偏簡單）':'遊戲高估了玩家（題目偏難）',`實際 − 預測 ＝ ${pt(b)}（${fmt(cur.biasN)} 題）`,b>0?'玩家實際答對的比遊戲以為的多，出題會比 85% 更簡單。':'玩家實際答對的比遊戲以為的少，出題會比 85% 更難，容易挫折。',[['觀察','到「模型校正」看偏差集中在哪個題型、哪個程度'],['調整','偏差連續兩週同方向時，依「模型校正」頁的建議調整題型難度參數']],'analysis/s-calib',cur.biasN)}
+  if(cur.dueN>=minDue&&cur.dueAcc!=null){if(cur.dueAcc<.75)add('watch','quality','到期複習答錯偏多',`隔天以上再出現的字答對 ${P1(cur.dueAcc)}（${fmt(cur.dueN)} 題，理想 80–92%）`,'複習間隔可能太長，玩家在複習前就忘了。',[['觀察','到「遺忘曲線」看是哪一個熟練盒掉最多'],['調整','把那一盒的間隔縮短一天']],'analysis/s-forget',cur.dueN);
+   else if(cur.dueAcc>.94)add('info','quality','到期複習幾乎都答對',`答對 ${P1(cur.dueAcc)}（${fmt(cur.dueN)} 題）`,'間隔可能可以拉長，讓玩家把時間花在新字。',[['觀察','到「遺忘曲線」確認各熟練盒的答對率']],'analysis/s-forget',0)}
+  const qRows=Object.keys(QT).map(q=>{const c=cur.q[q],bb=bAvg(s=>s.q[q]&&s.q[q].n>=30?s.q[q].ok/s.q[q].n:null);return {q,n:c?c.n:0,acc:c&&c.n?c.ok/c.n:null,bb}});
+  for(const r of qRows)if(r.n>=80&&r.bb!=null&&Math.abs(r.acc-r.bb)>=.08)add('watch','quality',`「${QT[r.q]}」的答對率${r.acc<r.bb?'下降':'上升'}`,`${P1(r.acc)}，${PR.baseLabel} ${P1(r.bb)}（${pt(r.acc-r.bb)}，${fmt(r.n)} 題）`,'單一題型突然變化，通常是題目內容、發音或介面改了，或這期剛好出了很多難字。',[['觀察','看下面「難字」是否集中在這個題型'],['觀察','如果剛換版本，比較新舊版本這個題型的答對率']],'analysis/s-matrix',r.n);
+  // expected accuracy of each level x type from the current and baseline periods together
+  const LT={};for(const s of [cur,...base])for(const x of s.ans){if(OP_EXAM.has(x.kind))continue;const k=x.l+'|'+x.q,m=LT[k]||(LT[k]={n:0,ok:0});m.n++;m.ok+=x.ok}
+  for(const x of cur.ans){const m=LT[x.l+'|'+x.q];cur.words[x.w].exp+=m&&m.n?m.ok/m.n:.8}
+  const hard=Object.entries(cur.words).filter(([,W])=>W.n>=minWord).map(([w,W])=>({w,n:W.n,acc:W.ok/W.n,exp:W.exp/W.n,l:W.l})).filter(x=>x.acc-x.exp<=-.25).sort((a,b)=>(a.acc-a.exp)-(b.acc-b.exp)).slice(0,6);
+  if(hard.length)add('watch','quality','比同程度難很多的字',hard.map(x=>`<b>${esc(x.w)}</b>（L${x.l}，${P1(x.acc)}，預期 ${P1(x.exp)}，${x.n} 次）`).join('、'),'這些字可能程度標錯、中文解釋不清楚、發音難辨，或干擾選項太像。',[['調整','到「單字難度」確認，再修改程度或解釋'],['觀察','下一期這些字的答對率是否改善']],'analysis/s-words',hard.length);
+  const wN=w=>(cur.words[w]||{n:0}).n,pairs=Object.entries(cur.pairs).filter(([k,n])=>n>=minPair&&n/wN(k.split('→')[0])>=.15).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(pairs.length)add('info','quality','容易搞混的字',pairs.map(([k,n])=>`${esc(k)}（${n} 次）`).join('、'),'玩家把答案選成另一個字，代表這兩個字真的容易混淆。',[['調整','做成「易混淆字」知識卡或練習'],['觀察','如果兩個字意思其實都對，改干擾選項']],'analysis/s-confuse',0);
+
+  /* --- experience --- */
+  const dk=cur.kind.daily;if(dk&&dk.s>=10&&dk.done/dk.s<.7)add('watch','exp','每日單字有很多回合沒做完',`${dk.s} 個回合完成 ${dk.done} 個（${P1(dk.done/dk.s)}）`,'做到一半離開，可能是太長、太難，或被打斷（下課、手機通知）。',[['觀察','看下面「放棄點」集中在哪一步']],'analysis/s-drop',dk.s-dk.done);
+  for(const [k,D] of Object.entries(cur.drop)){const tot=Object.values(D).reduce((a,b)=>a+b,0),[top,n]=Object.entries(D).sort((a,b)=>b[1]-a[1])[0]||[];if(tot>=5&&n/tot>=.4&&top!=='result')add('watch','exp',`「${KIND[k]||k}」的放棄集中在同一步`,`${tot} 次沒做完，其中 ${n} 次停在「${opStop(top)}」（${P1(n/tot)}）`,'集中在同一步代表那裡有東西卡住：題目太難、畫面不清楚，或按鈕不好找。',[['觀察','實際玩一次這個入口，走到那一步看看'],['觀察','看問題回報有沒有相關描述']],'analysis/s-drop',n)}
+  const msB=bAvg(s=>s.ms);if(baseOK&&msB&&cur.ms&&(cur.ms-msB)/msB>=.3)add('watch','exp','每題作答變慢',`中位數 ${fmt(cur.ms/1000,1)} 秒，${PR.baseLabel} ${fmt(msB/1000,1)} 秒（${chg(cur.ms,msB)}）`,'變慢可能是題目變難、裝置變慢、音檔載入慢，或新版本的介面改變。',[['觀察','比較各版本的作答時間（下面「版本」）']],null,act);
+  if(cur.chN>=100&&cur.fast>=.08){const who=Object.entries(cur.perP).filter(([,P])=>P.ch>=20&&P.fast/P.ch>=.3).sort((a,b)=>b[1].fast/b[1].ch-a[1].fast/a[1].ch).map(([p])=>p);
+   add('watch','exp','有人在亂按選項',`選擇題 0.7 秒內作答 ${P1(cur.fast)}`+(who.length?`；比例最高：${names(who,5)}`:''),'亂按會讓答對率和模型校正失真，也代表玩家只想拿獎勵。',[['觀察','這些玩家的答對率是不是特別低'],['調整','如果持續發生，考慮太快作答時不給獎勵']],null,who.length)}
+  // versions: one that first appeared in this period vs the versions before it
+  const vs=Object.entries(cur.ver).filter(([v])=>v!=='?');const fresh=vs.filter(([,V])=>V.first>=PR.cur[0]&&V.first<=PR.cur[1]);
+  for(const [v,V] of fresh){const old=vs.filter(([w])=>w!==v);const on=old.reduce((s,[,O])=>s+O.n,0),ook=old.reduce((s,[,O])=>s+O.ok,0),os=old.reduce((s,[,O])=>s+O.s,0),od=old.reduce((s,[,O])=>s+O.done,0),oms=median(old.flatMap(([,O])=>O.ms));
+   const share=act?V.ppl.size/act:0,msgs=[],acc=V.n?V.ok/V.n:null;let lv='info';
+   if(V.n>=30&&on>=30){if(acc-ook/on<=-.05){msgs.push(`答對率 ${P1(acc)}（舊版 ${P1(ook/on)}）`);lv='watch'}if(V.s>=5&&os>=5&&V.done/V.s-od/os<=-.1){msgs.push(`完成率 ${P1(V.done/V.s)}（舊版 ${P1(od/os)}）`);lv='watch'}const vm=median(V.ms);if(vm&&oms&&(vm-oms)/oms>=.3){msgs.push(`作答時間 ${fmt(vm/1000,1)} 秒（舊版 ${fmt(oms/1000,1)} 秒）`);lv='watch'}}
+   add(lv,'exp',`新版本 ${esc(v)} 開始使用`,`${kLabel(V.first)} 起，${V.ppl.size} 人（活躍的 ${P1(share)}）、${fmt(V.n)} 題`+(msgs.length?'；比舊版差：'+msgs.join('、'):''),msgs.length?'新版本的學習數字比舊版差，先確認是不是這版改到題目、出題或介面。':'新版本上線後前幾天最容易出問題，持續看問題回報和完成率。',[['觀察','到「問題回報」篩選這個版本'],['觀察',`${day?'明天':'下週'}再比較一次新舊版本`]],'reports',V.ppl.size)}
+
+  /* --- problem reports --- */
+  const rpIn=RPA.rows.filter(r=>{const g=gday(r.at||r.t||0);return g>=PR.cur[0]&&g<=PR.cur[1]&&(OP.who==='real'?!r.test:true)});
+  if(RPA.rows.length){const cat={};for(const r of rpIn)cat[r.cat]=(cat[r.cat]||0)+1;
+   const errs={};for(const r of rpIn)for(const e of r.errs||[]){const m=String(e).replace(/^\d\d:\d\d:\d\d\s*/,'').slice(0,80);(errs[m]||(errs[m]=new Set())).add(r.id)}
+   const errTop=Object.entries(errs).filter(([,s])=>s.size>=2).sort((a,b)=>b[1].size-a[1].size);
+   const items={};for(const r of rpIn)if(r.cat==='quiz'&&r.ans&&r.ans.item){const k=r.ans.item;(items[k]||(items[k]=[])).push(r)}const itemTop=Object.entries(items).filter(([,a])=>a.length>=2);
+   if((cat.stuck||0)>=3||errTop.length)add('alert','exp','有玩家卡住或遇到相同的錯誤',[(cat.stuck?`「卡住、當掉」${cat.stuck} 份`:''),...errTop.slice(0,3).map(([m,s])=>`${s.size} 份：<code>${esc(m)}</code>`)].filter(Boolean).join('；'),'同一個錯誤被不同玩家遇到，幾乎一定是程式問題，會直接讓人離開。',[['處理','到「問題回報」打開這幾份，把錯誤訊息和當時畫面交給工程'],['觀察','修正版上線後，這個錯誤是否消失']],'reports',(cat.stuck||0)+errTop.length*3);
+   if(itemTop.length)add('watch','quality','同一題被多人回報',itemTop.map(([w,a])=>`<b>${esc(w)}</b>（${a.length} 份）`).join('、'),'多人回報同一題，通常是答案真的有爭議（兩個都對、解釋不清楚）。',[['調整','修改這題的中文解釋或干擾選項'],['處理','在回報上寫備註並改成「已處理」，玩家會看到']],'reports',itemTop.length*2);
+   const now=Date.now(),stale=RPA.rows.filter(r=>r.status==='new'&&now-(r.at||r.t||now)>3*864e5&&(OP.who==='real'?!r.test:true));
+   if(stale.length)add('watch','exp','有回報超過 3 天沒有處理',`${stale.length} 份（最久 ${Math.floor((now-Math.min(...stale.map(r=>r.at||r.t)))/864e5)} 天）`,'玩家看得到處理狀態。改成「處理中」就能讓他知道有人在看。',[['處理','到「問題回報」篩選「新收到」，先改狀態']],'reports',stale.length);
+   OP.rp={rpIn,cat,errTop,items:itemTop}}else OP.rp=null;
+
+  /* --- behaviour --- */
+  let bh=null;
+  if(B.loaded){const sel=r=>{const t=r.tester||/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct)),s=/^sim\d/.test(r.dev||'');return OP.who==='all'?s||!t:OP.who==='sim'?s:!t&&!s};
+   const sum=([a,b])=>{const rows=B.raw.filter(r=>r.d>=a&&r.d<=b&&sel(r));if(!rows.length)return null;const t=this.bhSum(rows),tot=Object.values(t.act).reduce((x,y)=>x+y,0);return {t,rows,tot,learn:tot?(t.act.learn||0)/tot:null,visMed:median(rows.map(r=>r.v2?r.vis:(r.min||0))),users:t.users}};
+   bh=sum(PR.cur);const bb=PR.base.map(sum).filter(Boolean),visB=bb.length>=2?this.opBase(bb,x=>x.visMed):null;
+   if(bh){if(bh.tot>=60&&bh.learn<.15)add('watch','learn','玩的時候很少在學英文',`主動時間裡「學英文」占 ${P1(bh.learn)}`,'玩家來了，但大部分時間在別的地方。房間、小遊戲是吸引人來的，學習入口要在這些地方被看見。',[['觀察','到「使用行為」看時間主要花在哪裡'],['調整','在玩家最常待的地方（例如小遊戲結束時）加一個學習入口']],'behavior',bh.users.size);
+    if(visB&&bh.visMed!=null&&(bh.visMed-visB)/visB<=-.3)add('watch','learn','每人在線時間變短',`每人每天 ${fmt(bh.visMed,1)} 分，${PR.baseLabel} ${fmt(visB,1)} 分（${chg(bh.visMed,visB)}）`,'在線時間變短，常常比人數變少更早出現。',[['觀察','下一期是否持續']],'behavior',bh.users.size);
+    const miss=[...cur.ppl].filter(p=>!bh.users.has(p));if(act>=5&&miss.length/act>=.3)add('info','exp','部分學習玩家沒有使用行為紀錄',`${miss.length} 人有學習紀錄、沒有行為摘要`,'可能是舊版本、上傳失敗，或行為摘要比學習紀錄晚上傳（最多 15 分鐘）。',[['觀察','隔天再看一次；持續很多就檢查上傳']],'behavior',0)}}
+
+  /* --- class use: 6+ players start within 50 minutes on a school day --- */
+  const cls=[];{const byD={};for(const r of cur.sess){const d=new Date(r.t0),wd=d.getDay(),h=d.getHours();if(wd===0||wd===6||h<7||h>=17)continue;const k=dayKey(r.t0);(byD[k]||(byD[k]=[])).push(r)}
+   for(const [k,list] of Object.entries(byD)){const firsts={};for(const r of list)if(!firsts[r.pk]||r.t0<firsts[r.pk])firsts[r.pk]=r.t0;const ts=Object.entries(firsts).sort((a,b)=>a[1]-b[1]);
+    let i=0,best=null;for(let j=0;j<ts.length;j++){while(ts[j][1]-ts[i][1]>50*6e4)i++;const n=j-i+1;if(n>=6&&(!best||n>best.n))best={n,a:ts[i][1],b:ts[j][1],p:ts.slice(i,j+1).map(x=>x[0])}}
+    if(best){const nw=best.p.filter(p=>I.first[p]===gday(best.a)).length,hm=t=>new Date(t).toTimeString().slice(0,5);cls.push({k,...best,nw,txt:`${kLabel(k)} ${hm(best.a)}–${hm(best.b)}：${best.n} 人${nw?`（其中 ${nw} 位第一次）`:''}`})}}}
+  if(cls.length)add('info','people','疑似課堂使用',cls.map(c=>c.txt).join('；'),'短時間內很多人一起開始，通常是老師在課堂上帶。這是最好的推廣時機，也最容易遇到同時載入的問題（GitHub 429）。',[['觀察','這些玩家隔天、下週有沒有自己回來'],['觀察','同一時段有沒有「卡住、載入」的問題回報']],null,cls.reduce((s,c)=>s+c.n,0));
+
+  /* --- contest (weekly) --- */
+  let ct=null;if(!day){const wk='w'+PR.cur[0],key=wk+'|'+(OP.who==='real'?'rows':'test');if(key in OP.ct)ct=OP.ct[key];else this.opContest(wk);
+   if(ct&&ct.length){const reach=[1,2,3,4,5,6].map(l=>ct.filter(r=>r.l>=l).length),drops=reach.map((x,i)=>(i?reach[i-1]:ct.length)-x),worst=drops.indexOf(Math.max(...drops)),rate=act?ct.length/act:0;
+    add(rate<.15&&act>=10?'watch':'info','people','程度挑戰賽',`參加 ${ct.length} 人（本週活躍的 ${P1(rate)}）；登頂 ${reach[5]} 人；最多人卡在 L${worst+1}（${drops[worst]} 人）`,rate<.15?'參加的人少，可能是不知道有這個活動，或覺得太難。':'看最多人卡住的那一階，那一階的題目可能太難。',[['觀察','到「程度挑戰賽」看分布'],['調整','如果大家都卡在同一階，檢查那一階 15 題裡的難字']],'contest',ct.length)}}
+
+  /* ---------- assemble ---------- */
+  F.sort((a,b)=>OP_LV[b.lv].w-OP_LV[a.lv].w||b.w-a.w);
+  const areaSt=k=>{const f=F.filter(x=>x.area===k);return f.some(x=>x.lv==='alert')?'alert':f.some(x=>x.lv==='watch')?'watch':f.some(x=>x.lv==='good')?'good':'ok'};
+  const enough={people:act>0,learn:cur.n>0,quality:cur.pracN>=minAns/2,exp:cur.sess.length>=5,keep:prev.ppl.size>0};
+  const light={ok:['正常','var(--good)'],good:['做得好','var(--good)'],watch:['要注意','var(--warn)'],alert:['要處理','var(--acc2)'],na:['資料不足','var(--ink2)']};
+  const areas=Object.keys(OP_AREA).map(k=>{const s=enough[k]?areaSt(k):'na',f=F.filter(x=>x.area===k&&x.lv!=='info')[0];return `<div class="op-light"><i style="background:${light[s][1]}"></i><b>${OP_AREA[k]}</b><span>${light[s][0]}</span><small>${f?esc(f.title):s==='na'?'這期資料太少':'沒有異常'}</small></div>`}).join('');
+  const nA=F.filter(x=>x.lv==='alert').length,nW=F.filter(x=>x.lv==='watch').length,nG=F.filter(x=>x.lv==='good').length;
+  const head=`${day?PR.label:PR.label+' 這週'}共有 <b>${act}</b> 人學習`+(baseOK&&actB?`（${PR.baseLabel} ${fmt(actB,1)} 人，${chg(act,actB)||'持平'}）`:'')+`，作答 <b>${fmt(cur.n)}</b> 題`+(cur.acc!=null?`、練習答對率 <b>${P1(cur.acc)}</b>`:'')+(cur.newP.length?`，新玩家 <b>${cur.newP.length}</b> 人`:'')+'。'
+   +(nA||nW?` 有 <b>${nA}</b> 件要處理、<b>${nW}</b> 件要注意`:' 沒有需要處理的異常')+(nG?`；做得好的有 <b>${nG}</b> 件`:'')+'。'+(F[0]&&F[0].lv!=='good'&&F[0].lv!=='info'?` 最優先：${F[0].title}。`:'');
+  const goBtn=g=>g?`<button data-go="${g}">前往${(()=>{const [p,s]=g.split('/'),P=PAGES.find(x=>x.id===p);return P?'「'+(s?P.subs.find(x=>x[0]===s)[1]:P.n)+'」':''})()}</button>`:'';
+  const fHtml=F.map(f=>`<div class="op-f op-${f.lv}"><div class="op-fh"><span class="tag op-t" style="background:${OP_LV[f.lv].c}">${OP_LV[f.lv].n}</span><span class="tag">${OP_AREA[f.area]}</span><b>${f.title}</b></div><div class="op-ev">${f.ev}</div><p class="op-why">${f.why}</p>${f.next.length?`<ul class="op-next">${f.next.map(([t,x])=>`<li><span class="tag">${t}</span>${x}</li>`).join('')}</ul>`:''}${goBtn(f.go)}</div>`).join('')||'<p class="muted">這期沒有觸發任何判讀規則。</p>';
+
+  // key numbers: this period / previous / baseline
+  const row=(name,c,p,bv,f,good)=>{const rate=f===P1||name.includes('偏差');if(rate){const d=c!=null&&bv!=null?c-bv:null,col=d==null||Math.abs(d)<.03||!good?'':((d>0)===(good==='up')?'var(--good)':'var(--acc2)');return `<tr><td>${name}</td><td class="n"><b>${f(c)}</b></td><td class="n">${f(p)}</td><td class="n">${f(bv)}</td><td class="n" style="color:${col}">${d==null?'–':pt(d)}</td></tr>`}
+   const d=c!=null&&bv!=null&&bv!==0?(c-bv)/Math.abs(bv):null,col=d==null||Math.abs(d)<.1||!good?'':((d>0)===(good==='up')?'var(--good)':'var(--acc2)');return `<tr><td>${name}</td><td class="n"><b>${f(c)}</b></td><td class="n">${f(p)}</td><td class="n">${f(bv)}</td><td class="n" style="color:${col}">${d==null?'–':(d>0?'+':'')+Math.round(d*100)+'%'}</td></tr>`};
+  const N=x=>x==null?'–':fmt(x,Number.isInteger(x)?0:1),S2=x=>x==null?'–':fmt(x/1000,1)+' 秒';
+  const kv=[['學習人數（不重複）',s=>s.ppl.size,N,'up'],['學習人次（人‧天）',s=>s.pd.size,N,'up'],['新玩家',s=>s.newP.length,N,'up'],['回合數',s=>s.sess.length,N,'up'],['作答題數',s=>s.n,N,'up'],['每人作答（中位數）',s=>s.perPN,N,'up'],['練習答對率',s=>s.acc,P1,''],['到期複習答對率',s=>s.dueAcc,P1,''],['模型偏差（實際−預測）',s=>s.bias,x=>x==null?'–':pt(x),''],['完成每日單字的人',s=>s.dailyDone,N,'up'],['回合完成率',s=>s.sess.length?s.sess.filter(r=>r.done).length/s.sess.length:null,P1,'up'],['每題作答時間（中位數）',s=>s.ms,S2,'down']];
+  const kt=`<div class="tbl" style="max-height:none"><table><thead><tr><th>指標</th><th class="n">${day?'這一天':'本週'}</th><th class="n">${PR.prevLabel}</th><th class="n">${PR.baseLabel}</th><th class="n">和基準比</th></tr></thead><tbody>${kv.map(([n,f,fm,g])=>row(n,f(cur),f(prev),baseOK?this.opBase(base,f):null,fm,g)).join('')}</tbody></table></div>`;
+
+  // entries and question types
+  const kRows=Object.entries(cur.kind).sort((a,b)=>b[1].n-a[1].n).map(([k,K])=>`<tr><td>${KIND[k]||k}</td><td class="n">${K.ppl.size}</td><td class="n">${K.s}</td><td class="n">${P1(K.s?K.done/K.s:null)}</td><td class="n">${fmt(K.n)}</td><td class="n">${P1(K.n?K.ok/K.n:null)}</td></tr>`).join('');
+  const qT=qRows.filter(r=>r.n).map(r=>`<tr><td>${QT[r.q]}</td><td class="n">${fmt(r.n)}</td><td class="n">${P1(r.acc)}</td><td class="n">${P1(r.bb)}</td></tr>`).join('');
+  const dropT=Object.entries(cur.drop).flatMap(([k,D])=>Object.entries(D).map(([s,n])=>[k,s,n])).sort((a,b)=>b[2]-a[2]).slice(0,10).map(([k,s,n])=>`<tr><td>${KIND[k]||k}</td><td>${opStop(s)}</td><td class="n">${n}</td></tr>`).join('');
+  const verT=vs.sort((a,b)=>b[1].ppl.size-a[1].ppl.size).map(([v,V])=>`<tr><td>${esc(v)}${V.first>=PR.cur[0]?' <span class="tag easy">新</span>':''}</td><td class="n">${V.ppl.size}</td><td class="n">${fmt(V.n)}</td><td class="n">${P1(V.n?V.ok/V.n:null)}</td><td class="n">${P1(V.s?V.done/V.s:null)}</td><td class="n">${S2(median(V.ms))}</td></tr>`).join('');
+  // players to know about
+  const ppl=[...cur.ppl].map(p=>({p,...cur.perP[p],acc:cur.perP[p].n?cur.perP[p].ok/cur.perP[p].n:null}));
+  const lowAcc=ppl.filter(x=>x.n>=30&&x.acc<.55).sort((a,b)=>a.acc-b.acc),highAcc=ppl.filter(x=>x.n>=50&&x.acc>.95),top=[...ppl].sort((a,b)=>b.n-a.n).slice(0,5);
+  const plist=(t,arr,f,hint)=>arr.length?`<tr><td>${t}</td><td style="white-space:normal">${arr.slice(0,10).map(x=>nm(x.p||x)+(f?`（${f(x)}）`:'')).join('、')}${arr.length>10?` 等 ${arr.length} 人`:''}</td><td class="muted" style="white-space:normal">${hint}</td></tr>`:'';
+  const pT=[plist('新玩家',cur.newP.map(p=>({p,...cur.perP[p]})),x=>`${x.n} 題`,'看他們明天有沒有回來'),plist(day?'這一天沒來、前一天還在連續學習':'上週常來、本週沒來',lost,null,'可以請老師或家長關心'),plist('隔一週以上又回來',returned,null,'回來後在做什麼'),plist('答對率很低',lowAcc,x=>P1(x.acc),'程度可能勾太高'),plist('答對率很高',highAcc,x=>P1(x.acc),'程度可能勾太低'),plist('學最多',top,x=>`${x.n} 題`,'可以當成玩家訪談對象')].join('');
+  // behaviour block
+  const bhHtml=bh?(()=>{const t=bh.t,acts=Object.entries(t.act).sort((a,b)=>b[1]-a[1]).slice(0,6),mini=Object.entries(t.mini).sort((a,b)=>b[1]-a[1]).slice(0,5);
+   return `<div class="kpis">${[['不重複玩家',fmt(bh.users.size)],['每人每天在線（中位數）',fmt(bh.visMed,1)+' 分'],['開番茄鐘的人',fmt(t.focusU.size)],['聽音樂的人',fmt(t.musU.size)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('')}</div>
+   <p class="why" style="margin-top:10px">主動時間花在哪裡：${acts.map(([k,m])=>`${(BACT[k]||k).replace(/（.*）/,'')} ${P1(bh.tot?m/bh.tot:0)}`).join('、')}${mini.length?`<br>最多人玩的小遊戲：${mini.map(([k,n])=>`${BMINI[k]||k} ${n} 次`).join('、')}`:''}</p>`})():`<p class="why">${this.me.offline?'離線模式：到「使用行為」按「示範資料」或開啟資料後，這裡會一起分析。':'讀取中，或還沒有讀取使用行為。'}</p>`;
+  const rp=OP.rp,rpHtml=rp?`<p class="why">本期新回報 <b>${rp.rpIn.length}</b> 份${rp.rpIn.length?'：'+Object.entries(rp.cat).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${(RP_L['c.'+c]||c)} ${n}`).join('、'):''}。目前「新收到」還沒處理的共 <b>${RPA.rows.filter(r=>r.status==='new'&&(OP.who==='real'?!r.test:true)).length}</b> 份。</p>${rp.rpIn.length?`<div class="tbl"><table><thead><tr><th>時間</th><th>類型</th><th>內容</th><th>版本</th><th>狀態</th></tr></thead><tbody>${rp.rpIn.slice(0,12).map(r=>`<tr><td>${new Date(r.at||r.t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}</td><td>${esc(RP_L['c.'+r.cat]||r.cat)}</td><td style="white-space:normal">${esc(this.rpSum(r))}</td><td>${esc(r.ver||'')}</td><td>${esc(r.status)}</td></tr>`).join('')}</tbody></table></div>`:''}`:`<p class="why">${this.me.offline?'離線模式：到「問題回報」按「示範資料」後，這裡會一起分析。':'讀取中，或還沒有讀取問題回報。'}</p>`;
+  // daily bars for a week, hours for a day
+  let chartCfg;if(day){const H=Array(24).fill(0).map(()=>new Set());for(const r of cur.sess)H[new Date(r.t0).getHours()].add(r.pk);chartCfg={type:'bar',data:{labels:H.map((_,i)=>i+'時'),datasets:[{label:'開始學習的人',data:H.map(s=>s.size),backgroundColor:'#8c5aa8cc'}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'人數'}}}}}}
+  else{const ks=[0,1,2,3,4,5,6].map(i=>kAdd(PR.cur[0],i)),per=ks.map(k=>this.opStats(k,k));chartCfg={type:'bar',data:{labels:ks.map(kLabel),datasets:[{type:'line',label:'學習人數',data:per.map(s=>s.ppl.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{type:'bar',label:'作答題數',data:per.map(s=>s.n),yAxisID:'y2',backgroundColor:'#d9566f99'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人數'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題數'}}}}}}
+  const steps=F.flatMap(f=>f.next.map(([t,x])=>({t,x,f:f.title,lv:f.lv})));
+  const stepHtml=['處理','調整','觀察'].map(t=>{const s=steps.filter(x=>x.t===t);return s.length?`<h3>${t==='處理'?'馬上處理':t==='調整'?'可以考慮的調整':(day?'明天要看的':'下週要看的')}</h3><ul class="op-next">${s.map(x=>`<li>${x.x} <span class="muted">← ${x.f}</span></li>`).join('')}</ul>`:''}).join('')||'<p class="muted">沒有需要追蹤的事。</p>';
+  const rulesHtml=`<details><summary><b>判讀規則一覽</b>（${OP_RULES.length} 條）</summary><div class="tbl" style="max-height:none;margin-top:8px"><table><thead><tr><th>面向</th><th>規則</th><th>怎麼算</th><th>門檻</th></tr></thead><tbody>${OP_RULES.map(r=>`<tr><td>${OP_AREA[r[0]]}</td><td><b>${r[1]}</b></td><td style="white-space:normal">${r[2]}</td><td style="white-space:normal">${r[3]}</td></tr>`).join('')}</tbody></table></div></details>`;
+  const whoN={real:'真實玩家',sim:'模擬學生',all:'全部（不含測試帳號）'}[OP.who];
+  const warn=[partial?`這${day?'一天':'週'}還沒過完（遊戲的一天從早上 6 點開始），數字會繼續增加；「和平常比」的判讀等過完再做。`:'',!baseOK?'基準資料不足（需要前幾期也有資料），「和平常比」的判讀先不做。':'',OP.who==='real'&&!act&&I.sess.length===0&&S.raw.some(r=>whoOf(r)==='sim')?'目前沒有真實玩家的紀錄；上面「對象」可以改成「模擬學生」。':''].filter(Boolean).map(x=>`<p class="note">${x}</p>`).join('');
+  const html=`${warn}
+<section><h2>${day?'每日':'每週'}營運報告：${PR.label}</h2><p class="why">對象：${whoN}。遊戲的一天從早上 6:00 開始，一週從週一 6:00 開始。</p><p class="op-head">${head}</p><div class="op-lights">${areas}</div></section>
+<section><h2>重點與下一步</h2><p class="why">依嚴重程度排序。每一點都寫了數據、怎麼判讀、下一步要觀察或調整什麼。</p>${fHtml}</section>
+<section><h2>關鍵數字</h2><p class="why">「和基準比」：人數、題數看增減百分比，比例看差幾個百分點；綠色是變好、紅色是變差（差 10% 或 3 點以內不上色）。答對率、偏差沒有「越高越好」，所以不上色，請看上面的判讀。</p>${kt}<div class="chart" style="margin-top:12px"><canvas id="c-op"></canvas></div></section>
+<section><h2>學習入口與題型</h2><div class="grid2"><div class="tbl" style="max-height:none"><table><thead><tr><th>入口</th><th class="n">人數</th><th class="n">回合</th><th class="n">完成率</th><th class="n">題數</th><th class="n">答對率</th></tr></thead><tbody>${kRows||'<tr><td colspan="6" class="muted">沒有資料</td></tr>'}</tbody></table></div><div class="tbl" style="max-height:none"><table><thead><tr><th>題型（練習）</th><th class="n">題數</th><th class="n">答對率</th><th class="n">${PR.baseLabel}</th></tr></thead><tbody>${qT||'<tr><td colspan="4" class="muted">沒有資料</td></tr>'}</tbody></table></div></div></section>
+<section><h2>個別玩家</h2><p class="why">名字只在後台看得到。這些名單用來安排關心、訪談或調整程度，不是排名。</p><div class="tbl" style="max-height:none"><table><thead><tr><th>名單</th><th>玩家</th><th>可以做什麼</th></tr></thead><tbody>${pT||'<tr><td colspan="3" class="muted">沒有符合的玩家</td></tr>'}</tbody></table></div></section>
+<section><h2>放棄點與版本</h2><div class="grid2"><div class="tbl" style="max-height:none"><table><thead><tr><th>入口</th><th>停在</th><th class="n">次數</th></tr></thead><tbody>${dropT||'<tr><td colspan="3" class="muted">所有回合都做完了</td></tr>'}</tbody></table></div><div class="tbl" style="max-height:none"><table><thead><tr><th>版本</th><th class="n">人數</th><th class="n">題數</th><th class="n">答對率</th><th class="n">完成率</th><th class="n">每題時間</th></tr></thead><tbody>${verT||''}</tbody></table></div></div></section>
+<section><h2>使用行為</h2>${bhHtml}</section>
+<section><h2>問題回報</h2>${rpHtml}</section>
+<section><h2>下一步清單</h2>${stepHtml}</section>
+<section>${rulesHtml}</section>`;
+  const srcChip=(ok,t)=>`<span class="tag ${ok?'easy':''}">${ok?'✓':'…'} ${t}</span>`;
+  const src=[srcChip(true,`學習紀錄 ${fmt(S.raw.length)} 個回合`),srcChip(B.loaded,B.loaded?`使用行為 ${fmt(B.raw.length)} 份`:'使用行為'),srcChip(RPA.rows.length>0,RPA.rows.length?`問題回報 ${RPA.rows.length} 份`:'問題回報'),...(day?[]:[srcChip(!!ct,ct?`挑戰賽 ${ct.length} 人`:'挑戰賽')])].join(' ');
+  return {html,src,chart:chartCfg,F,cur,PR,head,stepHtml}},
+
+ // plain text for chat / e-mail
+ opText(){const R=OP.last;if(!R)return '';const strip=h=>String(h).replace(/<br>/g,'\n').replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"');
+  const L=[`呼嚕小窩${OP.mode==='day'?'每日':'每週'}營運報告：${R.PR.label}`,'',strip(R.head),'','【重點與下一步】'];
+  R.F.forEach((f,i)=>{L.push(`${i+1}. [${OP_LV[f.lv].n}｜${OP_AREA[f.area]}] ${strip(f.title)}`,`   數據：${strip(f.ev)}`,`   判讀：${strip(f.why)}`);for(const [t,x] of f.next)L.push(`   - ${t}：${strip(x)}`)});
+  if(!R.F.length)L.push('沒有觸發任何判讀規則。');return L.join('\n')},
+ async opCopy(){const t=this.opText();try{await navigator.clipboard.writeText(t);$('op-msg').textContent='已複製'}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();$('op-msg').textContent='已複製'}setTimeout(()=>$('op-msg').textContent='',2500);this.log('export','oprep',OP.mode+' '+OP.day)},
+ opDownload(){const t=this.opText(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain;charset=utf-8'}));a.download=`purrcozy-${OP.mode==='day'?'daily':'weekly'}-${OP.mode==='day'?OP.day:kMon(OP.day)}.txt`;a.click();this.log('export','oprep',OP.mode+' '+OP.day)},
+});
+$('op-mode').onchange=()=>{const t=gday(Date.now());if($('op-mode').value==='week'&&kAdd(kMon(OP.day),6)>=t){OP.day=kAdd(kMon(t),-7);$('op-day').value=OP.day}Admin.opRender()};$('op-who').onchange=()=>Admin.opRender();$('op-day').onchange=()=>{OP.day=$('op-day').value;Admin.opRender()};
+$('op-prev').onclick=()=>Admin.opStep(-1);$('op-next').onclick=()=>Admin.opStep(1);$('op-copy').onclick=()=>Admin.opCopy();$('op-dl').onclick=()=>Admin.opDownload();
 
 </script>
 </body>
