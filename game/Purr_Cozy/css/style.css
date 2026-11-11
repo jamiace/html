@@ -1413,3 +1413,33 @@ body.m.has-modebar .hand-hint { top:auto; bottom:6px; }
 .qlv { position:absolute; left:6px; top:6px; padding:0 6px; font-family:var(--pix); font-size:12px; line-height:18px; background:var(--chip-on); color:var(--ink); box-shadow:inset 0 0 0 2px var(--line); }
 .qlv.sm { position:static; flex:none; font-size:11px; line-height:16px; }
 body.purr-quiz-open .qlv { top:4px; left:4px; }
+/* 0.93.5 touch targets: on a touch screen every control is at least ~40 px (Apple 44 pt / Android 48 dp guidance) */
+@media (pointer: coarse) {
+  .win-h .xbtn, body.purr-study-open .win[data-id="study"] .win-h .xbtn { min-width: 44px; min-height: 44px; }
+  .dot { width: 32px; height: 32px; }
+  .sw, .avasw .sw { width: 36px; height: 36px; }
+  .lvtog { width: 34px; height: 34px; }
+  .todo .cb { min-width: 40px; min-height: 40px; }
+  .del { min-width: 40px; min-height: 40px; opacity: .75; }
+  .chip.sm, body.m .chip.sm { min-height: 36px; }
+  .wrow .xbtn { min-width: 40px; min-height: 40px; }
+  input[type=range] { height: 36px; }
+  input[type=range]::-webkit-slider-thumb { width: 24px; height: 28px; margin-top: -10px; }
+  input[type=range]::-moz-range-thumb { width: 24px; height: 28px; }
+  input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=color]), select { min-height: 40px; }
+}
+/* 0.93.5 an empty supply ("×0") stays readable in both themes: a disabled button is light grey with dark text (i18n.css),
+   so the text inside it must not keep its own light colour from the dark theme */
+button.chip:disabled *, button.swapbtn:disabled *, button.tab:disabled *, button.mtab:disabled * { color: inherit !important; }
+/* 0.93.5 the small text badges drawn by CSS follow the interface language */
+html[lang="zh-CN"] .pcard.away::after { content: "旅馆"; }
+html[lang="ja"] .pcard.away::after { content: "ホテル"; }
+html[lang="zh-CN"] .swapbtn.fav::after { content: "最爱"; }
+html[lang="ja"] .swapbtn.fav::after { content: "お気に入り"; }
+html[lang="zh-CN"] .card.fun::after { content: "互动"; }
+html[lang="ja"] .card.fun::after { content: "遊べる"; }
+/* 0.93.5 on a phone with a window open, toasts sit at the top but leave both corners free, so the window's close
+   button is never covered */
+body.m.m-win #toasts { left: 54px !important; right: 54px !important; width: auto !important; transform: none !important; }
+/* 0.93.5 the phone home list shows up to two lines of the hint (the story's first line was cut after a few words) */
+body.m .mrow-t .hint { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; }

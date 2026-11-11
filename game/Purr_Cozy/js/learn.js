@@ -387,9 +387,9 @@ Object.assign(UI, {
     }
     const r = s.result, n = s.qs.length;
     return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }), r.taskNote ? h('p', { class: 'swap-rule', text: r.taskNote }) : null,
-      h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + r.coins })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + r.xp })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))),
+      (r.coins + (s.luckC || 0)) || (r.xp + (s.luckX || 0)) || r.items.length ? h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + (r.coins + (s.luckC || 0)) })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + (r.xp + (s.luckX || 0)) })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))) : null,
       s.luckyN ? h('p', { class: 'hint', text: I18n.s("u_ecc018bdb57f", [s.luckyN]) }) : null,
-      s.newly || s.mastered ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
+      s.kind !== 'grade' && (s.newly || s.mastered) ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
       s.wrong.length ? h('div', { class: 'sub', text: I18n.s("u_dfcac72f08a7") }) : null,
       s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'qlv sm', text: 'L' + VOCAB[i].t }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
       h('div', { class: 'row center wrap' },

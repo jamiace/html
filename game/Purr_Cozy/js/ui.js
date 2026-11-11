@@ -93,7 +93,7 @@ const UI = {
     document.addEventListener('dragleave', e => { if (e.target === document.documentElement || !e.relatedTarget) document.body.classList.remove('dropping'); });
     document.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); document.body.classList.remove('dropping'); const files = [...e.dataTransfer.files]; if (files.length) { this.openWin('music'); Music.addFiles(files); } });
     setTimeout(() => { if (Game.S.wallet && Game.S.wallet.pend) this.openWin('gacha'); }, 900);   // a gacha result waiting for keep / sell
-    if (!Game.S.seenIntro) { Game.S.seenIntro = true; setTimeout(() => this.toast(I18n.s("u_ad58744f914c"), 'i_sparkle', 6), 600); if (window.innerWidth >= 900) { this.openWin('learn'); this.openWin('tasks'); } }
+    if (!Game.S.seenIntro) { Game.S.seenIntro = true; setTimeout(() => this.toast(I18n.s("u_ad58744f914c"), 'i_sparkle', 6), 600); }   // 0.93.5: the room is shown first on every device; the placement test follows (placement.js), windows are opened by the player
   },
   // ---------------- layout ----------------
   narrow() { return window.innerWidth < 760; },

@@ -110,8 +110,8 @@ function endDay(p, st, day, played, sats) {
 
 // ---------- inside a session: what to do next ----------
 const ALIAS = { piano: 'music', photo: 'cat', gacha: 'mini', collect: 'shop', story: 'merchant' };   // 商人故事 = visiting the weekly merchant
-const DWELL = { contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
-const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest'];
+const DWELL = { levelgate: 4, contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
+const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate'];
 // 0.92.49 程度挑戰賽: nobody is told to join. People who already like tests (程度小測, practice, spelling) are drawn to it,
 // people who dislike quizzes mostly ignore it, pure cat / music players almost never open it.
 function contestPull(p) { const P = p.play.prefs; if (P.contest != null) return P.contest; let x = .6 * (P.grade || 0) + .3 * (P.practice || 0) + .2 * (P.typo || 0) + .1 * (P.daily || 0) + .15 * (p.triggers.grade || 0); if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) x *= .2; if (p.play.dislikes.includes('too_easy')) x *= 1.3; return +x.toFixed(3); }
@@ -245,7 +245,7 @@ const TXT = path.resolve(String(arg('textlog', path.join(ROOT, '.sim', '行為�
 const GL = ['小一', '小二', '小三', '小四', '小五', '小六', '國一', '國二', '國三', '高一', '高二', '高三'], gname = g => g == null || isNaN(g) ? '' : GL[Math.max(1, Math.min(12, Math.round(g))) - 1];
 const QT = { en2zh: '英翻中', zh2en: '中翻英', listen: '聽音選字', spell: '拼字', listenspell: '聽音拼字', cloze: '填空', img: '看圖選字' };
 const MINI_BOTS = true;    // canvas minigames are played with a modelled result (see miniRound)
-const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字' };
+const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
 const DEVN = { phone: '手機', tablet: '平板', pc: '電腦', desktop: '電腦' };
 function say(p, msg) {
  const d = new Date(Date.now() + 8 * 3600e3).toISOString(), line = `${d.slice(11, 19)}  ${p.nick}（${p.id}）${msg}`;
@@ -351,7 +351,9 @@ async function runSession(S, p, s) {
    Object.assign(today, st2);
    const cs = await ev(() => typeof Cloud !== 'undefined' ? { st: Cloud.status, err: Cloud.err || Cloud.error || '' } : null).catch(() => null);
    if (cs && cs.st !== ses.cloudSt) { if (['error', 'offline', 'outdated', 'paused'].includes(cs.st)) ses.say(`⚠ 雲端存檔狀態：${cs.st}${cs.err ? '（' + String(cs.err).slice(0, 120) + '）' : ''}`); else if (['error', 'offline', 'outdated', 'paused'].includes(ses.cloudSt)) ses.say('雲端存檔恢復正常（' + cs.st + '）'); ses.cloudSt = cs.st; }
-   const a = nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
+   const gate = await ev(() => typeof LevelGate !== 'undefined' && LevelGate.pending('owner') && LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1)) <= 0).catch(() => false);
+   const gateP = .35 + .5 * (1 - (p.play.frustration || 0)) - (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d)) ? .3 : 0);
+   const a = gate && !ses.gateTried && chance(Math.max(.1, gateP)) ? (ses.gateTried = true, 'levelgate') : nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
    await act(page, p, st, ses, a, dwell, wait);
    const spent = (Date.now() - aStart) * FAST / 60000; ses.mins[a] = (ses.mins[a] || 0) + spent; ses.elapsed += spent;
@@ -380,9 +382,10 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (LEARN.includes(a)) {
    if (a === 'typo') return await typoRound(page, p, st, ses, until, wait);
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
-   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess; }, kind);
+   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'levelgate' ? await ev(() => { if (typeof LevelGate === 'undefined' || !LevelGate.pending('owner')) return false; UI.openWin('learn'); LevelGate.start('owner'); return !!(Learn.sess && Learn.sess.kind === 'levelgate') && 'levelgate'; }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess && (Learn.sess.kind === 'practice' && k === 'practice' ? 'practice' : k); }, kind);
    if (!ok) return;
-   ses.say('開始「' + (ACTN[a] || a) + '」');
+   const label = ACTN[typeof ok === 'string' ? ok : a] || ACTN[a] || a;
+   ses.say('開始「' + label + '」');
    if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) ses.frustration += .5;
    let wrongRun = 0;
    for (let guard = 0; guard < 300; guard++) {
@@ -391,12 +394,13 @@ async function act(page, p, st, ses, a, dwell, wait) {
      // a breakthrough pulls most people on to the next Level while they still have time
      if (a === 'contest') { const go = await ev(() => { const s = Learn.sess, R = Contest.Z.run; return !!(s && s.result && s.result.pass && R && !R.over); }); if (go && chance(Date.now() < until ? .85 : .35)) { ses.ctUp = (ses.ctUp || 0) + 1; ses.say('挑戰賽突破這一階，繼續下一階'); await ev(() => Contest.play()); continue; } }
      const res = await ev(() => { const s = Learn.sess; return s ? { right: s.right, n: s.qs ? s.qs.length : 0, pass: !!(s.result && s.result.pass) } : null; }).catch(() => null);
-     ses.say('完成「' + (ACTN[a] || a) + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
+     ses.say('完成「' + label + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
+     if (a === 'levelgate') { const lv = await ev(() => ({ lvl: Game.S.lvl, wait: LevelGate.pending('owner') ? Math.ceil(LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1))) : 0 })).catch(() => null); if (lv) ses.say(lv.wait ? `升級測驗沒通過，${lv.wait} 分鐘後可以再試（目前 Lv ${lv.lvl}）` : `升級到 Lv ${lv.lvl}`); }
      await ev(() => UI.closeWin('study')); break; }
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
     if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
-    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); ses.say(`複習卡 ${q.w}（${gname(q.g)}）按「${pressed ? '記得' : '不熟'}」`); learnWord(p, st, q.w, true); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
+    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); learnWord(p, st, q.w, true); continue; }
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
     if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; ses.say(`看到拼字題 ${q.w} 不想寫，離開`); break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);

@@ -3,7 +3,9 @@ window.I18n={
  lang:'zh-TW',ui:null,vocab:null,origins:new Map(),cache:new Map(),nodeState:new WeakMap(),attrState:new WeakMap(),observer:null,
  format(text,args=[]){return String(text).replace(/\{(\d+)\}/g,(_,n)=>args[n]??'')},
  s(id,args=[]){const source=this.ui.messages[id]?.source;if(source==null)throw Error('Missing localization key: '+id);const text=this.format(source,args);if(args.length){this.origins.set(text,{id,args});this.cache.delete(text);this.register(text,{id,args})}return text},
- t(id,args=[]){const entry=this.ui.messages[id];return this.format(entry?.[this.lang]??entry?.['zh-TW']??id,args.map(x=>typeof x==='string'?this.render(x):x))},
+ // 0.93.5: text from t() is already in the interface language. It is remembered as finished output, so the page observer does
+ // not translate it a second time (Japanese kanji such as 開 used to be swapped for a Chinese source fragment: 箱を開ける → 箱をオンける)
+ t(id,args=[]){const entry=this.ui.messages[id];const out=this.format(entry?.[this.lang]??entry?.['zh-TW']??id,args.map(x=>typeof x==='string'?this.render(x):x));if(this.lang!=='zh-TW'&&this.localizedOutputs&&out)this.localizedOutputs.add(out);return out},
  named(source,args={}){const id=this.sourceIndex.get(source),entry=id?this.ui.messages[id]:null;const template=entry?.[this.lang]??source;const text=template.replace(/\{(\w+)\}/g,(m,k)=>args[k]!=null?this.render(String(args[k])):m);if(text!==source)this.localizedOutputs.add(text);return text},
  meaning(word){const key=this.vocab.runtime[word],e=this.vocab.meanings[key];const value=e?.[this.lang]??e?.['zh-TW']??'';this.localizedOutputs?.add(value);for(const part of value.split(/[；;]/))this.localizedOutputs?.add(part.trim());return value},
 

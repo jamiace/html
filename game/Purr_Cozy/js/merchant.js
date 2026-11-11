@@ -46,6 +46,9 @@ FAM_NAMES.merchant = I18n.s("u_a924b4e38bc8");
 
 const MERCHANT_GOODS={"moss":Object.fromEntries(["m_pine_bonsai","m_giant_monstera","m_moss_dome","m_hanging_ivy","m_orchid","m_cactus_trio"].map(id=>[id,ITEMS[id]])),"clock":Object.fromEntries(["m_grandfather","m_gramophone","m_antique_globe","m_candelabra","m_parchment_map","m_old_trunk"].map(id=>[id,ITEMS[id]])),"fluff":Object.fromEntries(["m_cat_condo","m_round_bed","m_dog_house","m_scratch_post","m_paw_rug","m_pet_portrait"].map(id=>[id,ITEMS[id]])),"star":Object.fromEntries(["m_telescope","m_moon_lamp","m_crystal_ball","m_star_mobile","m_zodiac_rug","m_nebula_poster"].map(id=>[id,ITEMS[id]])),"cocoa":Object.fromEntries(["m_cake_stand","m_candy_jar","m_macaron_tower","m_donut_pouf","m_icecream_cart","m_pudding_plush"].map(id=>[id,ITEMS[id]])),"yarn":Object.fromEntries(["m_quilt_rug","m_embroidery","m_knit_pouf","m_loom","m_yarn_hanging","m_sewing_machine"].map(id=>[id,ITEMS[id]]))};
 
+// 0.93.5: every merchant brings something a new player can buy. Required levels are halved (Lv 3–4 → Lv 1, Lv 5–6 → Lv 2,
+// Lv 7–8 → Lv 3 … Lv 13–14 → Lv 6), prices stay the same, so the expensive pieces are still something to save up for.
+for (const mk in MERCHANT_GOODS) for (const id in MERCHANT_GOODS[mk]) { const d = ITEMS[id]; if (d && !d.lvlHalved) { d.lvl = Math.max(1, Math.round((d.lvl || 1) / 2) - 1); d.lvlHalved = true; } }
 
 /* ---------------- schedule & state ---------------- */
 const Merchant = {
@@ -89,8 +92,21 @@ const Merchant = {
     if (!Game.S) return;
     const mk = this.id(); if (this.shown === mk) return; this.shown = mk;
     if (Room.actors) Room.actors = Room.actors.filter(a => !(a instanceof MerchantSign));
-    if (!this.S.met) { this.S.met = true; Game.save(); setTimeout(() => UI.toast(I18n.s("u_b7698aebf390", [MERCHANTS[mk].n]), 'i_merchant', 5.5, { label: I18n.s("u_aa7bad4bc428"), fn: () => Merchant.go() }), 2500); }
+    if (!this.S.met) this.announce(mk);
     UI.badges();
+  },
+  // 0.93.5: the "merchant is here" toast waits until the player is not busy with the first placement test or a quiz
+  announce(mk) {
+    if (this._announcing === mk) return; this._announcing = mk;
+    const t0 = Date.now(), open = k => UI.wins && UI.wins[k] && !UI.wins[k].el.hidden;
+    const busy = () => ['placement', 'study', 'story', 'catstypo'].some(open) || (typeof Placement !== 'undefined' && !Placement.done() && (Placement.S().asked || 0) < 1 && Date.now() - t0 < 120000);
+    const tick = () => {
+      if (this.S.met || this.id() !== mk) { this._announcing = null; return; }
+      if (busy()) return setTimeout(tick, 3000);
+      this._announcing = null; this.S.met = true; Game.save();
+      UI.toast(I18n.s("u_b7698aebf390", [MERCHANTS[mk].n]), 'i_merchant', 5.5, { label: I18n.s("u_aa7bad4bc428"), fn: () => Merchant.go() });
+    };
+    setTimeout(tick, 2500);
   },
   check() { if (this.shown !== this.id()) this.spawn(); },
   // what the button does: a waiting story chapter first, otherwise the stall

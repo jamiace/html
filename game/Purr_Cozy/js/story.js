@@ -205,7 +205,12 @@ const Story = {
     // Friday: spell the name you chose
     if (i === 4 && St.name && VIDX[St.name] != null) { const v = VOCAB[VIDX[St.name]]; qs.push({ i: v.i, type: Challenge.spellable(v) ? 'spell' : 'zh2en', opts: Challenge.spellable(v) ? null : Learn.options(v, 'w'), ctx: I18n.s("u_41f112a9d417", [STORY_KEEP[mk].thing, this.zh(v)]) }); }
     // the rest from your own review words
-    const have = new Set(qs.map(q => q.i)), own = Learn.pick(10).filter(x => !have.has(x)).slice(0, 5 - qs.length);
+    // 0.93.5: the rest are words the player has already been shown — first the words of today's knowledge card
+    // (taught a minute ago), then their own review words — so the chapter never brings in a pile of unseen words
+    const have = new Set(qs.map(q => q.i)), seen = x => !!Learn.P[VOCAB[x].w];
+    const lore = typeof Lore !== 'undefined' && Lore.on() && Lore.chapter(i) ? Lore.chapter(i).w.map(([w]) => VIDX[w]).filter(x => x != null) : [];
+    const picked = Learn.pick(20), pool = [...lore, ...picked.filter(seen), ...picked.filter(x => !seen(x))];
+    const own = [...new Set(pool)].filter(x => !have.has(x)).slice(0, 5 - qs.length);
     const ownQs = Learn.makeQs(own); if (ownQs[0]) ownQs[0].ctx = this.pick(M.voice.quiz);
     return { qs: [...qs, ...ownQs], ids: [...qs, ...ownQs].map(q => q.i) };
   },

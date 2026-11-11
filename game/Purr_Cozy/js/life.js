@@ -62,7 +62,7 @@ const ACHS = [
   { id: 'family', n: I18n.s("u_e6d69ee3ed30"), d: (v) => I18n.s("u_e1d815f855ac", [v]), m: () => Pets.list().length, tiers: [2, 3, 5, 8] },
   { id: 'grow', n: I18n.s("u_1bcf9f0471be"), d: (v) => I18n.s("u_2d867664352e", [v]), m: () => Pets.maxLv(), tiers: [5, 10, 15, 20] },
   { id: 'trainer', n: I18n.s("u_0eb77f070c26"), d: (v) => I18n.s("u_b8b25b7bc6b3", [v]), m: () => Pets.trickCount(), tiers: [1, 3, 6, 12, 20, 30] },
-  { id: 'decor', n: I18n.s("u_cf1e9f461d77"), d: (v) => I18n.s("u_7455adb89443", [v]), m: () => Game.S.items.length, tiers: [15, 25, 40, 60] },
+  { id: 'decor', n: I18n.s("u_cf1e9f461d77"), d: (v) => I18n.s("u_7455adb89443", [v]), m: () => Game.S.items.length, tiers: [22, 30, 45, 65] },   // 0.93.5: the starting room already has 17 pieces, so the first tier needs a few of your own
   { id: 'rich', n: I18n.s("u_c7d27cbef76a"), d: (v) => I18n.s("u_aff95f14af4d", [v]), m: () => Life.L.stats.coins, tiers: [500, 2000, 6000, 15000, 40000, 100000, 250000] },
 ];
 const WILT_MAP = { k: 'w', l: 'x', j: 'v', i: 'u' };
@@ -369,7 +369,7 @@ Object.assign(UI, {
       });
       const all = D.tasks.every(t => t.claimed);
       body.push(h('div', { class: 'task bonus' + (D.bonus ? ' claimed' : all ? ' ready' : '') }, h('div', { class: 'task-main' }, h('div', { class: 'task-t', text: I18n.s("u_558b6255aa95") }), h('div', { class: 'task-meta' }, this.rewardChips({ c: 40, x: 30 }, true), h('span', { class: 'hint', text: I18n.s("u_1f71b7077ef3") }))),
-        D.bonus ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : h('button', { class: 'chip sm' + (all ? ' primary' : ''), disabled: !all, onclick: () => Life.claimBonus() }, I18n.s("u_92edf81e0715"))));
+        D.bonus ? h('span', { class: 'own', text: I18n.s("u_792019f09d2e") }) : all ? h('button', { class: 'chip sm primary', onclick: () => Life.claimBonus() }, I18n.s("u_92edf81e0715")) : h('span', { class: 'num hint', text: I18n.t('tasks.bonusLeft', [D.tasks.filter(t => !t.claimed).length]) })));   // 0.93.5: no grey "claim" button before anything is done
       body.push(h('p', { class: 'hint', text: I18n.s("u_06ee916e0076") }));
     } else if (tab === 'team') {
       body.push(...this.w_team());

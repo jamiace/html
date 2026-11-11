@@ -296,5 +296,5 @@ const Placement = {
 .pl-learnrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--paper-2);margin:0 0 8px}
 .ptag.pl-tag{background:var(--chip-on);margin-left:6px;font-size:11px;vertical-align:middle;white-space:nowrap}.bname .pl-tag,.frname .pl-tag{font-weight:400}` }));
   // first visit
-  const poll = setInterval(() => { if (!Game.S || !UI.el || !UI.el.lvl) return; if (document.body.classList.contains('mini')) return; clearInterval(poll); setTimeout(() => Placement.tryIntro(), 1500); }, 1000);
+  const poll = setInterval(() => { if (!Game.S || !UI.el || !UI.el.lvl) return; if (document.body.classList.contains('mini')) return; clearInterval(poll); setTimeout(() => Placement.tryIntro(), 3500); }, 1000);
 })();
