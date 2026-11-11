@@ -150,7 +150,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    <label>年級帶 <select id="f-grade"><option value="">全部</option><option value="e">國小</option><option value="j">國中</option><option value="s1">高一</option><option value="s2">高二</option><option value="s3">高三</option></select></label>
    <label>版本 <select id="f-app"><option value="">全部</option></select></label>
    <label>帳號 <select id="f-acct"><option value="">全部帳號</option></select></label>
-   <label>玩家 <select id="f-who"><option value="">全部（不含測試）</option><option value="real">只看真實玩家</option><option value="sim">只看模擬學生</option><option value="test">只看測試資料</option></select></label>
+   <label>玩家 <select id="f-who"><option value="all">全部（真人與測試帳號）</option><option value="real">真實玩家</option><option value="test">測試帳號</option></select></label>
    <label>單字最少作答數 <input type="number" id="f-min" value="20" min="1" style="width:70px"></label>
    <button id="btn-apply" class="primary">套用</button>
   </div>
@@ -162,7 +162,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    </div>
    <div class="page hidden" data-page="oprep">
     <section><h2>營運報告</h2><p class="why">每天或每週一份：先看這一天／這一週整體發生了什麼、哪裡要處理、接下來要觀察或調整什麼，細節再到各分頁看。報告用這個後台已經讀到的資料即時算出來（學習紀錄、使用行為、問題回報，每週報告另外讀該週的挑戰賽），不會另外存檔。</p>
-     <div class="row"><label>報告 <select id="op-mode"><option value="day">每日</option><option value="week">每週（週一起）</option></select></label><button id="op-prev" aria-label="上一期">◀</button><input type="date" id="op-day" aria-label="日期"><button id="op-next" aria-label="下一期">▶</button><label>對象 <select id="op-who"><option value="real">真實玩家</option><option value="sim">模擬學生</option><option value="all">全部（不含測試帳號）</option></select></label><button id="op-copy">複製成文字</button><button id="op-dl">下載文字檔</button><span class="muted" id="op-msg"></span></div>
+     <div class="row"><label>報告 <select id="op-mode"><option value="day">每日</option><option value="week">每週（週一起）</option></select></label><button id="op-prev" aria-label="上一期">◀</button><input type="date" id="op-day" aria-label="日期"><button id="op-next" aria-label="下一期">▶</button><label>對象 <select id="op-who"><option value="all">全部（真人與測試帳號）</option><option value="real">真實玩家</option><option value="test">測試帳號</option></select></label><button id="op-copy">複製成文字</button><button id="op-dl">下載文字檔</button><span class="muted" id="op-msg"></span></div>
      <div id="op-src" class="row" style="margin-top:8px"></div></section>
     <div id="op-out"></div>
    </div>
@@ -236,7 +236,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    <div class="page hidden" data-page="behavior">
     <section><h2>使用行為</h2><p class="why">每位玩家每天一份摘要（遊戲在背景累計，一天只上傳幾次）。人數一律分成「不重複玩家」（同一個人只算一次）和「人次」（一個人來一天算一次）。可以看全體，也可以單獨看一位玩家（會同時顯示全體做比較）。</p>
      <div class="row" style="margin-bottom:8px"><label>期間 <select id="bh-span"></select></label><button id="bh-prev" title="往前一段">◀</button><label>從 <input type="date" id="bh-from"></label><label>到 <input type="date" id="bh-to"></label><button id="bh-next" title="往後一段">▶</button><span class="muted" id="bh-range-note"></span></div>
-     <div class="row" style="margin-bottom:8px"><label>對象 <select id="bh-who"><option value="">真實玩家（不含測試、模擬）</option><option value="test">只看測試帳號</option><option value="sim">只看模擬學生</option><option value="all">全部</option></select></label>
+     <div class="row" style="margin-bottom:8px"><label>對象 <select id="bh-who"><option value="all">全部（真人與測試帳號）</option><option value="real">真實玩家</option><option value="test">測試帳號</option></select></label>
       <label>玩家 <select id="bh-user"><option value="">全部玩家（綜合）</option></select></label>
       <button id="bh-reload" class="primary">從 Firestore 讀取</button><button id="bh-demo">示範資料</button><button id="bh-csv">下載玩家表（CSV）</button></div>
      <p class="muted" id="bh-note">尚未載入</p><p class="note" id="bh-sel-note"></p><div class="kpis" id="bh-kpis"></div></section>
@@ -255,7 +255,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    </div>
    <div class="page hidden" data-page="contest">
     <section><h2>程度挑戰賽</h2><p class="why">遊戲 0.92.49 起的每週活動：玩家自由報名，從 L1 一路突破到 L6，每階 15 題、答對 11 題突破。每人每週一列成績（最好的一次），真實玩家和測試帳號分開存。這裡讀的是整週全部的成績（玩家在遊戲裡只看得到前 50 名和自己）。每讀一次＝這週的參加人數次讀取。</p>
-     <div class="row" style="margin-bottom:8px"><label>週 <select id="ct-wk"></select></label><label>對象 <select id="ct-board"><option value="rows">真實玩家</option><option value="test">測試帳號</option></select></label>
+     <div class="row" style="margin-bottom:8px"><label>週 <select id="ct-wk"></select></label><label>對象 <select id="ct-board"><option value="all">全部（真人與測試帳號）</option><option value="rows">真實玩家</option><option value="test">測試帳號</option></select></label>
       <button id="ct-load" class="primary">從 Firestore 讀取</button><button id="ct-demo">示範資料</button><button id="ct-csv">下載 CSV</button></div>
      <p class="muted" id="ct-note">尚未載入</p><div class="kpis" id="ct-kpis"></div></section>
     <section><h2>突破到哪一階</h2><p class="why">左：每位玩家本週最好成績的分布。右：突破到某一階以上的人占參加者的比例；哪一階掉最多，代表那一階對大家最難（或 15 題裡的難字太多）。題目逐題的答對率在「學習分析」，入口選「程度挑戰賽」。</p><div class="grid2"><div class="chart"><canvas id="c-ct-dist"></canvas></div><div class="chart"><canvas id="c-ct-reach"></canvas></div></div></section>
@@ -264,7 +264,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    <div class="page hidden" data-page="reports">
     <section><h2>問題回報</h2><p class="why">遊戲 0.93.7 起，玩家在「設定」或手機的「更多」按「回報問題」送出。每份回報包含玩家選的類型和答案、自己寫的話，以及遊戲自動附上的版本、裝置、語言、當時打開的視窗和題目、最近的程式錯誤、房間畫面（玩家可以取消），還可以加一張自己的截圖。改狀態後，玩家在遊戲裡的「送出的報告」會看到。</p>
      <div class="row" style="margin-bottom:8px"><label>狀態 <select id="rp-status"><option value="">全部</option><option value="new" selected>新收到</option><option value="doing">處理中</option><option value="done">已處理</option><option value="wontfix">先不處理</option></select></label>
-      <label>類型 <select id="rp-cat"><option value="">全部</option></select></label><label>對象 <select id="rp-who"><option value="real">真實玩家</option><option value="test">測試帳號</option><option value="">全部</option></select></label>
+      <label>類型 <select id="rp-cat"><option value="">全部</option></select></label><label>對象 <select id="rp-who"><option value="all">全部（真人與測試帳號）</option><option value="real">真實玩家</option><option value="test">測試帳號</option></select></label>
       <label>搜尋 <input type="text" id="rp-q" style="width:160px" placeholder="字、單字、編號"></label>
       <button id="rp-load" class="primary">從 Firestore 讀取</button><button id="rp-demo">示範資料</button><button id="rp-csv">下載 CSV</button><button id="rp-copy">複製成文字（給 AI 整理）</button></div>
      <p class="muted" id="rp-note">尚未載入</p><div class="kpis" id="rp-kpis"></div></section>
@@ -297,7 +297,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    <div class="page hidden" data-page="players">
     <section><h2>玩家列表</h2><p class="why">列出所有有雲端存檔的帳號，以及在後台建立、還沒登入過的帳號。每位玩家算 1 次讀取（300 位玩家約 300 次），不會自動重複讀。</p>
      <div class="row" style="margin-bottom:8px"><button id="pl-reload" class="primary">讀取玩家</button><input type="text" id="pl-q" placeholder="搜尋名稱、Email、UID、群組">
-      <select id="pl-kind"><option value="">全部</option><option value="real">只看真實玩家</option><option value="test">只看測試帳號</option><option value="none">尚未登入遊戲</option><option value="admin">後台改過的</option><option value="dev">用過開發者模式</option></select>
+      <select id="pl-kind"><option value="">全部（真人與測試帳號）</option><option value="real">真實玩家</option><option value="test">測試帳號</option><option value="none">尚未登入遊戲</option><option value="admin">後台改過的</option><option value="dev">用過開發者模式</option></select>
       <span class="muted" id="pl-count"></span><span class="muted" id="pl-note"></span></div>
      <div class="tbl" style="max-height:520px"><table id="t-players"></table></div></section>
     <section id="pl-detail" class="hidden"></section>
@@ -437,7 +437,10 @@ function demo(){
 // simulated students have a device id starting with sim (tools/sim), test runs with test-
 // the simulated students are also test accounts; they count as 模擬學生 (checked first), other test accounts as 測試
 const whoOf=r=>/^sim\d/.test(r.dev||'')?'sim':/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct))?'test':'real';
-function who(r){const w=$('f-who').value,k=whoOf(r);return w?k===w:k!=='test'}
+// every 對象 menu works the same way: all = 全部（真人與測試帳號）, real = 真實玩家, test = 測試帳號 (the 30 simulated students and every other test account)
+const isTestRec=r=>!!r.tester||whoOf(r)!=='real';
+const whoMatch=(w,r)=>w==='real'?!isTestRec(r):w==='test'?isTestRec(r):true;
+function who(r){return whoMatch($('f-who').value||'all',r)}
 function filtered(){
  const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
  const acct=$('f-acct')?$('f-acct').value:'',sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&(acct?r.acct===acct:who(r)));
@@ -813,8 +816,8 @@ function analyse(){
  $('gw-csv').onclick=()=>{const rows=[['word','grade_num','level','n','accuracy','predicted','mean_theta','suggested_delta_g','suggested_grade'],...gw.map(w=>[w.w,w.g,w.l,w.n,w.acc.toFixed(3),w.pm.toFixed(3),w.th.toFixed(2),w.dg,Math.max(1,Math.min(12,Math.round(w.g+w.dg)))])];const b=new Blob(['﻿'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='grade-adjust.csv';a.click()};
  summary.placement=GS.length?{players:pls.length,firstPlacements:GS.filter(r=>r.pl.m==='first').length,dailyProbes:GS.filter(r=>r.pl.m==='daily').length,medianGrade:latest.length?+med(latest.map(r=>r.pl.t)).toFixed(2):null,distribution:Object.fromEntries(G12.map(g=>[GRADE_NAME(g),latest.filter(r=>gOf(r.pl.t)===g).length])),declaredAgreementWithin1:declared.length?+(agree/declared.length).toFixed(3):null,declaredN:declared.length,dailyCompletion:comp.length?+compAll.toFixed(3):null,growth7d:grown.length?{n:grown.length,mean:+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2),median:+med(grown).toFixed(2),improved:grown.filter(x=>x>=.5).length,declined:grown.filter(x=>x<=-.5).length}:null,itemFit:Object.fromEntries(Object.keys(FN).map(t=>[t,XS.map(x=>{const f=FIT[t+'|'+x];return f&&f.n>=8?{x,n:f.n,actual:+(f.ok/f.n).toFixed(3),model:+(f.p/f.n).toFixed(3)}:null}).filter(Boolean)])),wordsToAdjust:gw.filter(w=>Math.abs(w.dg)>=1).slice(0,30).map(w=>({word:w.w,grade:w.g,n:w.n,accuracy:+w.acc.toFixed(3),predicted:+w.pm.toFixed(3),suggestedDeltaG:w.dg}))}:null;
 
- const pop={real:0,sim:0,test:0};for(const r of sess)pop[whoOf(r)]++;
- summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:$('f-who').value||'all-except-test'},sessionsByPopulation:pop,vocabulary:'0.92.45 起：國小～高中 6,924 字（大考 L1–6 ＋ 108 課綱國中小 2000 字，含 60 個新字），每題記錄建議年級 gr；舊紀錄的年級由 i18n/vocab.json 補上，改名詞條已合併',populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣大考中心 L1–L6，加上 108 課綱國中小 2000 字；0.92.45 起每題另有建議年級 g），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
+ const pop={real:0,test:0};for(const r of sess)pop[isTestRec(r)?'test':'real']++;
+ summary.meta={generatedAt:new Date().toISOString(),dateRange:[$('f-from').value,$('f-to').value],filters:{entry:$('f-kind').value||'all',level:$('f-level').value||'all',version:$('f-app').value||'all',players:{all:'all (real and test accounts)',real:'real players only',test:'test accounts only'}[$('f-who').value||'all']},sessionsByPopulation:pop,vocabulary:'0.92.45 起：國小～高中 6,924 字（大考 L1–6 ＋ 108 課綱國中小 2000 字，含 60 個新字），每題記錄建議年級 gr；舊紀錄的年級由 i18n/vocab.json 補上，改名詞條已合併',populationNote:'sim = 模擬高中生（依 115 學測英文五標與高中生作息設計的程式化玩家），real = 真實玩家；若兩者混合，請在報告中提醒結論可能受模擬資料影響',game:'呼嚕小窩 Purr Cozy：像素風房間遊戲，玩家在遊戲中學英文單字（台灣大考中心 L1–L6，加上 108 課綱國中小 2000 字；0.92.45 起每題另有建議年級 g），用 SRS 間隔 0/1/2/4/7/15 天與自適應出題（目標答對率 85%）'};
  S.summary=summary;
 }
 
@@ -868,8 +871,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.06';
-const CHANGELOG=[['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.07';
+const CHANGELOG=[['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 // 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
 const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
  ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
@@ -1330,7 +1333,7 @@ Object.assign(Admin,{
   const v1=rows.filter(r=>!r.v2).length;
   $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要（人‧天）、${fmt(new Set(rows.map(r=>this.keyOf(r))).size)} 位不重複玩家`+(v1?`；其中 ${fmt(v1)} 份是 0.92.48 的舊格式（只記錄視窗開著的時間，時間分配與音樂不採用）`:'');this.renderBehavior()},
  bhRows(user){const from=$('bh-from').value,to=$('bh-to').value,w=$('bh-who').value;
-  return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&(()=>{const t=r.tester||/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct)),s=/^sim\d/.test(r.dev||'');return w==='all'?true:w==='test'?t:w==='sim'?s:!t&&!s})())},
+  return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&whoMatch(w||'all',r))},
  // totals for one player or everyone; every count also keeps who did it, so charts can say "N 次（M 人）"
  bhSum(rows){const t={vis:0,min:0,mus:0,focus:0,sess:0,songs:0,pd:rows.length,v2:0,users:new Set(),act:{},actU:{},musU:new Set(),focusU:new Set(),cells:Array.from({length:7},()=>Array.from({length:24},()=>({m:0,u:new Set()}))),byB:{},firstD:{},lastD:{}};
   for(const k of ['mini','pet','furn','fp','win','soc'])t[k]={},t[k+'U']={};
@@ -1427,10 +1430,10 @@ Object.assign(Admin,{
  ctInit(){const sel=$('ct-wk');if(sel.options.length)return;for(const w of this.ctWeeks()){const m=w.slice(1),[y,mo,da]=m.split('-').map(Number),e=new Date(y,mo-1,da+7);sel.append(new Option(`${mo}/${da}（一）06:00 – ${e.getMonth()+1}/${e.getDate()}（一）06:00${w===this.ctWeeks()[0]?'・本週':''}`,w))}},
  async ctLoad(){if(this.me.offline){$('ct-note').textContent='離線模式不能讀取；可以按「示範資料」看看。';return}
   const {F,db}=await firebase(),wk=$('ct-wk').value,board=$('ct-board').value;$('ct-note').textContent='讀取中…';
-  try{const snap=await F.getDocs(F.collection(db,'contest',wk,board));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(Object.assign({id:d.id},x,{at:x.at&&x.at.toMillis?x.at.toMillis():0}))});
+  try{const rows=[];for(const bd of board==='all'?['rows','test']:[board]){const snap=await F.getDocs(F.collection(db,'contest',wk,bd));snap.forEach(d=>{const x=d.data();rows.push(Object.assign({id:d.id,_test:bd==='test'},x,{at:x.at&&x.at.toMillis?x.at.toMillis():0}))})}
    this.ctSet(rows,wk,board,'Firestore');this.log('load','contest',`${wk} ${board} ${rows.length} 人`)}catch(e){$('ct-note').textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.02 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
  ctSet(rows,wk,board,label){CTA.rows=rows.filter(r=>(r.s|0)>0||(r.n|0)>0).sort((a,b)=>b.s-a.s||(a.at||0)-(b.at||0)||(a.id<b.id?-1:1));CTA.wk=wk;CTA.board=board;
-  $('ct-note').textContent=`${label}：${wk.slice(1)} 這週・${board==='test'?'測試帳號':'真實玩家'}・${CTA.rows.length} 人有成績`;this.ctRender()},
+  $('ct-note').textContent=`${label}：${wk.slice(1)} 這週・${board==='test'?'測試帳號':board==='all'?'真人與測試帳號':'真實玩家'}・${CTA.rows.length} 人有成績`;this.ctRender()},
  ctRender(){const R=CTA.rows,n=R.length,kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
   const byL=[0,1,2,3,4,5,6].map(l=>R.filter(r=>r.l===l).length),reach=[1,2,3,4,5,6].map(l=>R.filter(r=>r.l>=l).length),tries=R.map(r=>r.tries||1).sort((a,b)=>a-b);
   const medL=n?R.map(r=>r.l).sort((a,b)=>a-b)[Math.floor((n-1)/2)]:0;
@@ -1439,7 +1442,7 @@ Object.assign(Admin,{
   chart('c-ct-dist',{type:'bar',data:{labels:['沒有突破','L1 青銅','L2 白銀','L3 黃金','L4 鉑金','L5 鑽石','L6 星耀（登頂）'],datasets:[{label:'人數',data:byL,backgroundColor:CT_COL}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'人數'}}}}});
   chart('c-ct-reach',{type:'line',data:{labels:['L1','L2','L3','L4','L5','L6'],datasets:[{label:'突破到這一階以上的比例 %',data:reach.map(x=>n?Math.round(x/n*100):0),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}}}}});
   const ago=t=>t?new Date(t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'';
-  table('t-ct',['名次','玩家','成績','答對率','突破各階的題數','報名次數','最後更新',''],R.map((r,i)=>[i<50?i+1:{v:i+1,h:`<span class="muted">${i+1}（榜外）</span>`},{v:r.name||'',h:esc(r.name||'(未命名)')+(window.TEST_UIDS&&TEST_UIDS.has(r.id)?' <span class="tag easy">測試</span>':''),n:false},{v:r.s,h:`<span class="tag" style="background:${CT_COL[r.l]};color:#fff">${r.l>=6?'L6 登頂':r.l?'通過 L'+r.l:'沒有突破'}</span>`,n:false},{v:r.a,h:(r.a/10).toFixed(1)+'%'},r.n|0,r.tries|0,ago(r.at),{v:0,h:`<button data-ctp="${esc(r.id)}">玩家帳號</button>`,n:false}]));
+  table('t-ct',['名次','玩家','成績','答對率','突破各階的題數','報名次數','最後更新',''],R.map((r,i)=>[i<50?i+1:{v:i+1,h:`<span class="muted">${i+1}（榜外）</span>`},{v:r.name||'',h:esc(r.name||'(未命名)')+((window.TEST_UIDS&&TEST_UIDS.has(r.id))||r._test?' <span class="tag easy">測試</span>':''),n:false},{v:r.s,h:`<span class="tag" style="background:${CT_COL[r.l]};color:#fff">${r.l>=6?'L6 登頂':r.l?'通過 L'+r.l:'沒有突破'}</span>`,n:false},{v:r.a,h:(r.a/10).toFixed(1)+'%'},r.n|0,r.tries|0,ago(r.at),{v:0,h:`<button data-ctp="${esc(r.id)}">玩家帳號</button>`,n:false}]));
   $('ct-rank-note').textContent=n>50?`玩家在遊戲裡只看得到前 50 名和自己；第 51 名以後沒有名次也沒有排行獎勵。`:'';},
  ctCsv(){const csv='﻿名次,玩家,UID,突破階數,答對率,題數,報名次數\n'+CTA.rows.map((r,i)=>[i+1,r.name,r.id,r.l,(r.a/10).toFixed(1),r.n,r.tries].map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`contest-${CTA.wk}-${CTA.board}.csv`;a.click();this.log('export','contest',CTA.wk)},
@@ -1452,7 +1455,7 @@ Object.assign(Admin,{
  rpSum(r){const a=r.ans||{};return [...Object.keys(a).map(q=>this.rpVal(q,r.cat,a[q])),r.text||''].filter(Boolean).join('｜').slice(0,90)},
  rpDev(d){d=d||{};const ua=d.ua||'',os=/iPhone|iPad/.test(ua)?'iOS':/Android/.test(ua)?'Android':/Windows/.test(ua)?'Windows':/Mac OS/.test(ua)?'Mac':/CrOS/.test(ua)?'Chromebook':/Linux/.test(ua)?'Linux':'?',br=/Line\//.test(ua)?'LINE':/FBAN|FBAV|Instagram/.test(ua)?'FB/IG':/Edg\//.test(ua)?'Edge':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':/Firefox\//.test(ua)?'Firefox':'?';return `${d.mobile?'手機':'電腦'}・${os}・${br}・${d.w||0}×${d.h||0}`},
  rpFiltered(){const st=$('rp-status').value,cat=$('rp-cat').value,who=$('rp-who').value,q=$('rp-q').value.trim().toLowerCase();
-  return RPA.rows.filter(r=>(!st||r.status===st)&&(!cat||r.cat===cat)&&(!who||(who==='test')===!!r.test)&&(!q||[r.id,r.text,r.learn,r.winText,JSON.stringify(r.ans||{})].join(' ').toLowerCase().includes(q)))},
+  return RPA.rows.filter(r=>(!st||r.status===st)&&(!cat||r.cat===cat)&&(!who||who==='all'||(who==='test')===!!r.test)&&(!q||[r.id,r.text,r.learn,r.winText,JSON.stringify(r.ans||{})].join(' ').toLowerCase().includes(q)))},
  rpSet(rows,label){RPA.rows=rows.sort((a,b)=>(b.at||b.t||0)-(a.at||a.t||0));$('rp-note').textContent=`${label}：${rows.length} 份回報`;this.rpRender()},
  async rpLoad(){if(this.me.offline){$('rp-note').textContent='離線模式不能讀取；可以按「示範資料」看看。';return}
   const {F,db}=await firebase();$('rp-note').textContent='讀取中…';
@@ -1496,7 +1499,7 @@ $('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if
    Built from the data already in this page: learning sessions (always), daily behaviour summaries, problem reports and the
    contest board (loaded on demand). Days and weeks follow the game: a day starts at 06:00, a week on Monday 06:00.
    Every rule lives in OP_RULES so the report and the "判讀規則" list at the bottom can never disagree. */
-const OP={mode:'day',day:'',who:'real',ct:{},auto:false,idx:null,idxKey:'',last:null};
+const OP={mode:'day',day:'',who:'all',ct:{},auto:false,idx:null,idxKey:'',last:null};
 const OP_H=6;
 // where an unfinished round stopped, in words
 const opStop=x=>{const m=/^([a-z]+)@(\d+)/.exec(x||'');if(m)return ({quiz:'測驗第 '+(+m[2]+1)+' 題',review:'複習第 '+(+m[2]+1)+' 張單字卡',teach:'看第 '+(+m[2]+1)+' 張新字卡',pause:'中場休息時'})[m[1]]||m[1]+' 第 '+(+m[2]+1)+' 步';return ({gone:'直接關掉遊戲',restart:'改去做別的學習',idle:'放著太久沒動',result:'結果畫面'})[x]||esc(x||'不明')};
@@ -1536,7 +1539,7 @@ const OP_RULES=[
 ];
 
 Object.assign(Admin,{
- opWho(r){const k=whoOf(r);return OP.who==='all'?k!=='test':k===OP.who},
+ opWho(r){return whoMatch(OP.who,r)},
  // per player: every game day with learning (whole history), so "new", "came back" and streaks are exact
  opIndex(){const key=OP.who+'|'+S.raw.length;if(OP.idxKey===key)return OP.idx;
   const days={},sess=S.raw.filter(r=>this.opWho(r)&&r.t0);for(const r of sess){r.gd=r.gd||gday(r.t0);(days[r.pk]||(days[r.pk]=new Set())).add(r.gd)}
@@ -1577,10 +1580,10 @@ Object.assign(Admin,{
   if(!OP.auto&&!this.me.offline){OP.auto=true;if(!B.loaded)this.loadBehavior().then(()=>this.opRender());if(!RPA.rows.length)this.rpLoad().then(()=>this.opRender())}
   this.opRender()},
  opStep(n){OP.day=kAdd(OP.day,OP.mode==='day'?n:7*n);$('op-day').value=OP.day;this.opRender()},
- async opContest(wk){const board=OP.who==='real'?'rows':'test',key=wk+'|'+board;if(key in OP.ct)return OP.ct[key];
+ async opContest(wk){const board=OP.who==='real'?'rows':OP.who==='test'?'test':'all',key=wk+'|'+board;if(key in OP.ct)return OP.ct[key];
   if(CTA.wk===wk&&CTA.board===board&&CTA.rows.length)return OP.ct[key]=CTA.rows;
   if(this.me.offline)return null;OP.ct[key]=null;
-  try{const {F,db}=await firebase(),snap=await F.getDocs(F.collection(db,'contest',wk,board)),rows=[];snap.forEach(d=>{const x=d.data();if((x.s|0)>0||(x.n|0)>0)rows.push(Object.assign({id:d.id},x))});OP.ct[key]=rows;this.log('load','contest',`${wk} ${board} ${rows.length} 人（營運報告）`);this.opRender()}catch(e){OP.ct[key]=null}
+  try{const {F,db}=await firebase(),rows=[];for(const bd of board==='all'?['rows','test']:[board]){const snap=await F.getDocs(F.collection(db,'contest',wk,bd));snap.forEach(d=>{const x=d.data();if((x.s|0)>0||(x.n|0)>0)rows.push(Object.assign({id:d.id,_test:bd==='test'},x))})}OP.ct[key]=rows;this.log('load','contest',`${wk} ${board} ${rows.length} 人（營運報告）`);this.opRender()}catch(e){OP.ct[key]=null}
   return OP.ct[key]},
 
  opRender(){if(this.page!=='oprep')return;const out=$('op-out');
@@ -1664,20 +1667,20 @@ Object.assign(Admin,{
    add(lv,'exp',`新版本 ${esc(v)} 開始使用`,`${kLabel(V.first)} 起，${V.ppl.size} 人（活躍的 ${P1(share)}）、${fmt(V.n)} 題`+(msgs.length?'；比舊版差：'+msgs.join('、'):''),msgs.length?'新版本的學習數字比舊版差，先確認是不是這版改到題目、出題或介面。':'新版本上線後前幾天最容易出問題，持續看問題回報和完成率。',[['觀察','到「問題回報」篩選這個版本'],['觀察',`${day?'明天':'下週'}再比較一次新舊版本`]],'reports',V.ppl.size)}
 
   /* --- problem reports --- */
-  const rpIn=RPA.rows.filter(r=>{const g=gday(r.at||r.t||0);return g>=PR.cur[0]&&g<=PR.cur[1]&&(OP.who==='real'?!r.test:true)});
+  const rpIn=RPA.rows.filter(r=>{const g=gday(r.at||r.t||0);return g>=PR.cur[0]&&g<=PR.cur[1]&&(OP.who==='all'||(OP.who==='test')===!!r.test)});
   if(RPA.rows.length){const cat={};for(const r of rpIn)cat[r.cat]=(cat[r.cat]||0)+1;
    const errs={};for(const r of rpIn)for(const e of r.errs||[]){const m=String(e).replace(/^\d\d:\d\d:\d\d\s*/,'').slice(0,80);(errs[m]||(errs[m]=new Set())).add(r.id)}
    const errTop=Object.entries(errs).filter(([,s])=>s.size>=2).sort((a,b)=>b[1].size-a[1].size);
    const items={};for(const r of rpIn)if(r.cat==='quiz'&&r.ans&&r.ans.item){const k=r.ans.item;(items[k]||(items[k]=[])).push(r)}const itemTop=Object.entries(items).filter(([,a])=>a.length>=2);
    if((cat.stuck||0)>=3||errTop.length)add('alert','exp','有玩家卡住或遇到相同的錯誤',[(cat.stuck?`「卡住、當掉」${cat.stuck} 份`:''),...errTop.slice(0,3).map(([m,s])=>`${s.size} 份：<code>${esc(m)}</code>`)].filter(Boolean).join('；'),'同一個錯誤被不同玩家遇到，幾乎一定是程式問題，會直接讓人離開。',[['處理','到「問題回報」打開這幾份，把錯誤訊息和當時畫面交給工程'],['觀察','修正版上線後，這個錯誤是否消失']],'reports',(cat.stuck||0)+errTop.length*3);
    if(itemTop.length)add('watch','quality','同一題被多人回報',itemTop.map(([w,a])=>`<b>${esc(w)}</b>（${a.length} 份）`).join('、'),'多人回報同一題，通常是答案真的有爭議（兩個都對、解釋不清楚）。',[['調整','修改這題的中文解釋或干擾選項'],['處理','在回報上寫備註並改成「已處理」，玩家會看到']],'reports',itemTop.length*2);
-   const now=Date.now(),stale=RPA.rows.filter(r=>r.status==='new'&&now-(r.at||r.t||now)>3*864e5&&(OP.who==='real'?!r.test:true));
+   const now=Date.now(),stale=RPA.rows.filter(r=>r.status==='new'&&now-(r.at||r.t||now)>3*864e5&&(OP.who==='all'||(OP.who==='test')===!!r.test));
    if(stale.length)add('watch','exp','有回報超過 3 天沒有處理',`${stale.length} 份（最久 ${Math.floor((now-Math.min(...stale.map(r=>r.at||r.t)))/864e5)} 天）`,'玩家看得到處理狀態。改成「處理中」就能讓他知道有人在看。',[['處理','到「問題回報」篩選「新收到」，先改狀態']],'reports',stale.length);
    OP.rp={rpIn,cat,errTop,items:itemTop}}else OP.rp=null;
 
   /* --- behaviour --- */
   let bh=null;
-  if(B.loaded){const sel=r=>{const t=r.tester||/^test-/.test(r.dev||'')||(r.acct&&window.TEST_UIDS&&TEST_UIDS.has(r.acct)),s=/^sim\d/.test(r.dev||'');return OP.who==='all'?s||!t:OP.who==='sim'?s:!t&&!s};
+  if(B.loaded){const sel=r=>whoMatch(OP.who,r);
    const sum=([a,b])=>{const rows=B.raw.filter(r=>r.d>=a&&r.d<=b&&sel(r));if(!rows.length)return null;const t=this.bhSum(rows),tot=Object.values(t.act).reduce((x,y)=>x+y,0);return {t,rows,tot,learn:tot?(t.act.learn||0)/tot:null,visMed:median(rows.map(r=>r.v2?r.vis:(r.min||0))),users:t.users}};
    bh=sum(PR.cur);const bb=PR.base.map(sum).filter(Boolean),visB=bb.length>=2?this.opBase(bb,x=>x.visMed):null;
    if(bh){if(bh.tot>=60&&bh.learn<.15)add('watch','learn','玩的時候很少在學英文',`主動時間裡「學英文」占 ${P1(bh.learn)}`,'玩家來了，但大部分時間在別的地方。房間、小遊戲是吸引人來的，學習入口要在這些地方被看見。',[['觀察','到「使用行為」看時間主要花在哪裡'],['調整','在玩家最常待的地方（例如小遊戲結束時）加一個學習入口']],'behavior',bh.users.size);
@@ -1692,7 +1695,7 @@ Object.assign(Admin,{
   if(cls.length)add('info','people','疑似課堂使用',cls.map(c=>c.txt).join('；'),'短時間內很多人一起開始，通常是老師在課堂上帶。這是最好的推廣時機，也最容易遇到同時載入的問題（GitHub 429）。',[['觀察','這些玩家隔天、下週有沒有自己回來'],['觀察','同一時段有沒有「卡住、載入」的問題回報']],null,cls.reduce((s,c)=>s+c.n,0));
 
   /* --- contest (weekly) --- */
-  let ct=null;if(!day){const wk='w'+PR.cur[0],key=wk+'|'+(OP.who==='real'?'rows':'test');if(key in OP.ct)ct=OP.ct[key];else this.opContest(wk);
+  let ct=null;if(!day){const wk='w'+PR.cur[0],key=wk+'|'+(OP.who==='real'?'rows':OP.who==='test'?'test':'all');if(key in OP.ct)ct=OP.ct[key];else this.opContest(wk);
    if(ct&&ct.length){const reach=[1,2,3,4,5,6].map(l=>ct.filter(r=>r.l>=l).length),drops=reach.map((x,i)=>(i?reach[i-1]:ct.length)-x),worst=drops.indexOf(Math.max(...drops)),rate=act?ct.length/act:0;
     add(rate<.15&&act>=10?'watch':'info','people','程度挑戰賽',`參加 ${ct.length} 人（本週活躍的 ${P1(rate)}）；登頂 ${reach[5]} 人；最多人卡在 L${worst+1}（${drops[worst]} 人）`,rate<.15?'參加的人少，可能是不知道有這個活動，或覺得太難。':'看最多人卡住的那一階，那一階的題目可能太難。',[['觀察','到「程度挑戰賽」看分布'],['調整','如果大家都卡在同一階，檢查那一階 15 題裡的難字']],'contest',ct.length)}}
 
@@ -1729,15 +1732,15 @@ Object.assign(Admin,{
   const bhHtml=bh?(()=>{const t=bh.t,acts=Object.entries(t.act).sort((a,b)=>b[1]-a[1]).slice(0,6),mini=Object.entries(t.mini).sort((a,b)=>b[1]-a[1]).slice(0,5);
    return `<div class="kpis">${[['不重複玩家',fmt(bh.users.size)],['每人每天在線（中位數）',fmt(bh.visMed,1)+' 分'],['開番茄鐘的人',fmt(t.focusU.size)],['聽音樂的人',fmt(t.musU.size)]].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('')}</div>
    <p class="why" style="margin-top:10px">主動時間花在哪裡：${acts.map(([k,m])=>`${(BACT[k]||k).replace(/（.*）/,'')} ${P1(bh.tot?m/bh.tot:0)}`).join('、')}${mini.length?`<br>最多人玩的小遊戲：${mini.map(([k,n])=>`${BMINI[k]||k} ${n} 次`).join('、')}`:''}</p>`})():`<p class="why">${this.me.offline?'離線模式：到「使用行為」按「示範資料」或開啟資料後，這裡會一起分析。':'讀取中，或還沒有讀取使用行為。'}</p>`;
-  const rp=OP.rp,rpHtml=rp?`<p class="why">本期新回報 <b>${rp.rpIn.length}</b> 份${rp.rpIn.length?'：'+Object.entries(rp.cat).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${(RP_L['c.'+c]||c)} ${n}`).join('、'):''}。目前「新收到」還沒處理的共 <b>${RPA.rows.filter(r=>r.status==='new'&&(OP.who==='real'?!r.test:true)).length}</b> 份。</p>${rp.rpIn.length?`<div class="tbl"><table><thead><tr><th>時間</th><th>類型</th><th>內容</th><th>版本</th><th>狀態</th></tr></thead><tbody>${rp.rpIn.slice(0,12).map(r=>`<tr><td>${new Date(r.at||r.t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}</td><td>${esc(RP_L['c.'+r.cat]||r.cat)}</td><td style="white-space:normal">${esc(this.rpSum(r))}</td><td>${esc(r.ver||'')}</td><td>${esc(r.status)}</td></tr>`).join('')}</tbody></table></div>`:''}`:`<p class="why">${this.me.offline?'離線模式：到「問題回報」按「示範資料」後，這裡會一起分析。':'讀取中，或還沒有讀取問題回報。'}</p>`;
+  const rp=OP.rp,rpHtml=rp?`<p class="why">本期新回報 <b>${rp.rpIn.length}</b> 份${rp.rpIn.length?'：'+Object.entries(rp.cat).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${(RP_L['c.'+c]||c)} ${n}`).join('、'):''}。目前「新收到」還沒處理的共 <b>${RPA.rows.filter(r=>r.status==='new'&&(OP.who==='all'||(OP.who==='test')===!!r.test)).length}</b> 份。</p>${rp.rpIn.length?`<div class="tbl"><table><thead><tr><th>時間</th><th>類型</th><th>內容</th><th>版本</th><th>狀態</th></tr></thead><tbody>${rp.rpIn.slice(0,12).map(r=>`<tr><td>${new Date(r.at||r.t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}</td><td>${esc(RP_L['c.'+r.cat]||r.cat)}</td><td style="white-space:normal">${esc(this.rpSum(r))}</td><td>${esc(r.ver||'')}</td><td>${esc(r.status)}</td></tr>`).join('')}</tbody></table></div>`:''}`:`<p class="why">${this.me.offline?'離線模式：到「問題回報」按「示範資料」後，這裡會一起分析。':'讀取中，或還沒有讀取問題回報。'}</p>`;
   // daily bars for a week, hours for a day
   let chartCfg;if(day){const H=Array(24).fill(0).map(()=>new Set());for(const r of cur.sess)H[new Date(r.t0).getHours()].add(r.pk);chartCfg={type:'bar',data:{labels:H.map((_,i)=>i+'時'),datasets:[{label:'開始學習的人',data:H.map(s=>s.size),backgroundColor:'#8c5aa8cc'}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'人數'}}}}}}
   else{const ks=[0,1,2,3,4,5,6].map(i=>kAdd(PR.cur[0],i)),per=ks.map(k=>this.opStats(k,k));chartCfg={type:'bar',data:{labels:ks.map(kLabel),datasets:[{type:'line',label:'學習人數',data:per.map(s=>s.ppl.size),yAxisID:'y',borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'},{type:'bar',label:'作答題數',data:per.map(s=>s.n),yAxisID:'y2',backgroundColor:'#d9566f99'}]},options:{scales:{y:{position:'left',title:{display:true,text:'人數'}},y2:{position:'right',grid:{display:false},title:{display:true,text:'題數'}}}}}}
   const steps=F.flatMap(f=>f.next.map(([t,x])=>({t,x,f:f.title,lv:f.lv})));
   const stepHtml=['處理','調整','觀察'].map(t=>{const s=steps.filter(x=>x.t===t);return s.length?`<h3>${t==='處理'?'馬上處理':t==='調整'?'可以考慮的調整':(day?'明天要看的':'下週要看的')}</h3><ul class="op-next">${s.map(x=>`<li>${x.x} <span class="muted">← ${x.f}</span></li>`).join('')}</ul>`:''}).join('')||'<p class="muted">沒有需要追蹤的事。</p>';
   const rulesHtml=`<details><summary><b>判讀規則一覽</b>（${OP_RULES.length} 條）</summary><div class="tbl" style="max-height:none;margin-top:8px"><table><thead><tr><th>面向</th><th>規則</th><th>怎麼算</th><th>門檻</th></tr></thead><tbody>${OP_RULES.map(r=>`<tr><td>${OP_AREA[r[0]]}</td><td><b>${r[1]}</b></td><td style="white-space:normal">${r[2]}</td><td style="white-space:normal">${r[3]}</td></tr>`).join('')}</tbody></table></div></details>`;
-  const whoN={real:'真實玩家',sim:'模擬學生',all:'全部（不含測試帳號）'}[OP.who];
-  const warn=[partial?`這${day?'一天':'週'}還沒過完（遊戲的一天從早上 6 點開始），數字會繼續增加；「和平常比」的判讀等過完再做。`:'',!baseOK?'基準資料不足（需要前幾期也有資料），「和平常比」的判讀先不做。':'',OP.who==='real'&&!act&&I.sess.length===0&&S.raw.some(r=>whoOf(r)==='sim')?'目前沒有真實玩家的紀錄；上面「對象」可以改成「模擬學生」。':''].filter(Boolean).map(x=>`<p class="note">${x}</p>`).join('');
+  const whoN={real:'真實玩家',test:'測試帳號（30 位模擬學生和其他測試帳號）',all:'全部（真人與測試帳號）'}[OP.who];
+  const warn=[partial?`這${day?'一天':'週'}還沒過完（遊戲的一天從早上 6 點開始），數字會繼續增加；「和平常比」的判讀等過完再做。`:'',!baseOK?'基準資料不足（需要前幾期也有資料），「和平常比」的判讀先不做。':'',OP.who==='real'&&I.sess.length===0&&S.raw.some(isTestRec)?'目前還沒有真實玩家的紀錄；上面「對象」可以改成「全部」或「測試帳號」。':''].filter(Boolean).map(x=>`<p class="note">${x}</p>`).join('');
   const html=`${warn}
 <section><h2>${day?'每日':'每週'}營運報告：${PR.label}</h2><p class="why">對象：${whoN}。遊戲的一天從早上 6:00 開始，一週從週一 6:00 開始。</p><p class="op-head">${head}</p><div class="op-lights">${areas}</div></section>
 <section><h2>重點與下一步</h2><p class="why">依嚴重程度排序。每一點都寫了數據、怎麼判讀、下一步要觀察或調整什麼。</p>${fHtml}</section>
