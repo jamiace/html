@@ -1,0 +1,676 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>呼嚕小窩教學設計</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@700;800&display=swap">
+<style>
+/* Layout: warm room-like reading page — left sticky chapter rail (desktop), single 68ch column, chapter openers as "rooms" */
+:root{--paw:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='16' rx='5.2' ry='4.4' fill='black'/%3E%3Cellipse cx='5.2' cy='10.5' rx='2.2' ry='2.8' fill='black'/%3E%3Cellipse cx='9.4' cy='6.2' rx='2.2' ry='2.9' fill='black'/%3E%3Cellipse cx='14.6' cy='6.2' rx='2.2' ry='2.9' fill='black'/%3E%3Cellipse cx='18.8' cy='10.5' rx='2.2' ry='2.8' fill='black'/%3E%3C/svg%3E");
+  --bg:#F5F6F0; --paper:#FFFFFF; --ink:#1F2B26; --muted:#5E6B64; --line:#DCE2D8;
+  --moss:#2F6E4F; --moss-soft:#E3EFE6; --honey:#E3A83A; --honey-soft:#FBEFD6; --plum:#7B4E77; --plum-soft:#F1E6F0;
+  --shadow:0 1px 2px rgba(31,43,38,.06),0 8px 24px rgba(31,43,38,.06);
+  --f-display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-num:"Nunito","Noto Sans TC",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121815; --paper:#19211D; --ink:#E6ECE7; --muted:#9AA8A0; --line:#2A3530;
+  --moss:#7CC39C; --moss-soft:#1E3027; --honey:#F0BE5E; --honey-soft:#3A2F1A; --plum:#D6A3D1; --plum-soft:#33233A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121815; --paper:#19211D; --ink:#E6ECE7; --muted:#9AA8A0; --line:#2A3530;
+  --moss:#7CC39C; --moss-soft:#1E3027; --honey:#F0BE5E; --honey-soft:#3A2F1A; --plum:#D6A3D1; --plum-soft:#33233A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.progress{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:3px;width:0;background:linear-gradient(90deg,var(--moss),var(--honey));z-index:20}
+a{color:var(--moss)}
+:focus-visible{outline:2px solid var(--honey);outline-offset:2px;border-radius:4px}
+
+/* hero */
+.hero{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:56px 40px;background:
+  radial-gradient(circle at 88% 20%,var(--honey-soft) 0 120px,transparent 121px),
+  radial-gradient(circle at 96% 70%,var(--moss-soft) 0 70px,transparent 71px),var(--paper);border-bottom:1px solid var(--line);overflow:hidden}
+.hero-in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.eyebrow{font-family:var(--f-body);font-size:13px;letter-spacing:.14em;color:var(--moss);font-weight:700}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,6vw,58px);line-height:1.2;margin:0;text-wrap:balance;max-width:16em}
+.hero h1 .sub{display:block;font-size:.5em;color:var(--muted);margin-top:10px}
+.hero p.lede{font-size:clamp(17px,2.1vw,20px);color:var(--muted);max-width:40em;margin:0}
+.meta{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.meta span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,40vw),1fr));gap:12px;margin-top:10px;max-width:900px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:2px}
+.stat b{font-family:var(--f-num);font-size:30px;font-weight:800;color:var(--moss);line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* shell */
+.shell{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 80px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:48px;align-items:start}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);max-height:calc(100vh - 40px);overflow:auto;font-size:14px;line-height:1.5;padding-right:6px}
+nav.toc .tt{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin-bottom:10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:c}
+nav.toc a{display:grid;grid-template-columns:28px 1fr;gap:6px;text-decoration:none;color:var(--muted);padding:7px 10px;border-radius:10px}
+nav.toc a .n{font-family:var(--f-num);font-weight:800;color:var(--line);font-variant-numeric:tabular-nums}
+nav.toc a:hover{background:var(--moss-soft);color:var(--ink)}
+nav.toc a.on{background:var(--moss-soft);color:var(--ink);font-weight:700}
+nav.toc a.on .n{color:var(--moss)}
+details.mtoc{display:none}
+
+article{min-width:0;max-width:760px}
+section.ch{margin-bottom:28px;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,44px);box-shadow:var(--shadow)}
+.chhead{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:8px}
+.chno{font-family:var(--f-num);font-weight:800;font-size:15px;color:var(--moss);background:var(--moss-soft);border-radius:14px;width:48px;height:48px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(25px,3.4vw,33px);line-height:1.3;margin:0;text-wrap:balance}
+h2 .k{display:block;font-size:.58em;color:var(--muted);margin-top:4px}
+h3{font-size:19px;line-height:1.45;margin:36px 0 10px;text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h3::before{content:"";flex:none;width:10px;height:10px;border-radius:3px;background:var(--honey);transform:translateY(-2px)}
+p{margin:12px 0}
+strong{font-weight:700;background:linear-gradient(transparent 62%,var(--honey-soft) 62%);padding:0 1px}
+ul,ol{padding-left:1.4em;margin:12px 0}
+li{margin:6px 0}
+li::marker{color:var(--moss)}
+article ol:not(.week){list-style:none;padding:0;counter-reset:o}
+article ol:not(.week)>li{counter-increment:o;position:relative;padding-left:40px}
+article ol:not(.week)>li::before{content:counter(o);position:absolute;left:0;top:3px;width:26px;height:26px;border-radius:50%;background:var(--moss);color:var(--paper);font-family:var(--f-num);font-weight:800;font-size:14px;display:grid;place-items:center;line-height:1}
+blockquote{margin:22px 0;padding:18px 22px 18px 58px;background:var(--plum-soft);border-radius:18px;position:relative;color:var(--ink);font-size:18px}
+blockquote::before{content:"";position:absolute;left:20px;top:22px;width:22px;height:22px;background:var(--plum);
+  -webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.6;min-width:460px}
+th{background:var(--moss-soft);text-align:left;font-weight:700;padding:11px 14px;white-space:nowrap;color:var(--ink)}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top;font-variant-numeric:tabular-nums}
+td:first-child{font-weight:700}
+tr:hover td{background:color-mix(in srgb,var(--honey-soft) 45%,transparent)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--moss-soft);padding:1px 6px;border-radius:6px}
+
+/* week timeline */
+ol.week{list-style:none;padding:0;margin:20px 0;position:relative}
+ol.week::before{content:"";position:absolute;left:21px;top:8px;bottom:8px;width:2px;background:var(--line)}
+ol.week li{position:relative;padding-left:62px;margin:0 0 18px}
+ol.week .d{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--honey-soft);border:2px solid var(--honey);display:grid;place-items:center;font-family:var(--f-display);font-size:16px;color:var(--ink)}
+ol.week .lbl{display:block;font-weight:700;color:var(--moss);font-size:14px;letter-spacing:.06em}
+ol.week li.quiet .d{background:var(--bg);border-color:var(--line)}
+
+footer{color:var(--muted);font-size:13px;text-align:center;padding-block:0 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:20px;padding-top:20px}
+  nav.toc{display:none}
+  details.mtoc{display:block;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+  details.mtoc summary{cursor:pointer;font-weight:700;color:var(--moss)}
+  details.mtoc ol{margin:10px 0 0;padding-left:1.4em;font-size:15px}
+  details.mtoc a{color:var(--ink);text-decoration:none}
+  body{font-size:16px}
+  section.ch{border-radius:18px}
+}
+@media (max-width:480px){.chhead{grid-template-columns:1fr}.chno{width:40px;height:40px}}
+</style>
+<div class="progress" aria-hidden="true"></div>
+<header class="hero"><div class="hero-in"><div class="eyebrow">產品設計說明 · 董事會報告</div>
+<h1>呼嚕小窩<span class="sub">教學設計與學習科學</span></h1><p class="lede">呼嚕小窩看起來是一間可以佈置、養貓、聽音樂的小房間；裡面運作的，是一套完整的記憶科學與自適應學習引擎。這份文件說明我們怎麼出題、怎麼讓孩子願意回來、怎麼讓每一次練習都有效。</p>
+<div class="meta"><span>LtBuilder · 呼嚕小窩團隊</span><span>2026 年 11 月</span><span>12 章</span></div>
+<div class="stats"><div class="stat"><b>6,924</b><span>個單字，國小到高三</span></div><div class="stat"><b>85%</b><span>每一題的目標答對率</span></div><div class="stat"><b>10</b><span>個新字，每天剛剛好</span></div><div class="stat"><b>270</b><span>張旅行商人知識卡</span></div></div></div></header>
+<div class="shell"><nav class="toc" aria-label="目錄"><div class="tt">目錄</div><ol><li><a href="#s1"><span class="n">01</span><span>一句話說完</span></a></li><li><a href="#s2"><span class="n">02</span><span>學什麼</span></a></li><li><a href="#s3"><span class="n">03</span><span>怎麼記得住</span></a></li><li><a href="#s4"><span class="n">04</span><span>怎麼出題</span></a></li><li><a href="#s5"><span class="n">05</span><span>先測再教</span></a></li><li><a href="#s6"><span class="n">06</span><span>知識卡與故事</span></a></li><li><a href="#s7"><span class="n">07</span><span>為什麼想做題</span></a></li><li><a href="#s8"><span class="n">08</span><span>怎麼讓玩家回來</span></a></li><li><a href="#s9"><span class="n">09</span><span>不讓人卡住，也不讓人累</span></a></li><li><a href="#s10"><span class="n">10</span><span>用數據持續變好，也守住隱私</span></a></li><li><a href="#s11"><span class="n">11</span><span>一位玩家的一週</span></a></li><li><a href="#s12"><span class="n">12</span><span>結語</span></a></li></ol></nav>
+<article><details class="mtoc"><summary>目錄（12 章）</summary><ol><li><a href="#s1">一句話說完</a></li><li><a href="#s2">學什麼</a></li><li><a href="#s3">怎麼記得住</a></li><li><a href="#s4">怎麼出題</a></li><li><a href="#s5">先測再教</a></li><li><a href="#s6">知識卡與故事</a></li><li><a href="#s7">為什麼想做題</a></li><li><a href="#s8">怎麼讓玩家回來</a></li><li><a href="#s9">不讓人卡住，也不讓人累</a></li><li><a href="#s10">用數據持續變好，也守住隱私</a></li><li><a href="#s11">一位玩家的一週</a></li><li><a href="#s12">結語</a></li></ol></details>
+<section class="ch" id="s1"><div class="chhead"><div class="chno">01</div><h2>一句話說完<span class="k">一間會學英文的房間</span></h2></div>
+<p>呼嚕小窩看起來是一間可以佈置、養貓、聽音樂的小房間，<strong>裡面運作的是一套完整的記憶科學與自適應學習引擎</strong>。玩家覺得自己在照顧貓、幫商人找東西、拆搬家紙箱；實際上，他每天在適合自己的難度上，用最不容易忘記的節奏，認識和複習英文單字。</p>
+<p>我們的核心信念只有一句：<strong>學習要有效，先要有人願意每天回來；人要願意回來，學習就不能像作業</strong>。市面上的單字 App 多半只做到其中一半：科學上很正確但很無聊，或很好玩但學不到東西。呼嚕小窩的每一個設計，都在試著同時做到這兩件事。</p>
+<h3>八個設計原則</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>原則</th>
+<th>白話意思</th>
+<th>在遊戲裡的樣子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>剛剛好的難度</td>
+<td>每題大約 85% 會答對：有挑戰，但不會氣餐</td>
+<td>每一題出題前，遊戲都先估這位玩家答對的機率</td>
+</tr>
+<tr>
+<td>在快忘記的時候複習</td>
+<td>記得的字隔久一點再出現，忘了的字隔天就回來</td>
+<td>每個字有自己的「複習日」，間隔 1、2、4、7、15 天</td>
+</tr>
+<tr>
+<td>想起來比看一次有用</td>
+<td>記憶是「想起來」練出來的，不是「看過」累積的</td>
+<td>每一輪卡片之後一定有小測驗</td>
+</tr>
+<tr>
+<td>先教再考</td>
+<td>不會拿沒看過的字去考人</td>
+<td>題目裡的新字，會先用字卡教一次</td>
+</tr>
+<tr>
+<td>先知道你在哪裡</td>
+<td>不同程度的孩子不該從同一個字開始</td>
+<td>第一天的「搬家日」就是一場不像考試的程度測驗</td>
+</tr>
+<tr>
+<td>英文是工具不是科目</td>
+<td>字要放在有意義的情境裡才記得住</td>
+<td>商人的知識卡、紙箱上的英文標籤、房間裡的需求</td>
+</tr>
+<tr>
+<td>想回來的理由不只一個</td>
+<td>每個人回來的理由不同</td>
+<td>貓、商人故事、佈置、挑戰賽、好友、音樂、番茄鐘</td>
+</tr>
+<tr>
+<td>對錯誤溫柔</td>
+<td>答錯是學習的一部分，不是懲罰</td>
+<td>答錯不扣進度、貓咪會安慰你、下次再試就好</td>
+</tr>
+</tbody>
+</table></div>
+<p>接下來的章節，按照一位玩家實際遇到的順序，逐一說明這些原則是怎麼落實的。</p>
+</section><section class="ch" id="s2"><div class="chhead"><div class="chno">02</div><h2>學什麼<span class="k">6,924 個單字，從國小到高三</span></h2></div>
+<p>單字庫共 <strong>6,924 個字</strong>，涵蓋國小到高三。程度分級採用大考中心的六級字表，並把十二年國教課綱的基礎 1,200 字全部放在第一級，所以國小、國中生一開始碰到的就是課本裡會學到的字。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>程度</th>
+<th>字數</th>
+<th>大約對應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Level 1</td>
+<td>1,498</td>
+<td>國小、國中基礎字（含課綱 1,200 字）</td>
+</tr>
+<tr>
+<td>Level 2</td>
+<td>1,004</td>
+<td>國中</td>
+</tr>
+<tr>
+<td>Level 3</td>
+<td>976</td>
+<td>國中到高一</td>
+</tr>
+<tr>
+<td>Level 4</td>
+<td>1,055</td>
+<td>高一、高二</td>
+</tr>
+<tr>
+<td>Level 5</td>
+<td>1,183</td>
+<td>高二、高三</td>
+</tr>
+<tr>
+<td>Level 6</td>
+<td>1,208</td>
+<td>高三、學測高分</td>
+</tr>
+</tbody>
+</table></div>
+<h3>每個字都不只是一個字</h3>
+<p>每個字在單字庫裡都有一整張「身分證」：</p>
+<ul>
+<li><strong>真人發音和 KK 音標</strong>：6,924 個字全部有發音檔。</li>
+<li><strong>詞性與三種語言的意思</strong>：繁體中文、簡體中文、日文。</li>
+<li><strong>建議年級</strong>：用「小一～高三」的 1～12 表示，用來配對玩家的程度。</li>
+<li><strong>細緻難度</strong>：同樣是 Level 1，「cat」和「according to」難度差很多，所以每個字另有一個更細的難度值。</li>
+<li><strong>可接受的拼法</strong>：colour 和 color、café 和 cafe 這類寫法都算對。孩子不會因為英式拼法被判錯。</li>
+</ul>
+<h3>選字的原則</h3>
+<ol>
+<li><strong>從課本開始</strong>：課綱基礎字優先，讓遊戲裡學的字马上能在學校用到，孩子會立刻感受到「有用」。</li>
+<li><strong>玩家自己選範圍</strong>：學習頁可以勾選 Level 1～6，只有勾選的程度才會出新字。程度測驗完會自動幫他勾好，之後可以自己調。</li>
+<li><strong>用真實作答修正難度</strong>：單字庫的程度和年級是「起點」。後台會比對全體玩家的實際答題結果，找出「標 Level 2 但難得像 Level 5」的字，定期修正。單字庫會隨著使用人數越來越準。</li>
+<li><strong>題目不洩題</strong>：中文解釋裡如果有英文註解（例如「April 縮寫」、「=photo」），出題時會自動拿掉，避免題目本身就是答案。</li>
+</ol>
+</section><section class="ch" id="s3"><div class="chhead"><div class="chno">03</div><h2>怎麼記得住<span class="k">四個記憶科學原理</span></h2></div>
+<p>人學單字，真正的敵人不是「學不會」，而是「<strong>學會了又忘記</strong>」。心理學家艾賓浩斯在一百多年前就發現，新學的東西在一天內會忘掉一大半。呼嚕小窩用四個經過大量研究驗證的原理對抗遺忘。</p>
+<h3>1. 間隔重複：在快忘記的時候複習</h3>
+<p>同樣複習五次，「一天內連續五次」遠不如「分散在兩週內的五次」。每次快要忘記時把它想起來，記憶就會被加固一次，下一次忘記的速度也會變慢。</p>
+<p>遊戲用的是「五個盒子」的方法（萊特納卡片盒）：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>盒子</th>
+<th>代表</th>
+<th>下一次出現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>盒 1</td>
+<td>剛認識、或剛答錯</td>
+<td>1 天後</td>
+</tr>
+<tr>
+<td>盒 2</td>
+<td>答對過一次</td>
+<td>2 天後</td>
+</tr>
+<tr>
+<td>盒 3</td>
+<td>漸漸熟悉</td>
+<td>4 天後</td>
+</tr>
+<tr>
+<td>盒 4</td>
+<td>很熟</td>
+<td>7 天後</td>
+</tr>
+<tr>
+<td>盒 5</td>
+<td>精熟</td>
+<td>15 天後</td>
+</tr>
+</tbody>
+</table></div>
+<p>答對就往下一盒移，答錯就退回一盒、隔天再複習。一個字從認識到精熟，大約要經過一個月、五次成功的「想起來」。每天的「今日單字」，就是從到期的字、不熟的字和新字裡配出來的 10 個字。</p>
+<p>更重要的是，這些間隔不是寫死的。後台會看「到期時的答對率」：理想是 80%～90%。太高就把間隔拉長，節省玩家時間；太低就縮短，避免白學。</p>
+<h3>2. 提取練習：想起來，比再看一次有效</h3>
+<p>大部分人認為「多看幾次」就會記得。研究一致發現，<strong>活動腦袋「把答案想出來」的那一次，比看十次更有用</strong>，這叫「測驗效應」。</p>
+<p>所以呼嚕小窩裡沒有「只看不考」的學習：</p>
+<ul>
+<li>今日單字：先翻卡片，點「記得」或「還不熟」，接著一定是小測驗。</li>
+<li>商人的知識卡：讀完故事，教 4 個字，立刻用兩題小問答想一次。</li>
+<li>寵物訓練、幫好友、房間泡泡：都是答題。</li>
+</ul>
+<p>「還不熟」的按鈕也有意義：玩家自己評估自己記不記得，這個動作本身就是一種「後設認知」的訓練。</p>
+<h3>3. 交錯練習：不同的題型混在一起</h3>
+<p>同一個字，「看到英文選意思」、「看到意思選英文」、「聽發音選意思」、「拼出英文」是四種不同的能力。小測驗裡的題型輪流出現，而且每一輪從不同的題型開始。腦袋每題都要重新「切換」，當下比較累，但記得更久，也更能在真實情境用出來。</p>
+<h3>4. 適度困難：稍微費力才記得住</h3>
+<p>太簡單的題目讓人覺得自己很厲害，實際上學不到東西；太難的題目讓人放棄。學習科學稱這種「剛好要用一點力」的狀態為<strong>可取的困難（desirable difficulty）</strong>。</p>
+<p>呼嚕小窩把這個「剛好」定在<strong>答對率約 85%</strong>。這個數字不是隨便挑的：認知科學的研究發現，人和機器學習都在「大約八成以上會」的時候進步最快；對孩子來說，十題錯一兩題也剛好是「不會氣餐、但要認真」的感覺。下一章說明遊戲怎麼做到每一題都瞄準 85%。</p>
+</section><section class="ch" id="s4"><div class="chhead"><div class="chno">04</div><h2>怎麼出題<span class="k">每一題都是為這位玩家挑的</span></h2></div>
+<p>呼嚕小窩沒有固定的題庫順序。<strong>每一題出題前，遊戲都會先算「這位玩家有幾 % 會答對」，再挑最接近 85% 的那一題</strong>。兩個同時打開遊戲的孩子，看到的題目幾乎不會一樣。</p>
+<h3>五種題型，由淺到深</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>題型</th>
+<th>練的能力</th>
+<th>難度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>選出意思（看英文選意思）</td>
+<td>看得懂：閱讀時認得這個字</td>
+<td>最容易</td>
+</tr>
+<tr>
+<td>選出英文（看意思選英文）</td>
+<td>想得到：知道意思時可以找到對的字</td>
+<td>稍難</td>
+</tr>
+<tr>
+<td>聽發音選意思</td>
+<td>聽得懂：聽到這個字知道是什麼</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>拼出英文</td>
+<td>寫得出：可以自己拼出來，有首字母提示</td>
+<td>難</td>
+</tr>
+<tr>
+<td>聽寫</td>
+<td>聽到就拼得出來</td>
+<td>最難</td>
+</tr>
+</tbody>
+</table></div>
+<p>選擇題是「認得」，拼字是「會用」。一個字要從只是認得走到會用，就是在這個階梯上一格一格往上爬。遊戲對每位玩家，<strong>分別記錄「認字」、「聽力」、「拼字」、「聽寫」四種能力</strong>，所以一個「看得懂但拼不出來」的孩子，會繼續拿到很多拼字練習，而不會因為選擇題都答對就被當成「已經會了」。</p>
+<h3>好的干擾選項：錯得有道理</h3>
+<p>選擇題的三個錯誤選項不是隨便抽的：</p>
+<ul>
+<li><strong>同一個詞性、同一個程度</strong>：答案是動詞，選項就都是動詞。孩子不能靠「只有它是動詞」猜對。</li>
+<li><strong>不能有兩個都對</strong>：程式會檢查每個干擾選項的所有意思，只要有一個意思跟答案重疊就不用。</li>
+<li><strong>不能有兩個長得一樣</strong>：四個選項不會出現同樣的文字。</li>
+<li><strong>用孩子看過的字當選項</strong>：「選出英文」的題目，錯誤選項盡量用他已經認識的字，讓比較是「在熟悉的字裡分辨」，而不是「一堆沒看過的字」。</li>
+</ul>
+<p>後台會統計「哪個答案最常被誤選成哪個字」。真正會被混淆的字對（例如 quiet 和 quite）會被找出來，做成專門的易混淆字練習。</p>
+<h3>拼字題的設計</h3>
+<ul>
+<li><strong>首字母提示</strong>：一般拼字題會給第一個字母和字母數。提示不是放水，而是把題目從「想不起來」拉回「努力想得起來」的區間。</li>
+<li><strong>太長的字不考拼字</strong>：超過 11 個字母的字或片語改考選擇，避免「沒拼對是因為太長」。</li>
+<li><strong>答錯不是結束</strong>：測驗結束前，剛剛答錯的字會再出現一次。拼錯時有「再檢查一下」的機會，幾次之後才直接告訴答案。</li>
+</ul>
+<h3>自適應難度：一個會學習的出題老師</h3>
+<p>出題的核心是一個「答對機率模型」，觀念來自教育測驗學的「題目反應理論（IRT）」：</p>
+<ul>
+<li><strong>玩家有一個能力值，每個題目有一個難度值</strong>。兩者的差距決定答對的機率。</li>
+<li><strong>題目難度不只看字</strong>：同一個字，聽力題比選擇題難、拼字比聽力難、字越長拼字越難、有提示比沒提示簡單。四個選項的題目就算亂猜也有 25% 會對，模型也算進去了。</li>
+<li><strong>個人記憶會加分</strong>：這個字以前答對過幾次、答錯過幾次，都會影響這次的預估。</li>
+<li><strong>每答一題就更新一次</strong>：比預估的好，能力值上調；比預估的差，下調。模型會越用越懂這位玩家。</li>
+<li><strong>會自我修正</strong>：如果一位玩家最近答對率偏低，目標會稍微拉高、出簡單一點，讓他找回信心；反之亦然。</li>
+</ul>
+<h3>每一組題目都是一頓均衡的飯</h3>
+<p>挑 10 個字時，遊戲不是只挑「最接近 85%」的，而是照一個小配方輪流挑：</p>
+<ol>
+<li><strong>到期要複習的字</strong>：間隔重複安排今天該見面的。</li>
+<li><strong>剛剛好的字</strong>：答對機率最接近目標的。</li>
+<li><strong>常錯的字</strong>：答錯次數占了三成以上的。</li>
+<li><strong>新字</strong>：每組都有、但不多。</li>
+</ol>
+<p>而且「到期」「新字」只是優先，不是硬性規定：如果一個到期的字對這位玩家實在太難，就先放著，不硬塞給他。最近出過的字也會被稍微排後，避免一直重複。</p>
+</section><section class="ch" id="s5"><div class="chhead"><div class="chno">05</div><h2>先測再教<span class="k">搬家日的紙箱測驗</span></h2></div>
+<p>每個新玩家進門的第一件事，不是「從 apple 開始背」，而是<strong>幫貓咪拆紙箱</strong>。這是一場包裝成搬家遊戲的程度測驗。</p>
+<h3>為什麼要先測</h3>
+<ul>
+<li><strong>不浪費會的人的時間</strong>：國中生如果從 cat、dog 開始，三天就會覺得「這遊戲是給小孩玩的」。</li>
+<li><strong>不嚇跑還不會的人</strong>：國小生如果一開始就遇到 environment，會覺得「我英文好爛」。</li>
+<li><strong>讓第一天就落在 85%</strong>：前一章的出題引擎需要一個起點。測驗給的就是這個起點。</li>
+</ul>
+<h3>怎麼測：每一箱都在縮小範圍</h3>
+<ol>
+<li><strong>先問年級</strong>：玩家選了自己的年級，遊戲就從那個年級常見的程度開始猜，這是「先驗」。</li>
+<li><strong>每開一箱就答一題</strong>：題目的難度會挑「最能分辨這位玩家程度」的那一個字。答對了，下一箱難一點；答錯了，簡單一點。</li>
+<li><strong>夠準就停</strong>：測驗用的同樣是題目反應理論。每答一題，遊戲對「這位玩家在哪裡」的把握就多一點。把握夠了（誤差小於 0.75）就停，<strong>最少 8 箱、最多 12 箱</strong>，平均三分鐘內結束。</li>
+<li><strong>自動勾選程度</strong>：結果會直接勾選 L1～L4 的單字範圍，玩家不用自己猜「我是哪一級」。</li>
+</ol>
+<h3>測完不是只給分數</h3>
+<ul>
+<li><strong>一份獎勵</strong>：60 金幣、40 經驗值，還有一件「程度證書」家具可以擺在房間裡。第一次測驗就是第一份禮物。</li>
+<li><strong>說的是「你認得這些」，不是「你錯了這些」</strong>：結果畫面強調玩家已經會的字，而不是缺點。</li>
+<li><strong>每天一次的小測驗</strong>：之後每天可以再做一次 8 題的小測驗，畫出自己的成長曲線。孩子看得到「我比上週更厲害了」，家長和老師也看得到。</li>
+</ul>
+<h3>什麼時候「不」先教</h3>
+<p>一般學習時，新字會先用單字卡教過一次，再出題考（下一章會談到）。但<strong>程度測驗、升級測驗、程度挑戰賽</strong>這三種是「考試」，目的是知道玩家真實的程度，所以直接出題，不先教。教和考分得清清楚楚，數據才會乾淨。</p>
+</section><section class="ch" id="s6"><div class="chhead"><div class="chno">06</div><h2>知識卡與故事<span class="k">讓單字有地方住</span></h2></div>
+<p>一個單字如果只是「apple＝蘋果」，很快就會忘。如果它出現在一個有畫面、有人物、有好奇心的故事裡，就有了<strong>可以掛上去的鉤子</strong>。認知心理學稱為「精緻化編碼」：資訊和越多已知的東西連在一起，越容易想起來。</p>
+<h3>先教再考：單字卡</h3>
+<p>每天的 10 個新字，都會先用單字卡介紹：英文、發音、意思、例句。看過之後才出題。這來自「錯誤最少學習」的觀念：第一次見面就讓孩子猜，猜錯的那個答案反而容易被記住。先教，讓第一次的記憶是對的。</p>
+<p>每 5 個字就休息一下，讓孩子喘口氣再繼續，避免一次塞太多。</p>
+<h3>旅行商人的 270 張知識卡</h3>
+<p>每週一早上 6 點，會有一位旅行商人來到小窩。一共 6 位，每位都有自己的個性和專長：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>商人</th>
+<th>帶來的世界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>青苔婆婆</td>
+<td>種子、花、森林</td>
+</tr>
+<tr>
+<td>老鐘先生</td>
+<td>時間、地圖、發明</td>
+</tr>
+<tr>
+<td>毛球小姐</td>
+<td>貓狗、動物、照顧</td>
+</tr>
+<tr>
+<td>夜星</td>
+<td>月亮、星座、太空</td>
+</tr>
+<tr>
+<td>可可</td>
+<td>烘焙、甜點、味道</td>
+</tr>
+<tr>
+<td>阿線</td>
+<td>紡織、顏色、衣服</td>
+</tr>
+</tbody>
+</table></div>
+<p>每位商人有 9 個主題，每個主題 5 張知識卡，<strong>一共 270 張</strong>。每張卡是一段小故事或冷知識（例如鮮味是誰發現的、為什麼一星期有七天），裡面藏著 4 個英文單字。</p>
+<ul>
+<li><strong>一天一張</strong>：週一到週五早上 6 點解鎖一張，像連載故事一樣，讓人想明天再來看下一張。</li>
+<li><strong>讀完有小問答</strong>：每張卡後面有 2 題，答完蓋上印章，收進筆記本。</li>
+<li><strong>故事測驗</strong>：一個主題的 5 張卡都看完，可以「幫商人一個忙」：5 題答對 3 題就過關，拿到這個主題的紀念品家具。</li>
+<li><strong>收集里程碑</strong>：收集到 10、30、60、120、200、270 張時，各有一份紀念獎勵。</li>
+</ul>
+<h3>為什麼是故事</h3>
+<ul>
+<li><strong>好奇心是最好的記憶膠水</strong>：研究發現，人在好奇的狀態下，連順帶看到的資訊都記得比較好。知識卡先給一個問題或驚奇，單字就跟著被記住。</li>
+<li><strong>單字在真實的情境裡出現</strong>：孩子不只知道 wind 是「風」，還記得青苔婆婆說過，蒲公英的種子就是乘著風飛到遠方的。</li>
+<li><strong>跨學科</strong>：自然、歷史、地理、料理……英文不再是一個科目，而是<strong>看世界的一扇窗</strong>。</li>
+<li><strong>給玩家命名的權利</strong>：有些家具和紀念品可以讓玩家自己取名字，房間裡的東西都有自己的故事，孩子會更在意它們。</li>
+</ul>
+<h3>三種語言，用心翻譯</h3>
+<p>知識卡有繁體中文、簡體中文、日文三個版本。翻譯不是逐字轉換：例如日文版會依日本讀者的習慣調整星期名稱的由來、介紹發現鮮味的池田菊苗。我們希望每個語言的孩子讀起來都是自然的故事，而不是翻譯腔。</p>
+</section><section class="ch" id="s7"><div class="chhead"><div class="chno">07</div><h2>為什麼想做題<span class="k">動機的三個層次</span></h2></div>
+<p>心理學的「自我決定理論」說，人會持續想做一件事，靠的是三個感受：<strong>我做得到</strong>（勝任感）、<strong>我自己選的</strong>（自主感）、<strong>有人在乎</strong>（歸屬感）。金幣和獎勵可以點燃動機，但只有這三個感受能讓它一直燃下去。呼嚕小窩把動機設計成三層。</p>
+<h3>第一層：答對就有回饋（立刻的獎勵）</h3>
+<ul>
+<li><strong>金幣與經驗值</strong>：每答對一題，就有金幣可以買家具、經驗值可以升級。學英文和佈置房間的樂趣直接連在一起。</li>
+<li><strong>幸運題</strong>：偶爾會出現獎勵加倍的題目。不確定什麼時候出現的小驚喜，讓每一題都有一點期待感。</li>
+<li><strong>答錯不扣分</strong>：這是我們最堅持的一點。答錯不會扣金幣、不會掉等級、不會讓進度倒退，只是這個字會在之後再出現。孩子不用怕答錯，才會放心嘗試。</li>
+<li><strong>練習的金幣有上限</strong>：自由練習每天最多拿 40 金幣。這防止「刷簡單題賺錢」，把主要獎勵留給每日單字和任務這些真正有學習意義的活動。</li>
+</ul>
+<h3>第二層：看得到自己在進步（勝任感）</h3>
+<ul>
+<li><strong>等級與升級測驗</strong>：每升一個等級，都要通過一個小測驗。測驗難度分三段：</li>
+</ul>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>等級</th>
+<th>題數與過關</th>
+<th>提示</th>
+<th>沒過的話</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lv2～Lv4</td>
+<td>8 題對 5 題</td>
+<td>有</td>
+<td>10 分鐘後再試</td>
+</tr>
+<tr>
+<td>Lv5～Lv8</td>
+<td>8 題對 6 題</td>
+<td>有</td>
+<td>30 分鐘後再試</td>
+</tr>
+<tr>
+<td>Lv9 以上</td>
+<td>8 題對 6 題</td>
+<td>沒有</td>
+<td>60 分鐘後再試</td>
+</tr>
+</tbody>
+</table></div>
+<p>升級不是「玩夠久就會升」，而是「真的學會了才升」。孩子拿到的每一個等級，都是自己證明過的。沒過也只是休息一下再來，不會倒退。</p>
+<ul>
+<li><strong>每週程度挑戰賽</strong>：從 L1 到 L6 一關一關挑戰，每關 15 題對 11 題過關。讓想要挑戰的孩子有地方證明自己。</li>
+<li><strong>成就</strong>：累積學會的字、連續天數、收集的知識卡……都有對應的成就。</li>
+<li><strong>成長曲線</strong>：每天的 8 題小測驗當天就畫在曲線上，進步看得見。</li>
+</ul>
+<h3>第三層：這個家是我的（自主感與歸屬感）</h3>
+<ul>
+<li><strong>房間是玩家自己佈置的</strong>：家具和飾品非常多，要擺哪裡、怎麼搭配都是自己決定。進度不是一張成績單，而是一個越來越溫馨的家。</li>
+<li><strong>寵物會想你</strong>：寵物有自己的需求（餓了、想玩、想睡覺）、跟玩家之間的親密度，還可以學會小把戲。房間裡的東西也會冒出小泡泡說「我需要……」。孩子回來不只是為了做題，也是為了照顧它們。</li>
+<li><strong>每個商人都有買得起的東西</strong>：每位旅行商人至少有一件 Lv1 就能買的家具（140～240 金幣）。新玩家第一週就能體驗「自己賺錢、自己挑選」的樂趣。</li>
+<li><strong>扶蛋先給沒有的</strong>：扶蛋有 25% 抽到家具，連續 4 次沒抽到，第 5 次一定中。而且優先給還沒有的東西，不讓孩子一直抽到重複的而失望。</li>
+</ul>
+<h3>一起做比一個人做更有力</h3>
+<ul>
+<li><strong>幫好友一個忙</strong>：好友的貓餓了、植物枯了、房間有灰塵，就會有一架紙飛機飛進你的窗戶。答幾題單字就能去幫忙，一天最多 5 次。幫別人的同時也在練習。</li>
+<li><strong>團隊星星罐</strong>：同一組的人一起完成任務，一起裝滿星星罐。老師可以讓全班一起玩，穿插在課堂中。</li>
+<li><strong>合作比輸贏重要</strong>：遊戲裡有排行榜，但只是一個小分頁，不會推到玩家面前。主要的社交是拜訪、幫忙、留言。我們希望孩子跟自己比，跟朋友一起。</li>
+</ul>
+</section><section class="ch" id="s8"><div class="chhead"><div class="chno">08</div><h2>怎麼讓玩家回來<span class="k">一個會等你的家</span></h2></div>
+<p>背單字最難的不是今天，而是<strong>明天、後天、下個月</strong>。間隔重複要有效，前提是孩子真的會回來。我們的做法不是用「你再不來就會失去什麼」來嚇人，而是讓「回來」本身是一件溫暖、值得期待的事。</p>
+<h3>回來時，房間認得你</h3>
+<p>房間會依照玩家離開多久，給不同的歡迎：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>離開多久</th>
+<th>回來時看到什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10 分鐘～1 小時</td>
+<td>寵物抬頭看你，主角轉過身來</td>
+</tr>
+<tr>
+<td>1～6 小時</td>
+<td>寵物剛睡醒，打個哈欠、伸懶腰走過來</td>
+</tr>
+<tr>
+<td>6 小時以上</td>
+<td>房間暗暗的，燈「喀」一聲打開，主角從床上醒來，早上會拉開窗簾</td>
+</tr>
+</tbody>
+</table></div>
+<p>離開的時候，房間也沒有停下來：寵物換了地方睡（在床上、在你的椅子上），地上有小腳印，植物底下多了一片葉子，有時還會留一張小紙條告訴你發生了什麼。<strong>孩子回來時會發現「我不在的時候，這個家也在過日子」</strong>，這種感覺讓人想常回來看看。</p>
+<h3>每天都有新的東西在等</h3>
+<ul>
+<li><strong>每日 10 個單字</strong>：每天一份，份量剛好，十分鐘內做得完。</li>
+<li><strong>每日任務</strong>：分一般和困難兩種，完成有獎勵。每週也有每週任務。</li>
+<li><strong>知識卡每天早上 6 點更新</strong>：週一到週五每天一張新故事，像追連載一樣。</li>
+<li><strong>旅行商人每週一換人</strong>：這週是可可帶來甜點的故事，下週會是誰？新的商品、新的知識卡，讓每一週都不一樣。</li>
+<li><strong>寵物和房間的小需求</strong>：貓餓了、植物要澆水，會在房間裡冒出小泡泡。</li>
+<li><strong>好友的紙飛機</strong>：好友需要幫忙時，紙飛機會飛進窗戶。</li>
+</ul>
+<h3>連續天數：鼓勵，但不懲罰</h3>
+<p>遊戲會記錄連續學習的天數，也記錄最長紀錄。行事曆上會顯示今天是第幾天。但我們很小心：</p>
+<ul>
+<li><strong>斷掉不會失去任何東西</strong>：金幣、家具、等級、學過的字都還在，只是天數重新開始。最長紀錄永遠保留。</li>
+<li><strong>寵物不會因為你沒來而生病或離開</strong>：很多遊戲用「你的寵物快餓死了」逼玩家回來，這會讓孩子焦慮，甚至在不方便的時候也覺得非玩不可。呼嚕小窩的寵物只會很高興看到你。</li>
+<li><strong>錯過的不用補</strong>：今天沒來，明天就做明天的份，不會累積成一大堆「欠的作業」。</li>
+</ul>
+<blockquote>
+<p>我們希望孩子回來是因為「想」，而不是因為「怕」。前者能撐好幾年，後者撐不過一個學期。</p>
+</blockquote>
+<h3>為什麼這樣設計</h3>
+<ul>
+<li><strong>習慣的養成需要固定的提示</strong>：心理學研究指出，習慣是「提示 → 行動 → 獎勵」反覆出現後形成的。每天早上 6 點的新卡片、固定的 10 個字，就是固定的提示。</li>
+<li><strong>份量小，才容易天天做</strong>：每天 10 個字比每天 50 個字更容易持續。一年下來，每天 10 個字也是 3,650 次學習。</li>
+<li><strong>溫暖的歡迎是最好的提醒</strong>：比起推播通知「你今天還沒學習」，一個認得你、會為你開燈的房間，更能讓孩子主動想回來。</li>
+</ul>
+</section><section class="ch" id="s9"><div class="chhead"><div class="chno">09</div><h2>不讓人卡住，也不讓人累</h2></div>
+<p>一個孩子會放棄一個學習產品，通常不是因為「不好玩」，而是因為兩件事：<strong>卡住了不知道怎麼辦</strong>，或是<strong>累了卻停不下來</strong>。這一章說明我們怎麼把這兩個坑填起來。</p>
+<h3>新手的第一分鐘</h3>
+<p>第一次打開遊戲，孩子不會看到一大堆按鈕和說明文字，而是：</p>
+<ol>
+<li><strong>先看到房間</strong>：一個溫馨的小窝，和一隻貓。</li>
+<li><strong>貓咪開口</strong>：「喵～歡迎搬進呼嚕小窩！」「先幫我拆幾個紙箱，看看你認得哪些英文字吧。」</li>
+<li><strong>拆紙箱</strong>：也就是程度測驗。</li>
+<li><strong>測完才教下一步</strong>：「接下來每天到『學習』複習 10 個單字……」</li>
+</ol>
+<p>一次只教一件事，而且是讓角色說出來，而不是彈出一個說明視窗。其他功能（寵物、商人、好友……）等玩家遇到時才會出現小提示。這是「認知負荷理論」的應用：人的工作記憶一次只能處理很少的新東西，一次塞太多就全部都記不住。</p>
+<h3>卡住時有後路</h3>
+<ul>
+<li><strong>太難會自動變簡單</strong>：最近答對率如果低於 70%，出題會自動放慢、出容易一點的題目。孩子不用自己去調設定。</li>
+<li><strong>提示</strong>：拼字題有首字母，大部分升級測驗也可以用提示。</li>
+<li><strong>寵物訓練連錯兩次</strong>：下一次就改用玩家很熟的字，讓他一定能成功。</li>
+<li><strong>升級沒過，休息一下再來</strong>：不扣任何東西。</li>
+<li><strong>故事測驗 5 題對 3 題就過</strong>：門檻放在「有認真讀」，而不是「全部背起來」。</li>
+<li><strong>每個商人都有新手買得起的東西</strong>：新玩家不會遇到「這週什麼都買不了」的情況。</li>
+<li><strong>有問題可以直接回報</strong>：設定裡有「回報問題」。先選類型（卡住、畫面怪怪的、題目有問題、太難或太簡單……），然後大部分只要用點的，小孩子也能完成。遊戲會自動附上當時的畫面和題目，我們很快就能找到問題。尤其是「這題兩個答案都對」這種回報，會直接幫助我們改善題目。</li>
+</ul>
+<h3>不讓人累：小份量、有節奏</h3>
+<ul>
+<li><strong>每天 10 個字，每 5 個字休息一次</strong>：份量是刻意選的。我們曾經設計成每天 20 個，後來改成 10 個：每天能穩定學會 10 個字，比偶爾學 20 個、之後就放棄更有價值。</li>
+<li><strong>專注時鐘</strong>：遊戲內建番茄鐘，專心讀書一段時間後休息。開始時桌燈亮起、點一聲「叮」；結束時主角伸懶腰、寵物過來蹭一蹭，後面是 30 秒的呼吸時間。放棄一個番茄鐘不會有任何責備，安安靜靜的。</li>
+<li><strong>房間會一起休息</strong>：玩家放著 30 分鐘沒動（專注時除外），房間會慢慢安靜下來：燈變暗、音樂變小、大家都打起瞌睡。晚上點一下床可以說晚安，燈一盞一盞關掉。遊戲本身在告訴孩子：「休息也是好的」。</li>
+<li><strong>喵喵打字機</strong>：一個輕鬆的拼字小遊戲。貓咪會幫你「加」字母，你只要按 Enter 確認，新手從很簡單的開始。累的時候也能輕鬆練習。</li>
+<li><strong>26 種小遊戲</strong>：房間裡的遊戲機、樂器、投籃框……都能玩。學習間的休息時間，也在小窩裡。</li>
+</ul>
+<h3>放心的氛圍</h3>
+<p>這些設計合起來是一個訊息：<strong>這裡是安全的地方，可以慢慢來</strong>。語言學習學者 Krashen 提出的「情意過濾」指出，焦慮和害怕出錯會直接阻擋語言學習。一個不怕答錯、不怕休息的孩子，學得最多。</p>
+</section><section class="ch" id="s10"><div class="chhead"><div class="chno">10</div><h2>用數據持續變好，也守住隱私</h2></div>
+<p>前面提到的每一個數字：85%、每天 10 個字、故事測驗 5 題對 3 題……都不是拍腦袋決定後就不再動的。呼嚕小窩內建一套學習紀錄和後台分析，讓我們可以<strong>用真實的作答來檢驗每一個設計</strong>。</p>
+<h3>後台看得到什麼</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>分析</th>
+<th>回答的問題</th>
+<th>會帶來的改善</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型校正</td>
+<td>預估「85% 會答對」的題目，實際上是不是真的答對 85%？</td>
+<td>調整出題引擎的參數</td>
+</tr>
+<tr>
+<td>單字難度</td>
+<td>每個字實際的答對率，程度有沒有標錯？</td>
+<td>把太難或太簡單的字移到對的程度</td>
+</tr>
+<tr>
+<td>遺忘曲線</td>
+<td>隔了幾天再複習，還記得多少？</td>
+<td>調整複習間隔</td>
+</tr>
+<tr>
+<td>留存</td>
+<td>新玩家有沒有回來？在哪一步離開的？</td>
+<td>改善新手流程與動機設計</td>
+</tr>
+<tr>
+<td>易混淆與拼錯</td>
+<td>哪個字最常被誤認成哪個字？拼字最常錯在哪裡？</td>
+<td>改善干擾選項，做易混淆字專題</td>
+</tr>
+<tr>
+<td>問題回報</td>
+<td>玩家遇到了什麼問題？</td>
+<td>修正錯誤、改題目</td>
+</tr>
+</tbody>
+</table></div>
+<h3>一個例子：每天 20 個字變 10 個字</h3>
+<p>最初的每日單字是 20 個。重新檢視後我們認為，對大部分孩子來說這份量太重，容易做到一半就停下來。改成 10 個字、中間休息一次之後，完成一整份的成就感更容易拿到。上線後，後台的留存和完成率會告訴我們這個調整是不是對的。同樣的思考也用在「故事測驗從對 4 題改成對 3 題」「每位商人都有 Lv1 買得起的東西」這些調整上。</p>
+<h3>30 位模擬學生</h3>
+<p>新功能在給真正的孩子之前，會先給 30 位「模擬學生」玩。他們有不同的年級、程度、上線習慣：有人每天早上來、有人只有週末來、有人偶爾消失幾天。他們在遊戲裡的作答會進入後台，讓我們在沒有真實玩家資料的時候，就能先確認出題引擎、複習排程、後台分析都正常運作。後台可以把模擬帳號和真實玩家分開篩選，兩者不會混在一起。</p>
+<h3>隱私：只記學習，不記人</h3>
+<p>我們的使用者是孩子，所以對資料的態度是「能不收就不收」：</p>
+<ul>
+<li><strong>只記學習行為</strong>：答了哪個字、對或錯、花了多久。不記家具、寵物、聊天內容，也不記名字和 Email。</li>
+<li><strong>用獨立的匿名編號</strong>：學習紀錄使用一個只用於紀錄的匿名帳號，和玩家的登入、雲端存檔分開。</li>
+<li><strong>可以關掉</strong>：設定裡有「分享匿名學習資料」，關掉後就不再上傳，還沒送出的也會丟掉。</li>
+<li><strong>回報問題不送密碼和 Email</strong>：玩家也可以拿掉自動附上的畫面截圖。</li>
+<li><strong>後台分級權限</strong>：只有被授權的分析者能看分析資料，刪除限管理者。每一條規則都有自動化測試驗證。</li>
+</ul>
+</section><section class="ch" id="s11"><div class="chhead"><div class="chno">11</div><h2>一位玩家的一週</h2></div>
+<p>把前面所有設計放在一起，看看一位虛構的五年級學生「小安」的第一週。</p>
+<ol class="week"><li><span class="d">一</span><span class="lbl">晚上，搬家日</span>小安打開遊戲，看到一個空空的房間和一隻貓。貓咪說歡迎她搬進來，請她幫忙拆紙箱。她拆了 9 個箱子，答對 6 題，遊戲幫她勾好了 L1 和 L2 的單字，送她一張程度證書和 60 金幣。她把證書掛在牆上。接著學了今天的 10 個字，中間休息了一下。</li><li><span class="d">二</span><span class="lbl">早上</span>上學前打開遊戲，房間暗暗的，燈「喀」一聲亮起，窗簾拉開，貓睡在她的椅子上。今天的知識卡是青苔婆婆的「種子是帶著便當的寶寶」，她認識了 seed 和 food。今天的 10 個字裡，有 3 個是昨天學過的，她發現自己還記得。</li><li><span class="d">三</span>她答對一題拼字，跳出「幸運題！」，多拿了一份獎勵。她的金幣夠了，在青苔婆婆那裡買了第一盆植物。晚上，一架紙飛機飛進她的窗戶：同學的貓餓了。她答了幾題單字，幫同學餵了貓。</li><li class="quiet"><span class="d">四</span>她忘記了。沒關係。</li><li><span class="d">五</span>她回來時，貓抬頭看她，地上有幾個小腳印，還有一張紙條說「你不在的時候，貓在你的床上睡了一整天」。連續天數從 1 開始，但她的金幣、植物、學過的字都還在。她一口氣做完了今天的 10 個字，也看完了這週的第 5 張知識卡。</li><li><span class="d">六</span>她幫青苔婆婆一個忙：5 題故事測驗答對 4 題，拿到「種子的旅行」的紀念品。她經驗值夠了，去考升級測驗，8 題對 5 題，升上 Lv2。</li><li><span class="d">日</span>她做了每日小測驗，成長曲線上多了一個點，比週一高了一點。明天早上 6 點，會有一位新的商人來。</li></ol><p>這一週，小安接觸了約 60 個單字，每一個都在對的時間複習、用對的題型練習。但對她來說，這只是「我的房間多了一盆植物，貓越來越黏我了」的一週。</p>
+</section><section class="ch" id="s12"><div class="chhead"><div class="chno">12</div><h2>結語<span class="k">我們的用心</span></h2></div>
+<p>呼嚕小窩要解決的問題，從來不是「怎麼讓孩子一次背更多字」，而是<strong>怎麼讓孩子一直學下去</strong>。為此，我們：</p>
+<ul>
+<li>用<strong>間隔重複與記憶提取</strong>，讓每一個學過的字都留得住。</li>
+<li>用<strong>自適應難度與題目反應理論</strong>，讓每一題都剛剛好。</li>
+<li>用<strong>故事與知識卡</strong>，讓單字有意義、讓好奇心帶著學習。</li>
+<li>用<strong>自我決定理論</strong>設計動機，讓金幣點燃興趣、讓房間與寵物留住興趣。</li>
+<li>用<strong>溫暖而不恐嚇的回歸設計</strong>，讓孩子因為「想」而回來。</li>
+<li>用<strong>數據與使用者回報</strong>持續檢驗每一個決定，並且守住孩子的隱私。</li>
+</ul>
+<p>好的學習產品，應該讓孩子感覺不到自己在「被教」，只覺得自己在過一個很喜歡的生活。這就是呼嚕小窩想成為的樣子：<strong>一個會等你回家的小窩，而英文就在裡面長大</strong>。</p></section></article></div>
+<footer>呼嚕小窩 PurrCozy · 教學設計與學習科學</footer>
+<script>
+(function(){
+  var bar=document.querySelector('.progress');
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1))});
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    if(bar) bar.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+    var cur=0; for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<140) cur=i; }
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  document.querySelectorAll('details.mtoc a').forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false})});
+})();
+</script>
+
+</body></html>

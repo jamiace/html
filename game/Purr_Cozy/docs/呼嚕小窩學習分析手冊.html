@@ -1,0 +1,814 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>呼嚕小窩學習分析手冊</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@700;800&display=swap">
+<style>
+/* Layout: warm room-like reading page — left sticky chapter rail (desktop), single 68ch column, chapter openers as "rooms" */
+:root{--paw:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='16' rx='5.2' ry='4.4' fill='black'/%3E%3Cellipse cx='5.2' cy='10.5' rx='2.2' ry='2.8' fill='black'/%3E%3Cellipse cx='9.4' cy='6.2' rx='2.2' ry='2.9' fill='black'/%3E%3Cellipse cx='14.6' cy='6.2' rx='2.2' ry='2.9' fill='black'/%3E%3Cellipse cx='18.8' cy='10.5' rx='2.2' ry='2.8' fill='black'/%3E%3C/svg%3E");
+  --bg:#F5F6F0; --paper:#FFFFFF; --ink:#1F2B26; --muted:#5E6B64; --line:#DCE2D8;
+  --moss:#2F6E4F; --moss-soft:#E3EFE6; --honey:#E3A83A; --honey-soft:#FBEFD6; --plum:#7B4E77; --plum-soft:#F1E6F0;
+  --shadow:0 1px 2px rgba(31,43,38,.06),0 8px 24px rgba(31,43,38,.06);
+  --f-display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-num:"Nunito","Noto Sans TC",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121815; --paper:#19211D; --ink:#E6ECE7; --muted:#9AA8A0; --line:#2A3530;
+  --moss:#7CC39C; --moss-soft:#1E3027; --honey:#F0BE5E; --honey-soft:#3A2F1A; --plum:#D6A3D1; --plum-soft:#33233A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121815; --paper:#19211D; --ink:#E6ECE7; --muted:#9AA8A0; --line:#2A3530;
+  --moss:#7CC39C; --moss-soft:#1E3027; --honey:#F0BE5E; --honey-soft:#3A2F1A; --plum:#D6A3D1; --plum-soft:#33233A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.progress{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:3px;width:0;background:linear-gradient(90deg,var(--moss),var(--honey));z-index:20}
+a{color:var(--moss)}
+:focus-visible{outline:2px solid var(--honey);outline-offset:2px;border-radius:4px}
+
+/* hero */
+.hero{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:56px 40px;background:
+  radial-gradient(circle at 88% 20%,var(--honey-soft) 0 120px,transparent 121px),
+  radial-gradient(circle at 96% 70%,var(--moss-soft) 0 70px,transparent 71px),var(--paper);border-bottom:1px solid var(--line);overflow:hidden}
+.hero-in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.eyebrow{font-family:var(--f-body);font-size:13px;letter-spacing:.14em;color:var(--moss);font-weight:700}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,6vw,58px);line-height:1.2;margin:0;text-wrap:balance;max-width:16em}
+.hero h1 .sub{display:block;font-size:.5em;color:var(--muted);margin-top:10px}
+.hero p.lede{font-size:clamp(17px,2.1vw,20px);color:var(--muted);max-width:40em;margin:0}
+.meta{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.meta span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,40vw),1fr));gap:12px;margin-top:10px;max-width:900px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:2px}
+.stat b{font-family:var(--f-num);font-size:30px;font-weight:800;color:var(--moss);line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* shell */
+.shell{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 80px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:48px;align-items:start}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);max-height:calc(100vh - 40px);overflow:auto;font-size:14px;line-height:1.5;padding-right:6px}
+nav.toc .tt{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin-bottom:10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:c}
+nav.toc a{display:grid;grid-template-columns:28px 1fr;gap:6px;text-decoration:none;color:var(--muted);padding:7px 10px;border-radius:10px}
+nav.toc a .n{font-family:var(--f-num);font-weight:800;color:var(--line);font-variant-numeric:tabular-nums}
+nav.toc a:hover{background:var(--moss-soft);color:var(--ink)}
+nav.toc a.on{background:var(--moss-soft);color:var(--ink);font-weight:700}
+nav.toc a.on .n{color:var(--moss)}
+details.mtoc{display:none}
+
+article{min-width:0;max-width:760px}
+section.ch{margin-bottom:28px;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,44px);box-shadow:var(--shadow)}
+.chhead{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:8px}
+.chno{font-family:var(--f-num);font-weight:800;font-size:15px;color:var(--moss);background:var(--moss-soft);border-radius:14px;width:48px;height:48px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(25px,3.4vw,33px);line-height:1.3;margin:0;text-wrap:balance}
+h2 .k{display:block;font-size:.58em;color:var(--muted);margin-top:4px}
+h3{font-size:19px;line-height:1.45;margin:36px 0 10px;text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h3::before{content:"";flex:none;width:10px;height:10px;border-radius:3px;background:var(--honey);transform:translateY(-2px)}
+p{margin:12px 0}
+strong{font-weight:700;background:linear-gradient(transparent 62%,var(--honey-soft) 62%);padding:0 1px}
+ul,ol{padding-left:1.4em;margin:12px 0}
+li{margin:6px 0}
+li::marker{color:var(--moss)}
+article ol:not(.week){list-style:none;padding:0;counter-reset:o}
+article ol:not(.week)>li{counter-increment:o;position:relative;padding-left:40px}
+article ol:not(.week)>li::before{content:counter(o);position:absolute;left:0;top:3px;width:26px;height:26px;border-radius:50%;background:var(--moss);color:var(--paper);font-family:var(--f-num);font-weight:800;font-size:14px;display:grid;place-items:center;line-height:1}
+blockquote{margin:22px 0;padding:18px 22px 18px 58px;background:var(--plum-soft);border-radius:18px;position:relative;color:var(--ink);font-size:18px}
+blockquote::before{content:"";position:absolute;left:20px;top:22px;width:22px;height:22px;background:var(--plum);
+  -webkit-mask:var(--paw) center/contain no-repeat;mask:var(--paw) center/contain no-repeat}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.6;min-width:460px}
+th{background:var(--moss-soft);text-align:left;font-weight:700;padding:11px 14px;white-space:nowrap;color:var(--ink)}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top;font-variant-numeric:tabular-nums}
+td:first-child{font-weight:700}
+tr:hover td{background:color-mix(in srgb,var(--honey-soft) 45%,transparent)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--moss-soft);padding:1px 6px;border-radius:6px}
+
+/* week timeline */
+ol.week{list-style:none;padding:0;margin:20px 0;position:relative}
+ol.week::before{content:"";position:absolute;left:21px;top:8px;bottom:8px;width:2px;background:var(--line)}
+ol.week li{position:relative;padding-left:62px;margin:0 0 18px}
+ol.week .d{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--honey-soft);border:2px solid var(--honey);display:grid;place-items:center;font-family:var(--f-display);font-size:16px;color:var(--ink)}
+ol.week .lbl{display:block;font-weight:700;color:var(--moss);font-size:14px;letter-spacing:.06em}
+ol.week li.quiet .d{background:var(--bg);border-color:var(--line)}
+
+footer{color:var(--muted);font-size:13px;text-align:center;padding-block:0 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:20px;padding-top:20px}
+  nav.toc{display:none}
+  details.mtoc{display:block;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+  details.mtoc summary{cursor:pointer;font-weight:700;color:var(--moss)}
+  details.mtoc ol{margin:10px 0 0;padding-left:1.4em;font-size:15px}
+  details.mtoc a{color:var(--ink);text-decoration:none}
+  body{font-size:16px}
+  section.ch{border-radius:18px}
+}
+@media (max-width:480px){.chhead{grid-template-columns:1fr}.chno{width:40px;height:40px}}
+</style>
+<div class="progress" aria-hidden="true"></div>
+<header class="hero"><div class="hero-in"><div class="eyebrow">後台使用手冊 · 給第一次看數據的人</div>
+<h1>呼嚕小窩後台<span class="sub">學習分析判讀手冊</span></h1><p class="lede">後台的每一頁都在回答一個問題：玩家有沒有在學、學得好不好、題目和遊戲設計得對不對。這份手冊逐頁說明看哪個數字、什麼算正常、不正常時該做什麼。</p>
+<div class="meta"><span>LtBuilder · 呼嚕小窩團隊</span><span>2026 年 11 月</span><span>8 章</span></div>
+<div class="stats"><div class="stat"><b>20</b><span>分鐘，每週固定看一次</span></div><div class="stat"><b>70–85%</b><span>健康的整體答對率</span></div><div class="stat"><b>11</b><span>個學習分析子頁</span></div><div class="stat"><b>8</b><span>個最常見的看錯</span></div></div></div></header>
+<div class="shell"><nav class="toc" aria-label="目錄"><div class="tt">目錄</div><ol><li><a href="#s1"><span class="n">01</span><span>先讀這裡</span></a></li><li><a href="#s2"><span class="n">02</span><span>篩選列</span></a></li><li><a href="#s3"><span class="n">03</span><span>儀表板</span></a></li><li><a href="#s4"><span class="n">04</span><span>學習分析</span></a></li><li><a href="#s5"><span class="n">05</span><span>使用行為、程度挑戰賽、問題回報</span></a></li><li><a href="#s6"><span class="n">06</span><span>AI 報告與資料匯出</span></a></li><li><a href="#s7"><span class="n">07</span><span>從數據到決策</span></a></li><li><a href="#s8"><span class="n">08</span><span>八個最常見的看錯</span></a></li></ol></nav>
+<article><details class="mtoc"><summary>目錄（8 章）</summary><ol><li><a href="#s1">先讀這裡</a></li><li><a href="#s2">篩選列</a></li><li><a href="#s3">儀表板</a></li><li><a href="#s4">學習分析</a></li><li><a href="#s5">使用行為、程度挑戰賽、問題回報</a></li><li><a href="#s6">AI 報告與資料匯出</a></li><li><a href="#s7">從數據到決策</a></li><li><a href="#s8">八個最常見的看錯</a></li></ol></details>
+<section class="ch" id="s1"><div class="chhead"><div class="chno">01</div><h2>先讀這裡<span class="k">這份手冊怎麼用</span></h2></div>
+<p>後台回答三個問題：<strong>玩家有沒有在學、學得好不好、題目和遊戲設計得對不對</strong>。每一頁都在回答其中一個，這份手冊逐頁說明「看哪個數字、什麼算正常、不正常時該做什麼」。</p>
+<p>第一次打開後台，建議照這個順序看，每週固定花 20 分鐘：</p>
+<ol>
+<li><strong>儀表板</strong>：先確認有多少人在學、答對率是否落在 70%～85%。</li>
+<li><strong>留存</strong>：新玩家隔天、第 2 週有沒有回來。這是產品健不健康的第一個訊號。</li>
+<li><strong>放棄點</strong>：玩家在哪一步離開。</li>
+<li><strong>模型校正</strong>：遊戲出的題目難度準不準。</li>
+<li><strong>單字難度、易混淆與拼錯</strong>：哪些字要調整、哪些干擾選項要換。</li>
+<li><strong>問題回報</strong>：玩家直接告訴你的事。</li>
+</ol>
+<h3>資料從哪裡來</h3>
+<ul>
+<li><strong>學習紀錄</strong>：玩家每做完一個學習回合（每日複習、自由練習、故事、升級考、挑戰賽、程度測驗、Meow Typo…），遊戲會上傳一份匿名紀錄，記錄每一題考哪個字、什麼題型、答對沒、花多久。不含名字、Email 和房間內容。玩家可以在設定裡關掉。</li>
+<li><strong>使用行為</strong>：每位玩家每天一份摘要，記錄在線多久、在做什麼、聽了多少音樂、玩了哪些小遊戲。</li>
+<li><strong>程度挑戰賽</strong>：每週每人一列最好成績。</li>
+<li><strong>問題回報</strong>：玩家在遊戲裡主動送出的回報。</li>
+</ul>
+<h3>名詞表</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>名詞</th>
+<th>白話意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回合</td>
+<td>玩家開始一次學習到結束，例如一次「每日複習」就是一個回合</td>
+</tr>
+<tr>
+<td>入口</td>
+<td>從哪裡開始學：每日複習、自由練習、房間泡泡、寵物訓練、故事、升級考、程度挑戰賽、程度測驗、貓咪打字等</td>
+</tr>
+<tr>
+<td>題型</td>
+<td>看英選中、看中選英、聽音選義、拼字、聽寫，共五種</td>
+</tr>
+<tr>
+<td>程度 L1～L6</td>
+<td>單字的難度等級，L1 最簡單</td>
+</tr>
+<tr>
+<td>年級（g、θ）</td>
+<td>用台灣學制表示的程度：1＝小一，7＝國一，12＝高三。g 是單字的年級，θ（讀作 theta）是玩家的年級</td>
+</tr>
+<tr>
+<td>熟練盒</td>
+<td>每個字的熟悉程度，盒 1 最生、盒 5 最熟；答對往上一盒，答錯往下</td>
+</tr>
+<tr>
+<td>不重複人數</td>
+<td>同一個人只算一次</td>
+</tr>
+<tr>
+<td>人次（人‧天）</td>
+<td>一個人來一天算一次，三個人各來兩天＝6 人次</td>
+</tr>
+<tr>
+<td>中位數</td>
+<td>排序後正中間那個值，比平均數不容易被少數極端值拉走</td>
+</tr>
+<tr>
+<td>百分點</td>
+<td>兩個百分比相減的差，70% 到 75% 是「增加 5 個百分點」</td>
+</tr>
+<tr>
+<td>95% 區間</td>
+<td>考慮運氣之後，真正的數字大概落在哪個範圍；區間越窄，結論越可信</td>
+</tr>
+<tr>
+<td>測試帳號、模擬學生</td>
+<td>開發和模擬用的帳號，做決策時要排除</td>
+</tr>
+</tbody>
+</table></div>
+</section><section class="ch" id="s2"><div class="chhead"><div class="chno">02</div><h2>篩選列<span class="k">看任何數字之前先設定</span></h2></div>
+<p>同一份資料用不同的篩選，結論可能完全相反。<strong>做決策前，「玩家」一定選「只看真實玩家」，「版本」先看最新版。</strong>儀表板、學習分析、AI 報告三頁共用這一列。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>篩選</th>
+<th>用途</th>
+<th>什麼時候要改</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>期間</td>
+<td>只算這幾天的回合，◀ ▶ 可以前後移一個期間</td>
+<td>看「改版前後」時，分別選改版前和改版後各一段一樣長的期間來比</td>
+</tr>
+<tr>
+<td>入口</td>
+<td>只看某一種學習，例如只看每日複習</td>
+<td>想知道「升級考是不是太難」、「故事題是不是太簡單」時</td>
+</tr>
+<tr>
+<td>程度</td>
+<td>只看某個程度（L1～L6）的題目</td>
+<td>檢查某個程度的字是否整體太難</td>
+</tr>
+<tr>
+<td>年級帶</td>
+<td>只看建議年級在國小、國中、高一～高三的字</td>
+<td>檢查「國中的字」是否適合國中生</td>
+</tr>
+<tr>
+<td>版本</td>
+<td>只看某個遊戲版本產生的紀錄</td>
+<td>改版後一定要分開看，舊版的資料會拉低或拉高數字</td>
+</tr>
+<tr>
+<td>帳號／玩家</td>
+<td>真實玩家、模擬學生、測試資料分開</td>
+<td>做決策只看真實玩家；檢查程式有沒有錯才看模擬學生</td>
+</tr>
+<tr>
+<td>單字最少作答數</td>
+<td>一個字至少被答過幾次，才出現在單字表裡（預設 20）</td>
+<td>玩家少時可以調低到 10 先看看，但不要拿來做決定</td>
+</tr>
+</tbody>
+</table></div>
+<p>設定好之後按「套用」，整頁數字才會重算。</p>
+<p><strong>為什麼一定要排除模擬學生</strong>：30 個模擬帳號每天自動上線答題，它們的答對率是依設定的個性算出來的，不是真人。用來檢查「遊戲會不會壞掉」很好，用來判斷「題目難不難」就會得到錯的結論。</p>
+</section><section class="ch" id="s3"><div class="chhead"><div class="chno">03</div><h2>儀表板<span class="k">一眼看健康狀況</span></h2></div>
+<p>儀表板最重要的三個數字是<strong>平均每天學習人數、整體答對率、回合完成率</strong>。前者看有沒有人來，後兩個看來了之後學得順不順。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>指標</th>
+<th>意思</th>
+<th>健康範圍</th>
+<th>太高代表</th>
+<th>太低代表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>學習人數（不重複）</td>
+<td>這段期間至少學過一次的人</td>
+<td>接近登記的測試人數</td>
+<td>—</td>
+<td>很多人拿到遊戲後沒開始學，可能卡在載入或新手流程</td>
+</tr>
+<tr>
+<td>學習人次（人‧天）</td>
+<td>每人每天算一次</td>
+<td>人數 × 天數 的 40% 以上就很好</td>
+<td>—</td>
+<td>大家只來一兩天就沒來了</td>
+</tr>
+<tr>
+<td>平均每天學習人數</td>
+<td>每天大概有幾人在學</td>
+<td>穩定或緩慢下降</td>
+<td>—</td>
+<td>急跌代表改版出問題或遇到假期、考試週</td>
+</tr>
+<tr>
+<td>回合數</td>
+<td>學習的次數</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>作答題數</td>
+<td>答了多少題</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>整體答對率</td>
+<td>所有題目答對的比例</td>
+<td>70%～85%</td>
+<td>題目太簡單，學不到新東西</td>
+<td>題目太難，玩家會氣餐而離開</td>
+</tr>
+<tr>
+<td>每題作答時間（中位數）</td>
+<td>一題大概想多久</td>
+<td>選擇題 3～6 秒</td>
+<td>題目太難、字太小、或玩家在分心</td>
+<td>亂點或題目太簡單</td>
+</tr>
+<tr>
+<td>回合完成率</td>
+<td>開始的回合中有完成的比例</td>
+<td>80% 以上</td>
+<td>—</td>
+<td>太長、太難或中途有東西打斷玩家，去看「放棄點」</td>
+</tr>
+<tr>
+<td>每回合時間（中位數）</td>
+<td>一次學多久</td>
+<td>每日複習 3～6 分鐘</td>
+<td>一次太長，容易中途放棄</td>
+<td>只是點一下就離開</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>為什麼答對率的目標是 70%～85%，不是越高越好</strong>：遊戲本來就是照「答對率約 85%」來挑題。答對率 95% 代表玩家在複習他本來就會的字；低於 60% 代表大部分時間在猜。答對率會因入口不同而不同：升級考、挑戰賽本來就比較難，整體偏低時先用「入口」篩選拆開看。</p>
+<p><strong>快速前往</strong>：五個按鈕是最常用的五個分析頁：模型校正、單字難度、遺忘曲線、留存、易混淆與拼錯。每週從這五個開始看就夠了。</p>
+<p><strong>每天學習人數的圖</strong>：長條是當天作答題數，線是當天學習人數。期間超過 92 天會改成每週一根。看的是趨勢，不是單天：週末、假日、考試週本來就會起伏。</p>
+</section><section class="ch" id="s4"><div class="chhead"><div class="chno">04</div><h2>學習分析<span class="k">11 個子頁逐頁判讀</span></h2></div>
+<p>學習分析的 11 頁，可以分成三組：<strong>題目對不對</strong>（單字難度、程度 × 題型、易混淆與拼錯、提示與重聽、Meow Typo）、<strong>方法對不對</strong>（遺忘曲線、模型校正、程度測驗、入口成效）、<strong>玩家留不留得住</strong>（放棄點、留存）。每頁都照「它回答什麼 → 怎麼讀 → 看到什麼要動作」來說明。</p>
+<h3>1. 單字實測難度</h3>
+<p><strong>它回答</strong>：哪些字比我們標的程度難或簡單。</p>
+<p><strong>怎麼讀</strong>：每一列是一個字。最重要的是「答對率」和「同程度同題型期望」這兩欄的差距。期望值是「同一個程度、同樣的題型組合下，一般字的答對率」。後面五欄是這個字在五種題型的答對率。</p>
+<ul>
+<li>答對率明顯<strong>低於</strong>期望 → 這個字比標示的程度難，例如標 L2、實際像 L5。</li>
+<li>答對率明顯<strong>高於</strong>期望 → 這個字比標示的簡單。</li>
+<li>「程度可能標錯」欄有標記的，就是差距大到不像運氣。勾「只看可能標錯的」可以直接看清單。</li>
+<li>拼字題本來就比選擇題難，期望值已經照每個字實際被考的題型算過，不會因為「剛好常考拼字」被誤判。</li>
+</ul>
+<p><strong>接下來做什麼</strong>：用「下載 CSV」匯出可能標錯的字，交給內容編輯重標程度或年級。一個字至少要 20 次作答再做決定。整批的字都比預期難（例如一堆數字、時間、抽象名詞），代表這類字可以做成知識卡先教。</p>
+<h3>2. 程度 × 題型</h3>
+<p><strong>它回答</strong>：哪一種題型對哪一個程度太難。</p>
+<p><strong>怎麼讀</strong>：列是程度 L1～L6，欄是五種題型，格子是答對率。正常情況下，往右下（程度越高、題型越難）答對率越低。常見的排序是：看英選中 ＞ 看中選英 ＞ 聽音選義 ＞ 拼字 ＞ 聽寫。</p>
+<ul>
+<li>某一格特別低，而且比它右邊（更難的題型）還低 → 這個題型的設計有問題，例如聽力題的發音不清楚。</li>
+<li>拼字題的答對率比選擇題低了 30 個百分點以上 → 拼字的提示太少，或拼字題出得太早。</li>
+<li>下面的「年級帶 × 題型」是同一件事換成國小、國中、高中來看，適合拿去跟學校的老師討論。</li>
+</ul>
+<p><strong>接下來做什麼</strong>：題型太難就加提示或延後出現；太簡單就減少它在複習裡的比例。</p>
+<h3>3. 易混淆字與拼錯</h3>
+<p><strong>它回答</strong>：玩家最常把什麼字認成什麼字、拼字最常錯在哪裡。</p>
+<p><strong>怎麼讀</strong>：三張表。</p>
+<ol>
+<li>「答案 → 被誤選的字」：例如正確答案是 quiet，很多人選了 quite。「佔該字作答」超過 20% 就是一組真正會被混淆的字。</li>
+<li>「最常被誤選的字」：不管題目是什麼，這個字一当選項就很容易被選。通常是玩家「半生不熟」的字。</li>
+<li>「拼字：常見錯誤類型」：少一個字母、多一個字母、兩個字母對調、母音拼錯。</li>
+</ol>
+<p><strong>接下來做什麼</strong>：這頁是做內容最有價值的一頁。經常一起出現的字對可以做成「易混淆字」知識卡或挑戰主題；太容易被排除的干擾選項要換掉；母音錯誤多，就加強發音和聽寫。</p>
+<h3>4. 遺忘曲線（複習間隔對不對）</h3>
+<p><strong>它回答</strong>：遊戲安排的複習間隔太短、太長，還是剛好。</p>
+<p><strong>背景</strong>：每個字依熟練程度放在 5 個盒子裡。答對就往下一個盒子、隔更久再出現：盒 1 隔 1 天、盒 2 隔 2 天、盒 3 隔 4 天、盒 4 隔 7 天、盒 5 隔 15 天。答錯就退回一盒、隔天再複習。</p>
+<p><strong>怎麼讀</strong>：每條線是一個盒子，橫軸是「隔了幾天再遇到」，縱軸是當時的答對率。看<strong>每條線在它自己的間隔天數那一點</strong>的答對率。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>到期時的答對率</th>
+<th>代表</th>
+<th>調整方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高於 92%</td>
+<td>隔太短，玩家在複習還記得的字，浪費時間</td>
+<td>這個盒子的間隔拉長</td>
+</tr>
+<tr>
+<td>80%～90%</td>
+<td>剛好：快忘記的時候剛好複習，記憶最牢</td>
+<td>不要動</td>
+</tr>
+<tr>
+<td>低於 75%</td>
+<td>隔太長，很多字已經忘了</td>
+<td>這個盒子的間隔縮短</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>注意</strong>：加上 0.92.45 以前的舊資料沒有精確的間隔，有新資料時圖只用新資料。盒 4、盒 5 需要玩家連續玩好幾週才會有資料，前一個月先看盒 1～3。</p>
+<h3>5. 模型校正：遊戲猜得準不準</h3>
+<p><strong>它回答</strong>：遊戲的「自動挑題」有沒有挑對難度。遊戲每出一題，都會先估「這位玩家有幾 % 會答對」，再挑最接近 85% 的題。這頁拿「猜的」和「實際的」來比。猜得準，題目才會不難也不易。</p>
+<p><strong>怎麼讀（由上往下）</strong>：</p>
+<ol>
+<li><strong>一句話判讀</strong>：頁面最上方直接寫結論，先看這句。</li>
+<li><strong>各題型：遊戲猜的 vs 實際</strong>：○ 是猜的，● 是實際。● 在 ○ 左邊 ＝ 遊戲太樂觀（題目其實更難）；在右邊 ＝ 太悲觀。</li>
+<li><strong>依猜的答對率分組</strong>：柱子是實際、◆ 是猜的。柱子頂端碰到 ◆ 就是準。下方題數少的組不要太在意。</li>
+<li><strong>每週變化</strong>：兩條線越靠近越好。改版後靠近了，就代表修正有效。</li>
+<li><strong>建議怎麼調</strong>與<strong>各程度的字</strong>：只有題數 150 題以上、而且確定不是運氣，才會給建議。建議的 Δd 可以直接拿去改單字的難度參數。</li>
+</ol>
+<p>不懂「進階數據」裡的統計名詞也沒關係，只要記住兩個：</p>
+<ul>
+<li><strong>偏差</strong>：實際 − 猜的，負數代表遊戲猜太高（題目實際更難）。絕對值小於 5 個百分點就算準。</li>
+<li><strong>BSS</strong>：大於 0 代表遊戲的猜測比「每題都猜平均值」更準，也就是「自動挑題」是有用的。</li>
+</ul>
+<p>升級考和故事用的是刻意加難的題目，猜測本來就會偏高。要看模型本身準不準，把「資料」選成「只看平常練習」。</p>
+<h3>6. 英文程度測驗（搬家日、每日小測）</h3>
+<p><strong>它回答</strong>：玩家大概是幾年級的字彙量、有沒有進步、單字的年級標得準不準。</p>
+<ul>
+<li><strong>玩家程度分布</strong>：每人最新一次測出來的年級。這就是「我們的玩家是誰」的答案。</li>
+<li><strong>自填年級 vs 實測</strong>：「±1 內」是實測跟自己填的差不到一個年級的比例。低於 50% 不一定是測驗不準，可能是程度本來就超前或落後。</li>
+<li><strong>每週趨勢與成長</strong>：右圖是「第一次和最近一次相隔 7 天以上」的玩家，程度變了多少。<strong>往右偏（正數多）就是產品有效的證據</strong>，這是對外報告最有力的一張圖。</li>
+<li><strong>每日完成率</strong>：來玩的人裡有做當天小測的比例。低於 30% 代表小測入口不醒目或太麻煩。</li>
+<li><strong>題目難度是否標得準（item fit）</strong>：實線是實際、虛線是預測。實線整體在虛線下方，代表單字比標的年級難。</li>
+<li><strong>單字年級修正建議</strong>：Δg 是建議調整的年級，正數代表應該調高。至少 12 次作答才計算，可以下載 CSV 套回單字庫。</li>
+</ul>
+<h3>7. 哪個入口學得最好</h3>
+<p><strong>它回答</strong>：不同的學習方式，哪一種真的讓人記得住。</p>
+<p><strong>最重要的一欄是「下次再遇到時答對率」</strong>。當下答對不稀奇，隔幾天還答得對才是真的學會。</p>
+<ul>
+<li>某個入口答對率很高，但「下次再遇到」很低 → 那裡的題太簡單或太有提示，玩家是「當下會」不是「記得」。</li>
+<li>某個入口「下次再遇到」特別高（例如故事、知識卡）→ 這種學法有效，可以多做。</li>
+<li>完成率低的入口去看「放棄點」。</li>
+</ul>
+<h3>8. 在哪裡放棄</h3>
+<p><strong>它回答</strong>：沒做完的回合停在哪一步。</p>
+<p><strong>怎麼讀</strong>：每個入口分開看「放棄率」和停留的步驟。放棄會自然分散在每一步，<strong>集中在某一步才是問題</strong>。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>集中在</th>
+<th>常見原因</th>
+<th>調整方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 1 張卡片</td>
+<td>點進來才發現不是想要的，或入口文字誤導</td>
+<td>改入口的按鈕文字</td>
+</tr>
+<tr>
+<td>每 5 張的休息點</td>
+<td>玩家認為「做完了」就離開</td>
+<td>休息頁更清楚地說還剩幾個</td>
+</tr>
+<tr>
+<td>測驗的前幾題</td>
+<td>題目太難，或測驗來得太突然</td>
+<td>降低開頭題目的難度</td>
+</tr>
+<tr>
+<td>測驗的最後幾題</td>
+<td>太長</td>
+<td>減少題數</td>
+</tr>
+<tr>
+<td>某一個特定題型（例如拼字）</td>
+<td>卡住做不出來</td>
+<td>加提示或「看答案」</td>
+</tr>
+</tbody>
+</table></div>
+<h3>9. 留存與習慣</h3>
+<p><strong>它回答</strong>：新玩家有沒有回來，以及大家什麼時候來。</p>
+<p><strong>怎麼讀</strong>：每一列是「同一週第一次學習的一群人」。三個數字是隔天、第 2 週（第 7～13 天）、第 5 週（第 28～34 天）還有回來學習的比例。</p>
+<ul>
+<li><strong>一列一列往下比</strong>：改版後加入的那一週，隔天回來的比例有沒有變高，就是改版有沒有用。</li>
+<li><strong>參考值</strong>（一般學習 App 的經驗值，只是大概）：隔天 30%～40%、第 2 週 15%～25%、第 5 週 10% 以上就算不錯。如果是老師在課堂要求使用，數字應該更高。</li>
+<li><strong>隔天很低</strong> → 第一天的體驗有問題，去看新手流程、載入時間、問題回報。</li>
+<li><strong>隔天還好但第 2 週掉很多</strong> → 缺少「繼續來的理由」，去看每日任務、連續天數、寵物、商人故事是否有吸引力。</li>
+<li><strong>「一週中什麼時段」的熱度圖</strong>：告訴你玩家是在上課時間、放學後、還是睡前來。上新活動、設推播時間都要對齊這張圖。</li>
+</ul>
+<h3>10. 貓咪打字（Meow Typo）</h3>
+<p><strong>它回答</strong>：拼字練習的難度合不合適，小貓搗蛋是助力還是阻力。</p>
+<ul>
+<li><strong>一次拼對率</strong> 60%～80% 最好。太低代表字太難。</li>
+<li><strong>看答案率</strong>超過 25% 代表玩家在放棄，要降低難度或加提示。</li>
+<li><strong>平均嘗試次數</strong>接近 1 代表太簡單。</li>
+<li><strong>常見錯拼</strong>：可以直接拿去做「這個字容易拼錯」的提醒。</li>
+<li>小貓搗蛋的比較：有搗蛋的題目拼對率如果低很多，代表搗蛋太過分。</li>
+</ul>
+<h3>11. 提示與重聽</h3>
+<p><strong>它回答</strong>：提示有沒有幫助，聽力題是不是聽不清楚。</p>
+<ul>
+<li>拼字題分三種：無提示、首字母提示、遮字提示。正常是「有提示的答對率較高、時間較短」。如果提示幾乎沒差，提示可能不夠有用。</li>
+<li>聽力題依重聽次數分開。<strong>重聽 2 次以上的題目很多</strong>，代表語音太快、太小聲或發音不清楚；可以拿「單字難度」裡聽力題特別低的字，實際聽聽看。</li>
+<li>0.92.45 以前的紀錄分不出「首字母提示」和「無提示」，會單獨列一行，判讀時跳過。</li>
+</ul>
+</section><section class="ch" id="s5"><div class="chhead"><div class="chno">05</div><h2>使用行為、程度挑戰賽、問題回報</h2></div>
+<p>學習分析看「學得怎樣」，這三頁看「玩家在遊戲裡做什麼、喜不喜歡、遇到什麼問題」。三頁都有自己的期間和對象篩選，一樣要先選「真實玩家」。</p>
+<h3>使用行為</h3>
+<p><strong>它回答</strong>：玩家每天來多久、來了都在做什麼。這是「遊戲好不好玩」的答案，學習分析答不了。</p>
+<p>頂端的卡片：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>卡片</th>
+<th>怎麼看</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>不重複玩家／人次</td>
+<td>跟儀表板的學習人數比：來玩的人遠多於來學的人，代表學習入口不夠吸引人</td>
+</tr>
+<tr>
+<td>打開遊戲次數</td>
+<td>平均每次幾分鐘：短而多次是好的習慣；一天一次很長，可能是開著當背景</td>
+</tr>
+<tr>
+<td>每人每天在線</td>
+<td>「其中主動操作」的比例很低，代表遊戲多半開著沒在玩</td>
+</tr>
+<tr>
+<td>音樂播放</td>
+<td>可以比在線時間還長（遊戲縮到背景聽歌），這是「陪伴型」使用</td>
+</tr>
+<tr>
+<td>番茄鐘計時</td>
+<td>有多少人把遊戲當讀書計時器</td>
+</tr>
+<tr>
+<td>小遊戲</td>
+<td>開了幾局、幾個人玩過</td>
+</tr>
+</tbody>
+</table></div>
+<p>下面的圖：</p>
+<ul>
+<li><strong>每天有多少人、玩多久</strong>：長條是人數，線是分鐘。</li>
+<li><strong>玩的時候在做什麼</strong>：只算玩家正在操作的時間，每分鐘只算一件事。<strong>學習類佔主動時間的比例</strong>是最重要的數字：太低代表遊戲帶不到學習，太高（幾乎只有學習）可能代表房間、寵物不夠好玩。</li>
+<li><strong>背景陪伴</strong>：音樂和番茄鐘。</li>
+<li><strong>上線時段（星期 × 小時）</strong>：顏色越深越多人。拿來決定活動、提醒、商人換貨的時間。</li>
+<li><strong>玩法細節</strong>：哪些小遊戲、家具、視窗、寵物照顧動作最常用。沒人用的功能可以考慮改善、移到更明顯的地方或拿掉。</li>
+<li><strong>每位玩家</strong>：「主要在做」、「來的節奏」、「陪伴」三欄是遊戲幫你分好的玩家類型。按「單獨看」可以拿一位玩家跟全體比。</li>
+</ul>
+<p><strong>常見的玩家類型</strong>可以拿來分 TA：「認真學習型」（學習為主、每天來）、「佈置收藏型」（房間和商店為主）、「陪伴型」（音樂或番茄鐘為主）、「小遊戲型」。各類型的人數比例，決定接下來該多做哪一種內容。</p>
+<h3>程度挑戰賽</h3>
+<p><strong>它回答</strong>：每週挑戰賽的難度階梯設計得好不好。規則是從 L1 一路突破到 L6，每階 15 題、答對 11 題突破。</p>
+<ul>
+<li><strong>先選週和對象</strong>，按「從 Firestore 讀取」。每讀一次會用掉「這週參加人數」次的讀取額度，不要連續狂按。</li>
+<li><strong>突破到哪一階</strong>：右邊那張圖是「突破到某一階以上的人」的比例，會一階一階往下掉。理想的樣子是平穩漸減；<strong>某一階掉特別多</strong>，就是那一階太難、或 15 題裡的難字太多。要知道是哪些字，到「學習分析 → 單字難度」把入口選成「程度挑戰賽」。</li>
+<li><strong>排行</strong>：跟遊戲裡一樣的排序。「報名次數」很多的人是高度投入的玩家，可以是訪談的對象。</li>
+</ul>
+<p><strong>判讀</strong>：參加人數佔一週學習人數的比例，代表「競爭」這個動機對你的 TA 有沒有用。低於 20% 代表大部分玩家不喜歡競爭，活動重心應該放在合作（團隊任務）或自我挑戰。</p>
+<h3>問題回報</h3>
+<p><strong>它回答</strong>：玩家直接告訴你哪裡有問題。這是唯一一頁「玩家主動開口」的資料。</p>
+<p><strong>每天的處理流程</strong>：</p>
+<ol>
+<li>「狀態」選「新收到」、「對象」選「真實玩家」。</li>
+<li>點一列看內容：玩家選了什麼、寫了什麼、當時的畫面和題目、裝置、最近的程式錯誤、截圖。</li>
+<li>改狀態：看過還沒處理的改「處理中」、修好了改「已處理」、不打算改的改「先不處理」。玩家在遊戲裡看得到這個狀態。</li>
+<li>備註寫你的判斷（只有後台看得到），下一個處理的人就知道前因後果。</li>
+</ol>
+<p><strong>怎麼判讀一份回報</strong>：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>看到</th>
+<th>代表</th>
+<th>該做什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「最近的錯誤」有內容</td>
+<td>程式真的出錯了</td>
+<td>最優先。把錯誤文字和「當時的視窗」交給工程</td>
+</tr>
+<tr>
+<td>同一個字被回報「答案錯了」「兩個都對」好幾次</td>
+<td>題目或干擾選項有問題</td>
+<td>修題目；去「易混淆字」確認是不是普遍現象</td>
+</tr>
+<tr>
+<td>「太難」集中在同一個地方</td>
+<td>那裡的難度需要調</td>
+<td>對照「放棄點」和「程度 × 題型」</td>
+</tr>
+<tr>
+<td>同一種裝置（例如某種手機或 LINE 內建瀏覽器）一直出問題</td>
+<td>相容性問題</td>
+<td>用那種裝置實測</td>
+</tr>
+<tr>
+<td>「我有一個點子」</td>
+<td>玩家的需求</td>
+<td>每月整理一次，重複出現的點子放進產品計畫</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>每週整理</strong>：用「複製成文字」把一週的回報貼給 AI，請它「依類型和發生地點歸類、排出前五個最常見的問題」；或下載 CSV 用 Excel 排序。「一人回報一次」的問題先記著，「好幾個人回報同一件事」才優先改。</p>
+</section><section class="ch" id="s6"><div class="chhead"><div class="chno">06</div><h2>AI 報告與資料匯出</h2></div>
+<p>AI 報告把上面所有頁面算好的「統計摘要」送給 AI，請它寫成一份給團隊看的報告。<strong>送出去的只有統計數字，沒有任何玩家 ID</strong>，API 金鑰只存在你自己的瀏覽器。</p>
+<h3>AI 報告怎麼用</h3>
+<ol>
+<li>先在篩選列選好期間、版本，對象選「只看真實玩家」。AI 只會根據你篩選後的資料寫。</li>
+<li>選服務（Claude 或 ChatGPT）、貼上 API 金鑰。</li>
+<li>選「報告重點」：</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>重點</th>
+<th>給誰看</th>
+<th>會寫什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完整報告</td>
+<td>經理、董事會</td>
+<td>整體學習成效、留存、問題與建議</td>
+</tr>
+<tr>
+<td>給編輯：單字與題目</td>
+<td>內容編輯</td>
+<td>哪些字要重標程度、哪些干擾選項要換</td>
+</tr>
+<tr>
+<td>給產品：留存與玩法</td>
+<td>企劃、產品經理</td>
+<td>玩家在哪裡放棄、哪個入口有用</td>
+</tr>
+<tr>
+<td>給工程：模型與複習間隔</td>
+<td>工程師</td>
+<td>模型校正的偏差、間隔要不要調</td>
+</tr>
+</tbody>
+</table></div>
+<ol start="4">
+<li>「補充說明」寫這段期間發生的事，例如「11/12 把每日單字從 20 個改成 10 個」。AI 不知道你改了什麼，不寫它就可能把改版造成的變化誤判成問題。</li>
+<li>先按「先看要送出的摘要」確認內容，再按「產生 AI 報告」，最後「下載報告」存檔。</li>
+</ol>
+<p><strong>使用 AI 報告的原則</strong>：AI 很會寫、也很會「解釋」，但它不知道樣本夠不夠。報告裡的每一個建議，都要回到對應的頁面看一下作答數。少於 100 題的結論當成「值得注意」，不要當成「已經確定」。</p>
+<h3>資料與匯出</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>按鈕</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開啟 JSON 檔</td>
+<td>讀一份之前下載的資料，不用登入。適合在沒有網路的會議室展示</td>
+</tr>
+<tr>
+<td>用示範資料看看</td>
+<td>用假資料熟悉後台。新人第一次來先用這個，不會動到真的資料</td>
+</tr>
+<tr>
+<td>下載目前資料（JSON）</td>
+<td>把目前讀到的所有匿名學習紀錄存下來。建議每月月初備份一份，對外報告時數字才有固定的出處</td>
+</tr>
+</tbody>
+</table></div>
+<p>各頁的「下載 CSV」可以用 Excel 開，適合交給內容編輯逐字修改。</p>
+<p><strong>會用到讀取額度的動作</strong>：登入、讀取使用行為、讀取挑戰賽、讀取問題回報。一般使用不會超過免費額度，但不要寫程式一直重複讀。</p>
+</section><section class="ch" id="s7"><div class="chhead"><div class="chno">07</div><h2>從數據到決策</h2></div>
+<p><strong>一個數字不足以做決定，要兩頁互相印證</strong>。下面是最常遇到的情境：先在哪頁發現、再去哪頁確認、最後怎麼調整內容或目標族群（TA）。</p>
+<h3>常見情境對照表</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>情境</th>
+<th>在哪裡發現</th>
+<th>去哪裡確認</th>
+<th>調整內容</th>
+<th>調整 TA 或推廣</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>整體答對率低於 65%</td>
+<td>儀表板</td>
+<td>程度測驗的玩家分布、模型校正</td>
+<td>新字先教再考；降低 L3 以上的出題比例</td>
+<td>如果玩家多半是國小低年級，推廣時不要主打國中生</td>
+</tr>
+<tr>
+<td>整體答對率高於 90%</td>
+<td>儀表板</td>
+<td>程度測驗、入口成效的「下次再遇到」</td>
+<td>提高新字比例；多出拼字和聽寫</td>
+<td>玩家程度比預期高，可以打更高年級的市場</td>
+</tr>
+<tr>
+<td>第一天之後就沒回來</td>
+<td>留存（隔天）</td>
+<td>放棄點、使用行為、問題回報</td>
+<td>縮短新手流程、第一天的題目要簡單、載入要快</td>
+<td>檢查是不是某個通路（例如 LINE 內建瀏覽器）的玩家特別容易流失</td>
+</tr>
+<tr>
+<td>第一週還好，第 2 週大量流失</td>
+<td>留存（第 2 週）</td>
+<td>使用行為的「在做什麼」</td>
+<td>加強長期目標：商人故事、收藏、寵物成長</td>
+<td>適合搭配老師或家長的「每週提醒」</td>
+</tr>
+<tr>
+<td>某一級卡很多人</td>
+<td>程度挑戰賽、放棄點</td>
+<td>單字難度（入口選「升級考」）</td>
+<td>換掉那一級太難的字、放寬過關題數</td>
+<td>—</td>
+</tr>
+<tr>
+<td>很多人來了只佈置不學</td>
+<td>使用行為</td>
+<td>入口成效</td>
+<td>把學習嵌進佈置：房間泡泡、商人要的英文、買家具前答題</td>
+<td>「佈置收藏型」多的話，推廣時強調房間和寵物</td>
+</tr>
+<tr>
+<td>很多人把遊戲開著聽音樂</td>
+<td>使用行為（背景陪伴）</td>
+<td>上線時段</td>
+<td>在音樂和番茄鐘的空檔放短小的學習（休息時一題）</td>
+<td>可以定位成「讀書陪伴 App」</td>
+</tr>
+<tr>
+<td>同一個字一直被回報</td>
+<td>問題回報</td>
+<td>單字難度、易混淆字</td>
+<td>修改題目、中文意思或干擾選項</td>
+<td>—</td>
+</tr>
+<tr>
+<td>程度測驗顯示玩家有進步</td>
+<td>程度測驗的成長分布</td>
+<td>留存（進步的人是不是持續在玩）</td>
+<td>—</td>
+<td>這是對學校、家長、投資人最有說服力的數據</td>
+</tr>
+</tbody>
+</table></div>
+<h3>固定的檢查節奏</h3>
+<ul>
+<li><strong>每天（5 分鐘）</strong>：問題回報的「新收到」，有程式錯誤的立刻處理。</li>
+<li><strong>每週（20 分鐘）</strong>：儀表板、留存、放棄點、挑戰賽。記下三個數字：每天學習人數、答對率、隔天回來率，跟上週比。</li>
+<li><strong>每月（1 小時）</strong>：模型校正、單字難度、易混淆字、遺忘曲線、程度測驗。整理一份「要改的字」清單交給編輯，產生一份完整 AI 報告存檔。</li>
+<li><strong>每次改版後兩週</strong>：用「版本」篩選分開改版前後，確認改版有沒有達到目的。</li>
+</ul>
+<h3>改版前先寫下「想要什麼數字變化」</h3>
+<p>例如「把每日單字從 20 個改成 10 個」，就先寫下預期：回合完成率上升、隔天回來率上升、每日小測完成率上升，而答對率不變。兩週後用版本篩選對照。<strong>事前不寫預期，事後什麼結果都能說成成功。</strong></p>
+</section><section class="ch" id="s8"><div class="chhead"><div class="chno">08</div><h2>八個最常見的看錯</h2></div>
+<p>後台的數字都是對的，看錯通常是因為「看的範圍」或「樣本」不對。做任何決定前，先拿這八點檢查一次。</p>
+<ol>
+<li><strong>樣本太少</strong>。一個字只被答了 5 次，答對率 40% 和 80% 都可能只是運氣。粗略的標準：單字至少 20 次、一組至少 100 題、一個程度至少 150 題、留存的一週至少 20 人，才拿來做決定。有 95% 區間的地方，區間越寬越不可信。</li>
+<li><strong>沒排除測試和模擬帳號</strong>。模擬學生的行為是程式決定的，混進去會讓留存看起來比實際好。做決定一定選「只看真實玩家」。</li>
+<li><strong>新舊版本混在一起</strong>。改版後第一週，很多玩家還在舊版。看改版效果時一定用「版本」篩選。</li>
+<li><strong>入口混在一起</strong>。升級考、挑戰賽本來就難，故事、房間泡泡本來就簡單。答對率突然變化，先看是不是某個入口的題數變多了。</li>
+<li><strong>把「一起發生」當成「因為」</strong>。「有養寵物的玩家留存比較高」不代表寵物讓人留下來，也可能是本來就會常來的人才會去養寵物。要確定因果，只能「只改一件事、比較改前改後」。</li>
+<li><strong>平均數被少數人拉走</strong>。一位玩家一天在線 8 小時，可以把 30 人的平均拉高很多。所以後台很多地方用中位數，看到平均數也要想一下有沒有極端的人。</li>
+<li><strong>忽略季節和行事曆</strong>。學生的使用量會跟著考試週、連假、開學起伏。比較時用「上週 vs 這週」、「去年同期」，不要拿考試週跟寒假比。</li>
+<li><strong>只看「當下答對」而不看「記不記得」</strong>。答對率高很容易：題目出簡單一點就好。學習產品真正的成效是「下次再遇到時答對率」和「程度測驗的成長」，對外報告要用這兩個。</li>
+</ol>
+<h3>要對外報告時的數字清單</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>數字</th>
+<th>在哪頁</th>
+<th>寫法範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>學習人數、人次</td>
+<td>儀表板</td>
+<td>「10/1～10/31 有 280 位學生學習，共 3,100 人次」</td>
+</tr>
+<tr>
+<td>作答題數</td>
+<td>儀表板</td>
+<td>「累計作答 52,000 題」</td>
+</tr>
+<tr>
+<td>隔天、第 2 週回來率</td>
+<td>留存</td>
+<td>「新玩家中 38% 隔天回來」</td>
+</tr>
+<tr>
+<td>記住的程度</td>
+<td>入口成效、遺忘曲線</td>
+<td>「隔 4 天再複習時，84% 的字仍然答對」</td>
+</tr>
+<tr>
+<td>程度成長</td>
+<td>程度測驗的成長分布</td>
+<td>「使用超過 2 週的學生，平均進步 0.4 個年級」</td>
+</tr>
+</tbody>
+</table></div>
+<p>表中的數字只是寫法示範。對外發表時，寫清楚期間、樣本人數、是否排除測試帳號，並備份當時的 JSON 檔。</p></section></article></div>
+<footer>呼嚕小窩 PurrCozy · 後台學習分析判讀手冊</footer>
+<script>
+(function(){
+  var bar=document.querySelector('.progress');
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1))});
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    if(bar) bar.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+    var cur=0; for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<140) cur=i; }
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  document.querySelectorAll('details.mtoc a').forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false})});
+})();
+</script>
+
+</body></html>
