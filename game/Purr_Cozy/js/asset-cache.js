@@ -4,12 +4,20 @@ window.PurrAssets={
  base:new URL('./',location.href), entries:new Map(), images:new Map(), masks:new Map(), urls:new Map(), stats:{downloaded:0,reused:0,bytes:0,recovered:0},
  crc32(bytes){let c=0xffffffff;for(const b of new Uint8Array(bytes)){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return ((c^0xffffffff)>>>0).toString(16).padStart(8,'0')},
  canonical(e,bytes){if(!e.text)return bytes;const src=new Uint8Array(bytes),out=new Uint8Array(src.length);let n=0;for(let i=0;i<src.length;i++){if(src[i]===13&&src[i+1]===10)continue;out[n++]=src[i]}return out.slice(0,n).buffer},
- async network(url,ms=15000){let error;for(let attempt=0;attempt<3;attempt++){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:ctrl.signal});if(!r.ok){error=Error(PurrBoot.text('bootResourceHTTP',[r.status]));if(r.status<500&&r.status!==429)throw Object.assign(error,{permanent:true});throw error}return await r.arrayBuffer()}catch(e){error=e;if(e.permanent||attempt===2)throw e}finally{clearTimeout(timer)}await new Promise(resolve=>setTimeout(resolve,250*(attempt+1)))}throw error},
+ /* 0.93.6: GitHub Pages answers HTTP 429 when a whole class loads from one school IP. Waits follow Retry-After (or grow
+    with random jitter so 30 computers do not retry in step), and files that are named by their CRC (manifest, packs) can
+    also come from the jsDelivr copy of the same GitHub repo. Every byte is still checked against its CRC32 afterwards. */
+ mirror(url){try{const u=new URL(url,this.base),m=/^([a-z0-9-]+)\.github\.io$/i.exec(u.hostname),p=u.pathname.split('/').filter(Boolean);if(!m||u.origin!==this.base.origin||p.length<2)return null;return 'https://cdn.jsdelivr.net/gh/'+m[1]+'/'+p[0]+'@main/'+p.slice(1).join('/')}catch{return null}},
+ async network(url,ms=15000,alt=null){const sleep=t=>new Promise(r=>setTimeout(r,t)),get=async u=>{const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),ms);try{const r=await fetch(u,{cache:'no-store',signal:ctrl.signal});if(!r.ok){const ra=Number(r.headers.get('Retry-After'));throw Object.assign(Error(PurrBoot.text('bootResourceHTTP',[r.status])),{status:r.status,retryAfter:ra>0?ra:0,permanent:r.status<500&&r.status!==429&&r.status!==408})}return await r.arrayBuffer()}finally{clearTimeout(timer)}};
+  let error;for(let attempt=0;attempt<6;attempt++){const order=alt?(this.useMirror?[alt,url]:[url,alt]):[url];let permanent=true,retryAfter=0;
+   for(const u of order){try{const data=await get(u);if(u===alt)this.stats.mirror=(this.stats.mirror||0)+1;return data}catch(e){error=e;if(!e.permanent)permanent=false;if(e.retryAfter)retryAfter=Math.max(retryAfter,e.retryAfter);if(u!==alt&&e.status===429&&alt)this.useMirror=true}}
+   if(permanent||attempt===5)throw error;if(attempt===0&&window.PurrBoot)PurrBoot.message(PurrBoot.text('bootResourceBusy'));
+   await sleep(retryAfter?Math.min(retryAfter*1000,30000):Math.min(15000,600*2**attempt)*(.6+Math.random()*.8))}throw error},
  async prepare(build){
   if(!isSecureContext||!window.caches)throw Error(PurrBoot.text('bootResourceSecure'));
   this.cache=await caches.open('purr-content-v2');this.index=await caches.open('purr-index-v2');
   const manifestURL=new URL(build.resources.manifest,this.base);manifestURL.searchParams.set('checksum',build.resources.checksum);
-  let data;const stored=await this.index.match(manifestURL);if(stored)data=await stored.arrayBuffer();else data=await this.network(manifestURL);
+  let data;const stored=await this.index.match(manifestURL);if(stored)data=await stored.arrayBuffer();else data=await this.network(manifestURL,15000,this.mirror(manifestURL));
   if(this.crc32(data)!==build.resources.checksum)throw Error(PurrBoot.text('bootResourceManifest'));
   const manifest=JSON.parse(new TextDecoder().decode(data));if(manifest.schema!==4)throw Error('Resource list format mismatch; upload resources.json and all update files.');
   let complete=0,failed=null;const files=manifest.files,progress=()=>{PurrBoot.set('pixel',.8*complete/files.length);PurrBoot.message(PurrBoot.text('bootResourceProgress',[Math.floor(complete/files.length*100)]))};
@@ -24,7 +32,7 @@ window.PurrAssets={
   const single=[];
   if(Array.isArray(manifest.packs)&&missing.length){const byPack=new Map();for(const e of missing){if(!Array.isArray(e.pk)||!manifest.packs[e.pk[0]]){single.push(e);continue}const k=e.pk[0];if(!byPack.has(k))byPack.set(k,[]);byPack.get(k).push(e)}
    await pool([...byPack.keys()],4,async k=>{const want=byPack.get(k),pack=manifest.packs[k];let data=null;
-    try{data=await this.network(new URL(pack.path,this.base),90000);if(data.byteLength!==pack.bytes)data=null}catch(error){console.warn('[assets] pack',pack.path,error)}
+    try{data=await this.network(new URL(pack.path,this.base),90000,this.mirror(new URL(pack.path,this.base)));if(data.byteLength!==pack.bytes)data=null}catch(error){console.warn('[assets] pack',pack.path,error)}
     if(!data){single.push(...want);return}this.stats.packs=(this.stats.packs||0)+1;
     for(const e of want){if(failed)return;const bytes=data.slice(e.pk[1],e.pk[1]+e.bytes);
      if(bytes.byteLength!==e.bytes||this.crc32(bytes)!==e.crc32){single.push(e);continue}

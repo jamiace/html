@@ -81,7 +81,7 @@ const Rewards = {
     const S = Game.S, W = this.W;
     if (W.pend) return UI.openWin('gacha');   // an earlier result is still waiting for keep / sell
     if (S.coins < GACHA_COST) return Game.bubbleAt(cx, it.y, I18n.s("u_c691b22e9bc2", [GACHA_COST]));
-    const pool = this.gachaPool(), got = pool[Math.floor(Math.random() * pool.length)]; if (!got) return;
+    const all = this.gachaPool(), fresh = all.filter(x => { const o = this.owned(x.id); return !(o.room + o.box); }), pool = fresh.length >= 5 ? fresh : all, got = pool[Math.floor(Math.random() * pool.length)]; if (!got) return;/* 0.93.6: new things first */
     const o = this.owned(got.id);
     S.coins -= GACHA_COST; Life.track('buy', 1, { kind: 'gacha', id: got.id });
     for (let i = 0; i < 4; i++) Room.puff('p_spark', cx - 4 + i * 3, it.y + 18, { vy: -8 - i, max: 0.9 });

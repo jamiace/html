@@ -132,7 +132,7 @@ const Placement = {
     if (g.anchor == null) {
       const base = .75 * d + Math.log(Adaptive.target / (1 - Adaptive.target));
       for (const k of Adaptive.skills) a.skills[k].ability = base - (k === 'meaning' || k === 'listen' ? .35 : 0);
-      if (first) Learn.L.levels = theta < 9.5 ? [1] : theta < 10.5 ? [1, 2] : theta < 11.5 ? [1, 2, 3, 4] : [];
+      if (first) Learn.L.levels = theta < 7.5 ? [1] : theta < 9.5 ? [1, 2] : theta < 10.5 ? [1, 2, 3] : theta < 11.5 ? [1, 2, 3, 4] : [];   // 0.93.6: 國二～國三 also get Level 2
     } else if (Math.abs(theta - g.anchor) >= 1) {
       const delta = .75 * (d - this.gradeToD(g.anchor));
       for (const k of Adaptive.skills) a.skills[k].ability = Adaptive.clamp(a.skills[k].ability + delta, -2, 9);

@@ -155,7 +155,7 @@ Object.assign(UI, {
     const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     const head = h('div', { class: 'mstage' }, merchantScene(mk),
       h('div', { class: 'msay' }, h('div', { class: 'mname' }, h('b', { text: M.n }), h('span', { class: 'ptag', text: M.tag })), h('p', { text: `「${M.hi}」` })));
-    const when = h('p', { class: 'hint', text: I18n.s("u_462b2804f993", [fmt(ws), fmt(we)]) });
+    const when = h('p', { class: 'hint', text: I18n.t('merchant.until', [typeof Contest !== 'undefined' && Contest.timeLeft ? Contest.timeLeft() : fmt(we)]) });   // 0.93.6: same countdown as the weekly tasks
     const tabs = h('div', { class: 'tabs' }, h('button', { class: 'tab' + (this.merchTab === 'sell' ? ' on' : ''), onclick: () => { this.merchTab = 'sell'; this.refresh('merchant'); } }, I18n.s("u_d728474bcf89")), h('button', { class: 'tab' + (this.merchTab === 'buy' ? ' on' : ''), onclick: () => { this.merchTab = 'buy'; this.refresh('merchant'); } }, I18n.s("u_cb18362f4930")));
     const wallet = h('span', { class: 'wallet' }, ico('i_coin', 20), h('b', { class: 'num', text: String(S.coins) }));
     const body = [];

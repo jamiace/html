@@ -11,7 +11,7 @@
    ============================================================ */
 (function () {
   if (typeof Learn === 'undefined' || typeof VOCAB === 'undefined') return;
-  const TESTS = new Set(['grade', 'contest']);
+  const TESTS = new Set(['grade', 'contest', 'levelgate']);   // 0.93.6: the level-up check no longer shows its words first
   const seen = i => !!(VOCAB[i] && Learn.P[VOCAB[i].w]);
   Learn.seen = seen;
   const start = Learn.start.bind(Learn);

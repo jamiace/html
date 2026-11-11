@@ -47,6 +47,6 @@ const LevelGate = {
  const hud=UI.hud.bind(UI);UI.hud=function(){const r=hud(...arguments),b=this.el.lvl;if(b){const pending=LevelGate.pending('owner');b.classList.toggle('gate-ready',pending);b.onclick=()=>this.openWin(pending?'learn':'settings');b.setAttribute('aria-label',pending?I18n.s("u_aa07570ccecc"):I18n.s("u_0b12e41f79f6"));if(pending)b.title=I18n.s("u_5f9cd43add1f");}return r};
  // 0.93.5: the story quiz is no longer made harder here (it used to add 2 extra hard questions with unseen words to a
  // chapter whose button says 5 questions, and no-hint spelling every third question)
- const finish=Story.finish.bind(Story);Story.finish=function(s,R){const c=this.week().ch[s.opts.ch];if(c.done)return finish(s,R);const n=s.qs.length,need=Math.ceil(n*.7);if(R<need)return{coins:0,xp:0,items:[],msg:I18n.s("u_af0402d95382")+R+'/'+n+I18n.s("u_af43a61737a9")+need+I18n.s("u_31de46656cfb")};return finish(s,R)};
+ const finish=Story.finish.bind(Story);Story.finish=function(s,R){const c=this.week().ch[s.opts.ch];if(c.done)return finish(s,R);const n=s.qs.length,need=Math.max(1,Math.ceil(n*.6));/* 0.93.6: 3 of 5 (was 4 of 5), and the button says so */if(R<need)return{coins:0,xp:0,items:[],msg:I18n.s("u_af0402d95382")+R+'/'+n+I18n.s("u_af43a61737a9")+need+I18n.s("u_31de46656cfb")};return finish(s,R)};
  window.addEventListener('pagehide',()=>LevelGate.abandon());setInterval(()=>LevelGate.refresh(),30000);
 })();

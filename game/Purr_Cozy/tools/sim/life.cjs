@@ -69,8 +69,11 @@ function planDay(p, st, day, date) {
  if (day < p.startDay) { out.why.push('還沒開始玩'); return out; }
  const ev = p.life.events.find(x => x[0] === day + 1); let factor = ev ? ev[1] : 1; if (ev) out.why.push(ev[2]);
  const E = out.E = engagementOf(p, st, day);
+ // 0.93.6: "install day" is the first day this person actually gets to play. It used to be day === startDay only,
+ // so anyone whose start day passed before the simulator was running (it started at 18:17) never had a first session.
+ const install = !st.playedDays && !st.sessions;
  let mean;
- if (day === p.startDay) mean = 1;                                   // install day
+ if (install) mean = 1;                                              // install day
  else if (st.dormant) { const back = e.revive * (weekend ? 1.6 : 1) * (1 + (p.triggers.friend || 0) * (chance(.3) ? 1 : 0)); if (!chance(back)) { out.why.push('休眠中'); return out; } st.dormant = false; st.M = Math.max(st.M, .55); st.low = 0; out.why.push('回流'); mean = Math.max(1, e.lam * .6); }
  else {
   mean = e.lam * E * (weekend ? (e.wkend || 1.15) : 1) * factor;
@@ -83,15 +86,15 @@ function planDay(p, st, day, date) {
   if (T.friend && chance(.35)) pull += .4 * T.friend;                           // 好友來拜訪、團隊進度
   mean += pull * e.lam * Math.min(1, E + .3) * factor;
  }
- let n = day === p.startDay ? 1 : Math.min(14, negbin(mean, e.k));
+ let n = install ? 1 : Math.min(14, negbin(mean, e.k));
  const peaks = weekend ? p.life.weekend : p.life.weekday, tot = peaks.reduce((s, x) => s + x[2], 0);
  const pickStart = () => { for (let i = 0; i < 60; i++) { let r = rnd() * tot, pk = peaks[0]; for (const x of peaks) if ((r -= x[2]) <= 0) { pk = x; break; } const m = Math.round(((pk[0] + pk[1] * normal()) * 60 + 1440) % 1440); if (!blocked(p, dow, m)) return m; } return null; };
  const lengthOf = (first) => { let L = chance(e.mara[0]) ? lognormal(e.mara[1], .4) : lognormal(e.sess[0] * (.7 + .5 * Math.min(1.2, E)), e.sess[1]); if (first) L *= 1.5; return clamp(L, 1, 300); };
  const starts = [];
- for (let i = 0; i < n; i++) { const m = pickStart(); if (m == null) continue; if (starts.some(s => Math.abs(s - m) < 20)) { i--; n--; continue; } starts.push(m); }
+ for (let i = 0; i < n; i++) { let m = pickStart(); if (m == null && install) for (let t = 0; t < 1440 && m == null; t += 30) { const c = (1080 + t) % 1440; if (!blocked(p, dow, c)) m = c; } if (m == null) continue; if (starts.some(s => Math.abs(s - m) < 20)) { i--; n--; continue; } starts.push(m); }
  starts.sort((a, b) => a - b);
  for (const m of starts) {
-  const len = Math.min(lengthOf(day === p.startDay), freeFor(p, dow, m, 300));
+  const len = Math.min(lengthOf(install), freeFor(p, dow, m, 300));
   if (len < 1) continue;
   out.sessions.push({ start: m, len: +len.toFixed(1) });
   if (chance(e.burst)) { const m2 = Math.round(m + len + lognormal(e.gap, .5)); if (m2 < 1440 && !blocked(p, dow, m2) && !starts.some(s => Math.abs(s - m2) < 15)) { const l2 = Math.min(lognormal(e.sess[0] * .6, e.sess[1]), freeFor(p, dow, m2, 300)); if (l2 >= 1) out.sessions.push({ start: m2, len: +clamp(l2, 1, 120).toFixed(1), burst: true }); } }
