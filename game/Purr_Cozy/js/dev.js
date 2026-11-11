@@ -75,7 +75,7 @@ const Dev = {
   addCoins(n) { Game.S.coins = Math.max(0, Game.S.coins + n); },
   setLevel(lv) { const S = Game.S; lv = Math.max(1, Math.min(99, Math.round(lv) || 1)); S.lvl = lv; S.xp = 0; },
   completeDaily() {
-    const L = Learn.L, day = Life.today(); L.reviewed = 20; L.dailyScore = '10/10';
+    const L = Learn.L, day = Life.today(); L.reviewed = Learn.DAILY; L.dailyScore = '10/10';
     if (!L.dailyDone) { L.dailyDone = true; L.streak = L.lastDone === Learn.yesterday() ? (L.streak || 0) + 1 : (L.lastDone === day ? L.streak : 1); L.lastDone = day; L.best = Math.max(L.best || 0, L.streak); Life.track('vocab', 1); }
   },
   learnRandom(n) { const today = Learn.dayNum(); const pool = shuffle(VOCAB.filter(v => !Learn.P[v.w] || Learn.P[v.w][0] < 2)).slice(0, n); for (const v of pool) { const b = 2 + Math.floor(Math.random() * 4); Learn.P[v.w] = [b, today + SRS_INT[b], 1, b, 0]; } },
@@ -130,7 +130,7 @@ Object.assign(UI, {
       body.push(row(I18n.s("u_8b62f26da525"), A(I18n.s("u_db60f0f23f74"), () => Game.levelUp())));
     } else if (D.tab === 'learn') {
       const L = Learn.L;
-      body.push(row(I18n.s("u_5f0212f0b3ef", [L.dailyDone ? I18n.s("u_f28461bb49c8") : I18n.s("u_093339fa02fb", [Math.min(20, L.reviewed)])]), A(I18n.s("u_b7247f87c702"), () => D.completeDaily()), A(I18n.s("u_354aed2a5ad9"), () => { L.dailyDone = false; L.reviewed = 0; L.dailyScore = ''; Life.L.daily && (Life.L.daily.tasks[0].prog = 0); }), A(I18n.s("u_75a45223b681"), () => { L.dailyDay = ''; Learn.ensureDaily(); })));
+      body.push(row(I18n.s("u_5f0212f0b3ef", [L.dailyDone ? I18n.s("u_f28461bb49c8") : I18n.s("u_093339fa02fb", [Math.min(Learn.DAILY, L.reviewed)])]), A(I18n.s("u_b7247f87c702"), () => D.completeDaily()), A(I18n.s("u_354aed2a5ad9"), () => { L.dailyDone = false; L.reviewed = 0; L.dailyScore = ''; Life.L.daily && (Life.L.daily.tasks[0].prog = 0); }), A(I18n.s("u_75a45223b681"), () => { L.dailyDay = ''; Learn.ensureDaily(); })));
       body.push(row(I18n.s("u_a510d856d084", [L.streak || 0, L.best || 0]), A(I18n.s("u_0c6176a81571"), () => { L.streak = (L.streak || 0) + 1; L.best = Math.max(L.best || 0, L.streak); L.lastDone = Life.today(); }), A(I18n.s("u_102a7240c40a"), () => { L.streak = (L.streak || 0) + 7; L.best = Math.max(L.best || 0, L.streak); L.lastDone = Life.today(); }), A(I18n.s("u_fd66f9dd1014"), () => { L.streak = 0; })));
       body.push(row(I18n.s("u_27517d6b0704", [Learn.countSeen(), Learn.countLearned(), Learn.countMastered()]), A(I18n.s("u_781b1cbb6cbd"), () => D.learnRandom(50)), A(I18n.s("u_6580972c4f08"), () => D.learnRandom(500)), A(I18n.s("u_86d4f79a669a"), () => { const d = Learn.dayNum(); for (const k in Learn.P) Learn.P[k][1] = d; })));
       body.push(row(I18n.s("u_747d826c1843"), A(I18n.s("u_e9dfcc0cca36"), () => { L.pCoins = 0; })));

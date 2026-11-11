@@ -45,8 +45,8 @@ const Feel = {
     const pool = ['coin', 'xp', 'treat']; if (team) pool.push('star'); if (pet) pool.push('bond');
     const k = pool[Math.floor(Math.random() * pool.length)];
     let r;
-    if (k === 'coin') { const c = Game.reward(5 + Math.floor(Math.random() * 8), 0, 'raw'); r = { icon: 'i_coin', text: I18n.s("u_9b583063d081", [c]) }; }
-    else if (k === 'xp') { const x = 8 + Math.floor(Math.random() * 8); Game.reward(0, x, 'raw'); r = { icon: 'i_star', text: I18n.s("u_f37fd1346438", [x]) }; }
+    if (k === 'coin') { const c = Game.reward(5 + Math.floor(Math.random() * 8), 0, 'raw'); s.luckC = (s.luckC || 0) + c; r = { icon: 'i_coin', text: I18n.s("u_9b583063d081", [c]) }; }
+    else if (k === 'xp') { const x = 8 + Math.floor(Math.random() * 8); Game.reward(0, x, 'raw'); s.luckX = (s.luckX || 0) + x; r = { icon: 'i_star', text: I18n.s("u_f37fd1346438", [x]) }; }
     else if (k === 'treat') { Life.give('cat_treat', 1); r = { icon: SUPPLIES.cat_treat.spr, text: I18n.s("u_359bff718aef") }; }
     else if (k === 'star') { Team.onTrack(team.ev, 1); r = { icon: 'i_people', text: I18n.s("u_d797909c9336", [TEAM_TYPES[team.type].n]) }; }
     else { Pets.addBond(pet, 2); Pets.say(pet, pet.sp.startsWith('dog') ? I18n.s("u_28452697f131") : I18n.s("u_b5d7570da46d")); r = { icon: 'i_heart', text: I18n.s("u_ea83e69f4518", [pet.name]) }; }

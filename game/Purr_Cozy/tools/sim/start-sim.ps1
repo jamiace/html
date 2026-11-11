@@ -56,6 +56,8 @@ while ($true) {
   if ((Get-Date) -ge [datetime]::Parse($End)) { Say '模擬期間已結束。'; break }
   & node $Life run --login --profiles --start-if-new $Start --end $End --state $State --accounts $Acc --concurrency 6 --load-conc 3 2>&1 | ForEach-Object { $l = "$_"; Write-Host $l; Add-Content -Path $Log -Value $l -Encoding UTF8 }
   if ($LASTEXITCODE -eq 0) { Say '模擬程式正常結束。'; break }
+  # 代碼 3 = life.cjs 偵測到自己有新版本，趁沒人在線上自己結束、換新版：這是正常的，馬上重開
+  if ($LASTEXITCODE -eq 3) { Say '已換上新版模擬程式（正常，不是故障），3 秒後繼續。'; Start-Sleep -Seconds 3; continue }
   Say "模擬程式意外結束（代碼 $LASTEXITCODE），1 分鐘後自動重新開始…"
   Start-Sleep -Seconds 60
 }

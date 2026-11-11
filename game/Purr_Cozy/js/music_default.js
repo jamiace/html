@@ -76,7 +76,7 @@ const MusicDefault = {
   Music.onYTState = function (ev) {
     const e = this.cur;
     // which song is on: highlighted in the list
-    if (e && e.id === NOOK_YT.id && ev.data === 1) { try { const v = (this.yt.getVideoData() || {}).video_id || ''; if (v !== MusicDefault.curVid) { MusicDefault.curVid = v; UI.refresh('music'); const r = NOOK_YT_TRACKS.find(x => x[0] === v), tt = document.querySelector('#ytpanel .yt-title'), nm = r ? r[1] : ((this.yt.getVideoData() || {}).title || ''); if (tt && nm) tt.textContent = I18n.s("u_06eceed05d03") + nm; } } catch (x) { } }
+    if (e && e.id === NOOK_YT.id && ev.data === 1) { try { const v = (this.yt.getVideoData() || {}).video_id || ''; if (v !== MusicDefault.curVid) { MusicDefault.curVid = v; UI.refresh('music'); const r = NOOK_YT_TRACKS.find(x => x[0] === v), tt = document.querySelector('#ytpanel .yt-title'), nm = r ? r[1] : ((this.yt.getVideoData() || {}).title || ''); if (tt && nm) tt.textContent = I18n.t("u_06eceed05d03") + nm;   /* .yt-title is not auto-translated (song names), so the label is translated here */ } } catch (x) { } }
     if (e && e.id === NOOK_YT.id && this.yt && (ev.data === 1 || ev.data === 5 || ev.data === -1)) {
       try {
         const pl = this.yt.getPlaylist() || [];

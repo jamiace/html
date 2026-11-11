@@ -65,7 +65,7 @@ const MiniInstrument={
  t(k,a){return MiniHost.t(k,a)},
  voiceOf(k){const s=ITEMS[k]?.spr||k;if(/^cozy_piano/.test(k))return'toy';if(/guitar/.test(s))return'guitar';if(/musicbox/.test(s))return'musicbox';if(/chime/.test(s))return'chime';return'piano'},
  active(){const s=FurnPlay.session;return!!(s&&s===this.owner&&this.st&&s.profile==='instrument'&&FurnPlay.visible())},
- base(){return 12*(this.st.octave+1)},
+ base(){return 12*((this.st?.octave??4)+1)},
  rec(){return MiniHost.record(this.owner.it.k)},
  ensure(){const s=FurnPlay.session;if(s&&s===this.owner&&this.st)return;this.close();this.owner=s;if(!s)return;
   this.st={mode:'free',octave:4,labels:MiniHost.record(s.it.k).pianoLabels||'solfege',sustain:false,voice:this.voiceOf(s.it.k),locked:false,mem:null,song:this.newSong(0),status:''}},
@@ -141,7 +141,7 @@ const MiniInstrument={
   const end=e=>{if(!this.ptrs.delete(e.pointerId))return;this.releaseSrc('p'+e.pointerId)};
   for(const t of['pointerup','pointercancel','lostpointercapture'])kb.addEventListener(t,end);
   kb.addEventListener('contextmenu',e=>e.preventDefault());
-  kb.addEventListener('click',e=>{const k=e.target.closest?.('.mi-key');if(e.detail===0&&k){this.press('click',midiOf(k),.75);const o=this.owner;setTimeout(()=>{if(this.owner===o)this.releaseSrc('click')},260)}})},
+  kb.addEventListener('click',e=>{const k=e.target.closest?.('.mi-key');if(e.detail===0&&k&&this.active()&&this.st){this.press('click',midiOf(k),.75);const o=this.owner;setTimeout(()=>{if(this.owner===o)this.releaseSrc('click')},260)}})},
  octave(d){if(!this.active())return;const st=this.st;if(st.mode==='song'||st.locked||st.mem&&st.mode==='memory'&&['input','listen'].includes(st.mem.phase))return;const o=Math.max(3,Math.min(5,st.octave+d));if(o===st.octave)return;this.releaseAll();st.octave=o;if(st.mem&&st.mem.phase!=='idle'){st.mem={seq:[],idx:0,phase:'idle',token:null};this.renderPanel()}this.syncKeys();this.syncBar()},
  renderAll(){if(!this.dom)return;for(const b of this.dom.tabs.children){const on=b.dataset.mode===this.st.mode;b.classList.toggle('on',on);b.setAttribute('aria-selected',String(on))}this.dom.root.dataset.mode=this.st.mode;this.renderPanel();this.syncKeys();this.syncBar()},
  syncKeys(){if(!this.dom)return;for(const k of this.dom.keys){const midi=this.base()+Number(k.dataset.semi),white=k.classList.contains('mi-white');k.dataset.midi=midi;k.setAttribute('aria-label',this.name(midi));k.querySelector('.mi-name').textContent=this.st.labels==='none'||!white?'':this.name(midi)}this.syncSong()},

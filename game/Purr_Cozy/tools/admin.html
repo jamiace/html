@@ -34,6 +34,9 @@ select,input[type=text],input[type=password],input[type=date],input[type=number]
 .kpi.bad b{color:var(--acc2)}.kpi.good b{color:var(--good)}.kpi small{display:block;color:var(--ink2);font-size:12px}
 @media (max-width:600px){.chart-xl{height:340px}.chart-lg{height:280px}}
 .tbl{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:8px}
+.rp-dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0}.rp-dl dt{font-weight:700;color:var(--muted,#666)}.rp-dl dd{margin:0;white-space:pre-wrap;word-break:break-word}
+.rp-pics{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}.rp-pics figure{margin:0}.rp-pics img{max-width:360px;max-height:280px;border:1px solid var(--line);border-radius:6px}
+@media (max-width:700px){.rp-dl{grid-template-columns:1fr}.rp-pics img{max-width:100%}}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
 th{position:sticky;top:0;background:var(--card);cursor:pointer;user-select:none}
@@ -244,6 +247,18 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
     <section><h2>突破到哪一階</h2><p class="why">左：每位玩家本週最好成績的分布。右：突破到某一階以上的人占參加者的比例；哪一階掉最多，代表那一階對大家最難（或 15 題裡的難字太多）。題目逐題的答對率在「學習分析」，入口選「程度挑戰賽」。</p><div class="grid2"><div class="chart"><canvas id="c-ct-dist"></canvas></div><div class="chart"><canvas id="c-ct-reach"></canvas></div></div></section>
     <section><h2>排行</h2><p class="why">排序和遊戲一樣：突破的階數 → 答對率（只算突破的那幾階）→ 先到的人在前面。</p><p class="note" id="ct-rank-note"></p><div class="tbl" style="max-height:640px"><table id="t-ct"></table></div></section>
    </div>
+   <div class="page hidden" data-page="reports">
+    <section><h2>問題回報</h2><p class="why">遊戲 0.93.7 起，玩家在「設定」或手機的「更多」按「回報問題」送出。每份回報包含玩家選的類型和答案、自己寫的話，以及遊戲自動附上的版本、裝置、語言、當時打開的視窗和題目、最近的程式錯誤、房間畫面（玩家可以取消），還可以加一張自己的截圖。改狀態後，玩家在遊戲裡的「送出的報告」會看到。</p>
+     <div class="row" style="margin-bottom:8px"><label>狀態 <select id="rp-status"><option value="">全部</option><option value="new" selected>新收到</option><option value="doing">處理中</option><option value="done">已處理</option><option value="wontfix">先不處理</option></select></label>
+      <label>類型 <select id="rp-cat"><option value="">全部</option></select></label><label>對象 <select id="rp-who"><option value="real">真實玩家</option><option value="test">測試帳號</option><option value="">全部</option></select></label>
+      <label>搜尋 <input type="text" id="rp-q" style="width:160px" placeholder="字、單字、編號"></label>
+      <button id="rp-load" class="primary">從 Firestore 讀取</button><button id="rp-demo">示範資料</button><button id="rp-csv">下載 CSV</button><button id="rp-copy">複製成文字（給 AI 整理）</button></div>
+     <p class="muted" id="rp-note">尚未載入</p><div class="kpis" id="rp-kpis"></div></section>
+    <section><h2>清單</h2><p class="why">新的在上面。點一列看完整內容、改狀態。</p><div class="tbl" style="max-height:520px"><table id="t-rp"></table></div></section>
+    <section id="rp-detail" class="hidden"><h2 id="rp-d-title">回報內容</h2><div id="rp-d-body"></div>
+     <div class="row" style="margin-top:10px;align-items:flex-start"><label>狀態 <select id="rp-d-status"><option value="new">新收到</option><option value="doing">處理中</option><option value="done">已處理</option><option value="wontfix">先不處理</option></select></label>
+      <label style="flex:1">備註（只有後台看得到） <textarea id="rp-d-note" rows="2" style="width:100%" maxlength="1000"></textarea></label><button id="rp-d-save" class="primary">儲存</button></div><p class="muted" id="rp-d-msg"></p></section>
+   </div>
    <div class="page hidden" data-page="ai"><section id="s-ai"><h2>AI 分析報告</h2>
   <p class="why">把上面算好的「統計摘要」（不含任何玩家 ID）送給 Claude 或 ChatGPT，請它寫成給團隊看的報告。API 金鑰只存在你這台電腦的瀏覽器。</p>
   <div class="row">
@@ -317,7 +332,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
    </div>
    <div class="page hidden" data-page="me">
     <section><h2>我的帳號</h2><p id="me-info"></p></section>
-    <section><h2>版本</h2><p class="why">後台 v<span id="ver-me"></span></p><div class="tbl" style="max-height:none"><table id="t-changelog"></table></div></section>
+    <section><h2>版本</h2><p class="why">後台 <span id="ver-me"></span></p><div class="tbl" style="max-height:none"><table id="t-changelog"></table></div></section>
     <section><h2>設定說明</h2><p class="why">最高管理者：Firebase 主控台 → Firestore Database → 資料 → <code>admins</code> 集合，新增文件，文件 ID 填 Gmail（全部小寫），加一個任意欄位。其他帳號請在「帳號與權限」新增。詳細步驟見 <code>docs/學習紀錄與分析-設定教學.md</code>。</p></section>
    </div>
   </main>
@@ -840,14 +855,15 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.03';
-const CHANGELOG=[['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.04';
+const CHANGELOG=[['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 const ROLES={super:{n:'最高管理者',lv:3,d:'在 Firebase 主控台的 admins 集合設定；擁有全部權限，可以新增管理者與分析者。'},manager:{n:'管理者',lv:2,d:'看全部分析、刪除玩家學習紀錄、管理「分析者」帳號、查看操作紀錄。'},analyst:{n:'分析者',lv:1,d:'看全部分析、下載資料、產生 AI 報告。不能管理帳號。'}};
 const PAGES=[
  {id:'dashboard',n:'儀表板',i:'◧',lv:0},
  {id:'analysis',n:'學習分析',i:'▤',lv:0,subs:[['s-words', '單字難度'], ['s-matrix', '程度 × 題型'], ['s-confuse', '易混淆與拼錯'], ['s-forget', '遺忘曲線'], ['s-calib', '模型校正'], ['s-grade', '程度測驗'], ['s-kinds', '入口成效'], ['s-drop', '放棄點'], ['s-retain', '留存'], ['s-typo', 'Meow Typo'], ['s-help', '提示與重聽']]},
  {id:'behavior',n:'使用行為',i:'☷',lv:0},
  {id:'contest',n:'程度挑戰賽',i:'♛',lv:0},
+ {id:'reports',n:'問題回報',i:'✉',lv:0},
  {id:'ai',n:'AI 報告',i:'✦',lv:0},
  {id:'data',n:'資料與匯出',i:'⇅',lv:0},
  {id:'players',n:'玩家帳號',i:'♟',lv:2,group:'管理'},
@@ -872,7 +888,7 @@ const Admin={
   document.body.classList.remove('navopen');this.renderNav();
   requestAnimationFrame(()=>Object.values(S.charts).forEach(c=>{try{c.resize()}catch(e){}}));
   if(id==='players'&&!this.players.length)this.loadPlayers();if(id==='behavior'){if(!B.loaded&&!this.me.offline)this.loadBehavior();else this.renderBehavior()}
-  if(id==='contest'){this.ctInit();if(!CTA.rows.length&&!this.me.offline)this.ctLoad()}if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
+  if(id==='contest'){this.ctInit();if(!CTA.rows.length&&!this.me.offline)this.ctLoad()}if(id==='reports'&&!RPA.rows.length&&!this.me.offline)this.rpLoad();if(id==='accounts')this.loadStaff();if(id==='audit')this.loadAudit();if(id==='me')this.renderMe()},
  // ---------- auth ----------
  // In-app browsers (LINE, Facebook, Instagram ...) cannot open the Google sign-in window, and on iPhone the Google
  // helper page on firebaseapp.com may lose its state when this page is on another domain (storage partitioning).
@@ -1317,6 +1333,49 @@ Object.assign(Admin,{
  ctDemo(){let seed=5;const r=()=>(seed=(seed*16807)%2147483647)/2147483647,rows=[];for(let i=0;i<64;i++){let l=0;while(l<6&&r()<.78-l*.07)l++;const a=l?Math.round(720+r()*280):Math.round(r()*700),n=l?l*15:5+Math.floor(r()*9);rows.push({id:'demo'+i,name:'示範玩家'+(i+1),l,a,n,s:l*1000+a,tries:1+Math.floor(r()*r()*4),at:Date.now()-Math.floor(r()*5*864e5)})}
   this.ctSet(rows,this.ctWeeks()[0],'rows','示範資料')},
 });
+const RP_L={"c.stuck": "卡住、當掉、存檔不見", "c.display": "畫面怪怪的", "c.text": "錯字或句子怪怪的", "c.quiz": "題目或答案有問題", "c.level": "太難或太簡單", "c.money": "金幣、獎勵、商店", "c.idea": "我有一個點子", "c.other": "其他", "q.where": "在哪裡發生？", "w.load": "開遊戲・載入", "w.learn": "學單字", "w.story": "故事・旅行商人", "w.test": "測驗・升級", "w.typo": "Meow Typo", "w.mini": "小遊戲", "w.shop": "商店・收納箱", "w.room": "佈置房間", "w.pet": "寵物", "w.task": "任務", "w.social": "好友・團隊", "w.other": "其他地方", "q.what": "發生了什麼？（可以選好幾個）", "s.frozen": "畫面卡住不動", "s.noreact": "按了沒反應", "s.reload": "遊戲自己重新整理", "s.error": "出現錯誤訊息", "s.lost": "進度或東西不見了", "s.slow": "很慢", "q.again": "再做一次還會發生嗎？", "a.always": "每次都會", "a.some": "有時候會", "a.once": "只有一次", "a.untried": "沒試", "d.cut": "字被切掉", "d.overlap": "東西重疊或擋住", "d.small": "按鈕太小、按不到", "d.faint": "顏色太淡、看不清楚", "d.image": "圖片不見或破圖", "d.layout": "版面跑掉", "q.textKind": "是哪一種？", "t.typo": "錯字", "t.unclear": "句子不通順", "t.wrong": "意思不對", "t.lang": "翻譯怪怪的", "q.wrongText": "是哪一句？（照抄或寫大概都可以）", "q.fixText": "應該怎麼寫？（選填）", "q.item": "哪一題、哪一個單字？", "q.itemNow": "剛剛的題目：{0}", "q.quizKind": "哪裡有問題？（可以選好幾個）", "k.answer": "答案是錯的", "k.two": "有兩個答案都對", "k.meaning": "意思不對", "k.sound": "發音不對", "k.confusing": "題目看不懂", "k.hard": "這題太難", "q.levelHow": "覺得怎麼樣？", "l.hard": "太難", "l.easy": "太簡單", "l.many": "題目太多", "l.few": "題目太少", "l.time": "時間不夠", "q.moneyKind": "發生了什麼？（可以選好幾個）", "m.noreward": "沒拿到獎勵", "m.expensive": "東西太貴", "m.short": "錢不夠用", "m.missing": "買了沒出現", "m.level": "等級不夠、買不了", "m.number": "數字對不上", "q.more": "想多說一點嗎？（選填）", "q.tell": "請告訴我們", "st.new": "已收到", "st.doing": "處理中", "st.done": "已處理", "st.wontfix": "先不處理", "st.wait": "等待送出", "st.unknown": "已送出"},RP_CATS=['stuck','display','text','quiz','level','money','idea','other'],RP_OPT={what:{stuck:'s',display:'d'},again:'a',textKind:'t',quizKind:'k',levelHow:'l',moneyKind:'m',where:'w'},RP_ST={new:'新收到',doing:'處理中',done:'已處理',wontfix:'先不處理'},RPA={rows:[],cur:null};
+Object.assign(Admin,{
+ rpVal(q,cat,v){const p=RP_OPT[q];if(!p)return String(v);const pre=typeof p==='object'?p[cat]:p;return String(v).split(',').map(o=>RP_L[pre+'.'+o]||o).join('、')},
+ rpSum(r){const a=r.ans||{};return [...Object.keys(a).map(q=>this.rpVal(q,r.cat,a[q])),r.text||''].filter(Boolean).join('｜').slice(0,90)},
+ rpDev(d){d=d||{};const ua=d.ua||'',os=/iPhone|iPad/.test(ua)?'iOS':/Android/.test(ua)?'Android':/Windows/.test(ua)?'Windows':/Mac OS/.test(ua)?'Mac':/CrOS/.test(ua)?'Chromebook':/Linux/.test(ua)?'Linux':'?',br=/Line\//.test(ua)?'LINE':/FBAN|FBAV|Instagram/.test(ua)?'FB/IG':/Edg\//.test(ua)?'Edge':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':/Firefox\//.test(ua)?'Firefox':'?';return `${d.mobile?'手機':'電腦'}・${os}・${br}・${d.w||0}×${d.h||0}`},
+ rpFiltered(){const st=$('rp-status').value,cat=$('rp-cat').value,who=$('rp-who').value,q=$('rp-q').value.trim().toLowerCase();
+  return RPA.rows.filter(r=>(!st||r.status===st)&&(!cat||r.cat===cat)&&(!who||(who==='test')===!!r.test)&&(!q||[r.id,r.text,r.learn,r.winText,JSON.stringify(r.ans||{})].join(' ').toLowerCase().includes(q)))},
+ rpSet(rows,label){RPA.rows=rows.sort((a,b)=>(b.at||b.t||0)-(a.at||a.t||0));$('rp-note').textContent=`${label}：${rows.length} 份回報`;this.rpRender()},
+ async rpLoad(){if(this.me.offline){$('rp-note').textContent='離線模式不能讀取；可以按「示範資料」看看。';return}
+  const {F,db}=await firebase();$('rp-note').textContent='讀取中…';
+  try{const snap=await F.getDocs(F.query(F.collection(db,'reports'),F.orderBy('at','desc'),F.limit(500)));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(Object.assign({id:d.id},x,{at:x.at&&x.at.toMillis?x.at.toMillis():x.t||0,at2:x.at2&&x.at2.toMillis?x.at2.toMillis():0}))});
+   this.rpSet(rows,'Firestore（最新 500 份）');this.log('load','reports',rows.length+' 份')}catch(e){$('rp-note').textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.93.7 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
+ rpDemo(){const now=Date.now(),mk=(i,cat,ans,text,o={})=>Object.assign({id:'demo-'+i,cat,ans,text,status:'new',note:'',ver:'0.93.7',build:'demo',lang:'zh-TW',lvl:2,test:false,name:'玩家'+i,acct:'',by:'anon'+i,win:'study',winText:'單字 今日單字 複習 3/10 Level 1 moon ...',learn:'daily · quiz · moon（月亮） · en2zh · 月亮 / 太陽 / 星星 / 雲',errs:[],shot:'',img:'',dev:{ua:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) Safari/605.1',w:390,h:844,dpr:3,mobile:true},t:now-i*3600e3,at:now-i*3600e3},o);
+  this.rpSet([mk(1,'quiz',{item:'moon',quizKind:'two'},'月亮和衛星都對吧'),mk(2,'stuck',{where:'mini',what:'frozen,noreact',again:'some'},'彈珠台按了發射沒反應',{win:'cozygame',errs:['12:03:11 TypeError: x is null @minigame-pinball.js:88']}),mk(3,'display',{where:'shop',what:'cut'},'',{dev:{ua:'Windows NT 10.0 Chrome/130',w:1366,h:768,dpr:1,mobile:false}}),mk(4,'idea',{},'希望可以跟同學一起養一隻貓',{status:'doing',note:'列入下一版討論'}),mk(5,'level',{where:'test',levelHow:'hard'},'升級測驗拼字好難'),mk(6,'text',{textKind:'typo',wrongText:'今天的單子',fixText:'今天的單字'},'',{status:'done'}),mk(7,'money',{where:'shop',moneyKind:'expensive'},'',{test:true})],'示範資料')},
+ rpRender(){const R=this.rpFiltered(),all=RPA.rows,kpi=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+  $('rp-kpis').innerHTML=kpi(all.length,'全部')+kpi(all.filter(r=>r.status==='new').length,'新收到')+kpi(all.filter(r=>r.status==='doing').length,'處理中')+RP_CATS.map(c=>[c,all.filter(r=>r.cat===c).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>kpi(n,RP_L['c.'+c])).join('');
+  const t=$('t-rp');t.replaceChildren();const head=document.createElement('tr');['時間','類型','內容','畫面','裝置','版本','狀態'].forEach(x=>{const th=document.createElement('th');th.textContent=x;head.append(th)});const th=document.createElement('thead');th.append(head);t.append(th);
+  const tb=document.createElement('tbody');for(const r of R){const tr=document.createElement('tr');tr.style.cursor='pointer';tr.onclick=()=>this.rpOpen(r.id);
+   for(const c of [new Date(r.at||r.t||0).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}),RP_L['c.'+r.cat]||r.cat,this.rpSum(r)||'（沒寫字）',r.win||'',this.rpDev(r.dev)+'・'+(r.lang||''),r.ver||'',(RP_ST[r.status]||r.status)+(r.test?'・測試':'')]){const td=document.createElement('td');td.textContent=c;tr.append(td)}
+   if(RPA.cur===r.id)tr.style.background='var(--hl,#fff3c4)';tb.append(tr)}t.append(tb);if(!R.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='沒有符合條件的回報';tr.append(td);tb.append(tr)}},
+ rpOpen(id){const r=RPA.rows.find(x=>x.id===id);if(!r)return;RPA.cur=id;this.rpRender();const box=$('rp-d-body');box.replaceChildren();$('rp-detail').classList.remove('hidden');
+  $('rp-d-title').textContent=`${RP_L['c.'+r.cat]||r.cat}・#${String(r.id).slice(-6).toUpperCase()}`;
+  const dl=document.createElement('dl');dl.className='rp-dl';const add=(k,v)=>{if(v==null||v==='')return;const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;dl.append(dt,dd)};
+  for(const [q,v] of Object.entries(r.ans||{}))add(RP_L['q.'+q]||q,this.rpVal(q,r.cat,v));
+  add('玩家寫的',r.text);add('時間',new Date(r.at||r.t||0).toLocaleString('zh-TW'));add('玩家',`${r.name||'（沒有名字）'}・Lv ${r.lvl}${r.test?'・測試帳號':''}${r.acct?'・帳號 '+r.acct:''}`);add('版本',`${r.ver}（素材 ${r.build}）・語言 ${r.lang}`);
+  add('裝置',this.rpDev(r.dev)+(r.dev&&r.dev.dpr?'・dpr '+r.dev.dpr:'')+(r.dev&&r.dev.dark?'・系統深色':'')+(r.dev&&r.dev.standalone?'・加到主畫面':'')+(r.dev&&r.dev.online===false?'・離線':''));add('瀏覽器',r.dev&&r.dev.ua);
+  add('當時的視窗',r.win);add('視窗文字',r.winText);add('當時的題目',r.learn);add('最近的錯誤',(r.errs||[]).join('\n'));
+  if(r.by2)add('上次修改',`${r.by2}・${r.at2?new Date(r.at2).toLocaleString('zh-TW'):''}`);box.append(dl);
+  const pics=document.createElement('div');pics.className='rp-pics';for(const [src,cap] of [[r.shot,'遊戲畫面（自動）'],[r.img,'玩家的截圖']])if(src&&/^data:image\/(jpeg|png|webp);base64,/.test(src)){const f=document.createElement('figure'),a=document.createElement('a'),im=document.createElement('img');im.src=src;im.alt=cap;a.href=src;a.target='_blank';a.rel='noopener';a.append(im);const fc=document.createElement('figcaption');fc.textContent=cap;f.append(a,fc);pics.append(f)}box.append(pics);
+  $('rp-d-status').value=r.status||'new';$('rp-d-note').value=r.note||'';$('rp-d-msg').textContent=this.me.offline?'離線模式：改的狀態不會存到 Firestore。':'';$('rp-detail').scrollIntoView({behavior:'smooth',block:'start'})},
+ async rpSave(){const r=RPA.rows.find(x=>x.id===RPA.cur);if(!r)return;const status=$('rp-d-status').value,note=$('rp-d-note').value.slice(0,1000);
+  if(this.me.offline||String(r.id).startsWith('demo-')){Object.assign(r,{status,note});this.rpRender();$('rp-d-msg').textContent='已改（只在這個畫面，沒有存到 Firestore）';return}
+  const {F,db}=await firebase();$('rp-d-msg').textContent='儲存中…';
+  try{await F.updateDoc(F.doc(db,'reports',r.id),{status,note,by2:this.me.email,at2:F.serverTimestamp()});Object.assign(r,{status,note,by2:this.me.email,at2:Date.now()});this.rpRender();$('rp-d-msg').textContent='已儲存';this.log('report',r.id,status)}
+  catch(e){$('rp-d-msg').textContent=e.code==='permission-denied'?'儲存被拒：需要分析者以上的權限，並發布 0.93.7 的 firestore.rules。':'儲存失敗：'+(e.code||e.message)}},
+ rpText(){return this.rpFiltered().map(r=>`#${String(r.id).slice(-6).toUpperCase()}｜${new Date(r.at||r.t||0).toLocaleString('zh-TW')}｜${RP_L['c.'+r.cat]||r.cat}｜${RP_ST[r.status]||r.status}\n`+Object.entries(r.ans||{}).map(([q,v])=>`- ${RP_L['q.'+q]||q}：${this.rpVal(q,r.cat,v)}`).join('\n')+(r.text?`\n- 玩家寫的：${r.text}`:'')+`\n- 版本 ${r.ver}・${r.lang}・${this.rpDev(r.dev)}・視窗 ${r.win||'無'}`+(r.learn?`\n- 題目：${r.learn}`:'')+((r.errs||[]).length?`\n- 錯誤：${r.errs.join(' / ')}`:'')).join('\n\n')},
+ async rpCopy(){const t=this.rpText();try{await navigator.clipboard.writeText(t);$('rp-note').textContent=`已複製 ${this.rpFiltered().length} 份回報的文字`}catch(e){const w=window.open('','_blank');if(w){w.document.body.innerText=t}}},
+ rpCsv(){const R=this.rpFiltered(),q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',head=['id','time','category','status','answers','text','version','build','lang','device','window','question','errors','test','note'];
+  const lines=[head.join(',')].concat(R.map(r=>[r.id,new Date(r.at||r.t||0).toISOString(),RP_L['c.'+r.cat]||r.cat,RP_ST[r.status]||r.status,Object.entries(r.ans||{}).map(([k,v])=>(RP_L['q.'+k]||k)+'：'+this.rpVal(k,r.cat,v)).join('；'),r.text,r.ver,r.build,r.lang,this.rpDev(r.dev),r.win,r.learn,(r.errs||[]).join(' / '),r.test?1:0,r.note].map(q).join(',')));
+  const b=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='purr-reports-'+dayKey(Date.now())+'.csv';a.click();this.log('export','reports',R.length+' 份')}});
+for(const c of RP_CATS){const o=document.createElement('option');o.value=c;o.textContent=RP_L['c.'+c];$('rp-cat').append(o)}
+$('rp-load').onclick=()=>Admin.rpLoad();$('rp-demo').onclick=()=>Admin.rpDemo();$('rp-csv').onclick=()=>Admin.rpCsv();$('rp-copy').onclick=()=>Admin.rpCopy();$('rp-d-save').onclick=()=>Admin.rpSave();
+for(const id of ['rp-status','rp-cat','rp-who'])$(id).onchange=()=>Admin.rpRender();$('rp-q').oninput=()=>Admin.rpRender();
 $('ct-load').onclick=()=>Admin.ctLoad();$('ct-demo').onclick=()=>Admin.ctDemo();$('ct-csv').onclick=()=>Admin.ctCsv();
 $('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if(b&&Admin.can(2)){Admin.go('players');setTimeout(()=>Admin.openPlayer&&Admin.openPlayer(b.dataset.ctp),600)}});
 

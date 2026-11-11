@@ -110,8 +110,8 @@ const Mobile = {
     if (typeof Story !== 'undefined' && Story.pending()) { const St = Story.week(), i = Story.next(); row('i_shop', I18n.s("u_b53c31653c1b", [MERCHANTS[St.mk].n, i + 1]), i === 0 ? Story.M().arcs[St.arc].open[0] : I18n.s("u_bebc98812dcc"), () => Story.open(), 'need'); }
     for (const n of Life.L.needs.slice(0, 2)) { const def = NEED_DEFS[n.type], sup = def.item && SUPPLIES[def.item]; row(sup ? sup.spr : def.icon, def.t(n), I18n.s("u_cece58780d3c"), () => UI.needCard(n.id)); }
     // today's words
-    Learn.ensureDaily(); const rev = Math.min(20, L.reviewed);
-    if (!L.dailyDone) row('i_learn', rev >= 20 ? I18n.s("u_6fa78fe31fa2") : rev ? I18n.s("u_d3aede83b2c3", [rev]) : I18n.s("u_94ca2126688a"), I18n.s("u_eae047483b84", [Learn.streakNow()]), () => Learn.start('daily'));
+    Learn.ensureDaily(); const rev = Math.min(Learn.DAILY, L.reviewed);
+    if (!L.dailyDone) row('i_learn', rev >= Learn.DAILY ? I18n.s("u_6fa78fe31fa2") : rev ? I18n.s("u_d3aede83b2c3", [rev]) : I18n.s("u_94ca2126688a"), I18n.s("u_eae047483b84", [Learn.streakNow()]), () => Learn.start('daily'));
     const claim = Life.claimable(); if (claim) row('i_task', I18n.s("u_4bcf70c0a38a", [claim]), I18n.s("u_92edf81e0715"), () => UI.openTasks('daily'));
     return out;
   },

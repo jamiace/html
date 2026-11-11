@@ -108,7 +108,7 @@ const Lights = {
     if (A && !A.walking) {
       if (A.state === 'sleep') {
         // wakes up, sits up for a moment, then a big standing stretch
-        setTimeout(() => { if (A.state !== 'sleep') return; A.stand(); A.timer = 4; Game.bubble(A, tier === 'morning' && this.morning() ? I18n.s("u_d7d84b280302") : I18n.s("u_fc0282834dbf"), 2.2); setTimeout(() => this.stretch(A), 900); }, 500);
+        setTimeout(() => { if (A.state !== 'sleep') return; A.stand(); A.timer = 4; if (!(UI.introUntil && Date.now() < UI.introUntil)) Game.bubble(A, tier === 'morning' && this.morning() ? I18n.s("u_d7d84b280302") : I18n.s("u_fc0282834dbf"), 2.2); setTimeout(() => this.stretch(A), 900); }, 500);
       } else if (A.state === 'idle') {
         if (tier === 'peek') { A.lp = { at: t, end: t + 1.6, frame: () => 'front0' }; A.happy = 1.4; setTimeout(() => Game.bubble(A, hi, 2.2), 250); }
         else { A.face = 'front'; setTimeout(() => this.stretch(A, hi), 300); }

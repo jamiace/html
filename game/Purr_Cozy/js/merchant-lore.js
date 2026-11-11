@@ -10,16 +10,15 @@
      5. then the usual story quiz (5 questions) — chapters are still completed by that quiz only
    商人的筆記本: every card you read is kept, by merchant and theme, can be read again, and collecting cards earns rewards.
    Themes go in order per merchant (9 each, 270 cards); after all nine they start again.
-   Content: js/lore-data.js (zh-TW, zh-CN). With the Japanese interface the story works as before until the Japanese
-   text is ready.
+   Content: js/lore-data.js (zh-TW, zh-CN, ja; Japanese added in 0.93.6 and still needs a native speaker's review).
    ============================================================ */
 const LORE_MS = [[10, { c: 100, it: [['cat_treat', 1]] }], [30, { c: 250, it: [['premium_food', 1]] }], [60, { c: 500, it: [['premium_food', 2], ['catnip', 1]] }], [120, { c: 900, it: [['premium_food', 3], ['coffee', 2]] }], [200, { c: 1500, it: [['premium_food', 4], ['catnip', 2]] }], [270, { c: 2700, it: [['premium_food', 5], ['cat_treat', 5]] }]];
 const lt = (id, a) => I18n.t('lore.' + id, a);
 
 const Lore = {
   view: null, book: { mk: null, open: null },
-  on() { return typeof LORE_DATA !== 'undefined' && I18n.lang !== 'ja'; },
-  D() { return LORE_DATA[I18n.lang === 'zh-CN' ? 'zh-CN' : 'zh-TW']; },
+  on() { return typeof LORE_DATA !== 'undefined'; },   // 0.93.6: Japanese cards added
+  D() { return LORE_DATA[I18n.lang === 'zh-CN' || I18n.lang === 'ja' && LORE_DATA.ja ? I18n.lang : 'zh-TW']; },
   get S() { const S = Game.S; if (!S.lore) S.lore = { next: {}, cur: null, read: {}, ms: {} }; const L = S.lore; for (const k of ['next', 'read', 'ms']) if (!L[k]) L[k] = {}; return L; },
   id(mk, th, i) { return `${mk}.${th}.${i}`; },
   // this week's theme: chosen the first time the week's story is opened, then the next one next visit

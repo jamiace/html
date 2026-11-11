@@ -87,7 +87,7 @@ const FURN_RULES = [
     if (Game.focusing()) return Furn.say(it, cx, I18n.s("u_4ea5f630da80"));
     if (Math.random() < 0.12) return Furn.say(it, cx, Furn.pick('pc0', [I18n.s("u_915cb55c764e"), I18n.s("u_62d6b94d8d89"), I18n.s("u_d6dced575944"), I18n.s("u_d52b2963e2ff")]));
     const S = Game.S, L = Learn.L, fm = (S.stats && S.stats.fDay && S.stats.fDay.d === Life.today()) ? S.stats.fDay.m : 0;
-    Furn.say(it, cx, I18n.s("u_f60656422cb2", [fm, L.dailyDone ? I18n.s("u_c0b3fbff51cc") : (L.reviewed || 0) + '/20', Learn.streakNow()]), 3.4);
+    Furn.say(it, cx, I18n.s("u_f60656422cb2", [fm, L.dailyDone ? I18n.s("u_c0b3fbff51cc") : Math.min(L.reviewed || 0, Learn.DAILY) + '/' + Learn.DAILY, Learn.streakNow()]), 3.4);
   }],
   [/打字機/, (it, d, cx) => { Furn.puff('p_dot', it, cx, 3, { vy: -4 }); Furn.word(it, cx, v => I18n.s("u_c29e50921225", [v.w, v.z.split('；')[0]])); }],
   [/書櫃|書架|一疊書|精裝書|筆記本/, (it, d, cx) => {

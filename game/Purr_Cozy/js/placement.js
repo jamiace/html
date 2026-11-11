@@ -121,6 +121,7 @@ const Placement = {
     res.coins = Game.reward(res.coins, res.xp, 'quiz');
     s.result = res; s.pl = { m: run.mode, t: theta, se, n: run.resp.length, r: s.right, g: res.grade.g, d: g.declared || 0, p: prev == null ? -1 : prev, mu: Math.round(run.mu * 100) / 100, sd: Math.round(run.sd * 100) / 100 };
     this.completeTask();
+    if (first) setTimeout(() => UI.toast(I18n.s("u_ad58744f914c"), 'i_sparkle', 7), 2600);   // 0.93.7: the daily-words tip, now that it is the next step
     if (gift) UI.toast(I18n.t('pl.certGift'), 'i_star', 6, { label: I18n.s("u_36441bffaeab"), fn: () => { UI.closeWin('study'); Game.place('grade_cert'); } });
     if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { try { Social.publish(true); } catch (e) { } }
     UI.badges(); UI.refresh('learn'); UI.refresh('placement'); Game.save(); saveSoon();
@@ -132,7 +133,7 @@ const Placement = {
     if (g.anchor == null) {
       const base = .75 * d + Math.log(Adaptive.target / (1 - Adaptive.target));
       for (const k of Adaptive.skills) a.skills[k].ability = base - (k === 'meaning' || k === 'listen' ? .35 : 0);
-      if (first) Learn.L.levels = theta < 9.5 ? [1] : theta < 10.5 ? [1, 2] : theta < 11.5 ? [1, 2, 3, 4] : [];
+      if (first) Learn.L.levels = theta < 7.5 ? [1] : theta < 9.5 ? [1, 2] : theta < 10.5 ? [1, 2, 3] : theta < 11.5 ? [1, 2, 3, 4] : [];   // 0.93.6: 國二～國三 also get Level 2
     } else if (Math.abs(theta - g.anchor) >= 1) {
       const delta = .75 * (d - this.gradeToD(g.anchor));
       for (const k of Adaptive.skills) a.skills[k].ability = Adaptive.clamp(a.skills[k].ability + delta, -2, 9);
@@ -205,6 +206,7 @@ const Placement = {
   // the first visit: offer the moving-day placement once the room is ready (at most three times)
   tryIntro() {
     if (!Game.S || this.done() || (this.S().asked || 0) >= 3) return;
+    if (UI.introUntil && Date.now() < UI.introUntil) return void setTimeout(() => this.tryIntro(), UI.introUntil - Date.now());   // 0.93.7: let the cat finish first
     if (typeof Visit !== 'undefined' && Visit.active) return;
     if (UI.wins && UI.wins.study && !UI.wins.study.el.hidden) return;
     this.S().asked = (this.S().asked || 0) + 1; Game.save();
@@ -296,5 +298,5 @@ const Placement = {
 .pl-learnrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--paper-2);margin:0 0 8px}
 .ptag.pl-tag{background:var(--chip-on);margin-left:6px;font-size:11px;vertical-align:middle;white-space:nowrap}.bname .pl-tag,.frname .pl-tag{font-weight:400}` }));
   // first visit
-  const poll = setInterval(() => { if (!Game.S || !UI.el || !UI.el.lvl) return; if (document.body.classList.contains('mini')) return; clearInterval(poll); setTimeout(() => Placement.tryIntro(), 1500); }, 1000);
+  const poll = setInterval(() => { if (!Game.S || !UI.el || !UI.el.lvl) return; if (document.body.classList.contains('mini')) return; clearInterval(poll); setTimeout(() => Placement.tryIntro(), 3500); }, 1000);
 })();

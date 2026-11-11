@@ -93,7 +93,11 @@ const UI = {
     document.addEventListener('dragleave', e => { if (e.target === document.documentElement || !e.relatedTarget) document.body.classList.remove('dropping'); });
     document.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); document.body.classList.remove('dropping'); const files = [...e.dataTransfer.files]; if (files.length) { this.openWin('music'); Music.addFiles(files); } });
     setTimeout(() => { if (Game.S.wallet && Game.S.wallet.pend) this.openWin('gacha'); }, 900);   // a gacha result waiting for keep / sell
-    if (!Game.S.seenIntro) { Game.S.seenIntro = true; setTimeout(() => this.toast(I18n.s("u_ad58744f914c"), 'i_sparkle', 6), 600); if (window.innerWidth >= 900) { this.openWin('learn'); this.openWin('tasks'); } }
+    // 0.93.7: a new player sees the room, then the cat says hello, then the placement test opens (placement.js waits for
+    // UI.introUntil). The tip about daily words comes after the test, when it is the next thing to do.
+    if (!Game.S.seenIntro) { Game.S.seenIntro = true; this.introUntil = Date.now() + 7600;
+      const talk = (key, at) => setTimeout(() => { const p = typeof Pets !== 'undefined' && Pets.home ? Pets.home()[0] : null, a = (p && Pets.actor(p)) || Game.avatar; if (a) Game.bubble(a, I18n.t(key), 3.4); }, at);
+      talk('intro.cat1', 1200); talk('intro.cat2', 4400); }
   },
   // ---------------- layout ----------------
   narrow() { return window.innerWidth < 760; },
@@ -687,7 +691,7 @@ const UI = {
   ytPanel(show, e, st) {
     const p = document.getElementById('ytpanel'); if (!p) return;
     if (!show) { p.hidden = true; return; }
-    p.hidden = false; p.querySelector('.yt-title').textContent = e ? e.title : 'YouTube';
+    p.hidden = false; p.querySelector('.yt-title').textContent = e ? (e.id === 'yt_nook' ? I18n.t('u_b98b2b8dc092') : e.title) : 'YouTube';
     const msg = p.querySelector('.yt-msg'), box = p.querySelector('#yt-player');
     if (st === 'blocked') {
       msg.hidden = false; msg.replaceChildren(h('p', { text: I18n.s("u_fbd37ea2fe04") }), h('a', { class: 'chip sm primary', href: Music.ytWatchUrl(e), target: '_blank', rel: 'noopener' }, ico('i_video', 18), I18n.s("u_38680cdd60ea")));

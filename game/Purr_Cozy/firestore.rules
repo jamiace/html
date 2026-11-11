@@ -222,6 +222,25 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------- 問題回報（0.93.7）----------
+    // 玩家在遊戲裡按「回報問題」送出：reports/{reportId}。用學習紀錄的匿名帳號寫入（by = 自己的匿名 UID），
+    // 不需要登入真實帳號。只能新增、不能修改；玩家可以讀回自己送出的那幾份（看處理狀態）。
+    // 後台：分析者以上可以列出、閱讀、更改處理狀態與備註（只能改 status、note、by2、at2）；刪除只限管理者以上。
+    match /reports/{reportId} {
+      allow create: if signedIn() && reportId.size() <= 40 && validReport(request.resource.data)
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.status == 'new' && request.resource.data.note == ''
+        && request.resource.data.at == request.time;
+      allow get: if (signedIn() && resource.data.by == request.auth.uid) || isAnalyst();
+      allow list: if isAnalyst();
+      allow update: if isAnalyst()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note', 'by2', 'at2'])
+        && request.resource.data.status in ['new', 'doing', 'done', 'wontfix']
+        && shortText(request.resource.data.note, 1000)
+        && request.resource.data.by2 == myEmail() && request.resource.data.at2 == request.time;
+      allow delete: if isManager();
+    }
+
     // 其他所有路徑一律拒絕
     match /{document=**} {
       allow read, write: if false;
@@ -323,6 +342,19 @@ service cloud.firestore {
 
     function shortText(t, n) {
       return t is string && t.size() <= n;
+    }
+
+    function validReport(d) {
+      return d.keys().hasOnly(['v', 'by', 'acct', 'name', 'test', 'cat', 'ans', 'text', 'ver', 'build', 'lang', 'dev', 'win', 'winText',
+          'learn', 'errs', 'shot', 'img', 'lvl', 'status', 'note', 't', 'at'])
+        && d.v == 1 && shortText(d.acct, 128) && shortText(d.name, 40) && d.test is bool
+        && d.cat in ['stuck', 'display', 'text', 'quiz', 'level', 'money', 'idea', 'other']
+        && d.ans is map && d.ans.size() <= 8 && shortText(d.text, 2000)
+        && shortText(d.ver, 16) && shortText(d.build, 16) && shortText(d.lang, 8) && d.dev is map && d.dev.size() <= 12
+        && shortText(d.win, 40) && shortText(d.winText, 800) && shortText(d.learn, 400)
+        && d.errs is list && d.errs.size() <= 10
+        && shortText(d.shot, 220000) && shortText(d.img, 620000)
+        && d.lvl is int && d.t is int;
     }
 
     function validProfile(d) {

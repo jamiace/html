@@ -87,9 +87,11 @@ const Learn = {
     r[5] = today;
     return { before, after: r[0] };
   },
+  DAILY: 10,   // 0.93.7: ten words a day (was 20)
   ensureDaily() {
-    const L = this.L, day = Life.today(); if (L.dailyDay && L.dailyDay >= day && L.dailyWords.length) return;   // >=: keeps a day started before the 06:00 rollover existed
-    L.dailyDay = day; L.dailyWords = this.pick(20).map(i => VOCAB[i].w); L.dailyDone = false; L.reviewed = 0; L.dailyScore = '';
+    const L = this.L, day = Life.today(); if (L.dailyWords.length > this.DAILY) { L.dailyWords = L.dailyWords.slice(0, this.DAILY); L.reviewed = Math.min(L.reviewed || 0, this.DAILY); }
+    if (L.dailyDay && L.dailyDay >= day && L.dailyWords.length) return;   // >=: keeps a day started before the 06:00 rollover existed
+    L.dailyDay = day; L.dailyWords = this.pick(this.DAILY).map(i => VOCAB[i].w); L.dailyDone = false; L.reviewed = 0; L.dailyScore = '';
   },
   tts() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined'; },
   canSpeak() { return this.tts(); },
@@ -292,12 +294,12 @@ Object.assign(UI, {
       this.swapOptions()];
   },
   w_learn() {
-    Learn.ensureDaily(); const L = Learn.L, done = L.dailyDone, rev = Math.min(20, L.reviewed);
+    Learn.ensureDaily(); const L = Learn.L, done = L.dailyDone, rev = Math.min(Learn.DAILY, L.reviewed);
     const step = (n, label, on, cur) => h('div', { class: 'lstep' + (on ? ' on' : '') + (cur ? ' cur' : '') }, h('b', { class: 'num', text: String(n) }), h('span', { text: label }));
     const preview = h('div', { class: 'wchips' }, ...L.dailyWords.slice(0, 8).map(w => h('span', { class: 'wchip', text: w })), L.dailyWords.length > 8 ? h('span', { class: 'hint', text: I18n.s("u_84515a556895", [L.dailyWords.length]) }) : null);
-    const today = h('div', { class: 'lcard' }, h('div', { class: 'lhead' }, h('b', { text: I18n.s("u_520b669f7f3e") }), h('span', { class: 'hint', text: done ? I18n.s("u_6652ba2ec4e7", [L.dailyScore]) : rev >= 20 ? I18n.s("u_4a871e9ab4af") : I18n.s("u_093339fa02fb", [rev]) })),
-      h('div', { class: 'lsteps' }, step(1, I18n.s("u_e056822f6361"), rev >= 20, rev < 20), step(2, I18n.s("u_24f699917a5d"), done, rev >= 20 && !done), step(3, I18n.s("u_ffdcd522f85e"), done && Life.L.daily && Life.L.daily.tasks[0].claimed, done)), preview,
-      done ? h('button', { class: 'chip', onclick: () => Learn.start('redo') }, ico('i_reset', 20), I18n.s("u_ffae5de7b95d")) : h('button', { class: 'chip big primary', onclick: () => Learn.start('daily') }, ico('i_learn', 22), rev >= 20 ? I18n.s("u_621b53c8d4a3") : rev > 0 ? I18n.s("u_847050f5fd0c", [rev]) : I18n.s("u_c69404c0634c")));
+    const today = h('div', { class: 'lcard' }, h('div', { class: 'lhead' }, h('b', { text: I18n.s("u_520b669f7f3e") }), h('span', { class: 'hint', text: done ? I18n.s("u_6652ba2ec4e7", [L.dailyScore]) : rev >= Learn.DAILY ? I18n.s("u_4a871e9ab4af") : I18n.s("u_093339fa02fb", [rev]) })),
+      h('div', { class: 'lsteps' }, step(1, I18n.s("u_e056822f6361"), rev >= Learn.DAILY, rev < Learn.DAILY), step(2, I18n.s("u_24f699917a5d"), done, rev >= Learn.DAILY && !done), step(3, I18n.s("u_ffdcd522f85e"), done && Life.L.daily && Life.L.daily.tasks[0].claimed, done)), preview,
+      done ? h('button', { class: 'chip', onclick: () => Learn.start('redo') }, ico('i_reset', 20), I18n.s("u_ffae5de7b95d")) : h('button', { class: 'chip big primary', onclick: () => Learn.start('daily') }, ico('i_learn', 22), rev >= Learn.DAILY ? I18n.s("u_621b53c8d4a3") : rev > 0 ? I18n.s("u_847050f5fd0c", [rev]) : I18n.s("u_c69404c0634c")));
     const tot = VOCAB.length;
     const stat = (n, label) => h('div', { class: 'lstat' }, h('b', { class: 'num', text: String(n) }), h('span', { text: label }));
     const stats = h('div', { class: 'lstats' }, stat(Learn.countSeen(), I18n.s("u_c6db6723c33c")), stat(Learn.countLearned(), I18n.s("u_7e02b75bee98")), stat(Learn.countFamiliar(), I18n.s("u_963d09bf058c")), stat(Learn.countMastered(), I18n.s("u_d93677166837")), stat(Learn.streakNow(), I18n.s("u_4bca91e71efd")));
@@ -387,9 +389,9 @@ Object.assign(UI, {
     }
     const r = s.result, n = s.qs.length;
     return [h('div', { class: 'result' }, h('div', { class: 'rscore num', text: `${s.right} / ${n}` }), h('p', { class: 'gift-t', text: r.msg }), r.taskNote ? h('p', { class: 'swap-rule', text: r.taskNote }) : null,
-      h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + r.coins })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + r.xp })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))),
+      (r.coins + (s.luckC || 0)) || (r.xp + (s.luckX || 0)) || r.items.length ? h('div', { class: 'rw big' }, h('span', { class: 'rwc' }, ico('i_coin', 22), h('b', { class: 'num', text: '+' + (r.coins + (s.luckC || 0)) })), h('span', { class: 'rwc' }, ico('i_star', 22), h('b', { class: 'num', text: '+' + (r.xp + (s.luckX || 0)) })), ...r.items.map(([k, c]) => h('span', { class: 'rwc' }, ico(SUPPLIES[k].spr, 24), h('b', { class: 'num', text: '×' + c })))) : null,
       s.luckyN ? h('p', { class: 'hint', text: I18n.s("u_ecc018bdb57f", [s.luckyN]) }) : null,
-      s.newly || s.mastered ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
+      s.kind !== 'grade' && (s.newly || s.mastered) ? h('p', { class: 'hint', text: I18n.s("u_cdcf6169899d", [s.newly]) + (s.mastered ? I18n.s("u_4155a119672e", [s.mastered]) : '') }) : null),
       s.wrong.length ? h('div', { class: 'sub', text: I18n.s("u_dfcac72f08a7") }) : null,
       s.wrong.length ? h('div', { class: 'wlist' }, ...s.wrong.map(i => h('div', { class: 'wrow' }, h('b', { text: VOCAB[i].w }), h('span', { class: 'qlv sm', text: 'L' + VOCAB[i].t }), h('span', { class: 'hint', text: VOCAB[i].p }), h('span', { text: VOCAB[i].z }), h('button', { class: 'xbtn', 'aria-label': I18n.s("u_07c1b097b4a1"), onclick: () => Learn.speak(VOCAB[i].w) }, ico('i_speaker', 18))))) : null,
       h('div', { class: 'row center wrap' },

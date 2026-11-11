@@ -69,8 +69,11 @@ function planDay(p, st, day, date) {
  if (day < p.startDay) { out.why.push('還沒開始玩'); return out; }
  const ev = p.life.events.find(x => x[0] === day + 1); let factor = ev ? ev[1] : 1; if (ev) out.why.push(ev[2]);
  const E = out.E = engagementOf(p, st, day);
+ // 0.93.6: "install day" is the first day this person actually gets to play. It used to be day === startDay only,
+ // so anyone whose start day passed before the simulator was running (it started at 18:17) never had a first session.
+ const install = !st.playedDays && !st.sessions;
  let mean;
- if (day === p.startDay) mean = 1;                                   // install day
+ if (install) mean = 1;                                              // install day
  else if (st.dormant) { const back = e.revive * (weekend ? 1.6 : 1) * (1 + (p.triggers.friend || 0) * (chance(.3) ? 1 : 0)); if (!chance(back)) { out.why.push('休眠中'); return out; } st.dormant = false; st.M = Math.max(st.M, .55); st.low = 0; out.why.push('回流'); mean = Math.max(1, e.lam * .6); }
  else {
   mean = e.lam * E * (weekend ? (e.wkend || 1.15) : 1) * factor;
@@ -83,15 +86,15 @@ function planDay(p, st, day, date) {
   if (T.friend && chance(.35)) pull += .4 * T.friend;                           // 好友來拜訪、團隊進度
   mean += pull * e.lam * Math.min(1, E + .3) * factor;
  }
- let n = day === p.startDay ? 1 : Math.min(14, negbin(mean, e.k));
+ let n = install ? 1 : Math.min(14, negbin(mean, e.k));
  const peaks = weekend ? p.life.weekend : p.life.weekday, tot = peaks.reduce((s, x) => s + x[2], 0);
  const pickStart = () => { for (let i = 0; i < 60; i++) { let r = rnd() * tot, pk = peaks[0]; for (const x of peaks) if ((r -= x[2]) <= 0) { pk = x; break; } const m = Math.round(((pk[0] + pk[1] * normal()) * 60 + 1440) % 1440); if (!blocked(p, dow, m)) return m; } return null; };
  const lengthOf = (first) => { let L = chance(e.mara[0]) ? lognormal(e.mara[1], .4) : lognormal(e.sess[0] * (.7 + .5 * Math.min(1.2, E)), e.sess[1]); if (first) L *= 1.5; return clamp(L, 1, 300); };
  const starts = [];
- for (let i = 0; i < n; i++) { const m = pickStart(); if (m == null) continue; if (starts.some(s => Math.abs(s - m) < 20)) { i--; n--; continue; } starts.push(m); }
+ for (let i = 0; i < n; i++) { let m = pickStart(); if (m == null && install) for (let t = 0; t < 1440 && m == null; t += 30) { const c = (1080 + t) % 1440; if (!blocked(p, dow, c)) m = c; } if (m == null) continue; if (starts.some(s => Math.abs(s - m) < 20)) { i--; n--; continue; } starts.push(m); }
  starts.sort((a, b) => a - b);
  for (const m of starts) {
-  const len = Math.min(lengthOf(day === p.startDay), freeFor(p, dow, m, 300));
+  const len = Math.min(lengthOf(install), freeFor(p, dow, m, 300));
   if (len < 1) continue;
   out.sessions.push({ start: m, len: +len.toFixed(1) });
   if (chance(e.burst)) { const m2 = Math.round(m + len + lognormal(e.gap, .5)); if (m2 < 1440 && !blocked(p, dow, m2) && !starts.some(s => Math.abs(s - m2) < 15)) { const l2 = Math.min(lognormal(e.sess[0] * .6, e.sess[1]), freeFor(p, dow, m2, 300)); if (l2 >= 1) out.sessions.push({ start: m2, len: +clamp(l2, 1, 120).toFixed(1), burst: true }); } }
@@ -110,8 +113,8 @@ function endDay(p, st, day, played, sats) {
 
 // ---------- inside a session: what to do next ----------
 const ALIAS = { piano: 'music', photo: 'cat', gacha: 'mini', collect: 'shop', story: 'merchant' };   // 商人故事 = visiting the weekly merchant
-const DWELL = { contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
-const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest'];
+const DWELL = { levelgate: 4, contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
+const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate'];
 // 0.92.49 程度挑戰賽: nobody is told to join. People who already like tests (程度小測, practice, spelling) are drawn to it,
 // people who dislike quizzes mostly ignore it, pure cat / music players almost never open it.
 function contestPull(p) { const P = p.play.prefs; if (P.contest != null) return P.contest; let x = .6 * (P.grade || 0) + .3 * (P.practice || 0) + .2 * (P.typo || 0) + .1 * (P.daily || 0) + .15 * (p.triggers.grade || 0); if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) x *= .2; if (p.play.dislikes.includes('too_easy')) x *= 1.3; return +x.toFixed(3); }
@@ -245,7 +248,7 @@ const TXT = path.resolve(String(arg('textlog', path.join(ROOT, '.sim', '行為�
 const GL = ['小一', '小二', '小三', '小四', '小五', '小六', '國一', '國二', '國三', '高一', '高二', '高三'], gname = g => g == null || isNaN(g) ? '' : GL[Math.max(1, Math.min(12, Math.round(g))) - 1];
 const QT = { en2zh: '英翻中', zh2en: '中翻英', listen: '聽音選字', spell: '拼字', listenspell: '聽音拼字', cloze: '填空', img: '看圖選字' };
 const MINI_BOTS = true;    // canvas minigames are played with a modelled result (see miniRound)
-const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字' };
+const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
 const DEVN = { phone: '手機', tablet: '平板', pc: '電腦', desktop: '電腦' };
 function say(p, msg) {
  const d = new Date(Date.now() + 8 * 3600e3).toISOString(), line = `${d.slice(11, 19)}  ${p.nick}（${p.id}）${msg}`;
@@ -351,7 +354,9 @@ async function runSession(S, p, s) {
    Object.assign(today, st2);
    const cs = await ev(() => typeof Cloud !== 'undefined' ? { st: Cloud.status, err: Cloud.err || Cloud.error || '' } : null).catch(() => null);
    if (cs && cs.st !== ses.cloudSt) { if (['error', 'offline', 'outdated', 'paused'].includes(cs.st)) ses.say(`⚠ 雲端存檔狀態：${cs.st}${cs.err ? '（' + String(cs.err).slice(0, 120) + '）' : ''}`); else if (['error', 'offline', 'outdated', 'paused'].includes(ses.cloudSt)) ses.say('雲端存檔恢復正常（' + cs.st + '）'); ses.cloudSt = cs.st; }
-   const a = nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
+   const gate = await ev(() => typeof LevelGate !== 'undefined' && LevelGate.pending('owner') && LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1)) <= 0).catch(() => false);
+   const gateP = .35 + .5 * (1 - (p.play.frustration || 0)) - (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d)) ? .3 : 0);
+   const a = gate && !ses.gateTried && chance(Math.max(.1, gateP)) ? (ses.gateTried = true, 'levelgate') : nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
    await act(page, p, st, ses, a, dwell, wait);
    const spent = (Date.now() - aStart) * FAST / 60000; ses.mins[a] = (ses.mins[a] || 0) + spent; ses.elapsed += spent;
@@ -380,9 +385,10 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (LEARN.includes(a)) {
    if (a === 'typo') return await typoRound(page, p, st, ses, until, wait);
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
-   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess; }, kind);
+   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'levelgate' ? await ev(() => { if (typeof LevelGate === 'undefined' || !LevelGate.pending('owner')) return false; UI.openWin('learn'); LevelGate.start('owner'); return !!(Learn.sess && Learn.sess.kind === 'levelgate') && 'levelgate'; }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess && (Learn.sess.kind === 'practice' && k === 'practice' ? 'practice' : k); }, kind);
    if (!ok) return;
-   ses.say('開始「' + (ACTN[a] || a) + '」');
+   const label = ACTN[typeof ok === 'string' ? ok : a] || ACTN[a] || a;
+   ses.say('開始「' + label + '」');
    if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) ses.frustration += .5;
    let wrongRun = 0;
    for (let guard = 0; guard < 300; guard++) {
@@ -391,12 +397,13 @@ async function act(page, p, st, ses, a, dwell, wait) {
      // a breakthrough pulls most people on to the next Level while they still have time
      if (a === 'contest') { const go = await ev(() => { const s = Learn.sess, R = Contest.Z.run; return !!(s && s.result && s.result.pass && R && !R.over); }); if (go && chance(Date.now() < until ? .85 : .35)) { ses.ctUp = (ses.ctUp || 0) + 1; ses.say('挑戰賽突破這一階，繼續下一階'); await ev(() => Contest.play()); continue; } }
      const res = await ev(() => { const s = Learn.sess; return s ? { right: s.right, n: s.qs ? s.qs.length : 0, pass: !!(s.result && s.result.pass) } : null; }).catch(() => null);
-     ses.say('完成「' + (ACTN[a] || a) + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
+     ses.say('完成「' + label + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
+     if (a === 'levelgate') { const lv = await ev(() => ({ lvl: Game.S.lvl, wait: LevelGate.pending('owner') ? Math.ceil(LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1))) : 0 })).catch(() => null); if (lv) ses.say(lv.wait ? `升級測驗沒通過，${lv.wait} 分鐘後可以再試（目前 Lv ${lv.lvl}）` : `升級到 Lv ${lv.lvl}`); }
      await ev(() => UI.closeWin('study')); break; }
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
     if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
-    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); ses.say(`複習卡 ${q.w}（${gname(q.g)}）按「${pressed ? '記得' : '不熟'}」`); learnWord(p, st, q.w, true); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
+    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); learnWord(p, st, q.w, true); continue; }
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
     if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; ses.say(`看到拼字題 ${q.w} 不想寫，離開`); break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);
