@@ -2,7 +2,7 @@
  "version": 3,
  "coverage": { "on": true, "day": 6, "night": 1, "nightFrom": 0, "nightTo": 6, "perPerson": 3, "perAdult": 6, "maxSessions": 9, "fillAns": 12 },
  "created": "2026-11-07",
- "note": "第三版行為（0.93.9）：tools/sim/life.cjs 的人物與習慣。每個人都會學英文，差別在程度、勤勞度和喜歡的玩法。",
+ "note": "第三版行為（0.93.9）：tools/sim/life.cjs 的人物與習慣。每個人都會學英文，差別在程度、勤勞度和喜歡的玩法。 ",
  "people": [
   {
    "id": "sim01",
