@@ -1,8 +1,18 @@
 {
- "version": 3,
- "coverage": { "on": true, "day": 6, "night": 1, "nightFrom": 0, "nightTo": 6, "perPerson": 3, "perAdult": 6, "maxSessions": 9, "fillAns": 12 },
+ "version": 4,
+ "coverage": {
+  "on": true,
+  "day": 6,
+  "night": 1,
+  "nightFrom": 0,
+  "nightTo": 6,
+  "perPerson": 3,
+  "perAdult": 6,
+  "maxSessions": 9,
+  "fillAns": 12
+ },
  "created": "2026-11-07",
- "note": "第三版行為（0.93.9）：tools/sim/life.cjs 的人物與習慣。每個人都會學英文，差別在程度、勤勞度和喜歡的玩法。",
+ "note": "第三版行為（0.93.9）：tools/sim/life.cjs 的人物與習慣。每個人都會學英文，差別在程度、勤勞度和喜歡的玩法。 0.93.12：每人加上 decor（佈置品味）。",
  "people": [
   {
    "id": "sim01",
@@ -142,7 +152,19 @@
    "shareDevice": "sim28",
    "personality": "好奇、坐不住",
    "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "pile",
+    "care": 0.2,
+    "freq": 0.18,
+    "fams": [
+     "play",
+     "cat"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "六歲：玩具和貓的東西都堆在房間中間"
+   }
   },
   {
    "id": "sim02",
@@ -273,7 +295,19 @@
    "shareDevice": null,
    "personality": "安靜、喜歡畫畫",
    "habit": "開著音樂邊聽邊學，做完單字再做別的",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.55,
+    "freq": 0.15,
+    "fams": [
+     "fabric",
+     "nature"
+    ],
+    "color": "pink",
+    "bedSide": "left",
+    "note": "愛畫畫：房間要溫馨、粉色系"
+   }
   },
   {
    "id": "sim03",
@@ -413,7 +447,19 @@
    "shareDevice": null,
    "personality": "好勝、急性子",
    "habit": "最愛小遊戲和打字，單字做完就去玩",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "pile",
+    "care": 0.3,
+    "freq": 0.1,
+    "fams": [
+     "play",
+     "media"
+    ],
+    "color": "",
+    "bedSide": "right",
+    "note": "急性子：買了就隨便放"
+   }
   },
   {
    "id": "sim04",
@@ -545,7 +591,19 @@
    "shareDevice": null,
    "personality": "認真、喜歡貼紙和獎狀",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.7,
+    "freq": 0.15,
+    "fams": [
+     "wall",
+     "collect"
+    ],
+    "color": "sun",
+    "bedSide": "left",
+    "note": "喜歡獎狀和貼紙：牆上掛滿、排整齊"
+   }
   },
   {
    "id": "sim05",
@@ -681,7 +739,19 @@
    "shareDevice": null,
    "personality": "溫柔、替每隻貓取名字",
    "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.5,
+    "freq": 0.15,
+    "fams": [
+     "cat",
+     "fabric"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "替每隻貓取名字：貓的東西擺最好的位置"
+   }
   },
   {
    "id": "sim06",
@@ -809,7 +879,21 @@
    "shareDevice": null,
    "personality": "有美感、挑家具很久",
    "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "theme",
+    "care": 0.9,
+    "freq": 0.35,
+    "fams": [
+     "fabric",
+     "nature",
+     "lighting",
+     "wall"
+    ],
+    "color": "pink",
+    "bedSide": "left",
+    "note": "有美感：整組配色，會換壁紙，常常重新佈置"
+   }
   },
   {
    "id": "sim07",
@@ -952,7 +1036,19 @@
    "shareDevice": null,
    "personality": "調皮、熬夜偷玩",
    "habit": "最愛小遊戲和打字，單字做完就去玩",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "pile",
+    "care": 0.3,
+    "freq": 0.1,
+    "fams": [
+     "play",
+     "media"
+    ],
+    "color": "",
+    "bedSide": "right",
+    "note": "調皮：東西亂放"
+   }
   },
   {
    "id": "sim08",
@@ -1084,7 +1180,19 @@
    "shareDevice": null,
    "personality": "自律、在意連續天數",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "minimal",
+    "care": 0.85,
+    "freq": 0.12,
+    "fams": [
+     "work",
+     "storage"
+    ],
+    "color": "white",
+    "bedSide": "right",
+    "note": "自律：整齊、收納、左右對稱"
+   }
   },
   {
    "id": "sim09",
@@ -1221,7 +1329,19 @@
    "shareDevice": null,
    "personality": "愛比較、喜歡團體",
    "habit": "愛看排行榜和任務進度，做完任務才安心",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.45,
+    "freq": 0.1,
+    "fams": [
+     "play",
+     "media"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "喜歡團體：房間是給朋友看的"
+   }
   },
   {
    "id": "sim10",
@@ -1352,7 +1472,20 @@
    "shareDevice": null,
    "personality": "浪漫、愛聽日文歌",
    "habit": "開著音樂邊聽邊學，做完單字再做別的",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "music",
+    "care": 0.7,
+    "freq": 0.18,
+    "fams": [
+     "media",
+     "lighting",
+     "fabric"
+    ],
+    "color": "lilac",
+    "bedSide": "left",
+    "note": "愛聽日文歌：唱機和喇叭擺在一角"
+   }
   },
   {
    "id": "sim11",
@@ -1483,7 +1616,19 @@
    "shareDevice": null,
    "personality": "三分鐘熱度",
    "habit": "最愛小遊戲和打字，單字做完就去玩",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "gamer",
+    "care": 0.4,
+    "freq": 0.1,
+    "fams": [
+     "media",
+     "play"
+    ],
+    "color": "",
+    "bedSide": "right",
+    "note": "三分鐘熱度：偶爾才整理"
+   }
   },
   {
    "id": "sim12",
@@ -1614,7 +1759,20 @@
    "shareDevice": null,
    "personality": "資優、好奇",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.8,
+    "freq": 0.12,
+    "fams": [
+     "work",
+     "collect",
+     "storage"
+    ],
+    "color": "navy",
+    "bedSide": "left",
+    "note": "資優：書櫃和書桌那一角最整齊"
+   }
   },
   {
    "id": "sim13",
@@ -1747,7 +1905,20 @@
    "shareDevice": null,
    "personality": "電玩咖",
    "habit": "最愛小遊戲和打字，單字做完就去玩",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "gamer",
+    "care": 0.5,
+    "freq": 0.15,
+    "fams": [
+     "media",
+     "play",
+     "lighting"
+    ],
+    "color": "black",
+    "bedSide": "right",
+    "note": "電玩咖：遊戲角落、霓虹燈"
+   }
   },
   {
    "id": "sim14",
@@ -1882,7 +2053,20 @@
    "shareDevice": null,
    "personality": "愛分享、愛拍照",
    "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.65,
+    "freq": 0.2,
+    "fams": [
+     "cat",
+     "wall",
+     "nature"
+    ],
+    "color": "sun",
+    "bedSide": "left",
+    "note": "愛拍照：牆上掛照片，房間要上相"
+   }
   },
   {
    "id": "sim15",
@@ -2019,7 +2203,18 @@
    "shareDevice": null,
    "personality": "疲倦的補習生",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.4,
+    "freq": 0.06,
+    "fams": [
+     "work"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "疲倦的補習生：很少佈置"
+   }
   },
   {
    "id": "sim16",
@@ -2150,7 +2345,19 @@
    "shareDevice": null,
    "personality": "專注型學生",
    "habit": "把遊戲當讀書計時器，休息時做單字",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.8,
+    "freq": 0.1,
+    "fams": [
+     "work",
+     "lighting"
+    ],
+    "color": "white",
+    "bedSide": "right",
+    "note": "專注型：書桌、檯燈"
+   }
   },
   {
    "id": "sim17",
@@ -2290,7 +2497,19 @@
    "shareDevice": null,
    "personality": "會考衝刺、刷題",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.7,
+    "freq": 0.08,
+    "fams": [
+     "work",
+     "storage"
+    ],
+    "color": "navy",
+    "bedSide": "left",
+    "note": "會考衝刺：只顧書桌"
+   }
   },
   {
    "id": "sim18",
@@ -2422,7 +2641,19 @@
    "shareDevice": null,
    "personality": "需要背景音樂才能讀書",
    "habit": "開著音樂邊聽邊學，做完單字再做別的",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "music",
+    "care": 0.7,
+    "freq": 0.15,
+    "fams": [
+     "media",
+     "lighting"
+    ],
+    "color": "lilac",
+    "bedSide": "right",
+    "note": "需要背景音樂：音樂角落"
+   }
   },
   {
    "id": "sim19",
@@ -2558,7 +2789,19 @@
    "shareDevice": null,
    "personality": "隨性、週末型",
    "habit": "最愛小遊戲和打字，單字做完就去玩",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "gamer",
+    "care": 0.4,
+    "freq": 0.1,
+    "fams": [
+     "media",
+     "play"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "隨性：週末才整理一下"
+   }
   },
   {
    "id": "sim20",
@@ -2679,7 +2922,19 @@
    "shareDevice": null,
    "personality": "學測導向、效率派",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "minimal",
+    "care": 0.9,
+    "freq": 0.08,
+    "fams": [
+     "work",
+     "storage"
+    ],
+    "color": "white",
+    "bedSide": "right",
+    "note": "效率派：極簡，不要的東西收起來"
+   }
   },
   {
    "id": "sim21",
@@ -2814,7 +3069,19 @@
    "shareDevice": null,
    "personality": "團體王",
    "habit": "愛看排行榜和任務進度，做完任務才安心",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.4,
+    "freq": 0.1,
+    "fams": [
+     "play",
+     "rest"
+    ],
+    "color": "",
+    "bedSide": "left",
+    "note": "團體王：沙發和懶骨頭給朋友坐"
+   }
   },
   {
    "id": "sim22",
@@ -2936,7 +3203,20 @@
    "shareDevice": null,
    "personality": "英文自信低",
    "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "cozy",
+    "care": 0.6,
+    "freq": 0.15,
+    "fams": [
+     "cat",
+     "fabric",
+     "nature"
+    ],
+    "color": "green",
+    "bedSide": "right",
+    "note": "英文自信低，但房間很用心：貓咪角落"
+   }
   },
   {
    "id": "sim23",
@@ -3067,7 +3347,19 @@
    "shareDevice": null,
    "personality": "夜貓衝刺型",
    "habit": "把遊戲當讀書計時器，休息時做單字",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.6,
+    "freq": 0.1,
+    "fams": [
+     "work",
+     "lighting"
+    ],
+    "color": "navy",
+    "bedSide": "right",
+    "note": "夜貓：燈光很多"
+   }
   },
   {
    "id": "sim24",
@@ -3188,7 +3480,20 @@
    "shareDevice": null,
    "personality": "哈日、用日文介面",
    "habit": "開著音樂邊聽邊學，做完單字再做別的",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "theme",
+    "care": 0.8,
+    "freq": 0.25,
+    "fams": [
+     "fabric",
+     "nature",
+     "wall"
+    ],
+    "color": "green",
+    "bedSide": "left",
+    "note": "哈日：和風、綠色系"
+   }
   },
   {
    "id": "sim25",
@@ -3325,7 +3630,20 @@
    "shareDevice": null,
    "personality": "收集控、交換生",
    "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "collector",
+    "care": 0.7,
+    "freq": 0.3,
+    "fams": [
+     "collect",
+     "storage",
+     "wall"
+    ],
+    "color": "walnut",
+    "bedSide": "right",
+    "note": "收集控：層架擺滿收藏"
+   }
   },
   {
    "id": "sim26",
@@ -3467,7 +3785,19 @@
    "shareDevice": null,
    "personality": "通勤族、碎片時間",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "minimal",
+    "care": 0.7,
+    "freq": 0.06,
+    "fams": [
+     "work",
+     "rest"
+    ],
+    "color": "white",
+    "bedSide": "left",
+    "note": "通勤族：很少佈置，但要整齊"
+   }
   },
   {
    "id": "sim27",
@@ -3588,7 +3918,19 @@
    "shareDevice": null,
    "personality": "想重新學英文的中年人",
    "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "study",
+    "care": 0.6,
+    "freq": 0.08,
+    "fams": [
+     "work",
+     "storage"
+    ],
+    "color": "walnut",
+    "bedSide": "left",
+    "note": "重新學英文：書房風"
+   }
   },
   {
    "id": "sim28",
@@ -3698,7 +4040,20 @@
    "shareDevice": "sim01",
    "personality": "陪小孩的媽媽",
    "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "parent",
+    "care": 0.7,
+    "freq": 0.12,
+    "fams": [
+     "cat",
+     "fabric",
+     "storage"
+    ],
+    "color": "sun",
+    "bedSide": "left",
+    "note": "陪小孩的媽媽：收拾、整理"
+   }
   },
   {
    "id": "sim29",
@@ -3831,7 +4186,19 @@
    "shareDevice": null,
    "personality": "動作慢、很有耐心",
    "habit": "開著音樂邊聽邊學，做完單字再做別的",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "green",
+    "care": 0.5,
+    "freq": 0.1,
+    "fams": [
+     "nature",
+     "rest"
+    ],
+    "color": "green",
+    "bedSide": "left",
+    "note": "動作慢：窗邊種滿植物，很少大改"
+   }
   },
   {
    "id": "sim30",
@@ -3963,7 +4330,20 @@
    "shareDevice": null,
    "personality": "夜貓、對畫面很挑剔",
    "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
-   "levels": null
+   "levels": null,
+   "decor": {
+    "style": "minimal",
+    "care": 1.0,
+    "freq": 0.3,
+    "fams": [
+     "lighting",
+     "wall",
+     "fabric"
+    ],
+    "color": "black",
+    "bedSide": "right",
+    "note": "對畫面很挑剔：對齊、留白、黑色系"
+   }
   }
  ],
  "archetypes": {

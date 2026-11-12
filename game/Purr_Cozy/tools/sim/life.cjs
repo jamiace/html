@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /* ============================================================
+   0.93.12「佈置房間」：每個人有自己的品味（people.json 的 decor：style 風格、care 細心程度、freq 多常佈置、fams 喜歡的家具、color 主題色）
+     - 新買的家具會被擺到合理的地方，而不是留在系統隨便放的位置；逛商店時會挑自己喜歡的種類和顏色
+     - 佈置時依風格做事：小小孩亂堆、整齊派對齊收納左右對稱、主題派整組換色換壁紙、收藏派擺滿層架、植物派種滿窗邊
+     - 會猶豫（擺上去看一下又移回去）、晚上開燈、把貓弄倒的東西扶好；佈置的大腦在 tools/sim/decor.cjs
    0.93.11「小遊戲」：小遊戲要先有遊戲類家具（遊戲主機、掌上機、方向盤、拼圖盤、圖卡盒…）才玩得到，以前沒有人買，所以一局都沒玩過
      - 想玩小遊戲但房間裡沒有遊戲機：一半的機率去商店找一台買得起的（錢不夠就改玩 Meow Typo），買到就當場玩
      - 一般逛商店買東西時，也有機率挑遊戲類家具：沒有的人 6% ＋ 40% × 喜歡小遊戲的程度，已經有的人 3% ＋ 12% ×（偏好買沒有的遊戲）
@@ -42,7 +46,7 @@
    其他：--only sim01,sim05  --fast 20（等待縮短，測試用）  --test-now（今天的場次立刻開始，測試用）  --base <網址>  --concurrency 6  --direct（不用共用快取）
    狀態：<專案>/.sim/life/（state.json、logs/日期.jsonl、各人的瀏覽器存檔），已在 .gitignore 的 .sim/ 底下。
    ============================================================ */
-const fs = require('fs'), path = require('path');
+const fs = require('fs'), path = require('path'), DECOR = require('./decor.cjs');
 const ROOT = path.join(__dirname, '..', '..');
 const argv = process.argv.slice(2), CMD = argv[0] && !argv[0].startsWith('--') ? argv[0] : 'preview';
 const arg = (k, d) => { const i = argv.indexOf('--' + k); return i < 0 ? d : (argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : true); };
@@ -188,6 +192,7 @@ function gradePull(p) { const P = p.play.prefs, T = p.triggers, D = p.play.disli
  return +(.25 * (T.task || 0) + .15 * (T.streak || 0) + .1 * (P.daily || 0)).toFixed(3); }   // 程度小測 sits in the daily task list
 function prefsOf(p, st) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; if (a === 'merchant' || a === 'tasks' || a === 'grade') continue; w[a] = (w[a] || 0) + v; } w.look = w.look || .15;
  if (!w.mini) w.mini = st && st.hasGame ? .12 : .03; if (!w.shop) w.shop = .05;   // 0.93.11: nobody is at exactly zero
+ w.decor = Math.max(w.decor || 0, decorOf(p).freq);   // 0.93.12: everyone rearranges their room now and then, some much more
  const c = contestPull(p); if (c > .02) w.contest = c; const m = merchantPull(p); if (m > .02) w.merchant = m; const t = tasksPull(p); if (t > .02) w.tasks = t; const g = gradePull(p); if (g > .02) w.grade = g; return w; }
 function nextActivity(p, st, ses, today) {
  const P = p.play, T = p.triggers, w = prefsOf(p, st), cand = [], first = k => !ses.count[k];
@@ -540,9 +545,11 @@ async function act(page, p, st, ses, a, dwell, wait) {
     const pg = (st.hasGame ? .03 + .12 * (P2.mini || 0) : .06 + .4 * (P2.mini || 0)) * (p.play.dislikes.includes('minigames') ? .3 : 1);
     const game = chance(pg) ? await gamePick(page, {}) : '';
     if (game) { st.hasGame = true; ses.bought = (ses.bought || []).concat(game); ses.say(`在商店買了遊戲類家具「${game}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); }
-    else { const got = await ev(() => { try { const S = Game.S, ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return d && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); }); if (!ids.length) return ''; ids.sort((a, b) => ITEMS[b].price - ITEMS[a].price); const id = ids[Math.floor(Math.random() * Math.min(ids.length, 8))], c0 = S.coins; Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.bought = (ses.bought || []).concat(got); ses.say(`在商店買了「${got}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); } } }
+    else { const D = decorOf(p), got = await ev(T => { try { const S = Game.S, ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return d && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); }); if (!ids.length) return ''; const big = d => d.bed ? 'bed' : d.desk ? 'desk' : d.layer === 'rug' ? 'rug' : d.seat ? 'seat' : d.tv ? 'tv' : (d.layer === 'floor' && d.fam === 'storage' && Room.itemCanvas({ k: d.id }).width >= 36) ? 'cab' : '', lim = { bed: 1, desk: 1, rug: 2, seat: 2, tv: 1, cab: 2 }, have = {}; for (const i of S.items) { const b = big(ITEMS[i.k] || {}); if (b) have[b] = (have[b] || 0) + 1; } for (const k in S.inv) { const b = big(ITEMS[k] || {}); if (b) have[b] = (have[b] || 0) + S.inv[k]; } for (let i = ids.length - 1; i >= 0; i--) { const b = big(ITEMS[ids[i]]); if (b && (have[b] || 0) >= lim[b]) ids.splice(i, 1); }   // nobody buys a fourth rug
+    ids.sort((a, b) => ITEMS[b].price - ITEMS[a].price); const liked = ids.filter(k => (T.fams.includes(ITEMS[k].fam) || (T.color && (k.split('__')[1] || '') === T.color)) && Math.random() < .9), pool = liked.length && Math.random() < .75 ? liked : ids; const id = pool[Math.floor(Math.random() * Math.min(pool.length, 10))], c0 = S.coins; Game.buy('item', id); if (S.coins >= c0) return ''; return ITEMS[id].n || id; } catch (e) { return ''; } }, { fams: D.fams, color: D.color }).catch(() => ''); if (got) { ses.bought = (ses.bought || []).concat(got); ses.say(`在商店買了「${got}」`); await wait(lognormal(4000 * p.play.pace, .4)); await page.evaluate(() => UI.closeWin('shop')).catch(() => { }); for (const x of await decorRun(page, { act: 'placeNew', max: 1, style: D.style, care: D.care, color: D.color, bedSide: D.bedSide })) if (x.line) ses.say('佈置：' + x.line); await wait(lognormal((5000 + 6000 * D.care) * p.play.pace, .4)); } } }
    await ev(() => { UI.closeWin('shop'); if (Room.edit) UI.setEdit(false); }); return; }
   if (a === 'gacha') { const got = await ev(() => { try { if (!(Rewards.W.tickets > 0)) return ''; Rewards.openTicket(); return 'ok'; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.say('抽了一次扭蛋'); await wait(lognormal(5000 * p.play.pace, .4)); await ev(() => { for (const w of ['prize', 'gacha', 'gift']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); }); } return; }
+  if (a === 'decor') return await decorVisit(page, p, st, ses, until, wait);
   if (a === 'look') { const l0 = Date.now(); await wait(lognormal(25000 * p.play.pace, .5)); ses.say(`看看房間、陪貓（${Math.max(1, Math.round((Date.now() - l0) * FAST / 1000))} 秒）`); return; }
   while (Date.now() < until) {
    let did = '';
@@ -553,13 +560,11 @@ async function act(page, p, st, ses, a, dwell, wait) {
      else if (Pets.Z.tools.brush && Math.random() < .5) { PetPlay.pick('brush'); PetPlay.down(x.x, x.y - 7); return `幫 ${nm} 梳毛`; }
      else { PetPlay.drop(); let ok = false; Game.interact && Room.hit && (() => { const h = Room.hit(x.x, x.y - 6); if (h && h.kind === 'actor' && h.a.poke) { h.a.poke(); ok = true; } })(); return ok ? `摸摸 ${nm}` : ''; } }, a);
    else if (a === 'mini') did = await ev(() => { const it = Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'); if (it) { Game.interact(it); const I = ITEMS[it.k]; return '玩「' + (I.n || I.name || it.k) + '」'; } UI.openWin('catstypo'); return '玩「Meow Typo」'; });
-   else if (a === 'decor') await ev(() => { if (!Room.edit) UI.setEdit(true); const items = Game.S.items.filter(i => ITEMS[i.k] && ITEMS[i.k].layer !== 'wall' && i.p == null), it = items[Math.floor(Math.random() * items.length)]; if (!it) return ''; Room.sel = it; it.x += Math.round(Math.random() * 16 - 8); Room.clampItem(it); const fl = Math.random() < .2; if (fl) it.flip = !it.flip; Game.save(); UI.editToolbar(); const I = ITEMS[it.k]; return '佈置：' + (fl ? '翻轉並移動' : '移動') + '「' + (I.n || I.name || it.k) + '」'; });
    if (did && (a === 'cat' || a === 'toys')) ses.tally.n[did] = (ses.tally.n[did] || 0) + 1; else if (did) ses.say(did);
    await wait(lognormal(a === 'mini' ? 30000 : a === 'decor' ? 9000 : 6000, .5) * p.play.pace);
    await ev(() => { for (const w of ['cozygame', 'furnplay', 'catstypo']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); });
   }
   if ((a === 'cat' || a === 'toys') && ses.tally && Object.keys(ses.tally.n).length) { const n = ses.tally.n; ses.say(`和貓咪玩了 ${Math.max(1, Math.round((Date.now() - ses.tally.t0) * FAST / 1000))} 秒：` + Object.entries(n).map(([k, v]) => v > 1 ? `${k} ×${v}` : k).join('、')); ses.tally = null; }
-  if (a === 'decor') await ev(() => { if (Room.edit) UI.setEdit(false); });
  } catch (e) { ses.error = String(e && e.message || e).slice(0, 160); }
 }
 // the weekly merchant: say hello, maybe hear today's story chapter (lore card → 4 words → 2 questions → 5-question story quiz), maybe buy something
@@ -595,7 +600,7 @@ async function merchantVisit(page, p, st, ses, until, wait) {
   await ev(() => Merchant.open()); await wait(lognormal(15000 * p.play.pace, .5));
   if (!D.includes('no_coins') || chance(.3)) if (chance(.1 + .35 * ((P.shop || 0) + (P.collect || 0) + (P.decor || 0) * .5))) {
    const got = await ev(() => { try { const ids = Merchant.goods().filter(id => Merchant.stockLeft(id) > 0 && (ITEMS[id] ? (ITEMS[id].price || 0) : 0) <= Game.S.coins); if (!ids.length) return ''; const id = ids[Math.floor(Math.random() * ids.length)]; const c0 = Game.S.coins; Merchant.buy(id); return Game.S.coins < c0 ? id : ''; } catch (e) { return ''; } });
-   if (got) { ses.bought = (ses.bought || []).concat(got); const nm = await ev(id => (ITEMS[id] && (ITEMS[id].n || ITEMS[id].name)) || id, got).catch(() => got); ses.say(`向商人「${info.mname}」買了「${nm}」`); }
+   if (got) { ses.bought = (ses.bought || []).concat(got); const nm = await ev(id => (ITEMS[id] && (ITEMS[id].n || ITEMS[id].name)) || id, got).catch(() => got); ses.say(`向商人「${info.mname}」買了「${nm}」`); await ev(() => Merchant.close ? Merchant.close() : UI.closeWin('merchant')).catch(() => { }); const D = decorOf(p); if (chance(.5 + .4 * D.care)) for (const x of await decorRun(page, { act: 'placeNew', max: 1, style: D.style, care: D.care, color: D.color, bedSide: D.bedSide })) if (x.line) ses.say('佈置：' + x.line); }
   }
   await ev(() => UI.closeWin('merchant'));
  } else await ev(() => UI.closeWin('merchant'));
@@ -612,6 +617,31 @@ const GAME_PICK = (modes, opts) => { const isG = d => d && (modes.includes(d.coz
  if (!ids.length) return '';
  const fresh = ids.filter(k => !owned.includes(ITEMS[k].cozyGame || ITEMS[k].interactionProfile)), pool = (fresh.length ? fresh : ids).sort((a, b) => ITEMS[a].price - ITEMS[b].price), id = pool[Math.floor(Math.random() * Math.min(pool.length, opts.cheap ? 4 : 10))], c0 = S.coins;
  Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; };
+const decorRun = (page, o) => page.evaluate(`(() => { try { return (${DECOR})(${JSON.stringify(o)}); } catch (e) { return [{ line: '', err: String(e && e.message || e) }]; } })()`).catch(e => [{ line: '', err: String(e && e.message || e) }]);
+const DECOR_STEPS = {   // what each style does when they sit down to decorate
+ pile: { pile: .6, surface: .15, fixOne: .1, lights: .15 }, cozy: { fixOne: .45, surface: .25, wallLine: .1, lights: .1, pair: .1 },
+ theme: { fixOne: .25, swap: .2, pair: .15, wallLine: .15, wallpaper: .12, surface: .13 }, minimal: { tidy: .3, fixOne: .3, pair: .2, wallLine: .2 },
+ collector: { surface: .5, fixOne: .3, wallLine: .1, wallpaper: .1 }, green: { fixOne: .55, surface: .35, lights: .1 },
+ study: { fixOne: .45, surface: .3, lights: .25 }, gamer: { fixOne: .45, surface: .35, lights: .2 }, music: { fixOne: .4, surface: .35, lights: .25 },
+ parent: { tidy: .45, fixOne: .3, surface: .25 } };
+const decorOf = p => Object.assign({ style: 'cozy', care: .5, freq: .12, fams: [], color: '' }, p.decor || {});
+async function decorVisit(page, p, st, ses, until, wait) {   // sitting down to decorate: a few changes, looking at each one, sometimes changing their mind
+ const D = decorOf(p), steps = DECOR_STEPS[D.style] || DECOR_STEPS.cozy, base = { style: D.style, care: D.care, color: D.color, bedSide: D.bedSide };
+ await page.evaluate(() => { if (!Room.edit) UI.setEdit(true); }).catch(() => { });
+ const say = r => { for (const x of r || []) { if (x.err) ses.say('⚠ 佈置失敗：' + x.err); else if (x.line) ses.say('佈置：' + x.line); if (x.bought) ses.bought = (ses.bought || []).concat(x.bought); } };
+ say(await decorRun(page, Object.assign({ act: 'placeNew', max: 3 }, base)));
+ const n = Math.max(1, Math.round((1 + 3 * D.care) * (.6 + rnd() * .8))), mk = D.style === 'theme' && chance(.1); const used = new Set();
+ for (let i = 0; i < n && Date.now() < until; i++) {
+  let act = mk && !i ? 'makeover' : 'fixOne'; if (!(mk && !i)) { let r = rnd() * Object.values(steps).reduce((a, b) => a + b, 0); for (const [k, v] of Object.entries(steps)) if ((r -= v) <= 0) { act = k; break; } }
+  if (used.has(act) && ['lights', 'wallpaper', 'tidy', 'pair', 'wallLine', 'swap'].includes(act)) act = 'fixOne'; used.add(act);   // once a visit is enough for these
+  const res = await decorRun(page, Object.assign({ act, recent: st.decorRecent || [], allowBuy: act === 'wallpaper' && chance(.3) }, base)); say(res);
+  st.decorRecent = [...(res || []).filter(x => x.uid != null).map(x => x.uid), ...(st.decorRecent || [])].slice(0, 8);
+  await wait(lognormal((6000 + 8000 * D.care) * p.play.pace, .45));   // stepping back to look at it
+  const moved = (res || []).filter(x => x.before);
+  if (moved.length && D.care >= .55 && chance(.18)) { await decorRun(page, { act: 'undo', before: moved.flatMap(x => [x.before, x.before2].filter(Boolean)) }); ses.say('佈置：退後看了一下，不太滿意，又移回原位'); await wait(lognormal(3000 * p.play.pace, .4)); }
+ }
+ await page.evaluate(() => { if (Room.edit) UI.setEdit(false); }).catch(() => { });
+}
 const gamePick = (page, o) => page.evaluate(`(() => { try { return (${GAME_PICK})(${JSON.stringify(Object.keys(MG))}, ${JSON.stringify(o)}); } catch (e) { return ''; } })()`).catch(() => '');   // a string, so the page's own security rules never block it
 const MG = {   // typical seconds per round, and how the result is described
  toss: { sec: 55, zh: '投籃' }, pinball: { sec: 95, zh: '彈珠台' }, vending: { sec: 85, zh: '貓咪販賣機' }, maze: { sec: 70, zh: '鋼珠迷宮' },
