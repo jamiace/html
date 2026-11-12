@@ -22,7 +22,8 @@
    ============================================================ */
 const SOCIAL_ON = true;
 const SOCIAL = {
-  maxFriends: 30, reqDays: 14, helpsPerDay: 5, ticketEvery: 10, boardTop: 30, familiar: 5,
+  maxFriends: 100,   // 0.93.9: was 30
+  reqDays: 14, helpsPerDay: 5, ticketEvery: 10, boardTop: 30, familiar: 5,
   boardMs: 3 * 3600e3, roomMs: 10 * 60e3, roomMinMs: 2 * 60e3, helpPollMs: 15 * 60e3, cardMs: 3 * 3600e3, quizMs: 10 * 60e3,
   helperCoins: 5, helperXp: 5, ownerCoins: 1, feedHunger: 30, guestMax: 100, statusUnits: 20,
 };

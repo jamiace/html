@@ -318,7 +318,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pt-ctl" checked> 同時建立模擬控制帳號（編號 00）</label></div>
      <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="6"> L6</label></div>
      <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-ctl-only">只建立模擬控制帳號（00）</button><button id="pt-names">套用模擬人物暱稱</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
-    <section class="pl-edit-only pl-super-only"><h2>和測試帳號互加好友</h2><p class="why">選一個帳號，直接和所有測試帳號成為好友（兩邊都寫成「已是好友」，不用等對方確認）。已經是好友的會略過。遊戲裡每人最多 30 位好友，超過時這裡會先提醒。只有最高管理者能用，要先發布 0.5.10 的 <code>firestore.rules</code>。</p>
+    <section class="pl-edit-only pl-super-only"><h2>和測試帳號互加好友</h2><p class="why">選一個帳號，直接和所有測試帳號成為好友（兩邊都寫成「已是好友」，不用等對方確認）。已經是好友的會略過。遊戲裡每人最多 100 位好友（0.93.9 起），超過時這裡會先提醒。只有最高管理者能用，要先發布 0.5.10 的 <code>firestore.rules</code>。</p>
      <div class="form"><label>帳號<select id="pf-me"><option value="">（先讀取玩家名單）</option></select></label>
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pf-mesh"> 測試帳號之間也彼此互加</label></div>
      <div class="row" style="margin-top:10px"><button id="pf-go" class="primary">互加好友</button></div><p id="pf-msg" class="muted"></p></section>
@@ -1249,9 +1249,9 @@ Object.assign(Admin,{
   const pairs=[];for(const t of testers)pairs.push([me,t.uid]);if(mesh)for(let i=0;i<testers.length;i++)for(let j=i+1;j<testers.length;j++)pairs.push([testers[i].uid,testers[j].uid]);
   const todo=pairs.filter(([a,b])=>!(have[a][b]==='ok'&&have[b][a]==='ok'));   // both copies must say 'ok'
   const after=u=>Object.values(have[u]||{}).filter(s=>s==='ok').length+todo.filter(([a,b])=>(a===u||b===u)&&!(have[u]&&have[u][a===u?b:a]==='ok')).length;
-  const meName=this.plName(byUid[me]),over=[me,...(mesh?testers.map(t=>t.uid):[])].filter(u=>after(u)>30);
+  const meName=this.plName(byUid[me]),over=[me,...(mesh?testers.map(t=>t.uid):[])].filter(u=>after(u)>100);
   if(!todo.length)return msg.textContent='都已經是好友了，不需要再加。';
-  if(!confirm(`要讓「${meName}」和 ${testers.length} 個測試帳號互加好友${mesh?'，測試帳號之間也彼此互加':''}嗎？\n\n共會建立 ${todo.length} 組好友（每組兩邊各寫一筆）。`+(over.length?`\n\n注意：${over.map(u=>this.plName(byUid[u])).join('、')} 的好友會超過遊戲上限 30 位。超過的好友一樣會顯示，但他們不能再加新的好友。`:'')))return;
+  if(!confirm(`要讓「${meName}」和 ${testers.length} 個測試帳號互加好友${mesh?'，測試帳號之間也彼此互加':''}嗎？\n\n共會建立 ${todo.length} 組好友（每組兩邊各寫一筆）。`+(over.length?`\n\n注意：${over.map(u=>this.plName(byUid[u])).join('、')} 的好友會超過遊戲上限 100 位。超過的好友一樣會顯示，但他們不能再加新的好友。`:'')))return;
   let done=0;try{for(let i=0;i<todo.length;i+=200){const b=F.writeBatch(db);for(const [a,c] of todo.slice(i,i+200)){b.set(F.doc(db,'users',a,'friends',c),{s:'ok',name:this.plName(byUid[c]),at:F.serverTimestamp()});b.set(F.doc(db,'users',c,'friends',a),{s:'ok',name:this.plName(byUid[a]),at:F.serverTimestamp()})}
     await b.commit();done+=Math.min(200,todo.length-i);msg.textContent=`寫入中… ${done}/${todo.length}`}}
   catch(e){return msg.textContent=(e.code==='permission-denied'?'寫入被拒：請先在 Firebase 主控台發布 0.5.10 的 firestore.rules。':'寫入失敗：'+(e.code||e.message))+(done?`（已完成 ${done} 組）`:'')}
