@@ -1,250 +1,7 @@
 {
- "version": 2,
+ "version": 3,
  "created": "2026-11-07",
- "note": "tools/sim/life.cjs 的人物與習慣（docs/試玩計畫-30位測試帳號.md）",
- "archetypes": {
-  "daily": {
-   "label": "黏著每日型",
-   "bore": 0.99,
-   "lam": 1.4,
-   "k": 4,
-   "burst": 0.15,
-   "gap": 90,
-   "sess": [
-    12,
-    0.5
-   ],
-   "mara": [
-    0.03,
-    45
-   ],
-   "M0": 0.75,
-   "N0": 0.25,
-   "half": 3,
-   "gain": 0.22,
-   "loss": 0.12,
-   "quit": 0.12,
-   "qd": 4,
-   "revive": 0.08
-  },
-  "snacker": {
-   "label": "短頻多次型",
-   "bore": 0.98,
-   "lam": 4.5,
-   "k": 2.5,
-   "burst": 0.45,
-   "gap": 35,
-   "sess": [
-    3.5,
-    0.6
-   ],
-   "mara": [
-    0.02,
-    25
-   ],
-   "M0": 0.7,
-   "N0": 0.3,
-   "half": 3,
-   "gain": 0.2,
-   "loss": 0.1,
-   "quit": 0.1,
-   "qd": 4,
-   "revive": 0.1
-  },
-  "marathon": {
-   "label": "長時間沉浸型",
-   "bore": 0.97,
-   "lam": 0.9,
-   "k": 2,
-   "burst": 0.1,
-   "gap": 120,
-   "sess": [
-    60,
-    0.55
-   ],
-   "mara": [
-    0.25,
-    170
-   ],
-   "M0": 0.75,
-   "N0": 0.25,
-   "half": 4,
-   "gain": 0.15,
-   "loss": 0.08,
-   "quit": 0.1,
-   "qd": 5,
-   "revive": 0.08
-  },
-  "weekend": {
-   "label": "週末型",
-   "bore": 0.99,
-   "lam": 0.35,
-   "wkend": 4.0,
-   "k": 1.5,
-   "burst": 0.2,
-   "gap": 60,
-   "sess": [
-    30,
-    0.6
-   ],
-   "mara": [
-    0.1,
-    90
-   ],
-   "M0": 0.7,
-   "N0": 0.2,
-   "half": 4,
-   "gain": 0.1,
-   "loss": 0.03,
-   "quit": 0.08,
-   "qd": 8,
-   "revive": 0.15
-  },
-  "sporadic": {
-   "label": "幾天一次型",
-   "bore": 0.98,
-   "lam": 0.4,
-   "k": 0.8,
-   "burst": 0.15,
-   "gap": 60,
-   "sess": [
-    15,
-    0.7
-   ],
-   "mara": [
-    0.05,
-    50
-   ],
-   "M0": 0.6,
-   "N0": 0.2,
-   "half": 3,
-   "gain": 0.08,
-   "loss": 0.04,
-   "quit": 0.08,
-   "qd": 7,
-   "revive": 0.15
-  },
-  "rare": {
-   "label": "兩週一兩次型",
-   "bore": 0.99,
-   "lam": 0.12,
-   "k": 0.6,
-   "burst": 0.05,
-   "gap": 60,
-   "sess": [
-    10,
-    0.7
-   ],
-   "mara": [
-    0.05,
-    40
-   ],
-   "M0": 0.5,
-   "N0": 0.3,
-   "half": 2,
-   "gain": 0.05,
-   "loss": 0.03,
-   "quit": 0.05,
-   "qd": 10,
-   "revive": 0.1
-  },
-  "burnout": {
-   "label": "三分鐘熱度型",
-   "bore": 0.72,
-   "lam": 2.2,
-   "k": 2,
-   "burst": 0.35,
-   "gap": 45,
-   "sess": [
-    25,
-    0.6
-   ],
-   "mara": [
-    0.15,
-    70
-   ],
-   "M0": 1,
-   "N0": 1,
-   "half": 1.6,
-   "gain": 0.05,
-   "loss": 0.2,
-   "quit": 0.18,
-   "qd": 2,
-   "revive": 0.04
-  },
-  "oneshot": {
-   "label": "試玩就走型",
-   "bore": 0.5,
-   "lam": 1.2,
-   "k": 1,
-   "burst": 0.1,
-   "gap": 60,
-   "sess": [
-    6,
-    0.6
-   ],
-   "mara": [
-    0,
-    0
-   ],
-   "M0": 0.5,
-   "N0": 0.6,
-   "half": 0.6,
-   "gain": 0.02,
-   "loss": 0.3,
-   "quit": 0.25,
-   "qd": 1,
-   "revive": 0.03
-  },
-  "comeback": {
-   "label": "流失後回流型",
-   "bore": 0.9,
-   "lam": 1.3,
-   "k": 2,
-   "burst": 0.2,
-   "gap": 60,
-   "sess": [
-    14,
-    0.6
-   ],
-   "mara": [
-    0.05,
-    45
-   ],
-   "M0": 0.85,
-   "N0": 0.5,
-   "half": 2,
-   "gain": 0.1,
-   "loss": 0.25,
-   "quit": 0.2,
-   "qd": 2,
-   "revive": 0.22
-  },
-  "goal": {
-   "label": "任務導向短打型",
-   "bore": 0.99,
-   "lam": 1.2,
-   "k": 5,
-   "burst": 0.05,
-   "gap": 60,
-   "sess": [
-    5,
-    0.35
-   ],
-   "mara": [
-    0,
-    0
-   ],
-   "M0": 0.8,
-   "N0": 0.1,
-   "half": 3,
-   "gain": 0.25,
-   "loss": 0.1,
-   "quit": 0.1,
-   "qd": 4,
-   "revive": 0.1
-  }
- },
+ "note": "第三版行為（0.93.9）：tools/sim/life.cjs 的人物與習慣。每個人都會學英文，差別在程度、勤勞度和喜歡的玩法。",
  "people": [
   {
    "id": "sim01",
@@ -256,35 +13,41 @@
    "declared": 1,
    "startDay": 0,
    "english": {
-    "grade": 1.0,
-    "readZh": 0.2,
-    "typing": 0.1,
-    "learn": 0.05
+    "grade": 1.6,
+    "readZh": 0.75,
+    "typing": 0.69,
+    "learn": 0.06,
+    "enc": 0.82,
+    "ret": 1,
+    "slip": 0.07
    },
    "engagement": {
-    "arch": "sporadic",
-    "label": "幾天一次型",
-    "bore": 0.98,
-    "lam": 0.55,
-    "k": 0.8,
+    "label": "想到才玩型",
+    "show": 0.45,
+    "showWe": 0.6,
+    "lam": 0.3,
+    "k": 1.5,
     "burst": 0.15,
     "gap": 60,
     "sess": [
      9,
-     0.4
+     0.55
     ],
     "mara": [
-     0.05,
-     50
+     0.03,
+     30
     ],
-    "M0": 0.6,
-    "N0": 0.2,
-    "half": 3,
-    "gain": 0.08,
-    "loss": 0.04,
-    "quit": 0.08,
-    "qd": 8,
-    "revive": 0.15
+    "M0": 0.75,
+    "N0": 0.25,
+    "half": 5,
+    "gain": 0.2,
+    "loss": 0.1,
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.25,
+    "bore": 0.985,
+    "maxN": 3,
+    "arch": "casual"
    },
    "life": {
     "weekday": [
@@ -342,12 +105,16 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "cat": 1,
-     "toys": 1,
-     "mini": 0.5,
-     "look": 0.6,
-     "music": 0.2,
-     "daily": 0.1
+     "toys": 0.8,
+     "practice": 0.3,
+     "typo": 0.3,
+     "story": 0.4,
+     "shop": 0.4,
+     "decor": 0.3,
+     "mini": 0.3,
+     "tasks": 0.4
     },
     "dislikes": [
      "spell",
@@ -355,21 +122,26 @@
     ],
     "pace": 1.6,
     "interrupt": 0.12,
-    "frustration": 0.8,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.6,
+    "gradeP": 0.44,
+    "leaveAfterGoal": 0.2,
+    "cap": 50
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0.8,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.4,
+    "pet": 1,
+    "friend": 0.2,
+    "merchant": 0.4,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": "sim28",
    "personality": "好奇、坐不住",
-   "habit": "家長晚飯後給 10 分鐘，最愛丟毛球給貓；看不懂字就亂點"
+   "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
+   "levels": null
   },
   {
    "id": "sim02",
@@ -381,36 +153,43 @@
    "declared": 1,
    "startDay": 0,
    "english": {
-    "grade": 1.5,
-    "readZh": 0.3,
-    "typing": 0.15,
-    "learn": 0.05
+    "grade": 1.6,
+    "readZh": 0.75,
+    "typing": 0.69,
+    "learn": 0.06,
+    "enc": 0.82,
+    "ret": 1,
+    "slip": 0.07
    },
    "engagement": {
-    "arch": "weekend",
-    "label": "週末型",
-    "bore": 0.99,
-    "lam": 0.35,
-    "wkend": 4.0,
-    "k": 1.5,
-    "burst": 0.2,
+    "label": "假日型",
+    "show": 0.4,
+    "showWe": 0.97,
+    "showWd": 1,
+    "lam": 0.45,
+    "wkend": 2.6,
+    "k": 3,
+    "burst": 0.15,
     "gap": 60,
     "sess": [
-     30,
-     0.6
+     9,
+     0.5
     ],
     "mara": [
-     0.1,
-     90
+     0.05,
+     40
     ],
-    "M0": 0.7,
-    "N0": 0.2,
-    "half": 4,
-    "gain": 0.1,
-    "loss": 0.03,
-    "quit": 0.08,
+    "M0": 0.85,
+    "N0": 0.25,
+    "half": 6,
+    "gain": 0.25,
+    "loss": 0.06,
+    "quit": 0.1,
     "qd": 8,
-    "revive": 0.15
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "weekend"
    },
    "life": {
     "weekday": [
@@ -456,33 +235,44 @@
    },
    "play": {
     "prefs": {
-     "music": 1,
-     "decor": 0.6,
-     "cat": 0.5,
-     "piano": 0.8,
-     "daily": 0.1
+     "daily": 0.7,
+     "music": 0.9,
+     "practice": 0.5,
+     "story": 0.5,
+     "typo": 0.3,
+     "cat": 0.4,
+     "decor": 0.4,
+     "shop": 0.3,
+     "tasks": 0.4,
+     "piano": 0.3
     },
     "dislikes": [
      "timer_pressure",
-     "lose_sound"
+     "lose_sound",
+     "spell"
     ],
-    "pace": 1.5,
+    "pace": 1.6,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 90
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0.3,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.5,
+    "task": 0.4,
+    "pet": 0.4,
+    "friend": 0.1,
+    "merchant": 0.4,
+    "grade": 0.3
    },
    "friends": [],
    "shareDevice": null,
    "personality": "安靜、喜歡畫畫",
-   "habit": "週末早上邊畫畫邊開音樂，彈房間裡的鋼琴"
+   "habit": "開著音樂邊聽邊學，做完單字再做別的",
+   "levels": null
   },
   {
    "id": "sim03",
@@ -494,35 +284,41 @@
    "declared": 2,
    "startDay": 0,
    "english": {
-    "grade": 2.0,
-    "readZh": 0.45,
-    "typing": 0.2,
-    "learn": 0.06
+    "grade": 1.6,
+    "readZh": 0.9,
+    "typing": 0.66,
+    "learn": 0.04,
+    "enc": 0.78,
+    "ret": 0.75,
+    "slip": 0.08
    },
    "engagement": {
-    "arch": "snacker",
     "label": "短頻多次型",
-    "bore": 0.98,
-    "lam": 4.5,
-    "k": 2.5,
-    "burst": 0.45,
+    "show": 0.88,
+    "showWe": 0.88,
+    "lam": 1.9,
+    "k": 3,
+    "burst": 0.35,
     "gap": 35,
     "sess": [
-     3.5,
-     0.6
+     6,
+     0.45
     ],
     "mara": [
      0.02,
-     25
+     20
     ],
-    "M0": 0.7,
+    "M0": 0.85,
     "N0": 0.3,
-    "half": 3,
-    "gain": 0.2,
+    "half": 5,
+    "gain": 0.28,
     "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.3,
+    "bore": 0.99,
+    "maxN": 6,
+    "arch": "snack"
    },
    "life": {
     "weekday": [
@@ -579,28 +375,35 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.6,
      "mini": 1,
-     "toys": 0.4,
-     "cat": 0.3,
-     "daily": 0.25,
-     "typo": 0.1
+     "typo": 0.6,
+     "practice": 0.35,
+     "gacha": 0.6,
+     "cat": 0.4,
+     "shop": 0.3,
+     "story": 0.25,
+     "tasks": 0.4
     },
     "dislikes": [
-     "reading",
      "waiting"
     ],
-    "pace": 1.2,
+    "pace": 1.3,
     "interrupt": 0.15,
-    "frustration": 0.7,
-    "goal": null
+    "frustration": 0.6,
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 60
    },
    "triggers": {
-    "streak": 0,
-    "task": 0.3,
-    "pet": 0,
-    "friend": 0.4,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.5,
+    "pet": 0.4,
+    "friend": 0.3,
+    "merchant": 0.3,
+    "grade": 0.2
    },
    "friends": [
     "sim07",
@@ -608,7 +411,8 @@
    ],
    "shareDevice": null,
    "personality": "好勝、急性子",
-   "habit": "安親班下課用媽媽手機，一天開好幾次，每次幾分鐘刷彈珠台"
+   "habit": "最愛小遊戲和打字，單字做完就去玩",
+   "levels": null
   },
   {
    "id": "sim04",
@@ -620,35 +424,41 @@
    "declared": 3,
    "startDay": 0,
    "english": {
-    "grade": 3.0,
-    "readZh": 0.75,
-    "typing": 0.45,
-    "learn": 0.1
+    "grade": 4.8,
+    "readZh": 0.9,
+    "typing": 0.72,
+    "learn": 0.08,
+    "enc": 0.86,
+    "ret": 1.3,
+    "slip": 0.06
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     12,
-     0.5
+     9,
+     0.4
     ],
     "mara": [
      0.03,
-     45
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
+    "half": 6,
+    "gain": 0.3,
+    "loss": 0.08,
     "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -700,11 +510,14 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "grade": 0.9,
-     "typo": 0.5,
-     "story": 0.4,
-     "cat": 0.3,
-     "tasks": 0.6
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "wrong",
@@ -712,21 +525,26 @@
     ],
     "pace": 1.3,
     "interrupt": 0.05,
-    "frustration": 0.5,
-    "goal": "daily"
+    "frustration": 0.35,
+    "goal": null,
+    "dilig": 0.97,
+    "gradeP": 0.69,
+    "leaveAfterGoal": 0.2,
+    "cap": 75
    },
    "triggers": {
     "streak": 0.9,
     "task": 0.8,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0.6
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "認真、喜歡貼紙和獎狀",
-   "habit": "有美語補習，每天把每日單字和程度小測做完，把獎狀掛牆上"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim05",
@@ -738,35 +556,41 @@
    "declared": 3,
    "startDay": 0,
    "english": {
-    "grade": 2.5,
-    "readZh": 0.6,
-    "typing": 0.3,
-    "learn": 0.06
+    "grade": 3.6,
+    "readZh": 0.9,
+    "typing": 0.69,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.05
    },
    "engagement": {
-    "arch": "snacker",
     "label": "短頻多次型",
-    "bore": 0.98,
-    "lam": 3.5,
-    "k": 2.5,
-    "burst": 0.45,
+    "show": 0.88,
+    "showWe": 0.88,
+    "lam": 1.9,
+    "k": 3,
+    "burst": 0.35,
     "gap": 35,
     "sess": [
-     4,
-     0.6
+     6,
+     0.45
     ],
     "mara": [
      0.02,
-     25
+     20
     ],
-    "M0": 0.7,
+    "M0": 0.85,
     "N0": 0.3,
-    "half": 3,
-    "gain": 0.2,
+    "half": 5,
+    "gain": 0.28,
     "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.3,
+    "bore": 0.99,
+    "maxN": 6,
+    "arch": "snack"
    },
    "life": {
     "weekday": [
@@ -823,33 +647,40 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "cat": 1,
-     "toys": 0.9,
-     "decor": 0.4,
+     "toys": 0.8,
+     "practice": 0.3,
+     "typo": 0.3,
+     "story": 0.4,
      "shop": 0.4,
-     "daily": 0.15
+     "decor": 0.3,
+     "mini": 0.3,
+     "tasks": 0.4
     },
-    "dislikes": [
-     "tasks",
-     "quiz"
-    ],
-    "pace": 1.2,
+    "dislikes": [],
+    "pace": 1.3,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.75,
+    "gradeP": 0.46,
+    "leaveAfterGoal": 0.2,
+    "cap": 80
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
+    "streak": 0.4,
+    "task": 0.4,
     "pet": 1,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "friend": 0.2,
+    "merchant": 0.4,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": null,
    "personality": "溫柔、替每隻貓取名字",
-   "habit": "只想養貓，一天開很多次確認貓有沒有餓，任務幾乎不看"
+   "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
+   "levels": null
   },
   {
    "id": "sim06",
@@ -859,37 +690,43 @@
    "lang": "zh-TW",
    "device": "tablet",
    "declared": 3,
-   "startDay": 1,
+   "startDay": 0,
    "english": {
-    "grade": 4.0,
-    "readZh": 0.8,
-    "typing": 0.4,
-    "learn": 0.07
+    "grade": 3.6,
+    "readZh": 0.9,
+    "typing": 0.69,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.05
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 0.6,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     35,
-     0.5
+     13,
+     0.4
     ],
     "mara": [
-     0.15,
-     90
+     0.03,
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 4,
-    "gain": 0.15,
+    "half": 6,
+    "gain": 0.3,
     "loss": 0.08,
-    "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -935,33 +772,43 @@
    },
    "play": {
     "prefs": {
-     "decor": 1,
-     "shop": 0.7,
-     "cat": 0.4,
-     "music": 0.4,
-     "daily": 0.3
+     "daily": 0.7,
+     "decor": 0.9,
+     "shop": 0.9,
+     "collect": 0.6,
+     "story": 0.6,
+     "practice": 0.35,
+     "typo": 0.25,
+     "cat": 0.5,
+     "gacha": 0.4,
+     "tasks": 0.5
     },
     "dislikes": [
      "mess",
      "no_coins"
     ],
-    "pace": 1.2,
+    "pace": 1.3,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.8,
+    "gradeP": 0.47,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0.6,
-    "grade": 0
+    "streak": 0.7,
+    "task": 0.6,
+    "pet": 0.5,
+    "friend": 0.2,
+    "merchant": 0.9,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": null,
    "personality": "有美感、挑家具很久",
-   "habit": "一進來就是佈置模式，反覆拖曳、翻轉、收起小物"
+   "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
+   "levels": null
   },
   {
    "id": "sim07",
@@ -973,35 +820,41 @@
    "declared": 4,
    "startDay": 0,
    "english": {
-    "grade": 3.0,
-    "readZh": 0.75,
-    "typing": 0.4,
-    "learn": 0.05
+    "grade": 3.6,
+    "readZh": 1,
+    "typing": 0.84,
+    "learn": 0.04,
+    "enc": 0.86,
+    "ret": 0.75,
+    "slip": 0.06
    },
    "engagement": {
-    "arch": "burnout",
     "label": "三分鐘熱度型",
-    "bore": 0.72,
-    "lam": 2.2,
-    "k": 2,
-    "burst": 0.35,
-    "gap": 45,
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.6,
+    "k": 3,
+    "burst": 0.25,
+    "gap": 40,
     "sess": [
-     25,
-     0.6
+     15,
+     0.5
     ],
     "mara": [
-     0.15,
-     70
+     0.05,
+     40
     ],
-    "M0": 1,
-    "N0": 1,
+    "M0": 1.05,
+    "N0": 0.45,
     "half": 3,
-    "gain": 0.12,
-    "loss": 0.2,
-    "quit": 0.18,
+    "gain": 0.15,
+    "loss": 0.15,
+    "quit": 0.36,
     "qd": 3,
-    "revive": 0.04
+    "revive": 0.1,
+    "bore": 0.8,
+    "maxN": 4,
+    "arch": "fading"
    },
    "life": {
     "weekday": [
@@ -1063,27 +916,33 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.6,
      "mini": 1,
-     "social": 0.3,
-     "cat": 0.3,
-     "typo": 0.25,
-     "daily": 0.12
+     "typo": 0.6,
+     "practice": 0.35,
+     "gacha": 0.6,
+     "cat": 0.4,
+     "shop": 0.3,
+     "story": 0.25,
+     "tasks": 0.4
     },
-    "dislikes": [
-     "forced_learning"
-    ],
-    "pace": 1.0,
-    "interrupt": 0.2,
-    "frustration": 0.3,
-    "goal": null
+    "dislikes": [],
+    "pace": 1.1,
+    "interrupt": 0.15,
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 120
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0.6,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.5,
+    "pet": 0.4,
+    "friend": 0.3,
+    "merchant": 0.3,
+    "grade": 0.2
    },
    "friends": [
     "sim03",
@@ -1091,7 +950,8 @@
    ],
    "shareDevice": null,
    "personality": "調皮、熬夜偷玩",
-   "habit": "晚上躲在被子裡玩小遊戲，手機被沒收三天後興趣下降"
+   "habit": "最愛小遊戲和打字，單字做完就去玩",
+   "levels": null
   },
   {
    "id": "sim08",
@@ -1103,35 +963,41 @@
    "declared": 4,
    "startDay": 0,
    "english": {
-    "grade": 5.0,
-    "readZh": 0.95,
-    "typing": 0.6,
-    "learn": 0.1
+    "grade": 5.8,
+    "readZh": 1,
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.04
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "積極型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.0,
+    "k": 5,
+    "burst": 0.2,
+    "gap": 45,
     "sess": [
-     12,
-     0.5
+     14,
+     0.45
     ],
     "mara": [
-     0.03,
-     45
+     0.04,
+     40
     ],
-    "M0": 0.75,
-    "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
-    "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "M0": 1.0,
+    "N0": 0.3,
+    "half": 6,
+    "gain": 0.35,
+    "loss": 0.06,
+    "quit": 0.1,
+    "qd": 7,
+    "revive": 0.4,
+    "bore": 0.997,
+    "maxN": 5,
+    "arch": "keen"
    },
    "life": {
     "weekday": [
@@ -1183,32 +1049,41 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "typo": 0.9,
+     "practice": 0.8,
+     "typo": 0.6,
      "grade": 0.7,
-     "story": 0.3,
-     "tasks": 0.5
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "music",
      "cat_mess"
     ],
-    "pace": 1.1,
+    "pace": 0.97,
     "interrupt": 0.05,
-    "frustration": 0.4,
-    "goal": "daily"
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.97,
+    "gradeP": 0.69,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 1,
-    "task": 0.6,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0.5
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "自律、在意連續天數",
-   "habit": "用家裡電腦，固定做每日單字＋Meow Typo，第一件事是關音樂"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim09",
@@ -1220,35 +1095,41 @@
    "declared": 5,
    "startDay": 0,
    "english": {
-    "grade": 4.0,
-    "readZh": 0.85,
-    "typing": 0.5,
-    "learn": 0.07
+    "grade": 5.6,
+    "readZh": 1,
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.05
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     12,
-     0.5
+     13,
+     0.4
     ],
     "mara": [
      0.03,
-     45
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
+    "half": 6,
+    "gain": 0.3,
+    "loss": 0.08,
     "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -1299,28 +1180,37 @@
    },
    "play": {
     "prefs": {
-     "social": 1,
-     "daily": 0.5,
+     "daily": 0.75,
+     "social": 0.8,
      "mini": 0.5,
-     "cat": 0.3,
-     "tasks": 0.5
+     "practice": 0.45,
+     "typo": 0.4,
+     "story": 0.4,
+     "cat": 0.4,
+     "tasks": 0.7,
+     "gacha": 0.4,
+     "contest": 0.5
     },
     "dislikes": [
      "lose_rank",
      "waiting_friend"
     ],
-    "pace": 1.0,
+    "pace": 1.1,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.85,
+    "gradeP": 0.48,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0.4,
-    "task": 0.5,
-    "pet": 0,
+    "streak": 0.7,
+    "task": 0.7,
+    "pet": 0.4,
     "friend": 1,
-    "merchant": 0,
-    "grade": 0
+    "merchant": 0.4,
+    "grade": 0.4
    },
    "friends": [
     "sim03",
@@ -1329,7 +1219,8 @@
    ],
    "shareDevice": null,
    "personality": "愛比較、喜歡團體",
-   "habit": "看排行榜、拜訪同學房間幫忙，沒人回應會很快離開"
+   "habit": "愛看排行榜和任務進度，做完任務才安心",
+   "levels": null
   },
   {
    "id": "sim10",
@@ -1339,37 +1230,43 @@
    "lang": "zh-TW",
    "device": "tablet",
    "declared": 5,
-   "startDay": 1,
+   "startDay": 0,
    "english": {
-    "grade": 6.0,
-    "readZh": 0.95,
-    "typing": 0.6,
-    "learn": 0.08
+    "grade": 6.8,
+    "readZh": 1,
+    "typing": 0.9,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.04
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 0.8,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     50,
-     0.5
+     16.25,
+     0.4
     ],
     "mara": [
-     0.3,
-     120
+     0.03,
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 4,
-    "gain": 0.15,
+    "half": 6,
+    "gain": 0.3,
     "loss": 0.08,
-    "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -1415,28 +1312,37 @@
    },
    "play": {
     "prefs": {
-     "music": 1,
-     "decor": 0.7,
+     "daily": 0.7,
+     "music": 0.9,
+     "practice": 0.5,
+     "story": 0.5,
+     "typo": 0.3,
      "cat": 0.4,
-     "daily": 0.3,
-     "social": 0.3
+     "decor": 0.4,
+     "shop": 0.3,
+     "tasks": 0.4,
+     "piano": 0.3
     },
     "dislikes": [
      "music_interrupt",
      "lyrics_cover"
     ],
-    "pace": 1.0,
+    "pace": 0.97,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.8,
+    "gradeP": 0.47,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0.5,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.7,
+    "task": 0.4,
+    "pet": 0.4,
+    "friend": 0.1,
+    "merchant": 0.4,
+    "grade": 0.3
    },
    "friends": [
     "sim14",
@@ -1444,7 +1350,8 @@
    ],
    "shareDevice": null,
    "personality": "浪漫、愛聽日文歌",
-   "habit": "開著歌詞聽音樂一兩個小時，邊慢慢佈置"
+   "habit": "開著音樂邊聽邊學，做完單字再做別的",
+   "levels": null
   },
   {
    "id": "sim11",
@@ -1456,35 +1363,41 @@
    "declared": 6,
    "startDay": 0,
    "english": {
-    "grade": 5.0,
-    "readZh": 0.9,
-    "typing": 0.55,
-    "learn": 0.08
+    "grade": 6.6,
+    "readZh": 1,
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.05
    },
    "engagement": {
-    "arch": "burnout",
     "label": "三分鐘熱度型",
-    "bore": 0.72,
-    "lam": 2.2,
-    "k": 2,
-    "burst": 0.35,
-    "gap": 45,
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.6,
+    "k": 3,
+    "burst": 0.25,
+    "gap": 40,
     "sess": [
-     25,
-     0.6
+     15,
+     0.5
     ],
     "mara": [
-     0.15,
-     70
+     0.05,
+     40
     ],
-    "M0": 1,
-    "N0": 1,
-    "half": 1.6,
-    "gain": 0.05,
-    "loss": 0.2,
-    "quit": 0.18,
-    "qd": 2,
-    "revive": 0.06
+    "M0": 1.05,
+    "N0": 0.45,
+    "half": 3,
+    "gain": 0.15,
+    "loss": 0.15,
+    "quit": 0.36,
+    "qd": 3,
+    "revive": 0.1,
+    "bore": 0.8,
+    "maxN": 4,
+    "arch": "fading"
    },
    "life": {
     "weekday": [
@@ -1536,12 +1449,14 @@
    "play": {
     "prefs": {
      "daily": 0.6,
-     "mini": 0.8,
-     "cat": 0.6,
-     "typo": 0.4,
-     "grade": 0.4,
-     "decor": 0.4,
-     "social": 0.3
+     "mini": 1,
+     "typo": 0.6,
+     "practice": 0.35,
+     "gacha": 0.6,
+     "cat": 0.4,
+     "shop": 0.3,
+     "story": 0.25,
+     "tasks": 0.4
     },
     "dislikes": [
      "repeat"
@@ -1549,20 +1464,25 @@
     "pace": 1.0,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.75,
+    "gradeP": 0.46,
+    "leaveAfterGoal": 0.2,
+    "cap": 120
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0.2,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.5,
+    "pet": 0.4,
+    "friend": 0.3,
+    "merchant": 0.3,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": null,
    "personality": "三分鐘熱度",
-   "habit": "前兩天什麼都試、玩很久，之後興趣快速下降，第二週可能回來一次"
+   "habit": "最愛小遊戲和打字，單字做完就去玩",
+   "levels": null
   },
   {
    "id": "sim12",
@@ -1574,35 +1494,41 @@
    "declared": 6,
    "startDay": 0,
    "english": {
-    "grade": 7.5,
+    "grade": 7.8,
     "readZh": 1,
-    "typing": 0.75,
-    "learn": 0.12
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.04
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "積極型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.0,
+    "k": 5,
+    "burst": 0.2,
+    "gap": 45,
     "sess": [
-     12,
-     0.5
+     14,
+     0.45
     ],
     "mara": [
-     0.03,
-     45
+     0.04,
+     40
     ],
-    "M0": 0.75,
-    "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
-    "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "M0": 1.0,
+    "N0": 0.3,
+    "half": 6,
+    "gain": 0.35,
+    "loss": 0.06,
+    "quit": 0.1,
+    "qd": 7,
+    "revive": 0.4,
+    "bore": 0.997,
+    "maxN": 5,
+    "arch": "keen"
    },
    "life": {
     "weekday": [
@@ -1653,32 +1579,41 @@
    },
    "play": {
     "prefs": {
-     "grade": 1,
-     "daily": 0.9,
-     "story": 0.8,
+     "daily": 1,
+     "practice": 0.8,
      "typo": 0.6,
-     "tasks": 0.5
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "too_easy"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": "grade"
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.98,
+    "gradeP": 0.69,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 0.6,
-    "task": 0.5,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 1
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "資優、好奇",
-   "habit": "每天做程度小測看有沒有進步，把商人故事讀完"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim13",
@@ -1690,35 +1625,41 @@
    "declared": 7,
    "startDay": 0,
    "english": {
-    "grade": 5.5,
+    "grade": 6.6,
     "readZh": 1,
-    "typing": 0.6,
-    "learn": 0.05
+    "typing": 0.92,
+    "learn": 0.04,
+    "enc": 0.86,
+    "ret": 0.75,
+    "slip": 0.045
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 1.7,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     40,
-     0.6
+     13,
+     0.4
     ],
     "mara": [
-     0.3,
-     150
+     0.03,
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 4,
-    "gain": 0.18,
+    "half": 6,
+    "gain": 0.3,
     "loss": 0.08,
-    "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -1769,34 +1710,43 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.6,
      "mini": 1,
-     "social": 0.4,
-     "typo": 0.15,
-     "daily": 0.1
+     "typo": 0.6,
+     "practice": 0.35,
+     "gacha": 0.6,
+     "cat": 0.4,
+     "shop": 0.3,
+     "story": 0.25,
+     "tasks": 0.4
     },
     "dislikes": [
-     "learning_tasks",
      "nagging"
     ],
     "pace": 1.0,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.65,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0.3,
-    "pet": 0,
-    "friend": 0.4,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.7,
+    "task": 0.5,
+    "pet": 0.4,
+    "friend": 0.3,
+    "merchant": 0.3,
+    "grade": 0.2
    },
    "friends": [
     "sim14"
    ],
    "shareDevice": null,
    "personality": "電玩咖",
-   "habit": "只刷彈珠台、販賣機、迷宮的高分；任務獎勵高才勉強做一次每日單字"
+   "habit": "最愛小遊戲和打字，單字做完就去玩",
+   "levels": null
   },
   {
    "id": "sim14",
@@ -1808,35 +1758,41 @@
    "declared": 7,
    "startDay": 0,
    "english": {
-    "grade": 7.0,
+    "grade": 8.8,
     "readZh": 1,
-    "typing": 0.7,
-    "learn": 0.08
+    "typing": 0.9,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "snacker",
     "label": "短頻多次型",
-    "bore": 0.98,
-    "lam": 5,
-    "k": 2.5,
-    "burst": 0.45,
+    "show": 0.88,
+    "showWe": 0.88,
+    "lam": 1.9,
+    "k": 3,
+    "burst": 0.35,
     "gap": 35,
     "sess": [
-     2.5,
-     0.6
+     6,
+     0.45
     ],
     "mara": [
      0.02,
-     25
+     20
     ],
-    "M0": 0.7,
+    "M0": 0.85,
     "N0": 0.3,
-    "half": 3,
-    "gain": 0.2,
+    "half": 5,
+    "gain": 0.28,
     "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.3,
+    "bore": 0.99,
+    "maxN": 6,
+    "arch": "snack"
    },
    "life": {
     "weekday": [
@@ -1886,27 +1842,36 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "cat": 1,
-     "social": 0.7,
-     "decor": 0.4,
-     "photo": 0.5,
-     "daily": 0.35
+     "toys": 0.8,
+     "practice": 0.3,
+     "typo": 0.3,
+     "story": 0.4,
+     "shop": 0.4,
+     "decor": 0.3,
+     "mini": 0.3,
+     "tasks": 0.4
     },
     "dislikes": [
      "pet_sick"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.8,
+    "gradeP": 0.47,
+    "leaveAfterGoal": 0.2,
+    "cap": 80
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0.7,
-    "friend": 0.9,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.4,
+    "pet": 1,
+    "friend": 0.2,
+    "merchant": 0.4,
+    "grade": 0.2
    },
    "friends": [
     "sim10",
@@ -1915,7 +1880,8 @@
    ],
    "shareDevice": null,
    "personality": "愛分享、愛拍照",
-   "habit": "一天開很多次看貓、拍照、看好友動態，每次一兩分鐘"
+   "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
+   "levels": null
   },
   {
    "id": "sim15",
@@ -1927,35 +1893,41 @@
    "declared": 8,
    "startDay": 0,
    "english": {
-    "grade": 6.5,
+    "grade": 8.6,
     "readZh": 1,
-    "typing": 0.65,
-    "learn": 0.07
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "goal",
-    "label": "任務導向短打型",
-    "bore": 0.99,
-    "lam": 1.2,
-    "k": 5,
-    "burst": 0.05,
-    "gap": 60,
+    "label": "忙碌型",
+    "show": 0.75,
+    "showWe": 0.65,
+    "lam": 0.5,
+    "k": 4,
+    "burst": 0.1,
+    "gap": 90,
     "sess": [
-     5,
-     0.35
+     7,
+     0.4
     ],
     "mara": [
-     0,
-     0
+     0.01,
+     20
     ],
-    "M0": 0.8,
-    "N0": 0.1,
-    "half": 3,
-    "gain": 0.25,
-    "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "M0": 0.85,
+    "N0": 0.2,
+    "half": 5,
+    "gain": 0.28,
+    "loss": 0.08,
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.3,
+    "bore": 0.992,
+    "maxN": 3,
+    "arch": "busy"
    },
    "life": {
     "weekday": [
@@ -2013,8 +1985,14 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "grade": 0.3,
-     "cat": 0.15
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "long_activity"
@@ -2022,20 +2000,25 @@
     "pace": 1.0,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": "daily"
+    "goal": null,
+    "dilig": 0.95,
+    "gradeP": 0.68,
+    "leaveAfterGoal": 0.2,
+    "cap": 60
    },
    "triggers": {
-    "streak": 0.7,
-    "task": 0.9,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "疲倦的補習生",
-   "habit": "回家只花 5 分鐘把每日單字做完就關掉"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim16",
@@ -2047,35 +2030,41 @@
    "declared": 8,
    "startDay": 0,
    "english": {
-    "grade": 9.0,
+    "grade": 9.8,
     "readZh": 1,
-    "typing": 0.8,
-    "learn": 0.1
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 1.5,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "積極型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.0,
+    "k": 5,
+    "burst": 0.2,
+    "gap": 45,
     "sess": [
-     75,
-     0.5
+     17.5,
+     0.45
     ],
     "mara": [
-     0.2,
-     160
+     0.04,
+     40
     ],
-    "M0": 0.75,
-    "N0": 0.25,
-    "half": 4,
-    "gain": 0.2,
-    "loss": 0.08,
+    "M0": 1.0,
+    "N0": 0.3,
+    "half": 6,
+    "gain": 0.35,
+    "loss": 0.06,
     "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "qd": 7,
+    "revive": 0.4,
+    "bore": 0.997,
+    "maxN": 5,
+    "arch": "keen"
    },
    "life": {
     "weekday": [
@@ -2126,31 +2115,41 @@
    },
    "play": {
     "prefs": {
-     "focus": 1,
-     "music": 0.8,
-     "daily": 0.6,
-     "typo": 0.3
+     "daily": 0.9,
+     "focus": 0.7,
+     "music": 0.6,
+     "practice": 0.8,
+     "typo": 0.5,
+     "grade": 0.6,
+     "story": 0.5,
+     "tasks": 0.5,
+     "cat": 0.2
     },
     "dislikes": [
      "notifications"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.9,
+    "gradeP": 0.62,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 0.4,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.8,
+    "task": 0.7,
+    "pet": 0.2,
+    "friend": 0.1,
+    "merchant": 0.3,
+    "grade": 0.6
    },
    "friends": [],
    "shareDevice": null,
    "personality": "專注型學生",
-   "habit": "讀書時開番茄鐘＋音樂兩三小時，休息時做一次每日單字"
+   "habit": "把遊戲當讀書計時器，休息時做單字",
+   "levels": null
   },
   {
    "id": "sim17",
@@ -2162,35 +2161,41 @@
    "declared": 9,
    "startDay": 0,
    "english": {
-    "grade": 8.0,
+    "grade": 9.6,
     "readZh": 1,
-    "typing": 0.75,
-    "learn": 0.1
+    "typing": 0.95,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "積極型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.0,
+    "k": 5,
+    "burst": 0.2,
+    "gap": 45,
     "sess": [
-     30,
-     0.4
+     14,
+     0.45
     ],
     "mara": [
-     0.03,
-     45
+     0.04,
+     40
     ],
-    "M0": 0.75,
-    "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
-    "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "M0": 1.0,
+    "N0": 0.3,
+    "half": 6,
+    "gain": 0.35,
+    "loss": 0.06,
+    "quit": 0.1,
+    "qd": 7,
+    "revive": 0.4,
+    "bore": 0.997,
+    "maxN": 5,
+    "arch": "keen"
    },
    "life": {
     "weekday": [
@@ -2253,30 +2258,38 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "practice": 1,
-     "typo": 0.8,
-     "grade": 0.5
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
-    "dislikes": [
-     "gamification"
-    ],
+    "dislikes": [],
     "pace": 1.0,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.97,
+    "gradeP": 0.69,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 0.6,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0.5
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "會考衝刺、刷題",
-   "habit": "只勾 L1、L2，一直刷自由練習與 Meow Typo 困難模式"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim18",
@@ -2288,35 +2301,41 @@
    "declared": 9,
    "startDay": 0,
    "english": {
-    "grade": 10.0,
+    "grade": 10.8,
     "readZh": 1,
-    "typing": 0.8,
-    "learn": 0.1
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 0.9,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     110,
-     0.45
+     16.25,
+     0.4
     ],
     "mara": [
-     0.3,
-     200
+     0.03,
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 4,
-    "gain": 0.15,
+    "half": 6,
+    "gain": 0.3,
     "loss": 0.08,
-    "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -2367,30 +2386,42 @@
    },
    "play": {
     "prefs": {
-     "music": 1,
-     "decor": 0.2,
-     "cat": 0.15
+     "daily": 0.7,
+     "music": 0.9,
+     "practice": 0.5,
+     "story": 0.5,
+     "typo": 0.3,
+     "cat": 0.4,
+     "decor": 0.4,
+     "shop": 0.3,
+     "tasks": 0.4,
+     "piano": 0.3
     },
     "dislikes": [
      "popups"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.02,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.75,
+    "gradeP": 0.46,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.7,
+    "task": 0.4,
+    "pet": 0.4,
+    "friend": 0.1,
+    "merchant": 0.4,
+    "grade": 0.3
    },
    "friends": [],
    "shareDevice": null,
    "personality": "需要背景音樂才能讀書",
-   "habit": "開著遊戲聽 lofi 兩三小時，幾乎不碰畫面"
+   "habit": "開著音樂邊聽邊學，做完單字再做別的",
+   "levels": null
   },
   {
    "id": "sim19",
@@ -2402,36 +2433,43 @@
    "declared": 10,
    "startDay": 0,
    "english": {
-    "grade": 9.0,
+    "grade": 10.6,
     "readZh": 1,
-    "typing": 0.75,
-    "learn": 0.08
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "weekend",
-    "label": "週末型",
-    "bore": 0.99,
-    "lam": 0.35,
-    "wkend": 4.0,
-    "k": 1.5,
-    "burst": 0.2,
+    "label": "假日型",
+    "show": 0.4,
+    "showWe": 0.97,
+    "showWd": 1,
+    "lam": 0.45,
+    "wkend": 2.6,
+    "k": 3,
+    "burst": 0.15,
     "gap": 60,
     "sess": [
-     30,
-     0.6
+     12,
+     0.5
     ],
     "mara": [
-     0.1,
-     90
+     0.05,
+     40
     ],
-    "M0": 0.7,
-    "N0": 0.2,
-    "half": 4,
-    "gain": 0.1,
-    "loss": 0.03,
-    "quit": 0.08,
+    "M0": 0.85,
+    "N0": 0.25,
+    "half": 6,
+    "gain": 0.25,
+    "loss": 0.06,
+    "quit": 0.1,
     "qd": 8,
-    "revive": 0.15
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "weekend"
    },
    "life": {
     "weekday": [
@@ -2482,11 +2520,15 @@
    },
    "play": {
     "prefs": {
-     "mini": 0.8,
-     "social": 0.5,
-     "cat": 0.4,
+     "daily": 0.6,
+     "mini": 1,
+     "typo": 0.6,
+     "practice": 0.35,
      "gacha": 0.6,
-     "daily": 0.3
+     "cat": 0.4,
+     "shop": 0.3,
+     "story": 0.25,
+     "tasks": 0.4
     },
     "dislikes": [
      "weekday_disturb"
@@ -2494,15 +2536,19 @@
     "pace": 1.0,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0.4,
-    "merchant": 0.4,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.5,
+    "pet": 0.4,
+    "friend": 0.3,
+    "merchant": 0.3,
+    "grade": 0.2
    },
    "friends": [
     "sim21",
@@ -2510,7 +2556,8 @@
    ],
    "shareDevice": null,
    "personality": "隨性、週末型",
-   "habit": "平日幾乎不上，週末一次玩很久，扭蛋、小遊戲、看排行榜"
+   "habit": "最愛小遊戲和打字，單字做完就去玩",
+   "levels": null
   },
   {
    "id": "sim20",
@@ -2522,35 +2569,41 @@
    "declared": 10,
    "startDay": 0,
    "english": {
-    "grade": 11.0,
+    "grade": 11.8,
     "readZh": 1,
-    "typing": 0.9,
-    "learn": 0.1
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     15,
-     0.35
+     13,
+     0.4
     ],
     "mara": [
      0.03,
-     45
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
+    "half": 6,
+    "gain": 0.3,
+    "loss": 0.08,
     "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -2591,31 +2644,41 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "story": 0.8,
-     "grade": 0.6,
-     "practice": 0.6
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "minigames",
      "cat_sound"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": "daily"
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.97,
+    "gradeP": 0.69,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0.7,
-    "task": 0.6,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "學測導向、效率派",
-   "habit": "勾 L3–L6，做每日單字和故事，討厭不相關的玩法"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim21",
@@ -2627,35 +2690,41 @@
    "declared": 11,
    "startDay": 0,
    "english": {
-    "grade": 10.0,
+    "grade": 11.6,
     "readZh": 1,
-    "typing": 0.8,
-    "learn": 0.07
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "snacker",
     "label": "短頻多次型",
-    "bore": 0.98,
-    "lam": 4.5,
-    "k": 2.5,
-    "burst": 0.45,
+    "show": 0.88,
+    "showWe": 0.88,
+    "lam": 1.9,
+    "k": 3,
+    "burst": 0.35,
     "gap": 35,
     "sess": [
-     3.5,
-     0.6
+     6,
+     0.45
     ],
     "mara": [
      0.02,
-     25
+     20
     ],
-    "M0": 0.7,
+    "M0": 0.85,
     "N0": 0.3,
-    "half": 3,
-    "gain": 0.2,
+    "half": 5,
+    "gain": 0.28,
     "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.3,
+    "bore": 0.99,
+    "maxN": 6,
+    "arch": "snack"
    },
    "life": {
     "weekday": [
@@ -2705,10 +2774,16 @@
    },
    "play": {
     "prefs": {
-     "social": 1,
+     "daily": 0.75,
+     "social": 0.8,
      "mini": 0.5,
-     "daily": 0.5,
-     "tasks": 0.6
+     "practice": 0.45,
+     "typo": 0.4,
+     "story": 0.4,
+     "cat": 0.4,
+     "tasks": 0.7,
+     "gacha": 0.4,
+     "contest": 0.5
     },
     "dislikes": [
      "playing_alone"
@@ -2716,15 +2791,19 @@
     "pace": 1.0,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.85,
+    "gradeP": 0.48,
+    "leaveAfterGoal": 0.2,
+    "cap": 80
    },
    "triggers": {
-    "streak": 0,
-    "task": 0.6,
-    "pet": 0,
+    "streak": 0.6,
+    "task": 0.7,
+    "pet": 0.4,
     "friend": 1,
-    "merchant": 0,
-    "grade": 0
+    "merchant": 0.4,
+    "grade": 0.4
    },
    "friends": [
     "sim19",
@@ -2733,7 +2812,8 @@
    ],
    "shareDevice": null,
    "personality": "團體王",
-   "habit": "一天開好幾次看團隊進度、邀好友、搶排行榜第一"
+   "habit": "愛看排行榜和任務進度，做完任務才安心",
+   "levels": null
   },
   {
    "id": "sim22",
@@ -2745,35 +2825,41 @@
    "declared": 11,
    "startDay": 0,
    "english": {
-    "grade": 6.0,
+    "grade": 10.6,
     "readZh": 1,
-    "typing": 0.55,
-    "learn": 0.05
+    "typing": 0.84,
+    "learn": 0.04,
+    "enc": 0.86,
+    "ret": 0.75,
+    "slip": 0.045
    },
    "engagement": {
-    "arch": "sporadic",
-    "label": "幾天一次型",
-    "bore": 0.98,
-    "lam": 0.4,
-    "k": 0.8,
+    "label": "想到才玩型",
+    "show": 0.45,
+    "showWe": 0.6,
+    "lam": 0.3,
+    "k": 1.5,
     "burst": 0.15,
     "gap": 60,
     "sess": [
-     15,
-     0.7
+     10,
+     0.55
     ],
     "mara": [
-     0.05,
-     50
+     0.03,
+     30
     ],
-    "M0": 0.6,
-    "N0": 0.2,
-    "half": 3,
-    "gain": 0.08,
-    "loss": 0.04,
-    "quit": 0.08,
-    "qd": 7,
-    "revive": 0.15
+    "M0": 0.75,
+    "N0": 0.25,
+    "half": 5,
+    "gain": 0.2,
+    "loss": 0.1,
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.25,
+    "bore": 0.985,
+    "maxN": 3,
+    "arch": "casual"
    },
    "life": {
     "weekday": [
@@ -2813,27 +2899,34 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "cat": 1,
-     "decor": 0.8,
-     "music": 0.4,
-     "daily": 0.08
+     "toys": 0.8,
+     "practice": 0.3,
+     "typo": 0.3,
+     "story": 0.4,
+     "shop": 0.4,
+     "decor": 0.3,
+     "mini": 0.3,
+     "tasks": 0.4
     },
-    "dislikes": [
-     "quiz",
-     "show_grade"
-    ],
+    "dislikes": [],
     "pace": 1.0,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.55,
+    "gradeP": 0.43,
+    "leaveAfterGoal": 0.2,
+    "cap": 70
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0.6,
-    "friend": 0.3,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.4,
+    "pet": 1,
+    "friend": 0.2,
+    "merchant": 0.4,
+    "grade": 0.2
    },
    "friends": [
     "sim10",
@@ -2841,7 +2934,8 @@
    ],
    "shareDevice": null,
    "personality": "英文自信低",
-   "habit": "幾天才上一次，只養貓和佈置，會把名片程度顯示關掉"
+   "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
+   "levels": null
   },
   {
    "id": "sim23",
@@ -2853,35 +2947,41 @@
    "declared": 12,
    "startDay": 0,
    "english": {
-    "grade": 12.0,
+    "grade": 13,
     "readZh": 1,
-    "typing": 0.9,
-    "learn": 0.08
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "積極型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.0,
+    "k": 5,
+    "burst": 0.2,
+    "gap": 45,
     "sess": [
-     35,
-     0.5
+     17.5,
+     0.45
     ],
     "mara": [
-     0.03,
-     45
+     0.04,
+     40
     ],
-    "M0": 0.75,
-    "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
-    "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "M0": 1.0,
+    "N0": 0.3,
+    "half": 6,
+    "gain": 0.35,
+    "loss": 0.06,
+    "quit": 0.1,
+    "qd": 7,
+    "revive": 0.4,
+    "bore": 0.997,
+    "maxN": 5,
+    "arch": "keen"
    },
    "life": {
     "weekday": [
@@ -2932,31 +3032,41 @@
    },
    "play": {
     "prefs": {
-     "focus": 0.9,
-     "daily": 0.8,
-     "practice": 0.7,
-     "grade": 0.3
+     "daily": 0.9,
+     "focus": 0.7,
+     "music": 0.6,
+     "practice": 0.8,
+     "typo": 0.5,
+     "grade": 0.6,
+     "story": 0.5,
+     "tasks": 0.5,
+     "cat": 0.2
     },
     "dislikes": [
      "animations"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.92,
+    "gradeP": 0.63,
+    "leaveAfterGoal": 0.2,
+    "cap": 110
    },
    "triggers": {
-    "streak": 0.5,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.8,
+    "task": 0.7,
+    "pet": 0.2,
+    "friend": 0.1,
+    "merchant": 0.3,
+    "grade": 0.6
    },
    "friends": [],
    "shareDevice": null,
    "personality": "夜貓衝刺型",
-   "habit": "凌晨讀書開番茄鐘，順便刷高難度單字"
+   "habit": "把遊戲當讀書計時器，休息時做單字",
+   "levels": null
   },
   {
    "id": "sim24",
@@ -2968,35 +3078,41 @@
    "declared": 12,
    "startDay": 0,
    "english": {
-    "grade": 11.5,
+    "grade": 13,
     "readZh": 1,
-    "typing": 0.85,
-    "learn": 0.08
+    "typing": 0.9,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "sporadic",
-    "label": "幾天一次型",
-    "bore": 0.98,
-    "lam": 0.55,
-    "k": 0.8,
+    "label": "想到才玩型",
+    "show": 0.45,
+    "showWe": 0.6,
+    "lam": 0.3,
+    "k": 1.5,
     "burst": 0.15,
     "gap": 60,
     "sess": [
-     15,
-     0.7
+     10,
+     0.55
     ],
     "mara": [
-     0.05,
-     50
+     0.03,
+     30
     ],
-    "M0": 0.6,
-    "N0": 0.2,
-    "half": 3,
-    "gain": 0.08,
-    "loss": 0.04,
-    "quit": 0.08,
-    "qd": 7,
-    "revive": 0.15
+    "M0": 0.75,
+    "N0": 0.25,
+    "half": 5,
+    "gain": 0.2,
+    "loss": 0.1,
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.25,
+    "bore": 0.985,
+    "maxN": 3,
+    "arch": "casual"
    },
    "life": {
     "weekday": [
@@ -3036,31 +3152,42 @@
    },
    "play": {
     "prefs": {
-     "music": 1,
-     "daily": 0.5,
+     "daily": 0.7,
+     "music": 0.9,
+     "practice": 0.5,
+     "story": 0.5,
+     "typo": 0.3,
      "cat": 0.4,
-     "decor": 0.3
+     "decor": 0.4,
+     "shop": 0.3,
+     "tasks": 0.4,
+     "piano": 0.3
     },
     "dislikes": [
      "bad_translation"
     ],
-    "pace": 1.0,
+    "pace": 0.88,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 70
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.5,
+    "task": 0.4,
+    "pet": 0.4,
+    "friend": 0.1,
+    "merchant": 0.4,
+    "grade": 0.3
    },
    "friends": [],
    "shareDevice": null,
    "personality": "哈日、用日文介面",
-   "habit": "邊聽歌邊做每日單字，看到不自然的日文會記下來"
+   "habit": "開著音樂邊聽邊學，做完單字再做別的",
+   "levels": null
   },
   {
    "id": "sim25",
@@ -3074,33 +3201,39 @@
    "english": {
     "grade": 11.0,
     "readZh": 1,
-    "typing": 0.85,
-    "learn": 0.05
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "comeback",
-    "label": "流失後回流型",
-    "bore": 0.9,
-    "lam": 1.3,
-    "k": 2,
-    "burst": 0.2,
-    "gap": 60,
+    "label": "三分鐘熱度型",
+    "show": 0.95,
+    "showWe": 0.95,
+    "lam": 1.6,
+    "k": 3,
+    "burst": 0.25,
+    "gap": 40,
     "sess": [
-     14,
-     0.6
+     15,
+     0.5
     ],
     "mara": [
      0.05,
-     45
+     40
     ],
-    "M0": 0.85,
-    "N0": 0.5,
-    "half": 2,
-    "gain": 0.1,
-    "loss": 0.25,
-    "quit": 0.2,
-    "qd": 2,
-    "revive": 0.22
+    "M0": 1.05,
+    "N0": 0.45,
+    "half": 3,
+    "gain": 0.15,
+    "loss": 0.15,
+    "quit": 0.36,
+    "qd": 3,
+    "revive": 0.1,
+    "bore": 0.8,
+    "maxN": 4,
+    "arch": "fading"
    },
    "life": {
     "weekday": [
@@ -3155,27 +3288,34 @@
    },
    "play": {
     "prefs": {
-     "decor": 0.8,
+     "daily": 0.7,
+     "decor": 0.9,
+     "shop": 0.9,
      "collect": 0.6,
-     "mini": 0.5,
+     "story": 0.6,
+     "practice": 0.35,
+     "typo": 0.25,
      "cat": 0.5,
-     "daily": 0.2
+     "gacha": 0.4,
+     "tasks": 0.5
     },
-    "dislikes": [
-     "forced_daily"
-    ],
-    "pace": 1.0,
+    "dislikes": [],
+    "pace": 0.95,
     "interrupt": 0.05,
     "frustration": 0.3,
-    "goal": null
+    "goal": null,
+    "dilig": 0.7,
+    "gradeP": 0.45,
+    "leaveAfterGoal": 0.2,
+    "cap": 120
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0.7,
-    "merchant": 0.6,
-    "grade": 0
+    "streak": 0.5,
+    "task": 0.6,
+    "pet": 0.5,
+    "friend": 0.2,
+    "merchant": 0.9,
+    "grade": 0.2
    },
    "friends": [
     "sim21",
@@ -3183,7 +3323,8 @@
    ],
    "shareDevice": null,
    "personality": "收集控、交換生",
-   "habit": "簡體介面，前幾天常上，期中報告後消失，被好友邀組隊才回來"
+   "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
+   "levels": null
   },
   {
    "id": "sim26",
@@ -3197,33 +3338,39 @@
    "english": {
     "grade": 10.0,
     "readZh": 1,
-    "typing": 0.85,
-    "learn": 0.06
+    "typing": 0.87,
+    "learn": 0.06,
+    "enc": 0.9,
+    "ret": 1,
+    "slip": 0.035
    },
    "engagement": {
-    "arch": "snacker",
-    "label": "短頻多次型",
-    "bore": 0.98,
-    "lam": 2.6,
-    "k": 2.5,
+    "label": "忙碌型",
+    "show": 0.75,
+    "showWe": 0.65,
+    "lam": 0.5,
+    "k": 4,
     "burst": 0.1,
-    "gap": 35,
+    "gap": 90,
     "sess": [
-     3,
-     0.45
+     7,
+     0.4
     ],
     "mara": [
-     0.02,
-     25
+     0.01,
+     20
     ],
-    "M0": 0.7,
-    "N0": 0.3,
-    "half": 3,
-    "gain": 0.2,
-    "loss": 0.1,
-    "quit": 0.1,
-    "qd": 4,
-    "revive": 0.1
+    "M0": 0.85,
+    "N0": 0.2,
+    "half": 5,
+    "gain": 0.28,
+    "loss": 0.08,
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.3,
+    "bore": 0.992,
+    "maxN": 3,
+    "arch": "busy"
    },
    "life": {
     "weekday": [
@@ -3286,29 +3433,40 @@
    "play": {
     "prefs": {
      "daily": 1,
-     "focus": 0.5,
-     "music": 0.4
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "long_activity"
     ],
-    "pace": 1.0,
-    "interrupt": 0.35,
+    "pace": 0.95,
+    "interrupt": 0.15,
     "frustration": 0.3,
-    "goal": "daily"
+    "goal": null,
+    "dilig": 0.92,
+    "gradeP": 0.67,
+    "leaveAfterGoal": 0.2,
+    "cap": 60
    },
    "triggers": {
-    "streak": 0.6,
-    "task": 0.5,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "通勤族、碎片時間",
-   "habit": "捷運上、午休、下班各開一下，每次三分鐘，常在測驗中途下車"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim27",
@@ -3322,33 +3480,39 @@
    "english": {
     "grade": 7.0,
     "readZh": 1,
-    "typing": 0.6,
-    "learn": 0.06
+    "typing": 0.92,
+    "learn": 0.04,
+    "enc": 0.86,
+    "ret": 0.75,
+    "slip": 0.045
    },
    "engagement": {
-    "arch": "sporadic",
-    "label": "幾天一次型",
-    "bore": 0.98,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
     "lam": 0.75,
-    "k": 0.8,
-    "burst": 0.15,
+    "k": 6,
+    "burst": 0.12,
     "gap": 60,
     "sess": [
-     25,
+     13,
      0.4
     ],
     "mara": [
-     0.05,
-     50
+     0.03,
+     35
     ],
-    "M0": 0.6,
-    "N0": 0.2,
-    "half": 3,
-    "gain": 0.08,
-    "loss": 0.04,
-    "quit": 0.08,
-    "qd": 7,
-    "revive": 0.15
+    "M0": 0.9,
+    "N0": 0.25,
+    "half": 6,
+    "gain": 0.3,
+    "loss": 0.08,
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -3389,31 +3553,41 @@
    },
    "play": {
     "prefs": {
-     "grade": 1,
-     "daily": 0.9,
-     "practice": 0.6,
-     "typo": 0.4
+     "daily": 1,
+     "practice": 0.8,
+     "typo": 0.6,
+     "grade": 0.7,
+     "story": 0.7,
+     "tasks": 0.6,
+     "cat": 0.25,
+     "shop": 0.2,
+     "mini": 0.15
     },
     "dislikes": [
      "childish"
     ],
-    "pace": 1.0,
+    "pace": 0.95,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.9,
+    "gradeP": 0.67,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0.8
+    "streak": 0.9,
+    "task": 0.8,
+    "pet": 0.3,
+    "friend": 0.1,
+    "merchant": 0.5,
+    "grade": 0.7
    },
    "friends": [],
    "shareDevice": null,
    "personality": "想重新學英文的中年人",
-   "habit": "想知道自己英文幾年級，熱情來得慢，兩三天上一次"
+   "habit": "把每日單字和小測當成固定功課，做完還會多練幾題",
+   "levels": null
   },
   {
    "id": "sim28",
@@ -3427,33 +3601,39 @@
    "english": {
     "grade": 6.0,
     "readZh": 1,
-    "typing": 0.5,
-    "learn": 0.04
+    "typing": 0.84,
+    "learn": 0.04,
+    "enc": 0.86,
+    "ret": 0.75,
+    "slip": 0.045
    },
    "engagement": {
-    "arch": "rare",
-    "label": "兩週一兩次型",
-    "bore": 0.99,
-    "lam": 0.12,
-    "k": 0.6,
-    "burst": 0.05,
+    "label": "想到才玩型",
+    "show": 0.45,
+    "showWe": 0.6,
+    "lam": 0.3,
+    "k": 1.5,
+    "burst": 0.15,
     "gap": 60,
     "sess": [
      10,
-     0.7
+     0.55
     ],
     "mara": [
-     0.05,
-     40
+     0.03,
+     30
     ],
-    "M0": 0.5,
-    "N0": 0.3,
-    "half": 2,
-    "gain": 0.05,
-    "loss": 0.03,
-    "quit": 0.05,
-    "qd": 10,
-    "revive": 0.1
+    "M0": 0.75,
+    "N0": 0.25,
+    "half": 5,
+    "gain": 0.2,
+    "loss": 0.1,
+    "quit": 0.12,
+    "qd": 5,
+    "revive": 0.25,
+    "bore": 0.985,
+    "maxN": 3,
+    "arch": "casual"
    },
    "life": {
     "weekday": [
@@ -3482,30 +3662,42 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "cat": 1,
+     "toys": 0.8,
+     "practice": 0.3,
+     "typo": 0.3,
+     "story": 0.4,
+     "shop": 0.4,
      "decor": 0.3,
-     "daily": 0.2
+     "mini": 0.3,
+     "tasks": 0.4
     },
     "dislikes": [
      "complex_ui"
     ],
-    "pace": 1.0,
+    "pace": 0.95,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.6,
+    "gradeP": 0.44,
+    "leaveAfterGoal": 0.2,
+    "cap": 70
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0.3,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "streak": 0.4,
+    "task": 0.4,
+    "pet": 1,
+    "friend": 0.2,
+    "merchant": 0.4,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": "sim01",
    "personality": "陪小孩的媽媽",
-   "habit": "兩週只自己登入一兩次，和女兒樂樂用同一台平板"
+   "habit": "為了貓每天上線，順手把今天的單字做完換飼料",
+   "levels": null
   },
   {
    "id": "sim29",
@@ -3519,33 +3711,39 @@
    "english": {
     "grade": 4.0,
     "readZh": 1,
-    "typing": 0.2,
-    "learn": 0.03
+    "typing": 0.72,
+    "learn": 0.04,
+    "enc": 0.76,
+    "ret": 0.64,
+    "slip": 0.07
    },
    "engagement": {
-    "arch": "daily",
-    "label": "黏著每日型",
-    "bore": 0.99,
-    "lam": 1.4,
-    "k": 4,
-    "burst": 0.15,
-    "gap": 90,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     20,
+     16.25,
      0.4
     ],
     "mara": [
      0.03,
-     45
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 3,
-    "gain": 0.22,
-    "loss": 0.12,
+    "half": 6,
+    "gain": 0.3,
+    "loss": 0.08,
     "quit": 0.12,
-    "qd": 4,
-    "revive": 0.08
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -3596,33 +3794,43 @@
    },
    "play": {
     "prefs": {
+     "daily": 0.7,
      "music": 0.9,
-     "piano": 0.6,
-     "decor": 0.5,
-     "cat": 0.5,
-     "daily": 0.4
+     "practice": 0.5,
+     "story": 0.5,
+     "typo": 0.3,
+     "cat": 0.4,
+     "decor": 0.4,
+     "shop": 0.3,
+     "tasks": 0.4,
+     "piano": 0.3
     },
     "dislikes": [
      "small_text",
      "miss_tap"
     ],
-    "pace": 2.2,
+    "pace": 1.8,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.45,
+    "goal": null,
+    "dilig": 0.85,
+    "gradeP": 0.48,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0.3,
-    "task": 0,
+    "streak": 0.7,
+    "task": 0.4,
     "pet": 0.4,
-    "friend": 0,
-    "merchant": 0,
-    "grade": 0
+    "friend": 0.1,
+    "merchant": 0.4,
+    "grade": 0.3
    },
    "friends": [],
    "shareDevice": null,
    "personality": "動作慢、很有耐心",
-   "habit": "早上九點聽老歌、彈鋼琴家具，點東西常點偏"
+   "habit": "開著音樂邊聽邊學，做完單字再做別的",
+   "levels": null
   },
   {
    "id": "sim30",
@@ -3632,37 +3840,43 @@
    "lang": "ja",
    "device": "desktop",
    "declared": 0,
-   "startDay": 1,
+   "startDay": 0,
    "english": {
     "grade": 11.5,
     "readZh": 1,
-    "typing": 0.9,
-    "learn": 0.05
+    "typing": 0.98,
+    "learn": 0.08,
+    "enc": 0.94,
+    "ret": 1.3,
+    "slip": 0.025
    },
    "engagement": {
-    "arch": "marathon",
-    "label": "長時間沉浸型",
-    "bore": 0.97,
-    "lam": 0.55,
-    "k": 2,
-    "burst": 0.1,
-    "gap": 120,
+    "label": "每天固定型",
+    "show": 0.87,
+    "showWe": 0.85,
+    "lam": 0.75,
+    "k": 6,
+    "burst": 0.12,
+    "gap": 60,
     "sess": [
-     55,
-     0.5
+     13,
+     0.4
     ],
     "mara": [
-     0.25,
-     170
+     0.03,
+     35
     ],
-    "M0": 0.75,
+    "M0": 0.9,
     "N0": 0.25,
-    "half": 4,
-    "gain": 0.15,
+    "half": 6,
+    "gain": 0.3,
     "loss": 0.08,
-    "quit": 0.1,
-    "qd": 5,
-    "revive": 0.08
+    "quit": 0.12,
+    "qd": 6,
+    "revive": 0.35,
+    "bore": 0.995,
+    "maxN": 4,
+    "arch": "steady"
    },
    "life": {
     "weekday": [
@@ -3713,32 +3927,235 @@
    },
    "play": {
     "prefs": {
-     "decor": 1,
-     "music": 0.7,
-     "photo": 0.6,
+     "daily": 0.7,
+     "decor": 0.9,
+     "shop": 0.9,
+     "collect": 0.6,
+     "story": 0.6,
+     "practice": 0.35,
+     "typo": 0.25,
      "cat": 0.5,
-     "mini": 0.2
+     "gacha": 0.4,
+     "tasks": 0.5
     },
     "dislikes": [
      "ui_covers_room"
     ],
-    "pace": 1.0,
+    "pace": 0.84,
     "interrupt": 0.05,
-    "frustration": 0.3,
-    "goal": null
+    "frustration": 0.2,
+    "goal": null,
+    "dilig": 0.75,
+    "gradeP": 0.46,
+    "leaveAfterGoal": 0.2,
+    "cap": 95
    },
    "triggers": {
-    "streak": 0,
-    "task": 0,
-    "pet": 0,
-    "friend": 0,
-    "merchant": 0.5,
-    "grade": 0
+    "streak": 0.7,
+    "task": 0.6,
+    "pet": 0.5,
+    "friend": 0.2,
+    "merchant": 0.9,
+    "grade": 0.2
    },
    "friends": [],
    "shareDevice": null,
    "personality": "夜貓、對畫面很挑剔",
-   "habit": "凌晨用日文介面精修房間、拍照，會注意介面有沒有擋到房間"
+   "habit": "喜歡佈置房間、逛商人，靠學單字存金幣買家具",
+   "levels": null
   }
- ]
+ ],
+ "archetypes": {
+  "steady": {
+   "label": "每天固定型",
+   "show": 0.87,
+   "showWe": 0.85,
+   "lam": 0.75,
+   "k": 6,
+   "burst": 0.12,
+   "gap": 60,
+   "sess": [
+    13,
+    0.4
+   ],
+   "mara": [
+    0.03,
+    35
+   ],
+   "M0": 0.9,
+   "N0": 0.25,
+   "half": 6,
+   "gain": 0.3,
+   "loss": 0.08,
+   "quit": 0.12,
+   "qd": 6,
+   "revive": 0.35,
+   "bore": 0.995,
+   "maxN": 4
+  },
+  "keen": {
+   "label": "積極型",
+   "show": 0.95,
+   "showWe": 0.95,
+   "lam": 1.0,
+   "k": 5,
+   "burst": 0.2,
+   "gap": 45,
+   "sess": [
+    14,
+    0.45
+   ],
+   "mara": [
+    0.04,
+    40
+   ],
+   "M0": 1.0,
+   "N0": 0.3,
+   "half": 6,
+   "gain": 0.35,
+   "loss": 0.06,
+   "quit": 0.1,
+   "qd": 7,
+   "revive": 0.4,
+   "bore": 0.997,
+   "maxN": 5
+  },
+  "snack": {
+   "label": "短頻多次型",
+   "show": 0.88,
+   "showWe": 0.88,
+   "lam": 1.9,
+   "k": 3,
+   "burst": 0.35,
+   "gap": 35,
+   "sess": [
+    6,
+    0.45
+   ],
+   "mara": [
+    0.02,
+    20
+   ],
+   "M0": 0.85,
+   "N0": 0.3,
+   "half": 5,
+   "gain": 0.28,
+   "loss": 0.1,
+   "quit": 0.12,
+   "qd": 5,
+   "revive": 0.3,
+   "bore": 0.99,
+   "maxN": 6
+  },
+  "weekend": {
+   "label": "假日型",
+   "show": 0.4,
+   "showWe": 0.97,
+   "showWd": 1,
+   "lam": 0.45,
+   "wkend": 2.6,
+   "k": 3,
+   "burst": 0.15,
+   "gap": 60,
+   "sess": [
+    12,
+    0.5
+   ],
+   "mara": [
+    0.05,
+    40
+   ],
+   "M0": 0.85,
+   "N0": 0.25,
+   "half": 6,
+   "gain": 0.25,
+   "loss": 0.06,
+   "quit": 0.1,
+   "qd": 8,
+   "revive": 0.35,
+   "bore": 0.995,
+   "maxN": 4
+  },
+  "fading": {
+   "label": "三分鐘熱度型",
+   "show": 0.95,
+   "showWe": 0.95,
+   "lam": 1.6,
+   "k": 3,
+   "burst": 0.25,
+   "gap": 40,
+   "sess": [
+    15,
+    0.5
+   ],
+   "mara": [
+    0.05,
+    40
+   ],
+   "M0": 1.05,
+   "N0": 0.45,
+   "half": 3,
+   "gain": 0.15,
+   "loss": 0.15,
+   "quit": 0.36,
+   "qd": 3,
+   "revive": 0.1,
+   "bore": 0.8,
+   "maxN": 4
+  },
+  "casual": {
+   "label": "想到才玩型",
+   "show": 0.45,
+   "showWe": 0.6,
+   "lam": 0.3,
+   "k": 1.5,
+   "burst": 0.15,
+   "gap": 60,
+   "sess": [
+    10,
+    0.55
+   ],
+   "mara": [
+    0.03,
+    30
+   ],
+   "M0": 0.75,
+   "N0": 0.25,
+   "half": 5,
+   "gain": 0.2,
+   "loss": 0.1,
+   "quit": 0.12,
+   "qd": 5,
+   "revive": 0.25,
+   "bore": 0.985,
+   "maxN": 3
+  },
+  "busy": {
+   "label": "忙碌型",
+   "show": 0.75,
+   "showWe": 0.65,
+   "lam": 0.5,
+   "k": 4,
+   "burst": 0.1,
+   "gap": 90,
+   "sess": [
+    7,
+    0.4
+   ],
+   "mara": [
+    0.01,
+    20
+   ],
+   "M0": 0.85,
+   "N0": 0.2,
+   "half": 5,
+   "gain": 0.28,
+   "loss": 0.08,
+   "quit": 0.12,
+   "qd": 6,
+   "revive": 0.3,
+   "bore": 0.992,
+   "maxN": 3
+  }
+ }
 }

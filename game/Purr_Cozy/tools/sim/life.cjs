@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 /* ============================================================
+   0.93.9「第三版行為」：30 位測試者都是來學英文的玩家，只是程度、勤勞度、喜歡的玩法不同。
+     - 出席：每個人有自己的「平常會來的機率」（people.json 的 engagement.show），投入程度低的時候才會下降
+     - 每次上線先做今天該做的（每日單字 → 領任務 → 程度小測），再依喜好做別的；音樂是邊聽邊玩，不會乾等
+     - 會玩所有學習入口：每日單字、重練、自由練習、程度小測、Meow Typo、商人知識卡與故事、升級測驗、程度挑戰賽、
+       房間需求換道具（need）、寵物訓練（train）、每日挑戰任務（chal）；也會買家具、抽扭蛋、照顧寵物、佈置
+     - 記憶模型：看過單字卡當下幾乎都記得，之後依每個人的記憶力遺忘；答對一次記更久、答錯會再看一次答案
+     - 每人每天作答有上限（play.cap，60–140 題），到了就只玩不學，不會一天做幾百題
+     - 電腦關機錯過的場次，開機後如果那個人今天還有空，會晚一點補上，不再整場丟掉
    呼嚕小窩：30 位測試者的「生活模擬」（0.92.48，取代 sim.cjs 的 --testers 擲骰模式）
    每個人是一個會變化的使用者，而不是固定機率：
      - 黏著度：動機 M（每次玩得開不開心會改變）、習慣 H（連續來會累積、不來會流失）、新鮮感 N（隨天數衰退）
@@ -59,7 +67,9 @@ function blocked(p, dow, minute) {
 const freeFor = (p, dow, minute, len) => { let m = 0; while (m < len && !blocked(p, dow, (minute + m) % 1440) && minute + m < 1440 + 120) m += 1; return m; };
 
 // ---------- one person's state ----------
-function newState(p) { const e = p.engagement; return { device: 'test-' + (p.shareDevice && p.id > p.shareDevice ? p.shareDevice : p.id) + '-' + Math.random().toString(36).slice(2, 8), M: e.M0, H: 0, N: e.N0, dormant: false, low: 0, streak: 0, lastPlay: -99, playedDays: 0, sessions: 0, minutes: 0, sat: [], mem: {}, theta: p.english.grade, grade: null, daily: {}, history: [] }; }
+function newState(p) { const e = p.engagement; return { v: 3, device: 'test-' + (p.shareDevice && p.id > p.shareDevice ? p.shareDevice : p.id) + '-' + Math.random().toString(36).slice(2, 8), M: e.M0, H: 0, N: e.N0, dormant: false, low: 0, streak: 0, lastPlay: -99, playedDays: 0, sessions: 0, minutes: 0, sat: [], mem: {}, theta: p.english.grade, grade: null, daily: {}, history: [] }; }
+// v3: states written by the older behaviour model start again with the new habits (memory of words, device and progress stay)
+function migrate(p, st) { if (st.v === 3) return false; const e = p.engagement; st.v = 3; st.M = e.M0; st.H = Math.max(st.H || 0, .35); st.dormant = false; st.low = 0; st.theta = p.english.grade; for (const w in st.mem) { const m = st.mem[w]; m.s = Math.max(m.s || 0, .6); m.d = Math.max(m.d || 0, 2); } return true; }
 function engagementOf(p, st, day) { const e = p.engagement; st.N = e.N0 * Math.pow(.5, day / e.half); return clamp(st.M * (.4 + .6 * st.H) + st.N, 0, 1.6); }
 
 // ---------- plan one day ----------
@@ -86,7 +96,9 @@ function planDay(p, st, day, date) {
   if (T.friend && chance(.35)) pull += .4 * T.friend;                           // 好友來拜訪、團隊進度
   mean += pull * e.lam * Math.min(1, E + .3) * factor;
  }
- let n = install ? 1 : Math.min(14, negbin(mean, e.k));
+ let n = install ? 1 : Math.min(e.maxN || 6, negbin(mean, e.k));
+ // v3: most testers come on a normal day; the chance drops only when their interest (E) has dropped
+ if (!install && !st.dormant && !n && e.show != null && chance(e.show * clamp(E / .55, .15, 1) * (weekend ? (e.showWe ?? 1) : (e.showWd ?? 1)) * Math.min(1.3, factor))) n = 1;
  const peaks = weekend ? p.life.weekend : p.life.weekday, tot = peaks.reduce((s, x) => s + x[2], 0);
  const pickStart = () => { for (let i = 0; i < 60; i++) { let r = rnd() * tot, pk = peaks[0]; for (const x of peaks) if ((r -= x[2]) <= 0) { pk = x; break; } const m = Math.round(((pk[0] + pk[1] * normal()) * 60 + 1440) % 1440); if (!blocked(p, dow, m)) return m; } return null; };
  const lengthOf = (first) => { let L = chance(e.mara[0]) ? lognormal(e.mara[1], .4) : lognormal(e.sess[0] * (.7 + .5 * Math.min(1.2, E)), e.sess[1]); if (first) L *= 1.5; return clamp(L, 1, 300); };
@@ -112,9 +124,9 @@ function endDay(p, st, day, played, sats) {
 }
 
 // ---------- inside a session: what to do next ----------
-const ALIAS = { piano: 'music', photo: 'cat', gacha: 'mini', collect: 'shop', story: 'merchant' };   // 商人故事 = visiting the weekly merchant
-const DWELL = { levelgate: 4, contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
-const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate'];
+const ALIAS = { piano: 'music', photo: 'cat', collect: 'shop', story: 'merchant' };   // 商人故事 = visiting the weekly merchant
+const DWELL = { need: 2, train: 2.5, chal: 3, redo: 3, gacha: 1, levelgate: 4, contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
+const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate', 'need', 'train', 'chal', 'redo'];
 // 0.92.49 程度挑戰賽: nobody is told to join. People who already like tests (程度小測, practice, spelling) are drawn to it,
 // people who dislike quizzes mostly ignore it, pure cat / music players almost never open it.
 function contestPull(p) { const P = p.play.prefs; if (P.contest != null) return P.contest; let x = .6 * (P.grade || 0) + .3 * (P.practice || 0) + .2 * (P.typo || 0) + .1 * (P.daily || 0) + .15 * (p.triggers.grade || 0); if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) x *= .2; if (p.play.dislikes.includes('too_easy')) x *= 1.3; return +x.toFixed(3); }
@@ -129,35 +141,60 @@ function gradePull(p) { const P = p.play.prefs, T = p.triggers, D = p.play.disli
 function prefsOf(p) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; if (a === 'merchant' || a === 'tasks' || a === 'grade') continue; w[a] = (w[a] || 0) + v; } w.look = w.look || .15;
  const c = contestPull(p); if (c > .02) w.contest = c; const m = merchantPull(p); if (m > .02) w.merchant = m; const t = tasksPull(p); if (t > .02) w.tasks = t; const g = gradePull(p); if (g > .02) w.grade = g; return w; }
 function nextActivity(p, st, ses, today) {
- const w = prefsOf(p), T = p.triggers, cand = [];
+ const P = p.play, T = p.triggers, w = prefsOf(p), cand = [], first = k => !ses.count[k];
+ const learnOK = (today.ans || 0) < (P.cap || 90), isLearn = a => LEARN.includes(a) || a === 'merchant';
+ // 0. a new player unpacks the moving boxes first (the placement test decides which words the game teaches)
+ if (today.placed === false && first('grade')) return 'grade';
+ // 1. what most players do first: today's words, then collect what is ready, then the small daily test
+ if (learnOK && !today.daily && first('daily') && chance(P.dilig ?? .8)) return 'daily';
+ if (today.claimable && first('tasks') && chance(.55 + .4 * (T.task || 0))) return 'tasks';
+ if (learnOK && today.daily && today.grade === false && first('grade') && chance(P.gradeP ?? .5)) return 'grade';
+ // 2. things the room offers right now
+ if (learnOK) { if (today.needs) w.need = .35 + .5 * (T.pet || 0); if (today.trainable) w.train = .25 + .4 * ((P.prefs.cat || 0) + (P.prefs.toys || 0)) / 2; if (today.chal) w.chal = .3 + .6 * (T.task || 0); if (today.daily) w.redo = .12 * (P.prefs.daily || 0) + .05; }
+ if (today.tickets) w.gacha = .5 + (P.prefs.gacha || 0);
  for (const [a, v] of Object.entries(w)) {
-  let x = v * Math.pow(.45, ses.count[a] || 0);
+  let x = v * Math.pow(a === 'need' || a === 'train' ? .6 : .45, ses.count[a] || 0);
+  if (!learnOK && isLearn(a)) continue;
+  if (a === 'gacha' && !today.tickets) continue;
   if (a === 'daily' && !today.daily) x *= 1 + 3 * Math.max(T.streak || 0, T.task || 0);
   if (a === 'grade' && !today.grade) x *= 1 + 3 * (T.grade || 0);
   if ((a === 'cat' || a === 'toys') && ses.elapsed < 1) x *= 1 + 2 * (T.pet || 0);
-  if (a === 'tasks' && today.claimable) x *= 3;
+  if (a === 'tasks' && today.claimable) x *= 3; else if (a === 'tasks' && (ses.count.tasks || 0) >= 1) x *= .1;
   if (a === 'tasks' && today.weekly) x *= 1.5;
-  if (a === 'merchant' && today.mNew != null) { if (today.mNew) x *= 1 + 2 * (T.merchant || 0) + (p.play.prefs.story || 0); else if (today.story) x *= 1.6; else x *= .3; }
+  if (a === 'merchant' && today.mNew != null) { if (today.mNew) x *= 1 + 2 * (T.merchant || 0) + (P.prefs.story || 0); else if (today.story) x *= 1.6; else x *= .3; }
   if (a === 'merchant' && (ses.count.merchant || 0) >= 1) x *= today.story ? .35 : .08;
-  if (a === 'grade' && today.grade) x *= .05; if (a === 'daily' && today.daily) x *= .15;
-  if (a === 'music' && ses.music) x *= .1;
-  if (a === 'contest' && today.ct) { const C = today.ct; if (C.mid) x *= 2.5; else if (C.over) x *= C.best >= 6 ? .03 : .3 * (1 - .6 * (p.play.frustration || .5)); }
+  if (a === 'grade' && today.grade) x *= .02; if (a === 'daily' && today.daily) x *= .02;
+  if (a === 'music' && ses.music) x *= .03;
+  if (a === 'focus' && (ses.count.focus || 0) >= 1) x *= .05;
+  if (a === 'contest' && today.ct) { const C = today.ct; if (C.mid) x *= 2.5; else if (C.over) x *= C.best >= 6 ? .03 : .3 * (1 - .6 * (P.frustration || .5)); }
   cand.push([a, x]);
  }
- const goal = p.play.goal; if (goal && !today[goal] && !ses.count[goal]) return goal;
  let r = rnd() * cand.reduce((s, c) => s + c[1], 0); for (const [a, x] of cand) if ((r -= x) <= 0) return a; return 'look';
 }
 // the chance this person answers a word right (3-parameter logistic on the grade scale, with memory)
 const OFF = { en2zh: 0, zh2en: .4, listen: .3, spell: .7, listenspell: 1 };
+// v3 memory: what the person knew before the game (grade θ against the word's grade) or what the game taught them,
+// whichever is stronger. A taught word is strong right away and fades with the person's own memory (m.d = days to fall to 37 %).
+function recall(st, w) { const m = st.mem[String(w).toLowerCase()]; return m ? m.s * Math.exp(-(Date.now() - m.t) / 864e5 / Math.max(.3, m.d)) : 0; }
 function answerChance(p, st, w, g, type) {
- const guess = type === 'spell' || type === 'listenspell' ? 0 : .25, b = (g || 8) + (OFF[type] ?? 0);
- let pr = 1 / (1 + Math.exp(-1.25 * (st.theta - b)));
- const m = st.mem[w]; if (m) pr = Math.max(pr, m.s * Math.exp(-(Date.now() - m.t) / 864e5 / Math.max(.5, m.d)));
- if ((type === 'en2zh' || type === 'zh2en') && p.english.readZh < 1) pr *= p.english.readZh;            // can't read the Chinese yet
- if (type === 'spell' || type === 'listenspell') pr *= p.english.typing;
- return guess + (1 - guess) * clamp(pr, 0, 1);
+ const E = p.english, typed = type === 'spell' || type === 'listenspell', b = (g || 8) + (OFF[type] ?? 0);
+ let know = Math.max(1 / (1 + Math.exp(-1.25 * (st.theta - b))), recall(st, w) * (typed ? .9 : 1) * (type === 'listen' ? .93 : 1));
+ if ((type === 'en2zh' || type === 'zh2en') && E.readZh < 1) know *= .6 + .4 * E.readZh;          // young children misread some of the Chinese
+ const slip = E.slip ?? .04;
+ if (typed) return clamp(know * Math.pow(E.typing, Math.max(1, String(w).length / 5)) * (1 - slip), 0, 1);   // every letter is a chance for a typo
+ const guess = .25 + .25 * know;                                                                       // half-known: one or two options can be ruled out
+ return clamp((know + (1 - know) * guess) * (1 - slip), 0, 1);
 }
-function learnWord(p, st, w, ok) { const m = st.mem[w] || (st.mem[w] = { s: 0, d: .5, t: Date.now() }); const r = p.english.learn * 5; m.s = clamp(m.s + (ok ? .25 : .15) * r * (1 - m.s), 0, 1); m.d = ok ? m.d * 1.8 : Math.max(.5, m.d * .6); m.t = Date.now(); st.theta += p.english.learn * .004 * (ok ? 1 : .5); }
+// how = 'card' (saw the word card), true (answered right), false (answered wrong and saw the answer)
+function learnWord(p, st, w, how) {
+ const k = String(w).toLowerCase(), E = p.english, m = st.mem[k] || (st.mem[k] = { s: 0, d: .4, t: Date.now() }), now = recall(st, k), ret = E.ret || 1;
+ if (how === 'card') { m.s = Math.max(now, clamp((E.enc ?? .9) * (.9 + .2 * rnd()), .4, .98)); m.d = Math.max(m.d, .8 * ret); }
+ else if (how) { m.s = clamp(now + .6 * (1 - now), .5, 1); m.d = Math.min(120, (m.d * 2.2 + 1.5) * ret); st.theta += (E.learn || .05) * .004; }
+ else { m.s = Math.max(now, .7 * (E.enc ?? .9)); m.d = Math.max(.6, m.d * .7); st.theta += (E.learn || .05) * .002; }
+ m.t = Date.now();
+}
+// how long someone looks at a question before answering (ms): faster when sure, slower when not; typing takes time per letter
+function thinkMs(p, pr, type, w) { const typed = type === 'spell' || type === 'listenspell', base = typed ? 2600 + 420 * String(w).length : type === 'listen' ? 3400 : 2400; return lognormal(base * p.play.pace * (pr < .55 ? 1.7 : pr < .8 ? 1.25 : 1), .4); }
 // satisfaction 0..1 from what happened
 function satisfaction(p, ses) {
  const liked = Object.entries(ses.mins).reduce((s, [a, m]) => s + m * ((prefsOf(p)[a] || 0) > .5 ? 1 : 0), 0) / Math.max(1, ses.elapsed);
@@ -182,12 +219,12 @@ function offlineSession(p, st, plan, today) {
    const n = Math.max(1, Math.round(d / (.25 * p.play.pace))); let wrongRun = 0;
    for (let i = 0; i < n; i++) { const L = levels[Math.floor(rnd() * levels.length)], [lo, hi] = LV_GRADE[L], g = between(lo, hi), type = a === 'typo' ? 'spell' : ['en2zh', 'zh2en', 'listen', 'spell'][Math.floor(rnd() * 4)];
     if (type === 'spell' && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) break; }
-    const ok = chance(answerChance(p, st, 'w' + Math.round(g * 10) + '_' + Math.floor(rnd() * 400), g, type)); ses.ans++; if (ok) { ses.right++; wrongRun = 0; } else if (++wrongRun >= 3 && chance(p.play.frustration)) { ses.frustration++; break; } }
+    const wk = 'w' + Math.round(g * 10) + '_' + Math.floor(rnd() * 400); if (!st.mem[wk] && a !== 'grade' && a !== 'contest' && a !== 'levelgate') learnWord(p, st, wk, 'card'); const ok = chance(answerChance(p, st, wk, g, type)); learnWord(p, st, wk, ok); ses.ans++; today.ans = (today.ans || 0) + 1; if (ok) { ses.right++; wrongRun = 0; } else if (++wrongRun >= 3 && chance(p.play.frustration)) { ses.frustration++; break; } }
    if (a === 'daily') { today.daily = true; ses.rewards += 50; } if (a === 'grade') { today.grade = true; ses.rewards += 10; st.grade = st.theta + normal() * .5; }
    if (p.play.dislikes.includes('quiz') || p.play.dislikes.includes('forced_learning') || p.play.dislikes.includes('learning_tasks')) ses.frustration += .5;
   } else ses.rewards += a === 'mini' ? 15 : a === 'cat' || a === 'toys' ? 5 : 0;
   ses.mins[a] = (ses.mins[a] || 0) + d; ses.elapsed += d; ses.acts.push(a);
-  if (p.play.goal && today[p.play.goal]) { ses.goalDone = true; if (chance(.8)) break; }
+  if (p.play.goal && today[p.play.goal]) { ses.goalDone = true; if (chance(p.play.leaveAfterGoal ?? .25)) break; }
   if (ses.frustration >= 2 && chance(p.play.frustration)) { ses.cut = true; break; }
  }
  return ses;
@@ -199,14 +236,14 @@ function preview() {
  for (const p of PEOPLE) {
   const st = newState(p), cal = [];
   for (let d = 0; d < DAYS; d++) {
-   const date = addDays(start, d), plan = planDay(p, st, d, date), today = { daily: false, grade: false }, sats = [];
+   const date = addDays(start, d), plan = planDay(p, st, d, date), today = { daily: false, grade: false, ans: 0 }, sats = []; st.ansLog = st.ansLog || [];
    for (const s of plan.sessions) { const ses = offlineSession(p, st, s, today); s.real = +ses.elapsed.toFixed(1); s.acts = [...new Set(ses.acts)].slice(0, 5); sats.push(satisfaction(p, ses)); st.sessions++; st.minutes += ses.elapsed; lens.push(ses.elapsed); }
    if (plan.sessions.length) { daily[d].users++; daily[d].minutes += plan.sessions.reduce((a, s) => a + s.real, 0); daily[d].sessions += plan.sessions.length; }
-   endDay(p, st, d, plan.sessions.length > 0, sats);
+   endDay(p, st, d, plan.sessions.length > 0, sats); st.ansLog.push(today.ans);
    cal.push({ d, date, n: plan.sessions.length, min: Math.round(plan.sessions.reduce((a, s) => a + s.real, 0)), E: +plan.E.toFixed(2), why: plan.why.join('、'), times: plan.sessions.map(s => `${hm(s.start)}(${Math.round(s.real)}′)`).join(' '), dormant: st.dormant });
   }
   const active = cal.filter(c => c.n).length, ses = cal.reduce((a, c) => a + c.n, 0), mins = cal.reduce((a, c) => a + c.min, 0), lastDay = Math.max(-1, ...cal.filter(c => c.n).map(c => c.d));
-  rows.push({ id: p.id, nick: p.nick, stage: p.stage, arch: p.engagement.label, active, sessions: ses, minutes: mins, perSession: ses ? Math.round(mins / ses) : 0, lastDay: lastDay + 1, theta0: p.english.grade, grade: st.grade == null ? null : +st.grade.toFixed(1), cal });
+  rows.push({ id: p.id, nick: p.nick, stage: p.stage, arch: p.engagement.label, active, sessions: ses, minutes: mins, perSession: ses ? Math.round(mins / ses) : 0, lastDay: lastDay + 1, theta0: p.english.grade, grade: st.grade == null ? null : +st.grade.toFixed(1), ansDay: (() => { const a = (st.ansLog || []).filter(x => x > 0).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; })(), ansMax: Math.max(0, ...(st.ansLog || [])), cal });
  }
  const sorted = lens.slice().sort((a, b) => a - b), q = f => sorted.length ? sorted[Math.floor(f * (sorted.length - 1))].toFixed(1) : '–';
  const ret = d => rows.filter(r => r.cal.slice(d).some(c => c.n)).length;
@@ -215,8 +252,8 @@ function preview() {
  const md = ['# 兩週生活模擬預覽', '', `開始 ${start}・${DAYS} 天・30 人・亂數種子 ${arg('seed', '（隨機）')}`, '',
   `每場分鐘數：10% ${out.sessionMinutes.p10}・中位數 ${out.sessionMinutes.median}・90% ${out.sessionMinutes.p90}・最長 ${out.sessionMinutes.max}`, '',
   `第 2 天之後還有來的 ${out.retention['D2+']} 人、第 7 天之後 ${out.retention['D7+']} 人、第 14 天 ${out.retention.D14} 人`, '',
-  '| 代號 | 暱稱 | 身分 | 類型 | 上線天數 | 場次 | 總分鐘 | 每場 | 最後一天 |', '|---|---|---|---|---|---|---|---|---|',
-  ...rows.map(r => `| ${r.id} | ${r.nick} | ${r.stage} | ${r.arch} | ${r.active} | ${r.sessions} | ${r.minutes} | ${r.perSession} | ${r.lastDay || '–'} |`), '',
+  '| 代號 | 暱稱 | 身分 | 類型 | 上線天數 | 場次 | 總分鐘 | 每場 | 最後一天 | 每天作答（中位數／最多） |', '|---|---|---|---|---|---|---|---|---|---|',
+  ...rows.map(r => `| ${r.id} | ${r.nick} | ${r.stage} | ${r.arch} | ${r.active} | ${r.sessions} | ${r.minutes} | ${r.perSession} | ${r.lastDay || '–'} | ${r.ansDay}／${r.ansMax} |`), '',
   '## 每天', '', '| 天 | 日期 | 上線人數 | 場次 | 總分鐘 |', '|---|---|---|---|---|', ...daily.map((x, i) => `| ${i + 1} | ${addDays(start, i)} | ${x.users} | ${x.sessions} | ${Math.round(x.minutes)} |`), '',
   '## 每個人的兩週', '', ...rows.flatMap(r => [`### ${r.id} ${r.nick}（${r.stage}・${r.arch}）`, '', ...r.cal.map(c => `- 第 ${c.d + 1} 天 ${c.date.slice(5)}：${c.n ? c.times : '沒來'}${c.why ? `（${c.why}）` : ''}`), ''])].join('\n');
  fs.writeFileSync(path.join(DIR, 'preview.md'), md);
@@ -234,6 +271,13 @@ function ensurePlan(S) {
  const now = tw(Date.now()), dayIndex = Math.round((Date.parse(now.date) - Date.parse(S.start)) / 864e5) - (now.min < 360 ? 1 : 0);   // a game day starts at 06:00
  if (dayIndex < 0 || dayIndex >= S.days) return null;
  const date = addDays(S.start, dayIndex);
+ let changed = false; for (const p of PEOPLE) { const st = S.people[p.id] || (S.people[p.id] = newState(p)); if (migrate(p, st)) changed = true; }
+ if (changed && S.today && S.today.day === dayIndex) {   // new behaviour model: what is left of today is planned again (finished and running visits stay)
+  const now = tw(Date.now()).min + (tw(Date.now()).min < 360 ? 1440 : 0);
+  for (const p of PEOPLE) { const old = S.today.plans[p.id] || { sessions: [] }, keep = old.sessions.filter(s => s.status === 'done' || s.status === 'running'), plan = planDay(p, S.people[p.id], dayIndex, date);
+   const fresh = plan.sessions.filter(s => s.start + (s.start < 360 ? 1440 : 0) > now + 2).slice(0, Math.max(0, 3 - keep.length)); fresh.forEach((s, i) => { s.id = `${p.id}-${date}-v3-${i}`; s.status = 'planned'; s.t = at(date, s.start + (s.start < 360 ? 1440 : 0)); });
+   plan.sessions = keep.concat(fresh); S.today.plans[p.id] = plan; logLine(date, { type: 'replan', id: p.id, sessions: fresh.map(s => ({ start: hm(s.start), len: s.len })) }); }
+  console.log('[life] 換上第三版行為：今天剩下的行程已重新安排'); saveState(S); return S.today; }
  if (S.today && S.today.day === dayIndex) return S.today;
  if (S.today) for (const p of PEOPLE) { const st = S.people[p.id], ps = S.today.plans[p.id]; if (!ps) continue; const done = ps.sessions.filter(s => s.status === 'done'); endDay(p, st, S.today.day, done.length > 0, done.map(s => s.sat)); }
  S.today = { day: dayIndex, date, plans: {} };
@@ -248,7 +292,7 @@ const TXT = path.resolve(String(arg('textlog', path.join(ROOT, '.sim', '行為�
 const GL = ['小一', '小二', '小三', '小四', '小五', '小六', '國一', '國二', '國三', '高一', '高二', '高三'], gname = g => g == null || isNaN(g) ? '' : GL[Math.max(1, Math.min(12, Math.round(g))) - 1];
 const QT = { en2zh: '英翻中', zh2en: '中翻英', listen: '聽音選字', spell: '拼字', listenspell: '聽音拼字', cloze: '填空', img: '看圖選字' };
 const MINI_BOTS = true;    // canvas minigames are played with a modelled result (see miniRound)
-const ACTN = { daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
+const ACTN = { need: '房間需求換道具', train: '寵物訓練', chal: '每日挑戰任務', redo: '重練今日單字', daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
 const DEVN = { phone: '手機', tablet: '平板', pc: '電腦', desktop: '電腦' };
 function say(p, msg) {
  const d = new Date(Date.now() + 8 * 3600e3).toISOString(), line = `${d.slice(11, 19)}  ${p.nick}（${p.id}）${msg}`;
@@ -349,8 +393,13 @@ async function runSession(S, p, s) {
   await ev(() => { for (const w of Object.keys(UI.wins || {})) if (UI.wins[w] && !UI.wins[w].el.hidden && w !== 'placement') UI.closeWin(w); });
   if (p.play.dislikes.includes('music')) await ev(() => { if (typeof Music !== 'undefined' && Music.playing) Music.toggle(); });
   while (Date.now() < endAt) {
-   if (chance(p.play.interrupt * .1)) { ses.cut = true; ses.say('被打斷，先離開'); break; }
-   const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)) || (typeof Weekly !== 'undefined' && Weekly.readyN() > 0), weekly: typeof Weekly !== 'undefined' ? Weekly.readyN() : 0, mNew: typeof Merchant !== 'undefined' ? !Merchant.S.seen : null, story: typeof Story !== 'undefined' && Story.pending(), ct: (() => { try { const Z = Contest.Z, R = Z.run; return { on: Z.on, over: !!(R && R.over), mid: !!(R && !R.over && R.qs && R.qi > 0), best: Z.top ? Z.top.l : 0 }; } catch (e) { return null; } })() }));
+   if (chance(p.play.interrupt * .06)) { ses.cut = true; ses.say('被打斷，先離開'); break; }
+   const st2 = await ev(() => ({ daily: !!Game.S.learn.dailyDone, grade: typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone(), claimable: !!(Life.L.daily && Life.L.daily.tasks.some(t => t.prog >= t.need && !t.claimed)) || (typeof Weekly !== 'undefined' && Weekly.readyN() > 0), weekly: typeof Weekly !== 'undefined' ? Weekly.readyN() : 0, needs: (() => { try { return Life.L.needs.filter(n => NEED_DEFS[n.type] && NEED_DEFS[n.type].item).length; } catch (e) { return 0; } })(),
+     trainable: (() => { try { return Pets.Z.pets.some(q => TRICKS.some(t => q.lv >= t.lv && !Pets.knows(q, t.id) && !Pets.why(q, 'train'))); } catch (e) { return false; } })(),
+     chal: (() => { try { return Life.L.daily.tasks.some(t => CHAL[t.k] && t.k !== 'c_spell' && !t.claimed && t.prog < t.need); } catch (e) { return false; } })(),
+     placed: typeof Placement !== 'undefined' ? Placement.done() : null,
+     tickets: (() => { try { return Rewards.W.tickets || 0; } catch (e) { return 0; } })(),
+     mNew: typeof Merchant !== 'undefined' ? !Merchant.S.seen : null, story: typeof Story !== 'undefined' && Story.pending(), ct: (() => { try { const Z = Contest.Z, R = Z.run; return { on: Z.on, over: !!(R && R.over), mid: !!(R && !R.over && R.qs && R.qi > 0), best: Z.top ? Z.top.l : 0 }; } catch (e) { return null; } })() }));
    Object.assign(today, st2);
    const cs = await ev(() => typeof Cloud !== 'undefined' ? { st: Cloud.status, err: Cloud.err || Cloud.error || '' } : null).catch(() => null);
    if (cs && cs.st !== ses.cloudSt) { if (['error', 'offline', 'outdated', 'paused'].includes(cs.st)) ses.say(`⚠ 雲端存檔狀態：${cs.st}${cs.err ? '（' + String(cs.err).slice(0, 120) + '）' : ''}`); else if (['error', 'offline', 'outdated', 'paused'].includes(ses.cloudSt)) ses.say('雲端存檔恢復正常（' + cs.st + '）'); ses.cloudSt = cs.st; }
@@ -358,9 +407,9 @@ async function runSession(S, p, s) {
    const gateP = .35 + .5 * (1 - (p.play.frustration || 0)) - (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d)) ? .3 : 0);
    const a = gate && !ses.gateTried && chance(Math.max(.1, gateP)) ? (ses.gateTried = true, 'levelgate') : nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
-   await act(page, p, st, ses, a, dwell, wait);
+   const ans0 = ses.ans; await act(page, p, st, ses, a, dwell, wait); today.ans = (today.ans || 0) + ses.ans - ans0;
    const spent = (Date.now() - aStart) * FAST / 60000; ses.mins[a] = (ses.mins[a] || 0) + spent; ses.elapsed += spent;
-   if (p.play.goal && today[p.play.goal] !== undefined) { const done = await ev(g => g === 'daily' ? !!Game.S.learn.dailyDone : g === 'grade' ? (typeof Placement !== 'undefined' && Placement.todayDone()) : false, p.play.goal); if (done) { ses.goalDone = true; if (chance(.8)) { ses.say('今天想做的做完了，離開'); break; } } }
+   if (p.play.goal && today[p.play.goal] !== undefined) { const done = await ev(g => g === 'daily' ? !!Game.S.learn.dailyDone : g === 'grade' ? (typeof Placement !== 'undefined' && Placement.todayDone()) : false, p.play.goal); if (done && !ses.goalDone) { ses.goalDone = true; if (chance(p.play.leaveAfterGoal ?? .25)) { ses.say('今天想做的做完了，離開'); break; } } }
    if (ses.frustration >= 2 && chance(p.play.frustration)) { ses.cut = true; ses.say('玩得不太開心，提早離開'); break; }
   }
   ses.rewards = Math.max(0, (await ev(() => Game.S.coins)) - coins0);
@@ -385,7 +434,11 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (LEARN.includes(a)) {
    if (a === 'typo') return await typoRound(page, p, st, ses, until, wait);
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
-   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'levelgate' ? await ev(() => { if (typeof LevelGate === 'undefined' || !LevelGate.pending('owner')) return false; UI.openWin('learn'); LevelGate.start('owner'); return !!(Learn.sess && Learn.sess.kind === 'levelgate') && 'levelgate'; }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; UI.openWin('learn'); Learn.start(k); return !!Learn.sess && (Learn.sess.kind === 'practice' && k === 'practice' ? 'practice' : k); }, kind);
+   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'need' ? await ev(() => { try { const n = Life.L.needs.find(n => NEED_DEFS[n.type] && NEED_DEFS[n.type].item), ks = Object.keys(SUPPLIES), item = n ? NEED_DEFS[n.type].item : ks[Math.floor(Math.random() * ks.length)]; window.__simNeed = n ? { id: n.id, item } : null; Learn.start('need', n ? { item, needId: n.id } : { item }); return !!(Learn.sess && Learn.sess.kind === 'need') && 'need'; } catch (e) { return false; } })
+    : a === 'train' ? await ev(() => { try { for (const q of Pets.Z.pets) for (const t of TRICKS) if (q.lv >= t.lv && !Pets.knows(q, t.id) && !Pets.why(q, 'train')) { Pets.train(q.id, t.id); return !!(Learn.sess && Learn.sess.kind === 'train') && 'train'; } } catch (e) { } return false; })
+    : a === 'chal' ? await ev(hard => { try { const t = Life.L.daily.tasks.find(t => CHAL[t.k] && t.k !== 'c_spell' && !t.claimed && t.prog < t.need); if (!t) return false; if (!Challenge.tierOf(t)) Challenge.choose(t.k, hard ? 'h' : 'n'); Learn.start('chal', { k: t.k }); return !!(Learn.sess && Learn.sess.kind === 'chal') && 'chal'; } catch (e) { return false; } }, chance(.15 + .5 * Math.max(0, (p.play.prefs.practice || 0) - .3)))
+    : a === 'redo' ? await ev(() => { try { if (!Game.S.learn.dailyDone) return false; UI.openWin('learn'); Learn.start('redo'); return !!Learn.sess && 'redo'; } catch (e) { return false; } })
+    : a === 'levelgate' ? await ev(() => { if (typeof LevelGate === 'undefined' || !LevelGate.pending('owner')) return false; UI.openWin('learn'); LevelGate.start('owner'); return !!(Learn.sess && Learn.sess.kind === 'levelgate') && 'levelgate'; }) : await ev(k => { if (k === 'daily' && Game.S.learn.dailyDone) k = 'practice'; if (k === 'grade' && typeof Placement !== 'undefined' && Placement.done() && Placement.todayDone()) return false; if (k === 'grade' && typeof Placement !== 'undefined') { const first = !Placement.done(); if (first) Placement.S().asked = 99; UI.closeWin('placement'); Learn.start('grade', { mode: first ? 'first' : 'daily' }); return !!(Learn.sess && Learn.sess.kind === 'grade') && 'grade'; } UI.openWin('learn'); Learn.start(k); return !!Learn.sess && (Learn.sess.kind === 'practice' && k === 'practice' ? 'practice' : k); }, kind);
    if (!ok) return;
    const label = ACTN[typeof ok === 'string' ? ok : a] || ACTN[a] || a;
    ses.say('開始「' + label + '」');
@@ -399,29 +452,33 @@ async function act(page, p, st, ses, a, dwell, wait) {
      const res = await ev(() => { const s = Learn.sess; return s ? { right: s.right, n: s.qs ? s.qs.length : 0, pass: !!(s.result && s.result.pass) } : null; }).catch(() => null);
      ses.say('完成「' + label + '」' + (res && res.n ? `（${res.right}/${res.n}）` : '') + (a === 'contest' && res ? (res.pass ? '，突破' : '，沒突破') : ''));
      if (a === 'levelgate') { const lv = await ev(() => ({ lvl: Game.S.lvl, wait: LevelGate.pending('owner') ? Math.ceil(LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1))) : 0 })).catch(() => null); if (lv) ses.say(lv.wait ? `升級測驗沒通過，${lv.wait} 分鐘後可以再試（目前 Lv ${lv.lvl}）` : `升級到 Lv ${lv.lvl}`); }
+     if (a === 'need') { const used = await ev(() => { try { const N = window.__simNeed, n = N && Life.L.needs.find(x => x.id === N.id); if (!n || !Life.L.bag[N.item]) return ''; const sup = SUPPLIES[N.item]; if (n.pet != null && sup.pet) { if (PetPlay.pick(N.item, n.pet)) { const x = PetPlay.pets().find(a => a.data && a.data.id === n.pet) || PetPlay.pets()[0]; if (x) PetPlay.down(x.x, x.y - 7); } } else Life.use(N.item, n); return sup.n || N.item; } catch (e) { return ''; } }).catch(() => ''); if (used) ses.say(`用換到的「${used}」處理房間的需求`); }
      await ev(() => UI.closeWin('study')); break; }
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
-    if (q.step === 'pause') { if (Date.now() < until || chance(.6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
-    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2400 : 4500) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); learnWord(p, st, q.w, true); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
+    if (q.step === 'pause') { if (Date.now() < until || chance(a === 'daily' ? .92 : .6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
+    if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2000 : 3800) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); learnWord(p, st, q.w, 'card'); continue; }
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate' && a !== 'need' && a !== 'train' && a !== 'chal') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
     if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; ses.say(`看到拼字題 ${q.w} 不想寫，離開`); break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);
-    await wait(lognormal((typed ? 3500 + 400 * q.w.length : 3000) * p.play.pace * (pr < .5 ? 1.6 : 1), .45));
+    await wait(thinkMs(p, pr, q.type, q.w));
     const val = typed ? (ok ? q.w : misspell(q.w)) : ok ? q.i : q.opts.filter(o => o !== q.i)[Math.floor(rnd() * 3)];
     const got = await ev(v => { Learn.answer(v); return Learn.sess && Learn.sess.ans ? !!Learn.sess.ans.ok : null; }, val);
     if (got == null) continue; ses.say(`答題 ${q.w}（${gname(q.g)}・${QT[q.type] || q.type}）${got ? '✓' : '✗'}`); ses.ans++; if (got) { ses.right++; wrongRun = 0; } else if (++wrongRun >= 3 && chance(p.play.frustration)) { ses.frustration++; }
     learnWord(p, st, q.w, got);
-    if (got) await new Promise(r => setTimeout(r, 2500)); else { await wait(lognormal(2600 * p.play.pace, .4)); await ev(() => Learn.next()); }
+    if (got) await new Promise(r => setTimeout(r, 2500)); else { await wait(lognormal(2200 * p.play.pace, .4)); await ev(() => Learn.next()); }
    }
    return;
   }
   if (a === 'mini') { const has = await ev(() => !!(Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!has || !MINI_BOTS) return await typoRound(page, p, st, ses, until, wait); return await miniRound(page, p, st, ses, until, wait); }
-  if (a === 'music') { const was = await ev(() => typeof Music !== 'undefined' && Music.playing); await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); if (!was) ses.say('開始聽音樂'); ses.music = true; await wait((until - Date.now()) * FAST); return; }
+  if (a === 'music') { const was = await ev(() => typeof Music !== 'undefined' && Music.playing); await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); if (!was) ses.say('開始聽音樂（邊聽邊玩）'); ses.music = true; await wait(lognormal(9000 * p.play.pace, .4)); return; }
   if (a === 'focus') { const f0 = Date.now(); await ev(() => { if (!Game.T().running) Game.start(); }); ses.say('開始番茄鐘'); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); ses.say(`暫停番茄鐘（專注 ${((Date.now() - f0) * FAST / 60000).toFixed(0)} 分鐘）`); return; }
   if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { let dn = 0, bonus = false; try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) { Life.claimTask(i); dn++; } }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) { Life.claimBonus(); bonus = true; } } catch (e) { } window.__simTask = { dn, bonus }; let n = 0; try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) { Weekly.claim(k); n++; } } } catch (e) { } UI.closeWin('tasks'); return n; }).then(async n => { if (n) ses.weekly = (ses.weekly || 0) + n; const t = await ev(() => window.__simTask || {}).catch(() => ({})); const parts = [t.dn ? `每日任務 ${t.dn} 個` : '', t.bonus ? '每日全勤獎勵' : '', n ? `每週任務 ${n} 個` : ''].filter(Boolean); if (parts.length) ses.say('領取 ' + parts.join('、')); }); return; }
   if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); const sb = await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); return true; } return false; }); if (sb) ses.say('看好友排行榜'); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
-  if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5)); await ev(() => UI.closeWin('shop')); return; }
+  if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5));
+   const P2 = p.play.prefs; if (chance(.25 + .45 * Math.min(1, (P2.shop || 0) + (P2.collect || 0) + .6 * (P2.decor || 0)))) { const got = await ev(() => { try { const S = Game.S, ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return d && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); }); if (!ids.length) return ''; ids.sort((a, b) => ITEMS[b].price - ITEMS[a].price); const id = ids[Math.floor(Math.random() * Math.min(ids.length, 8))], c0 = S.coins; Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.bought = (ses.bought || []).concat(got); ses.say(`在商店買了「${got}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); } }
+   await ev(() => { UI.closeWin('shop'); if (Room.edit) UI.setEdit(false); }); return; }
+  if (a === 'gacha') { const got = await ev(() => { try { if (!(Rewards.W.tickets > 0)) return ''; Rewards.openTicket(); return 'ok'; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.say('抽了一次扭蛋'); await wait(lognormal(5000 * p.play.pace, .4)); await ev(() => { for (const w of ['prize', 'gacha', 'gift']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); }); } return; }
   if (a === 'look') { const l0 = Date.now(); await wait(lognormal(25000 * p.play.pace, .5)); ses.say(`看看房間、陪貓（${Math.max(1, Math.round((Date.now() - l0) * FAST / 1000))} 秒）`); return; }
   while (Date.now() < until) {
    let did = '';
@@ -455,7 +512,7 @@ async function merchantVisit(page, p, st, ses, until, wait) {
   if (info.lore) {
    await ev(i => { UI.closeWin('merchant'); Story.open(); Lore.start(i); }, info.i); ses.lore = (ses.lore || 0) + 1; ses.say(`聽商人「${info.mname}」第 ${info.i + 1} 章的知識卡`);
    await wait(lognormal((reader ? 30000 : 9000) * p.play.pace * (p.age < 10 ? 1.4 : 1), .5));      // 你知道嗎？ + the English line
-   await ev(() => Lore.toWords()); await wait(lognormal(14000 * p.play.pace, .5));                  // 今天的單字
+   await ev(() => Lore.toWords()); const lw = await ev(() => { try { return Lore.C().w.map(x => x[0]); } catch (e) { return []; } }).catch(() => []); for (const w of lw) learnWord(p, st, w, 'card'); await wait(lognormal(14000 * p.play.pace, .5));                  // 今天的單字
    await ev(() => Lore.toQuiz());
    for (let k = 0; k < 6; k++) {
     const q = await ev(() => { const v = Lore.view; if (!v || v.step !== 'quiz') return null; const c = Lore.C(), a = c.q[v.qi][1]; return { a, opts: v.opts[v.qi], g: typeof VIDX !== 'undefined' && VIDX[a] != null ? VOCAB[VIDX[a]].g : 5 }; });
@@ -591,7 +648,11 @@ async function runLoop(once) {
   const now = Date.now(), due = [];
   for (const p of PEOPLE) for (const s of (T.plans[p.id] || { sessions: [] }).sessions) {
    if (s.status !== 'planned') continue;
-   if (!arg('test-now') && s.t < now - 45 * 60e3) { s.status = 'missed'; logLine(T.date, { type: 'missed', id: p.id, sid: s.id }); continue; }   // the computer was off
+   if (!arg('test-now') && s.t < now - 45 * 60e3) {   // the computer was off
+    // v3: the person would still have played today: once, a little later, if they are free now and it is not past their bedtime
+    const n = tw(now), late = T.plans[p.id].sessions.filter(x => x.late).length, played = T.plans[p.id].sessions.some(x => x.status === 'done' || x.status === 'running' || (x.status === 'planned' && x !== s && x.t > now));
+    if (!s.late && !late && !played && !blocked(p, n.dow, n.min) && freeFor(p, n.dow, n.min, 40) >= Math.min(8, s.len)) { s.late = true; s.t = now + Math.round(between(1, 25)) * 60e3; s.start = tw(s.t).min; s.len = Math.min(s.len, 25); logLine(T.date, { type: 'late', id: p.id, sid: s.id, start: hm(s.start) }); continue; }
+    s.status = 'missed'; logLine(T.date, { type: 'missed', id: p.id, sid: s.id }); continue; }
    if (END && s.t >= END) continue;
    if (s.t <= now || (once && s.t <= now + win) || arg('test-now')) due.push([p, s]);   // --test-now: play today's sessions right away (testing)
   }
