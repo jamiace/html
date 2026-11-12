@@ -103,6 +103,9 @@ service cloud.firestore {
       allow update: if isOwner(friendId) && resource.data.s == 'out' && request.resource.data.s == 'ok' && validFriend(request.resource.data);
       // 任何一方都能解除或拒絕
       allow delete: if isOwner(userId) || isOwner(friendId);
+      // 0.5.10 後台：最高管理者可以直接讓兩個帳號成為好友（和測試帳號互加），也能讀名單來略過已經是好友的
+      allow get, list: if isSuper();
+      allow create, update: if isSuper() && friendId != userId && validFriend(request.resource.data) && request.resource.data.s == 'ok';
     }
 
     // 房間快照：本人和好友能看；幫忙紀錄只有好友能新增（每個需求一筆，先到先得），只有房間主人能讀和刪

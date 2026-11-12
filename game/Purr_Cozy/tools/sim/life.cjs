@@ -1,5 +1,11 @@
 #!/usr/bin/env node
-/* ===============================================================
+/* ============================================================
+   0.93.11「小遊戲」：小遊戲要先有遊戲類家具（遊戲主機、掌上機、方向盤、拼圖盤、圖卡盒…）才玩得到，以前沒有人買，所以一局都沒玩過
+     - 想玩小遊戲但房間裡沒有遊戲機：一半的機率去商店找一台買得起的（錢不夠就改玩 Meow Typo），買到就當場玩
+     - 一般逛商店買東西時，也有機率挑遊戲類家具：沒有的人 6% ＋ 40% × 喜歡小遊戲的程度，已經有的人 3% ＋ 12% ×（偏好買沒有的遊戲）
+       討厭小遊戲的人機率乘 0.3，但都不是 0
+     - 沒有特別喜歡小遊戲的人：房間裡有遊戲機時偶爾會去玩（權重 0.12），沒有時權重 0.03；每個人逛商店的權重至少 0.05
+     - 成績照舊是模擬出來的，但每一局都真的在遊戲裡開始、用遊戲自己的結算畫面結束（最佳成績、過關獎勵、行為紀錄都會算）
    0.93.10「全時段」：前期收集數據用，每個小時都要有人在線上（people.json 的 coverage；--no-cover 可關掉）
      - 每個人照自己的作息排完之後，再看 06:00～隔天 06:00 的每一個小時：線上人數不到目標（白天 6 人、00–06 點 1 人）
        就請還有空的人多上線一次。現階段數據比作息重要，所以補位不看上學、上班、睡覺的時間
@@ -180,10 +186,11 @@ function tasksPull(p) { const P = p.play.prefs, T = p.triggers, D = p.play.disli
  if (D.some(d => ['tasks', 'forced_daily', 'gamification', 'nagging'].includes(d))) x *= .2; return +x.toFixed(3); }
 function gradePull(p) { const P = p.play.prefs, T = p.triggers, D = p.play.dislikes; if (P.grade != null) return P.grade; if (D.some(d => ['quiz', 'show_grade', 'forced_learning', 'learning_tasks'].includes(d))) return 0;
  return +(.25 * (T.task || 0) + .15 * (T.streak || 0) + .1 * (P.daily || 0)).toFixed(3); }   // 程度小測 sits in the daily task list
-function prefsOf(p) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; if (a === 'merchant' || a === 'tasks' || a === 'grade') continue; w[a] = (w[a] || 0) + v; } w.look = w.look || .15;
+function prefsOf(p, st) { const w = {}; for (const [k, v] of Object.entries(p.play.prefs)) { const a = ALIAS[k] || k; if (a === 'merchant' || a === 'tasks' || a === 'grade') continue; w[a] = (w[a] || 0) + v; } w.look = w.look || .15;
+ if (!w.mini) w.mini = st && st.hasGame ? .12 : .03; if (!w.shop) w.shop = .05;   // 0.93.11: nobody is at exactly zero
  const c = contestPull(p); if (c > .02) w.contest = c; const m = merchantPull(p); if (m > .02) w.merchant = m; const t = tasksPull(p); if (t > .02) w.tasks = t; const g = gradePull(p); if (g > .02) w.grade = g; return w; }
 function nextActivity(p, st, ses, today) {
- const P = p.play, T = p.triggers, w = prefsOf(p), cand = [], first = k => !ses.count[k];
+ const P = p.play, T = p.triggers, w = prefsOf(p, st), cand = [], first = k => !ses.count[k];
  const learnOK = (today.ans || 0) < (P.cap || 90) + (today.extra || 0) && ses.ans < (ses.budget || 1e9), isLearn = a => LEARN.includes(a) || a === 'merchant';
  // 0. a new player unpacks the moving boxes first (the placement test decides which words the game teaches)
  if (today.placed === false && first('grade')) return 'grade';
@@ -516,13 +523,24 @@ async function act(page, p, st, ses, a, dwell, wait) {
    }
    return;
   }
-  if (a === 'mini') { const has = await ev(() => !!(Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!has || !MINI_BOTS) return await typoRound(page, p, st, ses, until, wait); return await miniRound(page, p, st, ses, until, wait); }
+  if (a === 'mini') { const pick = (_, o) => gamePick(page, o);
+   let has = await pick(0, { check: true }); st.hasGame = !!has;
+   if (!has && MINI_BOTS && chance(.5)) {   // 0.93.11: no game in the room yet: go and look for one that is affordable
+    await ev(() => UI.openWin('shop')); await wait(lognormal(15000 * p.play.pace, .5));
+    const got = await pick(0, { cheap: true }); await ev(() => { UI.closeWin('shop'); if (Room.edit) UI.setEdit(false); }).catch(() => { });
+    if (got) { has = 1; st.hasGame = true; ses.bought = (ses.bought || []).concat(got); ses.say(`想玩小遊戲，去商店買了「${got}」擺進房間`); await wait(lognormal(5000 * p.play.pace, .4)); }
+    else ses.say('想玩小遊戲，但商店裡的遊戲機還買不起，改玩 Meow Typo'); }
+   if (!has || !MINI_BOTS) return await typoRound(page, p, st, ses, until, wait); return await miniRound(page, p, st, ses, until, wait); }
   if (a === 'music') { const was = await ev(() => typeof Music !== 'undefined' && Music.playing); await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); if (!was) ses.say('開始聽音樂（邊聽邊玩）'); ses.music = true; await wait(lognormal(9000 * p.play.pace, .4)); return; }
   if (a === 'focus') { const f0 = Date.now(); await ev(() => { if (!Game.T().running) Game.start(); }); ses.say('開始番茄鐘'); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); ses.say(`暫停番茄鐘（專注 ${((Date.now() - f0) * FAST / 60000).toFixed(0)} 分鐘）`); return; }
   if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { let dn = 0, bonus = false; try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) { Life.claimTask(i); dn++; } }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) { Life.claimBonus(); bonus = true; } } catch (e) { } window.__simTask = { dn, bonus }; let n = 0; try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) { Weekly.claim(k); n++; } } } catch (e) { } UI.closeWin('tasks'); return n; }).then(async n => { if (n) ses.weekly = (ses.weekly || 0) + n; const t = await ev(() => window.__simTask || {}).catch(() => ({})); const parts = [t.dn ? `每日任務 ${t.dn} 個` : '', t.bonus ? '每日全勤獎勵' : '', n ? `每週任務 ${n} 個` : ''].filter(Boolean); if (parts.length) ses.say('領取 ' + parts.join('、')); }); return; }
   if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); const sb = await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); return true; } return false; }); if (sb) ses.say('看好友排行榜'); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
   if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5));
-   const P2 = p.play.prefs; if (chance(.25 + .45 * Math.min(1, (P2.shop || 0) + (P2.collect || 0) + .6 * (P2.decor || 0)))) { const got = await ev(() => { try { const S = Game.S, ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return d && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); }); if (!ids.length) return ''; ids.sort((a, b) => ITEMS[b].price - ITEMS[a].price); const id = ids[Math.floor(Math.random() * Math.min(ids.length, 8))], c0 = S.coins; Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.bought = (ses.bought || []).concat(got); ses.say(`在商店買了「${got}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); } }
+   const P2 = p.play.prefs; if (chance(.25 + .45 * Math.min(1, (P2.shop || 0) + (P2.collect || 0) + .6 * (P2.decor || 0)))) {
+    const pg = (st.hasGame ? .03 + .12 * (P2.mini || 0) : .06 + .4 * (P2.mini || 0)) * (p.play.dislikes.includes('minigames') ? .3 : 1);
+    const game = chance(pg) ? await gamePick(page, {}) : '';
+    if (game) { st.hasGame = true; ses.bought = (ses.bought || []).concat(game); ses.say(`在商店買了遊戲類家具「${game}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); }
+    else { const got = await ev(() => { try { const S = Game.S, ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return d && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); }); if (!ids.length) return ''; ids.sort((a, b) => ITEMS[b].price - ITEMS[a].price); const id = ids[Math.floor(Math.random() * Math.min(ids.length, 8))], c0 = S.coins; Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.bought = (ses.bought || []).concat(got); ses.say(`在商店買了「${got}」擺進房間`); await wait(lognormal(8000 * p.play.pace, .4)); } } }
    await ev(() => { UI.closeWin('shop'); if (Room.edit) UI.setEdit(false); }); return; }
   if (a === 'gacha') { const got = await ev(() => { try { if (!(Rewards.W.tickets > 0)) return ''; Rewards.openTicket(); return 'ok'; } catch (e) { return ''; } }).catch(() => ''); if (got) { ses.say('抽了一次扭蛋'); await wait(lognormal(5000 * p.play.pace, .4)); await ev(() => { for (const w of ['prize', 'gacha', 'gift']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); }); } return; }
   if (a === 'look') { const l0 = Date.now(); await wait(lognormal(25000 * p.play.pace, .5)); ses.say(`看看房間、陪貓（${Math.max(1, Math.round((Date.now() - l0) * FAST / 1000))} 秒）`); return; }
@@ -586,6 +604,15 @@ async function merchantVisit(page, p, st, ses, until, wait) {
 // game's own result screen (best scores, win rewards and the behaviour log count it like a real round). What happens in between
 // is modelled from the person — skill from age, how much they like minigames and their pace — so scores look like real play:
 // a 7-year-old rarely clears the hardest maze, a teenager who loves minigames often does. Each round: one line; leaving: a total.
+// 0.93.11: furniture that opens one of the minigames above (instruments and the typing toy do not count)
+const GAME_PICK = (modes, opts) => { const isG = d => d && (modes.includes(d.cozyGame) || modes.includes(d.interactionProfile));
+ const S = Game.S, owned = [...new Set(S.items.filter(i => isG(ITEMS[i.k])).map(i => ITEMS[i.k].cozyGame || ITEMS[i.k].interactionProfile))];
+ if (opts.check) return owned.length;
+ const ids = Object.keys(ITEMS).filter(k => { const d = ITEMS[k]; return isG(d) && d.price > 0 && !d.hidden && !d.merchant && (d.lvl || 1) <= S.lvl && Rewards.price(d.price, 'item') <= S.coins && !(S.inv[k] > 0) && !S.items.some(i => i.k === k); });
+ if (!ids.length) return '';
+ const fresh = ids.filter(k => !owned.includes(ITEMS[k].cozyGame || ITEMS[k].interactionProfile)), pool = (fresh.length ? fresh : ids).sort((a, b) => ITEMS[a].price - ITEMS[b].price), id = pool[Math.floor(Math.random() * Math.min(pool.length, opts.cheap ? 4 : 10))], c0 = S.coins;
+ Game.buy('item', id); if (S.coins >= c0) return ''; try { Game.place(id); } catch (e) { } return ITEMS[id].n || id; };
+const gamePick = (page, o) => page.evaluate(`(() => { try { return (${GAME_PICK})(${JSON.stringify(Object.keys(MG))}, ${JSON.stringify(o)}); } catch (e) { return ''; } })()`).catch(() => '');   // a string, so the page's own security rules never block it
 const MG = {   // typical seconds per round, and how the result is described
  toss: { sec: 55, zh: '投籃' }, pinball: { sec: 95, zh: '彈珠台' }, vending: { sec: 85, zh: '貓咪販賣機' }, maze: { sec: 70, zh: '鋼珠迷宮' },
  memory: { sec: 65, zh: '翻牌配對' }, puzzle: { sec: 110, zh: '滑動拼圖' }, wire: { sec: 80, zh: '接水管通電' }, diff: { sec: 60, zh: '找不同' },
@@ -597,7 +624,10 @@ function binom(n, q) { let k = 0; for (let i = 0; i < n; i++) if (chance(q)) k++
 async function miniRound(page, p, st, ses, until, wait) {
  const ev = (fn, x) => page.evaluate(fn, x);
  const info = await ev(() => { const its = Game.S.items.filter(i => ITEMS[i.k] && (ITEMS[i.k].cozyGame || (ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!its.length) return null;
-  const it = its[Math.floor(Math.random() * its.length)]; Game.interact(it); const s = typeof MiniTable !== 'undefined' ? MiniTable.session : null, I = ITEMS[it.k];
+  const it = its[Math.floor(Math.random() * its.length)]; Game.interact(it); const I = ITEMS[it.k];
+  // 0.93.11: game consoles, handhelds and steering wheels open their device panel first; the player presses "play" there
+  if ((!MiniTable.session || MiniTable.session.uid !== it.uid) && UI.wins.device && !UI.wins.device.el.hidden && typeof CozyGames !== 'undefined' && (I.cozyGame || I.interactionProfile)) { UI.closeWin('device'); CozyGames.open(it, I.cozyGame || I.interactionProfile); }
+  const s = typeof MiniTable !== 'undefined' ? MiniTable.session : null;
   if (!s || s.uid !== it.uid) return { other: true, name: I.n || I.name || it.k };
   const g = s.g || {}; return { mode: s.mode, name: I.n || I.name || it.k, variant: s.variant, goal: (g.R && g.R.goal) || (g.L && g.L.goal) || (g.P && g.P.goal) || (g.B && g.B.goal) || g.goal || null, base: g.B && g.B.base, pairs: g.cards ? g.cards.length / 2 : null, diffs: g.diffs ? g.diffs.length : null, min: g.min || null, stars: g.C && g.C.p ? g.C.p.length : null }; });
  if (!info) return await typoRound(page, p, st, ses, until, wait);

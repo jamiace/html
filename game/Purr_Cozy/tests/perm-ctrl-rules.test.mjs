@@ -83,3 +83,15 @@ test('後台帳號：只能指派不超過自己權限、不是自己角色的�
   await assertSucceeds(getDocs(collection(lead, 'staff')));
 });
 test.after(() => env.cleanup());
+test('0.5.10 好友：最高管理者能直接讓兩個帳號成為好友；其他人不行', async () => {
+  const f = (name) => ({ s: 'ok', name, at: serverTimestamp() });
+  await assertSucceeds(setDoc(doc(as('boss@gmail.com'), 'users/kid1/friends/kid2'), f('小二')));
+  await assertSucceeds(setDoc(doc(as('boss@gmail.com'), 'users/kid2/friends/kid1'), f('小一')));
+  await assertSucceeds(getDocs(collection(as('boss@gmail.com'), 'users/kid1/friends')));
+  await assertFails(setDoc(doc(as('boss@gmail.com'), 'users/kid1/friends/kid1'), f('自己')));           // 不能和自己
+  await assertFails(setDoc(doc(as('boss@gmail.com'), 'users/kid1/friends/kid3'), { s: 'out', name: 'x', at: serverTimestamp() }));   // 只能寫成好友
+  await assertFails(setDoc(doc(as('mgr@gmail.com'), 'users/kid1/friends/kid3'), f('小三')));            // 管理者不行
+  await assertFails(getDocs(collection(as('mgr@gmail.com'), 'users/kid1/friends')));
+  await assertFails(setDoc(doc(kid('kid1'), 'users/kid1/friends/kid4'), f('小四')));                    // 玩家不能自己直接變好友
+  await assertSucceeds(getDocs(collection(kid('kid2'), 'users/kid2/friends')));                         // 玩家讀得到自己的名單
+});

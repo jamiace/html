@@ -318,6 +318,10 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
       <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pt-ctl" checked> 同時建立模擬控制帳號（編號 00）</label></div>
      <p style="margin:10px 0 4px">出題程度（不勾＝遊戲預設）</p><div class="row"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="1"> L1</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="2"> L2</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="3"> L3</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="4"> L4</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="5"> L5</label><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" class="pt-lv" value="6"> L6</label></div>
      <div class="row" style="margin-top:10px"><button id="pt-go" class="primary">開始建立</button><button id="pt-ctl-only">只建立模擬控制帳號（00）</button><button id="pt-names">套用模擬人物暱稱</button><button id="pt-dl" class="hidden">再次下載 accounts.json</button><button id="pt-csv" class="hidden">下載 CSV</button></div><p id="pt-msg" class="muted"></p></section>
+    <section class="pl-edit-only pl-super-only"><h2>和測試帳號互加好友</h2><p class="why">選一個帳號，直接和所有測試帳號成為好友（兩邊都寫成「已是好友」，不用等對方確認）。已經是好友的會略過。遊戲裡每人最多 30 位好友，超過時這裡會先提醒。只有最高管理者能用，要先發布 0.5.10 的 <code>firestore.rules</code>。</p>
+     <div class="form"><label>帳號<select id="pf-me"><option value="">（先讀取玩家名單）</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pf-mesh"> 測試帳號之間也彼此互加</label></div>
+     <div class="row" style="margin-top:10px"><button id="pf-go" class="primary">互加好友</button></div><p id="pf-msg" class="muted"></p></section>
    </div>
    <div class="page hidden" data-page="accounts">
     <section id="acct-sec"><h2>後台帳號</h2><p class="why" id="acct-count"></p><div class="row" style="margin-bottom:8px"><button id="btn-acct-reload">重新整理</button><span class="muted" id="acct-note"></span></div><div class="tbl" style="max-height:none"><table id="t-staff"></table></div></section>
@@ -871,8 +875,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.09';
-const CHANGELOG=[['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.10';
+const CHANGELOG=[['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 // 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
 const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
  ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
@@ -985,7 +989,7 @@ const Admin={
  dataLoaded(label){this.fillAcct();$('empty-dash').classList.add('hidden');if(this.page==='data'&&S.raw.length)setTimeout(()=>this.go('dashboard'),0);$('filterbar').classList.toggle('hidden',!(this.page==='dashboard'||this.page==='analysis'||this.page==='ai'));$('data-status').textContent=`${label}：${fmt(S.raw.length)} 個回合，${fmt(S.raw.reduce((n,r)=>n+(r.ans||[]).length,0))} 題作答`;},
  // ---------- audit log ----------
  async log(act,target,detail){if(this.me.offline)return;try{const {F,db}=await firebase();await F.addDoc(F.collection(db,'adminlog'),{by:this.me.email,role:this.me.role,act:String(act).slice(0,40),target:String(target||'').slice(0,120),detail:String(detail||'').slice(0,400),at:F.serverTimestamp()})}catch(e){console.warn('[adminlog]',e.code||e)}},
- ACT:{'role.add':'新增角色','role.edit':'修改角色','role.del':'刪除角色','player.ban':'封停玩家','player.unban':'解除封停','player.kick':'踢下線',login:'登入',load:'讀取學習紀錄',export:'下載資料',ai:'產生 AI 報告','staff.add':'新增帳號','staff.role':'變更角色','staff.on':'啟用帳號','staff.off':'停用帳號','staff.edit':'修改資料','staff.del':'刪除帳號'},
+ ACT:{'role.add':'新增角色','role.edit':'修改角色','role.del':'刪除角色','player.ban':'封停玩家','player.unban':'解除封停','player.kick':'踢下線',login:'登入',load:'讀取學習紀錄',friends:'互加好友',export:'下載資料',ai:'產生 AI 報告','staff.add':'新增帳號','staff.role':'變更角色','staff.on':'啟用帳號','staff.off':'停用帳號','staff.edit':'修改資料','staff.del':'刪除帳號'},
  async loadAudit(){const box=$('t-audit');if(!this.canV('audit')){return}try{const {F,db}=await firebase();const snap=await F.getDocs(F.query(F.collection(db,'adminlog'),F.orderBy('at','desc'),F.limit(300)));const rows=[];snap.forEach(d=>{const x=d.data();rows.push(x)});
   const f=$('audit-q').value.trim().toLowerCase(),act=$('audit-act').value;
   table('t-audit',['時間','帳號','角色','動作','對象','說明'],rows.filter(x=>(!act||x.act===act)&&(!f||[x.by,x.target,x.detail].join(' ').toLowerCase().includes(f))).map(x=>[{v:x.at&&x.at.toMillis?x.at.toMillis():0,h:x.at&&x.at.toDate?x.at.toDate().toLocaleString('zh-TW',{hour12:false}):'–',n:false},x.by,this.roleName(x.role),this.ACT[x.act]||x.act,x.target||'',x.detail||'']));
@@ -1099,7 +1103,7 @@ Object.assign(Admin,{
    for(const uid in reg)if(!out.some(p=>p.uid===uid))out.push({uid,doc:null,sum:null,reg:reg[uid]});
    this.ctrl={};if(this.canV('pctl'))try{(await F.getDocs(F.collection(db,'ctrl'))).forEach(d=>this.ctrl[d.id]=d.data())}catch(e){console.warn('[ctrl]',e.code||e)}
    this.players=out;setTimeout(()=>this.refreshNames(),0);window.TEST_UIDS=new Set(out.filter(p=>(p.reg&&p.reg.test)||(p.sum&&p.sum.tester)).map(p=>p.uid));
-   note.textContent='';this.renderPlayers()}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請確認 firestore.rules 已發布 0.5.01 版，而且你是管理者以上。':'讀取失敗：'+(e.code||e.message)}},
+   note.textContent='';this.renderPlayers();this.fillFriendPick()}catch(e){note.textContent=e.code==='permission-denied'?'讀取被拒：請確認 firestore.rules 已發布 0.5.01 版，而且你是管理者以上。':'讀取失敗：'+(e.code||e.message)}},
  renderPlayers(){const q=$('pl-q').value.trim().toLowerCase(),kind=$('pl-kind').value,ts=n=>n?new Date(n).toLocaleString('zh-TW',{hour12:false}):'–';
   const list=this.players.filter(p=>{const s=p.sum,test=(p.reg&&p.reg.test)||(s&&s.tester);
    if(kind==='real'&&test)return false;if(kind==='test'&&!test)return false;if(kind==='none'&&p.doc)return false;if(kind==='admin'&&!(s&&s.admin))return false;if(kind==='dev'&&!(s&&s.dev))return false;
@@ -1228,6 +1232,31 @@ Object.assign(Admin,{
    const blob=new Blob([JSON.stringify({created:new Date().toISOString(),controller:c},null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='controller.json';a.click();this.loadPlayers()}
   catch(e){msg.textContent='失敗：'+this.authErr(e)}},
  // test accounts NN get the nickname of simNN in tools/sim/people.json (registry name + the name the game seeds on first login)
+ // 0.5.10: make one account friends with every test account (both copies written as 'ok', no request to accept)
+ plName(p){return String((p&&p.sum&&p.sum.name)||(p&&p.reg&&p.reg.name)||'玩家').slice(0,40)},
+ isTestP(p){return !!((p.reg&&p.reg.test)||(p.sum&&p.sum.tester))},
+ fillFriendPick(){const sel=$('pf-me');if(!sel)return;document.querySelectorAll('.pl-super-only').forEach(x=>x.classList.toggle('hidden',this.me.role!=='super'));
+  const real=this.players.filter(p=>!this.isTestP(p)).map(p=>[p.uid,this.plName(p)]).sort((a,b)=>a[1].localeCompare(b[1],'zh-Hant')),cur=sel.value;
+  sel.replaceChildren(new Option('（選一個帳號）',''),...real.map(([u,n])=>new Option(n+'　'+u.slice(0,6),u)));
+  sel.value=cur||((real.find(([u,n])=>/jami/i.test(n))||[])[0]||'')},
+ async friendTesters(){const msg=$('pf-msg');if(this.me.role!=='super')return msg.textContent='只有最高管理者能用。';
+  const me=$('pf-me').value,mesh=$('pf-mesh').checked;if(!me)return msg.textContent='請先選一個帳號。';
+  const testers=this.players.filter(p=>this.isTestP(p)&&p.uid!==me);if(!testers.length)return msg.textContent='找不到測試帳號（先讀取玩家名單）。';
+  const byUid=Object.fromEntries(this.players.map(p=>[p.uid,p])),{F,db}=await firebase();
+  msg.textContent='讀取目前的好友…';const have={};
+  const read=async u=>{const m={};(await F.getDocs(F.collection(db,'users',u,'friends'))).forEach(d=>m[d.id]=d.data().s);return m};
+  try{have[me]=await read(me);for(const t of testers)have[t.uid]=await read(t.uid)}catch(e){return msg.textContent=e.code==='permission-denied'?'讀取被拒：請先在 Firebase 主控台發布 0.5.10 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}
+  const pairs=[];for(const t of testers)pairs.push([me,t.uid]);if(mesh)for(let i=0;i<testers.length;i++)for(let j=i+1;j<testers.length;j++)pairs.push([testers[i].uid,testers[j].uid]);
+  const todo=pairs.filter(([a,b])=>!(have[a][b]==='ok'&&have[b][a]==='ok'));   // both copies must say 'ok'
+  const after=u=>Object.values(have[u]||{}).filter(s=>s==='ok').length+todo.filter(([a,b])=>(a===u||b===u)&&!(have[u]&&have[u][a===u?b:a]==='ok')).length;
+  const meName=this.plName(byUid[me]),over=[me,...(mesh?testers.map(t=>t.uid):[])].filter(u=>after(u)>30);
+  if(!todo.length)return msg.textContent='都已經是好友了，不需要再加。';
+  if(!confirm(`要讓「${meName}」和 ${testers.length} 個測試帳號互加好友${mesh?'，測試帳號之間也彼此互加':''}嗎？\n\n共會建立 ${todo.length} 組好友（每組兩邊各寫一筆）。`+(over.length?`\n\n注意：${over.map(u=>this.plName(byUid[u])).join('、')} 的好友會超過遊戲上限 30 位。超過的好友一樣會顯示，但他們不能再加新的好友。`:'')))return;
+  let done=0;try{for(let i=0;i<todo.length;i+=200){const b=F.writeBatch(db);for(const [a,c] of todo.slice(i,i+200)){b.set(F.doc(db,'users',a,'friends',c),{s:'ok',name:this.plName(byUid[c]),at:F.serverTimestamp()});b.set(F.doc(db,'users',c,'friends',a),{s:'ok',name:this.plName(byUid[a]),at:F.serverTimestamp()})}
+    await b.commit();done+=Math.min(200,todo.length-i);msg.textContent=`寫入中… ${done}/${todo.length}`}}
+  catch(e){return msg.textContent=(e.code==='permission-denied'?'寫入被拒：請先在 Firebase 主控台發布 0.5.10 的 firestore.rules。':'寫入失敗：'+(e.code||e.message))+(done?`（已完成 ${done} 組）`:'')}
+  this.log('friends',me,`${meName} 和 ${testers.length} 個測試帳號互加好友${mesh?'（含測試帳號之間）':''}，新增 ${done} 組`);
+  msg.textContent=`完成：新增 ${done} 組好友。玩家下次開好友名單（或重新整理遊戲）就會看到。`},
  async applySimNames(){const msg=$('pt-msg'),prefix=$('pt-prefix').value.trim().toLowerCase()||'claude-test',domain=$('pt-domain').value.trim().toLowerCase()||'purrcozy.test';
   let P;try{P=(await (await fetch('sim/people.json',{cache:'no-store'})).json()).people}catch(e){return msg.textContent='讀不到 tools/sim/people.json（請從網站上開啟後台）。'}
   const nick=Object.fromEntries(P.map(p=>[p.id.replace(/^sim/,''),p.nick])),{F,db}=await firebase();
@@ -1288,7 +1317,7 @@ $('pl-reload').onclick=()=>Admin.loadPlayers();$('pl-q').oninput=()=>Admin.rende
 $('t-players').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)Admin.openPlayer(b.dataset.open)});
 $('pl-detail').addEventListener('click',e=>{const b=e.target.closest('[data-restore]');if(b)Admin.restoreBackup(b.dataset.restore)});
 $('pt-declared').append(...GRADE_LABEL.map((g,i)=>new Option(g,i+1)));
-$('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-ctl-only').onclick=()=>Admin.createControllerOnly();$('pt-names').onclick=()=>Admin.applySimNames();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
+$('pc-go').onclick=()=>Admin.createSingle();$('pc-gen').onclick=()=>{$('pc-pw').value=Admin.pw()};$('pt-go').onclick=()=>Admin.createBatch();$('pt-ctl-only').onclick=()=>Admin.createControllerOnly();$('pt-names').onclick=()=>Admin.applySimNames();$('pf-go').onclick=()=>Admin.friendTesters();$('pt-dl').onclick=()=>Admin.downloadBatch('json');$('pt-csv').onclick=()=>Admin.downloadBatch('csv');
 for(const el of document.querySelectorAll('#audit-act'))el.append(...['player.view','player.edit','player.json','player.restore','player.export','player.create','player.batch','player.rename','player.unreg','player.ban','player.unban','player.kick','role.add','role.edit','role.del'].map(k=>new Option(Admin.ACT[k],k)));
 
 
