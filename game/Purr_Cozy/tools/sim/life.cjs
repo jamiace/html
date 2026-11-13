@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /* ============================================================
+   0.93.13「出錯補跑」：遊戲載入失敗（網站壞掉、素材 404、逾時）而沒玩到的場次，會立刻自動補跑一次
+     （同一天、同樣的長度；每個場次最多補一次）。網站修好之後，那段時間的測試數據會補回來。
    0.93.12「佈置房間」：每個人有自己的品味（people.json 的 decor：style 風格、care 細心程度、freq 多常佈置、fams 喜歡的家具、color 主題色）
      - 新買的家具會被擺到合理的地方，而不是留在系統隨便放的位置；逛商店時會挑自己喜歡的種類和顏色
      - 佈置時依風格做事：小小孩亂堆、整齊派對齊收納左右對稱、主題派整組換色換壁紙、收藏派擺滿層架、植物派種滿窗邊
@@ -341,6 +343,15 @@ function ensurePlan(S) {
  { const add = coverDay(S.today.plans, S.people, dayIndex, date, gm(tw(Date.now()).min)); S.today.cover = COVER_V; logLine(date, { type: 'cover', sessions: add }); if (add.length) console.log(`[life] 全時段：今天補了 ${add.length} 個場次，每個小時都有人在線上`); }
  saveState(S); return S.today;
 }
+// 0.93.13: a visit that never got into the game (site down, a missing file, load timeout) is played again later the same day, once
+const LOAD_FAIL = /載入逾時|HTTP 404|HTTP 5\d\d|抓不到|下載素材失敗|net::ERR/;
+function retryFailed(T, now, log) { let n = 0;
+ for (const id in (T && T.plans) || {}) { const ss = T.plans[id].sessions;
+  for (const s of ss.slice()) { if (s.status !== 'done' || !s.error || s.retried || s.retry || (s.ans || 0) > 0 || !LOAD_FAIL.test(s.error)) continue;
+   s.retried = true; const t = now, m = tw(t).min;   // right away (at most 6 at a time, like every other visit)
+   const r = { id: s.id + 'r', start: m, len: s.len, status: 'planned', t, retry: true, fill: s.fill }; ss.push(r); n++;
+   if (log) log({ type: 'retry', id, sid: s.id, start: hm(m) }); } }
+ return n; }
 let browser = null, cache = new Map(), RUN_END = 0;
 // ---- what everyone is doing, readable: shown in the window and written to one file per day (all people together) ----
 //   .sim/行為紀錄/2026-11-10.txt   e.g. "20:31:05  芯芯（sim04）答題 apple（小三・英翻中）✓"
@@ -751,6 +762,7 @@ async function runLoop(once) {
   if (!once && !running.size) { let m = SELF_MTIME; try { m = fs.statSync(__filename).mtimeMs; } catch (e) { } if (m !== SELF_MTIME) { console.log('[life] 模擬程式有新版本，現在沒人在線上，重新啟動套用（進度不會遺失）'); RESTART = true; break; } }
   if (END && Date.now() >= END) { console.log('[life] 模擬已到結束時間 ' + arg('end') + '，不再開始新的場次'); break; }
   const T = ensurePlan(S); if (!T) { console.log('[life] 不在模擬期間（' + S.start + ' 起 ' + S.days + ' 天）'); break; }
+  { const r = retryFailed(T, Date.now(), o => logLine(T.date, o)); if (r) { console.log(`[life] 補跑：${r} 個沒載入成功的場次現在重新上線`); saveState(S); } }
   const now = Date.now(), due = [];
   for (const p of PEOPLE) for (const s of (T.plans[p.id] || { sessions: [] }).sessions) {
    if (s.status !== 'planned') continue;
@@ -805,4 +817,4 @@ else if (CMD === 'run') runLoop(false).then(() => process.exit(RESTART ? 3 : 0),
 else if (CMD === 'once') runLoop(true).then(() => process.exit(0), e => { console.error('[life] 失敗：', e && e.message || e); process.exit(1); });   // never hang the hourly run
 else if (CMD === 'status') status();
 else console.log('用法：node tools/sim/life.cjs preview | run | once | status');
-module.exports = { planDay, endDay, newState, PEOPLE, coverDay, gm };
+module.exports = { planDay, endDay, newState, PEOPLE, coverDay, gm, retryFailed };
