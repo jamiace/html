@@ -1,5 +1,16 @@
 #!/usr/bin/env node
 /* ============================================================
+   0.93.14「陪貓、交朋友重新設計」：原本陪貓只會一直摸（兩分鐘摸 18 下），好友只會看排行榜，全部的貓都叫麻糬
+     - 陪貓一次只做像真人會做的幾件事：先看貓需要什麼（餓了餵食或倒進碗裡、髒了梳毛、無聊就玩玩具），
+       摸 1–4 下（貓有「想被摸」的需求時摸到 3 下），偶爾看牠表演學會的把戲，再看牠走來走去一會兒就去做別的事
+       一天摸超過 6 下遊戲就不再加親密度，這時最多再摸 1 下；貓在吃東西、暴衝、表演時摸不到，就不算
+     - 貓餓了家裡卻沒有貓食：多半會馬上去商店買 1–3 個；想玩卻沒有玩具：有機會買球、毛線球或逗貓棒；
+       逛商店時也會補貓食、零食、玩具、梳子（愛貓的人比較常買）
+     - 第一次上線時幫貓取自己的名字（小孩幾乎都會取，大人有些保留原本的名字）
+     - 好友：去好友（優先現實中認識的人）的房間逛，看到需要幫忙的地方就幫（每天第一次免費，之後答 4 題）；
+       紙飛機飛進房間時，多數人會點開來幫忙；排行榜只是偶爾看看
+     - 小遊戲的「第幾局」改成這次上線累計的局數（以前每次重新從第 1 局算）
+     - 電腦休眠或暫停時會記一行；載入逾時如果是因為電腦休眠，會註明，並照常補跑
    0.93.13「出錯補跑」：遊戲載入失敗（網站壞掉、素材 404、逾時）而沒玩到的場次，會立刻自動補跑一次
      （同一天、同樣的長度；每個場次最多補一次）。網站修好之後，那段時間的測試數據會補回來。
    0.93.12「佈置房間」：每個人有自己的品味（people.json 的 decor：style 風格、care 細心程度、freq 多常佈置、fams 喜歡的家具、color 主題色）
@@ -180,7 +191,7 @@ function endDay(p, st, day, played, sats) {
 // ---------- inside a session: what to do next ----------
 const ALIAS = { piano: 'music', photo: 'cat', collect: 'shop', story: 'merchant' };   // 商人故事 = visiting the weekly merchant
 const DWELL = { need: 2, train: 2.5, chal: 3, redo: 3, gacha: 1, levelgate: 4, contest: 5, look: .6, daily: 5, practice: 4, typo: 3.5, grade: 3, story: 5, merchant: 6, storyq: 4, cat: 2, toys: 2, mini: 4, music: 12, decor: 6, shop: 2, focus: 25, social: 2, tasks: .6 };
-const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate', 'need', 'train', 'chal', 'redo'];
+const LEARN = ['daily', 'practice', 'typo', 'grade', 'story', 'storyq', 'contest', 'levelgate', 'need', 'train', 'chal', 'redo', 'helpq'];
 // 0.92.49 程度挑戰賽: nobody is told to join. People who already like tests (程度小測, practice, spelling) are drawn to it,
 // people who dislike quizzes mostly ignore it, pure cat / music players almost never open it.
 function contestPull(p) { const P = p.play.prefs; if (P.contest != null) return P.contest; let x = .6 * (P.grade || 0) + .3 * (P.practice || 0) + .2 * (P.typo || 0) + .1 * (P.daily || 0) + .15 * (p.triggers.grade || 0); if (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d))) x *= .2; if (p.play.dislikes.includes('too_easy')) x *= 1.3; return +x.toFixed(3); }
@@ -360,7 +371,7 @@ const TXT = path.resolve(String(arg('textlog', path.join(ROOT, '.sim', '行為�
 const GL = ['小一', '小二', '小三', '小四', '小五', '小六', '國一', '國二', '國三', '高一', '高二', '高三'], gname = g => g == null || isNaN(g) ? '' : GL[Math.max(1, Math.min(12, Math.round(g))) - 1];
 const QT = { en2zh: '英翻中', zh2en: '中翻英', listen: '聽音選字', spell: '拼字', listenspell: '聽音拼字', cloze: '填空', img: '看圖選字' };
 const MINI_BOTS = true;    // canvas minigames are played with a modelled result (see miniRound)
-const ACTN = { need: '房間需求換道具', train: '寵物訓練', chal: '每日挑戰任務', redo: '重練今日單字', daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
+const ACTN = { helpq: '幫好友的忙', need: '房間需求換道具', train: '寵物訓練', chal: '每日挑戰任務', redo: '重練今日單字', daily: '每日單字', practice: '自由練習', grade: '程度小測', contest: '程度挑戰賽', storyq: '商人故事測驗', story: '自由練習', typo: 'Meow Typo 打字', levelgate: '升級測驗' };
 const DEVN = { phone: '手機', tablet: '平板', pc: '電腦', desktop: '電腦' };
 function say(p, msg) {
  const d = new Date(Date.now() + 8 * 3600e3).toISOString(), line = `${d.slice(11, 19)}  ${p.nick}（${p.id}）${msg}`;
@@ -416,7 +427,7 @@ async function runSession(S, p, s) {
  // (GitHub Pages) answers HTTP 429 when one IP asks for too much; without this each new person re-downloaded ~7,000 files.
  // Everything else (index.html, version.json, Firebase) goes to the network as usual, so game updates are picked up.
  if (!arg('direct')) await ctx.route(u => u.href.startsWith(BASE) && FIXED.test(u.href), r => fixedFile(r));
- const page = await ctx.newPage(), errors = [], netBad = []; let live = null;   // live = ses.say once the session has started
+ const page = await ctx.newPage(), errors = [], netBad = []; let live = null, pendingName = false;   // live = ses.say once the session has started
  page.on('pageerror', e => { errors.push(e.message.slice(0, 200)); if (live && errors.length <= 10) live('⚠ 遊戲錯誤：' + e.message.slice(0, 200)); });
  // for diagnosing a load that never finishes: failed requests and HTTP errors while the game opens
  page.on('requestfailed', r => { if (netBad.length < 40) netBad.push('fail ' + r.url().replace(BASE, '').slice(0, 80) + ' ' + ((r.failure() || {}).errorText || '')); });
@@ -436,7 +447,7 @@ async function runSession(S, p, s) {
   } catch (e) {
    // say where it stopped: the loading screen's own text (progress or error), page errors, failed / 4xx-5xx requests
    const screen = await page.evaluate(() => { const el = document.getElementById('loading'); return { text: el ? el.innerText.replace(/\s+/g, ' ').trim().slice(0, 200) : '(沒有載入畫面)', learn: typeof Learn !== 'undefined', game: typeof Game !== 'undefined' && !!Game.S, stats: window.PurrAssets ? PurrAssets.stats : null, ready: document.readyState }; }).catch(x => ({ text: '(讀不到頁面：' + String(x.message || x).slice(0, 80) + ')' }));
-   const diag = `載入逾時 ${Math.round((Date.now() - q0) / 60000)} 分｜畫面：${screen.text}｜Learn ${!!screen.learn} Game ${!!screen.game} ${screen.ready || ''}｜素材 ${screen.stats ? JSON.stringify(screen.stats) : '–'}｜頁面錯誤 ${errors.length}：${errors.slice(0, 3).join(' / ')}｜網路問題 ${netBad.length}：${netBad.slice(0, 6).join(' / ')}`;
+   const zz = sleptDuring(q0, Date.now()), diag = `載入逾時 ${Math.round((Date.now() - q0) / 60000)} 分${zz ? `（其中電腦休眠 ${zz} 分）` : ''}｜畫面：${screen.text}｜Learn ${!!screen.learn} Game ${!!screen.game} ${screen.ready || ''}｜素材 ${screen.stats ? JSON.stringify(screen.stats) : '–'}｜頁面錯誤 ${errors.length}：${errors.slice(0, 3).join(' / ')}｜網路問題 ${netBad.length}：${netBad.slice(0, 6).join(' / ')}`;
    ses.say('⚠ ' + diag);
    throw new Error(diag);
   } finally { loadDone(); }
@@ -453,12 +464,14 @@ async function runSession(S, p, s) {
   const fixId = () => ev(([d, nick]) => { const g = typeof Placement !== 'undefined' && Placement.S(); if (g && !g.declared && d) g.declared = d; if (Game.S.avatar && (!Game.S.avatar.name || /^測試\d+$/.test(Game.S.avatar.name) || Game.S.avatar.name === (window.NAME_DEFAULT || ''))) Game.S.avatar.name = nick;
    const f = Game.S.flags || {}; if (f.tester && f.testGroup === 'claude-sim' && Game.S.avatar && Game.S.avatar.name === nick) return; Game.S.flags = Object.assign({}, f, { tester: true, testGroup: 'claude-sim' }); Game.save(); if (typeof UI !== 'undefined' && UI.refresh) try { UI.refresh('profile'); } catch (e) { } }, [p.declared || 0, p.nick]).catch(() => { });
   await fixId(); await new Promise(r => setTimeout(r, 6000)); await fixId();
+  pendingName = true;
   if (arg('test-give') && arg('no-upload')) await ev(list => { for (const m of list.split(',')) { const k = Object.keys(ITEMS).find(k => ITEMS[k].cozyGame === m || (m === 'vending' && /^cozy_vending_/.test(k))); if (k && !Game.S.items.some(i => i.k === k)) Game.S.items.push({ k, uid: 'test-' + m, x: 60 + 30 * Game.S.items.length % 200, y: 150 }); } }, String(arg('test-give')));   // testing only   // test account: its logs are left out of the analysis
   s.load = +((Date.now() - t0) / 1000).toFixed(0); t0 = Date.now(); endAt = t0 + s.len * 60000 / FAST;
   ses.say(`進入房間（載入 ${s.load} 秒${s.queued ? `，先排隊 ${s.queued} 分鐘` : ''}）`);
   if (RUN_END && endAt > RUN_END) { s.carry = +((endAt - RUN_END) * FAST / 60000).toFixed(1); endAt = RUN_END; }   // the rest continues in the next hourly run   // the visit starts once the room is on screen
   await wait(lognormal(3000 * p.play.pace, .4));
   // first look: popups are closed or read
+  if (pendingName) await namePets(page, p, st, ses);
   await ev(() => { for (const w of Object.keys(UI.wins || {})) if (UI.wins[w] && !UI.wins[w].el.hidden && w !== 'placement') UI.closeWin(w); });
   if (p.play.dislikes.includes('music')) await ev(() => { if (typeof Music !== 'undefined' && Music.playing) Music.toggle(); });
   while (Date.now() < endAt) {
@@ -474,6 +487,7 @@ async function runSession(S, p, s) {
    if (cs && cs.st !== ses.cloudSt) { if (['error', 'offline', 'outdated', 'paused'].includes(cs.st)) ses.say(`⚠ 雲端存檔狀態：${cs.st}${cs.err ? '（' + String(cs.err).slice(0, 120) + '）' : ''}`); else if (['error', 'offline', 'outdated', 'paused'].includes(ses.cloudSt)) ses.say('雲端存檔恢復正常（' + cs.st + '）'); ses.cloudSt = cs.st; }
    const gate = await ev(() => typeof LevelGate !== 'undefined' && LevelGate.pending('owner') && LevelGate.wait(LevelGate.gate('owner', null, Game.S.lvl + 1)) <= 0).catch(() => false);
    const gateP = .35 + .5 * (1 - (p.play.frustration || 0)) - (p.play.dislikes.some(d => ['quiz', 'forced_learning', 'learning_tasks'].includes(d)) ? .3 : 0);
+   if (await planeCheck(page, p, st, ses, wait, today)) continue;
    const a = gate && !ses.gateTried && chance(Math.max(.1, gateP)) ? (ses.gateTried = true, 'levelgate') : nextActivity(p, st, ses, today); ses.count[a] = (ses.count[a] || 0) + 1; ses.acts.push(a);
    const dwell = Math.min(lognormal(DWELL[a] * p.play.pace, .5), (endAt - Date.now()) * FAST / 60000 + .5), aStart = Date.now();
    const ans0 = ses.ans; await act(page, p, st, ses, a, dwell, wait); today.ans = (today.ans || 0) + ses.ans - ans0;
@@ -503,7 +517,7 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (LEARN.includes(a)) {
    if (a === 'typo') return await typoRound(page, p, st, ses, until, wait);
    const kind = a === 'story' ? 'practice' : a === 'grade' ? 'grade' : a;
-   const ok = a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'need' ? await ev(() => { try { const n = Life.L.needs.find(n => NEED_DEFS[n.type] && NEED_DEFS[n.type].item), ks = Object.keys(SUPPLIES), item = n ? NEED_DEFS[n.type].item : ks[Math.floor(Math.random() * ks.length)]; window.__simNeed = n ? { id: n.id, item } : null; Learn.start('need', n ? { item, needId: n.id } : { item }); return !!(Learn.sess && Learn.sess.kind === 'need') && 'need'; } catch (e) { return false; } })
+   const ok = a === 'helpq' ? await ev(() => !!(Learn.sess && Learn.sess.kind === 'help') && 'helpq') : a === 'storyq' ? await ev(i => { if (typeof Lore !== 'undefined') Lore.view = null; UI.closeWin('merchant'); Story.start(i); return !!(Learn.sess && Learn.sess.kind === 'story'); }, ses.storyCh) : a === 'contest' ? await ev(() => { if (typeof Contest === 'undefined') return false; const Z = Contest.Z; if (!Z.on || (Z.run && Z.run.over)) Contest.join(); Contest.play(); return !!(Learn.sess && Learn.sess.kind === 'contest'); }) : a === 'need' ? await ev(() => { try { const n = Life.L.needs.find(n => NEED_DEFS[n.type] && NEED_DEFS[n.type].item), ks = Object.keys(SUPPLIES), item = n ? NEED_DEFS[n.type].item : ks[Math.floor(Math.random() * ks.length)]; window.__simNeed = n ? { id: n.id, item } : null; Learn.start('need', n ? { item, needId: n.id } : { item }); return !!(Learn.sess && Learn.sess.kind === 'need') && 'need'; } catch (e) { return false; } })
     : a === 'train' ? await ev(() => { try { for (const q of Pets.Z.pets) for (const t of TRICKS) if (q.lv >= t.lv && !Pets.knows(q, t.id) && !Pets.why(q, 'train')) { Pets.train(q.id, t.id); return !!(Learn.sess && Learn.sess.kind === 'train') && 'train'; } } catch (e) { } return false; })
     : a === 'chal' ? await ev(hard => { try { const t = Life.L.daily.tasks.find(t => CHAL[t.k] && t.k !== 'c_spell' && !t.claimed && t.prog < t.need); if (!t) return false; if (!Challenge.tierOf(t)) Challenge.choose(t.k, hard ? 'h' : 'n'); Learn.start('chal', { k: t.k }); return !!(Learn.sess && Learn.sess.kind === 'chal') && 'chal'; } catch (e) { return false; } }, chance(.15 + .5 * Math.max(0, (p.play.prefs.practice || 0) - .3)))
     : a === 'redo' ? await ev(() => { try { if (!Game.S.learn.dailyDone) return false; UI.openWin('learn'); Learn.start('redo'); return !!Learn.sess && 'redo'; } catch (e) { return false; } })
@@ -526,7 +540,7 @@ async function act(page, p, st, ses, a, dwell, wait) {
     if (q.step === 'wait') { await new Promise(r => setTimeout(r, 300)); continue; }
     if (q.step === 'pause') { if (Date.now() < until || chance(a === 'daily' ? .92 : .6)) { await wait(1500); ses.say('再來一組'); await ev(() => Learn.more()); continue; } ses.say('停在這裡，不做了'); break; }
     if (q.step === 'review') { const know = chance(answerChance(p, st, q.w, q.g, 'en2zh')), pressed = know || chance(.2); await wait(lognormal((know ? 2000 : 3800) * p.play.pace, .4)); await ev(k => Learn.review(k), pressed); learnWord(p, st, q.w, 'card'); continue; }
-    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate' && a !== 'need' && a !== 'train' && a !== 'chal') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
+    if (Date.now() > until + 120000 / FAST && a !== 'daily' && a !== 'grade' && a !== 'storyq' && a !== 'levelgate' && a !== 'need' && a !== 'train' && a !== 'chal' && a !== 'helpq') { if (a === 'contest') { ses.ctPause = true; ses.say('挑戰賽時間到先離開（答案已存，下次接著答）'); await ev(() => UI.closeWin('study')); } break; }
     const typed = q.type === 'spell' || q.type === 'listenspell';
     if (typed && p.play.dislikes.includes('spell')) { ses.frustration += .5; if (chance(.5)) { ses.cut = true; ses.say(`看到拼字題 ${q.w} 不想寫，離開`); break; } }
     const pr = answerChance(p, st, q.w, q.g, q.type), ok = chance(pr);
@@ -550,8 +564,10 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (a === 'music') { const was = await ev(() => typeof Music !== 'undefined' && Music.playing); await ev(() => { if (typeof Music !== 'undefined' && !Music.playing) Music.toggle(); }); if (!was) ses.say('開始聽音樂（邊聽邊玩）'); ses.music = true; await wait(lognormal(9000 * p.play.pace, .4)); return; }
   if (a === 'focus') { const f0 = Date.now(); await ev(() => { if (!Game.T().running) Game.start(); }); ses.say('開始番茄鐘'); await wait((until - Date.now()) * FAST); await ev(() => { if (Game.T().running) Game.pause(); }); ses.say(`暫停番茄鐘（專注 ${((Date.now() - f0) * FAST / 60000).toFixed(0)} 分鐘）`); return; }
   if (a === 'tasks') { await ev(() => { UI.openTasks ? UI.openTasks('daily') : UI.openWin('tasks'); }); await wait(lognormal(4000 * p.play.pace, .4)); await ev(() => { let dn = 0, bonus = false; try { Life.L.daily.tasks.forEach((t, i) => { if (t.prog >= t.need && !t.claimed) { Life.claimTask(i); dn++; } }); if (Life.L.daily.tasks.every(t => t.claimed) && !Life.L.daily.bonus) { Life.claimBonus(); bonus = true; } } catch (e) { } window.__simTask = { dn, bonus }; let n = 0; try { if (typeof Weekly !== 'undefined') { UI.openTasks('weekly'); for (const k of Object.keys(WEEKLY_DEFS)) if (Weekly.ready(k)) { Weekly.claim(k); n++; } } } catch (e) { } UI.closeWin('tasks'); return n; }).then(async n => { if (n) ses.weekly = (ses.weekly || 0) + n; const t = await ev(() => window.__simTask || {}).catch(() => ({})); const parts = [t.dn ? `每日任務 ${t.dn} 個` : '', t.bonus ? '每日全勤獎勵' : '', n ? `每週任務 ${n} 個` : ''].filter(Boolean); if (parts.length) ses.say('領取 ' + parts.join('、')); }); return; }
-  if (a === 'social') { await ev(() => UI.openWin('friends')); await wait(lognormal(6000 * p.play.pace, .4)); const sb = await ev(() => { if (typeof Social !== 'undefined' && Social.ready && Social.ready()) { UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); return true; } return false; }); if (sb) ses.say('看好友排行榜'); await wait(lognormal(8000, .4)); await ev(() => UI.closeWin('friends')); return; }
+  if (a === 'social') return await socialVisit(page, p, st, ses, until, wait);
+  if (a === 'cat' || a === 'toys') return await petVisit(page, p, st, ses, a, until, wait);
   if (a === 'shop') { await ev(() => UI.openWin('shop')); await wait(lognormal(20000 * p.play.pace, .5));
+   if (chance(.15 + .45 * petLove(p))) { if (await petShop(page, p, ses, { auto: true, love: petLove(p) })) await wait(lognormal(5000 * p.play.pace, .4)); }
    const P2 = p.play.prefs; if (chance(.25 + .45 * Math.min(1, (P2.shop || 0) + (P2.collect || 0) + .6 * (P2.decor || 0)))) {
     const pg = (st.hasGame ? .03 + .12 * (P2.mini || 0) : .06 + .4 * (P2.mini || 0)) * (p.play.dislikes.includes('minigames') ? .3 : 1);
     const game = chance(pg) ? await gamePick(page, {}) : '';
@@ -564,18 +580,11 @@ async function act(page, p, st, ses, a, dwell, wait) {
   if (a === 'look') { const l0 = Date.now(); await wait(lognormal(25000 * p.play.pace, .5)); ses.say(`看看房間、陪貓（${Math.max(1, Math.round((Date.now() - l0) * FAST / 1000))} 秒）`); return; }
   while (Date.now() < until) {
    let did = '';
-   if (!ses.tally || ses.tally.a !== a) ses.tally = { a, t0: Date.now(), n: {} };
-   if (a === 'cat' || a === 'toys') did = await ev(k => { const pets = PetPlay.pets(); if (!pets.length) return ''; const x = pets[Math.floor(Math.random() * pets.length)], d = x.data, nm = (d && (d.name || d.n)) || '貓咪'; PetPlay.trayOpen = true;
-     if (k === 'cat' && d && d.hunger < 55 && PetPlay.owned('cat_can')) { PetPlay.pick('cat_can'); PetPlay.down(x.x, x.y - 7); return `餵 ${nm} 吃貓罐頭`; }
-     else if (k === 'toys' && (Pets.Z.tools.ball || Pets.Z.tools.yarn || Life.L.bag.catnip)) { const t = Pets.Z.tools.ball && Math.random() < .5 ? 'ball' : Pets.Z.tools.yarn ? 'yarn' : Life.L.bag.catnip ? 'catnip' : 'ball'; PetPlay.pick(t); PetPlay.down(x.x + 22 - Math.random() * 44, Math.max(110, Math.min(160, x.y + 4))); return `丟${({ ball: '球', yarn: '毛線球', catnip: '貓草' })[t]}給 ${nm}`; }
-     else if (Pets.Z.tools.brush && Math.random() < .5) { PetPlay.pick('brush'); PetPlay.down(x.x, x.y - 7); return `幫 ${nm} 梳毛`; }
-     else { PetPlay.drop(); let ok = false; Game.interact && Room.hit && (() => { const h = Room.hit(x.x, x.y - 6); if (h && h.kind === 'actor' && h.a.poke) { h.a.poke(); ok = true; } })(); return ok ? `摸摸 ${nm}` : ''; } }, a);
-   else if (a === 'mini') did = await ev(() => { const it = Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'); if (it) { Game.interact(it); const I = ITEMS[it.k]; return '玩「' + (I.n || I.name || it.k) + '」'; } UI.openWin('catstypo'); return '玩「Meow Typo」'; });
-   if (did && (a === 'cat' || a === 'toys')) ses.tally.n[did] = (ses.tally.n[did] || 0) + 1; else if (did) ses.say(did);
+   if (a === 'mini') did = await ev(() => { const it = Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].cozyGame) || Game.S.items.find(i => ITEMS[i.k] && ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'); if (it) { Game.interact(it); const I = ITEMS[it.k]; return '玩「' + (I.n || I.name || it.k) + '」'; } UI.openWin('catstypo'); return '玩「Meow Typo」'; });
+   if (did) ses.say(did);
    await wait(lognormal(a === 'mini' ? 30000 : a === 'decor' ? 9000 : 6000, .5) * p.play.pace);
    await ev(() => { for (const w of ['cozygame', 'furnplay', 'catstypo']) if (UI.wins[w] && !UI.wins[w].el.hidden) UI.closeWin(w); });
   }
-  if ((a === 'cat' || a === 'toys') && ses.tally && Object.keys(ses.tally.n).length) { const n = ses.tally.n; ses.say(`和貓咪玩了 ${Math.max(1, Math.round((Date.now() - ses.tally.t0) * FAST / 1000))} 秒：` + Object.entries(n).map(([k, v]) => v > 1 ? `${k} ×${v}` : k).join('、')); ses.tally = null; }
  } catch (e) { ses.error = String(e && e.message || e).slice(0, 160); }
 }
 // the weekly merchant: say hello, maybe hear today's story chapter (lore card → 4 words → 2 questions → 5-question story quiz), maybe buy something
@@ -662,6 +671,111 @@ const MG = {   // typical seconds per round, and how the result is described
 };
 function miniSkill(p) { const a = p.age, P = p.play.prefs, base = a < 8 ? .25 : a < 11 ? .4 : a < 26 ? .55 : a < 50 ? .45 : .3; return clamp(base + .2 * ((P.mini || 0) + (P.gacha || 0) * .5) + (rnd() - .5) * .3, .05, .95); }
 function binom(n, q) { let k = 0; for (let i = 0; i < n; i++) if (chance(q)) k++; return k; }
+// ---------- 0.93.14 pets: what a person actually does with their cat ----------
+const PET_NAME_POOL = ['小橘', '布丁', '奶茶', '黑糖', '咪咪', 'Lucky', 'Momo', '可可', '豆花', '湯圓', '芝麻', '小虎', '雪球', '阿福', '花花', 'QQ', 'Coco', '小米', '胖胖', '球球', 'Kiki', '小白', '大福', '妞妞', '蛋黃', 'Mochi', '咖啡', '小黑', 'Nana', '饅頭'];
+const FOODN = { cat_can: '貓罐頭', fish_snack: '小魚乾', premium_food: '高級貓糧' }, TOYN = { ball: '球', yarn: '毛線球', wand: '逗貓棒', catnip: '貓草' };
+function petLove(p) { return clamp(.6 * (p.play.prefs.cat || 0) + .3 * (p.play.prefs.toys || 0) + .4 * (p.triggers.pet || 0), 0, 1); }
+// the first time someone has a cat, most of them give it a name of their own
+async function namePets(page, p, st, ses) {
+ if (st.petNamed) return;
+ const pets = await page.evaluate(() => { try { return Pets.home().map(q => ({ id: q.id, name: q.name })); } catch (e) { return null; } }).catch(() => null);
+ if (!pets || !pets.length) return;
+ st.petNamed = true;
+ const keep = (p.age >= 30 ? .35 : p.age >= 18 ? .25 : .08) * (1 - .6 * petLove(p));
+ if (chance(keep)) { ses.say(`貓咪就叫原本的名字「${pets[0].name}」`); return; }
+ let h = 0; for (const c of p.id + p.nick) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+ const pool = PET_NAME_POOL.slice();
+ for (const q of pets) { const nm = pool.splice((h + q.id * 7) % pool.length, 1)[0]; const ok = await page.evaluate(([id, n]) => { try { Pets.rename(id, n); return Pets.get(id).name === n; } catch (e) { return false; } }, [q.id, nm]).catch(() => false); if (ok) ses.say(`幫貓咪取名字：${q.name} → ${nm}`); }
+}
+// buying for the cat: food when it runs out, sometimes a treat, a toy, a brush
+async function petShop(page, p, ses, want) {
+ const got = await page.evaluate(w => { try { if (!Pets.home().length) return ''; const out = [], c = () => Game.S.coins, r = Math.random, stock = ['cat_can', 'fish_snack', 'premium_food'].reduce((n, k) => n + (Life.L.bag[k] || 0), 0);
+   if (w.auto) { w.food = stock < 2 && r() < .5 + .4 * w.love; w.treat = r() < .25 * w.love; w.toy = !['ball', 'yarn', 'wand'].some(k => Pets.Z.tools[k]) ? r() < .1 + .4 * w.love : r() < .05 * w.love; w.brush = !Pets.Z.tools.brush && r() < .05 + .3 * w.love; }
+   if (w.food) { const k = c() >= 80 ? 'cat_can' : 'fish_snack', pr = SUPPLIES[k].price, n = Math.min(Math.floor(c() / pr), 1 + Math.floor(r() * 3)); if (n >= 1 && Life.buySupply(k, n)) out.push(SUPPLIES[k].n + (n > 1 ? ' ×' + n : '')); }
+   if (w.treat && c() >= 60 && Life.buySupply('cat_treat', 1)) out.push(SUPPLIES.cat_treat.n);
+   if (w.toy) { const ts = ['ball', 'yarn', 'wand'].filter(k => !Pets.Z.tools[k] && Rewards.price(PET_TOOLS[k].price, 'pettool') + 20 <= c()); if (ts.length) { const k = ts[Math.floor(r() * ts.length)]; Pets.buyTool(k); if (Pets.Z.tools[k]) out.push(PET_TOOLS[k].n); } }
+   if (w.brush && !Pets.Z.tools.brush && Rewards.price(PET_TOOLS.brush.price, 'pettool') + 20 <= c()) { Pets.buyTool('brush'); if (Pets.Z.tools.brush) out.push(PET_TOOLS.brush.n); }
+   return out.join('、'); } catch (e) { return ''; } }, want).catch(() => '');
+ if (got) { ses.bought = (ses.bought || []).concat(got.split('、')); ses.say(`買了貓咪用品：${got}`); }
+ return got;
+}
+// one visit with the cat: see what it needs, do one or two things, pat it a few times, watch it, then go and do something else
+async function petVisit(page, p, st, ses, a, until, wait) {
+ const ev = (fn, x) => page.evaluate(fn, x), love = petLove(p), t0 = Date.now(), did = [];
+ const pets = await ev(() => { try { const day = Life.today(); return Pets.home().map(q => { const b = Pets.bowlShown(q), today = q.day && q.day.d === day; return { id: q.id, name: q.name, hunger: q.hunger, mood: q.mood, clean: q.clean, energy: q.energy, sick: !!q.sick, pats: today ? q.day.pet : 0, brushOk: (q.brushAt || 0) + 20 * 60000 < Date.now(), shown: Object.keys((today && q.day.show) || {}), tricks: TRICKS.filter(t => Pets.knows(q, t.id)).map(t => ({ id: t.id, n: t.n })), patNeed: Life.L.needs.some(n => n.type === 'cat_pet' && n.pet === q.id), bowl: b ? { uid: b.uid, left: Pets.bowlLeft(b) } : null }; }); } catch (e) { return []; } }).catch(() => []);
+ if (!pets.length) return;
+ // the one that needs something most, otherwise any of them
+ const q = pets.slice().sort((x, y) => (x.hunger + x.mood + x.clean) - (y.hunger + y.mood + y.clean))[chance(.6) ? 0 : Math.floor(rnd() * pets.length)];
+ const bag = () => ev(() => { try { return { food: ['cat_can', 'fish_snack', 'premium_food'].filter(k => Life.L.bag[k] > 0), catnip: Life.L.bag.catnip || 0, treat: Life.L.bag.cat_treat || 0, toys: ['ball', 'yarn', 'wand'].filter(k => Pets.Z.tools[k]), brush: !!Pets.Z.tools.brush }; } catch (e) { return null; } }).catch(() => null);
+ let B = await bag(); if (!B) return;
+ // hungry: into the bowl, or from the hand; nothing at home → most people go and buy some right away
+ if (q.hunger < 55) {
+  if (!B.food.length && chance(.5 + .4 * love)) { if (await petShop(page, p, ses, { food: true })) B = await bag(); }
+  if (B.food.length) { const food = B.food.includes('cat_can') ? 'cat_can' : B.food[0];
+   const how = await ev(([pid, food, bowl]) => { try { if (bowl && bowl.left < 20 && Pets.fillBowl(bowl.uid, food)) return 'bowl'; return Pets.feed(pid, food) ? 'hand' : ''; } catch (e) { return ''; } }, [q.id, food, q.bowl]);
+   if (how) { did.push(how === 'bowl' ? `把${FOODN[food]}倒進碗裡` : `餵${FOODN[food]}`); await wait(lognormal(6000 * p.play.pace, .4)); } }
+  else did.push('發現牠餓了，但家裡沒有貓食');
+ }
+ else if (B.treat && chance(.25 * love)) { if (await ev(pid => { try { return Pets.feed(pid, 'cat_treat'); } catch (e) { return false; } }, q.id)) { did.push('給零食'); await wait(lognormal(4000 * p.play.pace, .4)); } }
+ // dirty: brush it (the game allows once every 20 minutes)
+ if (q.clean < 50 && B.brush && q.brushOk && chance(.4 + .5 * love)) { if (await ev(pid => { try { return Pets.brush(pid); } catch (e) { return false; } }, q.id)) { did.push('梳毛'); await wait(lognormal(5000 * p.play.pace, .4)); } }
+ // play: a toys visit, or now and then when it looks bored
+ if ((a === 'toys' || (q.mood < 60 && chance(.3 + .5 * love))) && !q.sick && q.energy >= 15) {
+  let toy = B.toys.length ? B.toys[Math.floor(rnd() * B.toys.length)] : (B.catnip && q.mood < 50 ? 'catnip' : '');
+  if (!toy && a === 'toys' && chance(.3 + .5 * love)) { if (await petShop(page, p, ses, { toy: true })) { B = await bag(); toy = B.toys[0] || ''; } }
+  if (toy && await ev(([pid, t]) => { try { return Pets.play(pid, t); } catch (e) { return false; } }, [q.id, toy])) { did.push(`玩${TOYN[toy]}`); await wait(lognormal(9000 * p.play.pace, .5)); }
+  else if (!toy) did.push('想陪牠玩，但沒有玩具');
+ }
+ // a few pats; after the 6th pat of the day the game gives nothing more, and people mostly stop too
+ let pats = 1 + binom(3, .25 + .5 * love); if (q.patNeed) pats = Math.max(pats, 3); if (q.pats >= 6) pats = chance(.4) ? 1 : 0;
+ let n = 0; for (let i = 0; i < pats; i++) {
+  const ok = await ev(pid => { try { const q = Pets.get(pid), x = Pets.actor(q); if (!q || !x) return false; const b = q.st.pet; x.poke(); return q.st.pet > b; } catch (e) { return false; } }, q.id).catch(() => false);
+  if (ok) n++; await wait(lognormal(3500 * p.play.pace, .4)); }
+ if (n) did.push(n > 1 ? `摸摸 ×${n}` : '摸摸');
+ // a trick it already knows (each trick pays a little once a day)
+ const tk = q.tricks.filter(t => !q.shown.includes(t.id));
+ if (tk.length && chance(.2 + .5 * love)) { const t = tk[Math.floor(rnd() * tk.length)]; const ok = await ev(([pid, tid]) => { try { Pets.perform(pid, tid); return true; } catch (e) { return false; } }, [q.id, t.id]); if (ok) { did.push(`看牠表演「${t.n}」`); await wait(lognormal(6000, .3)); } }
+ // then just watch it a while
+ await wait(Math.min(lognormal((did.length ? 8000 + 30000 * love : 6000 + 12000 * love) * p.play.pace, .5), Math.max(3000, (until - Date.now()) * FAST)));   // nothing else to do: a shorter look
+ ses.say(`陪${q.name}（${Math.round((Date.now() - t0) * FAST / 1000)} 秒）：${did.concat('看牠走來走去').join('、')}`);
+}
+// ---------- 0.93.14 friends: visit, help, paper airplanes ----------
+async function helpFlow(page, p, st, ses, wait, today, r, fname) {
+ if (r && r.quiz) { ses.say(`幫 ${fname} 的忙，先答 4 個英文字`); const a0 = ses.ans; ses.count.helpq = (ses.count.helpq || 0) + 1; ses.acts.push('helpq'); await act(page, p, st, ses, 'helpq', 3, wait); if (today) today.ans = (today.ans || 0) + ses.ans - a0; return; }
+ if (r && r.free) { await wait(2000); const done = await page.evaluate(() => { try { return Social.helpsToday(); } catch (e) { return 0; } }).catch(() => 0); ses.say(done ? `幫 ${fname} 一個忙（今天第一次，不用答題）` : `想幫 ${fname}，但沒有成功（可能別人先幫了）`); }
+}
+async function socialVisit(page, p, st, ses, until, wait) {
+ const ev = (fn, x) => page.evaluate(fn, x), fr = p.triggers.friend || 0;
+ await ev(() => UI.openWin('friends')); await wait(lognormal(5000 * p.play.pace, .4));
+ const list = await ev(() => { try { if (!Social.ready()) return null; return Social.okFriends().map(f => ({ id: f.id, name: Social.friendName(f.id) })); } catch (e) { return null; } }).catch(() => null);
+ if (!list || !list.length || chance(.2)) {
+  const sb = await ev(() => { try { if (!Social.ready()) return false; UI.frTab = 'board'; Social.loadBoard('lvl'); UI.refresh('friends'); return true; } catch (e) { return false; } }).catch(() => false);
+  if (sb) { ses.say('看一下好友排行榜'); await wait(lognormal(7000, .4)); }
+  await ev(() => UI.closeWin('friends')); return; }
+ const mates = (p.friends || []).map(id => (PEOPLE.find(x => x.id === id) || {}).nick).filter(Boolean), known = list.filter(f => mates.some(m => String(f.name).includes(m)));
+ const pool = known.length && chance(.75) ? known : list, f = pool[Math.floor(rnd() * pool.length)];
+ await ev(fid => Social.visit(fid), f.id).catch(() => { });
+ await page.waitForFunction(() => Social.visitSt && !Social.visitSt.loading, null, { timeout: 20000 }).catch(() => { });
+ const v = await ev(() => { try { const v = Social.visitSt || {}; return { ok: !!v.d, name: v.name || '', needs: v.d ? (v.d.needs || []).filter(n => NEED_HELP[n.type] && !Social.canHelp(v.fid, n)).map(n => n.k) : [], items: v.d ? (v.d.items || []).length : 0, pets: v.d ? (v.d.pets || []).map(x => x.name) : [] }; } catch (e) { return null; } }).catch(() => null);
+ if (!v || !v.ok) { ses.say(`想去 ${f.name} 的房間，但沒有打開`); await ev(() => { UI.closeWin('visit'); UI.closeWin('friends'); }).catch(() => { }); return; }
+ ses.say(`去 ${v.name} 的房間逛逛（${v.items} 件家具${v.pets.length ? '，貓咪 ' + v.pets.join('、') : ''}）`);
+ await wait(lognormal((15000 + 30000 * (p.play.prefs.decor || 0)) * p.play.pace, .5));
+ if (v.needs.length && chance(.45 + .4 * fr + (p.age < 13 ? .15 : 0))) {
+  const r = await ev(k => { try { const v = Social.visitSt, n = v.d.needs.find(n => n.k === k); if (!n) return null; const free = Social.freeLeft(); Social.help(v.fid, n); return { free, quiz: !!(Learn.sess && Learn.sess.kind === 'help') }; } catch (e) { return null; } }, v.needs[0]).catch(() => null);
+  await helpFlow(page, p, st, ses, wait, null, r, v.name);
+ }
+ await ev(() => { UI.closeWin('visit'); UI.closeWin('friends'); }).catch(() => { });
+}
+// a paper airplane that has landed in the room: a friend's room needs a hand
+async function planeCheck(page, p, st, ses, wait, today) {
+ const P = await page.evaluate(() => { try { const P = typeof Feel !== 'undefined' && Feel.plane; return P && P.t >= 1 ? { text: P.text, fname: P.fname, at: P.until } : null; } catch (e) { return null; } }).catch(() => null);
+ if (!P || ses.planeSeen === P.at) return false; ses.planeSeen = P.at;
+ if (!chance(.55 + .3 * (p.triggers.friend || 0) + (p.age < 13 ? .15 : 0))) { ses.say(`紙飛機飛進來（${P.text}），先不理它`); return false; }
+ ses.say(`紙飛機飛進來：${P.text}，點開來幫忙`);
+ const r = await page.evaluate(() => { try { const free = Social.freeLeft(); Feel.openPlane(); return { free, quiz: !!(Learn.sess && Learn.sess.kind === 'help') }; } catch (e) { return null; } }).catch(() => null);
+ await helpFlow(page, p, st, ses, wait, today, r, P.fname);
+ return true;
+}
 async function miniRound(page, p, st, ses, until, wait) {
  const ev = (fn, x) => page.evaluate(fn, x);
  const info = await ev(() => { const its = Game.S.items.filter(i => ITEMS[i.k] && (ITEMS[i.k].cozyGame || (ITEMS[i.k].interactionProfile && ITEMS[i.k].interactionProfile !== 'native'))); if (!its.length) return null;
@@ -679,7 +793,7 @@ async function miniRound(page, p, st, ses, until, wait) {
   const sec = Math.max(12, lognormal(M.sec * p.play.pace * (1.35 - .6 * k), .3)), left = (until - Date.now()) * FAST / 1000 + 60;
   if (round) await ev(() => { const s = MiniTable.session; if (s) MiniTable.reset(s); });
   agg.rounds++;
-  if (sec > left && chance(.6)) { await wait(left * 1000); await ev(() => UI.closeWin('cozygame')); ses.say(`${label} 第 ${round + 1} 局沒玩完就關掉（${Math.round(left)} 秒）`); agg.sec += left; break; }
+  if (sec > left && chance(.6)) { await wait(left * 1000); await ev(() => UI.closeWin('cozygame')); ses.say(`${label} 第 ${agg.rounds} 局沒玩完就關掉（${Math.round(left)} 秒）`); agg.sec += left; break; }
   await wait(sec * 1000);
   // the modelled outcome
   const o = { mode: info.mode, sec: Math.round(sec) }; let line = '';
@@ -719,7 +833,7 @@ async function miniRound(page, p, st, ses, until, wait) {
    if (o.win) MiniTable.win(s); MiniTable.end(s, r); return true; }, o).catch(e => 'err:' + (e && e.message || e));
   if (okEnd !== true) { ses.say(`⚠ ${label} 結算失敗：${okEnd}`); break; }
   agg.done++; if (o.win) agg.wins++; agg.sec += o.sec; (agg.list = agg.list || []).push(o);
-  ses.say(`${label} 第 ${round + 1} 局：${line}${o.win ? '，過關' : ''}（${o.sec} 秒）`);
+  ses.say(`${label} 第 ${agg.rounds} 局：${line}${o.win ? '，過關' : ''}（${o.sec} 秒）`);
   await wait(lognormal(3000 * p.play.pace, .4));
   if (Date.now() > until || !chance(.35 + .4 * ((p.play.prefs.mini || 0) / 1.2) + (o.win ? .1 : -.1))) break;
  }
@@ -753,6 +867,11 @@ function misspell(word) { const w = String(word).toLowerCase(); if (w.length < 3
 
 const END = arg('end') ? Date.parse(String(arg('end'))) : 0;
 const SELF_MTIME = fs.statSync(__filename).mtimeMs; let RESTART = false;   // run mode: a newer life.cjs on disk is picked up between sessions   // e.g. --end 2026-11-24T00:00:00+08:00
+// 0.93.14: the computer running this can sleep. Timers stop, so a page that was loading looks like a "load timeout"
+// of several hours afterwards. Long pauses are written down and attached to the error, and the visit is played again.
+const SLEEPS = []; let lastTick = Date.now();
+setInterval(() => { const n = Date.now(); if (n - lastTick > 5 * 60e3) { SLEEPS.push([lastTick, n]); console.log(`[life] 電腦休眠或暫停了 ${Math.round((n - lastTick) / 60000)} 分鐘（${hm(tw(lastTick).min)}–${hm(tw(n).min)}），這段時間沒有人上線`); } lastTick = n; }, 30000).unref();
+const sleptDuring = (a, b) => Math.round(SLEEPS.reduce((m, [x, y]) => m + Math.max(0, Math.min(b, y) - Math.max(a, x)), 0) / 60000);
 async function runLoop(once) {
  if (once) RUN_END = Date.now() + (+arg('window', 30) + 3) * 60e3;
  let S = loadState();
