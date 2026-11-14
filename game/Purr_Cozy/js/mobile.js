@@ -2,6 +2,11 @@
    Phone (portrait) version
    The game switches by screen shape: a portrait screen up to 900 px wide gets the phone
    layout (body.m), everything else keeps the desktop layout exactly as it was.
+   0.93.15 foldables: a touch screen up to 960 px wide gets the phone layout in any orientation.
+   When that screen is square-ish or lying down (the inside of a Galaxy Z Fold 7 / Fold 8 or an
+   iPhone Duo, after the browser's own bars are taken off the height), the room and the
+   "today" panel sit side by side (body.m.mw) instead of on top of each other, and windows
+   open as a panel on the right so the room stays in view.
    Phone layout, top to bottom:
      HUD (one row) / the room, as wide as the screen / "today" panel (what you can do right
      now: timer, today's words, the merchant's story, needs, team, paper plane, the hand
@@ -17,13 +22,19 @@
 const magn = (minus) => icon(g => { const W = palAdd('#fff6ec'), D = palAdd('#4b4560'), B = palAdd('#cfe6ee'); g.ellipse(6.5, 6.5, 5, 5, D); g.ellipse(6.5, 6.5, 3.8, 3.8, B); g.hl(4, 6, 6, D); if (!minus) g.vl(6, 4, 6, D); g.px(4, 4, W); for (let i = 0; i < 4; i++) { g.px(10 + i, 11 + i, D); g.px(11 + i, 11 + i, D); g.px(11 + i, 10 + i, D); } });
 ; ;
 ;
-const MOBILE = { maxW: 900, idleMs: 20000, longMs: 450, zoom: 2 };
+const MOBILE = { maxW: 900, touchW: 960, wideW: 560, wideR: 1.1, squareR: 0.82, idleMs: 20000, longMs: 450, zoom: 2 };
 const HALF_WINS = new Set(['need', 'timer', 'todo', 'memo', 'account', 'cowork', 'visit', 'gacha']);
 const FULL_WINS = new Set(['study', 'shop', 'avatar', 'words', 'storage', 'merchant', 'story', 'learn', 'tasks', 'friends', 'music', 'settings', 'dev', 'more']);
 
 const Mobile = {
   on: false, lastInput: performance.now(), zoomed: false, zx: 0, zy: 0,
-  detect() { return window.innerHeight > window.innerWidth && window.innerWidth <= MOBILE.maxW; },
+  coarse() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); },
+  detect() { const w = window.innerWidth, h = window.innerHeight; return (h > w && w <= MOBILE.maxW) || (this.coarse() && w <= MOBILE.touchW); },
+  // square-ish or lying down: not enough height to put the room on top of the panel
+  // '' = tall (room on top of the panel), 'sq' = about square (a big room, the panel under it in two columns),
+  // 'w' = lying down (room on the left, panel on the right)
+  detectShape() { const w = window.innerWidth, h = window.innerHeight; return w < MOBILE.wideW || h >= w * MOBILE.wideR ? '' : h >= w * MOBILE.squareR ? 'sq' : 'w'; },
+  wide: false, square: false, shape: '',
   apply() {
     const m = this.detect();
     if (m !== this.on) {
@@ -37,6 +48,8 @@ const Mobile = {
       if (yp && st) { if (m && yp.parentNode !== st) st.insertBefore(yp, this.today && this.today.parentNode === st ? this.today.nextSibling : null); else if (!m && yp.parentNode === st) document.body.insertBefore(yp, document.getElementById('toasts')); }
       this.render();
     }
+    const shp = m ? this.detectShape() : '';
+    if (shp !== this.shape) { this.shape = shp; this.wide = shp === 'w'; this.square = shp === 'sq'; document.body.classList.toggle('mw', this.wide); document.body.classList.toggle('msq', this.square); for (const id in UI.wins) if (!UI.wins[id].el.hidden) UI.placeWin(UI.wins[id]); }
     // Layout must not force cross-site redirect authentication. Cloud uses a user-triggered popup.
     return m;
   },
@@ -135,7 +148,7 @@ const Mobile = {
       // the bar under the room: the hand tray on the left; the travelling merchant and the zoom on the right
       const mbtn = mw ? h('button', { class: 'chip mmerch', onclick: () => Merchant.go(), 'aria-label': I18n.s("u_a924b4e38bc8") + mw[0] }, ico('i_merchant', 22), h('span', { text: mw[0] }), mw[1] ? h('span', { class: 'badge-dot' }) : null) : null;
       const rows = this.rows(); if (!focusing && typeof Lights !== 'undefined') { const nr = Lights.nightRow(); if (nr) rows.push(h('button', { class: 'mrow', onclick: () => Lights.goodnight() }, ico('i_moon', 26), h('span', { class: 'mrow-t' }, h('b', { text: nr[0] }), h('span', { class: 'hint', text: nr[1] })), ico('i_chev', 16))); }
-      this.today.replaceChildren(h('div', { class: 'mbar' }, h('div', { class: 'mtray-slot' }), h('div', { class: 'mbar-r' }, mbtn, this.zbtn)), this.timerCard(), focusing ? h('p', { class: 'hint center', text: I18n.s("u_20f08b0a9fc1") }) : h('div', { class: 'mrows' }, ...rows));
+      this.today.replaceChildren(h('div', { class: 'mbar' }, h('div', { class: 'mtray-slot' }), h('div', { class: 'mbar-r' }, mbtn, this.zbtn)), h('div', { class: 'mside' }, this.timerCard(), focusing ? h('p', { class: 'hint center', text: I18n.s("u_20f08b0a9fc1") }) : h('div', { class: 'mrows' }, ...rows)));
       if (tray) this.today.querySelector('.mtray-slot').append(tray);
     }
     const tm = this.today.querySelector('.mt-time'); if (tm) { const t = Game.S.timer; tm.textContent = fmt(t.running ? (t.endsAt - Date.now()) / 1000 : t.remain); }
@@ -146,8 +159,14 @@ const Mobile = {
     const stage = document.querySelector('.stage'), cv = document.getElementById('room'), wrap = document.querySelector('.room-wrap');
     const W = stage.getBoundingClientRect().width, H = window.innerHeight, dpr = window.devicePixelRatio || 1;
     let s = Math.min(W / RW, (H * 0.5) / RH);
+    if (this.wide) {   // side by side: the room as tall as the space allows (a row under it for the hand tray), the panel keeps at least 260–300 px
+      const sh = stage.getBoundingClientRect().height, side = W >= 760 ? 300 : 260;
+      s = Math.min((W - side - 10) / RW, (sh - 12 - 48) / RH);
+    } else if (this.square) s = Math.min(W / RW, (stage.getBoundingClientRect().height - 12 - 132) / RH);   // under the room: the hand-tray row and the timer
     s = Math.max(1 / 16, Math.floor(s * RW * dpr) / (RW * dpr));
     Game.scale = s; cv.style.width = RW * s + 'px'; cv.style.height = RH * s + 'px'; wrap.style.width = RW * s + 'px'; wrap.style.height = RH * s + 'px';
+    const de = document.documentElement.style;
+    if (this.wide) { const side = Math.max(0, W - RW * s - 10); de.setProperty('--mw-side', side + 'px'); de.setProperty('--mw-top', Math.round(stage.getBoundingClientRect().top) + 'px'); }
     this.applyZoom();
   },
   // ---------- zoom: 2x around a point, the room box stays the same ----------
