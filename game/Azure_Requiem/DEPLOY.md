@@ -15,15 +15,17 @@ azure-requiem/
 │  ├─ manifest.json        「音效欄位 → 檔名」對照表（使用中）
 │  ├─ manifest.ace-pack.json  另一份對照表：搭配你那批遊戲音效使用
 │  └─ *.mp3                遊戲中每一個聲音各一個檔案，例如 target_switch.mp3（切換目標）
-└─ voice/                  無線電錄音（檔名見錄音稿 RECORDING_SCRIPT.md，不需要對照表）
-   └─ （你的錄音檔）       例如 BISHOP_ACK-A01.wav
+├─ voice/                  無線電錄音（檔名見錄音稿 RECORDING_SCRIPT.md，不需要對照表）
+│  └─ （你的錄音檔）       例如 BISHOP_ACK-A01.wav
+└─ models/                 機體模型（可替換；沒有這個資料夾時使用內嵌在 index.html 裡的模型）
+   └─ fa18.glb、f22.glb、f35.glb、f14.glb、su30.glb、su35.glb、su47.glb、su57.glb
 ```
 
 交付的 `azure-requiem-deploy.zip` 已經照這個結構放好 `index.html`、四張頭像、`sound/` 裡的全部內建音效與 `manifest.json`。你需要自己放進去的是 `head/Enemy.png` 和 `voice/` 裡的錄音檔；`sound/` 裡的音效可以直接覆蓋替換。
 
 ## 載入流程
 
-開啟網頁時會先出現載入畫面，顯示「頭像 x/5　音效 y/n」，全部完成後才進主選單。這段期間做的事：
+開啟網頁時會先出現載入畫面，顯示「機體 x/8　頭像 x/5　音效 y/n　語音 z/m」，全部完成後才進主選單。這段期間做的事：
 
 1. 下載 `head/` 的五張頭像。
 2. 解碼內建音效。
@@ -34,6 +36,26 @@ azure-requiem/
 進入遊戲之後不會再下載任何頭像或音效。網路太慢時最多等 60 秒，之後先進遊戲，沒載到的音效用內建的。
 
 優先順序（後面的蓋過前面的）：內建音效 → `sound/` 資料夾 → 瀏覽器裡手動匯入的音檔。
+
+## models/ 資料夾
+
+八種機體的模型都已經內嵌在 `index.html` 裡，所以不放 `models/` 也能正常遊玩。`models/` 的用途是替換：放入同名的 `.glb`，遊戲會優先使用它。
+
+| 檔名 | 機型 |
+|---|---|
+| `fa18.glb` | F/A-18 |
+| `f22.glb` | F-22 |
+| `f35.glb` | F-35 |
+| `f14.glb` | F-14（主翼是名為 `wing_L`、`wing_R` 的獨立零件，原點在樞軸） |
+| `su30.glb` | Su-30 |
+| `su35.glb` | Su-35 |
+| `su47.glb` | Su-47 |
+| `su57.glb` | Su-57 |
+
+- 替換用的模型要符合：機鼻朝 −Z、上方 +Y、右方 +X，單位公尺，機身中心在原點，起落架收起。用 `tools/process_models.py`（在 Blender 執行）可以把下載的模型整理成這個規格。
+- 會動的零件是模型裡獨立的物件，原點在轉軸上：水平尾翼 `stab_L`／`stab_R`、方向舵 `rud_L`／`rud_R`、副翼 `ail_L`／`ail_R`、鴨翼 `canard_L`／`canard_R`（Su-30）、F-14 的主翼 `wing_L`／`wing_R`。沒有這些零件的模型仍可使用，只是舵面不會動。
+- 尾焰與翼尖的位置、各舵面的轉軸方向記在原始碼的 `assets/models/models.json`，換成外形差很多的模型時要重新產生並重新建置。
+- 模型的來源與授權見 `models/CREDITS.md`。F-22 的模型是 Sketchfab Standard 授權，不可把模型檔單獨轉散布；目前是不公開的內部試驗所以一併放入，日後若要公開請先換掉。
 
 ## 必須透過網頁伺服器開啟
 
