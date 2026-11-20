@@ -393,7 +393,7 @@ async function load(list,label){
  fillSelect('f-level',[1,2,3,4,5,6],l=>'L'+l);
  fillSelect('f-app',[...new Set(S.raw.map(r=>r.app).filter(Boolean))].sort(),x=>x);
  analyse();
- OP.idxKey='';Admin.devKey='';Admin.guests={};if(Admin.page==='oprep')Admin.opRender();
+ OP.idxKey='';Admin.devKey='';Admin.guestKey='';if(Admin.page==='oprep')Admin.opRender();
 }
 function fillSelect(id,vals,label){const el=$(id),cur=el.value;el.replaceChildren(new Option('全部',''),...vals.map(v=>new Option(label(v),v)));el.value=cur}
 
@@ -894,7 +894,7 @@ const keyName=()=>'purr-analytics.key.'+aiP.value;
 function syncProvider(){$('ai-models').replaceChildren(...MODELS[aiP.value].map(m=>new Option(m,m)));aiM.value=localStorage.getItem('purr-analytics.model.'+aiP.value)||MODELS[aiP.value][0];aiK.value=localStorage.getItem(keyName())||'';$('ai-remember').checked=!!aiK.value}
 aiP.onchange=syncProvider;try{aiP.value=localStorage.getItem('purr-analytics.provider')||'anthropic'}catch(e){}syncProvider();
 const FOCUS={all:'完整報告：涵蓋內容、學習成效、產品留存、模型與複習間隔。',content:'讀者是教材編輯：重點放在單字難度、程度標錯、易混淆字、常見拼錯，並給出可以直接修改的單字清單。',product:'讀者是產品經理：重點放在留存、放棄點、各學習入口的效果、使用時段，並提出 A/B 測試。',model:'讀者是工程師：重點放在自適應模型校正、複習間隔是否合理、題型難度，並提出具體參數調整。'};
-function prompt(){return `你是教育科技公司的資深學習數據分析師。以下是英文單字學習遊戲「呼嚕小窩」的匿名學習統計（JSON，已彙總，不含個人資料）。
+function aiPrompt(){return `你是教育科技公司的資深學習數據分析師。以下是英文單字學習遊戲「呼嚕小窩」的匿名學習統計（JSON，已彙總，不含個人資料）。
 
 請用繁體中文寫一份給團隊看的 Markdown 報告。${FOCUS[$('ai-focus').value]}
 ${$('ai-extra').value?'團隊補充：'+$('ai-extra').value+'\n':''}
@@ -909,14 +909,14 @@ ${$('ai-extra').value?'團隊補充：'+$('ai-extra').value+'\n':''}
 
 資料：
 ${JSON.stringify(S.summary)}`}
-$('ai-preview').onclick=()=>{if(!S.summary)return;const el=$('ai-summary');el.textContent=prompt();el.classList.toggle('hidden')};
+$('ai-preview').onclick=()=>{if(!S.summary)return;const el=$('ai-summary');el.textContent=aiPrompt();el.classList.toggle('hidden')};
 $('ai-go').onclick=async()=>{
  if(!S.summary)return alert('請先載入資料');const key=aiK.value.trim(),model=aiM.value.trim();if(!key)return alert('請輸入 API 金鑰');
  try{localStorage.setItem('purr-analytics.provider',aiP.value);localStorage.setItem('purr-analytics.model.'+aiP.value,model);if($('ai-remember').checked)localStorage.setItem(keyName(),key);else localStorage.removeItem(keyName())}catch(e){}
  const out=$('ai-out');out.innerHTML='<p class="muted">AI 分析中，通常需要 30–90 秒…</p>';$('ai-go').disabled=true;
  try{let text='';
-  if(aiP.value==='anthropic'){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:6000,messages:[{role:'user',content:prompt()}]})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.content.map(c=>c.text||'').join('')}
-  else{const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+key},body:JSON.stringify({model,input:prompt()})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.output_text||(j.output||[]).flatMap(o=>o.content||[]).filter(c=>c.type==='output_text').map(c=>c.text).join('')}
+  if(aiP.value==='anthropic'){const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:6000,messages:[{role:'user',content:aiPrompt()}]})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.content.map(c=>c.text||'').join('')}
+  else{const r=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+key},body:JSON.stringify({model,input:aiPrompt()})});const j=await r.json();if(!r.ok)throw Error(j.error?.message||r.status);text=j.output_text||(j.output||[]).flatMap(o=>o.content||[]).filter(c=>c.type==='output_text').map(c=>c.text).join('')}
   S.report=text;out.innerHTML=md(text);Admin.log('ai','',$('ai-focus').value);$('ai-dl').disabled=false;
  }catch(e){out.innerHTML='<p style="color:var(--acc2)">失敗：'+esc(e.message)+'</p><p class="muted">常見原因：金鑰錯誤、帳戶沒有額度、模型名稱打錯（到 Anthropic / OpenAI 文件查最新的模型名稱）。</p>'}
  finally{$('ai-go').disabled=false}};
@@ -936,8 +936,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.14';
-const CHANGELOG=[['0.5.14','2026/11/20','放棄點看得出「停在哪種題型」：遊戲（learn-log.js 更新後）中途離開或改做別的學習時，會記下停在第幾題、是什麼題型，例如「測驗第 4 題（拼字）・改做別的學習」。「在哪裡放棄」新增「放棄時正在作答的題型」表（每種題型出現時有多少比例在這一題離開）；營運報告新增「在某種題型前放棄」判讀。舊紀錄沒有位置時，改顯示「答完幾題後」。'],['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.15';
+const CHANGELOG=[['0.5.15','2026/11/20','三個小修正：程度挑戰賽選「全部」時，真實玩家和測試帳號各自排名（和遊戲一樣），名次和「榜外」不再被測試帳號擠掉；「訪客 N」改成依第一次出現在資料裡的時間編號，每一頁都是同一個號碼；複製網址失敗時的備用視窗恢復正常。'],['0.5.14','2026/11/20','放棄點看得出「停在哪種題型」：遊戲（learn-log.js 更新後）中途離開或改做別的學習時，會記下停在第幾題、是什麼題型，例如「測驗第 4 題（拼字）・改做別的學習」。「在哪裡放棄」新增「放棄時正在作答的題型」表（每種題型出現時有多少比例在這一題離開）；營運報告新增「在某種題型前放棄」判讀。舊紀錄沒有位置時，改顯示「答完幾題後」。'],['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 // 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
 const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
  ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
@@ -1414,7 +1414,7 @@ Object.assign(Admin,{
  // 0.5.06: names people can read. The 30 simulated students are 測試-暱稱 (tools/sim/people.json), other test accounts 測試-名稱,
  // players who never signed in are 訪客 1, 訪客 2 … (numbered in the order they first appear)
  nameOf(k){if(!k)return '';const sim=this.simName(k);if(sim)return sim;
-  if(k.startsWith('anon:')){const G=this.guests||(this.guests={});if(!G[k])G[k]=Object.keys(G).length+1;return '訪客 '+G[k]}
+  if(k.startsWith('anon:'))return '訪客 '+this.guestNo(k)
   const p=(this.players||[]).find(x=>x.uid===k),nm=p?((p.sum&&p.sum.name)||(p.reg&&p.reg.name)||(p.doc&&p.doc.email)||''):(B.names&&B.names[k])||'';
   const test=(window.TEST_UIDS&&TEST_UIDS.has(k))||(p&&((p.reg&&p.reg.test)||(p.sum&&p.sum.tester)));
   if(!nm){if(this.needName(k))return test?'測試帳號':'讀取名字中…';return test?'測試帳號':'未取名的玩家'}return test&&!/^測試/.test(nm)?'測試-'+nm:nm},
@@ -1428,6 +1428,13 @@ Object.assign(Admin,{
   this.refreshNames()},
  // after names arrive: the account menu and whatever page shows names are drawn again
  refreshNames(){this.fillAcct();if(this.page==='oprep')this.opRender();else if(this.page==='behavior'&&B.loaded)this.renderBehavior();else if(this.page==='players')this.renderPlayers()},
+ // 0.5.15: guests are numbered by the time they first show up in the data (learning rounds and daily usage together),
+ // so 訪客 3 is the same person on every page, whichever page was opened first
+ guestNo(k){const raw=S.raw.length+'|'+B.raw.length+'|'+((S.raw[0]&&S.raw[0].pk)||'');
+  if(this.guestKey!==raw){this.guestKey=raw;const first=new Map(),see=(g,t)=>{if(!g||!g.startsWith('anon:')||!(t>0))return;const o=first.get(g);if(o===undefined||t<o)first.set(g,t)};
+   for(const r of S.raw)see(r.pk,new Date(r.t0).getTime());for(const r of B.raw)see(r.pk,Date.parse(r.d+'T00:00:00'));
+   const G=this.guests={};[...first].sort((a,b)=>a[1]-b[1]||(a[0]<b[0]?-1:1)).forEach(([g],i)=>G[g]=i+1)}
+  const G=this.guests;if(!G[k])G[k]=Object.keys(G).length+1;return G[k]},
  simName(k){const raw=S.raw.length+'|'+B.raw.length+'|'+((S.raw[0]&&S.raw[0].pk)||'');if(this.devKey!==raw){this.devKey=raw;const D=this.devOf={};for(const r of S.raw){if(r.dev&&r.pk&&!D[r.pk])D[r.pk]=r.dev;if(r.dev&&r.acct&&!D[r.acct])D[r.acct]=r.dev}for(const r of B.raw)if(r.dev&&r.pk&&!D[r.pk])D[r.pk]=r.dev}
   const m=/^(?:test-)?(sim\d+)/.exec((this.devOf||{})[k]||'');return m&&SIMN[m[1]]?'測試-'+SIMN[m[1]]:''},
  async loadBehavior(full){if(this.me.offline)return;const note=$('bh-note');note.textContent='讀取中…';
@@ -1540,7 +1547,7 @@ Object.assign(Admin,{
   const {F,db}=await firebase(),wk=$('ct-wk').value,board=$('ct-board').value;$('ct-note').textContent='讀取中…';
   try{const rows=[];for(const bd of board==='all'?['rows','test']:[board]){const snap=await F.getDocs(F.collection(db,'contest',wk,bd));snap.forEach(d=>{const x=d.data();rows.push(Object.assign({id:d.id,_test:bd==='test'},x,{at:x.at&&x.at.toMillis?x.at.toMillis():0}))})}
    this.ctSet(rows,wk,board,'Firestore');this.log('load','contest',`${wk} ${board} ${rows.length} 人`)}catch(e){$('ct-note').textContent=e.code==='permission-denied'?'讀取被拒：請發布 0.5.02 的 firestore.rules。':'讀取失敗：'+(e.code||e.message)}},
- ctSet(rows,wk,board,label){CTA.rows=rows.filter(r=>(r.s|0)>0||(r.n|0)>0).sort((a,b)=>b.s-a.s||(a.at||0)-(b.at||0)||(a.id<b.id?-1:1));CTA.wk=wk;CTA.board=board;
+ ctSet(rows,wk,board,label){CTA.rows=rows.filter(r=>(r.s|0)>0||(r.n|0)>0).sort((a,b)=>(board==='all'?(a._test?1:0)-(b._test?1:0):0)||b.s-a.s||(a.at||0)-(b.at||0)||(a.id<b.id?-1:1));CTA.wk=wk;CTA.board=board;
   $('ct-note').textContent=`${label}：${wk.slice(1)} 這週・${board==='test'?'測試帳號':board==='all'?'真人與測試帳號':'真實玩家'}・${CTA.rows.length} 人有成績`;this.ctRender()},
  ctRender(){const R=CTA.rows,n=R.length,kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
   const byL=[0,1,2,3,4,5,6].map(l=>R.filter(r=>r.l===l).length),reach=[1,2,3,4,5,6].map(l=>R.filter(r=>r.l>=l).length),tries=R.map(r=>r.tries||1).sort((a,b)=>a-b);
@@ -1550,9 +1557,11 @@ Object.assign(Admin,{
   chart('c-ct-dist',{type:'bar',data:{labels:['沒有突破','L1 青銅','L2 白銀','L3 黃金','L4 鉑金','L5 鑽石','L6 星耀（登頂）'],datasets:[{label:'人數',data:byL,backgroundColor:CT_COL}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'人數'}}}}});
   chart('c-ct-reach',{type:'line',data:{labels:['L1','L2','L3','L4','L5','L6'],datasets:[{label:'突破到這一階以上的比例 %',data:reach.map(x=>n?Math.round(x/n*100):0),borderColor:'#8c5aa8',backgroundColor:'#8c5aa8'}]},options:{scales:{y:{min:0,max:100,title:{display:true,text:'%'}}}}});
   const ago=t=>t?new Date(t).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'';
-  table('t-ct',['名次','玩家','成績','答對率','突破各階的題數','報名次數','最後更新',''],R.map((r,i)=>[i<50?i+1:{v:i+1,h:`<span class="muted">${i+1}（榜外）</span>`},{v:r.name||'',h:esc(r.name||'(未命名)')+((window.TEST_UIDS&&TEST_UIDS.has(r.id))||r._test?' <span class="tag easy">測試</span>':''),n:false},{v:r.s,h:`<span class="tag" style="background:${CT_COL[r.l]};color:#fff">${r.l>=6?'L6 登頂':r.l?'通過 L'+r.l:'沒有突破'}</span>`,n:false},{v:r.a,h:(r.a/10).toFixed(1)+'%'},r.n|0,r.tries|0,ago(r.at),{v:0,h:`<button data-ctp="${esc(r.id)}">玩家帳號</button>`,n:false}]));
-  $('ct-rank-note').textContent=n>50?`玩家在遊戲裡只看得到前 50 名和自己；第 51 名以後沒有名次也沒有排行獎勵。`:'';},
- ctCsv(){const csv='﻿名次,玩家,UID,突破階數,答對率,題數,報名次數\n'+CTA.rows.map((r,i)=>[i+1,r.name,r.id,r.l,(r.a/10).toFixed(1),r.n,r.tries].map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  // 0.5.15: the game ranks real players and test accounts on separate boards, so 「全部」 ranks each board on its own (real players first)
+  const rk=[],cnt={};for(const r of R){const b=r._test?1:0;cnt[b]=(cnt[b]||0)+1;rk.push(cnt[b])}
+  table('t-ct',['名次','玩家','成績','答對率','突破各階的題數','報名次數','最後更新',''],R.map((r,i)=>[rk[i]<=50?rk[i]:{v:rk[i],h:`<span class="muted">${rk[i]}（榜外）</span>`},{v:r.name||'',h:esc(r.name||'(未命名)')+((window.TEST_UIDS&&TEST_UIDS.has(r.id))||r._test?' <span class="tag easy">測試</span>':''),n:false},{v:r.s,h:`<span class="tag" style="background:${CT_COL[r.l]};color:#fff">${r.l>=6?'L6 登頂':r.l?'通過 L'+r.l:'沒有突破'}</span>`,n:false},{v:r.a,h:(r.a/10).toFixed(1)+'%'},r.n|0,r.tries|0,ago(r.at),{v:0,h:`<button data-ctp="${esc(r.id)}">玩家帳號</button>`,n:false}]));
+  $('ct-rank-note').textContent=(CTA.board==='all'?'真實玩家和測試帳號在遊戲裡是兩個分開的排行榜，這裡也各排各的：先列真實玩家，再列測試帳號。':'')+(Math.max(cnt[0]||0,cnt[1]||0)>50?`玩家在遊戲裡只看得到前 50 名和自己；第 51 名以後沒有名次也沒有排行獎勵。`:'');},
+ ctCsv(){const cnt={};const csv='﻿名次,排行榜,玩家,UID,突破階數,答對率,題數,報名次數\n'+CTA.rows.map(r=>{const b=r._test?1:0;cnt[b]=(cnt[b]||0)+1;return [cnt[b],r._test?'測試':'真實',r.name,r.id,r.l,(r.a/10).toFixed(1),r.n,r.tries].map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')}).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`contest-${CTA.wk}-${CTA.board}.csv`;a.click();this.log('export','contest',CTA.wk)},
  ctDemo(){let seed=5;const r=()=>(seed=(seed*16807)%2147483647)/2147483647,rows=[];for(let i=0;i<64;i++){let l=0;while(l<6&&r()<.78-l*.07)l++;const a=l?Math.round(720+r()*280):Math.round(r()*700),n=l?l*15:5+Math.floor(r()*9);rows.push({id:'demo'+i,name:'示範玩家'+(i+1),l,a,n,s:l*1000+a,tries:1+Math.floor(r()*r()*4),at:Date.now()-Math.floor(r()*5*864e5)})}
   this.ctSet(rows,this.ctWeeks()[0],'rows','示範資料')},
