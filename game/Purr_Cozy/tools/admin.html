@@ -234,7 +234,7 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
   <div class="tbl"><table id="t-grade-words"></table></div>
  </section></div>
 <div class="sub" data-sub="s-kinds"><section id="s-kinds"><h2>哪個入口學得最好</h2><p class="why">每個學習入口的答題量、答對率、完成率，以及「下次再遇到同一個字時答對率」（記得住的程度）。</p><div class="tbl"><table id="t-kinds"></table></div></section></div>
-<div class="sub" data-sub="s-drop"><section id="s-drop"><h2>在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題）。集中在某一步就代表那裡太難、太長或卡住。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div></section></div>
+<div class="sub" data-sub="s-drop"><section id="s-drop"><h2>在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題、什麼題型），以及怎麼離開的（改做別的學習、直接關掉遊戲、放著太久）。集中在某一步或某種題型，就代表那裡太難、太長或卡住。舊紀錄沒有記位置，改顯示「答完幾題後」。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div><h3 style="margin-top:16px">放棄時正在作答的題型</h3><p class="why">每種題型出現在畫面上的次數裡，有多少次玩家沒有作答就離開。某一種特別高（例如拼字），代表玩家是「看到這種題就走」，不是整個回合太長。</p><p class="note hidden" id="dropq-need"></p><div class="tbl"><table id="t-dropq"></table></div></section></div>
 <div class="sub" data-sub="s-retain"><section id="s-retain"><h2>留存與習慣</h2><p class="why">第一次學習後，隔天、第 2 週（第 7–13 天）、第 5 週（第 28–34 天）還回來學習的比例（依第一次學習的週分組），以及一週中什麼時段最多人學。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section></div>
 <div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><p class="why" id="typo-note" style="margin-top:8px"></p><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
 <div class="sub" data-sub="s-help"><section id="s-help"><h2>提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section></div></div>
@@ -560,6 +560,15 @@ const P=v=>({v,h:pct(v)});
 function effDays(from,to,firstDay){const today=dayKey(Date.now()),y=new Date();y.setDate(y.getDate()-1);const yest=dayKey(y.getTime());
  const a=[from,firstDay].filter(Boolean).sort().pop()||from,b=[to,yest].filter(Boolean).sort()[0]||to;
  if(!a||!b||b<a)return{a:today,b:today,n:1,partial:true};return{a,b,n:Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5)+1,partial:false}}
+
+// 0.5.14: where an unfinished round stopped. learn-log.js (0.93.10+) writes 'how|step@i/n:type' (e.g. restart|quiz@3/8:spell);
+// older records have 'step@i/n' or just how (restart, gone, idle, left) with no position, so the answers given are counted instead
+const STOP_HOW={restart:'改做別的學習',gone:'直接關掉遊戲',left:'中途離開',idle:'放著太久沒動',pause:'中場休息'};
+function parseStop(r){const x=String(r.stop||'');const m=/^(?:([a-z]+)\|)?([a-z]+)@(\d+)\/(\d+)(?::(\w+))?/.exec(x);
+ if(m)return{how:m[1]||'',step:m[2],i:+m[3],n:+m[4],type:m[5]||''};return{how:x||'gone',step:'',i:-1,n:0,type:'',done:(r.ans||[]).length}}
+function stopText(st){const where=st.step==='quiz'?'測驗第 '+(st.i+1)+' 題':st.step==='review'||st.step==='pause'?'複習第 '+(st.i+1)+' 張':st.step==='teach'?'新字卡第 '+(st.i+1)+' 張':st.step?st.step+' 第 '+(st.i+1)+' 步':'';
+ const type=st.type?'（'+(QT[st.type]||st.type)+'）':'',how=STOP_HOW[st.how]||(st.how?st.how:'');
+ if(!where)return (how||'不明')+(st.done!=null?(st.done?`（答完 ${st.done} 題後）`:'（還沒作答）'):'');return where+type+(how?'・'+how:'')}
 function analyse(){
  const {sess,ans,rev,typo}=filtered(),minN=+$('f-min').value||20,summary={};
  /* 1 overview */
@@ -783,7 +792,13 @@ function analyse(){
  summary.entries=Object.fromEntries(kr.map(([k,v])=>[k,{sessions:v.s,completion:+(v.d/v.s).toFixed(3),answers:v.n,accuracy:v.n?+(v.ok/v.n).toFixed(3):null,nextTimeRecall:v.next>=20?+(v.nextOk/v.next).toFixed(3):null,nextTimeSamples:v.next}]));
 
  /* 8 drop-off */
- const undone=sess.filter(r=>!r.done),D={};for(const r of undone){const m=/^(\w+)@(\d+)\/(\d+)/.exec(r.stop||'');const key=m?(m[1]==='quiz'?'測驗第 '+(+m[2]+1)+' 題':m[1]==='review'||m[1]==='pause'?'複習第 '+(+m[2]+1)+' 張':m[1]):({left:'中途離開',restart:'改做別的',idle:'閒置太久'}[r.stop]||r.stop||'不明');D[key]=(D[key]||0)+1}
+ const undone=sess.filter(r=>!r.done),D={};for(const r of undone){const key=stopText(parseStop(r));D[key]=(D[key]||0)+1}
+ // 0.5.14: which question type was on screen when the round was left, against how often that type was shown at all
+ const QS={},QQ={};for(const a of ans)QS[a.q]=(QS[a.q]||0)+1;for(const r of undone){const st=parseStop(r);if(st.step==='quiz'&&st.type){const k=st.type,x=QQ[k]||(QQ[k]={n:0,ppl:new Set()});x.n++;x.ppl.add(r.pk)}}
+ const qqRows=Object.keys(QT).filter(q=>QS[q]||QQ[q]).map(q=>{const quit=QQ[q]?QQ[q].n:0,shown=(QS[q]||0)+quit;return[QT[q],shown,quit,QQ[q]?QQ[q].ppl.size:0,shown?P(quit/shown):{v:-1,h:'–'}]}).sort((a,b)=>(b[4].v||0)-(a[4].v||0));
+ need('dropq-need',Object.keys(QQ).length?'':'還沒有記錄題型的放棄紀錄：要等遊戲更新到記錄「停在哪一題、什麼題型」的版本（learn-log.js 0.93.10），新上傳的紀錄才會出現在這張表。');
+ table('t-dropq',['題型','出現次數（作答＋在這題離開）','在這題離開','人數','離開率'],qqRows);
+ summary.quitByType=Object.fromEntries(qqRows.map(r=>[r[0],{shown:r[1],quit:r[2],people:r[3]}]));
  const dl=Object.entries(D).sort((a,b)=>b[1]-a[1]);
  chart('c-drop',{type:'bar',data:{labels:dl.slice(0,15).map(x=>x[0]),datasets:[{label:'回合數',data:dl.slice(0,15).map(x=>x[1]),backgroundColor:'#d9566f'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
  const dk2={};for(const r of sess){const k=dk2[r.kind]||(dk2[r.kind]={s:0,u:0});k.s++;if(!r.done)k.u++}
@@ -921,8 +936,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.13';
-const CHANGELOG=[['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.14';
+const CHANGELOG=[['0.5.14','2026/11/20','放棄點看得出「停在哪種題型」：遊戲（learn-log.js 更新後）中途離開或改做別的學習時，會記下停在第幾題、是什麼題型，例如「測驗第 4 題（拼字）・改做別的學習」。「在哪裡放棄」新增「放棄時正在作答的題型」表（每種題型出現時有多少比例在這一題離開）；營運報告新增「在某種題型前放棄」判讀。舊紀錄沒有位置時，改顯示「答完幾題後」。'],['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 // 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
 const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
  ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
@@ -1595,7 +1610,7 @@ $('t-ct').addEventListener('click',e=>{const b=e.target.closest('[data-ctp]');if
 const OP={mode:'day',day:'',who:'all',ct:{},auto:false,idx:null,idxKey:'',last:null};
 const OP_H=0;
 // where an unfinished round stopped, in words
-const opStop=x=>{const m=/^([a-z]+)@(\d+)/.exec(x||'');if(m)return ({quiz:'測驗第 '+(+m[2]+1)+' 題',review:'複習第 '+(+m[2]+1)+' 張單字卡',teach:'看第 '+(+m[2]+1)+' 張新字卡',pause:'中場休息時'})[m[1]]||m[1]+' 第 '+(+m[2]+1)+' 步';return ({gone:'直接關掉遊戲',restart:'改去做別的學習',idle:'放著太久沒動',result:'結果畫面'})[x]||esc(x||'不明')};
+const opStop=x=>{if(x&&x.includes('|'))return esc(stopText(parseStop({stop:x})));const m=/^([a-z]+)@(\d+)/.exec(x||'');if(m)return ({quiz:'測驗第 '+(+m[2]+1)+' 題',review:'複習第 '+(+m[2]+1)+' 張單字卡',teach:'看第 '+(+m[2]+1)+' 張新字卡',pause:'中場休息時'})[m[1]]||m[1]+' 第 '+(+m[2]+1)+' 步';return ({gone:'直接關掉遊戲',restart:'改去做別的學習',idle:'放著太久沒動',result:'結果畫面'})[x]||esc(x||'不明')};
 const gday=t=>dayKey(t-OP_H*36e5);
 const kAdd=(k,n)=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()+n);return dayKey(d.getTime())};
 const kWd=k=>new Date(k+'T12:00').getDay();
@@ -1622,6 +1637,7 @@ const OP_RULES=[
  ['quality','難字','本期答對率比「同程度、同題型」的平均低 25 個百分點以上的字。每日至少 12 次、每週至少 20 次作答。','列出最多 6 個：要注意'],
  ['quality','易混淆','選擇題的「答案 → 被選成的錯字」。每日至少 4 次、每週至少 6 次，且占這個字作答的 15% 以上。','列出：參考（可改干擾選項或做專題）'],
  ['exp','回合完成率','每個入口有多少回合沒做完。每日單字至少 10 個回合才判斷；放棄點有 40% 以上集中在同一步也會列出。','每日單字完成率低於 70%：要注意｜集中在同一步：要注意'],
+ ['exp','看到某種題型就離開','（遊戲 0.93.10 起記錄離開時的題型）某種題型出現時，沒作答就離開的比例。','同一種題型 ≥ 5 次且 ≥ 10%：要注意'],
  ['exp','作答時間','每題作答時間的中位數和基準比。','慢 30% 以上：要注意'],
  ['exp','疑似亂按','選擇題 0.7 秒內作答的比例。至少 100 題。','8% 以上：要注意（列出最多的玩家）'],
  ['exp','新版本','本期開始出現的版本，和舊版本比答對率、完成率、作答時間、問題回報。新版本至少 30 題才比較。','答對率低 5 點、完成率低 10 點、作答時間慢 30% 以上：要注意'],
@@ -1640,15 +1656,15 @@ Object.assign(Admin,{
   const all=[...new Set(sess.map(r=>r.gd))].sort();
   OP.idx={sess,days,first,lo:all[0]||'',hi:all[all.length-1]||''};OP.idxKey=key;return OP.idx},
  // everything the rules need for one period [a, b] (game-day keys, inclusive)
- opStats(a,b){const I=this.opIndex(),sess=I.sess.filter(r=>r.gd>=a&&r.gd<=b),st={a,b,sess,ppl:new Set(),pd:new Set(),ans:[],kind:{},q:{},ver:{},lang:{},words:{},pairs:{},drop:{},perP:{},streak:{}};
+ opStats(a,b){const I=this.opIndex(),sess=I.sess.filter(r=>r.gd>=a&&r.gd<=b),st={a,b,sess,ppl:new Set(),pd:new Set(),ans:[],kind:{},q:{},ver:{},lang:{},words:{},pairs:{},drop:{},perP:{},streak:{},quitQ:{},shownQ:{}};
   for(const r of sess){const p=r.pk;st.ppl.add(p);st.pd.add(p+'|'+r.gd);
-   const K=st.kind[r.kind]||(st.kind[r.kind]={s:0,done:0,n:0,ok:0,ppl:new Set(),donePpl:new Set()});K.s++;K.ppl.add(p);if(r.done){K.done++;K.donePpl.add(p)}else{const stp=String(r.stop||'gone').replace(/\/\d+$/,'');const D=st.drop[r.kind]||(st.drop[r.kind]={});D[stp]=(D[stp]||0)+1}
+   const K=st.kind[r.kind]||(st.kind[r.kind]={s:0,done:0,n:0,ok:0,ppl:new Set(),donePpl:new Set()});K.s++;K.ppl.add(p);if(r.done){K.done++;K.donePpl.add(p)}else{const P0=parseStop(r),stp=P0.step?(P0.how?P0.how+'|':'')+P0.step+'@'+P0.i+'/0'+(P0.type?':'+P0.type:''):String(r.stop||'gone').replace(/\/\d+$/,'');if(P0.step==='quiz'&&P0.type){const Qq=st.quitQ[P0.type]||(st.quitQ[P0.type]={n:0,ppl:new Set()});Qq.n++;Qq.ppl.add(p)}const D=st.drop[r.kind]||(st.drop[r.kind]={});D[stp]=(D[stp]||0)+1}
    const V=st.ver[r.app||'?']||(st.ver[r.app||'?']={s:0,done:0,n:0,ok:0,ms:[],ppl:new Set(),first:''});V.s++;if(r.done)V.done++;V.ppl.add(p);
    st.lang[r.lang||'?']=(st.lang[r.lang||'?']||0)+1;st.streak[p]=Math.max(st.streak[p]||0,r.streak||0);
    const P=st.perP[p]||(st.perP[p]={n:0,ok:0,fast:0,ch:0,days:new Set(),kinds:new Set()});P.days.add(r.gd);P.kinds.add(r.kind);
    for(const x of r.ans||[]){const a2=Object.assign({kind:r.kind,pk:p,app:r.app,gd:r.gd},x);st.ans.push(a2);K.n++;K.ok+=x.ok;V.n++;V.ok+=x.ok;if(x.ms>0)V.ms.push(x.ms);P.n++;P.ok+=x.ok;
     if(OP_CHOICE.has(x.q)){P.ch++;if(x.ms>0&&x.ms<700)P.fast++}
-    if(!OP_EXAM.has(r.kind)){const Q=st.q[x.q]||(st.q[x.q]={n:0,ok:0});Q.n++;Q.ok+=x.ok}
+    st.shownQ[x.q]=(st.shownQ[x.q]||0)+1;if(!OP_EXAM.has(r.kind)){const Q=st.q[x.q]||(st.q[x.q]={n:0,ok:0});Q.n++;Q.ok+=x.ok}
     const W=st.words[x.w]||(st.words[x.w]={n:0,ok:0,exp:0,l:x.l});W.n++;W.ok+=x.ok;
     if(!x.ok&&x.g&&OP_CHOICE.has(x.q)){const k=x.w+'→'+x.g;st.pairs[k]=(st.pairs[k]||0)+1}}}
   const prac=st.ans.filter(x=>!OP_EXAM.has(x.kind)),ok=prac.filter(x=>x.ok).length;
@@ -1749,6 +1765,8 @@ Object.assign(Admin,{
   /* --- experience --- */
   const dk=cur.kind.daily;if(dk&&dk.s>=10&&dk.done/dk.s<.7)add('watch','exp','每日單字有很多回合沒做完',`${dk.s} 個回合完成 ${dk.done} 個（${P1(dk.done/dk.s)}）`,'做到一半離開，可能是太長、太難，或被打斷（下課、手機通知）。',[['觀察','看下面「放棄點」集中在哪一步']],'analysis/s-drop',dk.s-dk.done);
   for(const [k,D] of Object.entries(cur.drop)){const tot=Object.values(D).reduce((a,b)=>a+b,0),[top,n]=Object.entries(D).sort((a,b)=>b[1]-a[1])[0]||[];if(tot>=5&&n/tot>=.4&&top!=='result')add('watch','exp',`「${KIND[k]||k}」的放棄集中在同一步`,`${tot} 次沒做完，其中 ${n} 次停在「${opStop(top)}」（${P1(n/tot)}）`,'集中在同一步代表那裡有東西卡住：題目太難、畫面不清楚，或按鈕不好找。',[['觀察','實際玩一次這個入口，走到那一步看看'],['觀察','看問題回報有沒有相關描述']],'analysis/s-drop',n)}
+  // 0.5.14: leaving when a certain question type appears (needs learn-log 0.93.10, which records the type)
+  for(const [q,Q] of Object.entries(cur.quitQ)){const shown=(cur.shownQ[q]||0)+Q.n,rate=shown?Q.n/shown:0;if(Q.n>=5&&rate>=.1)add('watch','exp',`看到「${QT[q]||q}」就離開`,`${Q.n} 次在這種題目沒作答就離開（這種題出現 ${fmt(shown)} 次的 ${P1(rate)}），${Q.ppl.size} 人：${names([...Q.ppl],5)}`,'玩家不是整個回合做不完，而是看到某一種題型就走。常見原因是這種題對他的程度太難（例如低年級的拼字），或輸入方式不順手。',[['觀察','到「在哪裡放棄」看各題型的離開率，以及是哪些年級的玩家'],['調整','對低年級改成排字母、選缺少的字母，或允許一回合換一題']],'analysis/s-drop',Q.n)}
   const msB=bAvg(s=>s.ms);if(baseOK&&msB&&cur.ms&&(cur.ms-msB)/msB>=.3)add('watch','exp','每題作答變慢',`中位數 ${fmt(cur.ms/1000,1)} 秒，${PR.baseLabel} ${fmt(msB/1000,1)} 秒（${chg(cur.ms,msB)}）`,'變慢可能是題目變難、裝置變慢、音檔載入慢，或新版本的介面改變。',[['觀察','比較各版本的作答時間（下面「版本」）']],null,act);
   if(cur.chN>=100&&cur.fast>=.08){const who=Object.entries(cur.perP).filter(([,P])=>P.ch>=20&&P.fast/P.ch>=.3).sort((a,b)=>b[1].fast/b[1].ch-a[1].fast/a[1].ch).map(([p])=>p);
    add('watch','exp','有人在亂按選項',`選擇題 0.7 秒內作答 ${P1(cur.fast)}`+(who.length?`；比例最高：${names(who,5)}`:''),'亂按會讓答對率和模型校正失真，也代表玩家只想拿獎勵。',[['觀察','這些玩家的答對率是不是特別低'],['調整','如果持續發生，考慮太快作答時不給獎勵']],null,who.length)}
