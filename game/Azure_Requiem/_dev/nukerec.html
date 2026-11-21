@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>NUKE REC</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
+#st{position:fixed;left:8px;bottom:8px;z-index:9;color:#ff0;font:16px monospace;background:#000a;padding:4px 8px;white-space:pre}</style></head>
+<body><iframe id="f" src="index.html?r=rec4156"></iframe><div id="st">loading…</div>
+<script>
+// 核爆錄影（開發用）：載入遊戲 → 自由飛行 → 前方 14 km 引爆 → 錄下畫面（含閃光）→ 下載 webm
+const st = document.getElementById('st'), F = document.getElementById('f');
+const say = (s) => { st.textContent = s; document.title = 'NUKE REC ' + s.split('\n')[0]; };
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+(async () => {
+  let W, g;
+  for (let i = 0; i < 200; i++) { await sleep(250); W = F.contentWindow; g = W && W.__game; if (g && g.renderer) break; }
+  if (!g) { say('ERROR: game not found'); return; }
+  await sleep(2500);
+  say('gpu: ' + g.gpuName);
+  g.launch(true);
+  await sleep(7000);
+  g.cheats.noDamage = true; g.cheats.freezeAll = true;
+  const s = g.sim.player.state, V = s.pos.constructor;
+  // 玩家固定在 5000 m、朝 +x 平飛，核爆在前方 14 km
+  const L = s.fwd.clone().applyQuaternion(s.quat.clone().invert()).normalize();
+  const hold = new V(-20000, 5000, 6000), dir = new V(1, 0, -0.12).normalize();
+  const fixPlayer = () => { s.pos.copy(hold); s.quat.setFromUnitVectors(L, dir); s.vel.copy(dir).multiplyScalar(240); s.speed = 240; };
+  fixPlayer();
+  await sleep(3000);
+  // 合成用畫布：遊戲畫面 + 閃光層
+  const gc = g.renderer.domElement, OW = 1920, OH = 1080;
+  const cv = document.createElement('canvas'); cv.width = OW; cv.height = OH; const cx = cv.getContext('2d');
+  const flashEl = [...F.contentDocument.body.children].find(e => e.style && e.style.mixBlendMode === 'screen');
+  const stream = cv.captureStream(60);
+  const mt = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t));
+  const rec = new MediaRecorder(stream, { mimeType: mt, videoBitsPerSecond: 16e6 });
+  const chunks = []; rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  let recording = true, frames = 0, fpsMin = 999, t0 = performance.now(), lastT = t0;
+  const draw = () => {
+    if (!recording) return;
+    fixPlayer();
+    const now = performance.now(), fdt = now - lastT; lastT = now; if (frames > 30) fpsMin = Math.min(fpsMin, 1000 / fdt);
+    // 慢的階段加速：衝擊波過去之後（40 秒）以 3 倍速播放蕈狀雲長大
+    const nk = g.nuke; if (nk.active && nk.t > 40) nk.t += 2 * fdt / 1000;
+    cx.drawImage(gc, 0, 0, OW, OH);
+    if (flashEl) {
+      const op = +flashEl.style.opacity || 0;
+      if (op > 0.002) {
+        const m = /at ([\d.]+)% ([\d.]+)%/.exec(flashEl.style.background);
+        cx.save(); cx.globalCompositeOperation = 'screen'; cx.globalAlpha = Math.min(1, op);
+        if (m) {
+          const x = +m[1] / 100 * OW, y = +m[2] / 100 * OH, gr = cx.createRadialGradient(x, y, 0, x, y, Math.hypot(Math.max(x, OW - x), Math.max(y, OH - y)));
+          gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.12, 'rgba(255,250,235,0.95)'); gr.addColorStop(0.4, 'rgba(255,240,215,0.75)'); gr.addColorStop(1, 'rgba(255,235,210,0.55)');
+          cx.fillStyle = gr;
+        } else cx.fillStyle = 'rgba(255,245,230,0.6)';
+        cx.fillRect(0, 0, OW, OH); cx.restore();
+      }
+    }
+    frames++;
+    if (frames % 15 === 0) say(`REC t=${nk.active ? nk.t.toFixed(1) : '-'} fps=${g.fps | 0} min=${fpsMin | 0}\ngpu: ${g.gpuName}\nvol=${g.volOn}`);
+  };
+  rec.start(1000);
+  const orig = g.loop; g.loop = (tms) => { orig(tms); try { draw(); } catch (e) { say('ERROR draw ' + e); } };      // 遊戲每畫完一格就接著合成（緩衝區還在）
+  await sleep(2500);      // 引爆前先錄 2.5 秒
+  g.nukeTest = g.nukeTest; g.sim.nuke(new V(hold.x + dir.x * 14000, 500, hold.z + dir.z * 14000));
+  for (let i = 0; i < 50 && !g.nuke.active; i++) await sleep(100);
+  const tStart = performance.now();
+  while (g.nuke.active && g.nuke.t < 170 && performance.now() - tStart < 150000) await sleep(200);
+  await sleep(500);
+  recording = false; g.loop = orig; rec.stop();
+  await new Promise(r => rec.onstop = r);
+  const blob = new Blob(chunks, { type: 'video/webm' });
+  const info = { gpu: g.gpuName, vol: g.volOn, frames, secs: (performance.now() - t0) / 1000, fpsMin: fpsMin | 0, size: blob.size };
+  localStorage.setItem('nukerec_info', JSON.stringify(info));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'nuke_41.56.webm'; document.body.appendChild(a); a.click();
+  say('DONE ' + JSON.stringify(info));
+})().catch(e => say('ERROR ' + e));
+</script></body></html>
