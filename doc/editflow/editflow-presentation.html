@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ecefe9">
+<title>教材編務流轉與品質管理系統｜企劃主管提案</title>
+<style>
+:root{--ink:#172c2b;--muted:#627572;--emerald:#147b6b;--emerald2:#0a584e;--mint:#dfeee6;--paper:#f7f6f1;--gold:#bd9a5d;--line:#d8e0da;--night:#142f31;--red:#b65f4b;--width:1440px;--height:810px}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:#dbe3dc;color:var(--ink);-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #d1a257;outline-offset:4px}a{color:#126b61}button:disabled{opacity:.38;cursor:not-allowed}
+#screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 70% 20%,#e9eee7,#d4ded6)}
+#stage{width:var(--width);height:var(--height);position:relative;flex:none;transform-origin:center center;background:var(--paper);box-shadow:0 22px 75px #18322c33;overflow:hidden}
+.slide{position:absolute;inset:0;display:block;visibility:hidden;opacity:0;pointer-events:none;overflow:hidden;padding:63px 86px 76px;background:var(--paper);will-change:opacity,transform}.slide.active{visibility:visible;opacity:1;pointer-events:auto;z-index:2}.slide.exiting{visibility:visible;pointer-events:none;z-index:1}.slide.dark{background:var(--night);color:#f3f8f0}.slide.dark .soft{color:#b9d5ca}.slide.dark .footer-in{color:#87b0a7}.slide.dark .topline{color:#98cebd}
+.slide:after{content:"";position:absolute;width:660px;height:660px;right:-400px;bottom:-460px;border:1px solid #c0d5c8;border-radius:50%;pointer-events:none}.slide.dark:after{border-color:#4c7a70}
+.topline{display:flex;align-items:center;gap:14px;font-size:17px;letter-spacing:.17em;font-weight:750;color:#177c6c}.topline:before{content:"";display:block;width:29px;height:3px;background:currentColor}.headline{font-size:58px;line-height:1.24;font-weight:850;letter-spacing:-.047em;max-width:1250px;margin:20px 0 17px}.headline.xl{font-size:77px;line-height:1.15}.subline{font-size:24px;line-height:1.68;max-width:1000px;color:var(--muted);margin:0}.dark .subline{color:#bbd7cc}.footer-in{position:absolute;bottom:29px;left:86px;right:86px;display:flex;justify-content:space-between;align-items:center;color:#778a83;font-size:15px;letter-spacing:.04em;border-top:1px solid #dde4db;padding-top:15px}.dark .footer-in{border-color:#40635b}.footer-in b{font-variant-numeric:tabular-nums;color:inherit}
+.detail-link{position:absolute;top:57px;right:86px;border:1px solid #b9cfc4;border-radius:99px;background:#fdfef9;color:#145f54;padding:12px 21px;font-size:17px;font-weight:750;transition:.18s}.detail-link:hover{background:#d9eae0;transform:translateY(-2px)}.dark .detail-link{background:#234e4a;color:#e1faf1;border-color:#47786c}.dark .detail-link:hover{background:#356961}
+.deck-grid{display:grid;gap:26px}.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.card{border:1px solid #d4dfd5;border-radius:20px;background:#fffefa;padding:28px 29px;min-width:0}.card.mint{background:#e6f0e7;border-color:#d5e4d7}.card.darkcard{background:#19413d;border-color:#396c63;color:#f6fff8}.card h3{font-size:29px;line-height:1.35;margin:10px 0 12px;letter-spacing:-.03em}.card p{font-size:22px;line-height:1.65;color:#637671;margin:0}.card.darkcard p{color:#c1d8d0}.card .num{font-size:55px;font-weight:850;color:var(--emerald);line-height:1}.eyeline{font-size:17px;color:var(--emerald);font-weight:800;letter-spacing:.1em}.card .label{font-size:19px;color:#637570}.big-quote{font-size:36px;line-height:1.45;letter-spacing:-.035em;font-weight:800}.huge{font-size:94px;line-height:1.05;font-weight:900;letter-spacing:-.08em}.soft{color:#61736f}.accent{color:var(--emerald)}.night-accent{color:#a6d8c5}.pill{display:inline-flex;align-items:center;padding:10px 18px;background:#e4efe8;border-radius:99px;color:#146f62;font-size:17px;font-weight:750}.pill.warm{color:#926538;background:#f3e8d6}.pill.red{color:#a65342;background:#f6e5df}.bullet{display:flex;align-items:flex-start;gap:15px;font-size:26px;line-height:1.52;margin:18px 0}.bullet:before{content:"";width:10px;height:10px;flex:none;margin-top:15px;border-radius:50%;background:var(--emerald)}.split{display:grid;grid-template-columns:1fr 1fr;gap:45px;align-items:center}.rule{height:1px;background:#d8e0da;margin:20px 0}.small{font-size:18px;line-height:1.6}.large-label{font-size:24px;font-weight:800}.mini-label{font-size:16px;font-weight:800;letter-spacing:.08em;color:var(--emerald)}
+/* 投影片播放：無常駐底部工具列。工具圖示藏於右上角，不佔畫布。 */
+#tools{position:fixed;right:14px;top:14px;z-index:30;display:flex;align-items:center;gap:7px;opacity:.14;transition:opacity .18s ease;}
+#tools:hover,#tools:focus-within{opacity:1}
+#tools button{width:36px;height:36px;border:1px solid #ffffff77;border-radius:11px;background:#244c48d9;color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;backdrop-filter:blur(5px)}
+#tools button:hover{background:#197c68}
+#statusLive{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+#stage{cursor:pointer}
+.slide.active button,.slide.active a{cursor:pointer}
+@keyframes enterNext{from{opacity:0;transform:translate3d(6%,0,0) scale(.985);filter:blur(2px)}to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+@keyframes leaveNext{from{opacity:1;transform:translate3d(0,0,0) scale(1)}to{opacity:0;transform:translate3d(-3.4%,0,0) scale(.987)}}
+@keyframes enterPrev{from{opacity:0;transform:translate3d(-6%,0,0) scale(.985);filter:blur(2px)}to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+@keyframes leavePrev{from{opacity:1;transform:translate3d(0,0,0) scale(1)}to{opacity:0;transform:translate3d(3.4%,0,0) scale(.987)}}
+.slide.enter-next{animation:enterNext .44s cubic-bezier(.22,.8,.25,1) both}
+.slide.exit-next{animation:leaveNext .44s cubic-bezier(.22,.8,.25,1) both}
+.slide.enter-prev{animation:enterPrev .44s cubic-bezier(.22,.8,.25,1) both}
+.slide.exit-prev{animation:leavePrev .44s cubic-bezier(.22,.8,.25,1) both}
+@media(prefers-reduced-motion:reduce){.slide.enter-next,.slide.exit-next,.slide.enter-prev,.slide.exit-prev{animation-duration:.01ms!important}#tools{transition:none}}
+/* slide-specific */
+.hero-mark{position:absolute;right:76px;top:148px;width:400px;height:400px;border-radius:50%;border:1px solid #47766e;box-shadow:0 0 0 48px #ffffff05,0 0 0 96px #ffffff04}.hero-mark:after{content:"";position:absolute;inset:90px;border:4px solid #8fbcae;border-radius:30px;transform:rotate(-17deg)}.hero-strap{font-size:22px;color:#b2cfc3;margin-top:42px;max-width:850px}.cover-meta{display:flex;gap:14px;margin-top:40px}.cover-meta span{padding:10px 17px;border:1px solid #628c7f;border-radius:99px;color:#d2e9dc;font-size:18px}
+.problem-band{display:flex;align-items:center;gap:21px;margin-top:47px}.problem-step{flex:1;background:#fff;padding:30px 25px;border-radius:20px;border:1px solid #d8e1d9;min-height:220px}.problem-step b{font-size:24px}.problem-step .value{font-size:32px;font-weight:850;line-height:1.38;margin-top:22px}.problem-step .mini{font-size:19px;color:#697e74;margin-top:16px}.problem-arrow{font-size:40px;color:#459280;flex:none}
+.demo-paper{background:#fffef9;border-radius:22px;border:1px solid #d1dbd2;padding:27px;box-shadow:0 10px 40px #193e3220}.demo-head{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #dbe4db;padding-bottom:19px;font-size:21px;font-weight:800}.demo-body{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.demo-doc{background:#f5f3ef;border-radius:12px;padding:23px;min-height:182px;font-size:25px;line-height:1.7}.demo-doc .s{font-size:16px;color:#63736f;display:block;margin-bottom:9px}.before{color:#ae5745;text-decoration:line-through;background:#fbe7e0;padding:1px 8px}.after{color:#08775f;background:#d9f2e6;padding:1px 8px;font-weight:800}.statusrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}.st{padding:12px 16px;border:1px solid #d7dfd7;background:#fff;border-radius:9px;font-size:18px;color:#485c56}.st.good{background:#e1f0e6;color:#086c56}.st.warn{background:#fcf0e1;color:#885825}
+.flow-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:53px}.flow-step{padding:30px 22px;border-radius:18px;border:1px solid #d5e1d7;background:#fff;position:relative;min-height:212px}.flow-step:not(:last-child):after{content:'›';font-size:34px;position:absolute;right:-19px;top:80px;z-index:2;color:var(--emerald)}.flow-step .n{font-size:18px;color:var(--emerald);font-weight:850}.flow-step h3{font-size:28px;margin:24px 0 14px}.flow-step p{font-size:19px;color:#687a72;line-height:1.55;margin:0}
+.trust-rows{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;margin-top:34px}.trust-stacks{display:grid;gap:14px}.trust-item{border-left:5px solid #268475;background:#fff;border-radius:11px;padding:18px 24px;display:flex;align-items:center;gap:22px}.trust-item:nth-child(2){border-color:#c59c57}.trust-item:nth-child(3){border-color:#a9b6b0}.trust-item strong{font-size:25px;min-width:110px}.trust-item span{font-size:21px;color:#5a6e65}.trust-proof{background:#e3eee7;border-radius:24px;padding:29px}.trust-proof h3{font-size:31px;margin:12px 0 23px}.trust-proof p{font-size:23px;line-height:1.65}
+.compare{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:26px}.compare .card{min-height:350px;padding:30px}.compare .card h3{font-size:34px}.compare ul{margin:24px 0 0;padding-left:25px}.compare li{font-size:23px;line-height:1.65;margin:7px 0}
+.cost-main{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;margin-top:42px}.cost-big{background:#163b37;color:#f6fff8;border-radius:24px;padding:42px}.cost-big .huge{font-size:84px}.cost-note{color:#b9d7ca;font-size:20px;margin:18px 0 0;line-height:1.55}.cost-cond{background:#e6eee6;padding:32px 38px;border-radius:22px}.cost-cond h3{font-size:28px;margin:0 0 18px}.cost-cond p{font-size:23px;line-height:1.65;margin:8px 0}.thin-marker{border-left:5px solid var(--gold);padding-left:21px;margin-top:34px;font-size:23px;line-height:1.6}
+.steps-three{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;margin-top:51px}.stepnum{display:inline-block;font-size:21px;color:var(--emerald);font-weight:850}.steps-three .card{min-height:290px}.steps-three h3{font-size:31px}.steps-three p{font-size:21px}
+/* modal */
+#shade{position:fixed;inset:0;z-index:40;background:#102c2b88;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(5px)}#shade.open{display:flex}#modal{width:min(1040px,95vw);max-height:min(850px,92vh);background:#fdfdf9;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 100px #001e1b55}#modalhead{padding:25px 32px;display:flex;align-items:center;justify-content:space-between;gap:15px;background:#e6f0e9;border-bottom:1px solid #d8e3da}#modaltitle{font-size:28px;line-height:1.3;font-weight:850;margin:0}#closemodal{font-size:28px;line-height:1;border:0;background:transparent;color:#316258;width:44px;height:44px;border-radius:50%}#closemodal:hover{background:#c8dfd0}#modalbody{padding:30px 42px 38px;overflow-y:auto;font-size:21px;line-height:1.85}#modalbody h3{font-size:25px;margin:23px 0 9px;color:#135e54}#modalbody p{margin:10px 0 19px}#modalbody ul{padding-left:28px}#modalbody li{margin:7px 0}#modalbody table{width:100%;border-collapse:collapse;margin:18px 0 26px;font-size:19px}#modalbody th,#modalbody td{border-bottom:1px solid #dce5dd;text-align:left;padding:10px 8px;vertical-align:top}#modalbody th{color:#266458;background:#edf4ec}#modalbody .warntext{background:#f7eddd;border-left:4px solid #c49e5b;padding:14px 18px;border-radius:8px}#modalbody .links{font-size:17px;color:#5e7268}#modalbody details{border:1px solid #d3e1d7;border-radius:12px;margin:12px 0;padding:10px 17px}#modalbody summary{cursor:pointer;font-weight:800;color:#226b5e}#modalbody details>p{font-size:19px}#modalbody code{font-size:.86em;background:#edf1ed;padding:2px 6px;border-radius:5px}
+/* calculator */
+.calculator-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:30px}.controls-col{display:grid;gap:18px}.range-row{display:grid;grid-template-columns:1fr auto;gap:6px 18px}.range-row label{font-size:19px;font-weight:750}.range-row output{font-size:18px;color:#137267;font-weight:750}.range-row input{grid-column:1/-1;width:100%;accent-color:#17796b}.calc-result{background:#e3eee6;border-radius:17px;padding:24px}.calc-result .big{font-size:45px;color:#154b43;font-weight:850;line-height:1.25;margin:15px 0}.calc-result .r{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #cbd9cd;font-size:17px}.select-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.select-row button{border:1px solid #b7d0c3;background:#fff;border-radius:99px;padding:8px 16px;color:#2d6459;font-size:17px}.select-row button.active{background:#147768;border-color:#147768;color:white}
+/* slide grid modal */
+.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.overview button{border:1px solid #d4dfd7;border-radius:12px;background:#f8faf6;padding:16px 15px;text-align:left;min-height:100px;color:#314f48}.overview b{display:block;font-size:15px;color:#1b7567}.overview span{font-size:19px;font-weight:750}.overview button.active{background:#dcefe2;border-color:#64a38e}
+@media print{@page{size:landscape;margin:0}html,body{width:1440px;height:auto;overflow:visible;background:white}#screen{position:static;display:block;overflow:visible;width:1440px;height:auto}#stage{width:1440px!important;height:auto!important;transform:none!important;box-shadow:none} .slide{display:block!important;visibility:visible!important;opacity:1!important;transform:none!important;animation:none!important;position:relative!important;width:1440px;height:810px;break-after:page;page-break-after:always}#tools,#shade,.detail-link{display:none!important}}
+
+/* 手機用左右滑手勢；滑鼠點擊翻頁，不啟用拖曳。 */
+html,body{overscroll-behavior-x:none}
+#screen{touch-action:pan-y;overscroll-behavior-x:none}
+@media(max-width:900px){#tools{right:8px;top:8px;opacity:.4}#tools button{width:31px;height:31px}}
+</style>
+</head>
+<body>
+<div id="screen"><main id="stage" aria-label="教材編務流轉系統簡報">
+<section class="slide dark active" data-title="封面">
+<div class="topline">EDITORIAL WORKFLOW · 企劃提案</div>
+<h1 class="headline xl" style="margin-top:100px;max-width:950px">讓每一次改稿，<br><span class="night-accent">都有交代。</span></h1>
+<p class="subline" style="font-size:30px;max-width:870px">教材編務流轉與品質管理系統</p>
+<div class="hero-mark" aria-hidden="true"></div>
+<div class="cover-meta"><span>修改可追蹤</span><span>結果可驗證</span><span>工作可加速</span></div>
+<p class="hero-strap">以現有 Word、PDF、InDesign 工作方式為基礎；先建立可信的流轉流程，再逐步增加 AI 協助。</p>
+<div class="footer-in"><span>內部概念提案 · 2026.11</span><b>01 / 14</b></div></section>
+
+<section class="slide" data-title="真正耗時的地方">
+<div class="topline">01 · 問題在哪裡</div><h2 class="headline">不是改稿一次太慢，<br>而是<span class="accent">同一件事反覆確認。</span></h2>
+<p class="subline">作者、編輯、美編、審稿人員之間，最容易耗損的是「修改資訊」沒有同步到所有環節。</p>
+<div class="problem-band"><div class="problem-step"><b>修改意見分散</b><div class="value">不確定<br>誰說了什麼</div><div class="mini">PDF 註解、通訊、郵件、表單</div></div><div class="problem-arrow">→</div><div class="problem-step"><b>文件版本往返</b><div class="value">不確定<br>哪份才是最新</div><div class="mini">校一、校二、修訂版、返稿</div></div><div class="problem-arrow">→</div><div class="problem-step"><b>結果難以驗收</b><div class="value">不確定<br>改完了沒有</div><div class="mini">漏改、重改、影響配套卻未同步</div></div></div>
+<button class="detail-link" data-detail="problem">展開實務細節 ＋</button>
+<div class="footer-in"><span>目標不是取代編輯，而是減少無效往返</span><b>02 / 14</b></div></section>
+
+<section class="slide" data-title="一個具體改稿案例">
+<div class="topline">02 · 一項修改，牽動不只一頁</div><h2 class="headline" style="font-size:54px">答案由 C 改成 B。<br>真正的工作<span class="accent">還沒結束。</span></h2>
+<div class="split" style="grid-template-columns:1.12fr .88fr;margin-top:25px;gap:35px">
+<div class="demo-paper"><div class="demo-head"><span>#M3-058-012　校二修改任務</span><span class="pill warm">待編輯覆核</span></div><div class="demo-body"><div class="demo-doc"><span class="s">修改前</span>標準答案 <span class="before">C</span><div class="small soft">詳解沿用原題條件</div></div><div class="demo-doc"><span class="s">修改後</span>標準答案 <span class="after">B</span><div class="small soft">詳解已更動，尚待確認</div></div></div><div class="statusrow"><span class="st good">✓ 課本已改</span><span class="st warn">! 教師手冊待查</span><span class="st warn">! 題庫待查</span></div></div>
+<div><div class="pill">示意案例</div><p class="big-quote" style="margin:21px 0">要確認的不是<br>「有沒有改字」，<br>而是「修改要求<br>是否<span class="accent">完整落地</span>」。</p><p class="small soft">每個結論都要能打開原稿與修改後版本來核對。</p></div></div>
+<button class="detail-link" data-detail="case">展開案例細節 ＋</button>
+<div class="footer-in"><span>把修訂意見、變動證據、配套關聯綁在同一筆工作上</span><b>03 / 14</b></div></section>
+
+<section class="slide" data-title="工具定位">
+<div class="topline">03 · 不是再做一套編輯軟體</div><h2 class="headline">Word 繼續寫；InDesign 繼續排。<br><span class="accent">新系統負責讓改稿不失聯。</span></h2>
+<div class="deck-grid c3" style="margin-top:45px;align-items:stretch">
+<div class="card"><div class="eyeline">既有工具</div><h3 style="font-size:33px">Word / PDF<br>InDesign</h3><p>寫稿、審閱、排版、修正；維持熟悉的製作流程。</p></div>
+<div class="card mint" style="border:2px solid #82bba5"><div class="eyeline">新建核心</div><h3 style="font-size:34px">書稿流轉台</h3><p>版本管理、任務指派、差異證據、跨人覆核與正式結案。</p></div>
+<div class="card"><div class="eyeline">後續延伸</div><h3 style="font-size:33px">配套連動<br>AI 內容檢查</h3><p>有足夠資料基礎後，再擴大自動化與語意理解。</p></div>
+</div><div class="thin-marker">不替代現有排版軟體，降低使用者學習與導入負擔。</div>
+<button class="detail-link" data-detail="scope">展開系統邊界 ＋</button><div class="footer-in"><span>優先整合現有工作，不要求全面改變編輯習慣</span><b>04 / 14</b></div></section>
+
+<section class="slide" data-title="工作流如何改變">
+<div class="topline">04 · 工作流程</div><h2 class="headline">一條修改意見，<br>變成<span class="accent">可驗收的工作紀錄。</span></h2>
+<div class="flow-track"><div class="flow-step"><span class="n">01 / 登記</span><h3>提出意見</h3><p>綁定原文、頁面與檔案版本</p></div><div class="flow-step"><span class="n">02 / 負責</span><h3>指派人員</h3><p>確定誰處理、何時交付</p></div><div class="flow-step"><span class="n">03 / 執行</span><h3>修改上傳</h3><p>保留新稿與歷史差異</p></div><div class="flow-step"><span class="n">04 / 品質</span><h3>人工覆核</h3><p>查看前後證據，可退回</p></div><div class="flow-step"><span class="n">05 / 結案</span><h3>連動確認</h3><p>檢查配套後才真正完成</p></div></div>
+<div style="margin-top:31px;font-size:25px;font-weight:800;color:#1c786a">「已修改」≠「已確認完成」。</div>
+<button class="detail-link" data-detail="flow">展開完整七步流程 ＋</button><div class="footer-in"><span>修改任務可以重開、退回與追溯，不因上傳新版自動結案</span><b>05 / 14</b></div></section>
+
+<section class="slide" data-title="品質如何被信任">
+<div class="topline">05 · 信任來自證據</div><h2 class="headline">不要相信系統說「沒問題」。<br>要能<span class="accent">查證它怎麼判斷。</span></h2>
+<div class="trust-rows"><div class="trust-stacks"><div class="trust-item"><strong>已確認</strong><span>可重現的比對或規則已成立</span></div><div class="trust-item"><strong>疑似異常</strong><span>有線索，但尚需專業判斷</span></div><div class="trust-item"><strong>無法確認</strong><span>解析不完整、來源不足或定位失敗</span></div></div><div class="trust-proof"><div class="mini-label">每一筆結論都要附</div><h3>原稿 ＋ 新稿 ＋ 修改意見 ＋ 覆核人</h3><p>用得久的工具，不是「永遠不犯錯」，而是<strong>不隱藏不確定性、錯了可以追回來。</strong></p></div></div>
+<button class="detail-link" data-detail="trust">展開品質驗收 ＋</button><div class="footer-in"><span>原始檔不被覆蓋；重要內容由指定編輯作最後確認</span><b>06 / 14</b></div></section>
+
+<section class="slide" data-title="沒有 AI 也有價值">
+<div class="topline">06 · 第一階段｜不用 AI</div><h2 class="headline">不靠 AI，<br><span class="accent">也能先解決大量返工。</span></h2>
+<div class="deck-grid c3" style="margin-top:46px"><div class="card"><div class="num">01</div><h3>版本只有一個真相</h3><p>每一份正式交付、修訂時間與原檔都能追溯。</p></div><div class="card"><div class="num">02</div><h3>修改項不會憑空消失</h3><p>指派、處理、退回、覆核、結案有明確狀態。</p></div><div class="card"><div class="num">03</div><h3>基本防呆自動執行</h3><p>文字差異、欄位缺漏、編號與已知連動檢查。</p></div></div>
+<div class="thin-marker">先回答「事情有沒有確實處理」，而非急著宣稱「教材內容完全正確」。</div>
+<button class="detail-link" data-detail="noai">展開非 AI 版清單 ＋</button><div class="footer-in"><span>無 AI 版本本身應有獨立投資價值</span><b>07 / 14</b></div></section>
+
+<section class="slide" data-title="AI 額外做什麼">
+<div class="topline">07 · 第二階段｜加入 AI</div><h2 class="headline">AI 不批准改稿。<br><span class="accent">它替編輯找到值得再看的地方。</span></h2>
+<div class="deck-grid c4" style="margin-top:42px"><div class="card"><div class="num" style="font-size:48px">≡</div><h3>拆解意見</h3><p>長篇審稿意見整理成候選任務。</p></div><div class="card"><div class="num" style="font-size:48px">⌕</div><h3>搜尋關聯</h3><p>尋找相似題、詳解與配套內容。</p></div><div class="card"><div class="num" style="font-size:48px">≈</div><h3>語意檢查</h3><p>指出可能未解決的內容疑義。</p></div><div class="card"><div class="num" style="font-size:48px">▤</div><h3>修訂摘要</h3><p>整理本輪變更與待審項目。</p></div></div>
+<div class="thin-marker">AI 提供線索與來源，不替編輯作最終品質認定。</div>
+<button class="detail-link" data-detail="ai">展開 AI 實作邏輯 ＋</button><div class="footer-in"><span>已知規則仍使用程式確認；不必讓模型猜能確定的事</span><b>08 / 14</b></div></section>
+
+<section class="slide" data-title="兩種版本差在哪">
+<div class="topline">08 · 比較兩種版本</div><h2 class="headline">同一套底座，<br>逐步增加<span class="accent">內容理解能力。</span></h2>
+<div class="compare"><div class="card mint"><span class="pill">無 AI｜先做</span><h3>證明工作有沒有做完</h3><ul><li>版本與任務可追蹤</li><li>修改、退回、覆核有證據</li><li>固定規則與已知關聯檢查</li></ul></div><div class="card"><span class="pill warm">有 AI｜再加</span><h3>協助發現可能漏看的問題</h3><ul><li>理解不規則的修改意見</li><li>尋找尚未建立的語意關聯</li><li>提示內容矛盾與疑似錯誤</li></ul></div></div>
+<button class="detail-link" data-detail="compare">查看完整能力對照 ＋</button><div class="footer-in"><span>AI 是增強層，不是流程基礎的替代品</span><b>09 / 14</b></div></section>
+
+<section class="slide" data-title="雲端 AI 的營運費">
+<div class="topline">09 · 營運費用｜雲端 API</div><h2 class="headline">模型費未必是最大成本。<br><span class="accent">先把用量算清楚。</span></h2>
+<div class="cost-main"><div class="cost-big"><div style="font-size:23px;color:#b6d1c7">20 本書／月 · 模擬情境</div><div class="huge" style="margin-top:22px">NT$ <span id="slideCost">11,526</span></div><p class="cost-note">AI 混合模型＋付費版面解析<br>不含託管、備份、人力、稅費</p></div><div class="cost-cond"><h3>目前試算基準</h3><p>每本：400 萬輸入＋80 萬輸出 Tokens</p><p>每本：780 頁次付費版面解析</p><p>模型：80% Mini＋20% 進階</p><div class="rule"></div><p class="small soft">工作量是為估算設定的假設，非出版社實際帳單。</p></div></div>
+<div style="margin-top:25px"><button class="ctrl primary" style="font-size:20px;padding:12px 25px" id="openCalc">開啟可調整的成本試算 ↗</button></div>
+<button class="detail-link" data-detail="cost">展開計算依據 ＋</button><div class="footer-in"><span>US$→NT$ 約 32.97；單價來源及假設見詳細頁</span><b>10 / 14</b></div></section>
+
+<section class="slide" data-title="自建 DGX Spark 的角色">
+<div class="topline">10 · 營運費用｜自有算力</div><h2 class="headline">三台 DGX Spark，<br>能把<span class="accent">大量重複分析留在公司內部。</span></h2>
+<div class="split" style="margin-top:39px;grid-template-columns:1.04fr .96fr"><div class="deck-grid c3" style="gap:15px"><div class="card" style="padding:25px 18px;text-align:center"><div class="num">01</div><h3 style="font-size:23px">文件語意</h3><p style="font-size:17px">分類、摘要、關聯檢索</p></div><div class="card" style="padding:25px 18px;text-align:center"><div class="num">02</div><h3 style="font-size:23px">其他服務</h3><p style="font-size:17px">影音、OCR、測試等</p></div><div class="card" style="padding:25px 18px;text-align:center"><div class="num">03</div><h3 style="font-size:23px">研發備援</h3><p style="font-size:17px">模型比較與驗證</p></div></div><div class="card mint"><div class="mini-label">需要注意的成本</div><h3 style="font-size:35px">不是「零成本」</h3><p>電費、散熱、維運、儲存，還有與其他專案共用算力的機會成本。</p><div style="margin-top:25px" class="pill">優先批次處理，避免佔住正式服務</div></div></div>
+<div class="thin-marker">本地模型必須先做教材測試；無法以硬體容量推定語意判斷品質。</div>
+<button class="detail-link" data-detail="dgx">展開自建成本與限制 ＋</button><div class="footer-in"><span>先以單台服務試點，視負載決定是否擴大</span><b>11 / 14</b></div></section>
+
+<section class="slide" data-title="怎麼證明有效">
+<div class="topline">11 · 驗證方式</div><h2 class="headline">不比較 AI 回答有多快。<br>比較<span class="accent">人到底少做多少事。</span></h2>
+<div class="deck-grid c4" style="margin-top:53px"><div class="card"><div class="num">01</div><h3>人工工時</h3><p>處理與覆核實際花費時間</p></div><div class="card"><div class="num">02</div><h3>遺漏修改</h3><p>要求處理卻未真正完成的項目</p></div><div class="card"><div class="num">03</div><h3>重新返工</h3><p>結案後又退回重修的次數</p></div><div class="card"><div class="num">04</div><h3>誤報負擔</h3><p>AI 提醒卻沒有問題的檢查時間</p></div></div>
+<div class="thin-marker">拿 1～2 本保有完整校稿紀錄的真實教材，做相同任務的流程對照測試。</div>
+<button class="detail-link" data-detail="pilot">展開驗證設計 ＋</button><div class="footer-in"><span>改稿週期與跨人等待時間也一併記錄</span><b>12 / 14</b></div></section>
+
+<section class="slide" data-title="分階段導入">
+<div class="topline">12 · 推動方式</div><h2 class="headline">先讓每一項修改可驗收，<br>再讓 AI <span class="accent">幫忙看更多。</span></h2>
+<div class="steps-three"><div class="card"><span class="stepnum">階段 01</span><h3>工作流與版本</h3><p>先做任務、差異、覆核、原始檔及結案證據。</p><div class="pill" style="margin-top:27px">檢驗漏改與返工</div></div><div class="card"><span class="stepnum">階段 02</span><h3>AI 輔助檢查</h3><p>增加意見拆解、語意關聯與疑點提示。</p><div class="pill" style="margin-top:27px">檢驗節時與誤報</div></div><div class="card"><span class="stepnum">階段 03</span><h3>跨教材連動</h3><p>擴充教師手冊、習作、題庫、數位教材的對應關係。</p><div class="pill" style="margin-top:27px">檢驗跨文件漏改</div></div></div>
+<button class="detail-link" data-detail="roadmap">展開導入條件 ＋</button><div class="footer-in"><span>每個階段用實測結果決定是否繼續，而非一次做完整出版 ERP</span><b>13 / 14</b></div></section>
+
+<section class="slide dark" data-title="立項重點">
+<div class="topline">DECISION · 討論重點</div><h2 class="headline xl" style="margin-top:95px;max-width:1150px">讓編輯把時間<br>留給<span class="night-accent">真正需要專業判斷</span>的事。</h2>
+<p class="subline" style="font-size:28px;margin-top:25px">第一步不需要承諾 AI 能校對所有錯誤。<br>先證明：修改不遺失、每次處理可核對、返工與確認時間確實減少。</p>
+<div class="cover-meta" style="margin-top:54px"><span>選定一本真實試點教材</span><span>取得完整校稿歷程</span><span>建立效率與品質基準</span></div>
+<button class="detail-link" data-detail="decision">展開主管決策問題 ＋</button><div class="footer-in"><span>教材編務流轉與品質管理系統 · 內部企劃討論稿</span><b>14 / 14</b></div></section>
+</main></div>
+<div id="tools" aria-label="簡報工具"><button id="overviewBtn" title="投影片總覽（G）" aria-label="投影片總覽">▦</button><button id="fullscreenBtn" title="全螢幕（F）" aria-label="切換全螢幕">⛶</button></div>
+<div id="statusLive" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="shade" role="presentation"><div id="modal" role="dialog" aria-modal="true" aria-labelledby="modaltitle"><div id="modalhead"><h2 id="modaltitle">詳細說明</h2><button id="closemodal" aria-label="關閉詳情">×</button></div><div id="modalbody"></div></div></div>
+<script>
+(function(){
+const slides=[...document.querySelectorAll('.slide')];let idx=0;const stage=document.getElementById('stage');let lastFocus=null;
+function fit(){const s=Math.min((innerWidth-16)/1440,(innerHeight-16)/810);stage.style.transform=`scale(${Math.max(.1,s)})`;}addEventListener('resize',fit);fit();
+let cleanupTimer=null;
+const motionReduced=matchMedia('(prefers-reduced-motion: reduce)');
+function go(i,animate=true){
+  const target=Math.max(0,Math.min(slides.length-1,i));
+  if(target===idx&&slides[idx].classList.contains('active'))return;
+  const old=slides[idx], next=slides[target], forward=target>idx;
+  clearTimeout(cleanupTimer);
+  slides.forEach(s=>{s.classList.remove('active','exiting','enter-next','enter-prev','exit-next','exit-prev');s.setAttribute('aria-hidden','true')});
+  idx=target;
+  if(animate&&!motionReduced.matches&&old!==next){
+    old.classList.add('exiting',forward?'exit-next':'exit-prev');
+    next.classList.add('active',forward?'enter-next':'enter-prev');
+    cleanupTimer=setTimeout(()=>{old.classList.remove('exiting','exit-next','exit-prev');next.classList.remove('enter-next','enter-prev')},480);
+  }else{
+    next.classList.add('active');
+  }
+  next.setAttribute('aria-hidden','false');
+  document.getElementById('statusLive').textContent=`第 ${idx+1} 頁，共 ${slides.length} 頁：${next.dataset.title}`;
+  try{history.replaceState(null,'',`#slide-${idx+1}`)}catch(e){location.hash=`slide-${idx+1}`}
+}
+document.getElementById('fullscreenBtn').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
+const D={
+problem:{title:'編務流轉：為什麼會產生反覆工時',body:`<p>這裡討論的不是所有出版社都具有相同流程，而是要透過實際書稿紀錄驗證的典型問題。</p><h3>最容易消耗時間的情境</h3><ul><li>一項修改分散在 PDF、郵件、聊天訊息與 Excel，編輯需要先確認最新意見。</li><li>美編使用了舊版資料；新稿雖然上傳，卻沒有回答各項修改是否逐一完成。</li><li>題目、答案、詳解、教師手冊與題庫存在對應關係，但修改沒有同步流轉。</li><li>資深編輯靠記憶掌握歷史意見，新人接手時重新查閱往返紀錄。</li></ul><h3>真正要量測的不是檔案數量</h3><p>而是每條修改的「人工查找／溝通時間」「等待週期」「退回次數」與「結案後返工」。這些數據才能證明系統實際節省多少時間。</p>`},
+case:{title:'示意案例：答案 C → B',body:`<p>這是一個用來展示流程的假想案例，並非真實出版品的錯誤紀錄。</p><ol><li>審稿教師要求調整題目條件與正解。</li><li>系統建立一筆任務，綁定原始檔、頁面、題號及修改意見。</li><li>文字編輯將正解由 C 改為 B，並確認詳解需同步。</li><li>新版上傳後，系統記錄實際變動；編輯查看修改前後差異。</li><li>若教師手冊與題庫有已登記關聯，系統產生待確認項目。</li><li>所有必要覆核完成後，才將整筆任務標為已結案。</li></ol><p class="warntext">發現「答案由 C 變成 B」只能證明文字有變動，不能證明 B 就是正確答案。學科正確性仍需具備相應驗證程序。</p>`},
+scope:{title:'與既有 Word／PDF／InDesign 的分工',body:`<h3>不需要重新製作的功能</h3><ul><li>Word 文件編寫與文字修訂。</li><li>InDesign 專業排版與 PDF 審閱整合。</li><li>PDF 的批註、檢視與交付。</li></ul><h3>新系統真正需要建立的能力</h3><ul><li>跨工具共享的版本編號、原始檔歸檔、修改任務狀態。</li><li>每條意見對應的處理證據與指定覆核人。</li><li>不同版本的變動與已知內容關聯的追蹤。</li><li>整本書所有未結案事項、退回原因與製作週期。</li></ul><p>可參考現成能力：<a href="https://support.microsoft.com/zh-tw/office/比較文件差異-25c1a6cf-5fd2-4b39-a210-2e0b0a5e0d6d" target="_blank" rel="noopener">Microsoft Word 比較文件</a>、<a href="https://helpx.adobe.com/indesign/using/import-pdf-comments.html" target="_blank" rel="noopener">Adobe InDesign 匯入 PDF 註解</a>。整合時需依檔案格式與實際工作流程確認可用介面。</p>`},
+flow:{title:'完整的七步流轉與結案條件',body:`<table><tr><th>步驟</th><th>處理內容</th><th>保留證據</th></tr><tr><td>1. 提出</td><td>意見綁定頁面、段落、版本</td><td>原始意見與來源</td></tr><tr><td>2. 指派</td><td>指定責任人與期限</td><td>任務狀態與責任紀錄</td></tr><tr><td>3. 修改</td><td>使用原有工具修改書稿</td><td>新稿與時間戳</td></tr><tr><td>4. 比對</td><td>找出新舊稿實際差異</td><td>差異報告與解析警告</td></tr><tr><td>5. 覆核</td><td>編輯接受、退回或要求重修</td><td>覆核者、結論及原因</td></tr><tr><td>6. 連動</td><td>檢查已知配套關聯</td><td>相關項目的確認狀態</td></tr><tr><td>7. 結案</td><td>所有必要檢查完成</td><td>完整可稽核結案紀錄</td></tr></table><p class="warntext">一份新檔案上傳，不代表所有修改任務自動完成；如果版本比對無法定位，也不能強行判定已修正。</p>`},
+trust:{title:'品質信任設計與驗收依據',body:`<h3>系統不得混用三種結論</h3><ul><li><strong>已確認：</strong>明確的欄位、文字差異或規則結果可重現。</li><li><strong>疑似異常：</strong>AI 或啟發式演算法找到線索，但仍需人工判讀。</li><li><strong>無法確認：</strong>掃描品質不佳、結構解析失敗、位置被搬移或資料不足。</li></ul><h3>每個結果必須回答</h3><ul><li>依據的是哪一個原始檔與哪一個版本？</li><li>修改意見的原文是什麼？</li><li>實際有什麼變動？可以打開差異畫面嗎？</li><li>誰批准結案？何時批准？</li></ul><h3>先在已完成教材上做回溯實驗</h3><p>使用人工作成的真實修改清單作對照，統計修改辨識率、漏報率、誤報率、定位正確率與人工覆核時間。未通過測試的功能不能當成自動品質保證。</p>`},
+noai:{title:'非 AI 版本：完整工作範圍',body:`<table><tr><th>工作能力</th><th>非 AI 是否可做</th></tr><tr><td>原始書稿、版本、時間與歷史紀錄</td><td>可</td></tr><tr><td>修改意見、指派、退回、覆核、結案</td><td>可</td></tr><tr><td>文字／結構差異（依格式與品質）</td><td>可</td></tr><tr><td>題號、欄位、缺漏、固定規則</td><td>可</td></tr><tr><td>已登記跨書內容關聯</td><td>可</td></tr><tr><td>未知的語意關聯與專業內容正確性</td><td>通常無法直接判斷</td></tr></table><p>這一版的核心成果是讓員工不用花大量時間確認「哪個版本」「誰要處理」「是否有人確認」。不要將它誤稱為全自動學科校稿。</p>`},
+ai:{title:'AI 增強版：使用情境與誤報控制',body:`<h3>AI 真正值得接手的工作</h3><ul><li><strong>意見拆解：</strong>把自然語言批註轉成候選任務；編輯確認後才成立。</li><li><strong>語意關聯：</strong>用向量檢索／重新排序，提出其他可能受影響的教材內容；不自動建立不可撤銷的關聯。</li><li><strong>疑似錯誤：</strong>檢查題目、答案、詳解的語意矛盾；有可程式驗證的數學問題，優先使用規則或計算工具。</li><li><strong>本輪摘要：</strong>產生給主編看的變動與待決事項，並保留來源。</li></ul><h3>避免 AI 增加人工負擔</h3><p>依問題類型、證據來源與重要性分級。先在回溯教材測試模型的精確率、召回率與編輯覆核耗時；只有能證明帶來淨效益的功能，才加入正式流程。</p><p class="warntext">AI 的工作是提出線索與整理資料，不是自動批准內容正確、正式結案或付印。</p>`},
+compare:{title:'非 AI／有 AI 的能力對照',body:`<table><tr><th>場景</th><th>沒有 AI</th><th>加入 AI</th></tr><tr><td>修改意見整理</td><td>人工登記／依固定格式匯入</td><td>自由文字拆解為候選任務</td></tr><tr><td>新舊版差異</td><td>比對文字及可解析結構</td><td>補充語意差異的描述與疑點</td></tr><tr><td>跨教材連動</td><td>根據已知 ID 與關聯</td><td>搜尋可能尚未建立的語意關聯</td></tr><tr><td>題解品管</td><td>欄位、數量、編號及規則檢查</td><td>語意矛盾、可能錯解的提示</td></tr><tr><td>本輪回報</td><td>狀態、統計、交付紀錄</td><td>附來源的摘要與待決事項</td></tr><tr><td>正式品質決策</td><td>人工</td><td>仍是人工</td></tr></table><p>兩個版本應共用書稿、任務、版本與查證資料庫。AI 可以隨時升級或更換，而不破壞原本可驗收的流程。</p>`},
+cost:{title:'雲端 AI 費用：來源、公式與假設',body:`<p>模型定價使用先前企劃引用的 2026 年 11 月公開價目作試算基準，實際採購與使用時仍需重查；匯率以 US$1 ≈ NT$32.97 換算。</p><table><tr><th>模型／文件服務</th><th>試算單價</th></tr><tr><td>GPT-5.4 mini</td><td>輸入 US$0.75／百萬 Tokens；輸出 US$4.50／百萬 Tokens</td></tr><tr><td>GPT-5.4</td><td>輸入 US$2.50／百萬 Tokens；輸出 US$15.00／百萬 Tokens</td></tr><tr><td>版面解析參考費</td><td>US$10／千頁次</td></tr></table><h3>費用假設</h3><p>每本輸入 400 萬 Tokens、輸出 80 萬 Tokens，80% 由 mini 處理，20% 由進階模型處理；另有 780 頁次付費版面解析。這些是成本模型的假設，不代表真實教材必定消耗這些資源。</p><h3>不包括在下方金額中的項目</h3><ul><li>軟體託管、資料庫、備份、監控、維運人力、稅費。</li><li>多模態影像 Token、特殊模型／搜尋工具計費、重試與多模型交叉檢查。</li><li>與原本工作流程相比所節省或新增的人力成本。</li></ul><div class="links">參考：<a href="https://platform.openai.com/docs/pricing" target="_blank" rel="noopener">OpenAI API Pricing</a>；<a href="https://cloud.google.com/document-ai/pricing" target="_blank" rel="noopener">Google Cloud Document AI Pricing</a>。</div>`},
+dgx:{title:'三台 DGX Spark：本地模型的運作成本',body:`<h3>適合的定位</h3><p>將大量但不必即時完成的文件分類、摘要、檢索與低風險重複分析放在本地執行。先使用一台服務試點，其餘維持既有研發用途。</p><h3>電力情境（僅試算）</h3><p>以每台 240W 電源額定值、每天 24 小時、30 天滿額計算，約 172.8 kWh／台月。如果用每度 NT$3～6 假設電價，約 NT$518～1,037／台月；三台為 NT$1,555～3,110／月。這不是實際平均功耗，且未含空調。</p><h3>自建不是零費用</h3><ul><li>需計入儲存、散熱、資安、監控、模型部署與維護。</li><li>三台 DGX Spark 服務其他內部工具時，必須衡量算力排擠。</li><li>硬體可執行某種模型，不代表它在繁體中文教材語意檢查的品質已合格。</li></ul><h3>操作策略</h3><p>先以一致的教材測試集比較本地 8B／30B 等級模型與雲端模型的品質、延遲及總成本。若高難度判斷本地模型尚不足，可僅在經批准後把指定工作轉送雲端 API。</p>`},
+pilot:{title:'試點驗證：不要把模型速度當成工作效率',body:`<h3>試點素材</h3><p>挑 1～2 本保留校稿歷程與修改紀錄的已完成書籍，涵蓋文字修改、圖文修改、題解修改及跨配套內容。盡可能由不同編輯交叉操作。</p><h3>三種作業方式</h3><ol><li>沿用目前文件、訊息與人工追蹤方式。</li><li>使用無 AI 的流轉系統。</li><li>使用相同流轉系統，再開啟 AI 增強模組。</li></ol><h3>測量結果</h3><table><tr><th>量測</th><th>定義</th></tr><tr><td>人工總工時</td><td>從收到意見至覆核完成的人工作業時間</td></tr><tr><td>工作週期</td><td>提出至結案的歷時，另外區分等待時間</td></tr><tr><td>漏改／返工</td><td>已知未處理項目、已結案後的重修次數</td></tr><tr><td>AI 誤報成本</td><td>編輯檢查無實際問題警告的時間</td></tr></table><p class="warntext">相同任務重做可能產生學習效應。可用不同書稿或任務隨機分組、交換操作順序等方式，減少測試偏差。</p>`},
+roadmap:{title:'分階段導入，不把研發變成一個巨大的 ERP 專案',body:`<h3>第一階段：非 AI 核心</h3><p>建立版本管理、任務狀態、原稿保存、差異證據與指定覆核。只有在實際書稿上能可靠追蹤修改，才進第二階段。</p><h3>第二階段：可選 AI 增強</h3><p>先做意見拆解、修訂摘要與語意關聯搜尋。針對每個功能記錄 AI 誤報／漏報、人工驗證時間和每本書消耗的 Tokens。</p><h3>第三階段：跨教材連動</h3><p>為課本、教師手冊、習作、題庫與數位教材建立可用的關聯 ID 或可人工確認的關聯表。修改主要教材時，自動產生關聯檢查工作。</p><p class="warntext">每階段是否值得繼續，應由實測節省工時與品質指標決定，不應只因功能可以做就全部上線。</p>`},
+decision:{title:'主管討論：三個需要先確定的事情',body:`<ol><li><strong>現有工作流：</strong>校稿意見目前主要存在 Word、PDF、InDesign、Excel 還是通訊軟體？正式版的認定方式是什麼？</li><li><strong>試點素材：</strong>哪一本已出版的教材保留了從初稿到定稿的完整歷程、問題清單與修訂檔？</li><li><strong>驗收標準：</strong>最優先減少的是漏改、人工追查時間、反覆退回，還是跨配套遺漏？</li></ol><p>有了這三項資訊，才能把概念提案轉成可以實際測試的 MVP，而不是先替編輯增加一套需要維護的新工具。</p>`}
+};
+const shade=document.getElementById('shade'),modalbody=document.getElementById('modalbody'),modaltitle=document.getElementById('modaltitle');
+function openModal(title,body){lastFocus=document.activeElement;modaltitle.textContent=title;modalbody.innerHTML=body;shade.classList.add('open');modalbody.scrollTop=0;document.getElementById('closemodal').focus();}
+function closeModal(){shade.classList.remove('open');lastFocus?.focus?.();}
+document.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>{let d=D[b.dataset.detail];openModal(d.title,d.body)}));
+document.getElementById('closemodal').onclick=closeModal;shade.addEventListener('click',e=>{if(e.target===shade)closeModal()});
+function overview(){openModal('全部投影片',`<div class="overview">${slides.map((s,i)=>`<button data-goto="${i}" class="${i===idx?'active':''}"><b>${String(i+1).padStart(2,'0')}</b><span>${s.dataset.title}</span></button>`).join('')}</div>`);modalbody.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{closeModal();go(Number(b.dataset.goto));})}
+document.getElementById('overviewBtn').onclick=overview;
+addEventListener('keydown',e=>{if(shade.classList.contains('open')){if(e.key==='Escape')closeModal();return}if(e.target.closest('input,textarea,select,[contenteditable="true"]'))return;if(e.key===' '&&e.target.closest('button,a'))return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(idx+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(idx-1)}else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);else if(e.key.toLowerCase()==='g')overview();else if(e.key.toLowerCase()==='f')document.getElementById('fullscreenBtn').click();});
+
+// 觸控手勢：僅允許手指／觸控筆水平滑動。滑鼠不使用拖曳換頁。
+const screen=document.getElementById('screen');
+const interactive='button,a,input,textarea,select,[contenteditable="true"],[role="button"],.no-swipe';
+let touchStart=null;
+screen.addEventListener('pointerdown',e=>{
+  if(shade.classList.contains('open')||e.pointerType==='mouse'||e.target.closest(interactive))return;
+  touchStart={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now()};
+});
+screen.addEventListener('pointerup',e=>{
+  if(!touchStart||e.pointerId!==touchStart.id)return;
+  const {x,y,t}=touchStart;touchStart=null;
+  if(shade.classList.contains('open'))return;
+  const dx=e.clientX-x,dy=e.clientY-y;
+  const min=Math.min(105,Math.max(50,innerWidth*.09));
+  if(Math.abs(dx)>=min&&Math.abs(dx)>Math.abs(dy)*1.25&&performance.now()-t<2000){
+    go(idx+(dx<0?1:-1));
+    suppressClickUntil=performance.now()+350;
+  }
+});
+screen.addEventListener('pointercancel',()=>{touchStart=null});
+let suppressClickUntil=0;
+screen.addEventListener('click',e=>{
+  // 詳情按鈕、連結和表單保留原生點擊；觸控滑動後禁止誤觸。
+  if(performance.now()<suppressClickUntil){e.preventDefault();e.stopPropagation();return}
+  if(shade.classList.contains('open')||e.target.closest(interactive))return;
+  const rect=stage.getBoundingClientRect();
+  if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)return;
+  // 單擊投影片：左側 25% 返回，其餘區域前進；不需點任何按鈕。
+  const relativeX=(e.clientX-rect.left)/rect.width;
+  go(idx+(relativeX<.25?-1:1));
+});
+// 滑鼠滾輪：向下下一頁、向上上一頁。
+// 觸控板：水平左右滑動換頁；垂直兩指捲動也可以換頁。
+// 連續／慣性捲動合併為一次換頁，避免一次跳過多頁。
+let wheelDelta=0,wheelLocked=false,wheelQuietTimer=0,lastWheelTurn=-Infinity;
+screen.addEventListener('wheel',e=>{
+  if(shade.classList.contains('open')||e.ctrlKey)return; // Ctrl + 滾輪保留瀏覽器縮放
+  const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
+  const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)*.7;
+  const step=(horizontal?e.deltaX:e.deltaY)*unit;
+  if(Math.abs(step)<.3)return;
+  e.preventDefault();
+  clearTimeout(wheelQuietTimer);
+  wheelQuietTimer=setTimeout(()=>{wheelDelta=0;wheelLocked=false},420);
+  if(wheelLocked)return;
+  wheelDelta+=step;
+  const threshold=horizontal?38:45;
+  if(Math.abs(wheelDelta)>=threshold&&performance.now()-lastWheelTurn>=430){
+    go(idx+(wheelDelta>0?1:-1));
+    lastWheelTurn=performance.now();
+    wheelLocked=true;
+  }
+},{passive:false});
+
+let costState={books:20,input:4,output:.8,pages:780,mode:'hybrid'};const fx=32.97;
+function calc(){let{books,input,output,pages,mode}=costState;let prices={mini:[.75,4.5],large:[2.5,15],hybrid:[1.10,6.60]};let [pIn,pOut]=prices[mode];let model=books*(input*pIn+output*pOut)*fx,parse=books*pages/1000*10*fx,total=model+parse;document.getElementById('slideCost').textContent=Math.round(total).toLocaleString('en-US');return{model,parse,total,perBook:total/books};}
+function makeCalc(){const x=calc();openModal('AI 營運成本｜互動試算',`<div class="calculator-grid"><div class="controls-col"><div class="range-row"><label for="cbooks">每月書籍數</label><output id="cbooksOut">${costState.books} 本</output><input id="cbooks" type="range" min="1" max="100" step="1" value="${costState.books}"></div><div class="range-row"><label for="cinput">每本輸入 Tokens</label><output id="cinputOut">${costState.input} 百萬</output><input id="cinput" type="range" min=".5" max="12" step=".5" value="${costState.input}"></div><div class="range-row"><label for="coutput">每本輸出 Tokens</label><output id="coutputOut">${costState.output} 百萬</output><input id="coutput" type="range" min=".1" max="3" step=".1" value="${costState.output}"></div><div class="range-row"><label for="cpages">每本付費解析頁次</label><output id="cpagesOut">${costState.pages} 頁次</output><input id="cpages" type="range" min="0" max="2500" step="30" value="${costState.pages}"></div><div style="font-size:18px;font-weight:800">模型配置</div><div class="select-row"><button data-mode="mini">全 Mini</button><button data-mode="hybrid">混合 80 / 20</button><button data-mode="large">全進階</button></div></div><div class="calc-result"><div style="font-weight:800;font-size:18px">每月模型＋解析費</div><div class="big" id="ctotal">NT$ ${Math.round(x.total).toLocaleString('en-US')}</div><div class="r"><span>AI 模型</span><b id="cmodel"></b></div><div class="r"><span>版面解析</span><b id="cparse"></b></div><div class="r"><span>平均每本</span><b id="cbook"></b></div><p style="font-size:16px;color:#587068;line-height:1.55">模型單價與匯率固定為企劃基準；Token 及頁次屬可調整假設。未含託管、人力、儲存、稅費與可能的多模態成本。</p></div></div><p class="small soft" style="margin-top:20px">以上為工作量情境推算，非廠商報價。從完整文件改為只送「有異動的頁面」通常是最值得優先驗證的成本控制方式。</p>`);
+const inputs=[['cbooks','books',' 本'],['cinput','input',' 百萬'],['coutput','output',' 百萬'],['cpages','pages',' 頁次']];function update(){let r=calc(),nf=n=>Math.round(n).toLocaleString('en-US');document.getElementById('ctotal').textContent='NT$ '+nf(r.total);document.getElementById('cmodel').textContent='NT$ '+nf(r.model);document.getElementById('cparse').textContent='NT$ '+nf(r.parse);document.getElementById('cbook').textContent='NT$ '+nf(r.perBook);modalbody.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===costState.mode))}inputs.forEach(([id,key,suf])=>{const el=document.getElementById(id);el.addEventListener('input',()=>{costState[key]=Number(el.value);document.getElementById(id+'Out').textContent=costState[key]+suf;update()})});modalbody.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{costState.mode=b.dataset.mode;update()});update();}
+document.getElementById('openCalc').onclick=makeCalc;
+let hash=/^#slide-(\d+)$/.exec(location.hash);slides.forEach(s=>s.classList.remove('active'));go(hash?Number(hash[1])-1:0,false);
+})();
+</script>
+</body></html>
