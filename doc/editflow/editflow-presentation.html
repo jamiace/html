@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ecefe9">
-<title>教材編務流轉與品質管理系統｜企劃主管提案</title>
+<title>教材編務流轉與品質管理系統｜企劃提案</title>
 <style>
 :root{--ink:#172c2b;--muted:#627572;--emerald:#147b6b;--emerald2:#0a584e;--mint:#dfeee6;--paper:#f7f6f1;--gold:#bd9a5d;--line:#d8e0da;--night:#142f31;--red:#b65f4b;--width:1440px;--height:810px}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:#dbe3dc;color:var(--ink);-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #d1a257;outline-offset:4px}a{color:#126b61}button:disabled{opacity:.38;cursor:not-allowed}
@@ -145,7 +145,7 @@ html,body{overscroll-behavior-x:none}
 <div class="topline">DECISION · 討論重點</div><h2 class="headline xl" style="margin-top:95px;max-width:1150px">讓編輯把時間<br>留給<span class="night-accent">真正需要專業判斷</span>的事。</h2>
 <p class="subline" style="font-size:28px;margin-top:25px">第一步不需要承諾 AI 能校對所有錯誤。<br>先證明：修改不遺失、每次處理可核對、返工與確認時間確實減少。</p>
 <div class="cover-meta" style="margin-top:54px"><span>選定一本真實試點教材</span><span>取得完整校稿歷程</span><span>建立效率與品質基準</span></div>
-<button class="detail-link" data-detail="decision">展開主管決策問題 ＋</button><div class="footer-in"><span>教材編務流轉與品質管理系統 · 內部企劃討論稿</span><b>14 / 14</b></div></section>
+<button class="detail-link" data-detail="decision">展開決策問題 ＋</button><div class="footer-in"><span>教材編務流轉與品質管理系統 · 內部企劃討論稿</span><b>14 / 14</b></div></section>
 </main></div>
 <div id="tools" aria-label="簡報工具"><button id="overviewBtn" title="投影片總覽（G）" aria-label="投影片總覽">▦</button><button id="fullscreenBtn" title="全螢幕（F）" aria-label="切換全螢幕">⛶</button></div>
 <div id="statusLive" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -188,7 +188,7 @@ cost:{title:'雲端 AI 費用：來源、公式與假設',body:`<p>模型定價�
 dgx:{title:'三台 DGX Spark：本地模型的運作成本',body:`<h3>適合的定位</h3><p>將大量但不必即時完成的文件分類、摘要、檢索與低風險重複分析放在本地執行。先使用一台服務試點，其餘維持既有研發用途。</p><h3>電力情境（僅試算）</h3><p>以每台 240W 電源額定值、每天 24 小時、30 天滿額計算，約 172.8 kWh／台月。如果用每度 NT$3～6 假設電價，約 NT$518～1,037／台月；三台為 NT$1,555～3,110／月。這不是實際平均功耗，且未含空調。</p><h3>自建不是零費用</h3><ul><li>需計入儲存、散熱、資安、監控、模型部署與維護。</li><li>三台 DGX Spark 服務其他內部工具時，必須衡量算力排擠。</li><li>硬體可執行某種模型，不代表它在繁體中文教材語意檢查的品質已合格。</li></ul><h3>操作策略</h3><p>先以一致的教材測試集比較本地 8B／30B 等級模型與雲端模型的品質、延遲及總成本。若高難度判斷本地模型尚不足，可僅在經批准後把指定工作轉送雲端 API。</p>`},
 pilot:{title:'試點驗證：不要把模型速度當成工作效率',body:`<h3>試點素材</h3><p>挑 1～2 本保留校稿歷程與修改紀錄的已完成書籍，涵蓋文字修改、圖文修改、題解修改及跨配套內容。盡可能由不同編輯交叉操作。</p><h3>三種作業方式</h3><ol><li>沿用目前文件、訊息與人工追蹤方式。</li><li>使用無 AI 的流轉系統。</li><li>使用相同流轉系統，再開啟 AI 增強模組。</li></ol><h3>測量結果</h3><table><tr><th>量測</th><th>定義</th></tr><tr><td>人工總工時</td><td>從收到意見至覆核完成的人工作業時間</td></tr><tr><td>工作週期</td><td>提出至結案的歷時，另外區分等待時間</td></tr><tr><td>漏改／返工</td><td>已知未處理項目、已結案後的重修次數</td></tr><tr><td>AI 誤報成本</td><td>編輯檢查無實際問題警告的時間</td></tr></table><p class="warntext">相同任務重做可能產生學習效應。可用不同書稿或任務隨機分組、交換操作順序等方式，減少測試偏差。</p>`},
 roadmap:{title:'分階段導入，不把研發變成一個巨大的 ERP 專案',body:`<h3>第一階段：非 AI 核心</h3><p>建立版本管理、任務狀態、原稿保存、差異證據與指定覆核。只有在實際書稿上能可靠追蹤修改，才進第二階段。</p><h3>第二階段：可選 AI 增強</h3><p>先做意見拆解、修訂摘要與語意關聯搜尋。針對每個功能記錄 AI 誤報／漏報、人工驗證時間和每本書消耗的 Tokens。</p><h3>第三階段：跨教材連動</h3><p>為課本、教師手冊、習作、題庫與數位教材建立可用的關聯 ID 或可人工確認的關聯表。修改主要教材時，自動產生關聯檢查工作。</p><p class="warntext">每階段是否值得繼續，應由實測節省工時與品質指標決定，不應只因功能可以做就全部上線。</p>`},
-decision:{title:'主管討論：三個需要先確定的事情',body:`<ol><li><strong>現有工作流：</strong>校稿意見目前主要存在 Word、PDF、InDesign、Excel 還是通訊軟體？正式版的認定方式是什麼？</li><li><strong>試點素材：</strong>哪一本已出版的教材保留了從初稿到定稿的完整歷程、問題清單與修訂檔？</li><li><strong>驗收標準：</strong>最優先減少的是漏改、人工追查時間、反覆退回，還是跨配套遺漏？</li></ol><p>有了這三項資訊，才能把概念提案轉成可以實際測試的 MVP，而不是先替編輯增加一套需要維護的新工具。</p>`}
+decision:{title:'討論：三個需要先確定的事情',body:`<ol><li><strong>現有工作流：</strong>校稿意見目前主要存在 Word、PDF、InDesign、Excel 還是通訊軟體？正式版的認定方式是什麼？</li><li><strong>試點素材：</strong>哪一本已出版的教材保留了從初稿到定稿的完整歷程、問題清單與修訂檔？</li><li><strong>驗收標準：</strong>最優先減少的是漏改、人工追查時間、反覆退回，還是跨配套遺漏？</li></ol><p>有了這三項資訊，才能把概念提案轉成可以實際測試的 MVP，而不是先替編輯增加一套需要維護的新工具。</p>`}
 };
 const shade=document.getElementById('shade'),modalbody=document.getElementById('modalbody'),modaltitle=document.getElementById('modaltitle');
 function openModal(title,body){lastFocus=document.activeElement;modaltitle.textContent=title;modalbody.innerHTML=body;shade.classList.add('open');modalbody.scrollTop=0;document.getElementById('closemodal').focus();}
