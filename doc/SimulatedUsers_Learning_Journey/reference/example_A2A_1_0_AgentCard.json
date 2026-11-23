@@ -1,0 +1,37 @@
+{
+  "name": "Simulated User Designer",
+  "description": "Designs stateful personas, cross-domain transfer ideas, and reproducible scenario plans. Does not equate synthetic data with real-user evidence.",
+  "version": "0.2.0",
+  "supportedInterfaces": [
+    {
+      "url": "http://127.0.0.1:8000/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "design_personas",
+      "name": "Design simulated users",
+      "description": "Create domain-transfer ideas, simulated user profiles, behavioral policies and evidence-aware experiments.",
+      "tags": [
+        "simulation",
+        "user-experience",
+        "quality-assurance",
+        "education"
+      ]
+    }
+  ]
+}

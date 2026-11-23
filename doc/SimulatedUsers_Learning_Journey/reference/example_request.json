@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.2.0",
+  "operation": "design_personas",
+  "scenario_id": "document-flow-01",
+  "work_experience": "熟悉教材修訂與跨部門交接",
+  "transfer_goal": "找出除了編輯工作之外，這些經驗還能協助測試哪些數位流程",
+  "problem": "修改稿在不同角色間流轉時的資訊落差",
+  "product": "示例修訂追蹤介面",
+  "environment": "sandbox",
+  "mode": "coverage",
+  "duration_days": 3,
+  "persona_count": 3,
+  "random_seed": 7,
+  "questions": [
+    "新手是否能辨識目前版本？",
+    "時間有限的人是否能完成必要確認？"
+  ],
+  "expected_artifacts": [
+    "transfer_ideas.json",
+    "persona_profiles.json",
+    "behavior_policies.json",
+    "events.jsonl",
+    "limitations.md"
+  ],
+  "synthetic": true,
+  "notes": "本例為應用層任務資料，不是完整 A2A 協定封包；未連線任何系統。"
+}

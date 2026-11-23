@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>30位模擬玩家，是怎麼設計出來的？｜多頁離線教學</title><style>
+:root{--bg:#f6f6f2;--paper:#ffffff;--ink:#132b29;--muted:#61736e;--accent:#136b60;--dark:#102d2b;--a2:#e1f3ed;--orange:#c7733a;--obg:#fff4e8;--line:#dce7e1;--soft:#f0f6f2;--radius:20px;--shadow:0 14px 48px rgba(10,48,39,.055)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.83}
+a{color:var(--accent)}button,input,textarea,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #d89c50;outline-offset:3px}p{margin:.7em 0 1.15em}h1,h2,h3,h4{line-height:1.28;letter-spacing:-.027em}h1{font-size:clamp(2.35rem,5vw,4.6rem);font-weight:800;letter-spacing:-.052em;margin:.35em 0 .45em}h2{font-size:clamp(1.55rem,2.7vw,2.25rem);margin:1.65em 0 .7em}h3{font-size:1.2rem;margin:.7em 0 .4em}strong{font-weight:750}small{font-size:.82em}ul,ol{padding-left:1.45em}li{margin:.42em 0}code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{font-size:.9em;background:#eef5f1;border-radius:5px;padding:2px 5px}pre{background:#142c29;color:#edf8f2;border-radius:15px;padding:19px 20px;overflow:auto;font-size:13px;line-height:1.64;white-space:pre;tab-size:2}pre code{background:none;padding:0;color:inherit;font-size:inherit}
+.layout{display:grid;grid-template-columns:276px minmax(0,1fr)}.sidebar{position:sticky;top:0;max-height:100dvh;overflow-y:auto;background:var(--dark);color:#f3faf7;padding:27px 18px 30px 24px;align-self:start;scrollbar-width:thin}.brand{font-weight:800;font-size:21px;line-height:1.25;letter-spacing:-.035em}.brand-sub{font-size:12px;color:#adcbc0;margin:9px 0 26px;line-height:1.65}.nav-label{color:#8eada1;font-weight:750;font-size:11px;letter-spacing:.16em;margin:25px 0 12px}.nav{display:flex;flex-direction:column;gap:3px}.nav a{display:flex;align-items:center;gap:12px;color:#d6e6dd;text-decoration:none;border-radius:10px;padding:9px 10px;font-size:13px;line-height:1.3}.nav a:hover,.nav a.active{background:#285249;color:#fff}.nav small{font-size:11px;color:#a6bdb4;display:block;width:20px}.nav a.active small{color:#c4e6d9}.sidebar-bottom{font-size:12px;color:#afc9c0;line-height:1.7;border-top:1px solid #34504b;padding-top:18px;margin-top:27px}
+main{min-width:0;width:min(100%,1140px);padding:43px clamp(20px,4.4vw,65px) 80px;margin:0 auto}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.lead{font-size:clamp(1.11rem,1.6vw,1.28rem);line-height:1.75;color:#3c5850;max-width:870px}.hero{padding:10px 0 33px;border-bottom:1px solid #dbe6de;margin-bottom:34px}.hero p{max-width:920px}.intro-flag{display:inline-flex;align-items:center;gap:8px;background:var(--a2);border-radius:100px;padding:4px 11px;font-size:12px;font-weight:750;color:#205c51}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.card{grid-column:span 12;min-width:0;background:var(--paper);border:1px solid var(--line);padding:25px 27px;border-radius:var(--radius);box-shadow:var(--shadow)}.card h2{margin:0 0 12px;font-size:1.5rem}.card h3:first-child{margin-top:0}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}
+.panel{background:var(--soft);border-radius:16px;padding:17px 19px}.panel p:last-child,.card p:last-child{margin-bottom:0}.quote{font-size:clamp(1.28rem,2.1vw,2rem);font-weight:800;line-height:1.52;letter-spacing:-.035em;color:#174f46;border-left:5px solid #8ed7bd;padding:10px 0 10px 22px;margin:24px 0}.accent{color:var(--accent)}.muted{color:var(--muted)}.callout{padding:18px 22px;background:#e8f4ee;border:1px solid #cfebdc;border-left:4px solid #2a8a6f;border-radius:15px;margin:22px 0}.caution{padding:16px 20px;background:var(--obg);border-left:4px solid #d98a50;border-radius:13px;margin:19px 0;color:#6d4324}.tag{display:inline-flex;align-items:center;color:#23584c;background:#e3f3eb;border-radius:99px;padding:4px 11px;font-size:12px;font-weight:760}.tag.ember{color:#874b27;background:#fce8d6}.label{font-weight:760;font-size:13px;color:#415e54;margin-bottom:7px;display:block}.mini{font-size:13px;color:var(--muted)}.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#578b78;font-weight:800}.step{display:flex;gap:18px;align-items:start;padding:16px 0;border-bottom:1px solid var(--line)}.step:last-child{border-bottom:0}.numb{flex:0 0 38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#dcefe5;color:#14574b;font-weight:850}.step-body{min-width:0}.step-body h3{margin:0 0 5px}.step-body p{margin:0}.btn{border:0;border-radius:11px;padding:11px 17px;background:#14675b;color:#fff;font-weight:750;display:inline-flex;align-items:center;gap:8px;text-decoration:none;justify-content:center}.btn:hover{background:#0c5449;text-decoration:none}.btn.secondary{background:#e4efe9;color:#17574b}.btn.secondary:hover{background:#d2e8dc}.btn.ghost{background:#fff;border:1px solid #bfd6cb;color:#206153}.actions{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0}.tablewrap{overflow-x:auto;border-radius:13px;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;min-width:530px;font-size:14px;text-align:left}th,td{padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#eef5f0;color:#285649;font-weight:780}tr:last-child td{border-bottom:0}tbody tr:hover{background:#f6faf7}.pill{display:inline-block;border-radius:50px;background:#edf5ef;color:#285c51;font-weight:750;font-size:12px;padding:4px 10px}.big-stat{font-size:clamp(2rem,4.1vw,3.6rem);font-weight:850;letter-spacing:-.055em;line-height:1.1}.stat-label{font-size:13px;color:var(--muted);margin-top:10px}.checklist{list-style:none;padding-left:0}.checklist li{padding-left:27px;position:relative}.checklist li:before{content:'✓';position:absolute;left:0;color:#1b8b6a;font-weight:900}.crumb{font-size:13px;color:var(--muted);margin-top:20px}.crumb a{color:#438b79}
+.route{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:22px 0}.route-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.route-item:hover{border-color:#8bc7b0}.route-item .num{font-size:12px;color:var(--accent);font-weight:800}.route-item h3{margin:8px 0;font-size:18px}.route-item p{font-size:13px;color:var(--muted);margin:0}.route-item a{color:inherit;text-decoration:none;display:block}
+.case-btn{border:1px solid #bfd9cc;background:#fff;border-radius:12px;color:#265449;text-align:left;padding:11px 14px;font-weight:730}.case-btn:hover,.case-btn.active{background:#dff1e7;border-color:#6bbf9c}.case-btn[aria-pressed=true]{background:#dff1e7;border-color:#6bbf9c}.case-output{background:#eff7f2;padding:20px;border-radius:15px;min-height:190px}.example-col{display:flex;gap:11px;flex-wrap:wrap}.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:19px 0}.timeline>div{background:#fff;border:1px solid var(--line);padding:16px;border-radius:14px}.timeline strong{display:block;color:#176655;font-size:13px;margin-bottom:5px}.timeline span{font-size:13px;line-height:1.5}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-grid .full{grid-column:1/-1}input,select,textarea{width:100%;border:1px solid #bed3c8;background:#fff;border-radius:10px;padding:10px 12px;color:#193f34;min-height:44px}textarea{min-height:120px;resize:vertical}textarea.mono{font-family:ui-monospace,monospace;font-size:13px;line-height:1.6}.result{background:#17302d;color:#e9f6f0;border-radius:14px;padding:19px;line-height:1.75;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,monospace;font-size:13px}.result:empty:before{content:'選擇一個工作情境，按下「產生提示詞」後，這裡會出現可直接交給 AI 的內容。';color:#aecdc2}.simple-mark{font-size:13px;background:#edf6ef;border-left:4px solid #4a9a7e;padding:12px 14px;border-radius:10px}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:9px 0}summary{cursor:pointer;font-weight:750;color:#29574e}details p{margin-bottom:0}.footer{margin-top:40px;border-top:1px solid var(--line);padding-top:17px;color:#708078;font-size:12px}.source{font-size:13px;color:#637a70}.source a{word-break:break-word}.two-lines{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mobilebar{display:none}.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.filter-row input{max-width:340px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{position:static;max-height:none;padding:15px 18px}.brand{font-size:18px}.brand-sub,.nav-label,.sidebar-bottom{display:none}.nav{margin-top:13px;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;padding:0 0 5px;scrollbar-width:thin}.nav a{white-space:nowrap;padding:9px 12px;background:#20483f}.nav small{display:none}main{padding:25px 22px 60px}}@media(max-width:700px){body{font-size:15px}main{padding:21px 15px 60px}.card{padding:18px;border-radius:15px}.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.route{grid-template-columns:1fr}.timeline{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.two-lines{grid-template-columns:1fr}.hero{margin-bottom:23px;padding:7px 0 23px}h1{font-size:2.5rem}.quote{margin:13px 0;font-size:1.36rem;padding-left:14px}.grid{gap:12px}pre{font-size:12px}}
+@media print{.layout{display:block}.sidebar,.actions,.btn,.no-print{display:none!important}main{padding:0;width:100%}body{background:#fff}.card{box-shadow:none;break-inside:avoid}h2{break-after:avoid}.hero{break-after:avoid}a{color:#105449}}
+
+
+.discovery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}
+.discovery{padding:20px 21px;border:1px solid var(--line);background:#f7faf8;border-radius:15px}
+.discovery strong{display:block;color:#165b50;font-size:16px;line-height:1.55}
+.discovery p{margin:8px 0 0;font-size:14px;color:#4d665b}
+.challenge{border:1px solid var(--line);border-radius:14px;background:#fff;margin:10px 0;overflow:hidden}
+.challenge summary{list-style:none;cursor:pointer;padding:16px 19px;font-size:17px;font-weight:800;display:flex;align-items:center;gap:14px;color:#164d45}
+.challenge summary::-webkit-details-marker{display:none}.challenge summary:after{content:'＋';margin-left:auto;font-size:22px;color:#4c8c75}.challenge[open] summary:after{content:'−'}
+.challenge[open] summary{background:#f0f7f2}.challenge-num{font-size:12px;letter-spacing:.12em;color:#2b9475}
+.challenge-body{padding:5px 20px 21px;border-top:1px solid var(--line)}.challenge-body p{max-width:900px}
+.lab-results{min-height:90px;padding:18px 20px;border-radius:14px;background:#eef6f1;border:1px solid #d1e5d9}
+.lab-stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:8px 0 18px}
+.lab-stat>div{border-radius:12px;background:white;border:1px solid #d7e7dd;padding:13px}
+.lab-stat .value{font-size:29px;font-weight:850;color:#18584e;line-height:1.1}
+.lab-stat span{font-size:12px;color:var(--muted)}
+.lab-bars{display:grid;grid-template-columns:90px 1fr 46px;gap:8px 13px;align-items:center;margin:15px 0;font-size:13px}
+.lab-track{background:#dce9df;height:15px;border-radius:99px;overflow:hidden}.lab-fill{background:#2b9575;height:100%;border-radius:99px}
+.lab-persona-path{border-top:1px solid #cbded2;margin-top:17px;padding-top:12px;font-size:13px;line-height:1.7}
+.lab-compare{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:12px 0}
+.lab-compare>div{background:white;border:1px solid var(--line);border-radius:13px;padding:15px}
+input[type=range]{accent-color:#176f5a;cursor:pointer;width:100%}
+@media(max-width:760px){.discovery-grid,.lab-stat,.lab-compare{grid-template-columns:1fr}.challenge summary{font-size:15px}}
+
+.chapter-pager{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;padding-top:24px;margin-top:28px;border-top:1px solid var(--line)}
+.chapter-pager .btn{font-size:13px}
+</style><style>[hidden]{display:none!important}</style></head><body><div class="layout"><aside class="sidebar"><div class="brand">30 位模擬玩家<br/>設計與應用指南</div><div class="brand-sub">先看懂這套方法，再親自操作，最後探索其他用途。</div><div class="nav-label">閱讀目錄 / CONTENTS</div><nav aria-label="章節導覽" class="nav"><a data-page="index.html" href="#index.html"><small>01</small><span>從問題開始</span></a><a data-page="story.html" href="#story.html"><small>02</small><span>案例：為何要有30個人</span></a><a data-page="design.html" href="#design.html"><small>03</small><span>拆解：30人怎麼設計</span></a><a data-page="beginner.html" href="#beginner.html"><small>04</small><span>動手做：先從3人開始</span></a><a data-page="advanced.html" href="#advanced.html"><small>05</small><span>進階：狀態與驗證</span></a><a data-page="experiments.html" href="#experiments.html"><small>06</small><span>互動實驗：親自試一次</span></a><a data-page="transfer.html" href="#transfer.html"><small>07</small><span>延伸：還能用在哪裡</span></a><a data-page="workshop.html" href="#workshop.html"><small>08</small><span>把自己的想法交給AI</span></a><a data-page="ai-agent.html" href="#ai-agent.html"><small>09</small><span>AI專用方法與規格</span></a><a data-page="a2a.html" href="#a2a.html"><small>10</small><span>A2A與多Agent協作</span></a><a data-page="appendix.html" href="#appendix.html"><small>11</small><span>資料來源與附錄</span></a></nav><div class="sidebar-bottom">跟著案例走一遍；有興趣的地方，再自由深入。</div></aside><main id="main-content"><section class="offline-page" data-view="index.html" id="view-index.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / A LEARNING JOURNEY</div><h1>30 個模擬玩家，是怎麼設計出來的？</h1><p class="lead">從 Purr Cozy 的一次測試開始。先看懂問題、人物與行為如何設計，再親手試一次，最後才談這套方法還能拿去做什麼。</p></header>
+<div class="quote">一款遊戲，要怎麼在真人進場之前，先遇見三十種不同的使用方式？</div>
+<p class="lead">Purr Cozy 是一款有養貓、布置、音樂與英文學習的遊戲。不同玩家會在不同時間登入，也可能只想養貓、完全不想做題。要測試這些情境，光讓一個機器人重複登入三十次，並沒有多少意義。</p>
+<p class="lead">因此，我們試著做出三十位設定各不相同的模擬玩家，讓他們依照各自的能力、作息、喜好與當下狀態來決定怎麼玩。這份教材就從這個問題開始，把整個方法拆給你看。</p>
+<div class="grid">
+<section class="card col-12"><div class="kicker">先知道你會看到什麼</div><h2>按照理解的順序，走過這六站</h2>
+<div class="timeline"><div><strong>01｜為什麼</strong><span>普通自動測試不夠的地方</span></div><div><strong>02｜怎麼設計</strong><span>30人的設定與行為規則</span></div><div><strong>03｜怎麼操作</strong><span>從3個人物開始練習</span></div><div><strong>04｜怎麼驗證</strong><span>紀錄、結果與限制</span></div></div>
+<div class="timeline" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div><strong>05｜親自玩玩看</strong><span>切換規則、看見結果為什麼不同</span></div><div><strong>06｜然後，還能做什麼？</strong><span>理解方法後，延伸到其他熟悉的情境</span></div></div>
+<div class="actions"><a class="btn" href="#story.html">從第一站開始：為什麼要設計30個人 →</a></div></section>
+<section class="card col-6"><div class="kicker">原來的問題</div><h2>同樣一款遊戲，每個人真的都會一樣玩嗎？</h2><p>有人只有三分鐘、有人週末才有空、有人遇到難題會改去照顧貓咪。這些不是漂亮的人物背景設定，而是會改變實際操作路徑的條件。</p></section>
+<section class="card col-6"><div class="kicker">我們要學的</div><h2>不只看結果，也看方法如何形成</h2><p>這裡會展示原本的30人名單、十種使用習慣、行為會如何隨時間改變，以及模擬過程有哪些不能誤讀的地方。你不用先會寫程式。</p></section>
+<section class="card col-12"><div class="kicker">讀完之後</div><h2>先學會一件事，再自己找到其他用途</h2><p>後面確實會有跨領域的應用、開放式探索題目、給 AI 的提示詞，以及 A2A 的技術資料。但那是建立在你已經理解這個案例之後的下一站，不需要先接受任何結論。</p></section>
+</div><div class="footer">模擬學習者／使用者方法指南｜教學案例與延伸實作 · 2026 年 11 月</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#story.html">下一章：案例：為何要有30個人 →</a></div></section><section class="offline-page" data-view="story.html" id="view-story.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>一個遊戲，30 種不同的生活。</h1><p class="lead">先了解 Purr Cozy 的實驗，才知道我們能帶走什麼</p></header>
+<p class="lead">Purr Cozy 需要測試的不只是按鈕和畫面。真實玩家可能有不同的年齡、能力、喜好與作息；有人每天上線，有人兩週才來一次，也有人在挫折後不再回來。原始設計因此建立了 30 位不同的模擬人物。</p>
+<div class="grid"><section class="card col-8"><div class="kicker">30 位角色，10 種使用習慣</div><h2>不是讓同一個機器人登入 30 次</h2><p>每位人物的設定包含：年齡與英文程度、生活作息、每日可用時間、對活動的偏好、遇到挫折的反應、記憶與遺忘、朋友互動、裝置與語言。還會因為新鮮感、習慣、事件而改變行為。</p><div class="timeline"><div><strong>人物</strong><span>年齡、能力、喜好</span></div><div><strong>處境</strong><span>時間、裝置、生活事件</span></div><div><strong>選擇</strong><span>登入、做題、養貓、離開</span></div><div><strong>變化</strong><span>習慣、挫折、記憶、回流</span></div></div><p>重點不是角色有多像真人，而是他們能否幫助我們走到<strong>不同的操作路徑與例外情境</strong>。</p></section><section class="card col-4"><div class="kicker">原始設計中的三個例子</div><h2>相同產品，不同行為</h2><div class="panel"><b>安安｜週末型</b><p class="mini">小一，喜歡音樂、鋼琴、佈置；平日時間少，假日較有機會長時間使用。</p></div><div class="panel" style="margin-top:9px"><b>詩晴｜短頻多次型</b><p class="mini">國一，偏好養貓、好友、拍照；原始設定單次中位數約 2.5 分鐘。</p></div><div class="panel" style="margin-top:9px"><b>淑芬｜兩週一兩次型</b><p class="mini">家長，偏好養貓、佈置、每日單字；原本可能極少使用。</p></div><div class="mini" style="margin-top:10px">以上是模擬人物設定，不是實際受訪者。</div></section><section class="card col-12"><div class="kicker">實驗曾經發現的事</div><h2>從「能跑」到「知道什麼不能說」</h2><p>兩週測試報告彙整的 11/10～11/21 資料，約有 <strong>3,885 個學習回合、25,952 題作答</strong>。這批資料能協助發現流程與規則上的問題，例如低年級題型、測驗門檻、載入等待及紀錄是否正常。</p><p>但報告也指出：後來為了確保測試功能都有資料，啟用了每天固定場次的 coverage 設定，使原本應該會流失的人也持續上線。</p><div class="caution"><strong>重要教訓：</strong>如果你為了測試功能，強制每個人每天登入，那麼「全部都回來了」只能表示你安排他們回來，不能推論真人留存。</div><p class="source">依據：原始《試玩計畫－30位測試帳號》與《30位測試帳號報告與300人真人測試計畫》（11/21）。</p></section><section class="card col-12"><div class="kicker">接下來看設計過程</div><h2>這三十個人不是憑空編出來的</h2><p>先從測試目的出發：我們想看見哪些操作差異？然後才為不同人物設定英文能力、作息、使用時間、喜好與遇到問題的反應。下一頁會實際拆開人物設計表和決策規則。</p><div class="actions"><a class="btn" href="#design.html">繼續看：三十個人怎麼設計 →</a></div></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#index.html">← 上一章：從問題開始</a><a class="btn" href="#design.html">下一章：拆解：30人怎麼設計 →</a></div></section><section class="offline-page" data-view="design.html" id="view-design.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / A LEARNING JOURNEY</div><h1>這三十個人，是怎麼設計出來的？</h1><p class="lead">這一章完整交代設計思路，再看真實採用的30個人物設定。先理解方法，後面才談創意應用。</p></header>
+<p class="lead">首先，不是「需要三十個帳號，所以隨機生成三十個名字」。原始設計是想讓同一款遊戲經過不同生活條件與使用習慣的測試，包含只玩幾分鐘、偶爾才來、玩兩天就膩、流失後回來等情境。</p>
+<div class="grid">
+<section class="card col-12"><div class="kicker">第一步｜定義問題</div><h2>先決定需要看到哪些差異</h2><p>Purr Cozy 要測試的至少有四種差異：一是登入節奏，二是進遊戲後選什麼，三是英文能力與答題反應，四是時間推移後，這個人可能變得不一樣。因為目標不同，人物不能只換個名字。</p>
+<div class="timeline"><div><strong>上線習慣</strong><span>多久來一次？一次多久？</span></div><div><strong>生活限制</strong><span>上課、上班、睡覺、裝置</span></div><div><strong>玩法偏好</strong><span>做題、養貓、裝飾、好友</span></div><div><strong>後續變化</strong><span>新鮮感、習慣、疲倦、回流</span></div></div></section>
+<section class="card col-7"><div class="kicker">第二步｜設計人物</div><h2>用可觀察的差異，而不是把人寫得像小說</h2>
+<p>原始人物除了年齡、身分和英文程度，也有作息、平假日高峰、單次使用時間、喜好與討厭、生活事件、裝置語言，以及容易中斷、挫折時會怎麼做等條件。</p>
+<p>例如：</p><ul><li><b>安安</b>：原始設定是週末型，喜歡音樂、鋼琴與布置；平常較少來。</li><li><b>詩晴</b>：短頻多次型，偏好養貓、好友與拍照，使用時間短。</li><li><b>淑芬</b>：兩週一兩次型，即使對遊戲不排斥，也可能因為日常安排很少出現。</li></ul>
+<p class="mini">人物是測試假設，不是真實訪談對象。不同類型也不是人口分類標準。</p></section>
+<section class="card col-5"><div class="kicker">第三步｜十種使用節奏</div><h2>讓三十人具有不同的出現方式</h2>
+<p>原始文件使用十種黏著類型：黏著每日、短頻多次、長時間沉浸、週末、幾天一次、兩週一兩次、三分鐘熱度、試玩就走、流失後回流、任務導向短打。</p>
+<div class="callout"><strong>最重要的不是十種名稱。</strong> 是讓「他會不會來」由他的條件決定，而不是固定每天被叫上線。</div></section>
+<section class="card col-12"><div class="kicker">第四步｜每一天都重新決定</div><h2>讓行為有原因，也讓角色會改變</h2>
+<pre><code>今天的時間、作息、生活事件
+           ↓
+現在的興趣、習慣、新鮮感、疲倦
+           ↓
+今天要登入嗎？（也可以完全不來）
+           ↓
+登入後想做什麼？（養貓／單字／布置／離開）
+           ↓
+產品真的回應了什麼？成功、失敗、等待、卡住
+           ↓
+更新人物狀態，影響下一次選擇</code></pre>
+<p>如果要實作，可以用排程、機率分布、狀態規則與瀏覽器操作。原始方法也設計了答題能力、猜測、記憶與遺忘，讓「學習過」能影響下一次作答；這些都是模型假設，之後須以真人資料校準。</p></section>
+<section class="card col-12"><div class="kicker">第五步｜真的操作，再留下證據</div><h2>不要只產生一張假資料表</h2>
+<p>原始方案使用排程與瀏覽器，自動登入正式網站、執行實際操作，並記錄雲端存檔與事件。這能協助測試真實流程、資料是否寫入、測驗規則是否正常；但測試帳號應與真人資料隔離。</p>
+<p>後期因為改採強制覆蓋模式，部分原本可能流失的人也被安排每天上線。這讓功能更容易測到，卻也提醒我們：<strong>功能覆蓋結果不能拿來宣稱自然留存。</strong></p></section>
+</div><section class="card col-12"><h2>30 人設定一覽</h2><div class="filter-row"><label class="label" for="roster-filter">依暱稱、類型、程度或喜好搜尋</label><input id="roster-filter" placeholder="例如：週末、養貓、國二、Rina"/><span class="mini" id="roster-count">顯示 30 / 30 位</span></div><div class="tablewrap" style="margin-top:15px"><table><thead><tr><th>ID</th><th>人物</th><th>英文程度</th><th>原始黏著類型</th><th>單次中位數</th><th>偏好</th></tr></thead><tbody><tr data-roster-row=""><td>sim01</td><td><strong>樂樂</strong><br/><span class="mini">6・小一</span></td><td>小一</td><td>幾天一次型</td><td>9 分</td><td>養貓、丟玩具、看房間</td></tr><tr data-roster-row=""><td>sim02</td><td><strong>安安</strong><br/><span class="mini">7・小一</span></td><td>小二</td><td>週末型</td><td>30 分</td><td>音樂、鋼琴、佈置</td></tr><tr data-roster-row=""><td>sim03</td><td><strong>小宇</strong><br/><span class="mini">8・小二</span></td><td>小二</td><td>短頻多次型</td><td>3.5 分</td><td>小遊戲、丟玩具、養貓</td></tr><tr data-roster-row=""><td>sim04</td><td><strong>芯芯</strong><br/><span class="mini">8・小二</span></td><td>小三</td><td>黏著每日型</td><td>12 分</td><td>每日單字、程度測驗、領任務</td></tr><tr data-roster-row=""><td>sim05</td><td><strong>皓皓</strong><br/><span class="mini">9・小三</span></td><td>小二</td><td>短頻多次型</td><td>4 分</td><td>養貓、丟玩具、佈置</td></tr><tr data-roster-row=""><td>sim06</td><td><strong>語晴</strong><br/><span class="mini">9・小三</span></td><td>小四</td><td>長時間沉浸型</td><td>35 分</td><td>佈置、商店、養貓</td></tr><tr data-roster-row=""><td>sim07</td><td><strong>子恩</strong><br/><span class="mini">10・小四</span></td><td>小三</td><td>三分鐘熱度型</td><td>25 分</td><td>小遊戲、好友、養貓</td></tr><tr data-roster-row=""><td>sim08</td><td><strong>品妤</strong><br/><span class="mini">10・小四</span></td><td>小五</td><td>黏著每日型</td><td>12 分</td><td>每日單字、Meow Typo、程度測驗</td></tr><tr data-roster-row=""><td>sim09</td><td><strong>柏翰</strong><br/><span class="mini">11・小五</span></td><td>小四</td><td>黏著每日型</td><td>12 分</td><td>好友、每日單字、小遊戲</td></tr><tr data-roster-row=""><td>sim10</td><td><strong>安琪</strong><br/><span class="mini">11・小五</span></td><td>小六</td><td>長時間沉浸型</td><td>50 分</td><td>音樂、佈置、養貓</td></tr><tr data-roster-row=""><td>sim11</td><td><strong>承恩</strong><br/><span class="mini">12・小六</span></td><td>小五</td><td>三分鐘熱度型</td><td>25 分</td><td>小遊戲、每日單字、養貓</td></tr><tr data-roster-row=""><td>sim12</td><td><strong>筠筠</strong><br/><span class="mini">12・小六</span></td><td>國二</td><td>黏著每日型</td><td>12 分</td><td>程度測驗、每日單字、商人故事</td></tr><tr data-roster-row=""><td>sim13</td><td><strong>冠宇</strong><br/><span class="mini">13・國一</span></td><td>小六</td><td>長時間沉浸型</td><td>40 分</td><td>小遊戲、好友、Meow Typo</td></tr><tr data-roster-row=""><td>sim14</td><td><strong>詩晴</strong><br/><span class="mini">13・國一</span></td><td>國一</td><td>短頻多次型</td><td>2.5 分</td><td>養貓、好友、拍照</td></tr><tr data-roster-row=""><td>sim15</td><td><strong>宥翔</strong><br/><span class="mini">14・國二</span></td><td>小六</td><td>任務導向短打型</td><td>5 分</td><td>每日單字、程度測驗、養貓</td></tr><tr data-roster-row=""><td>sim16</td><td><strong>子晴</strong><br/><span class="mini">14・國二</span></td><td>國三</td><td>長時間沉浸型</td><td>75 分</td><td>番茄鐘、音樂、每日單字</td></tr><tr data-roster-row=""><td>sim17</td><td><strong>品睿</strong><br/><span class="mini">15・國三</span></td><td>國二</td><td>黏著每日型</td><td>30 分</td><td>每日單字、自由練習、Meow Typo</td></tr><tr data-roster-row=""><td>sim18</td><td><strong>欣妍</strong><br/><span class="mini">15・國三</span></td><td>高一</td><td>長時間沉浸型</td><td>110 分</td><td>音樂、佈置、養貓</td></tr><tr data-roster-row=""><td>sim19</td><td><strong>家瑋</strong><br/><span class="mini">16・高一</span></td><td>國三</td><td>週末型</td><td>30 分</td><td>小遊戲、扭蛋、好友</td></tr><tr data-roster-row=""><td>sim20</td><td><strong>雨萱</strong><br/><span class="mini">16・高一</span></td><td>高二</td><td>黏著每日型</td><td>15 分</td><td>每日單字、商人故事、程度測驗</td></tr><tr data-roster-row=""><td>sim21</td><td><strong>俊傑</strong><br/><span class="mini">17・高二</span></td><td>高一</td><td>短頻多次型</td><td>3.5 分</td><td>好友、領任務、小遊戲</td></tr><tr data-roster-row=""><td>sim22</td><td><strong>采妮</strong><br/><span class="mini">17・高二</span></td><td>小六</td><td>幾天一次型</td><td>15 分</td><td>養貓、佈置、音樂</td></tr><tr data-roster-row=""><td>sim23</td><td><strong>博文</strong><br/><span class="mini">18・高三</span></td><td>高三</td><td>黏著每日型</td><td>35 分</td><td>番茄鐘、每日單字、自由練習</td></tr><tr data-roster-row=""><td>sim24</td><td><strong>曉薇</strong><br/><span class="mini">18・高三</span></td><td>高三</td><td>幾天一次型</td><td>15 分</td><td>音樂、每日單字、養貓</td></tr><tr data-roster-row=""><td>sim25</td><td><strong>阿哲</strong><br/><span class="mini">20・大學生</span></td><td>高二</td><td>流失後回流型</td><td>14 分</td><td>佈置、收集、小遊戲</td></tr><tr data-roster-row=""><td>sim26</td><td><strong>Mia</strong><br/><span class="mini">28・上班族</span></td><td>高一</td><td>短頻多次型</td><td>3 分</td><td>每日單字、番茄鐘、音樂</td></tr><tr data-roster-row=""><td>sim27</td><td><strong>志明</strong><br/><span class="mini">35・上班族</span></td><td>國一</td><td>幾天一次型</td><td>25 分</td><td>程度測驗、每日單字、自由練習</td></tr><tr data-roster-row=""><td>sim28</td><td><strong>淑芬</strong><br/><span class="mini">40・家長</span></td><td>小六</td><td>兩週一兩次型</td><td>10 分</td><td>養貓、佈置、每日單字</td></tr><tr data-roster-row=""><td>sim29</td><td><strong>王伯伯</strong><br/><span class="mini">65・退休</span></td><td>小四</td><td>黏著每日型</td><td>20 分</td><td>音樂、鋼琴、佈置</td></tr><tr data-roster-row=""><td>sim30</td><td><strong>Rina</strong><br/><span class="mini">31・設計師</span></td><td>高三</td><td>長時間沉浸型</td><td>55 分</td><td>佈置、音樂、拍照</td></tr></tbody></table></div><p class="mini">來源：原始《試玩計畫－30位測試帳號》的人物設計。<strong>這些是模型設定，不是對真實人群的抽樣資料。</strong>最初的預覽數值也不等於後來 coverage 階段的結果。</p></section>
+<div class="grid"><section class="card col-12"><div class="kicker">理解之後，親自試一次</div><h2>三十人的設計，是如何從三個人逐步擴充的？</h2><p>看完完整名單，不需要立刻再做三十個人。下一章會將同一方法縮成三個人、一個熟悉情境，示範如何自己動手開始。</p><div class="actions"><a class="btn" href="#beginner.html">下一章：從三個人開始 →</a></div></section></div>
+<div class="footer">資料來源：本專案《試玩計畫－30位測試帳號.md》與原始30人設定表；此處區分原始人物設計與後期執行結果。</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#story.html">← 上一章：案例：為何要有30個人</a><a class="btn" href="#beginner.html">下一章：動手做：先從3人開始 →</a></div></section><section class="offline-page" data-view="beginner.html" id="view-beginner.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>你也做一次：先從三個人開始。</h1><p class="lead">前面已經看過三十人的設計。現在把同樣的做法縮小：先做三個人物，記錄幾次選擇，再試著比較不同結果。</p></header>
+<p class="lead">不用學統計，也不用先學 Agent。找一件你每天都很熟悉的工作，從「大家怎麼做」改問「不同的人遇到同一件事，會發生什麼？」</p>
+<div class="grid"><section class="card col-7"><div class="kicker">最小練習</div><h2>只需要一件事，三個人</h2><div class="step"><span class="numb">1</span><div class="step-body"><h3>選一件你熟悉的事</h3><p>例如：一份重要的說明、教材閱讀、報名表、客服問答、產品介紹。先選你能說清楚細節的，不必選最厲害的。</p></div></div><div class="step"><span class="numb">2</span><div class="step-body"><h3>寫出三種不一樣的人</h3><p>不要只換名字。讓其中一個很忙、一個不熟悉流程、另一個有明確目的；三個人會遇到不同困難。</p></div></div><div class="step"><span class="numb">3</span><div class="step-body"><h3>讓三個人真的做同一件事</h3><p>想像他們會在哪一步遲疑、跳過、放棄、改道或詢問；這些是待驗證的假設。</p></div></div><div class="step"><span class="numb">4</span><div class="step-body"><h3>先把差異記下來</h3><p>記錄三個人各在哪一步停下、改道、完成或放棄。先確認自己能說清楚差別，不急著延伸到其他領域。</p></div></div><div class="step"><span class="numb">5</span><div class="step-body"><h3>先用一個小試驗驗證</h3><p>找測試環境實作、請真實同事試走或比較歷史案例。只有實際觀察才能提升信心。</p></div></div></section><section class="card col-5"><div class="kicker">具體範例</div><h2>以「修一份重要的說明」為例</h2><p>假設你很懂編輯的改稿流程。先不要急著做系統。你可以用三個人物推演同一份修改稿：</p><div class="example-col"><button class="case-btn" type="button">時間很少</button><button class="case-btn" type="button">第一次接手</button><button class="case-btn" type="button">熟悉的老手</button></div><div aria-live="polite" class="case-output" id="case-output" style="margin-top:14px"></div><p class="mini">點選不同情境，看同一項工作可能出現的不同路徑。這是教學示意，並非真實測試結果。</p></section><section class="card col-12"><div class="kicker">先做好基礎</div><h2>知道三個人為什麼不同，就可以開始學怎麼驗證</h2><p>同一個人物會因為時間限制、熟悉度和目標不同而做出不同選擇。下一站先練習把這些變化留下可重現紀錄；等方法穩固，再談其他用途。</p><div class="actions"><a class="btn" href="#advanced.html">下一章：讓模擬可以驗證 →</a></div></section><section class="card col-12"><div class="kicker">完成這一頁以後</div><h2>你已經能做一個最小版本</h2><p>寫下三個人、三種可能路徑、至少一個新用途。然後選一件最容易驗證的事情試試看。需要 AI 幫忙時，下一頁的互動工作台會替你整理成可以直接貼給 AI 的指令。</p><div class="actions"><a class="btn" href="#workshop.html">用自己的工作做一輪 →</a><a class="btn secondary" href="#transfer.html">先看其他部門例子</a></div></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#design.html">← 上一章：拆解：30人怎麼設計</a><a class="btn" href="#advanced.html">下一章：進階：狀態與驗證 →</a></div></section><section class="offline-page" data-view="advanced.html" id="view-advanced.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>讓好點子，經得起實際驗證。</h1><p class="lead">進階內容：狀態、決策、覆蓋測試、行為推演與證據</p></header>
+<p class="lead">進階的重點不是讓人物寫得更像小說，而是讓它們的行為能被追溯、重現、比較，並且清楚知道哪些結論可以說、哪些不能說。</p>
+<div class="grid"><section class="card col-8"><h2>把「人物」寫成會變動的系統</h2><p>建議將每次操作寫成以下循環。人的能力、時間、興趣與挫折程度，會影響他是否行動；系統回饋又反過來改變他之後的選擇。</p><pre><code>人物固定設定（能力、偏好、裝置、作息）
+          ↓
+當下狀態（時間、記憶、疲勞、信心、習慣）
+          ↓
+事件觸發（通知、任務、朋友、需求、失敗）
+          ↓
+候選動作（使用、跳過、改道、求助、離開）
+          ↓
+按規則／機率選擇動作
+          ↓
+執行產品 → 取得真實系統回應
+          ↓
+寫入事件紀錄，更新人物狀態</code></pre><p>可以用機率模型、規則、有限狀態機或其他技術實作；模型再精細，也不會自動等於真人。</p></section><section class="card col-4"><h2>三種證據，要分開存</h2><p><b>系統事實：</b>真的執行了什麼操作、畫面與 API 回傳了什麼。</p><p><b>模擬觀察：</b>依某套假設，虛擬人物選擇了什麼、何時離開、如何改變。</p><p><b>真人證據：</b>真實觀察、訪談、使用日誌或研究所得，需有合法取得與分析依據。</p><div class="caution">「模擬覺得這功能容易使用」不是使用者研究結果。它只能提示你下一步該找真人驗證什麼。</div></section><section class="card col-12"><h2>Coverage 與 Behavior，應該是兩份實驗</h2><div class="tablewrap"><table><tr><th></th><th>功能覆蓋 Coverage</th><th>行為推演 Behavior</th></tr><tr><td>問題</td><td>流程有沒有走通？</td><td>在指定假設下，人物可能會怎麼選？</td></tr><tr><td>可以強制登入嗎</td><td>可以，為了測指定功能</td><td>不可以，除非規則自然讓他選擇</td></tr><tr><td>可以看什麼</td><td>錯誤率、畫面、事件追蹤、可重現步驟</td><td>不同設定下的路徑、行為差異、敏感度</td></tr><tr><td>不能說什麼</td><td>不能推論自然留存</td><td>不能直接推論真人留存與市場規模</td></tr><tr><td>常見陷阱</td><td>以為測試數據就是市場數據</td><td>偷偷補場次或讓模型符合預設結論</td></tr></table></div><p>在 Purr Cozy 的案例裡，後期補場次確實幫助了功能覆蓋，卻也使「原本會流失的人」沒有流失。因此應把這段經驗納入方法，而不是只展示漂亮統計。</p></section><section class="card col-6"><h2>事件紀錄：至少要能回答「為什麼」</h2><pre><code>{
+  "run_id": "demo-001",
+  "persona_id": "editor-new-01",
+  "timestamp": "2026-11-23T10:00:00+08:00",
+  "mode": "coverage",
+  "trigger": "revision_assigned",
+  "action": "open_revision_detail",
+  "result": { "status": "success", "visible_version": "v3" },
+  "state_delta": { "familiarity": 0.1 },
+  "model_version": "0.1.0",
+  "seed": 7,
+  "synthetic": true
+}</code></pre><p class="mini">以上是示範資料，不是實際的編務系統事件。</p></section><section class="card col-6"><h2>可靠性檢查</h2><ul class="checklist"><li>人物設定與版本固定；實驗有亂數種子。</li><li>每次動作都能回溯到狀態與觸發。</li><li>與被測系統的回應有真實證據（不是 AI 自稱成功）。</li><li>使用測試帳號與隔離環境，避免汙染正式數據。</li><li>同一條規則變動時，能比較結果差異。</li><li>若模擬器和被測系統共用同樣假設，主動揭露循環驗證問題。</li><li>規劃何時需要真人測試；不能靠角色模擬替代。</li></ul></section><section class="card col-12"><div class="kicker">進階使用者的更大價值</div><h2>不是把模擬做得很複雜，而是能夠更快排除不值得繼續的假設</h2><p>當你能低成本重現不同情境，許多討論就不必只靠想像爭論。你可以先做小型原型、跑指定流程、比較兩種方法，在真正投入大量人力與預算之前，知道哪些地方需要改、哪些還需要真人確認。</p><p>更重要的是：下一次碰到完全不同的產品，你仍然可以重用這套方法，而不是從零開始。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#beginner.html">← 上一章：動手做：先從3人開始</a><a class="btn" href="#experiments.html">下一章：互動實驗：親自試一次 →</a></div></section><section class="offline-page" data-view="experiments.html" id="view-experiments.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>七個值得玩玩看的實驗。</h1><p class="lead">你已經知道人物如何設計、狀態如何變化。現在自己操作一個簡化模型，先看見規則如何改變結果，再挑一個情境動手做。</p></header>
+<p class="lead">下面不是測驗，也沒有要你交作業。你可以先玩最上面的即時模擬，看看同樣一批虛擬人物在不同規則下會發生什麼，再挑一個你想試的問題帶回自己的工作或興趣。</p>
+<div class="grid"><section class="card col-12"><div class="kicker">LIVE DEMO / OFFLINE</div><h2>實驗 1｜為什麼三十個人「每天都上線」？</h2><p>這裡放的是一個<strong>教學用的小型示範模型</strong>。你可以切換「自然選擇」與「強制出現」，觀察數據如何被測試規則改變。數字只由本頁的示範規則產生，不是 Purr Cozy 的歷史成績，更不是真實市場資料。</p><div class="form-grid"><div><label class="label" for="lab-mode">這次採用的模式</label><select id="lab-mode"><option value="behavior">自然選擇：可以不上線</option><option value="coverage">功能覆蓋：每天要求上線</option></select></div><div><label class="label" for="lab-seed">亂數種子（可重現）</label><input id="lab-seed" max="999999" min="1" type="number" value="1739"/></div><div><label class="label" for="lab-friction">使用摩擦 <output id="lab-friction-val">50</output> / 100</label><input id="lab-friction" max="100" min="0" type="range" value="50"/></div><div><label class="label" for="lab-autonomy">可自主選擇的程度 <output id="lab-autonomy-val">50</output> / 100</label><input id="lab-autonomy" max="100" min="0" type="range" value="50"/></div></div><div class="actions"><button class="btn" id="lab-run" type="button">模擬 30 人 × 7 天</button><button class="btn secondary" id="lab-compare" type="button">一鍵比較兩種模式</button></div><div aria-live="polite" class="lab-results" id="lab-results"><p class="muted">按下按鈕，就會看到不同規則造成的差別。</p></div><div class="caution"><strong>你要觀察的不是哪組數字漂亮：</strong>如果測試工具要求三十個人天天出現，就不能拿「天天都有上線」證明產品有吸引力。模擬也無法代替真人留存研究。</div></section><section class="card col-12"><div class="kicker">CHOOSE AN EXPERIMENT</div><h2>實驗 2｜七個可以隨意玩的題目</h2><p>每一題都能用紙筆、試算表、AI 對話或一個小原型來嘗試。不必依照順序，也不必有程式背景。你可以選任何題目，直接改成自己正在思考的事情。</p><details class="challenge" open=""><summary><span class="challenge-num">01</span><span>讓使用者有權利不來</span></summary><div class="challenge-body"><p>假設一個新功能再好，沒有人「被要求」登入。先設定三種動機不同的人，看看什麼事情會讓他們自己回來。</p><p><b>動手試：</b>比較「強制完成一次」與「自由選擇」；試著刪掉獎勵或通知。</p><p class="mini"><b>可以跨到：</b>新手導覽、會員制度、學習產品、內部工具的採用意願</p><div class="actions"><button class="btn secondary send-challenge" data-intro="假設一個新功能再好，沒有人「被要求」登入。先設定三種動機不同的人，看看什麼事情會讓他們自己回來。" data-name="讓使用者有權利不來" data-try="比較「強制完成一次」與「自由選擇」；試著刪掉獎勵或通知。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">02</span><span>讓一句話被三種人誤解</span></summary><div class="challenge-body"><p>挑一段大家覺得很好懂的文字，安排三個目的不同的人閱讀；請他們各用一句話說明自己以為它是什麼。</p><p><b>動手試：</b>交換人物的目標與限制，再觀察理解是不是改變。</p><p class="mini"><b>可以跨到：</b>產品介紹、企劃溝通、AI 答覆、活動說明</p><div class="actions"><button class="btn secondary send-challenge" data-intro="挑一段大家覺得很好懂的文字，安排三個目的不同的人閱讀；請他們各用一句話說明自己以為它是什麼。" data-name="讓一句話被三種人誤解" data-try="交換人物的目標與限制，再觀察理解是不是改變。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">03</span><span>把最完美的流程打斷</span></summary><div class="challenge-body"><p>先畫出一條「一切順利」的路，再加入：網路斷線、被迫離開、版本更新、忘記上一步。</p><p><b>動手試：</b>觀察重新回來的人，需要哪些資訊才能接續。</p><p class="mini"><b>可以跨到：</b>帳號登入、付款、表單、課程、跨人交接</p><div class="actions"><button class="btn secondary send-challenge" data-intro="先畫出一條「一切順利」的路，再加入：網路斷線、被迫離開、版本更新、忘記上一步。" data-name="把最完美的流程打斷" data-try="觀察重新回來的人，需要哪些資訊才能接續。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">04</span><span>讓 AI 教一個故意誤會的人</span></summary><div class="challenge-body"><p>讓虛擬學習者帶著錯誤前提不斷追問，測試 AI 能否辨識誤解、調整解釋而不是只重複答案。</p><p><b>動手試：</b>試試讓學習者明確拒絕繼續，看看 AI 如何回應。</p><p class="mini"><b>可以跨到：</b>AI 助理、客服、內容說明、教育產品</p><div class="actions"><button class="btn secondary send-challenge" data-intro="讓虛擬學習者帶著錯誤前提不斷追問，測試 AI 能否辨識誤解、調整解釋而不是只重複答案。" data-name="讓 AI 教一個故意誤會的人" data-try="試試讓學習者明確拒絕繼續，看看 AI 如何回應。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">05</span><span>給每個人不同的時間</span></summary><div class="challenge-body"><p>同一個任務，一個人只有 90 秒，另一個人有 30 分鐘，第三個人隨時可能中斷。</p><p><b>動手試：</b>比較流程是否允許跳過、暫存、續接、分段完成。</p><p class="mini"><b>可以跨到：</b>行動服務、工作系統、報名、電子商務</p><div class="actions"><button class="btn secondary send-challenge" data-intro="同一個任務，一個人只有 90 秒，另一個人有 30 分鐘，第三個人隨時可能中斷。" data-name="給每個人不同的時間" data-try="比較流程是否允許跳過、暫存、續接、分段完成。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">06</span><span>讓使用者發明你沒設計的玩法</span></summary><div class="challenge-body"><p>不要只教模擬者「正確操作」。給他目標和可用資源，問他會不會組合出產品原本沒想過的用途。</p><p><b>動手試：</b>把最奇怪的一條路徑畫成新功能原型，找真人試。</p><p class="mini"><b>可以跨到：</b>社群、教育、內容工具、組合式產品</p><div class="actions"><button class="btn secondary send-challenge" data-intro="不要只教模擬者「正確操作」。給他目標和可用資源，問他會不會組合出產品原本沒想過的用途。" data-name="讓使用者發明你沒設計的玩法" data-try="把最奇怪的一條路徑畫成新功能原型，找真人試。" type="button">把這題帶到探索工作台 →</button></div></div></details><details class="challenge"><summary><span class="challenge-num">07</span><span>把你的專業借給另一個領域</span></summary><div class="challenge-body"><p>選一件你覺得「只有做這行才知道」的小技巧。把它改寫成使用者習慣、判斷規則或流程限制。</p><p><b>動手試：</b>隨機選一個陌生產品，把那條規則放進去，看它能發現什麼。</p><p class="mini"><b>可以跨到：</b>不限領域：只要有使用者與選擇，就能設計情境</p><div class="actions"><button class="btn secondary send-challenge" data-intro="選一件你覺得「只有做這行才知道」的小技巧。把它改寫成使用者習慣、判斷規則或流程限制。" data-name="把你的專業借給另一個領域" data-try="隨機選一個陌生產品，把那條規則放進去，看它能發現什麼。" type="button">把這題帶到探索工作台 →</button></div></div></details></section><section class="card col-12"><div class="kicker">A GOOD EXPERIMENT IS SMALL</div><h2>每次只要留下三件東西</h2><div class="timeline"><div><strong>一個問題</strong><span>「如果這個人不想配合，我們的設計還有用嗎？」</span></div><div><strong>一條可觀察路徑</strong><span>發生了什麼、怎麼選、在哪裡停、為什麼。</span></div><div><strong>下一次想試的事</strong><span>改一個條件，看看會不會發現另一種可能。</span></div><div><strong>一個清楚限制</strong><span>這是模擬觀察，不是對真人的定論。</span></div></div><div class="actions"><a class="btn" href="#workshop.html">把你的想法交給 AI →</a></div></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#advanced.html">← 上一章：進階：狀態與驗證</a><a class="btn" href="#transfer.html">下一章：延伸：還能用在哪裡 →</a></div></section><section class="offline-page" data-view="transfer.html" id="view-transfer.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>現在，試試把這套方法用在別的地方。</h1><p class="lead">前面學會了怎麼設計人物、建立行為規則並比較結果。這一章才開始討論：你熟悉的經驗，還能在哪些情境發揮作用？</p></header>
+<p class="lead">你不必先知道自己「擅長什麼新技術」。從一件已經非常熟悉的事情開始，先把它的原理抽出來，再試著放到陌生的場景裡。</p>
+<div class="quote">方法的價值，不只在於做對原本的事情，<br/>而是開始想到原本沒有打算做的事情。</div>
+<div class="grid"><section class="card col-7"><div class="kicker">THE TRANSFER</div><h2>抽出你已經知道的事</h2><p>你熟悉的可能不是某一套軟體，而是「人們何時會搞錯」、「什麼資訊在交接時容易遺失」、「某種文字為什麼難懂」、「人遇到壓力會先做什麼」。</p><p>這些知識從原工作抽出來後，就能變成模擬角色的能力、動機、環境限制與行為規則。</p><div class="callout">例如：<strong>你很懂版本交接</strong>，這項經驗也能拿來研究線上申請、客服轉接、訂單追蹤，甚至 AI Agent 交付工作時的狀態遺失。</div></section><section class="card col-5"><div class="kicker">RECOMBINE</div><h2>一個簡單的三步法</h2><div class="step"><span class="numb">1</span><div class="step-body"><h3>先把職稱拿掉</h3><p>不要說「我是做某某工作的」，改說「我很懂某一種人、流程、錯誤或選擇」。</p></div></div><div class="step"><span class="numb">2</span><div class="step-body"><h3>把它放到新情境</h3><p>如果這些人正在用新的產品、遇到另一種選擇，會怎麼做？</p></div></div><div class="step"><span class="numb">3</span><div class="step-body"><h3>設計一個小實驗</h3><p>選一件最容易被操作與觀察的事情，先試看看。</p></div></div></section><section class="card col-12"><div class="kicker">THOUGHT EXPERIMENTS</div><h2>六種可能的「原來還可以這樣」</h2><p>這些題目沒有對應職位，也沒有預設誰才有能力做。你可以從任何一個喜歡的角度切入。</p><div class="discovery-grid"><div class="discovery"><strong>01 / 把「容易誤解」變成測試資源</strong><p>你知道某句話容易讓人會錯意。試試設計三個不同理解方式的人，反過來測試說明書、AI 回答或新產品介紹。</p></div><div class="discovery"><strong>02 / 把「經常改來改去」變成版本設計</strong><p>你熟悉每次來回修改時最容易遺失的資訊。試著模擬多人、跨日、不同版本交錯時的決策路徑。</p></div><div class="discovery"><strong>03 / 把「誰都不想做」變成體驗設計</strong><p>選一件大家都覺得麻煩的事，設計一個有權不做的人，看看怎樣改變體驗，才會讓他願意主動開始。</p></div><div class="discovery"><strong>04 / 把「客人一直問同一題」變成 AI 測試</strong><p>你知道那個問題為什麼難回答。讓虛擬對話者用各種模糊、急躁、錯誤前提來提問，看 AI 會不會更混亂。</p></div><div class="discovery"><strong>05 / 把「沒有空」變成流程條件</strong><p>設計一個只有 90 秒的人。他會不會放棄？如果每一步都必須很快，原本複雜的流程是不是能重新設計？</p></div><div class="discovery"><strong>06 / 把「不按預期走」變成創意來源</strong><p>不要只問使用者怎麼完成任務。看看他是不是繞過功能、自己發明新用途，甚至把系統用在完全沒預想到的事情。</p></div></div></section><section class="card col-12"><div class="kicker">OPEN-ENDED</div><h2>比「找到問題」更有趣的問題</h2><p>試著把這句話補完：</p><div class="quote">「我原本只把＿＿用來做＿＿。<br/>如果改用在＿＿，會不會出現完全不同的結果？」</div><p>不用急著判斷能否商用，也不必先設計完整提案。先把它變成一個可低成本嘗試的情境；做到這一步，新的可能性才會開始具體。</p><div class="actions"><a class="btn" href="#experiments.html">帶一個想法進實驗室 →</a><a class="btn secondary" href="#workshop.html">產生 AI 探索提示詞</a></div></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#experiments.html">← 上一章：互動實驗：親自試一次</a><a class="btn" href="#workshop.html">下一章：把自己的想法交給AI →</a></div></section><section class="offline-page" data-view="workshop.html" id="view-workshop.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>把熟悉的事，變成陌生的可能。</h1><p class="lead">不從職務開始分類；從你已經知道的一件事，產生跨領域的模擬實驗</p></header>
+<p class="lead">這個頁面會把你的經驗組成一份可直接交給 AI 的探索提示詞。你不必先填寫職稱，也不用依照部門挑選題目；你想研究什麼，就從什麼出發。</p>
+<div class="grid"><section class="card col-7"><div class="kicker">01 / 先用自己的話描述</div><h2>我已經很熟悉的，是什麼？</h2><div class="form-grid">
+<div class="full"><label class="label" for="knowledge">我很懂的一件事（不必是工作）</label><textarea id="knowledge" placeholder="例如：我知道人在急著做決定時最容易漏掉哪個資訊；或我很熟悉讀者看懂一張圖的順序。" rows="3"></textarea></div>
+<div><label class="label" for="problem">我好奇的一個問題</label><input id="problem" placeholder="例如：如果讓使用者有權利直接放棄，會怎樣？"/></div>
+<div><label class="label" for="product">想拿來試的情境／產品</label><input id="product" placeholder="例如：一個線上工具、一堂課、一份產品說明"/></div>
+<div class="full"><label class="label" for="extra">你想加入什麼限制或意外？（可留空）</label><textarea id="extra" placeholder="例如：有人只有 90 秒；某個人一直誤解；網路中途斷線；不要假設所有人都願意加入。" rows="2"></textarea></div></div>
+<div class="callout"><b>不用寫成正式提案。</b>最有用的材料，往往是你自己最熟悉、也最容易被別人忽略的一個小細節。</div></section><section class="card col-5"><div class="kicker">02 / 換個角度</div><h2>不用先指定誰是哪種人</h2><p>這套方法關心的是<strong>目標和情境的差異</strong>，不是把人固定分成三個職務或十種性格。</p><div id="persona-preview"><p><b>人 A：</b>很想完成，但沒有時間。</p><p><b>人 B：</b>有時間，但一點興趣也沒有。</p><p><b>人 C：</b>不是照我們預期的方式使用東西。</p></div><p class="mini">你可以把這三個人全部換掉。先想出不同的「選擇理由」，比較重要。</p><div class="panel"><strong>加一個不尋常的角色：</strong><p>如果其中一個人，比產品設計者更熟悉這件事，他會不會發現你完全沒想過的用法？</p></div></section><section class="card col-12"><div class="kicker">03 / 想把實驗玩多大？</div><h2>讓 AI 幫你提出新的可能性</h2><div class="form-grid">
+<div><label class="label" for="test-mode">實驗模式</label><select id="test-mode"><option value="both">兩種分開：功能覆蓋＋行為假設</option><option value="behavior">只看不同選擇與可能的路徑</option><option value="coverage">只檢查流程與例外情境</option></select></div>
+<div><label class="label" for="duration">推演的時間</label><select id="duration"><option value="1">一天</option><option selected="" value="7">七天</option><option value="14">十四天</option></select></div>
+<div><label class="label" for="persona-count">不同情境人物</label><select id="persona-count"><option selected="" value="3">三個</option><option value="5">五個</option><option value="10">十個</option></select></div></div>
+<div class="actions"><button class="btn" id="generate-prompt" type="button">幫我組成 AI 探索提示詞 →</button><button class="btn secondary" id="sample-prompt" type="button">放入一個有趣的例子</button></div>
+<p class="mini">AI 會被要求先提出至少三種跨場景用途，再給你能實際試驗的行動；它不會因為得到提示詞，就自動連線或執行。</p></section><section class="card col-12"><div class="kicker">04 / 拿去試</div><h2>從「原來可以這樣」走向第一次動手</h2><div aria-live="polite" class="result" id="prompt-result"><p class="muted">填入上面的想法，再按下按鈕產生提示詞。</p></div><div class="actions" hidden="" id="prompt-actions"><button class="btn" id="copy-prompt" type="button">複製提示詞</button><button class="btn secondary" id="download-prompt" type="button">存成 TXT</button></div><p class="mini">所有文字只在你的瀏覽器裡組合，不會自動上傳；請自行決定是否將內容貼給外部 AI。涉及公司內部資料時，請遵守適用的使用規範。</p></section><section class="card col-12"><div class="kicker">THE NEXT IDEA</div><h2>拿到答案之後，再多問一句</h2><div class="quote">「假如這個方法真的可行，<br/>它還能用在哪個我沒想到的地方？」</div><p>不一定是同一個產品，不一定是同一類使用者。這句追問很可能比第一輪模擬，更值得繼續往下做。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#transfer.html">← 上一章：延伸：還能用在哪裡</a><a class="btn" href="#ai-agent.html">下一章：AI專用方法與規格 →</a></div></section><section class="offline-page" data-view="ai-agent.html" id="view-ai-agent.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>把這套方法，直接交給 AI。</h1><p class="lead">AI 可以幫你把既有知識帶到新情境；不要依職稱預設人的能力與想法</p></header>
+<p class="lead">不需要先建置多代理系統。最簡單的做法，是把下面的「方法規格」交給你常用的 AI，然後提供自己熟悉的工作、想研究的問題與可用的實驗條件。</p>
+<div class="grid"><section class="card col-12"><div class="kicker">AI 專用 / 可直接複製</div><h2>完整技能規格</h2><p>這份規格比一般「幫我設計三個假想使用者」更完整：它會要求 AI 先挖掘既有專業的跨領域用途，再建立人物、設計測試、分開不同證據。</p><pre id="skill-pre"><code># AI Skill — Stateful Simulated User Designer v0.2
+
+你是「模擬使用者實驗設計助手」，目標不是製造漂亮的假數據，而是利用使用者對既有專業的理解，提出跨領域應用並設計可驗證的小實驗。
+
+## 重要態度
+- 不得先依使用者職稱、部門或階級劃定其專業能力或探索範圍；讓他自行定義熟悉的事。
+- 先示範有趣、可低成本實作的跨域小實驗，避免把方法變成另一份工作績效考核。
+- 允許使用者沒有想解決的問題，只是想看看已知知識還有什麼可能性。
+
+## 首要任務
+1. 了解使用者熟悉哪種人、哪種流程、哪種常見問題。
+2. 先提出 3 個可能跨出原職務的新用途，並解釋「原有專業為什麼能移用」。
+3. 選定一個問題，設計相互有差異的假設人物，不要只換名字。
+4. 讓人物具備能力、目標、限制、偏好、挫折反應、可變狀態；允許不操作、拒絕、離開與改道。
+5. 將「測試功能的 coverage」與「探究行為假設的 behavior」分成兩套資料與評估。
+6. 提出低成本的實際驗證方法；沒有可操作環境時，只能輸出情境推演，不得聲稱實際執行。
+
+## 測試循環
+state → trigger → candidate actions → decision → system feedback → state update
+
+## 必須交付
+- transfer_ideas: 3 個跨領域用途，含現有知識、移用原因與首個實驗
+- test_plan: 研究問題、範圍、模式、不能推論的事
+- persona_profiles: 差異化人物（固定屬性與可變狀態）
+- behavior_policies: 可解釋的決策與狀態更新規則
+- execution_plan: 授權環境、工具與不操作的邊界
+- event_schema: run_id, persona_id, timestamp, mode, trigger, action, result, state_delta, seed, synthetic
+- evaluation: 已驗證的系統事實、模擬觀察、未驗證的推論，明確分開
+- limitations: 假設、偏差、真人驗證需求
+
+## 不可違反
+- 不得把合成留存、喜好、學習成效當作真人證據。
+- Behavior 模式不得為了補足覆蓋率強制安排活動。
+- 不得憑空捏造測試日誌或宣稱操作完成。
+- 不得使用未授權帳號或修改正式資料；測試帳號資料必須隔離。
+- 不得預先把「這方法有效」寫進模型再拿輸出證明有效。
+- 不得把這套方法變成強制性的員工創意 KPI。
+
+## 回覆方式
+優先用容易懂的例子說明新用途。必要時再提供公式、程式、A2A 協定細節。先幫對方想到可能性，不是先把對方推進複雜技術。</code></pre><div class="actions"><button class="btn copy-target" data-target="skill-pre" type="button">複製完整規格</button><a class="btn secondary" download="" href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">下載 Markdown</a></div></section><section class="card col-7"><h2>AI 應用層任務範例</h2><p>JSON 可以傳給你的自動化流程、工具呼叫或代理。它描述的，是這次需要產生哪些人物與成果。</p><pre id="request-pre"><code>{
+  "schema_version": "0.2.0",
+  "operation": "design_personas",
+  "scenario_id": "document-flow-01",
+  "work_experience": "熟悉教材修訂與跨部門交接",
+  "transfer_goal": "找出除了編輯工作之外，這些經驗還能協助測試哪些數位流程",
+  "problem": "修改稿在不同角色間流轉時的資訊落差",
+  "product": "示例修訂追蹤介面",
+  "environment": "sandbox",
+  "mode": "coverage",
+  "duration_days": 3,
+  "persona_count": 3,
+  "random_seed": 7,
+  "questions": [
+    "新手是否能辨識目前版本？",
+    "時間有限的人是否能完成必要確認？"
+  ],
+  "expected_artifacts": [
+    "transfer_ideas.json",
+    "persona_profiles.json",
+    "behavior_policies.json",
+    "events.jsonl",
+    "limitations.md"
+  ],
+  "synthetic": true,
+  "notes": "本例為應用層任務資料，不是完整 A2A 協定封包；未連線任何系統。"
+}</code></pre><div class="actions"><button class="btn secondary copy-target" data-target="request-pre" type="button">複製任務 JSON</button><a class="btn secondary" download="" href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">下載 JSON</a></div></section><section class="card col-5"><h2>AI 的輸出要能交接</h2><p>建議固定要求以下內容：</p><ul><li><code>transfer_ideas</code>：這份專業還能用在哪</li><li><code>test_plan</code>：本輪要驗證什麼</li><li><code>persona_profiles</code>：不同人物與狀態</li><li><code>behavior_policies</code>：選擇規則</li><li><code>execution_plan</code>：怎麼做、哪些動作需授權</li><li><code>event_schema</code>：如何重現</li><li><code>evaluation</code>：證據與結果</li><li><code>limitations</code>：不該下的結論</li></ul><div class="caution">如果沒有真的操作網站，AI 不能宣稱「測試成功」，只能說「推演結果」。</div></section><section class="card col-12"><h2>讓 AI 真正學會這套方法，靠的是規則與案例</h2><p>提示詞是起點。更可靠的方式，是讓 AI 同時看見成功案例、失敗案例和「哪些說法不被允許」。例如 Purr Cozy 的 coverage 補量事件，就是特別值得保留的失敗案例：它能幫助後續代理知道，功能覆蓋與自然行為不可混成同一組證據。</p><p>如果未來要讓不同部門共用，可以把這份 Skill、JSON 範例與驗證測試一起版本管理。AI 不需要先有一套新模型，也能依規格協助不同的人展開實驗。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#workshop.html">← 上一章：把自己的想法交給AI</a><a class="btn" href="#a2a.html">下一章：A2A與多Agent協作 →</a></div></section><section class="offline-page" data-view="a2a.html" id="view-a2a.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>當不同 AI Agent 開始合作。</h1><p class="lead">技術延伸：A2A 的職責分工、協定定位與 Agent Card 範例</p></header>
+<p class="lead">A2A（Agent-to-Agent）是讓不同代理互相委派任務、交換狀態與交付成果的協定；它不會直接把這份方法「教進」模型權重。真正讓代理遵循方法的，是上一頁的技能規格與任務契約。</p>
+<div class="grid"><section class="card col-7"><div class="kicker">最小分工</div><h2>三個代理，分別做好三件事</h2><div class="step"><span class="numb">1</span><div class="step-body"><h3>Persona Designer｜人物與用途</h3><p>接收同事的專業描述，提出跨領域用途、設計人物、標明假設；不直接操作正式系統。</p></div></div><div class="step"><span class="numb">2</span><div class="step-body"><h3>Scenario Runner｜有紀錄地執行</h3><p>在授權的測試環境裡依規則操作，保留截圖、事件紀錄、規則版本與可重現步驟。</p></div></div><div class="step"><span class="numb">3</span><div class="step-body"><h3>Evidence Reviewer｜看證據而不是聽故事</h3><p>把實際系統回應與模擬觀察分開，指出哪些流程真的驗證過、哪些仍需真人。</p></div></div></section><section class="card col-5"><h2>最容易搞混的事</h2><p><strong>Skill：</strong>讓代理知道要遵守什麼方法、應該輸出什麼。</p><p><strong>A2A：</strong>讓不同代理有一致的方式互相傳遞任務、狀態與成果。</p><p><strong>執行器：</strong>真正負責瀏覽器、API、排程與事件記錄。</p><p>如果只需要一個聊天式 AI 協助設計三位模擬人物，完全沒有必要先架設完整的 A2A。</p><div class="callout">先把一個小實驗做對，再決定是否值得拆成多代理。</div></section><section class="card col-12"><h2>A2A Agent Card 1.0：可編輯的示意檔</h2><p>依 2026 年 11 月查核的官方 1.0 規格，<code>supportedInterfaces[]</code> 承載每個端點的 <code>url</code>、<code>protocolBinding</code> 與 <code>protocolVersion</code>。</p><pre id="card-pre"><code>{
+  "name": "Simulated User Designer",
+  "description": "Designs stateful personas, cross-domain transfer ideas, and reproducible scenario plans. Does not equate synthetic data with real-user evidence.",
+  "version": "0.2.0",
+  "supportedInterfaces": [
+    {
+      "url": "http://127.0.0.1:8000/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "design_personas",
+      "name": "Design simulated users",
+      "description": "Create domain-transfer ideas, simulated user profiles, behavioral policies and evidence-aware experiments.",
+      "tags": [
+        "simulation",
+        "user-experience",
+        "quality-assurance",
+        "education"
+      ]
+    }
+  ]
+}</code></pre><div class="actions"><button class="btn secondary copy-target" data-target="card-pre" type="button">複製 Agent Card</button><a class="btn secondary" download="" href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">下載範例 JSON</a></div><div class="caution"><strong>注意：</strong><code>127.0.0.1:8000</code> 是示範地址。這份檔案沒有部署服務；要互通還必須實作伺服器、任務執行器、權限與授權機制。</div></section><section class="card col-12"><h2>A2A 任務與應用層資料的差別</h2><p><code>example_request.json</code> 描述的是你的研究需求，不是能直接傳給 A2A 端點的完整協定封包。實作時要由 SDK 或客戶端將資料包裝成符合協定的 Message / Part，再處理 Task 的生命週期與回傳產物。</p><p class="source">官方參考：<a href="https://a2a-protocol.org/latest/specification/" rel="noreferrer" target="_blank">A2A 1.0 規格</a>、<a href="https://a2a-protocol.org/latest/specification/agent-card/" rel="noreferrer" target="_blank">Agent Card</a>、<a href="https://github.com/a2aproject/a2a-python" rel="noreferrer" target="_blank">Python SDK</a>。本頁僅為設計說明及示範檔，非可執行的 A2A 服務。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#ai-agent.html">← 上一章：AI專用方法與規格</a><a class="btn" href="#appendix.html">下一章：資料來源與附錄 →</a></div></section><section class="offline-page" data-view="appendix.html" id="view-appendix.html" hidden><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>原始資料、版本差異與繼續研究的入口。</h1><p class="lead">人物設定已放在第3章，這裡保留來源與不同階段的設計差異，方便需要追查依據的人閱讀。</p></header>
+<p class="lead">這裡保留 Purr Cozy 最初 30 位模擬測試者的設定概要，讓想深入研究的同事看到：不是「隨機做出 30 個人」，而是先讓 30 位使用者代表不同使用條件。</p>
+<div class="grid"><section class="card col-12"><h2>30位人物名單已移到前面</h2><p>現在讀者在知道「為什麼需要這30人」之後，就能立即看到人物的完整設定概要，而不是翻到最後一章才找到答案。</p><div class="actions"><a class="btn" href="#design.html">查看第3章：30人如何設計 →</a></div></section><section class="card col-7"><h2>這個案例有三個不同時間點，不能混在一起</h2><div class="step"><span class="numb">1</span><div class="step-body"><h3>早期的角色設計</h3><p>包含 30 位具備不同年齡、英文程度、作息和偏好的模擬人物，以及多種使用頻率與休眠型態。</p></div></div><div class="step"><span class="numb">2</span><div class="step-body"><h3>後期的功能覆蓋</h3><p>為了確保每日有足夠功能與題型資料，加入每人每天固定場次，造成原本會低頻使用的人也被強制出現。</p></div></div><div class="step"><span class="numb">3</span><div class="step-body"><h3>規劃中的真人驗證</h3><p>後續需要真實受試者，才有機會回答實際留存、自然動機、介面理解及市場受眾等問題。</p></div></div></section><section class="card col-5"><h2>哪裡可以找到完整方法？</h2><p>整理後的方法與原始設定，一併收錄在 ZIP 的 <code>reference/</code> 資料夾。</p><ul><li><a href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">原始 30 人試玩計畫</a></li><li><a href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">30 位人物 JSON</a></li><li><a href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">給 AI 的完整方法說明</a></li><li><a href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">任務輸入 JSON</a></li><li><a href="#appendix.html" title="原始來源檔案請參考ZIP附件中的reference資料夾">A2A Agent Card JSON</a></li></ul><p class="mini">若要分享給其他部門，請先從首頁與「把方法帶到別處」開始。完整數值設定留給需要深入實作的人。</p></section><section class="card col-12"><h2>最後想留下的一句話</h2><div class="quote">學會怎麼模擬一個使用者，只是第一步。<br/>真正有意思的是，開始發現自己的知識還能做些什麼。</div><p>對不同的人而言，這個「還能做些什麼」可能指向教材、產品、服務、流程、AI 助教或其他完全沒想過的方向。先從一個小實驗開始即可。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="#a2a.html">← 上一章：A2A與多Agent協作</a></div></section></main></div><script>
+(()=>{
+  const basename=location.pathname.split('/').pop()||'index.html';
+  document.querySelectorAll('.nav a').forEach(a=>{ if(a.getAttribute('href')===basename){a.classList.add('active');a.setAttribute('aria-current','page')} });
+  // shared interaction handlers
+  const $=(sel,scope=document)=>scope.querySelector(sel);
+  const $$=(sel,scope=document)=>[...scope.querySelectorAll(sel)];
+  async function copyText(t,button){
+    let ok=false;
+    if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(t);ok=true}catch(_){}}
+    if(!ok){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{ok=document.execCommand('copy')}catch(_){}ta.remove()}
+    if(button){let label=button.textContent;button.textContent=ok?'已複製':'請選取下方文字複製';setTimeout(()=>button.textContent=label,1800)}return ok;
+  }
+  $$('.copy-target').forEach(b=>b.addEventListener('click',()=>{const target=document.getElementById(b.dataset.target);if(target)copyText(target.value??target.textContent,b)}));
+
+  // Open-ended workshop: no roles or capability caps
+  const knowledge=$('#knowledge');
+  if(knowledge){
+    const problem=$('#problem'),product=$('#product'),extra=$('#extra'),result=$('#prompt-result');
+    function generate(){
+      const k=knowledge.value.trim(),p=problem.value.trim(),s=product.value.trim(),x=extra.value.trim();
+      if(!k){knowledge.focus();result.textContent='先寫下一件你已經很熟悉的事。可以是工作、生活、興趣或一種觀察。';return}
+      let mode=$('#test-mode').value,days=$('#duration').value,count=$('#persona-count').value;
+      let modeText=mode==='both'?'分開設計 coverage（指定流程）與 behavior（可拒絕／不操作）的兩組測試，禁止混用數據':mode==='coverage'?'只測功能與例外路徑，不得推論留存或自然動機':'只根據明示假設推演自然選擇；允許角色不出現、不操作、離開與回流，不可強制補量';
+      result.textContent=`你是「跨領域探索與模擬使用者實驗夥伴」。你的任務是協助我把已經熟悉的知識重新組合，發現以往沒有考慮的用途；不是替我撰寫制式企劃，也不是依照職稱限制我的能力。\n\n我已經熟悉的事情：${k}\n我好奇的問題：${p||'暫無明確題目，先從已知經驗出發探索'}\n我想試的場景／產品：${s||'不限；請跨三個差異明顯的場景提出'}\n額外限制或意外：${x||'無'}\n\n請完成：\n1. 先把我熟悉的經驗抽成 2–3 條可移植的原理，說明為什麼能跨領域使用。\n2. 提出至少 5 個『原來還可以這樣』的不同用途：包含一個非常貼近日常的、一個能在 15 分鐘動手試的、一個跳脫常見領域但有合理連結的、一個可能失敗但有趣的，以及一個你認為我不容易想到的。不要只是改寫原問題。\n3. 幫我挑 2 個有意思的方向，分別設計 ${count} 位差異化的假設使用者。人物的差異應反映目標、處境、能力、偏好、時間限制與變動狀態；不要硬套工作職稱。\n4. 在 ${days} 天的情境內，用『狀態 → 觸發 → 候選動作 → 選擇 → 回饋 → 更新狀態』建立可說明的行為路徑。\n5. 測試模式：${modeText}。特別安排一個人物不照預期使用產品，另一個人選擇不參與。\n6. 為每個方向設計『今天就能動手』的最小實驗：要準備什麼、要操作什麼、應該記錄什麼、什麼結果會讓我們改變想法。\n7. 最後提出 3 個能引發我繼續探索的問題，讓我自己決定下一步。\n\n要求：\n- 清楚區分已驗證事實、假設、模擬觀察與未驗證推論。\n- 不得將合成留存、付費、學習成效當作真人證據。\n- 不得聲稱已操作真實網站或系統，除非有授權及實際工具證據。\n- 不必特別稱讚想法；把有趣之處與其成立條件說清楚。\n- 不要設計成需要交件或被打分數的員工任務。`;
+      $('#prompt-actions').hidden=false;
+    }
+    $('#generate-prompt')?.addEventListener('click',generate);
+    $('#sample-prompt')?.addEventListener('click',()=>{knowledge.value='我很熟悉人們在時間壓力下，會跳過說明、直接做眼前最容易完成的事。';problem.value='如果他有權不使用，我要怎麼讓這件事自己變得值得做？';product.value='一個原本被當作例行工作的流程或數位工具';extra.value='有人只有 90 秒；其中一個人根本不想參與。';generate()});
+    $('#copy-prompt')?.addEventListener('click',()=>copyText(result.textContent,$('#copy-prompt')));
+    $('#download-prompt')?.addEventListener('click',()=>{if(!result.textContent.trim())return;const blob=new Blob([result.textContent],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Exploration_Experiment_Prompt.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+  }
+  $$('.send-challenge').forEach(btn=>btn.addEventListener('click',()=>{
+    const payload=[btn.dataset.name,btn.dataset.intro,btn.dataset.try].join('\n');
+    if(document.querySelector('[data-view]')){location.hash='workshop.html';const a=$('#knowledge');if(a)a.value=btn.dataset.intro;const p=$('#problem');if(p)p.value=btn.dataset.name;const x=$('#extra');if(x)x.value=btn.dataset.try;}
+    else{ const q=new URL('workshop.html',location.href);q.searchParams.set('idea',payload);location.href=q.href }
+  }));
+  // A local link from an experiment can prefill the workshop without a server.
+  if(knowledge){const u=new URL(location.href);let idea=u.searchParams.get('idea');if(idea){const [title,description,how]=idea.split('\n');knowledge.value=description||'';problem.value=title||'';extra.value=how||''}}
+  const caseTabs=$$('.case-btn');
+  if(caseTabs.length){const outs=[{who:'快進快出的使用者',goal:'想在 3 分鐘內做完一件事',action:'一看到長篇說明就離開，連主要功能都沒碰到',insight:'問題不一定在功能本身；可能是入口太慢、文字太多或缺少跳過選項。'},
+    {who:'第一次接觸的使用者',goal:'想完成，但不熟悉專用詞',action:'反覆找不到下一步，可能停在第一關',insight:'測試的是「流程是否仰賴老手才懂的隱性知識」。'},
+    {who:'熟練的使用者',goal:'想快速核對結果',action:'跳過說明、直接找差異；若資料版本錯就無法判斷',insight:'同樣介面對老手也可能不友善，因為資訊密度與追溯能力不足。'}];
+    let out=$('#case-output');function show(i){caseTabs.forEach((b,j)=>{b.classList.toggle('active',i===j);b.setAttribute('aria-pressed',String(i===j))});const v=outs[i];out.innerHTML='';[['span','情境推演，不是真人測試'],['h3',v.who],['p',`這個人要什麼：${v.goal}`],['p',`可能做什麼：${v.action}`],['p',`你能從中想什麼：${v.insight}`]].forEach(([tag,txt])=>{let el=document.createElement(tag);el.textContent=txt;if(tag==='span')el.className='tag';out.appendChild(el)})}
+    caseTabs.forEach((b,i)=>b.addEventListener('click',()=>show(i)));show(0);
+  }
+  const roleFilter=$('#roster-filter');
+  if(roleFilter){roleFilter.addEventListener('input',()=>{let val=roleFilter.value.trim().toLowerCase();let shown=0;$$('[data-roster-row]').forEach(r=>{let okay=r.textContent.toLowerCase().includes(val);r.hidden=!okay;if(okay)shown++});$('#roster-count').textContent=`顯示 ${shown} / 30 位`})}
+})();
+
+
+(()=>{
+  const $=s=>document.querySelector(s);
+  if(!$('#lab-run'))return;
+  const labels=['週末才有空','喜歡先看看','時間零碎','好奇但易膩','只完成必要','遇錯就離開'];
+  const personas=Array.from({length:30},(_,i)=>({id:i+1,type:i%labels.length,name:labels[i%labels.length],base:[.2,.5,.65,.7,.55,.43][i%labels.length],interest:[.52,.64,.55,.82,.61,.51][i%labels.length],habit:[.2,.37,.55,.19,.6,.28][i%labels.length],fatigue:0,visits:0}));
+  function rng(seed){let t=(seed|0)>>>0;return ()=>{t+=0x6D2B79F5;let x=t;x=Math.imul(x^(x>>>15),x|1);x^=x+Math.imul(x^(x>>>7),x|61);return ((x^(x>>>14))>>>0)/4294967296}}
+  function simulate(mode,seed,friction,autonomy){
+    const r=rng(seed);let states=personas.map(p=>({...p})), days=[];let log=[];
+    for(let d=1;d<=7;d++){
+      let arrived=0;
+      for(let p of states){
+        const hasTime=r()<(p.type===0?(d>=6?.9:.12):p.type===2?.77:.76);
+        const prob=Math.max(.015,Math.min(.96,p.base*.56+p.interest*.33+p.habit*.2-friction*.19-p.fatigue*.18+autonomy*.17));
+        const natural=hasTime&&r()<prob;
+        const come=mode==='coverage'?true:natural;
+        if(come){arrived++;p.visits++;const e=r();let wasFun=e < (.6-friction*.28+autonomy*.2);p.interest=Math.min(1,Math.max(.06,p.interest+(wasFun?.025:-.055)));p.fatigue=Math.min(1,p.fatigue+(wasFun?.018:.09));p.habit=Math.min(1,p.habit+.025);
+          if([1,4,9].includes(p.id))log.push(`Day ${d}｜${p.name} ${mode==='coverage'&&!natural?'被排程要求上線':'自行決定上線'}；${wasFun?'體驗不錯':'遇到一些挫折'}`);
+        }else{p.habit=Math.max(0,p.habit-.025);p.fatigue=Math.max(0,p.fatigue-.045);p.interest=Math.max(.06,p.interest-.018);
+          if([1,4,9].includes(p.id))log.push(`Day ${d}｜${p.name} 沒有來（這也是行為資料）`);
+        }
+      }
+      days.push(arrived)
+    }
+    return {mode,days,total:days.reduce((a,b)=>a+b,0),weekEnd:days[6],unique:states.filter(s=>s.visits>0).length,forced:mode==='coverage',log:log.slice(-11)}
+  }
+  function number(id){return Number($(id).value)}
+  function opts(){return [Math.max(1,number('#lab-seed')||1),number('#lab-friction')/100,number('#lab-autonomy')/100]}
+  function bars(s){return s.days.map((v,i)=>`<span>第 ${i+1} 天</span><div class="lab-track"><div class="lab-fill" style="width:${100*v/30}%"></div></div><b>${v} / 30</b>`).join('')}
+  function output(s){return `<div class="lab-stat"><div><div class="value">${s.weekEnd}/30</div><span>第七天有出現（合成）</span></div><div><div class="value">${s.total}</div><span>七天總人次（合成）</span></div><div><div class="value">${s.unique}/30</div><span>七天內至少出現一次</span></div></div><div class="lab-bars">${bars(s)}</div><div class="lab-persona-path"><b>少數人物路徑節錄</b><p>${s.log.slice(-6).map(v=>v.replaceAll('<','&lt;')).join('<br>')}</p></div>`}
+  function run(dual){let [seed,friction,autonomy]=opts();const out=$('#lab-results');
+    if(dual){const b=simulate('behavior',seed,friction,autonomy),c=simulate('coverage',seed,friction,autonomy);
+      out.innerHTML=`<div class="lab-compare"><div><span class="tag">自由選擇</span>${output(b)}</div><div><span class="tag ember">強制覆蓋</span>${output(c)}</div></div><p><b>你剛剛改變的不是玩家的喜好，而是測試規則。</b>強制模式讓每天都有人出現，並不能證明產品比較吸引人。</p>`;
+    }else{const mode=$('#lab-mode').value,s=simulate(mode,seed,friction,autonomy);out.innerHTML=`<span class="tag">${mode==='coverage'?'功能覆蓋｜強制出現':'行為推演｜可自行選擇'}</span>${output(s)}<p><b>${mode==='coverage'?'每人每天都來，是因為測試指定他要來。':'有人沒有出現，才讓「自發」成為可觀察的可能。'}</b></p>`;}
+  }
+  ['friction','autonomy'].forEach(n=>$('#lab-'+n)?.addEventListener('input',e=>$('#lab-'+n+'-val').textContent=e.target.value));
+  $('#lab-run').addEventListener('click',()=>run(false));$('#lab-compare').addEventListener('click',()=>run(true));
+})();
+</script><script>
+(()=>{const nav=[...document.querySelectorAll('nav a[data-page]')],views=[...document.querySelectorAll('[data-view]')];function show(){const name=decodeURIComponent(location.hash.replace(/^#/,'')||'index.html');const selected=views.some(v=>v.dataset.view===name)?name:'index.html';views.forEach(v=>{v.hidden=v.dataset.view!==selected});nav.forEach(a=>{a.classList.toggle('active',a.dataset.page===selected);if(a.dataset.page===selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});window.scrollTo(0,0)}window.addEventListener('hashchange',show);show();})();</script></body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="light" name="color-scheme"/><meta content="從 Purr Cozy 30 位模擬使用者出發，讓工作中的既有經驗產生跨領域的應用。給初學者、進階者與 AI Agent 的多頁教學。" name="description"/><title>讓好點子，經得起實際驗證。｜一種方法，很多可能｜模擬使用者的跨領域應用</title><link href="assets/style.css" rel="stylesheet"/></head><body><div class="layout"><aside class="sidebar"><div class="brand">30 位模擬玩家<br/>設計與應用指南</div><div class="brand-sub">先看懂這套方法，再親自操作，最後探索其他用途。</div><div class="nav-label">閱讀目錄 / CONTENTS</div><nav aria-label="章節導覽" class="nav"><a href="index.html"><small>01</small><span>從問題開始</span></a><a href="story.html"><small>02</small><span>案例：為何要有30個人</span></a><a href="design.html"><small>03</small><span>拆解：30人怎麼設計</span></a><a href="beginner.html"><small>04</small><span>動手做：先從3人開始</span></a><a href="advanced.html"><small>05</small><span>進階：狀態與驗證</span></a><a href="experiments.html"><small>06</small><span>互動實驗：親自試一次</span></a><a href="transfer.html"><small>07</small><span>延伸：還能用在哪裡</span></a><a href="workshop.html"><small>08</small><span>把自己的想法交給AI</span></a><a href="ai-agent.html"><small>09</small><span>AI專用方法與規格</span></a><a href="a2a.html"><small>10</small><span>A2A與多Agent協作</span></a><a href="appendix.html"><small>11</small><span>資料來源與附錄</span></a></nav><div class="sidebar-bottom">跟著案例走一遍；有興趣的地方，再自由深入。</div></aside><main id="main-content"><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>讓好點子，經得起實際驗證。</h1><p class="lead">進階內容：狀態、決策、覆蓋測試、行為推演與證據</p></header>
+<p class="lead">進階的重點不是讓人物寫得更像小說，而是讓它們的行為能被追溯、重現、比較，並且清楚知道哪些結論可以說、哪些不能說。</p>
+<div class="grid"><section class="card col-8"><h2>把「人物」寫成會變動的系統</h2><p>建議將每次操作寫成以下循環。人的能力、時間、興趣與挫折程度，會影響他是否行動；系統回饋又反過來改變他之後的選擇。</p><pre><code>人物固定設定（能力、偏好、裝置、作息）
+          ↓
+當下狀態（時間、記憶、疲勞、信心、習慣）
+          ↓
+事件觸發（通知、任務、朋友、需求、失敗）
+          ↓
+候選動作（使用、跳過、改道、求助、離開）
+          ↓
+按規則／機率選擇動作
+          ↓
+執行產品 → 取得真實系統回應
+          ↓
+寫入事件紀錄，更新人物狀態</code></pre><p>可以用機率模型、規則、有限狀態機或其他技術實作；模型再精細，也不會自動等於真人。</p></section><section class="card col-4"><h2>三種證據，要分開存</h2><p><b>系統事實：</b>真的執行了什麼操作、畫面與 API 回傳了什麼。</p><p><b>模擬觀察：</b>依某套假設，虛擬人物選擇了什麼、何時離開、如何改變。</p><p><b>真人證據：</b>真實觀察、訪談、使用日誌或研究所得，需有合法取得與分析依據。</p><div class="caution">「模擬覺得這功能容易使用」不是使用者研究結果。它只能提示你下一步該找真人驗證什麼。</div></section><section class="card col-12"><h2>Coverage 與 Behavior，應該是兩份實驗</h2><div class="tablewrap"><table><tr><th></th><th>功能覆蓋 Coverage</th><th>行為推演 Behavior</th></tr><tr><td>問題</td><td>流程有沒有走通？</td><td>在指定假設下，人物可能會怎麼選？</td></tr><tr><td>可以強制登入嗎</td><td>可以，為了測指定功能</td><td>不可以，除非規則自然讓他選擇</td></tr><tr><td>可以看什麼</td><td>錯誤率、畫面、事件追蹤、可重現步驟</td><td>不同設定下的路徑、行為差異、敏感度</td></tr><tr><td>不能說什麼</td><td>不能推論自然留存</td><td>不能直接推論真人留存與市場規模</td></tr><tr><td>常見陷阱</td><td>以為測試數據就是市場數據</td><td>偷偷補場次或讓模型符合預設結論</td></tr></table></div><p>在 Purr Cozy 的案例裡，後期補場次確實幫助了功能覆蓋，卻也使「原本會流失的人」沒有流失。因此應把這段經驗納入方法，而不是只展示漂亮統計。</p></section><section class="card col-6"><h2>事件紀錄：至少要能回答「為什麼」</h2><pre><code>{
+  "run_id": "demo-001",
+  "persona_id": "editor-new-01",
+  "timestamp": "2026-11-23T10:00:00+08:00",
+  "mode": "coverage",
+  "trigger": "revision_assigned",
+  "action": "open_revision_detail",
+  "result": { "status": "success", "visible_version": "v3" },
+  "state_delta": { "familiarity": 0.1 },
+  "model_version": "0.1.0",
+  "seed": 7,
+  "synthetic": true
+}</code></pre><p class="mini">以上是示範資料，不是實際的編務系統事件。</p></section><section class="card col-6"><h2>可靠性檢查</h2><ul class="checklist"><li>人物設定與版本固定；實驗有亂數種子。</li><li>每次動作都能回溯到狀態與觸發。</li><li>與被測系統的回應有真實證據（不是 AI 自稱成功）。</li><li>使用測試帳號與隔離環境，避免汙染正式數據。</li><li>同一條規則變動時，能比較結果差異。</li><li>若模擬器和被測系統共用同樣假設，主動揭露循環驗證問題。</li><li>規劃何時需要真人測試；不能靠角色模擬替代。</li></ul></section><section class="card col-12"><div class="kicker">進階使用者的更大價值</div><h2>不是把模擬做得很複雜，而是能夠更快排除不值得繼續的假設</h2><p>當你能低成本重現不同情境，許多討論就不必只靠想像爭論。你可以先做小型原型、跑指定流程、比較兩種方法，在真正投入大量人力與預算之前，知道哪些地方需要改、哪些還需要真人確認。</p><p>更重要的是：下一次碰到完全不同的產品，你仍然可以重用這套方法，而不是從零開始。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="beginner.html">← 上一章：動手做：先從3人開始</a><a class="btn" href="experiments.html">下一章：互動實驗：親自試一次 →</a></div></main></div><script src="assets/app.js"></script></body></html>

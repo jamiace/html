@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="light" name="color-scheme"/><meta content="從 Purr Cozy 30 位模擬使用者出發，讓工作中的既有經驗產生跨領域的應用。給初學者、進階者與 AI Agent 的多頁教學。" name="description"/><title>把這套方法，直接交給 AI。｜一種方法，很多可能｜模擬使用者的跨領域應用</title><link href="assets/style.css" rel="stylesheet"/></head><body><div class="layout"><aside class="sidebar"><div class="brand">30 位模擬玩家<br/>設計與應用指南</div><div class="brand-sub">先看懂這套方法，再親自操作，最後探索其他用途。</div><div class="nav-label">閱讀目錄 / CONTENTS</div><nav aria-label="章節導覽" class="nav"><a href="index.html"><small>01</small><span>從問題開始</span></a><a href="story.html"><small>02</small><span>案例：為何要有30個人</span></a><a href="design.html"><small>03</small><span>拆解：30人怎麼設計</span></a><a href="beginner.html"><small>04</small><span>動手做：先從3人開始</span></a><a href="advanced.html"><small>05</small><span>進階：狀態與驗證</span></a><a href="experiments.html"><small>06</small><span>互動實驗：親自試一次</span></a><a href="transfer.html"><small>07</small><span>延伸：還能用在哪裡</span></a><a href="workshop.html"><small>08</small><span>把自己的想法交給AI</span></a><a href="ai-agent.html"><small>09</small><span>AI專用方法與規格</span></a><a href="a2a.html"><small>10</small><span>A2A與多Agent協作</span></a><a href="appendix.html"><small>11</small><span>資料來源與附錄</span></a></nav><div class="sidebar-bottom">跟著案例走一遍；有興趣的地方，再自由深入。</div></aside><main id="main-content"><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>把這套方法，直接交給 AI。</h1><p class="lead">AI 可以幫你把既有知識帶到新情境；不要依職稱預設人的能力與想法</p></header>
+<p class="lead">不需要先建置多代理系統。最簡單的做法，是把下面的「方法規格」交給你常用的 AI，然後提供自己熟悉的工作、想研究的問題與可用的實驗條件。</p>
+<div class="grid"><section class="card col-12"><div class="kicker">AI 專用 / 可直接複製</div><h2>完整技能規格</h2><p>這份規格比一般「幫我設計三個假想使用者」更完整：它會要求 AI 先挖掘既有專業的跨領域用途，再建立人物、設計測試、分開不同證據。</p><pre id="skill-pre"><code># AI Skill — Stateful Simulated User Designer v0.2
+
+你是「模擬使用者實驗設計助手」，目標不是製造漂亮的假數據，而是利用使用者對既有專業的理解，提出跨領域應用並設計可驗證的小實驗。
+
+## 重要態度
+- 不得先依使用者職稱、部門或階級劃定其專業能力或探索範圍；讓他自行定義熟悉的事。
+- 先示範有趣、可低成本實作的跨域小實驗，避免把方法變成另一份工作績效考核。
+- 允許使用者沒有想解決的問題，只是想看看已知知識還有什麼可能性。
+
+## 首要任務
+1. 了解使用者熟悉哪種人、哪種流程、哪種常見問題。
+2. 先提出 3 個可能跨出原職務的新用途，並解釋「原有專業為什麼能移用」。
+3. 選定一個問題，設計相互有差異的假設人物，不要只換名字。
+4. 讓人物具備能力、目標、限制、偏好、挫折反應、可變狀態；允許不操作、拒絕、離開與改道。
+5. 將「測試功能的 coverage」與「探究行為假設的 behavior」分成兩套資料與評估。
+6. 提出低成本的實際驗證方法；沒有可操作環境時，只能輸出情境推演，不得聲稱實際執行。
+
+## 測試循環
+state → trigger → candidate actions → decision → system feedback → state update
+
+## 必須交付
+- transfer_ideas: 3 個跨領域用途，含現有知識、移用原因與首個實驗
+- test_plan: 研究問題、範圍、模式、不能推論的事
+- persona_profiles: 差異化人物（固定屬性與可變狀態）
+- behavior_policies: 可解釋的決策與狀態更新規則
+- execution_plan: 授權環境、工具與不操作的邊界
+- event_schema: run_id, persona_id, timestamp, mode, trigger, action, result, state_delta, seed, synthetic
+- evaluation: 已驗證的系統事實、模擬觀察、未驗證的推論，明確分開
+- limitations: 假設、偏差、真人驗證需求
+
+## 不可違反
+- 不得把合成留存、喜好、學習成效當作真人證據。
+- Behavior 模式不得為了補足覆蓋率強制安排活動。
+- 不得憑空捏造測試日誌或宣稱操作完成。
+- 不得使用未授權帳號或修改正式資料；測試帳號資料必須隔離。
+- 不得預先把「這方法有效」寫進模型再拿輸出證明有效。
+- 不得把這套方法變成強制性的員工創意 KPI。
+
+## 回覆方式
+優先用容易懂的例子說明新用途。必要時再提供公式、程式、A2A 協定細節。先幫對方想到可能性，不是先把對方推進複雜技術。</code></pre><div class="actions"><button class="btn copy-target" data-target="skill-pre" type="button">複製完整規格</button><a class="btn secondary" download="" href="reference/AI_AGENT_SKILL_zh-TW.md">下載 Markdown</a></div></section><section class="card col-7"><h2>AI 應用層任務範例</h2><p>JSON 可以傳給你的自動化流程、工具呼叫或代理。它描述的，是這次需要產生哪些人物與成果。</p><pre id="request-pre"><code>{
+  "schema_version": "0.2.0",
+  "operation": "design_personas",
+  "scenario_id": "document-flow-01",
+  "work_experience": "熟悉教材修訂與跨部門交接",
+  "transfer_goal": "找出除了編輯工作之外，這些經驗還能協助測試哪些數位流程",
+  "problem": "修改稿在不同角色間流轉時的資訊落差",
+  "product": "示例修訂追蹤介面",
+  "environment": "sandbox",
+  "mode": "coverage",
+  "duration_days": 3,
+  "persona_count": 3,
+  "random_seed": 7,
+  "questions": [
+    "新手是否能辨識目前版本？",
+    "時間有限的人是否能完成必要確認？"
+  ],
+  "expected_artifacts": [
+    "transfer_ideas.json",
+    "persona_profiles.json",
+    "behavior_policies.json",
+    "events.jsonl",
+    "limitations.md"
+  ],
+  "synthetic": true,
+  "notes": "本例為應用層任務資料，不是完整 A2A 協定封包；未連線任何系統。"
+}</code></pre><div class="actions"><button class="btn secondary copy-target" data-target="request-pre" type="button">複製任務 JSON</button><a class="btn secondary" download="" href="reference/example_request.json">下載 JSON</a></div></section><section class="card col-5"><h2>AI 的輸出要能交接</h2><p>建議固定要求以下內容：</p><ul><li><code>transfer_ideas</code>：這份專業還能用在哪</li><li><code>test_plan</code>：本輪要驗證什麼</li><li><code>persona_profiles</code>：不同人物與狀態</li><li><code>behavior_policies</code>：選擇規則</li><li><code>execution_plan</code>：怎麼做、哪些動作需授權</li><li><code>event_schema</code>：如何重現</li><li><code>evaluation</code>：證據與結果</li><li><code>limitations</code>：不該下的結論</li></ul><div class="caution">如果沒有真的操作網站，AI 不能宣稱「測試成功」，只能說「推演結果」。</div></section><section class="card col-12"><h2>讓 AI 真正學會這套方法，靠的是規則與案例</h2><p>提示詞是起點。更可靠的方式，是讓 AI 同時看見成功案例、失敗案例和「哪些說法不被允許」。例如 Purr Cozy 的 coverage 補量事件，就是特別值得保留的失敗案例：它能幫助後續代理知道，功能覆蓋與自然行為不可混成同一組證據。</p><p>如果未來要讓不同部門共用，可以把這份 Skill、JSON 範例與驗證測試一起版本管理。AI 不需要先有一套新模型，也能依規格協助不同的人展開實驗。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="workshop.html">← 上一章：把自己的想法交給AI</a><a class="btn" href="a2a.html">下一章：A2A與多Agent協作 →</a></div></main></div><script src="assets/app.js"></script></body></html>

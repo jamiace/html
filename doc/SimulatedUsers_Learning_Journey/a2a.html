@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="light" name="color-scheme"/><meta content="從 Purr Cozy 30 位模擬使用者出發，讓工作中的既有經驗產生跨領域的應用。給初學者、進階者與 AI Agent 的多頁教學。" name="description"/><title>當不同 AI Agent 開始合作。｜一種方法，很多可能｜模擬使用者的跨領域應用</title><link href="assets/style.css" rel="stylesheet"/></head><body><div class="layout"><aside class="sidebar"><div class="brand">30 位模擬玩家<br/>設計與應用指南</div><div class="brand-sub">先看懂這套方法，再親自操作，最後探索其他用途。</div><div class="nav-label">閱讀目錄 / CONTENTS</div><nav aria-label="章節導覽" class="nav"><a href="index.html"><small>01</small><span>從問題開始</span></a><a href="story.html"><small>02</small><span>案例：為何要有30個人</span></a><a href="design.html"><small>03</small><span>拆解：30人怎麼設計</span></a><a href="beginner.html"><small>04</small><span>動手做：先從3人開始</span></a><a href="advanced.html"><small>05</small><span>進階：狀態與驗證</span></a><a href="experiments.html"><small>06</small><span>互動實驗：親自試一次</span></a><a href="transfer.html"><small>07</small><span>延伸：還能用在哪裡</span></a><a href="workshop.html"><small>08</small><span>把自己的想法交給AI</span></a><a href="ai-agent.html"><small>09</small><span>AI專用方法與規格</span></a><a href="a2a.html"><small>10</small><span>A2A與多Agent協作</span></a><a href="appendix.html"><small>11</small><span>資料來源與附錄</span></a></nav><div class="sidebar-bottom">跟著案例走一遍；有興趣的地方，再自由深入。</div></aside><main id="main-content"><header class="hero"><div class="eyebrow">SIMULATED USERS / FIELD GUIDE</div><h1>當不同 AI Agent 開始合作。</h1><p class="lead">技術延伸：A2A 的職責分工、協定定位與 Agent Card 範例</p></header>
+<p class="lead">A2A（Agent-to-Agent）是讓不同代理互相委派任務、交換狀態與交付成果的協定；它不會直接把這份方法「教進」模型權重。真正讓代理遵循方法的，是上一頁的技能規格與任務契約。</p>
+<div class="grid"><section class="card col-7"><div class="kicker">最小分工</div><h2>三個代理，分別做好三件事</h2><div class="step"><span class="numb">1</span><div class="step-body"><h3>Persona Designer｜人物與用途</h3><p>接收同事的專業描述，提出跨領域用途、設計人物、標明假設；不直接操作正式系統。</p></div></div><div class="step"><span class="numb">2</span><div class="step-body"><h3>Scenario Runner｜有紀錄地執行</h3><p>在授權的測試環境裡依規則操作，保留截圖、事件紀錄、規則版本與可重現步驟。</p></div></div><div class="step"><span class="numb">3</span><div class="step-body"><h3>Evidence Reviewer｜看證據而不是聽故事</h3><p>把實際系統回應與模擬觀察分開，指出哪些流程真的驗證過、哪些仍需真人。</p></div></div></section><section class="card col-5"><h2>最容易搞混的事</h2><p><strong>Skill：</strong>讓代理知道要遵守什麼方法、應該輸出什麼。</p><p><strong>A2A：</strong>讓不同代理有一致的方式互相傳遞任務、狀態與成果。</p><p><strong>執行器：</strong>真正負責瀏覽器、API、排程與事件記錄。</p><p>如果只需要一個聊天式 AI 協助設計三位模擬人物，完全沒有必要先架設完整的 A2A。</p><div class="callout">先把一個小實驗做對，再決定是否值得拆成多代理。</div></section><section class="card col-12"><h2>A2A Agent Card 1.0：可編輯的示意檔</h2><p>依 2026 年 11 月查核的官方 1.0 規格，<code>supportedInterfaces[]</code> 承載每個端點的 <code>url</code>、<code>protocolBinding</code> 與 <code>protocolVersion</code>。</p><pre id="card-pre"><code>{
+  "name": "Simulated User Designer",
+  "description": "Designs stateful personas, cross-domain transfer ideas, and reproducible scenario plans. Does not equate synthetic data with real-user evidence.",
+  "version": "0.2.0",
+  "supportedInterfaces": [
+    {
+      "url": "http://127.0.0.1:8000/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "design_personas",
+      "name": "Design simulated users",
+      "description": "Create domain-transfer ideas, simulated user profiles, behavioral policies and evidence-aware experiments.",
+      "tags": [
+        "simulation",
+        "user-experience",
+        "quality-assurance",
+        "education"
+      ]
+    }
+  ]
+}</code></pre><div class="actions"><button class="btn secondary copy-target" data-target="card-pre" type="button">複製 Agent Card</button><a class="btn secondary" download="" href="reference/example_A2A_1_0_AgentCard.json">下載範例 JSON</a></div><div class="caution"><strong>注意：</strong><code>127.0.0.1:8000</code> 是示範地址。這份檔案沒有部署服務；要互通還必須實作伺服器、任務執行器、權限與授權機制。</div></section><section class="card col-12"><h2>A2A 任務與應用層資料的差別</h2><p><code>example_request.json</code> 描述的是你的研究需求，不是能直接傳給 A2A 端點的完整協定封包。實作時要由 SDK 或客戶端將資料包裝成符合協定的 Message / Part，再處理 Task 的生命週期與回傳產物。</p><p class="source">官方參考：<a href="https://a2a-protocol.org/latest/specification/" rel="noreferrer" target="_blank">A2A 1.0 規格</a>、<a href="https://a2a-protocol.org/latest/specification/agent-card/" rel="noreferrer" target="_blank">Agent Card</a>、<a href="https://github.com/a2aproject/a2a-python" rel="noreferrer" target="_blank">Python SDK</a>。本頁僅為設計說明及示範檔，非可執行的 A2A 服務。</p></section></div><div class="footer">模擬使用者實驗與跨領域應用｜內部分享學習素材 · 2026 年 11 月 · 模擬資料不等於真人證據</div><div aria-label="章節導覽" class="actions chapter-pager"><a class="btn" href="ai-agent.html">← 上一章：AI專用方法與規格</a><a class="btn" href="appendix.html">下一章：資料來源與附錄 →</a></div></main></div><script src="assets/app.js"></script></body></html>
