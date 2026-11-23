@@ -38,13 +38,18 @@ const LearnLog = {
  close(rec, how) {
   if (!rec || rec.t1) return; rec.t1 = Date.now(); rec.dur = rec.t1 - rec.t0; rec.stop = String(how || '').slice(0, 40);
   try { rec.streak = Learn.streakNow(); } catch (e) { }
-  if (!rec.ans.length && !rec.rev.length && !rec.typo.length) return;   // opened and closed without learning anything
+  const unansweredQuiz = !rec.done && /^(?:[a-z]+\|)?quiz@\d+\/\d+:\w+$/.test(rec.stop);
+  if (!unansweredQuiz && !rec.ans.length && !rec.rev.length && !rec.typo.length) return;
   if (this.enabled()) this.enqueue(rec);
  },
- // 0.93.10: the question on screen keeps its type (quiz@3/8:spell); after answering it, the position is the next question
+ // The stop stage distinguishes a displayed question from feedback and an empty quiz.
  stopOf(s) {
   if (!s) return 'gone'; if (s.result) return 'result';
-  if (s.step === 'quiz') { const q = !s.ans && s.qs ? s.qs[s.qi] : null; return 'quiz@' + (s.ans ? s.qi + 1 : s.qi) + '/' + (s.qs ? s.qs.length : 0) + (q && q.type ? ':' + q.type : ''); }
+  if (s.step === 'quiz') {
+   const q = s.qs?.[s.qi], index = s.qi, total = s.qs?.length || 0;
+   if (s.ans) return 'quizfeedback@' + index + '/' + total;
+   return q?.type ? 'quiz@' + index + '/' + total + ':' + q.type : 'quizpending@' + index + '/' + total;
+  }
   return s.step + '@' + s.ri + '/' + (s.words ? s.words.length : 0);
  },
  // a round closed by something else (restart, idle, gone) keeps where it stopped: 'restart|quiz@3/8:spell' (admin 0.5.14 reads it)
@@ -179,6 +184,13 @@ const LearnLog = {
  }
 
  // ----- leaving -----
+ if (typeof UI !== 'undefined' && UI.closeWin) {
+  const closeStudy = UI.closeWin.bind(UI);
+  UI.closeWin = function (id) {
+   if (id === 'study' && this.wins.study && !this.wins.study.el.hidden && L.cur?.s === Learn.sess) L.closeLearn('left');
+   return closeStudy(...arguments);
+  };
+ }
  const leave = () => { L.closeLearn('gone'); const t = L.typo; if (t) { L.typo = null; if (t.item) { t.rec.typo.push(Object.assign(t.item, { ms: Math.min(Math.round(now() - t.shown), 600000) })); } L.close(t.rec, t.s.done ? 'result' : 'left'); } };
  window.addEventListener('pagehide', leave);
  // a session left open in a background tab for 30 minutes counts as abandoned
