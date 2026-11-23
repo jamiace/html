@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2A / 多 Agent 協作頁</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h1>模擬學習者／使用者<br>方法指南</h1>
+    <div class="sub">多頁 HTML 版｜給人看，也給 AI / Agent 直接用</div>
+    <div>
+      <span class="tag">初學者</span>
+      <span class="tag">進階者</span>
+      <span class="tag">AI Agent</span>
+      <span class="tag">A2A</span>
+    </div>
+    <nav class="nav" style="margin-top:18px"><a href="index.html">首頁 / 導覽</a><a href="beginner.html">初學者：10 分鐘上手</a><a href="advanced.html">進階者：建模與測試</a><a href="ai-agent.html">給 AI 的規格</a><a href="a2a.html">A2A / 多 Agent 協作</a><a href="templates.html">模板 / 範例 / FAQ</a></nav>
+    <div class="footer">整理重點：<br>1. 先分清楚 coverage 與 behavior<br>2. 模擬資料不能假裝真人資料<br>3. 先讓方法可重現，再談自動化與多 Agent</div>
+  </aside>
+  <main class="main">
+    <section class="hero">
+      <div class="tag">給 Agent 工程與自動化設計者</div>
+      <h2>A2A / 多 Agent 協作頁</h2>
+    </section>
+    
+<div class="grid">
+  <section class="card col-7">
+    <h3>A2A 的正確定位</h3>
+    <p>A2A 是 <strong>Agent-to-Agent</strong> 的通訊協定，用來讓不同代理發現彼此、接受任務、交換狀態與交付產物。它<strong>不是把知識直接訓練進別的模型</strong>的方式。</p>
+    <div class="note">如果你的目標只是「讓某個 LLM 學會這套方法」，先給它明確的技能規範與任務契約就好，不必一開始就上 A2A。</div>
+  </section>
+  <section class="card col-5">
+    <h3>什麼時候值得用 A2A？</h3>
+    <ul class="tight">
+      <li>要把人物設計、場景執行、證據驗證拆成不同代理。</li>
+      <li>需要跨團隊、跨框架或跨服務協作。</li>
+      <li>希望 Agent 能被目錄發現、可替換、可擴充。</li>
+    </ul>
+  </section>
+
+  <section class="card col-12">
+    <h3>建議的三個 Agent</h3>
+    <table>
+      <tr><th>Agent</th><th>責任</th><th>不該做什麼</th></tr>
+      <tr><td>Persona Designer</td><td>根據目標建立人物、狀態模型與假設</td><td>不要直接操作正式系統</td></tr>
+      <tr><td>Scenario Runner</td><td>依核准規則實際執行瀏覽器 / API 測試，輸出事件與截圖</td><td>不要臨場任意編故事更改人物</td></tr>
+      <tr><td>Evidence Reviewer</td><td>比對事件、日誌與目標，回報通過 / 失敗 / 未驗證</td><td>不要把 coverage 數據包裝成真人行為</td></tr>
+    </table>
+  </section>
+
+  <section class="card col-6">
+    <h3>典型任務流</h3>
+    <ol class="steps">
+      <li>主代理送出 <code>design_personas</code>。</li>
+      <li>收到 persona 後由人或規則檢查器先驗收。</li>
+      <li>送出 <code>execute_scenario</code>，指明是 coverage 或 behavior。</li>
+      <li>Runner 交付 events.jsonl、截圖、可重現步驟。</li>
+      <li>送出 <code>review_evidence</code>。</li>
+      <li>Reviewer 回傳已證實結果、限制、下一輪調整建議。</li>
+    </ol>
+  </section>
+  <section class="card col-6">
+    <h3>最低協作守則</h3>
+    <ul class="tight">
+      <li>每個事件都要標示 <code>synthetic=true</code>。</li>
+      <li>mode=coverage 與 mode=behavior 的統計不得混用。</li>
+      <li>必須保存 seed、規則版本、模型版本與執行環境。</li>
+      <li>最終驗證必須來自系統真實回應，不是代理口頭說成功。</li>
+      <li>若正式站涉及付費或資料修改，必須有人員授權。</li>
+    </ul>
+  </section>
+
+  <section class="card col-12">
+    <h3>Agent Card 概念範例</h3>
+    <pre><code>{
+  "name": "persona-designer",
+  "description": "Designs stateful simulated learners/users",
+  "supportedInterfaces": ["tasks", "artifacts"],
+  "skills": [
+    "design_personas",
+    "build_behavior_policies",
+    "declare_limitations"
+  ]
+}</code></pre>
+    <p class="small">欄位名稱請依當下官方 A2A 規格與 SDK 為準。這裡是概念示意，不代表可直接部署的完整服務。</p>
+  </section>
+</div>
+
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

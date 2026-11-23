@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模板、範例與 FAQ</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h1>模擬學習者／使用者<br>方法指南</h1>
+    <div class="sub">多頁 HTML 版｜給人看，也給 AI / Agent 直接用</div>
+    <div>
+      <span class="tag">初學者</span>
+      <span class="tag">進階者</span>
+      <span class="tag">AI Agent</span>
+      <span class="tag">A2A</span>
+    </div>
+    <nav class="nav" style="margin-top:18px"><a href="index.html">首頁 / 導覽</a><a href="beginner.html">初學者：10 分鐘上手</a><a href="advanced.html">進階者：建模與測試</a><a href="ai-agent.html">給 AI 的規格</a><a href="a2a.html">A2A / 多 Agent 協作</a><a href="templates.html">模板 / 範例 / FAQ</a></nav>
+    <div class="footer">整理重點：<br>1. 先分清楚 coverage 與 behavior<br>2. 模擬資料不能假裝真人資料<br>3. 先讓方法可重現，再談自動化與多 Agent</div>
+  </aside>
+  <main class="main">
+    <section class="hero">
+      <div class="tag">可直接複製使用</div>
+      <h2>模板、範例與 FAQ</h2>
+    </section>
+    
+<div class="grid">
+  <section class="card col-12">
+    <h3>人物模板（可直接複製）</h3>
+    <pre><code>Persona 名稱：
+身分／情境：
+目前能力：
+主要目標：
+喜歡：
+討厭：
+時間條件：
+遇到挫折時：
+可變狀態：interest / confidence / familiarity / fatigue / memory
+備註限制：</code></pre>
+  </section>
+
+  <section class="card col-6">
+    <h3>測試計畫模板</h3>
+    <pre><code>產品：
+測試期間：
+模式：coverage / behavior / 兩者分開
+這次要驗證的問題：
+不應拿來推論的事情：
+使用的 persona：
+操作入口：
+紀錄欄位：
+驗證指標：
+風險與限制：</code></pre>
+  </section>
+  <section class="card col-6">
+    <h3>事件記錄模板</h3>
+    <pre><code>{
+  "run_id": "",
+  "persona_id": "",
+  "timestamp": "",
+  "mode": "coverage|behavior",
+  "trigger": "",
+  "action": "",
+  "result": "",
+  "state_delta": {},
+  "seed": 0,
+  "synthetic": true,
+  "notes": ""
+}</code></pre>
+  </section>
+
+  <section class="card col-12">
+    <h3>FAQ</h3>
+    <details open>
+      <summary>Q1：我沒有工程背景，也能用這套方法嗎？</summary>
+      <p>可以。先用紙筆、試算表或文件記錄 3 個人物、7 天狀態與事件，就足夠掌握方法核心。你不必先有瀏覽器自動化。</p>
+    </details>
+    <details>
+      <summary>Q2：我可不可以直接做 30 個人？</summary>
+      <p>可以，但建議先用 3～5 個人驗證方法是否合理，再擴充。否則你很容易得到大量看似完整、實際上無法解釋的資料。</p>
+    </details>
+    <details>
+      <summary>Q3：模擬結果能不能直接當成產品 KPI？</summary>
+      <p>不能。模擬結果適合拿來檢查流程、觀察假設差異與找 bug，不適合拿來直接宣稱留存率、學習成效或市場接受度。</p>
+    </details>
+    <details>
+      <summary>Q4：我要先做人版教學，還是先做 AI 版規格？</summary>
+      <p>如果團隊裡有很多非技術同事，先做人版教學最重要；等大家概念穩定，再把它壓縮成 AI 規格，會更容易避免誤用。</p>
+    </details>
+    <details>
+      <summary>Q5：如果我真的想做成內部平台，應先做什麼？</summary>
+      <p>先固定三件事：人物結構、事件 schema、coverage / behavior 的分流規則。這三件事穩了，再談介面、排程與 A2A。</p>
+    </details>
+  </section>
+
+  <section class="card col-12">
+    <h3>最後提醒</h3>
+    <div class="warn">模擬使用者的真正價值，在於<strong>低成本試錯、可重現驗證、比較不同假設</strong>。它不是用來取代真人，不是拿來裝作已經擁有市場證據，也不是讓圖表看起來很豐富的手段。</div>
+  </section>
+</div>
+
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

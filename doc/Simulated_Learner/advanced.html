@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>進階者：建模、事件與驗證</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h1>模擬學習者／使用者<br>方法指南</h1>
+    <div class="sub">多頁 HTML 版｜給人看，也給 AI / Agent 直接用</div>
+    <div>
+      <span class="tag">初學者</span>
+      <span class="tag">進階者</span>
+      <span class="tag">AI Agent</span>
+      <span class="tag">A2A</span>
+    </div>
+    <nav class="nav" style="margin-top:18px"><a href="index.html">首頁 / 導覽</a><a href="beginner.html">初學者：10 分鐘上手</a><a href="advanced.html">進階者：建模與測試</a><a href="ai-agent.html">給 AI 的規格</a><a href="a2a.html">A2A / 多 Agent 協作</a><a href="templates.html">模板 / 範例 / FAQ</a></nav>
+    <div class="footer">整理重點：<br>1. 先分清楚 coverage 與 behavior<br>2. 模擬資料不能假裝真人資料<br>3. 先讓方法可重現，再談自動化與多 Agent</div>
+  </aside>
+  <main class="main">
+    <section class="hero">
+      <div class="tag">給 PM、測試、分析與設計者</div>
+      <h2>進階者：建模、事件與驗證</h2>
+    </section>
+    
+<div class="grid">
+  <section class="card col-8">
+    <h3>進階版核心：把人物寫成「有狀態的系統」</h3>
+    <p>如果你已經會做簡單人物設定，下一步不是「增加角色數量」，而是提升模型的可解釋性與可重現性。推薦用這個循環：</p>
+    <pre><code>state -> trigger -> candidate actions -> decision -> product feedback -> state update</code></pre>
+    <p>這讓你不再只是寫故事，而是建立一個能夠在多日、多情境下穩定執行的行為模型。</p>
+  </section>
+  <section class="card col-4">
+    <h3>何時算進階？</h3>
+    <ul class="tight">
+      <li>你開始追蹤可變狀態，而不是只看固定 persona。</li>
+      <li>你知道 coverage 與 behavior 要分開。</li>
+      <li>你會保存亂數種子與規則版本。</li>
+      <li>你能說清楚哪些是已證實、哪些只是模擬觀察。</li>
+    </ul>
+  </section>
+
+  <section class="card col-6">
+    <h3>建議追蹤的狀態</h3>
+    <table>
+      <tr><th>狀態</th><th>用途</th><th>典型變化</th></tr>
+      <tr><td>interest</td><td>是否還願意啟動</td><td>重複內容太多就下降；新鮮回饋可上升</td></tr>
+      <tr><td>confidence</td><td>對自己是否做得到的感受</td><td>連續成功上升；連錯幾次下降</td></tr>
+      <tr><td>familiarity</td><td>對產品流程的熟悉度</td><td>使用越多越高，跨版本大改可能下降</td></tr>
+      <tr><td>fatigue</td><td>暫時性疲勞與抗拒</td><td>長流程、長閱讀、連續失敗會增加</td></tr>
+      <tr><td>memory</td><td>知識保留狀態</td><td>隨時間遺忘，複習或正確回想上升</td></tr>
+    </table>
+  </section>
+  <section class="card col-6">
+    <h3>事件記錄最低欄位</h3>
+    <pre><code>{
+  "run_id": "2026-11-23-demo-01",
+  "persona_id": "P03",
+  "timestamp": "2026-11-23T19:31:00+08:00",
+  "mode": "behavior",
+  "trigger": "pet_hungry",
+  "action": "answer_vocab_quiz",
+  "result": "2_correct_1_wrong",
+  "state_delta": {"confidence": -0.05, "memory": +0.02},
+  "seed": 917213,
+  "synthetic": true
+}</code></pre>
+    <div class="note">這個 schema 不只給人看，也可以直接供 log pipeline、驗證器與回放工具使用。</div>
+  </section>
+
+  <section class="card col-12">
+    <h3>驗證框架：你究竟在證明什麼？</h3>
+    <table>
+      <tr><th>類型</th><th>你能證明的事</th><th>你不能直接證明的事</th></tr>
+      <tr><td>功能正確性</td><td>流程真的走得通、錯誤能重現、資料有記錄</td><td>真人會不會喜歡</td></tr>
+      <tr><td>行為差異</td><td>不同 persona 規則可產生可解釋差異</td><td>真實人口比例、自然留存率</td></tr>
+      <tr><td>模型敏感度</td><td>改動某參數時結果如何變動</td><td>市場規模、真實產品 KPI</td></tr>
+    </table>
+  </section>
+
+  <section class="card col-12">
+    <h3>進階者最常犯的錯誤</h3>
+    <details open><summary>錯誤 1：用同一套模擬結果同時報告流程覆蓋與自然留存</summary><p>如果人物被迫每天執行固定場次，那就已經不是自然行為。這樣的數據可以拿來看系統有沒有漏記錄，不能拿來說明自然使用情況。</p></details>
+    <details><summary>錯誤 2：讓 LLM 每一步即興決策，卻沒有固定規則與版本</summary><p>這會讓你無法重現，也無法區分是產品有問題，還是模型當下心情不同。</p></details>
+    <details><summary>錯誤 3：讓模擬器與被測系統共用同一套假設</summary><p>如果產品的推薦規則與模擬器的評估規則完全相同，你可能只是在做循環驗證，看見的「成功」可能只是自我證明。</p></details>
+  </section>
+</div>
+
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>
