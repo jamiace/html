@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>數據與 300 人測試計畫</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f6f2ee;--card:#fffdf9;--ink:#2f2433;--ink2:#6b5a6e;--line:#e6dcd2;--acc:#8c5aa8;--acc2:#d9566f;--good:#3f8a4f;--warn:#b86a12;--chip:#f1e7f6;--blue:#2f6fc8;--on-acc:#fff;--shadow:0 10px 30px rgba(47,36,51,.10)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1724;--card:#262033;--ink:#f1e9f3;--ink2:#b9a8bd;--line:#3d3449;--acc:#c49ae0;--acc2:#ef8fa1;--good:#7cc58a;--warn:#f0b35a;--chip:#33294a;--blue:#8fb5ea;--on-acc:#1b1724;--shadow:0 10px 30px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#1b1724;--card:#262033;--ink:#f1e9f3;--ink2:#b9a8bd;--line:#3d3449;--acc:#c49ae0;--acc2:#ef8fa1;--good:#7cc58a;--warn:#f0b35a;--chip:#33294a;--blue:#8fb5ea;--on-acc:#1b1724;--shadow:0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font:500 16px/1.4 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+button{font:inherit;color:inherit;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+button.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+#viewport{position:fixed;inset:0 0 52px 0;display:grid;place-items:center;overflow:hidden}
+#deck{width:1280px;height:720px;position:relative}
+.slide{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:56px 72px;display:none;flex-direction:column;overflow:hidden}
+.slide.on{display:flex}
+.slide.center{justify-content:center}
+.k{font-size:26px;font-weight:700;color:var(--acc);margin:0 0 10px}
+.k.red{color:var(--acc2)}.k.amber{color:var(--warn)}.k.green{color:var(--good)}
+h1{font-size:84px;line-height:1.12;margin:0;font-weight:900}
+h2{font-size:60px;line-height:1.18;margin:0 0 18px;font-weight:900}
+.huge{font-size:220px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big{font-size:130px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums}
+.red{color:var(--acc2)}.green{color:var(--good)}.amber{color:var(--warn)}.purple{color:var(--acc)}.muted{color:var(--ink2)}
+.say{font-size:42px;line-height:1.35;font-weight:700;margin:14px 0 0}
+.sub{font-size:34px;line-height:1.4;color:var(--ink2);margin:10px 0 0}
+.row{display:flex;gap:56px;align-items:center;flex:1;min-height:0}
+.row>*{flex:1;min-width:0}
+.chart{position:relative;flex:1;min-height:0}
+.pill{display:inline-block;background:var(--chip);color:var(--acc);border-radius:40px;padding:6px 24px;font-size:28px;font-weight:700}
+ol.do{list-style:none;margin:10px 0 0;padding:0;counter-reset:n}
+ol.do li{counter-increment:n;display:flex;gap:24px;align-items:center;font-size:44px;font-weight:700;margin:0 0 26px;line-height:1.25}
+ol.do li::before{content:counter(n);flex:0 0 76px;height:76px;border-radius:50%;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;font-size:40px;font-weight:900}
+ol.do.red li::before{background:var(--acc2)}
+.words{display:flex;flex-wrap:wrap;gap:18px 28px;margin-top:20px}
+.words span{font-size:76px;font-weight:900;background:var(--chip);border-radius:16px;padding:4px 26px}
+.vs{display:flex;gap:40px;align-items:flex-end;flex:1}
+.vs div{flex:1;text-align:center}
+.vs b{display:block;font-size:150px;line-height:1;font-weight:900}
+.vs span{font-size:36px;color:var(--ink2);font-weight:700}
+table.kpi{border-collapse:collapse;width:100%;font-size:38px}
+table.kpi td{padding:14px 10px;border-bottom:2px solid var(--line)}
+table.kpi td.n{text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
+table.kpi td.t{text-align:right;font-weight:900;color:var(--good)}
+table.kpi tr:first-child td{font-size:26px;color:var(--ink2);font-weight:700;padding-top:0}
+.pg{position:absolute;right:28px;bottom:18px;font-size:20px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.prep{margin-top:auto;background:var(--chip);border-left:12px solid var(--acc);border-radius:14px;padding:16px 26px;font-size:36px;font-weight:700;line-height:1.3}
+.prep b{color:var(--acc);margin-right:18px}
+.prep::before{content:"→ ";color:var(--acc);font-weight:900}
+.slide .row{flex:1}
+.areas{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px}
+.areas span{font-size:44px;font-weight:900;background:var(--chip);border-radius:18px;padding:10px 30px}
+.divider{justify-content:center;background:linear-gradient(135deg,var(--card) 50%,var(--chip))}
+h1.dv{font-size:140px}
+.blue{color:var(--blue)}
+.vs{align-items:center}.vs b{font-size:130px}.vs>div>span{display:block;margin-top:8px}
+table.kpi.tight td{padding:9px 10px}
+ol.do.five li{font-size:40px;margin-bottom:16px}ol.do.five li::before{flex-basis:64px;height:64px;font-size:34px}
+body.scroll .prep{font-size:18px;padding:10px 14px;margin-top:14px}
+body.scroll .areas span{font-size:20px}
+body.scroll h1.dv{font-size:56px}
+aside.notes{display:none}
+#notes{position:fixed;left:12px;right:12px;bottom:60px;max-height:40vh;overflow:auto;background:var(--card);border:2px solid var(--acc);border-radius:12px;padding:14px 18px;font-size:17px;line-height:1.7;z-index:12;display:none;box-shadow:var(--shadow)}
+#notes.open{display:block}
+#notes h4{margin:0 0 4px;color:var(--acc)}
+#notes ul{margin:4px 0;padding-left:20px}
+#ctrl{position:fixed;left:0;right:0;bottom:0;height:52px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--bg);border-top:1px solid var(--line);z-index:10}
+#ctrl .title{font-weight:700;font-size:14px;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#prog{position:fixed;left:0;bottom:52px;height:4px;background:var(--acc);transition:width .25s;z-index:11}
+#count{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:14px;min-width:56px;text-align:center}
+/* phone: scroll */
+html.scroll,html.scroll body{overflow-x:hidden;overflow-y:auto;height:auto}
+body.scroll #viewport{position:static;display:block;place-items:normal;padding:12px 16px 70px}
+body.scroll #deck{width:100%;height:auto;transform:none!important}
+body.scroll .slide{position:relative;display:flex;inset:auto;margin:0 0 16px;padding:28px 20px;border-radius:14px;min-height:0}
+body.scroll h1{font-size:40px}body.scroll h2{font-size:30px}
+body.scroll .huge{font-size:96px}body.scroll .big{font-size:72px}
+body.scroll .say{font-size:22px}body.scroll .sub,body.scroll .k,body.scroll .pill{font-size:18px}
+body.scroll .row{flex-direction:column;gap:20px}
+body.scroll .chart{height:260px;flex:none;width:100%}
+body.scroll ol.do li{font-size:22px;gap:14px}body.scroll ol.do li::before{flex-basis:40px;height:40px;font-size:20px}
+body.scroll .words span{font-size:30px}
+body.scroll .vs{flex-wrap:wrap;gap:16px}body.scroll .vs b{font-size:60px}body.scroll .vs span{font-size:18px}
+body.scroll table.kpi{font-size:18px}body.scroll table.kpi tr:first-child td{font-size:14px}
+body.scroll aside.notes{display:block;font-size:14px;color:var(--ink2);border-top:1px dashed var(--line);margin-top:14px;padding-top:8px}
+body.scroll .pg,body.scroll #prog,body.scroll #btn-prev,body.scroll #btn-next,body.scroll #count,body.scroll #btn-notes,body.scroll #ctrl .title{display:none}
+@media print{html,body{height:auto;overflow:visible}#ctrl,#prog,#notes{display:none!important}#viewport{position:static;display:block}#deck{transform:none!important;height:auto}.slide{display:flex!important;position:relative;inset:auto;height:720px;page-break-after:always;box-shadow:none}@page{size:1280px 720px;margin:0}}
+
+.card{background:var(--chip);border-radius:18px;padding:22px 30px}
+.card h3{font-size:36px;margin:0 0 10px}
+.card.good h3{color:var(--good)}.card.bad h3{color:var(--warn)}
+.card ul{margin:0;padding-left:30px;font-size:31px;line-height:1.5;font-weight:700}
+.tl{display:flex;gap:18px;margin-top:24px;flex:1}
+.tl div{flex:1;background:var(--chip);border-radius:18px;padding:24px;border-top:10px solid var(--acc);display:flex;flex-direction:column;gap:10px}
+.tl b{font-size:34px;color:var(--acc)}.tl span{font-size:46px;font-weight:900}.tl small{font-size:26px;color:var(--ink2);font-weight:700}
+.app{display:flex;gap:18px;flex:1;min-height:0}
+.app table{border-collapse:collapse;font-size:17px;flex:1}
+.app th{font-size:14px;color:var(--ink2);text-align:left;padding:4px 6px;border-bottom:2px solid var(--line)}
+.app td{padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.app td.n{text-align:right;font-variant-numeric:tabular-nums}
+body.scroll .card h3{font-size:20px}body.scroll .card ul{font-size:16px}
+body.scroll .tl{flex-direction:column}body.scroll .tl b{font-size:18px}body.scroll .tl span{font-size:24px}body.scroll .tl small{font-size:14px}
+body.scroll .app{flex-direction:column;overflow-x:auto}body.scroll .app table{font-size:13px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<section class="slide center">
+  <p class="pill" style="align-self:flex-start">🐾 11/10 – 11/21・30 位測試帳號</p>
+  <h1 style="margin-top:28px">30 位測試帳號報告<br>與 300 人真人測試計畫</h1>
+  <p class="sub">數據告訴我們什麼，300 人測試要做什麼</p>
+  <aside class="notes"><h4>講者備註</h4>資料：後台 v0.5.15 匯出的學習紀錄（到 11/21 19:00）、使用行為玩家表、兩週的程度挑戰賽成績，加上 11/12–11/19 的每日營運報告與原始事件。30 位測試帳號由模擬程式 life.cjs 自動玩，人物設定在 tools/sim/people.json。</aside>
+</section>
+
+<section class="slide center">
+  <p class="k">今天講兩件事</p>
+  <ol class="do">
+    <li>這 12 天的數據告訴我們什麼</li>
+    <li>300 人真人測試：目的是什麼、要準備什麼</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>第一部分只講發現；第二部分把發現變成測試目的、對象、進場方式、開測前要完成的事和成功標準。</aside>
+</section>
+
+<section class="slide divider">
+  <p class="k">1 / 2</p>
+  <h1 class="dv">📊 數據</h1>
+  <p class="sub">這 12 天告訴我們什麼</p>
+</section>
+
+<section class="slide">
+  <p class="k">資料</p>
+  <h2>12 天，30 人</h2>
+  <div class="vs" style="margin-top:20px">
+    <div><b>3,885</b><span>個學習回合</span></div>
+    <div><b class="purple">25,952</b><span>題作答</span></div>
+    <div><b>11</b><span>平均上線天數</span></div>
+  </div>
+  <div class="prep"><b>真實玩家</b>同期間只有 7 人、103 個回合，還不夠拿來分析</div>
+  <aside class="notes"><h4>講者備註</h4>11/10–11/11 是模擬開跑的頭兩天，只有 14–18 人上線；11/12 起每天 30 人、約 350–400 個回合、2,400–2,700 題。11/21 只到傍晚。淑芬和樂樂共用一台平板，這次用帳號分開算。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">先講結論</p>
+  <h2 style="font-size:54px">這批資料能信什麼、不能信什麼</h2>
+  <div class="row" style="align-items:stretch;gap:36px;margin-top:10px">
+    <div class="card good"><h3>✅ 可以拿來用</h3><ul><li>程度測驗會不會算準</li><li>各題型的難度和遊戲的預測</li><li>小一、小二卡在哪裡</li><li>升級測驗、挑戰賽公不公平</li><li>載入速度</li></ul></div>
+    <div class="card bad"><h3>⚠️ 不能拿來用</h3><ul><li>留存：每人每天至少玩 3 場</li><li>上線節奏、時段、社交：照劇本走</li><li>哪些單字比較難：答對與否是模型算的</li></ul></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>people.json 第 4 版開了 coverage 模式（perPerson 3、perAdult 6），確保每個人每天都有資料。好處是每個功能都被測到；代價是原本設計的「三分鐘熱度型、試玩就走型、兩週一兩次型」都沒有流失。所以上一版簡報裡「國三比較難」「最常答錯的字」「晚上 7 點最多人」這幾頁這次拿掉了。</aside>
+</section>
+
+<section class="slide">
+  <p class="k amber">發現 1</p>
+  <h2>每個人都天天來，但這不是真的</h2>
+  <div class="row">
+    <div><div class="huge">30<span style="font-size:90px" class="muted">/30</span></div><p class="say">每天都有上線</p></div>
+    <div><p class="say" style="font-size:38px">設計成會流失的人<br>也沒有流失</p><p class="sub">安安（假日型）10 天<br>阿哲（三分鐘熱度型）9 天<br>淑芬（兩週一兩次型）11 天</p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>每日單字完成率也很高（90%），但同樣受模擬設定影響。後台「使用行為」把幾乎每個人都判成「常常來、一天開很多次」，代表模擬沒有測到後台「分辨不同黏著類型」的能力。</aside>
+</section>
+
+<section class="slide">
+  <p class="k green">發現 2</p>
+  <h2>程度測驗算得很準</h2>
+  <div class="row">
+    <div class="chart" style="align-self:stretch;flex:1.2"><canvas id="c-grade"></canvas></div>
+    <div style="flex:.7"><div class="big green">0.3</div><p class="say">個年級<br>平均誤差</p><p class="sub">30 人都在 1 個年級以內<br>成人從「小四」起算，2 次就測準</p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>橫軸是設定的英文程度（people.json 的 english.grade），縱軸是最後 5 次程度小測的中位數。要小心：模擬的答題模型和程度測驗是同一類模型，所以這裡證明的是「算法會收斂」，不是「對真人一定準」。</aside>
+</section>
+
+<section class="slide">
+  <p class="k amber">發現 3</p>
+  <h2>選擇題比遊戲以為的簡單</h2>
+  <div class="chart"><canvas id="c-type"></canvas></div>
+  <aside class="notes"><h4>講者備註</h4>只算平常練習（不含程度小測、升級測驗、挑戰賽），15,619 題，目標答對率 85%。看中選英 90.9%（預測 85.6）、看英選中 92.2%（85.5）、聽音選義 86.9%（84.1）、拼字 72.8%（72.4）、聽音拼字 46.6%（預測 77.9，311 題）。拼字的預測是準的，偏差在選擇題；聽音拼字差了 31 點，各年級都一樣，要先查答案比對或預測參數。</aside>
+</section>
+
+<section class="slide">
+  <p class="k red">發現 4</p>
+  <h2>小一還是卡住</h2>
+  <div class="row">
+    <div style="flex:.8"><div class="big red">84%</div><p class="say">的中途放棄<br>來自樂樂、安安</p></div>
+    <div style="flex:1.4"><table class="kpi" style="font-size:32px;white-space:nowrap">
+      <tr><td></td><td class="n">每日單字做完</td><td class="n">拼字答對</td></tr>
+      <tr><td>安安（小一）</td><td class="n red">2 / 23</td><td class="n red">39%</td></tr>
+      <tr><td>樂樂（小一）</td><td class="n red">5 / 16</td><td class="n red">45%</td></tr>
+      <tr><td>其他 28 人</td><td class="n green">302 / 306</td><td class="n">69%</td></tr>
+    </table></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>94 次中途放棄裡 79 次是這兩人（安安 49、樂樂 30），多半發生在每日單字和升級測驗；看到的都是 blue、she、egg、dog 這類最簡單的字。問題是「從空白開始打字」對低年級太難。小二的小宇拼字 51%，但每日單字 11/11 都做完，可以當「排字母」改版後的對照。</aside>
+</section>
+
+<section class="slide">
+  <p class="k red">發現 5</p>
+  <h2>連錯，孩子就離開</h2>
+  <div class="row">
+    <div><div class="huge red">46</div><p class="say">次「玩得不開心，<br>提早離開」</p></div>
+    <div><div class="big amber">41%</div><p class="say">離開前 5 題<br>錯了 3 題以上</p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>11/12–11/19 的原始事件。樂樂 16、安安 12、小宇 6、王伯伯 4。37% 發生在升級測驗和程度挑戰賽。</aside>
+</section>
+
+<section class="slide">
+  <p class="k amber">發現 6</p>
+  <h2>升級測驗對國小生特別難</h2>
+  <div class="chart"><canvas id="c-gate"></canvas></div>
+  <aside class="notes"><h4>講者備註</h4>升級測驗每次 8 題，這裡算「答對 6 題以上」的比例，11/12 起共 399 次。國小 171 次只有 56%，國中 79%、高中 88%、成人 68%。小宇 22 次只有 6 次、芯芯 22 次 9 次。依等級看，升 Lv 5 的通過率最低（56%），其他等級多在 72–86%。</aside>
+</section>
+
+<section class="slide">
+  <p class="k amber">發現 7</p>
+  <h2>挑戰賽，國小生上不了榜</h2>
+  <div class="row">
+    <div><div class="big">16<span class="muted" style="font-size:70px">/30</span></div><p class="say">第二週有突破的人</p></div>
+    <div><div class="big red">1<span class="muted" style="font-size:70px">/12</span></div><p class="say">國小生有突破<br><span class="muted" style="font-size:30px">筠筠，只到 L1</span></p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>11/16 這週 30 位測試帳號都報名；登頂（L6）只有博文、曉薇兩位高三。國小 12 人裡 11 人沒突破任何一階，答對率 17–67%。上週也一樣。全體一起排，低年級永遠在最後面。真實玩家上週有 2 位（豪豬、麵）都登頂。</aside>
+</section>
+
+<section class="slide">
+  <p class="k purple">發現 8</p>
+  <h2>學習以外，時間花在這三件事</h2>
+  <div class="vs" style="gap:20px">
+    <div><b class="purple" style="font-size:112px">2,429</b><span>次佈置房間</span></div>
+    <div><b class="purple" style="font-size:112px">1,727</b><span>局小遊戲</span></div>
+    <div><b class="purple" style="font-size:112px">1,676</b><span>次陪貓</span></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>11/12–11/19。佈置收藏型（Rina 一人 409 次）、小遊戲型（冠宇、筠筠、承恩、子恩 130–145 局）、照顧貓咪型（Rina、詩晴、淑芬 100 次以上）。這是劇本裡的偏好，真人喜歡哪一種要靠問卷問出來。</aside>
+</section>
+
+<section class="slide">
+  <p class="k amber">發現 9</p>
+  <h2>小遊戲難度不平均</h2>
+  <div class="vs">
+    <div><b class="amber">100%</b><span>反應力：每局都過關</span></div>
+    <div><b class="red">1/3</b><span>拼圖、停車場：<br>中途放棄</span></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>反應力 196 局全部過關；滑動拼圖 292 局有 103 局放棄或中途關掉，貓咪停車場 328 局有 102 局。疊積木 54%、彈珠台 50% 也偏難。</aside>
+</section>
+
+<section class="slide">
+  <p class="k purple">發現 10</p>
+  <div class="row">
+    <div><div class="huge purple">131</div><p class="say">次「想陪貓玩沒玩具」<br>或「貓餓了沒貓食」</p></div>
+    <div><p class="say" style="font-size:46px">想照顧貓，<br>家裡卻沒東西</p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>沒玩具 93 次、沒貓食 38 次；阿哲 24、Rina 17、品睿 15。玩具只賣出 29 件，罐頭 233 件。</aside>
+</section>
+
+<section class="slide">
+  <p class="k red">發現 11</p>
+  <h2>30 人就要等 32 秒</h2>
+  <div class="vs">
+    <div><b class="amber">32<span style="font-size:60px">秒</span></b><span>平常進房間</span></div>
+    <div><b class="red">50<span style="font-size:60px">秒</span></b><span>很多人同時上線</span></div>
+    <div><b class="purple">×10</b><span>300 人會怎樣？</span></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>839 次進房間，中位數 32 秒，29% 超過 1 分鐘，沒有一次低於 15 秒。整點前 5 分鐘（很多人同時開）中位數 50 秒，有 38 次要排隊。這是系統本身的速度，不受劇本影響。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">發現 12</p>
+  <h2>有些事，模擬量不到</h2>
+  <ol class="do">
+    <li>真的會不會回來</li>
+    <li>什麼時候上線、玩多久</li>
+    <li>會不會去同學家、看排行榜</li>
+    <li>放棄時正在答哪一題</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>1–3 是照劇本走（例如 30 人裡 28 人從沒互訪，只是劇本沒安排）。第 4 點：後台 v0.5.14 已經能顯示「放棄時正在作答的題型」，但遊戲端的 learn-log.js 更新還沒上線，94 次中途放棄裡 67 次只記成「改去做別的學習」。</aside>
+</section>
+
+<section class="slide divider">
+  <p class="k">2 / 2</p>
+  <h1 class="dv">🧭 300 人測試</h1>
+  <p class="sub">目的是什麼、要準備什麼</p>
+</section>
+
+<section class="slide">
+  <p class="k">目的</p>
+  <h2>300 人要回答的五個問題</h2>
+  <ol class="do five">
+    <li>真人會不會回來？（第 1、7、14 天）</li>
+    <li>程度測驗對真人準不準？</li>
+    <li>題目難度有沒有落在 80–88%？</li>
+    <li>真人什麼時候玩、會不會互動？</li>
+    <li>哪個年齡層最適合這個遊戲？</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>1、2、4 是模擬做不到、只有真人能回答的；3 模擬已經看出方向，真人用來確認；5 決定之後的目標族群。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">準備 1・找誰</p>
+  <h2>以國小中年級到高中為主</h2>
+  <div class="row">
+    <div class="chart" style="align-self:stretch;flex:1.2"><canvas id="c-mix"></canvas></div>
+    <div style="flex:.8"><p class="say" style="font-size:36px">每組至少 30 人，<br>才分得出差異</p><p class="sub">小一、小二和成人<br>各收 30 人當對照，<br>不當主力</p></div>
+  </div>
+  <aside class="notes"><h4>講者備註</h4>小三以上用起來順，小一小二卡在拼字（發現 4）。如果「排字母」改版來得及，小一二這 30 人就是驗證它的對照組。每組 30 人時，留存率的誤差大約 ±15 個百分點，只能看大方向。建議：小一二 30・小三到小六 90・國中 90・高中 60・成人 30。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">準備 2・怎麼進場</p>
+  <h2>分三批進，不要一次 300 人</h2>
+  <div class="tl">
+    <div><b>第 0 週</b><span>30 人</span><small>1 個班，試跑 3 天找 bug</small></div>
+    <div><b>第 1 週</b><span>+120 人</span><small>修完第 0 週的問題才開</small></div>
+    <div><b>第 2 週</b><span>+150 人</span><small>到 300 人</small></div>
+    <div><b>第 3–4 週</b><span>只觀察</span><small>最後一批也滿 14 天</small></div>
+  </div>
+  <div class="prep"><b>好處</b>出問題只影響一小批，也能比較改版前後</div>
+  <aside class="notes"><h4>講者備註</h4>整個測試約 5 週。如果是整班一起上課使用，一次就是 30 人同時上線，第 0 週剛好當壓力測試（發現 11）。每批用不同的報名代碼，後台就能分批比較。</aside>
+</section>
+
+<section class="slide">
+  <p class="k red">準備 3・遊戲要先修</p>
+  <h2>開測前，遊戲裡要改的</h2>
+  <ol class="do red">
+    <li>小二以下：拼字改排字母、可換題</li>
+    <li>選擇題出難一點；查聽音拼字</li>
+    <li>國小升級測驗降門檻、挑戰賽分組</li>
+    <li>連錯 3 題，下一題給熟字</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>對應發現 3–7。有時間再做：反應力加難度、拼圖和停車場降一點（發現 9）；貓咪需要東西時在房間直接買、新手先送一個玩具（發現 10）。</aside>
+</section>
+
+<section class="slide">
+  <p class="k red">準備 4・系統要先備好</p>
+  <h2>開測前，系統和營運要做的</h2>
+  <ol class="do red five">
+    <li>發布 learn-log.js 放棄題型紀錄</li>
+    <li>Firebase 升級付費方案，設預算警示</li>
+    <li>30 人同時上線壓力測試，目標 15 秒</li>
+    <li>先分班、預先加好友</li>
+    <li>模擬帳號 11/23 停掉，不再寫入</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>第 2 點最容易被忽略：30 人每天 2,000–5,000 次寫入，300 人就是 2–5 萬次，超過免費方案每天 2 萬次寫入的上限，超過當天遊戲就存不了檔。付費方案照用量計費，300 人一個月大約幾美元。第 4 點：真人第一次有同學在同一個遊戲裡，「一進來就有朋友」社交功能才會被用到。第 5 點：模擬排程原本就設定 11/23 結束，確認有關掉，免得混進真人資料和用量。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">準備 5・報名收什麼</p>
+  <h2>報名表決定之後能不能分析</h2>
+  <table class="kpi" style="margin-top:6px">
+    <tr><td>欄位</td><td class="n">用來做什麼</td></tr>
+    <tr><td>年級</td><td class="n">分組看留存、難度</td></tr>
+    <tr><td>最近一次英文成績</td><td class="n">驗證程度測驗</td></tr>
+    <tr><td>學校／班級、主要裝置</td><td class="n">分批、找裝置問題</td></tr>
+    <tr><td>家長同意（未成年）</td><td class="n">必要</td></tr>
+  </table>
+  <div class="prep"><b>規定</b>一定要登入帳號玩，不收「訪客」</div>
+  <aside class="notes"><h4>講者備註</h4>訪客換裝置或清瀏覽器就變成另一個人，留存會被低估。英文成績可以用會考、段考、學測或老師的評估，只要能換算成年級就好。可以再加一題選填：「你最想在遊戲裡做什麼？」（佈置、小遊戲、照顧貓），之後看哪一群留得久。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">準備 6・要不要做 A/B</p>
+  <h2>前兩週不做，之後最多一個</h2>
+  <div class="row">
+    <div><p class="say">300 人分成 5 組後，<br>每組再對半就太小了</p><p class="sub">先量出每組的基準，<br>第 3 週起再挑一個最想驗證的改動<br>（例如：連錯保護 開／關）</p></div>
+  </div>
+  <div class="prep"><b>建議</b>A/B 用 150 對 150，只看一個指標</div>
+  <aside class="notes"><h4>講者備註</h4>150 對 150 時，第 7 天回來率要差到 12 個百分點以上才看得出來。所以只挑「預期效果很大」的改動來測。</aside>
+</section>
+
+<section class="slide">
+  <p class="k green">成功標準</p>
+  <h2 style="margin-bottom:6px">測試期間每天看這些</h2>
+  <table class="kpi tight" style="font-size:31px">
+    <tr><td>指標</td><td class="n">模擬</td><td class="t">真人目標</td></tr>
+    <tr><td>第 1 天回來</td><td class="n muted">量不到</td><td class="t">≥ 40%</td></tr>
+    <tr><td>第 7 天回來</td><td class="n muted">量不到</td><td class="t">≥ 20%</td></tr>
+    <tr><td>每日單字完成率</td><td class="n">90%</td><td class="t">≥ 85%</td></tr>
+    <tr><td>各題型練習答對率</td><td class="n">47–92%</td><td class="t">80–88%</td></tr>
+    <tr><td>程度測驗 vs 學校成績</td><td class="n muted">—</td><td class="t">差 ≤ 1 年級</td></tr>
+    <tr><td>進房間等待</td><td class="n">32 秒</td><td class="t">≤ 15 秒</td></tr>
+  </table>
+  <aside class="notes"><h4>講者備註</h4>手遊的第 1／7 天留存一般約 30%／9–14%（試玩計畫引用的 Mistplay 數字）。這次有老師或家長帶，目標訂高一點。每天晚上看後台營運報告，每週看一次挑戰賽和「使用行為」玩家表；每週挑 10 人做簡短訪談。也要記錄真人的上線時段和互訪次數，這兩個模擬都量不到。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">需要你決定</p>
+  <h2>五個決定，我的建議</h2>
+  <ol class="do five">
+    <li>對象：國小中年級到高中為主</li>
+    <li>進場：30 → 150 → 300，三批</li>
+    <li>先完成開測前要改的九件事</li>
+    <li>報名收年級、成績、班級、家長同意</li>
+    <li>前兩週不做 A/B</li>
+  </ol>
+  <aside class="notes"><h4>講者備註</h4>每一項都可以改；最不能省的是 Firebase 方案和英文成績，少了前者測試會中斷，少了後者就無法驗證程度測驗。</aside>
+</section>
+
+<section class="slide">
+  <p class="k">附錄</p>
+  <h2 style="font-size:40px;margin-bottom:8px">30 位測試帳號 <span class="muted" style="font-size:22px;font-weight:700">程度用年級表示：1＝小一、7＝國一、10＝高一</span></h2>
+  <div class="app"><table><tr><th>暱稱</th><th>身分</th><th>設定程度</th><th>測出程度</th><th>答對</th><th>拼字</th><th>每日單字</th><th>放棄</th><th>天數</th></tr><tr><td>樂樂</td><td>小一</td><td class='n'>1.6</td><td class='n'>1.8</td><td class='n'>68%</td><td class='n red'>45%</td><td class='n red'>5/16</td><td class='n red'>30</td><td class='n'>11</td></tr><tr><td>安安</td><td>小一</td><td class='n'>1.6</td><td class='n'>1.6</td><td class='n'>68%</td><td class='n red'>39%</td><td class='n red'>2/23</td><td class='n red'>49</td><td class='n'>10</td></tr><tr><td>小宇</td><td>小二</td><td class='n'>1.6</td><td class='n'>2.0</td><td class='n'>62%</td><td class='n'>51%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>芯芯</td><td>小二</td><td class='n'>4.8</td><td class='n'>4.5</td><td class='n'>72%</td><td class='n'>59%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>皓皓</td><td>小三</td><td class='n'>3.6</td><td class='n'>3.3</td><td class='n'>70%</td><td class='n red'>43%</td><td class='n'>10/11</td><td class='n'>2</td><td class='n'>11</td></tr><tr><td>語晴</td><td>小三</td><td class='n'>3.6</td><td class='n'>3.9</td><td class='n'>75%</td><td class='n'>59%</td><td class='n'>10/11</td><td class='n'>1</td><td class='n'>11</td></tr><tr><td>子恩</td><td>小四</td><td class='n'>3.6</td><td class='n'>3.2</td><td class='n'>72%</td><td class='n'>55%</td><td class='n'>12/12</td><td class='n'>1</td><td class='n'>12</td></tr><tr><td>品妤</td><td>小四</td><td class='n'>5.8</td><td class='n'>5.6</td><td class='n'>80%</td><td class='n'>76%</td><td class='n'>12/12</td><td class='n'>1</td><td class='n'>12</td></tr><tr><td>柏翰</td><td>小五</td><td class='n'>5.6</td><td class='n'>6.2</td><td class='n'>80%</td><td class='n'>68%</td><td class='n'>10/10</td><td class='n'>0</td><td class='n'>10</td></tr><tr><td>安琪</td><td>小五</td><td class='n'>6.8</td><td class='n'>7.3</td><td class='n'>79%</td><td class='n'>72%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>承恩</td><td>小六</td><td class='n'>6.6</td><td class='n'>6.4</td><td class='n'>78%</td><td class='n'>66%</td><td class='n'>12/12</td><td class='n'>0</td><td class='n'>12</td></tr><tr><td>筠筠</td><td>小六</td><td class='n'>7.8</td><td class='n'>8.4</td><td class='n'>81%</td><td class='n'>76%</td><td class='n'>10/10</td><td class='n'>0</td><td class='n'>12</td></tr><tr><td>冠宇</td><td>國一</td><td class='n'>6.6</td><td class='n'>6.9</td><td class='n'>80%</td><td class='n'>73%</td><td class='n'>11/11</td><td class='n'>2</td><td class='n'>11</td></tr><tr><td>詩晴</td><td>國一</td><td class='n'>8.8</td><td class='n'>8.7</td><td class='n'>80%</td><td class='n'>67%</td><td class='n'>10/11</td><td class='n'>1</td><td class='n'>11</td></tr><tr><td>宥翔</td><td>國二</td><td class='n'>8.6</td><td class='n'>9.1</td><td class='n'>77%</td><td class='n'>58%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr></table><table><tr><th>暱稱</th><th>身分</th><th>設定程度</th><th>測出程度</th><th>答對</th><th>拼字</th><th>每日單字</th><th>放棄</th><th>天數</th></tr><tr><td>子晴</td><td>國二</td><td class='n'>9.8</td><td class='n'>10.2</td><td class='n'>83%</td><td class='n'>71%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>12</td></tr><tr><td>品睿</td><td>國三</td><td class='n'>9.6</td><td class='n'>9.8</td><td class='n'>83%</td><td class='n'>72%</td><td class='n'>11/11</td><td class='n'>1</td><td class='n'>11</td></tr><tr><td>欣妍</td><td>國三</td><td class='n'>10.8</td><td class='n'>11.1</td><td class='n'>82%</td><td class='n'>71%</td><td class='n'>10/10</td><td class='n'>1</td><td class='n'>11</td></tr><tr><td>家瑋</td><td>高一</td><td class='n'>10.6</td><td class='n'>10.2</td><td class='n'>80%</td><td class='n'>62%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>雨萱</td><td>高一</td><td class='n'>11.8</td><td class='n'>11.8</td><td class='n'>84%</td><td class='n'>71%</td><td class='n'>12/12</td><td class='n'>2</td><td class='n'>12</td></tr><tr><td>俊傑</td><td>高二</td><td class='n'>11.6</td><td class='n'>12.0</td><td class='n'>79%</td><td class='n'>68%</td><td class='n'>12/12</td><td class='n'>0</td><td class='n'>12</td></tr><tr><td>采妮</td><td>高二</td><td class='n'>10.6</td><td class='n'>10.4</td><td class='n'>76%</td><td class='n'>56%</td><td class='n'>9/10</td><td class='n'>1</td><td class='n'>10</td></tr><tr><td>博文</td><td>高三</td><td class='n'>13.0</td><td class='n'>12.7</td><td class='n'>86%</td><td class='n'>73%</td><td class='n'>12/12</td><td class='n'>1</td><td class='n'>11</td></tr><tr><td>曉薇</td><td>高三</td><td class='n'>13.0</td><td class='n'>12.7</td><td class='n'>88%</td><td class='n'>70%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>阿哲</td><td>大學生</td><td class='n'>11.0</td><td class='n'>11.2</td><td class='n'>81%</td><td class='n'>64%</td><td class='n'>9/9</td><td class='n'>1</td><td class='n'>9</td></tr><tr><td>Mia</td><td>上班族</td><td class='n'>10.0</td><td class='n'>9.8</td><td class='n'>79%</td><td class='n'>65%</td><td class='n'>10/10</td><td class='n'>0</td><td class='n'>10</td></tr><tr><td>志明</td><td>上班族</td><td class='n'>7.0</td><td class='n'>7.2</td><td class='n'>80%</td><td class='n'>75%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>12</td></tr><tr><td>淑芬</td><td>家長</td><td class='n'>6.0</td><td class='n'>5.8</td><td class='n'>79%</td><td class='n'>69%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>王伯伯</td><td>退休</td><td class='n'>4.0</td><td class='n'>3.9</td><td class='n'>74%</td><td class='n'>55%</td><td class='n'>11/11</td><td class='n'>0</td><td class='n'>11</td></tr><tr><td>Rina</td><td>設計師</td><td class='n'>11.5</td><td class='n'>11.6</td><td class='n'>84%</td><td class='n'>71%</td><td class='n'>10/10</td><td class='n'>0</td><td class='n'>10</td></tr></table></div>
+  <aside class="notes"><h4>講者備註</h4>「設定程度」「測出程度」都是年級量尺（1 = 小一、7 = 國一、10 = 高一、12 = 高三）。設定程度是 people.json 的英文程度，「測出程度」是最後 5 次程度小測的中位數。答對率含所有測驗。每日單字＝做完次數／開始次數。</aside>
+</section>
+
+</div></div>
+
+<div id="prog"></div>
+<div id="notes"></div>
+<div id="ctrl">
+  <span class="title">呼嚕小窩・數據報告與 300 人測試計畫</span>
+  <button id="btn-theme" title="深淺色">◐</button>
+  <button id="btn-notes" title="講者備註（N）">備註</button>
+  <button id="btn-full" title="全螢幕（F）">全螢幕</button>
+  <button id="btn-prev" aria-label="上一頁">‹</button>
+  <span id="count"></span>
+  <button id="btn-next" class="primary" aria-label="下一頁">›</button>
+</div>
+
+<script>
+(function(){
+const slides=[...document.querySelectorAll('.slide')], N=slides.length, deck=document.getElementById('deck');
+slides.forEach((s,i)=>{const p=document.createElement('div');p.className='pg';p.textContent=(i+1)+' / '+N;s.appendChild(p)});
+let cur=0, scrollMode=false;
+try{const h=parseInt(location.hash.slice(1));if(h>=1&&h<=N)cur=h-1}catch(e){}
+const notesEl=document.getElementById('notes');
+function showNotes(){const n=slides[cur].querySelector('aside.notes');notesEl.innerHTML=n?n.innerHTML:'<h4>講者備註</h4>這頁沒有備註。'}
+function fit(){
+  const want=window.innerWidth<760;
+  if(want!==scrollMode){scrollMode=want;document.body.classList.toggle('scroll',want);document.documentElement.classList.toggle('scroll',want);if(want)renderAll();else go(cur)}
+  if(!scrollMode){const s=Math.min((window.innerWidth-24)/1280,(window.innerHeight-52-24)/720);deck.style.transform='scale('+s+')'}
+}
+function go(i){
+  cur=Math.max(0,Math.min(N-1,i));
+  if(scrollMode)return;
+  slides.forEach((s,k)=>s.classList.toggle('on',k===cur));
+  document.getElementById('count').textContent=(cur+1)+' / '+N;
+  document.getElementById('prog').style.width=((cur+1)/N*100)+'%';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  showNotes(); renderIn(slides[cur]);
+}
+document.getElementById('btn-prev').onclick=()=>go(cur-1);
+document.getElementById('btn-next').onclick=()=>go(cur+1);
+document.getElementById('btn-notes').onclick=()=>notesEl.classList.toggle('open');
+function full(){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}}
+document.getElementById('btn-full').onclick=full;
+document.getElementById('btn-theme').onclick=()=>{
+  const r=document.documentElement,dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#1b1724';
+  r.setAttribute('data-theme',dark?'light':'dark');try{localStorage.setItem('pc-theme',r.getAttribute('data-theme'))}catch(e){}
+  rebuild();
+};
+try{const t=localStorage.getItem('pc-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}
+document.addEventListener('keydown',e=>{
+  if(scrollMode)return;
+  if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(N-1);
+  else if(e.key==='n'||e.key==='N')notesEl.classList.toggle('open');
+  else if(e.key==='f'||e.key==='F')full();
+});
+document.getElementById('viewport').addEventListener('click',e=>{if(!scrollMode&&!e.target.closest('canvas'))go(cur+(e.clientX<window.innerWidth/3?-1:1))});
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(scrollMode||tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(cur+(dx<0?1:-1));tx=null});
+window.addEventListener('resize',fit);
+
+/* charts: big type for projection */
+const charts={};
+const V=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(){
+  if(!window.Chart)return null;
+  const fs=scrollMode?14:28;
+  Chart.defaults.font.family='"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+  Chart.defaults.font.size=fs;Chart.defaults.font.weight=700;
+  Chart.defaults.color=V('--ink2');Chart.defaults.borderColor=V('--line');
+  Chart.defaults.maintainAspectRatio=false;Chart.defaults.animation=false;
+  Chart.defaults.plugins.legend.display=false;Chart.defaults.plugins.tooltip.enabled=true;
+  return {fs,acc:V('--acc'),acc2:V('--acc2'),good:V('--good'),warn:V('--warn'),ink:V('--ink'),line:V('--line'),blue:V('--blue')};
+}
+// draw value labels on bars / points
+const labels={id:'vl',afterDatasetsDraw(ch,a,o){const c=ch.ctx;c.save();c.fillStyle=o.color;c.font='900 '+o.size+'px "Noto Sans TC",sans-serif';c.textAlign='center';
+  ch.data.datasets.forEach((d,di)=>ch.getDatasetMeta(di).data.forEach((el,i)=>{const v=d.data[i];if(o.only&&!o.only.includes(i))return;c.fillText(v+(o.suffix||''),el.x,el.y-o.size*0.45)}));c.restore()}};
+const B={
+ 'c-grade':c=>{const pts=[{"x": 1.6, "y": 1.76}, {"x": 1.6, "y": 1.55}, {"x": 1.6, "y": 1.96}, {"x": 4.8, "y": 4.49}, {"x": 3.6, "y": 3.32}, {"x": 3.6, "y": 3.92}, {"x": 3.6, "y": 3.23}, {"x": 5.8, "y": 5.64}, {"x": 5.6, "y": 6.15}, {"x": 6.8, "y": 7.28}, {"x": 6.6, "y": 6.37}, {"x": 7.8, "y": 8.45}, {"x": 6.6, "y": 6.9}, {"x": 8.8, "y": 8.65}, {"x": 8.6, "y": 9.05}, {"x": 9.8, "y": 10.24}, {"x": 9.6, "y": 9.82}, {"x": 10.8, "y": 11.14}, {"x": 10.6, "y": 10.24}, {"x": 11.8, "y": 11.83}, {"x": 11.6, "y": 11.99}, {"x": 10.6, "y": 10.39}, {"x": 13, "y": 12.68}, {"x": 13, "y": 12.65}, {"x": 11.0, "y": 11.18}, {"x": 10.0, "y": 9.78}, {"x": 7.0, "y": 7.18}, {"x": 6.0, "y": 5.78}, {"x": 4.0, "y": 3.87}, {"x": 11.5, "y": 11.62}];
+   return {type:'scatter',data:{datasets:[{data:pts,backgroundColor:c.good,pointRadius:c.fs*0.4},{type:'line',data:[{x:1,y:1},{x:13,y:13}],borderColor:c.line,borderWidth:3,pointRadius:0,borderDash:[8,8]}]},
+   options:{scales:{x:{min:0,max:14,title:{display:true,text:'設定的程度（年級）',font:{size:c.fs*0.8}},grid:{color:c.line}},y:{min:0,max:14,title:{display:true,text:'測出的程度',font:{size:c.fs*0.8}},grid:{color:c.line}}}}}},
+ 'c-type':c=>({type:'bar',data:{labels:['看中選英','看英選中','聽音選義','拼字','聽音拼字'],datasets:[{label:'實際',data:[90.9,92.2,86.9,72.8,46.6],backgroundColor:[c.warn,c.warn,c.acc,c.acc,c.acc2],borderRadius:12,barPercentage:.8},{label:'遊戲預測',data:[85.6,85.5,84.1,72.4,77.9],backgroundColor:c.line,borderRadius:12,barPercentage:.8}]},
+   options:{layout:{padding:{top:c.fs*1.6}},plugins:{legend:{display:true,position:'top',align:'end'},vl:{color:c.ink,size:c.fs*0.9,suffix:''}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',stepSize:25},grid:{color:c.line}},x:{grid:{display:false}}}},plugins:[labels]}),
+ 'c-gate':c=>({type:'bar',data:{labels:['國小','國中','高中','成人'],datasets:[{data:[56,79,88,68],backgroundColor:[c.acc2,c.acc,c.acc,c.acc],borderRadius:12,barPercentage:.6}]},
+   options:{layout:{padding:{top:c.fs*1.6}},plugins:{vl:{color:c.ink,size:c.fs*1.3,suffix:'%'}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',stepSize:25},grid:{color:c.line},title:{display:true,text:'答對 6 題以上的比例',font:{size:c.fs*0.8}}},x:{grid:{display:false}}}},plugins:[labels]}),
+ 'c-mix':c=>({type:'bar',data:{labels:['小一二','小三～小六','國中','高中','成人'],datasets:[{data:[30,90,90,60,30],backgroundColor:[c.line,c.acc,c.acc,c.acc,c.line],borderRadius:12,barPercentage:.7}]},
+   options:{layout:{padding:{top:c.fs*1.6}},plugins:{vl:{color:c.ink,size:c.fs*1.1,suffix:' 人'}},scales:{y:{min:0,max:100,display:false},x:{grid:{display:false},ticks:{maxRotation:0,font:{size:c.fs*0.8}}}}},plugins:[labels]})
+};
+function make(id){const cv=document.getElementById(id);if(!cv||charts[id])return;const c=setup();if(!c)return;charts[id]=new Chart(cv,B[id](c))}
+function renderIn(el){el.querySelectorAll('canvas').forEach(cv=>make(cv.id))}
+function renderAll(){Object.keys(B).forEach(make)}
+function rebuild(){Object.keys(charts).forEach(k=>{charts[k].destroy();delete charts[k]});scrollMode?renderAll():renderIn(slides[cur])}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',rebuild);
+window.addEventListener('beforeprint',()=>{slides.forEach(s=>s.classList.add('on'));renderAll()});
+fit();if(!scrollMode)go(cur);
+})();
+</script>
+</body>
+</html>
