@@ -82,6 +82,29 @@ const Game = {
       delete it._place;
     }
   },
+  restoreRoomItems(S) {
+    const items = Array.isArray(S.items) ? S.items : [];
+    const unavailable = Array.isArray(S.unavailableRoomItems) ? S.unavailableRoomItems : [];
+    const all = [], seen = new Set();
+    let nextUid = Math.max(1, Number.isSafeInteger(S.nextUid) ? S.nextUid : 1);
+    for (const it of [...items, ...unavailable]) {
+      if (!it || typeof it.k !== 'string' || seen.has(it.uid)) continue;
+      seen.add(it.uid); all.push(it);
+      if (Number.isSafeInteger(it.uid)) nextUid = Math.max(nextUid, it.uid + 1);
+    }
+    // Keep unavailable furniture and its mounted items in the save for a compatible client.
+    const hidden = new Set(all.filter(it => !Object.hasOwn(ITEMS, it.k)).map(it => it.uid));
+    for (let changed = true; changed;) {
+      changed = false;
+      for (const it of all) if (it.p != null && hidden.has(it.p) && !hidden.has(it.uid)) {
+        hidden.add(it.uid); changed = true;
+      }
+    }
+    S.items = all.filter(it => !hidden.has(it.uid));
+    if (hidden.size) S.unavailableRoomItems = all.filter(it => hidden.has(it.uid));
+    else delete S.unavailableRoomItems;
+    S.nextUid = nextUid;
+  },
   load(snapshot) {
     let S = snapshot || null;
     const first = this.loadedFp == null; let raw0 = null;
@@ -107,7 +130,7 @@ const Game = {
       S.schema = SAVE_SCHEMA; S.appVersion = NOOK_VERSION;
     }
     for (const list of [S.todos, S.memos]) { const seen = new Set(); for (const x of list || []) { while (seen.has(x.id)) x.id++; seen.add(x.id); } }
-    S.items = S.items.filter(it => ITEMS[it.k]);
+    this.restoreRoomItems(S);
     this.S = S; this.fixPlacements();
   },
   save() {

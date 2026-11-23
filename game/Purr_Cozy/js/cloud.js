@@ -136,7 +136,17 @@ function saveSummary(S, local) {
     dev: !!(S.flags && S.flags.dev) || (local && deviceUsedDev()), legacy: !!(S.flags && S.flags.legacy),
   };
 }
-function isFreshSave(S) { return (S.lvl || 1) <= 1 && (S.xp || 0) < 30 && !Object.keys(S.vocab || {}).length && !((S.stats || {}).focusMin > 0) && !((S.stats || {}).todos > 0); }
+function roomSaveHash(S) {
+  const items = [...(S.items || []), ...(S.unavailableRoomItems || [])]
+    .map(i => [i.uid, i.k, i.x, i.y, i.p ?? null, i.dx ?? null, i.dy ?? null, !!i.flip, i.wall || ''])
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0]), 'en'));
+  return saveHash(JSON.stringify([items, Object.entries(S.inv || {}).sort(), S.wp, S.fl, S.view]));
+}
+function isFreshSave(S) {
+  return (S.lvl || 1) <= 1 && (S.xp || 0) < 30 && !Object.keys(S.vocab || {}).length &&
+    !((S.stats || {}).focusMin > 0) && !((S.stats || {}).todos > 0) &&
+    roomSaveHash(S) === roomSaveHash(Game.newState());
+}
 // merge rule: the newer save is the base (room layout, today's tasks, needs); progress is combined so nothing earned is lost
 // totals that only ever grow by playing, used to add up both devices' earnings after a simultaneous save
 function totalXp(S) { let t = S.xp || 0; for (let l = 1; l < (S.lvl || 1); l++) t += Game.need(l); return t; }
@@ -166,7 +176,17 @@ function mergeSaves(a, b, common, cloudBase) {
   M.vocab = M.vocab || {}; for (const w in o.vocab || {}) { const r = o.vocab[w], m = M.vocab[w]; if (!m || r[0] > m[0] || (r[0] === m[0] && r[1] > m[1])) M.vocab[w] = r.slice(); }
   const L = M.learn, OL = o.learn || {}; if (L) { L.streak = max(L.streak, OL.streak); L.best = max(L.best, OL.best); if ((OL.lastDone || '') > (L.lastDone || '')) L.lastDone = OL.lastDone; }
   if (L && OL.adaptive && (!L.adaptive || (OL.adaptive.at || 0) > (L.adaptive.at || 0))) L.adaptive = JSON.parse(JSON.stringify(OL.adaptive));
-  for (const k in o.inv || {}) M.inv[k] = max(M.inv[k], o.inv[k]);
+  // If the remote still has the synced room, only this device changed that layout.
+  // Copy its inventory together with the placed items so storage and placement stay consistent.
+  const syncedRoom = b.pv?.room;
+  if (cloudBase && syncedRoom && roomSaveHash(a) === syncedRoom && roomSaveHash(b) !== syncedRoom) {
+    for (const k of ['items', 'unavailableRoomItems', 'nextUid', 'inv', 'wp', 'fl', 'view']) {
+      if (b[k] === undefined) delete M[k];
+      else M[k] = JSON.parse(JSON.stringify(b[k]));
+    }
+  } else {
+    for (const k in o.inv || {}) M.inv[k] = max(M.inv[k], o.inv[k]);
+  }
   for (const k of ['ownWP', 'ownFL', 'ownViews', 'themes', 'pets']) M[k] = [...new Set([...(M[k] || []), ...(o[k] || [])])];
   if (!common) for (const k in o.stats || {}) if (typeof o.stats[k] === 'number') M.stats[k] = max(M.stats[k], o.stats[k]);
   if (M.life && o.life) {
@@ -256,12 +276,12 @@ function progressKey(S) {
   const v = Object.values(S.vocab || {}), pets = (S.zoo && S.zoo.pets) || [];
   // only things that change because you did something (no counters that move on their own, nothing reset by the 6 a.m. rollover)
   return saveHash(JSON.stringify([totalXp(S), S.coins || 0, v.length, v.reduce((n, r) => n + (r ? (r[0] || 0) * 1000 + (r[1] || 0) : 0), 0),
-    (S.items || []).map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, [(S.homeCare?.messes||[]).map(m=>[m.id,m.x,m.y,m.pet,m.at]),S.homeCare?.cleanedMesses||{}], S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
+    [...(S.items || []), ...(S.unavailableRoomItems || [])].map(i => [i.k, i.x, i.y, i.flip ? 1 : 0, i.p || 0, !!i.on, !!i.closed, !!i.soiled, !!i.fallen]), S.social?.status || '', S.social?.statusEditedAt || 0, S.settings || {}, S.playProgress || {}, [(S.homeCare?.messes||[]).map(m=>[m.id,m.x,m.y,m.pet,m.at]),S.homeCare?.cleanedMesses||{}], S.inv || {}, S.wp, S.fl, S.view, S.avatar || null,
     (S.music?.list || []).filter(e=>!e.builtin&&e.id!=='yt_nook'), (S.todos || []).map(t => [t.t, t.done ? 1 : 0]), (S.memos || []).map(m => [m.text,m.w,m.h,m.pin]), pets.map(p => [p.id, p.sp, p.name, p.bond || 0, p.blv || 0, p.lv || 0, p.xp || 0, p.home ? 1 : 0])]));
 }
 // 0.92.48: { at, by, note } written into the save by the back office (tools/admin.html)
 function adminNewer(rs, L) { const a = rs && rs.admin && rs.admin.at || 0, b = L && L.admin && L.admin.at || 0; return a > b; }
-function makeStamp(S, rev) { return { rev, fp: progressKey(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
+function makeStamp(S, rev) { return { rev, fp: progressKey(S), room: roomSaveHash(S), base: progressBase(S), dev: DEVICE_ID, at: Date.now() }; }
 // real progress made on this device since its stamp (no stamp: an older version's save, treated as unknown)
 function workSince(S) { return !S.pv || S.pv.fp !== progressKey(S); }
 function syncMeta(uid, v) { const k = 'pocketnook.sync.' + uid; try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
