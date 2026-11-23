@@ -234,8 +234,8 @@ i.cd-p{background:var(--card);border:3px solid var(--ink)}i.cd-a{background:var(
   <div class="tbl"><table id="t-grade-words"></table></div>
  </section></div>
 <div class="sub" data-sub="s-kinds"><section id="s-kinds"><h2>哪個入口學得最好</h2><p class="why">每個學習入口的答題量、答對率、完成率，以及「下次再遇到同一個字時答對率」（記得住的程度）。</p><div class="tbl"><table id="t-kinds"></table></div></section></div>
-<div class="sub" data-sub="s-drop"><section id="s-drop"><h2>在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題、什麼題型），以及怎麼離開的（改做別的學習、直接關掉遊戲、放著太久）。集中在某一步或某種題型，就代表那裡太難、太長或卡住。舊紀錄沒有記位置，改顯示「答完幾題後」。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div><h3 style="margin-top:16px">放棄時正在作答的題型</h3><p class="why">每種題型出現在畫面上的次數裡，有多少次玩家沒有作答就離開。某一種特別高（例如拼字），代表玩家是「看到這種題就走」，不是整個回合太長。</p><p class="note hidden" id="dropq-need"></p><div class="tbl"><table id="t-dropq"></table></div></section></div>
-<div class="sub" data-sub="s-retain"><section id="s-retain"><h2>留存與習慣</h2><p class="why">第一次學習後，隔天、第 2 週（第 7–13 天）、第 5 週（第 28–34 天）還回來學習的比例（依第一次學習的週分組），以及一週中什麼時段最多人學。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section></div>
+<div class="sub" data-sub="s-drop"><section id="s-drop"><h2>在哪裡放棄</h2><p class="why">沒有完成的回合停在哪一步（複習第幾張、測驗第幾題、什麼題型），以及怎麼離開的（改做別的學習、直接關掉遊戲、放著太久）。集中在某一步或某種題型，就代表那裡太難、太長或卡住。舊紀錄沒有記位置，改顯示「答完幾題後」。</p><div class="grid2"><div class="chart"><canvas id="c-drop"></canvas></div><div class="tbl"><table id="t-drop"></table></div></div><h3 style="margin-top:16px">放棄時正在作答的題型</h3><p class="why">離開率＝未作答就離開的題次 ÷（已作答題次＋未作答就離開的題次），只採用可追蹤的紀錄。</p><p class="note hidden" id="dropq-need"></p><div class="tbl"><table id="t-dropq"></table></div></section></div>
+<div class="sub" data-sub="s-retain"><section id="s-retain"><h2>留存與習慣</h2><p class="why">選取期間內第一次學習的玩家，再用完整紀錄查隔天、第 2 週（第 7–13 天）及第 5 週（第 28–34 天）的回訪。入口與版本套在首次學習，回訪可來自任何入口與版本。最新紀錄日暫不當作完整觀察日。</p><div class="grid2"><div class="tbl"><table id="t-retain"></table></div><div class="chart"><canvas id="c-hour"></canvas></div></div></section></div>
 <div class="sub" data-sub="s-typo"><section id="s-typo"><h2>貓咪打字（Meow Typo）</h2><p class="why">一次就拼對的比例、平均嘗試次數、直接看答案的比例，以及小貓搗蛋對結果的影響。</p><div class="kpis" id="typo-kpis"></div><p class="why" id="typo-note" style="margin-top:8px"></p><div class="tbl" style="margin-top:8px"><table id="t-typo"></table></div></section></div>
 <div class="sub" data-sub="s-help"><section id="s-help"><h2>提示與重聽</h2><p class="why">拼字題的提示分三種：無提示、首字母提示（一般拼字題）、遮字提示（故事的模糊標籤）。0.92.45 以前的紀錄把「首字母提示」和「無提示」都記成 0，無法區分，會單獨列一行。聽力題的重聽次數不含自動播放的第一次。</p><div class="tbl"><table id="t-help"></table></div></section></div></div>
    <div class="page hidden" data-page="behavior">
@@ -487,10 +487,10 @@ const isTestRec=r=>!!r.tester||whoOf(r)!=='real';
 const whoMatch=(w,r)=>w==='real'?!isTestRec(r):w==='test'?isTestRec(r):true;
 function who(r){return whoMatch($('f-who').value||'all',r)}
 function filtered(){
- const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
- const acct=$('f-acct')?$('f-acct').value:'',sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&(acct?r.acct===acct:who(r)));
+ const from=$('f-from').value?new Date($('f-from').value+'T00:00').getTime():-Infinity,to=$('f-to').value?new Date($('f-to').value+'T23:59:59.999').getTime():Infinity,kind=$('f-kind').value,app=$('f-app').value,lvl=+$('f-level').value||0,gb=$('f-grade').value,inG=a=>!gb||bandOf(a.gr||0)===gb;
+ const acct=$('f-acct')?$('f-acct').value:'',sess=S.raw.filter(r=>r.t0>=from&&r.t0<=to&&(!kind||r.kind===kind)&&(!app||r.app===app)&&(acct?r.pk===acct:who(r)));
  const ans=[],rev=[],typo=[];
- for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
+ for(const r of sess){for(const a of r.ans)if((!lvl||a.l===lvl)&&inG(a))ans.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0+(a.t||0)},a,{pk:r.pk}));for(const a of r.rev||[])if((!lvl||a.l===lvl)&&inG(a))rev.push(Object.assign({lid:r.lid,kind:r.kind,at:r.t0},a));for(const a of r.typo||[])if((!lvl||a.l===lvl)&&inG(a))typo.push(Object.assign({lid:r.lid,at:r.t0},a))}
  return {sess,ans,rev,typo}}
 
 // axes that count people or things never show fractions (there is no such thing as half a player)
@@ -564,11 +564,58 @@ function effDays(from,to,firstDay){const today=dayKey(Date.now()),y=new Date();y
 // 0.5.14: where an unfinished round stopped. learn-log.js (0.93.10+) writes 'how|step@i/n:type' (e.g. restart|quiz@3/8:spell);
 // older records have 'step@i/n' or just how (restart, gone, idle, left) with no position, so the answers given are counted instead
 const STOP_HOW={restart:'改做別的學習',gone:'直接關掉遊戲',left:'中途離開',idle:'放著太久沒動',pause:'中場休息'};
-function parseStop(r){const x=String(r.stop||'');const m=/^(?:([a-z]+)\|)?([a-z]+)@(\d+)\/(\d+)(?::(\w+))?/.exec(x);
+function parseStop(r){const x=String(r.stop||'');const m=/^(?:([a-z]+)\|)?([a-z]+)@(\d+)\/(\d+)(?::(\w+))?$/.exec(x);
  if(m)return{how:m[1]||'',step:m[2],i:+m[3],n:+m[4],type:m[5]||''};return{how:x||'gone',step:'',i:-1,n:0,type:'',done:(r.ans||[]).length}}
 function stopText(st){const where=st.step==='quiz'?'測驗第 '+(st.i+1)+' 題':st.step==='review'||st.step==='pause'?'複習第 '+(st.i+1)+' 張':st.step==='teach'?'新字卡第 '+(st.i+1)+' 張':st.step?st.step+' 第 '+(st.i+1)+' 步':'';
  const type=st.type?'（'+(QT[st.type]||st.type)+'）':'',how=STOP_HOW[st.how]||(st.how?st.how:'');
  if(!where)return (how||'不明')+(st.done!=null?(st.done?`（答完 ${st.done} 題後）`:'（還沒作答）'):'');return where+type+(how?'・'+how:'')}
+
+function quizExit(stop){
+ return stop.step==='quiz'&&stop.i<stop.n&&Object.hasOwn(QT,stop.type)?stop:null;
+}
+function questionExitTracking(history){
+ const tracked=new Map();
+ for(const r of history){
+  if(r.done||!r.app||!quizExit(parseStop(r)))continue;
+  if(!tracked.has(r.app))tracked.set(r.app,new Set());
+  tracked.get(r.app).add(r.kind);
+ }
+ return tracked;
+}
+function questionExitStats(sessions,tracked,questionFiltered=false){
+ const byType=Object.fromEntries(Object.keys(QT).map(q=>[q,{answered:0,quit:0,people:new Set()}]));
+ let compatible=0,legacy=0,unknown=0;
+ if(!questionFiltered)for(const r of sessions){
+  if(!tracked.get(r.app)?.has(r.kind)){legacy++;continue}
+  compatible++;
+  const answered=new Map();
+  let invalid=false;
+  for(const a of r.ans||[]){
+   if(!Object.hasOwn(QT,a.q))continue;
+   if(!Number.isInteger(a.i)||a.i<0||(answered.has(a.i)&&answered.get(a.i)!==a.q)){invalid=true;continue}
+   answered.set(a.i,a.q);
+  }
+  const stop=r.done?null:parseStop(r),exit=stop&&quizExit(stop);
+  if(invalid||(stop&&!exit&&!['review','teach','pause'].includes(stop.step))||
+     (exit&&answered.has(exit.i)&&answered.get(exit.i)!==exit.type)){
+   unknown++;continue;
+  }
+  for(const q of answered.values())byType[q].answered++;
+  if(exit&&!answered.has(exit.i)){
+   byType[exit.type].quit++;
+   if(r.pk)byType[exit.type].people.add(r.pk);
+  }
+ }
+ return {byType,questionFiltered,compatible,legacy,unknown,countable:compatible>0&&unknown===0};
+}
+function questionExitNote(stats){
+ if(stats.questionFiltered)return '離開紀錄沒有題目的程度或年級帶。使用這兩種篩選時，只顯示已記錄的作答次數。';
+ if(!stats.compatible)return '目前缺少可確認有追蹤離開題型的回合，無法計算各題型離開率。';
+ const coverage='可追蹤回合 '+fmt(stats.compatible)+' 個，另有 '+fmt(stats.legacy)+' 個回合無法確認追蹤格式。';
+ return coverage+(stats.unknown?' 其中 '+fmt(stats.unknown)+' 個可追蹤回合缺少完整的題目結果，暫不顯示離開率。':' 離開率只使用可追蹤的題次。');
+}
+const placementMode=r=>r.pl?.m||r.sub;
+const completedPlacement=(r,mode)=>r.kind==='grade'&&r.done&&placementMode(r)===mode;
 function analyse(){
  const {sess,ans,rev,typo}=filtered(),minN=+$('f-min').value||20,summary={};
  /* 1 overview */
@@ -783,7 +830,7 @@ function analyse(){
 
  /* 7 kinds */
  const K={};for(const r of sess){const k=K[r.kind]||(K[r.kind]={s:0,d:0,n:0,ok:0,ms:[],next:0,nextOk:0,dur:[]});k.s++;if(r.done)k.d++;if(r.dur>0)k.dur.push(r.dur)}
- const byUserWord=new Map();for(const a of ans.slice().sort((x,y)=>x.at-y.at)){const key=a.lid+'|'+a.w;(byUserWord.get(key)||byUserWord.set(key,[]).get(key)).push(a)}
+ const byUserWord=new Map();for(const a of ans.slice().sort((x,y)=>x.at-y.at)){const key=a.pk+'|'+a.w;(byUserWord.get(key)||byUserWord.set(key,[]).get(key)).push(a)}
  for(const a of ans){const k=K[a.kind];if(!k)continue;k.n++;k.ok+=a.ok;k.ms.push(a.ms)}
  for(const list of byUserWord.values())for(let i=0;i+1<list.length;i++){const a=list[i],b=list[i+1];if(b.at-a.at<36e5)continue;const k=K[a.kind];if(!k)continue;k.next++;k.nextOk+=b.ok}
  for(const t of typo){const k=K.typo;if(k){k.n++;k.ok+=t.ok&&!t.rv?1:0;k.ms.push(t.ms)}}
@@ -793,12 +840,19 @@ function analyse(){
 
  /* 8 drop-off */
  const undone=sess.filter(r=>!r.done),D={};for(const r of undone){const key=stopText(parseStop(r));D[key]=(D[key]||0)+1}
- // 0.5.14: which question type was on screen when the round was left, against how often that type was shown at all
- const QS={},QQ={};for(const a of ans)QS[a.q]=(QS[a.q]||0)+1;for(const r of undone){const st=parseStop(r);if(st.step==='quiz'&&st.type){const k=st.type,x=QQ[k]||(QQ[k]={n:0,ppl:new Set()});x.n++;x.ppl.add(r.pk)}}
- const qqRows=Object.keys(QT).filter(q=>QS[q]||QQ[q]).map(q=>{const quit=QQ[q]?QQ[q].n:0,shown=(QS[q]||0)+quit;return[QT[q],shown,quit,QQ[q]?QQ[q].ppl.size:0,shown?P(quit/shown):{v:-1,h:'–'}]}).sort((a,b)=>(b[4].v||0)-(a[4].v||0));
- need('dropq-need',Object.keys(QQ).length?'':'還沒有記錄題型的放棄紀錄：要等遊戲更新到記錄「停在哪一題、什麼題型」的版本（learn-log.js 0.93.10），新上傳的紀錄才會出現在這張表。');
- table('t-dropq',['題型','出現次數（作答＋在這題離開）','在這題離開','人數','離開率'],qqRows);
- summary.quitByType=Object.fromEntries(qqRows.map(r=>[r[0],{shown:r[1],quit:r[2],people:r[3]}]));
+ const answeredByType={};for(const a of ans)answeredByType[a.q]=(answeredByType[a.q]||0)+1;
+ const exits=questionExitStats(sess,questionExitTracking(S.raw),!!(+$('f-level').value||$('f-grade').value));
+ const missing={v:-1,h:'–'};
+ const quitByType=Object.keys(QT).filter(q=>answeredByType[q]||exits.byType[q].quit).map(q=>{
+  const x=exits.byType[q],shown=x.answered+x.quit,available=exits.countable&&shown>0;
+  return {q,answered:answeredByType[q]||0,shown:exits.countable?shown:null,
+   quit:available?x.quit:null,people:available?x.people.size:null,rate:available?x.quit/shown:null};
+ }).sort((a,b)=>(b.rate??-1)-(a.rate??-1));
+ need('dropq-need',questionExitNote(exits));
+ table('t-dropq',['題型','已記錄作答次數','可追蹤題次','在這題離開','離開人數','離開率'],
+  quitByType.map(x=>[QT[x.q],x.answered,x.shown??missing,x.quit??missing,x.people??missing,x.rate==null?missing:P(x.rate)]));
+ summary.quitByType=Object.fromEntries(quitByType.map(({q,...x})=>[QT[q],x]));
+ summary.questionExitCoverage={compatibleRounds:exits.compatible,unverifiedRounds:exits.legacy,unknownRounds:exits.unknown,available:exits.countable,note:questionExitNote(exits)};
  const dl=Object.entries(D).sort((a,b)=>b[1]-a[1]);
  chart('c-drop',{type:'bar',data:{labels:dl.slice(0,15).map(x=>x[0]),datasets:[{label:'回合數',data:dl.slice(0,15).map(x=>x[1]),backgroundColor:'#d9566f'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
  const dk2={};for(const r of sess){const k=dk2[r.kind]||(dk2[r.kind]={s:0,u:0});k.s++;if(!r.done)k.u++}
@@ -806,20 +860,42 @@ function analyse(){
  summary.dropOff={unfinishedSessions:undone.length,share:sess.length?+(undone.length/sess.length).toFixed(3):null,topStops:dl.slice(0,12).map(([k,n])=>({where:k,sessions:n})),byEntry:Object.fromEntries(Object.entries(dk2).map(([k,v])=>[k,+(v.u/v.s).toFixed(3)]))};
 
  /* 9 retention */
- const allSess=S.raw.filter(who),first=new Map(),active=new Map();let lastDay=0;for(const r of allSess){const d=dayNo(r.t0);if(d>lastDay)lastDay=d;if(!first.has(r.pk)||d<first.get(r.pk))first.set(r.pk,d);(active.get(r.pk)||active.set(r.pk,new Set()).get(r.pk)).add(d)}
+ const acct=$('f-acct').value,first=new Map(),active=new Map();
+ let lastDay=-Infinity;
+ for(const r of S.raw){
+  if(!r.t0)continue;
+  const d=dayNo(r.t0);
+  lastDay=Math.max(lastDay,d);
+  if(!(acct?r.pk===acct:who(r)))continue;
+  if(!first.has(r.pk)||r.t0<first.get(r.pk).t0)first.set(r.pk,r);
+  if(!active.has(r.pk))active.set(r.pk,new Set());
+  active.get(r.pk).add(d);
+ }
+ const observedThrough=Math.min(lastDay,dayNo(Date.now()))-1;
+ const from=$('f-from').value,to=$('f-to').value,kind=$('f-kind').value,app=$('f-app').value;
  const coh={};
- // back = active on any day in [from, to] after the first day; counted only when that window has fully passed
  const W3=[['d1',1,1],['w2',7,13],['w5',28,34]];
- // cohort week starts on Sunday of the local calendar (dayNo 0 = 1970-01-01, a Thursday)
- for(const [lid,d0] of first){if(!learners.has(lid))continue;const wk=dayNoKey(d0-((d0+4)%7));const c=coh[wk]||(coh[wk]={n:0});c.n++;const set=active.get(lid);
-  for(const [k,from,to] of W3){if(d0+to>lastDay)continue;c['e'+k]=(c['e'+k]||0)+1;let back=false;for(let x=d0+from;x<=d0+to;x++)if(set.has(x))back=true;if(back)c[k]=(c[k]||0)+1}}
+ for(const [pk,r] of first){
+  const key=dayKey(r.t0);
+  if((from&&key<from)||(to&&key>to)||(kind&&r.kind!==kind)||(app&&r.app!==app))continue;
+  const d0=dayNo(r.t0),wk=dayNoKey(d0-((d0+4)%7)),c=coh[wk]||(coh[wk]={n:0});
+  c.n++;
+  for(const [k,lo,hi] of W3){
+   if(d0+hi>observedThrough)continue;
+   c['e'+k]=(c['e'+k]||0)+1;
+   for(let d=d0+lo;d<=d0+hi;d++)if(active.get(pk).has(d)){c[k]=(c[k]||0)+1;break}
+  }
+ }
  const cr=Object.entries(coh).sort();
- table('t-retain',['第一次學習那週','人數','隔天回來','第 2 週有回來','第 5 週有回來'],cr.map(([w,c])=>[w,c.n,...W3.map(([k])=>c['e'+k]?P((c[k]||0)/c['e'+k]):{v:-1,h:'還沒到'})]));
+ table('t-retain',['第一次學習那週','人數','隔天回來','第 2 週有回來','第 5 週有回來'],cr.map(([w,c])=>[w,c.n,...W3.map(([k])=>{
+  const n=c['e'+k]||0,back=c[k]||0;
+  return n?{v:back/n,h:pct(back/n)+' <span class="muted">('+fmt(back)+' / '+fmt(n)+')</span>'}:{v:-1,h:'還沒到'};
+ })]));
  const H=Array.from({length:7},()=>Array(24).fill(0));for(const r of sess){const d=new Date(r.t0);H[d.getDay()][d.getHours()]++}
  const wd=['日','一','二','三','四','五','六'];
  chart('c-hour',{type:'bar',data:{labels:Array.from({length:24},(_,h)=>h+'時'),datasets:[{label:'平日',data:Array.from({length:24},(_,h)=>[1,2,3,4,5].reduce((s,d)=>s+H[d][h],0)),backgroundColor:'#8c5aa8'},{label:'週末',data:Array.from({length:24},(_,h)=>H[0][h]+H[6][h]),backgroundColor:'#d9566f'}]},options:{scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'回合數'}}}}});
  const sum=k=>cr.reduce((s,[,c])=>s+(c[k]||0),0),rate=k=>sum('e'+k)?+(sum(k)/sum('e'+k)).toFixed(3):null;
- summary.retention={nextDay:rate('d1'),week2:rate('w2'),week5:rate('w5'),cohorts:cr.slice(-8).map(([w,c])=>({week:w,learners:c.n}))};
+ summary.retention={nextDay:rate('d1'),week2:rate('w2'),week5:rate('w5'),cohorts:cr.slice(-8).map(([w,c])=>({week:w,learners:c.n,windows:Object.fromEntries(W3.map(([k])=>[k,{returned:c[k]||0,eligible:c['e'+k]||0}]))}))};
  summary.sessionsByHour=Array.from({length:24},(_,h)=>H.reduce((s,d)=>s+d[h],0));
 
  /* 10 typo */
@@ -842,18 +918,32 @@ function analyse(){
  summary.hintsAndFatigue=hp.map(r=>({case:r[0],n:r[1],accuracy:+(r[2].v||0).toFixed(3)}));
  /* 13 placement (kind 'grade', session field pl) */
  const PL_A=1.1,PL_OFF={en2zh:0,zh2en:.4,spell:.7},PL_G={en2zh:.25,zh2en:.25,spell:0};
- const GS=sess.filter(r=>r.kind==='grade'&&r.pl&&typeof r.pl.t==='number').sort((a,b)=>a.t0-b.t0);
+ const GS=sess.filter(r=>r.kind==='grade'&&r.done&&r.pl&&typeof r.pl.t==='number').sort((a,b)=>a.t0-b.t0);
  const byP={};for(const r of GS)(byP[r.pk]||(byP[r.pk]=[])).push(r);
  const pls=Object.keys(byP),latest=pls.map(k=>byP[k][byP[k].length-1]),firsts=pls.map(k=>byP[k][0]);
  const med=a=>median(a),gOf=t=>Math.max(1,Math.min(12,Math.round(t)));
  const declared=latest.filter(r=>r.pl.d>0),agree=declared.filter(r=>Math.abs(gOf(r.pl.t)-r.pl.d)<=1).length;
- // daily completion: players active on a day vs players with a grade session that day (days after their first placement)
- const actD={},gradeD={};for(const r of sess){const k=dayKey(r.t0);(actD[k]||(actD[k]=new Set())).add(r.pk);if(r.kind==='grade')(gradeD[k]||(gradeD[k]=new Set())).add(r.pk)}
- const firstDay={};for(const k of pls)firstDay[k]=dayKey(byP[k][0].t0);
- const dkeys=Object.keys(actD).sort().slice(-30),comp=dkeys.map(k=>{const el=[...actD[k]].filter(l=>firstDay[l]&&firstDay[l]<k);return{k,n:el.length,ok:el.filter(l=>gradeD[k]&&gradeD[k].has(l)).length}}).filter(x=>x.n>0);
- const compAll=comp.reduce((s,x)=>s+x.ok,0)/Math.max(1,comp.reduce((s,x)=>s+x.n,0));
+ // Historical first placements determine eligibility even when the selected dates start later.
+ const actD={},gradeD={},firstDay={};
+ for(const r of S.raw){
+  if(r.kind!=='grade'||!r.done||!r.t0)continue;
+  const k=dayKey(r.t0),mode=placementMode(r);
+  if(mode==='first'&&(!firstDay[r.pk]||k<firstDay[r.pk]))firstDay[r.pk]=k;
+  if(mode==='daily')(gradeD[k]||(gradeD[k]=new Set())).add(r.pk);
+ }
+ for(const r of sess){
+  const k=dayKey(r.t0);
+  (actD[k]||(actD[k]=new Set())).add(r.pk);
+ }
+ const comp=Object.keys(actD).sort().map(k=>{
+  const eligible=[...actD[k]].filter(pk=>firstDay[pk]&&firstDay[pk]<k);
+  return {k,n:eligible.length,ok:eligible.filter(pk=>gradeD[k]?.has(pk)).length};
+ }).filter(x=>x.n>0);
+ const compAll=comp.length?comp.reduce((s,x)=>s+x.ok,0)/comp.reduce((s,x)=>s+x.n,0):null;
  const grown=pls.map(k=>({first:byP[k][0],last:byP[k][byP[k].length-1]})).filter(x=>x.last.t0-x.first.t0>=7*864e5).map(x=>x.last.pl.t-x.first.pl.t);
  $('grade-kpis').innerHTML=GS.length?[['有程度資料的玩家',fmt(pls.length)],['搬家日（首測）',fmt(GS.filter(r=>r.pl.m==='first').length)],['每日小測回合',fmt(GS.filter(r=>r.pl.m==='daily').length)],['每人測驗次數（中位數）',fmt(Math.round(median(pls.map(k=>byP[k].length))))+' 次'],['程度中位數',latest.length?GRADE_NAME(gOf(med(latest.map(r=>r.pl.t)))):'–'],['自填 vs 實測 ±1 內',declared.length?pct(agree/declared.length)+` <small>(${declared.length})</small>`:'–'],['每日小測完成率',comp.length?pct(compAll):'–'],['7 天以上的成長（平均）',grown.length?(grown.reduce((a,b)=>a+b,0)/grown.length>=0?'+':'')+(grown.reduce((a,b)=>a+b,0)/grown.length).toFixed(2)+` <small>年級 (${grown.length} 人)</small>`:'–']].map(([a,b])=>`<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join(''):'<p class="muted">還沒有程度測驗的紀錄（需要 0.92.46 以上的遊戲版本）。</p>';
+ if(!GS.length&&comp.length)$('grade-kpis').insertAdjacentHTML('beforeend','<div class="kpi"><b>'+pct(compAll)+'</b><span>每日小測完成率</span></div>');
+ summary.dailyPlacementCompletion={rate:compAll,eligible:comp.reduce((n,d)=>n+d.n,0),completed:comp.reduce((n,d)=>n+d.ok,0)};
  const G12=Array.from({length:12},(_,i)=>i+1),g12l=G12.map(g=>GRADE_NAME(g));
  chart('c-grade-dist',{type:'bar',data:{labels:g12l,datasets:[{label:'實測（最新）',data:G12.map(g=>latest.filter(r=>gOf(r.pl.t)===g).length),backgroundColor:'#8c5aa8'},{label:'自填年級',data:G12.map(g=>latest.filter(r=>r.pl.d===g).length),backgroundColor:'#d9566fcc'}]},options:{scales:{y:{title:{display:true,text:'人數'}}}}});
  const DEC={};for(const r of latest){const k=r.pl.d>0?r.pl.d:0;(DEC[k]||(DEC[k]=[])).push(r.pl.t)}
@@ -936,8 +1026,8 @@ function md(src){const lines=esc(src).split('\n'),out=[];let list=null,tbl=null;
 
 
 /* ================= 後台：登入、角色、頁面切換、帳號管理、操作紀錄 ================= */
-const ADMIN_VERSION='0.5.15';
-const CHANGELOG=[['0.5.15','2026/11/20','三個小修正：程度挑戰賽選「全部」時，真實玩家和測試帳號各自排名（和遊戲一樣），名次和「榜外」不再被測試帳號擠掉；「訪客 N」改成依第一次出現在資料裡的時間編號，每一頁都是同一個號碼；複製網址失敗時的備用視窗恢復正常。'],['0.5.14','2026/11/20','放棄點看得出「停在哪種題型」：遊戲（learn-log.js 更新後）中途離開或改做別的學習時，會記下停在第幾題、是什麼題型，例如「測驗第 4 題（拼字）・改做別的學習」。「在哪裡放棄」新增「放棄時正在作答的題型」表（每種題型出現時有多少比例在這一題離開）；營運報告新增「在某種題型前放棄」判讀。舊紀錄沒有位置時，改顯示「答完幾題後」。'],['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
+const ADMIN_VERSION='0.5.16';
+const CHANGELOG=[['0.5.16','2026/11/23','修正題型離開率的資料覆蓋與分母、留存的首學分組、小測完成判定、使用行為人天統計，以及跨裝置的單字複習配對。'],['0.5.15','2026/11/20','三個小修正：程度挑戰賽選「全部」時，真實玩家和測試帳號各自排名（和遊戲一樣），名次和「榜外」不再被測試帳號擠掉；「訪客 N」改成依第一次出現在資料裡的時間編號，每一頁都是同一個號碼；複製網址失敗時的備用視窗恢復正常。'],['0.5.14','2026/11/20','放棄點看得出「停在哪種題型」：遊戲（learn-log.js 更新後）中途離開或改做別的學習時，會記下停在第幾題、是什麼題型，例如「測驗第 4 題（拼字）・改做別的學習」。「在哪裡放棄」新增「放棄時正在作答的題型」表（每種題型出現時有多少比例在這一題離開）；營運報告新增「在某種題型前放棄」判讀。舊紀錄沒有位置時，改顯示「答完幾題後」。'],['0.5.13','2026/11/20','讀取量大幅減少：學習紀錄、使用行為、玩家存檔第一次讀完後存在這台電腦的瀏覽器，之後只向 Firebase 要「上次之後」新上傳或有更新的資料（「資料與匯出」可以清除快取、全部重新讀取；登出時會清除快取）。玩家名單不再保留完整存檔，打開單一玩家時才讀。操作紀錄只在進入頁面或按「重新整理」時讀取，搜尋不再每打一個字就讀一次。「平均每天學習人數」只算有資料、而且已經過完的日子（原本連資料開始前和今天都算進去，數字被低估）。營運報告的每日基準改成「前 7 天平均」，題型答對率的基準加起來不到 300 題就不判斷，避免假警報。'],['0.5.12','2026/11/20','新增淺色／深色切換：右上角（登入畫面也有）的按鈕可以切換，選擇會記在這台電腦的瀏覽器；沒選過就跟著系統設定。切換時圖表會用新的顏色重畫。深色模式下問題回報選中的那一列、營運報告的燈號標籤也改成看得清楚的顏色。'],['0.5.11','2026/11/13','營運報告改用 0:00 換日（原本用遊戲任務刷新的早上 6 點），每日報告的 0–23 時圖表就是當天的 0 點到 23 點；每週報告從週一 0:00 起算。'],['0.5.10','2026/11/12','玩家帳號頁新增「和測試帳號互加好友」：選一個帳號，直接和所有測試帳號成為好友（可選測試帳號之間也互加）。只有最高管理者能用。'],['0.5.09','2026/11/12','模擬學生的裝置代號其實是 test-simNN 開頭，後台原本認不出來；現在不用等玩家名單也會顯示「測試-暱稱」。'],['0.5.08','2026/11/12','玩家名稱：還沒讀過名字的帳號，後台會自動從玩家名片讀取（每人一次）；模擬學生一律顯示「測試-暱稱」。「帳號」選單照名稱排序，真實玩家在前、測試帳號在後。不再出現一整排「名字還沒讀取」。'],['0.5.07','2026/11/12','所有「對象」選單統一成「全部（真人與測試帳號）／真實玩家／測試帳號」，預設是全部：儀表板與學習分析的篩選、營運報告、使用行為、程度挑戰賽（全部會同時讀兩個榜）、問題回報、玩家帳號。30 位模擬學生算在測試帳號裡。'],['0.5.06','2026/11/12','角色與權限：可以新增自己的角色，在每一頁勾選「查詢」或「修改」（伺服器規則同步把關，只能指派不超過自己權限的角色）。玩家帳號新增「封停與踢下線」：封停（可設期限、原因，玩家看得到）、解除、所有裝置立刻登出。報告與名單裡，30 位模擬學生顯示成「測試-暱稱」，沒登入的玩家顯示成「訪客 1、訪客 2」；放棄點改成「測驗第 4 題」這種說法。'],['0.5.05','2026/11/12','新增「營運報告」頁：每日／每週報告。用 21 條判讀規則自動整理這一天／這一週的參與、學習量、學習品質、體驗、留存，列出要處理和要注意的重點、判讀方式、下一步要觀察或調整什麼，以及要關心的個別玩家；可以複製成文字或下載。'],['0.5.04','2026/11/11','新增「問題回報」頁：看玩家在遊戲裡送出的回報（類型、玩家的答案和留言、版本、裝置、當時的畫面和題目、截圖），可以篩選、改處理狀態、寫備註、下載 CSV、複製成文字給 AI 整理。'],['0.5.03','2026/11/10','學習分析「模型校正」改成先講結論：一句話判讀、各題型「遊戲猜的 vs 實際」對照、依預測分組（一次看一種題型）、每週變化、條列的調整建議與各程度表；原本的統計指標、偏差圖、預測分布、各技能／年級帶／入口表與修正公式收在「進階數據」。玩家帳號：批次建立時可一起建立模擬控制帳號、套用模擬人物暱稱。圖表：長條＋折線時折線一律畫在上層，雙軸圖刻度帶單位。深色／淺色模式：主要按鈕、目前所在的選單、頁籤的文字改成和底色相反的顏色；太淡的背景長條、熱度表數字、圖上的預測點與線都改成兩種模式都看得清楚的顏色（所有頁面文字對比 ≥ 3:1）。'],['0.5.02','2026/11/07','儀表板、學習分析、使用行為都可以選期間：過去 7 天、一週（週日起）、過去 30 天、一個月、過去 90 天、過去一年或自訂（最短 7 天、最長 1 年，◀ ▶ 前後切換），超過 92 天改成每週一根。人數一律分成「不重複人數」和「人次」，人數的座標軸只有整數。學習分析：同一個人以登入帳號計算；聽寫、遺忘曲線、題目難度標準在資料不夠時說明原因和目前的量。使用行為重寫（需要遊戲 0.92.49）：音樂以真的在播放的分鐘計算、時間分配每分鐘只算正在用的那件事、名稱和遊戲一致、上線時段可看人數或分鐘、每位玩家用「主要在做／來的節奏／陪伴」描述。新增「程度挑戰賽」頁：每週成績分布、各階突破比例、完整排行與 CSV。'],['0.5.01','2026/11/07','玩家帳號：列出所有玩家、查看與修改存檔（先備份、玩家端自動採用）、備份還原、原始 JSON；建立玩家帳號與批次建立測試帳號（下載 accounts.json 給模擬程式）。使用行為：每人每天的遊玩摘要（時段、功能時間、小遊戲、寵物、音樂、佈置），全體與單一玩家並存檢視。學習分析可以只看單一帳號；測試帳號預設排除。'],['0.5.0','2026/11/06','後台改版：左側功能選單、帳號與權限（最高管理者／管理者／分析者）、操作紀錄、Email 登入與應用程式內瀏覽器相容、程度測驗分析頁、Meow Typo 單字清單修正、自適應模型校正圖表重做。']];
 // 0.5.06 permissions: every role is a list of tokens「頁面.v」(查詢) /「頁面.e」(修改). firestore.rules checks the same tokens.
 const PERM_PAGES=[['dashboard','儀表板','查看',''],['oprep','營運報告','查看',''],['analysis','學習分析','查看',''],['behavior','使用行為','查看',''],
  ['contest','程度挑戰賽','查看','刪除成績'],['reports','問題回報','查看','改處理狀態、寫備註'],['ai','AI 報告','產生報告',''],['data','資料與匯出','查看、下載','刪除學習紀錄（刪除問題回報也需要）'],
@@ -1446,19 +1536,26 @@ Object.assign(Admin,{
   for(const r of rows){const a=accOf.get(r.lid);r.pk=r.acct||(a&&a.size===1?[...a][0]:'anon:'+r.lid);r.v2=r.v>=2&&typeof r.vis==='number'}
   B.raw=rows;B.loaded=true;B.range=B.range||rangeCtl('bh',()=>this.renderBehavior(),()=>spanOf(B.raw.map(r=>r.d)),'7');B.range.reset();
   const v1=rows.filter(r=>!r.v2).length;
-  $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要（人‧天）、${fmt(new Set(rows.map(r=>this.keyOf(r))).size)} 位不重複玩家`+(v1?`；其中 ${fmt(v1)} 份是 0.92.48 的舊格式（只記錄視窗開著的時間，時間分配與音樂不採用）`:'');this.renderBehavior()},
+  $('bh-note').textContent=`${label}：${fmt(rows.length)} 份每日摘要、${fmt(new Set(rows.map(r=>this.keyOf(r))).size)} 位不重複玩家`+(v1?`；其中 ${fmt(v1)} 份是 0.92.48 的舊格式（只記錄視窗開著的時間，時間分配與音樂不採用）`:'');this.renderBehavior()},
  bhRows(user){const from=$('bh-from').value,to=$('bh-to').value,w=$('bh-who').value;
   return B.raw.filter(r=>(!from||r.d>=from)&&(!to||r.d<=to)&&(user?this.keyOf(r)===user:true)&&whoMatch(w||'all',r))},
  // totals for one player or everyone; every count also keeps who did it, so charts can say "N 次（M 人）"
- bhSum(rows){const t={vis:0,min:0,mus:0,focus:0,sess:0,songs:0,pd:rows.length,v2:0,users:new Set(),act:{},actU:{},musU:new Set(),focusU:new Set(),cells:Array.from({length:7},()=>Array.from({length:24},()=>({m:0,u:new Set()}))),byB:{},firstD:{},lastD:{}};
+ bhSum(rows){const t={vis:0,min:0,mus:0,focus:0,sess:0,songs:0,pd:0,v2:0,visV2:0,minV2:0,personDays:new Map(),users:new Set(),act:{},actU:{},musU:new Set(),focusU:new Set(),cells:Array.from({length:7},()=>Array.from({length:24},()=>({m:0,u:new Set()}))),byB:{},firstD:{},lastD:{}};
   for(const k of ['mini','pet','furn','fp','win','soc'])t[k]={},t[k+'U']={};
   for(const r of rows){const u=this.keyOf(r),vis=r.v2?r.vis:(r.min||0);t.users.add(u);t.sess+=r.sess||0;t.vis+=vis;t.min+=r.min||0;
    if(!t.firstD[u]||r.d<t.firstD[u])t.firstD[u]=r.d;if(!t.lastD[u]||r.d>t.lastD[u])t.lastD[u]=r.d;
-   const bk=B.range?B.range.bucket(r.d):r.d,b=t.byB[bk]||(t.byB[bk]={u:new Set(),pd:0,vis:0});b.u.add(u);b.pd++;b.vis+=vis;
-   if(r.v2){t.v2++;t.mus+=r.mus||0;t.focus+=r.focus||0;t.songs+=r.songs||0;if((r.mus||0)>=1)t.musU.add(u);if((r.focus||0)>=1)t.focusU.add(u);
+   const key=JSON.stringify([u,r.d]),bk=B.range?B.range.bucket(r.d):r.d;
+   const b=t.byB[bk]||(t.byB[bk]={u:new Set(),pd:0,vis:0});
+   let pd=t.personDays.get(key);
+   if(!pd){pd={date:r.d,vis:0,v2:false};t.personDays.set(key,pd);b.pd++}
+   pd.vis+=vis;
+   b.u.add(u);b.vis+=vis;
+   if(r.v2){pd.v2=true;t.visV2+=vis;t.minV2+=r.min||0;t.mus+=r.mus||0;t.focus+=r.focus||0;t.songs+=r.songs||0;if((r.mus||0)>=1)t.musU.add(u);if((r.focus||0)>=1)t.focusU.add(u);
     for(const [a,m] of Object.entries(r.wt||{})){t.act[a]=(t.act[a]||0)+m;if(m>=1)(t.actU[a]||(t.actU[a]=new Set())).add(u)}}
    const dw=new Date(r.d+'T12:00').getDay();for(const [hh,m] of Object.entries(r.h||{})){const c=t.cells[dw][+hh];if(!c)continue;c.m+=m;if(m>=1)c.u.add(u)}
    for(const k of ['mini','pet','furn','fp','win','soc'])for(const [a,n] of Object.entries(r[k]||{})){t[k][a]=(t[k][a]||0)+n;(t[k+'U'][a]||(t[k+'U'][a]=new Set())).add(u)}}
+  t.pd=t.personDays.size;
+  t.v2=[...t.personDays.values()].filter(d=>d.v2).length;
   return t},
  // a description a person would write: what they mostly do, how often and how long they come, what keeps them company
  styleOf(t,periodDays){
@@ -1468,7 +1565,7 @@ Object.assign(Admin,{
   const days=t.pd,rate=days/Math.max(1,periodDays),perVisit=t.sess?t.vis/t.sess:0,visitsDay=days?t.sess/days:0;
   const often=days<=1?'只來過 1 天':rate>=.7?'幾乎每天':rate>=.35?'常常來':rate>=.12?'偶爾來':'很少來';
   const how=visitsDay>=3&&perVisit<12?'、一天開很多次、每次很短':perVisit>=60?'、一次待很久':perVisit<5&&t.sess?'、每次只看一下':'';
-  const company=[];if(t.v2&&t.vis>0){if(t.mus/t.vis>=.5)company.push('邊聽音樂');if(t.focus/t.vis>=.3)company.push('開著番茄鐘')}
+  const company=[];if(t.v2&&t.visV2>0){if(t.mus/t.visV2>=.5)company.push('邊聽音樂');if(t.focus/t.visV2>=.3)company.push('開著番茄鐘')}
   return {what,rhythm:often+how,company:company.join('、')}},
  renderBehavior(){if(!B.loaded)return;const all=this.bhRows(''),users=[...new Set(all.map(r=>this.keyOf(r)))];
   const sel=$('bh-user'),cur=B.sel&&users.includes(B.sel)?B.sel:'';B.sel=cur;
@@ -1477,10 +1574,10 @@ Object.assign(Admin,{
   const kpi=(v,l,sub)=>`<div class="kpi"><b>${v}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`,n=x=>fmt(Math.round(x)),per=(x,d)=>d?n(x/d):'–',pc=(x,d)=>d?Math.round(x/d*100)+'%':'–';
   const nU=T.users.size,st=cur?this.styleOf(T,PD):null;
   $('bh-kpis').innerHTML=(cur?kpi(esc(this.nameOf(cur)),'玩家',esc(st.what+(st.company?'・'+st.company:'')))+kpi(n(T.pd)+' 天','期間內上線',`共 ${PD} 天・${esc(st.rhythm)}`)
-    :kpi(n(nU),'不重複玩家')+kpi(n(T.pd),'人次（人‧天）',(()=>{const E=effDays($('bh-from').value,$('bh-to').value,(spanOf(B.raw.map(r=>r.d))||[])[0]),c=rows.filter(r=>r.d>=E.a&&r.d<=E.b).length;return `平均每天 ${fmt(c/E.n,1)} 人（${E.partial?'今天':E.n+' 天'}）`})()))
+    :kpi(n(nU),'不重複玩家')+kpi(n(T.pd),'人次（人‧天）',(()=>{const E=effDays($('bh-from').value,$('bh-to').value,(spanOf(B.raw.map(r=>r.d))||[])[0]),c=[...T.personDays.values()].filter(d=>d.date>=E.a&&d.date<=E.b).length;return `平均每天 ${fmt(c/E.n,1)} 人（${E.partial?'今天':E.n+' 天'}）`})()))
    +kpi(n(T.sess),'打開遊戲次數',`平均每次 ${per(T.vis,T.sess)} 分鐘`)
    +kpi(per(T.vis,T.pd)+' 分','每人每天在線',`其中主動操作 ${pc(T.min,T.vis)}`)
-   +kpi(n(T.mus)+' 分','音樂播放',(cur?'':`${n(T.musU.size)} 人有聽・`)+`占在線 ${pc(T.mus,T.vis)}・${n(T.songs)} 首`)
+   +kpi(n(T.mus)+' 分','音樂播放',(cur?'':`${n(T.musU.size)} 人有聽・`)+`占在線 ${pc(T.mus,T.visV2)}・${n(T.songs)} 首`)
    +kpi(n(T.focus)+' 分','番茄鐘計時',cur?'':`${n(T.focusU.size)} 人用過`)
    +kpi(n(Object.values(T.mini).reduce((a,b)=>a+b,0))+' 局','小遊戲',cur?'':`${n(new Set(Object.values(T.miniU).flatMap(s=>[...s])).size)} 人玩過`);
   // per day (or per week for long periods): people and minutes
@@ -1498,7 +1595,7 @@ Object.assign(Admin,{
   chart('c-bh-share',{type:'bar',data:{labels:acts.map(k=>BACT[k]+(cur?'':`（${(A.actU[k]||new Set()).size} 人）`)),datasets:[{label:cur?'這位玩家 %':'全體 %',data:share(T),backgroundColor:acts.map(k=>BCOL[k])},...(cur?[{label:'全體 %',data:share(A),backgroundColor:'#ddd'}]:[])]},options:{indexAxis:'y',plugins:{legend:{display:!!cur}},scales:{x:{beginAtZero:true,max:100,title:{display:true,text:'主動操作時間的占比（%）'}}}}});
   $('bh-share-note').textContent=T.v2?'':'這段期間只有 0.92.48 舊格式的資料，沒有可用的時間分配。';
   // background company: per person-day minutes
-  const bg=t=>[t.vis,t.min,t.mus,t.focus].map(x=>t.v2?Math.round(x/Math.max(1,t.v2)):0);
+  const bg=t=>[t.visV2,t.minV2,t.mus,t.focus].map(x=>t.v2?Math.round(x/t.v2):null);
   chart('c-bh-bg',{type:'bar',data:{labels:['在線（畫面開著）','主動操作','音樂播放中','番茄鐘計時中'],datasets:[{label:cur?'這位玩家':'全體',data:bg(T),backgroundColor:['#9b7bbd','#8c5aa8','#3a7bd5','#6b7a8f']},...(cur?[{label:'全體',data:bg(A),backgroundColor:'#ddd'}]:[])]},options:{plugins:{legend:{display:!!cur}},scales:{y:{beginAtZero:true,title:{display:true,text:'分鐘（每人每天平均）'}}}}});
   // weekday × hour (Sunday first, like the week picker)
   const people=B.heat==='people',val=c=>people?c.u.size:Math.round(c.m),mx=Math.max(1,...T.cells.flat().map(val));
@@ -1646,7 +1743,7 @@ const OP_RULES=[
  ['quality','難字','本期答對率比「同程度、同題型」的平均低 25 個百分點以上的字。每日至少 12 次、每週至少 20 次作答。','列出最多 6 個：要注意'],
  ['quality','易混淆','選擇題的「答案 → 被選成的錯字」。每日至少 4 次、每週至少 6 次，且占這個字作答的 15% 以上。','列出：參考（可改干擾選項或做專題）'],
  ['exp','回合完成率','每個入口有多少回合沒做完。每日單字至少 10 個回合才判斷；放棄點有 40% 以上集中在同一步也會列出。','每日單字完成率低於 70%：要注意｜集中在同一步：要注意'],
- ['exp','看到某種題型就離開','（遊戲 0.93.10 起記錄離開時的題型）某種題型出現時，沒作答就離開的比例。','同一種題型 ≥ 5 次且 ≥ 10%：要注意'],
+ ['exp','看到某種題型就離開','只採用可追蹤題型的回合，比較未作答就離開的題次與總可追蹤題次。','同一種題型 ≥ 5 次且 ≥ 10%：要注意'],
  ['exp','作答時間','每題作答時間的中位數和基準比。','慢 30% 以上：要注意'],
  ['exp','疑似亂按','選擇題 0.7 秒內作答的比例。至少 100 題。','8% 以上：要注意（列出最多的玩家）'],
  ['exp','新版本','本期開始出現的版本，和舊版本比答對率、完成率、作答時間、問題回報。新版本至少 30 題才比較。','答對率低 5 點、完成率低 10 點、作答時間慢 30% 以上：要注意'],
@@ -1665,15 +1762,15 @@ Object.assign(Admin,{
   const all=[...new Set(sess.map(r=>r.gd))].sort();
   OP.idx={sess,days,first,lo:all[0]||'',hi:all[all.length-1]||''};OP.idxKey=key;return OP.idx},
  // everything the rules need for one period [a, b] (game-day keys, inclusive)
- opStats(a,b){const I=this.opIndex(),sess=I.sess.filter(r=>r.gd>=a&&r.gd<=b),st={a,b,sess,ppl:new Set(),pd:new Set(),ans:[],kind:{},q:{},ver:{},lang:{},words:{},pairs:{},drop:{},perP:{},streak:{},quitQ:{},shownQ:{}};
+ opStats(a,b){const I=this.opIndex(),sess=I.sess.filter(r=>r.gd>=a&&r.gd<=b),st={a,b,sess,ppl:new Set(),pd:new Set(),ans:[],kind:{},q:{},ver:{},lang:{},words:{},pairs:{},drop:{},perP:{},streak:{}};
   for(const r of sess){const p=r.pk;st.ppl.add(p);st.pd.add(p+'|'+r.gd);
-   const K=st.kind[r.kind]||(st.kind[r.kind]={s:0,done:0,n:0,ok:0,ppl:new Set(),donePpl:new Set()});K.s++;K.ppl.add(p);if(r.done){K.done++;K.donePpl.add(p)}else{const P0=parseStop(r),stp=P0.step?(P0.how?P0.how+'|':'')+P0.step+'@'+P0.i+'/0'+(P0.type?':'+P0.type:''):String(r.stop||'gone').replace(/\/\d+$/,'');if(P0.step==='quiz'&&P0.type){const Qq=st.quitQ[P0.type]||(st.quitQ[P0.type]={n:0,ppl:new Set()});Qq.n++;Qq.ppl.add(p)}const D=st.drop[r.kind]||(st.drop[r.kind]={});D[stp]=(D[stp]||0)+1}
+   const K=st.kind[r.kind]||(st.kind[r.kind]={s:0,done:0,n:0,ok:0,ppl:new Set(),donePpl:new Set()});K.s++;K.ppl.add(p);if(r.done){K.done++;K.donePpl.add(p)}else{const P0=parseStop(r),stp=P0.step?(P0.how?P0.how+'|':'')+P0.step+'@'+P0.i+'/0'+(P0.type?':'+P0.type:''):String(r.stop||'gone').replace(/\/\d+$/,'');const D=st.drop[r.kind]||(st.drop[r.kind]={});D[stp]=(D[stp]||0)+1}
    const V=st.ver[r.app||'?']||(st.ver[r.app||'?']={s:0,done:0,n:0,ok:0,ms:[],ppl:new Set(),first:''});V.s++;if(r.done)V.done++;V.ppl.add(p);
    st.lang[r.lang||'?']=(st.lang[r.lang||'?']||0)+1;st.streak[p]=Math.max(st.streak[p]||0,r.streak||0);
    const P=st.perP[p]||(st.perP[p]={n:0,ok:0,fast:0,ch:0,days:new Set(),kinds:new Set()});P.days.add(r.gd);P.kinds.add(r.kind);
    for(const x of r.ans||[]){const a2=Object.assign({kind:r.kind,pk:p,app:r.app,gd:r.gd},x);st.ans.push(a2);K.n++;K.ok+=x.ok;V.n++;V.ok+=x.ok;if(x.ms>0)V.ms.push(x.ms);P.n++;P.ok+=x.ok;
     if(OP_CHOICE.has(x.q)){P.ch++;if(x.ms>0&&x.ms<700)P.fast++}
-    st.shownQ[x.q]=(st.shownQ[x.q]||0)+1;if(!OP_EXAM.has(r.kind)){const Q=st.q[x.q]||(st.q[x.q]={n:0,ok:0});Q.n++;Q.ok+=x.ok}
+    if(!OP_EXAM.has(r.kind)){const Q=st.q[x.q]||(st.q[x.q]={n:0,ok:0});Q.n++;Q.ok+=x.ok}
     const W=st.words[x.w]||(st.words[x.w]={n:0,ok:0,exp:0,l:x.l});W.n++;W.ok+=x.ok;
     if(!x.ok&&x.g&&OP_CHOICE.has(x.q)){const k=x.w+'→'+x.g;st.pairs[k]=(st.pairs[k]||0)+1}}}
   const prac=st.ans.filter(x=>!OP_EXAM.has(x.kind)),ok=prac.filter(x=>x.ok).length;
@@ -1728,7 +1825,7 @@ Object.assign(Admin,{
    if(r<=-.3)add('alert','people','學習人數明顯變少',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'人數一下子少很多，常見原因依序是：假日或考試週、新版本載入失敗或卡住、上課沒有使用。先排除產品問題，再看是不是外部因素。',[['觀察','到「問題回報」看有沒有「卡住、當掉」或載入相關回報'],['觀察','看「版本」段落：人數變少是不是只發生在新版本'],['觀察',day?'明天同一時段的人數有沒有回來':'下週人數有沒有回到基準']],'reports',act);
    else if(r<=-.15)add('watch','people','學習人數比平常少',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'少一些不一定是問題，連續兩期都偏少才代表趨勢。',[['觀察',day?'接下來 3 天是否持續偏低':'下週是否持續偏低']],'dashboard',act);
    else if(r>=.3)add('good','people','學習人數明顯變多',`${act} 人，${PR.baseLabel} ${fmt(actB,1)} 人（${chg(act,actB)}）`,'人多的時候最該確認的是新玩家有沒有順利上手（程度測驗、第一次每日單字）。',[['觀察','看下面「新玩家」和「課堂使用」，找出人變多的來源']],'dashboard',act)}
-  const np=cur.newP,npDaily=np.filter(p=>cur.kind.daily&&cur.kind.daily.donePpl.has(p)),npGrade=np.filter(p=>cur.kind.grade&&cur.kind.grade.ppl.has(p));
+  const np=cur.newP,npDaily=np.filter(p=>cur.kind.daily&&cur.kind.daily.donePpl.has(p)),firstCompleters=new Set(cur.sess.filter(r=>completedPlacement(r,'first')).map(r=>r.pk)),npGrade=np.filter(p=>firstCompleters.has(p));
   if(np.length>=3&&npDaily.length/np.length<.5)add('watch','people','新玩家沒有完成第一次每日單字',`新玩家 ${np.length} 人：完成程度測驗 ${npGrade.length} 人、完成每日單字 ${npDaily.length} 人`,'新手流程是「看房間 → 程度測驗 → 每日單字」。第一次每日單字沒做完，隔天回來的機率會低很多。',[['觀察','到「在哪裡放棄」把入口選「每日複習」，看新玩家停在哪一步'],['調整','如果多數人停在程度測驗之後，考慮讓「去學今天的 10 個字」的提示更明顯']],'analysis/s-drop',np.length);
   else if(np.length)add('info','people',`新玩家 ${np.length} 人`,`完成程度測驗 ${npGrade.length} 人、完成每日單字 ${npDaily.length} 人：${names(np)}`,'新玩家的前三天最關鍵，下一期報告會自動追蹤他們有沒有回來。',[['觀察',day?'明天的報告看這些人有沒有回來':'下週的報告看這些人有沒有回來']],null,np.length);
 
@@ -1774,8 +1871,15 @@ Object.assign(Admin,{
   /* --- experience --- */
   const dk=cur.kind.daily;if(dk&&dk.s>=10&&dk.done/dk.s<.7)add('watch','exp','每日單字有很多回合沒做完',`${dk.s} 個回合完成 ${dk.done} 個（${P1(dk.done/dk.s)}）`,'做到一半離開，可能是太長、太難，或被打斷（下課、手機通知）。',[['觀察','看下面「放棄點」集中在哪一步']],'analysis/s-drop',dk.s-dk.done);
   for(const [k,D] of Object.entries(cur.drop)){const tot=Object.values(D).reduce((a,b)=>a+b,0),[top,n]=Object.entries(D).sort((a,b)=>b[1]-a[1])[0]||[];if(tot>=5&&n/tot>=.4&&top!=='result')add('watch','exp',`「${KIND[k]||k}」的放棄集中在同一步`,`${tot} 次沒做完，其中 ${n} 次停在「${opStop(top)}」（${P1(n/tot)}）`,'集中在同一步代表那裡有東西卡住：題目太難、畫面不清楚，或按鈕不好找。',[['觀察','實際玩一次這個入口，走到那一步看看'],['觀察','看問題回報有沒有相關描述']],'analysis/s-drop',n)}
-  // 0.5.14: leaving when a certain question type appears (needs learn-log 0.93.10, which records the type)
-  for(const [q,Q] of Object.entries(cur.quitQ)){const shown=(cur.shownQ[q]||0)+Q.n,rate=shown?Q.n/shown:0;if(Q.n>=5&&rate>=.1)add('watch','exp',`看到「${QT[q]||q}」就離開`,`${Q.n} 次在這種題目沒作答就離開（這種題出現 ${fmt(shown)} 次的 ${P1(rate)}），${Q.ppl.size} 人：${names([...Q.ppl],5)}`,'玩家不是整個回合做不完，而是看到某一種題型就走。常見原因是這種題對他的程度太難（例如低年級的拼字），或輸入方式不順手。',[['觀察','到「在哪裡放棄」看各題型的離開率，以及是哪些年級的玩家'],['調整','對低年級改成排字母、選缺少的字母，或允許一回合換一題']],'analysis/s-drop',Q.n)}
+
+  const exits=questionExitStats(cur.sess,questionExitTracking(S.raw));
+  if(exits.countable)for(const [q,Q] of Object.entries(exits.byType)){
+   const shown=Q.answered+Q.quit,rate=shown?Q.quit/shown:null;
+   if(Q.quit>=5&&rate>=.1)add('watch','exp','這類題目的離開率偏高（'+QT[q]+'）',
+    Q.quit+' 次未作答就離開，占 '+fmt(shown)+' 個可追蹤題次的 '+P1(rate)+'，涉及 '+Q.people.size+' 人。',
+    '離開集中在這種題型。可對照題目在回合中的位置及問題回報，找出原因。',
+    [['觀察','到「在哪裡放棄」比較各題型的可追蹤題次與離開率']],'analysis/s-drop',Q.quit);
+  }
   const msB=bAvg(s=>s.ms);if(baseOK&&msB&&cur.ms&&(cur.ms-msB)/msB>=.3)add('watch','exp','每題作答變慢',`中位數 ${fmt(cur.ms/1000,1)} 秒，${PR.baseLabel} ${fmt(msB/1000,1)} 秒（${chg(cur.ms,msB)}）`,'變慢可能是題目變難、裝置變慢、音檔載入慢，或新版本的介面改變。',[['觀察','比較各版本的作答時間（下面「版本」）']],null,act);
   if(cur.chN>=100&&cur.fast>=.08){const who=Object.entries(cur.perP).filter(([,P])=>P.ch>=20&&P.fast/P.ch>=.3).sort((a,b)=>b[1].fast/b[1].ch-a[1].fast/a[1].ch).map(([p])=>p);
    add('watch','exp','有人在亂按選項',`選擇題 0.7 秒內作答 ${P1(cur.fast)}`+(who.length?`；比例最高：${names(who,5)}`:''),'亂按會讓答對率和模型校正失真，也代表玩家只想拿獎勵。',[['觀察','這些玩家的答對率是不是特別低'],['調整','如果持續發生，考慮太快作答時不給獎勵']],null,who.length)}
@@ -1801,7 +1905,7 @@ Object.assign(Admin,{
   /* --- behaviour --- */
   let bh=null;
   if(B.loaded){const sel=r=>whoMatch(OP.who,r);
-   const sum=([a,b])=>{const rows=B.raw.filter(r=>r.d>=a&&r.d<=b&&sel(r));if(!rows.length)return null;const t=this.bhSum(rows),tot=Object.values(t.act).reduce((x,y)=>x+y,0);return {t,rows,tot,learn:tot?(t.act.learn||0)/tot:null,visMed:median(rows.map(r=>r.v2?r.vis:(r.min||0))),users:t.users}};
+   const sum=([a,b])=>{const rows=B.raw.filter(r=>r.d>=a&&r.d<=b&&sel(r));if(!rows.length)return null;const t=this.bhSum(rows),tot=Object.values(t.act).reduce((x,y)=>x+y,0);return {t,rows,tot,learn:tot?(t.act.learn||0)/tot:null,visMed:median([...t.personDays.values()].map(d=>d.vis)),users:t.users}};
    bh=sum(PR.cur);const bb=PR.base.map(sum).filter(Boolean),visB=bb.length>=2?this.opBase(bb,x=>x.visMed):null;
    if(bh){if(bh.tot>=60&&bh.learn<.15)add('watch','learn','玩的時候很少在學英文',`主動時間裡「學英文」占 ${P1(bh.learn)}`,'玩家來了，但大部分時間在別的地方。房間、小遊戲是吸引人來的，學習入口要在這些地方被看見。',[['觀察','到「使用行為」看時間主要花在哪裡'],['調整','在玩家最常待的地方（例如小遊戲結束時）加一個學習入口']],'behavior',bh.users.size);
     if(visB&&bh.visMed!=null&&(bh.visMed-visB)/visB<=-.3)add('watch','learn','每人在線時間變短',`每人每天 ${fmt(bh.visMed,1)} 分，${PR.baseLabel} ${fmt(visB,1)} 分（${chg(bh.visMed,visB)}）`,'在線時間變短，常常比人數變少更早出現。',[['觀察','下一期是否持續']],'behavior',bh.users.size);
@@ -1867,18 +1971,18 @@ Object.assign(Admin,{
 <section><h2>關鍵數字</h2><p class="why">「和基準比」：人數、題數看增減百分比，比例看差幾個百分點；綠色是變好、紅色是變差（差 10% 或 3 點以內不上色）。答對率、偏差沒有「越高越好」，所以不上色，請看上面的判讀。</p>${kt}<div class="chart" style="margin-top:12px"><canvas id="c-op"></canvas></div></section>
 <section><h2>學習入口與題型</h2><div class="grid2"><div class="tbl" style="max-height:none"><table><thead><tr><th>入口</th><th class="n">人數</th><th class="n">回合</th><th class="n">完成率</th><th class="n">題數</th><th class="n">答對率</th></tr></thead><tbody>${kRows||'<tr><td colspan="6" class="muted">沒有資料</td></tr>'}</tbody></table></div><div class="tbl" style="max-height:none"><table><thead><tr><th>題型（練習）</th><th class="n">題數</th><th class="n">答對率</th><th class="n">${PR.baseLabel}</th></tr></thead><tbody>${qT||'<tr><td colspan="4" class="muted">沒有資料</td></tr>'}</tbody></table></div></div></section>
 <section><h2>個別玩家</h2><p class="why">名字只在後台看得到。這些名單用來安排關心、訪談或調整程度，不是排名。</p><div class="tbl" style="max-height:none"><table><thead><tr><th>名單</th><th>玩家</th><th>可以做什麼</th></tr></thead><tbody>${pT||'<tr><td colspan="3" class="muted">沒有符合的玩家</td></tr>'}</tbody></table></div></section>
-<section><h2>放棄點與版本</h2><div class="grid2"><div class="tbl" style="max-height:none"><table><thead><tr><th>入口</th><th>停在</th><th class="n">次數</th></tr></thead><tbody>${dropT||'<tr><td colspan="3" class="muted">所有回合都做完了</td></tr>'}</tbody></table></div><div class="tbl" style="max-height:none"><table><thead><tr><th>版本</th><th class="n">人數</th><th class="n">題數</th><th class="n">答對率</th><th class="n">完成率</th><th class="n">每題時間</th></tr></thead><tbody>${verT||''}</tbody></table></div></div></section>
+<section><h2>放棄點與版本</h2><p class="why">${questionExitNote(exits)}</p><div class="grid2"><div class="tbl" style="max-height:none"><table><thead><tr><th>入口</th><th>停在</th><th class="n">次數</th></tr></thead><tbody>${dropT||'<tr><td colspan="3" class="muted">所有回合都做完了</td></tr>'}</tbody></table></div><div class="tbl" style="max-height:none"><table><thead><tr><th>版本</th><th class="n">人數</th><th class="n">題數</th><th class="n">答對率</th><th class="n">完成率</th><th class="n">每題時間</th></tr></thead><tbody>${verT||''}</tbody></table></div></div></section>
 <section><h2>使用行為</h2>${bhHtml}</section>
 <section><h2>問題回報</h2>${rpHtml}</section>
 <section><h2>下一步清單</h2>${stepHtml}</section>
 <section>${rulesHtml}</section>`;
   const srcChip=(ok,t)=>`<span class="tag ${ok?'easy':''}">${ok?'✓':'…'} ${t}</span>`;
   const src=[srcChip(true,`學習紀錄 ${fmt(S.raw.length)} 個回合`),srcChip(B.loaded,B.loaded?`使用行為 ${fmt(B.raw.length)} 份`:'使用行為'),srcChip(RPA.rows.length>0,RPA.rows.length?`問題回報 ${RPA.rows.length} 份`:'問題回報'),...(day?[]:[srcChip(!!ct,ct?`挑戰賽 ${ct.length} 人`:'挑戰賽')])].join(' ');
-  return {html,src,chart:chartCfg,F,cur,PR,head,stepHtml}},
+  return {html,src,chart:chartCfg,F,cur,PR,head,stepHtml,questionExitCoverage:questionExitNote(exits)}},
 
  // plain text for chat / e-mail
  opText(){const R=OP.last;if(!R)return '';const strip=h=>String(h).replace(/<br>/g,'\n').replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"');
-  const L=[`呼嚕小窩${OP.mode==='day'?'每日':'每週'}營運報告：${R.PR.label}`,'',strip(R.head),'','【重點與下一步】'];
+  const L=[`呼嚕小窩${OP.mode==='day'?'每日':'每週'}營運報告：${R.PR.label}`,'',strip(R.head),R.questionExitCoverage,'','【重點與下一步】'];
   R.F.forEach((f,i)=>{L.push(`${i+1}. [${OP_LV[f.lv].n}｜${OP_AREA[f.area]}] ${strip(f.title)}`,`   數據：${strip(f.ev)}`,`   判讀：${strip(f.why)}`);for(const [t,x] of f.next)L.push(`   - ${t}：${strip(x)}`)});
   if(!R.F.length)L.push('沒有觸發任何判讀規則。');return L.join('\n')},
  async opCopy(){const t=this.opText();try{await navigator.clipboard.writeText(t);$('op-msg').textContent='已複製'}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();$('op-msg').textContent='已複製'}setTimeout(()=>$('op-msg').textContent='',2500);this.log('export','oprep',OP.mode+' '+OP.day)},
