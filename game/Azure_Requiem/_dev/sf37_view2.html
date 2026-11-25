@@ -1,0 +1,18 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>SF37 view</title>
+<style>body{margin:0;background:#7a8a9a}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.170.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.170.0/examples/jsm/"}}</script>
+</head><body><script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setSize(innerWidth,innerHeight);document.body.appendChild(r.domElement);
+r.toneMapping=THREE.ACESFilmicToneMapping;
+const sc=new THREE.Scene();sc.background=new THREE.Color(0x8fa3b8);
+sc.environment=new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(),0.04).texture;
+const sun=new THREE.DirectionalLight(0xffffff,2.2);sun.position.set(5,10,3);sc.add(sun);
+const cam=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,0.1,200);
+window.views={iso:[14,7,-14],side:[22,0,0],top:[0,24,0.01],front:[0,1,-22],belly:[6,-12,-10],nose:[5,1,-12]};
+window.setView=(k,t=[0,0,0])=>{r.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();cam.position.set(...views[k]);cam.lookAt(...t);r.render(sc,cam);return k};
+new GLTFLoader().load(new URLSearchParams(location.search).get('f')||'sf37_v1.glb',g=>{sc.add(g.scene);window.ok=true;setView('iso');
+ const b=new THREE.Box3().setFromObject(g.scene);window.bbox=[b.min.toArray(),b.max.toArray()];},undefined,e=>{window.err=String(e)});
+</script></body></html>
